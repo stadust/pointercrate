@@ -3,8 +3,9 @@ use diesel::{
     expression::Expression,
     serialize::Output,
     sql_types::Text,
-    types::{IsNull, ToSql},
+    types::{FromSql, IsNull, ToSql},
 };
+use failure::Fail;
 use gdcf::chrono::NaiveDateTime;
 use ipnetwork::IpNetwork;
 use schema::*;
@@ -46,6 +47,26 @@ impl<DB: Backend> ToSql<Text, DB> for AuditOperation {
     }
 }
 
+impl<DB: Backend> FromSql<Text, DB> for AuditOperation
+where
+    String: FromSql<Text, DB>,
+{
+    fn from_sql(bytes: Option<&DB::RawValue>) -> Result<Self, Box<Error + Send + Sync + 'static>> {
+        Ok(match <String as FromSql<Text, DB>>::from_sql(bytes)?.as_ref() {
+            "ADD_DEMON" => AuditOperation::AddDemon,
+            "PATCH_DEMON" => AuditOperation::PatchDemon,
+            "ADD_RECORD" => AuditOperation::AddRecord,
+            "REMOVE_RECORD" => AuditOperation::RemoveRecord,
+            "PATCH_RECORD" => AuditOperation::PatchRecord,
+            "ADD_PLAYER" => AuditOperation::AddPlayer,
+            "REMOVE_PLAYER" => AuditOperation::RemovePlayer,
+            "PATCH_PLAYER" => AuditOperation::PatchPlayer,
+            "BAN_SUBMITTER" => AuditOperation::BanSubmitter,
+            _ => unreachable!(),
+        })
+    }
+}
+
 #[derive(Debug, AsExpression)]
 pub enum RecordStatus {
     Submitted,
@@ -67,6 +88,20 @@ impl<DB: Backend> ToSql<Text, DB> for RecordStatus {
             },
             out,
         )
+    }
+}
+
+impl<DB: Backend> FromSql<Text, DB> for RecordStatus
+where
+    String: FromSql<Text, DB>,
+{
+    fn from_sql(bytes: Option<&DB::RawValue>) -> Result<Self, Box<Error + Send + Sync + 'static>> {
+        Ok(match <String as FromSql<Text, DB>>::from_sql(bytes)?.as_ref() {
+            "SUBMITTED" => RecordStatus::Submitted,
+            "APPROVED" => RecordStatus::Approved,
+            "REJECTED" => RecordStatus::Rejected,
+            _ => unreachable!(),
+        })
     }
 }
 
