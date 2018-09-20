@@ -9,16 +9,12 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
-//use diesel_derives::{Queryable, Identifiable};
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
 #[primary_key("submitter_id")]
 pub struct Submitter {
-    #[column_name = "submitter_id"]
     id: i32,
-
-    #[column_name = "ip_address"]
     ip: IpNetwork,
     banned: bool,
 }
