@@ -15,11 +15,11 @@ pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
 impl Actor for DatabaseActor {
     type Context = SyncContext<Self>;
 
-    fn started(&mut self, ctx: &mut Self::Context) {
+    fn started(&mut self, _ctx: &mut Self::Context) {
         info!("Started pointercrate database actor! We can now interact with the database!")
     }
 
-    fn stopped(&mut self, ctx: &mut Self::Context) {
+    fn stopped(&mut self, _ctx: &mut Self::Context) {
         info!("Stopped pointercrate database actor! We ca no longer interact with the database! :(")
     }
 }
@@ -54,7 +54,7 @@ impl Message for PlayerByName {
 impl Handler<PlayerByName> for DatabaseActor {
     type Result = Result<Player, PointercrateError>;
 
-    fn handle(&mut self, msg: PlayerByName, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: PlayerByName, _ctx: &mut Self::Context) -> Self::Result {
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Player::by_name(&msg.0).first(connection) {
@@ -72,7 +72,7 @@ impl Message for DemonByName {
 impl Handler<DemonByName> for DatabaseActor {
     type Result = Result<Demon, PointercrateError>;
 
-    fn handle(&mut self, msg: DemonByName, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: DemonByName, _ctx: &mut Self::Context) -> Self::Result {
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Demon::by_name(&msg.0).first(connection) {

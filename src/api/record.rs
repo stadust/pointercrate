@@ -17,7 +17,7 @@ pub struct Submission {
     pub verify_only: bool,
 }
 
-fn submit_form_error_handler(error: UrlencodedError, req: &HttpRequest<DemonlistState>) -> Error {
+fn submit_form_error_handler(error: UrlencodedError, _req: &HttpRequest<DemonlistState>) -> Error {
     match error {
         UrlencodedError::UnknownLength => PointercrateError::LengthRequired,
         UrlencodedError::ContentType =>
@@ -33,7 +33,7 @@ pub fn submit(req: &HttpRequest<DemonlistState>) -> impl Responder {
     let mut form_config = FormConfig::default();
     form_config.error_handler(submit_form_error_handler);
 
-    let form = Form::<Submission>::from_request(req, &form_config)
+    let _form = Form::<Submission>::from_request(req, &form_config)
         .and_then(|form: Form<Submission>| {
             let submission = form.into_inner();
             let remote_addr = req.extensions_mut().remove::<IpNetwork>().unwrap();
@@ -55,7 +55,7 @@ pub fn submit(req: &HttpRequest<DemonlistState>) -> impl Responder {
                 .send(ResolveSubmission(submission))
                 .map_err(|_| PointercrateError::InternalServerError.into())
                 .and_then(move |result| result.map_err(Into::into))
-        }).and_then(|(progress, player, demon, video, verify_only)| {
+        }).and_then(|(progress, player, demon, _video, _verify_only)| {
             let state = req.state();
             if player.banned() {}
 

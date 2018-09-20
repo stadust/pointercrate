@@ -35,7 +35,7 @@ impl Message for UserRequestMessage {
 impl Handler<UserRequestMessage> for GdcfActor {
     type Result = Option<User>;
 
-    fn handle(&mut self, msg: UserRequestMessage, ctx: &mut Context<Self>) -> Option<User> {
+    fn handle(&mut self, msg: UserRequestMessage, _ctx: &mut Context<Self>) -> Option<User> {
         let GdcfFuture { cached, inner } = self.0.user(msg.0);
 
         if let Some(inner) = inner {
@@ -65,7 +65,7 @@ impl Message for LevelsRequestMessage {
 impl Handler<LevelsRequestMessage> for GdcfActor {
     type Result = Option<Vec<PartialLevel<u64, u64>>>;
 
-    fn handle(&mut self, msg: LevelsRequestMessage, ctx: &mut Context<Self>) -> Option<Vec<PartialLevel<u64, u64>>> {
+    fn handle(&mut self, msg: LevelsRequestMessage, _ctx: &mut Context<Self>) -> Option<Vec<PartialLevel<u64, u64>>> {
         let GdcfFuture { cached, inner } = self.0.levels(msg.0);
 
         if let Some(inner) = inner {
