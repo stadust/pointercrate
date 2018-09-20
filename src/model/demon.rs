@@ -1,6 +1,6 @@
+use crate::schema::demons;
 use diesel::{expression::bound::Bound, *};
 use ipnetwork::IpNetwork;
-use crate::schema::demons;
 
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]
@@ -37,13 +37,13 @@ const ALL_COLUMNS: AllColumns = (
     demons::publisher,
 );
 
-type All = ::diesel::dsl::Select<demons::table, AllColumns>;
+type All = diesel::dsl::Select<demons::table, AllColumns>;
 
-type WithName<'a> = ::diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
-type ByName<'a> = ::diesel::dsl::Filter<All, WithName<'a>>;
+type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
+type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
 
-type WithPosition = ::diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
-type ByPosition = ::diesel::dsl::Filter<All, WithPosition>;
+type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
+type ByPosition = diesel::dsl::Filter<All, WithPosition>;
 
 impl Demon {
     pub fn all() -> All {
@@ -64,5 +64,9 @@ impl Demon {
 
     pub fn requirement(&self) -> i16 {
         self.requirement
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 }

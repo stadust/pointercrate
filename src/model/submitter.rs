@@ -1,3 +1,4 @@
+use crate::schema::submitters;
 use diesel::{
     connection::Connection,
     expression::bound::Bound,
@@ -8,7 +9,7 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
-use crate::schema::submitters;
+//use diesel_derives::{Queryable, Identifiable};
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
@@ -29,9 +30,9 @@ struct NewSubmitter<'a> {
     ip: &'a IpNetwork,
 }
 
-type All = ::diesel::dsl::Select<submitters::table, (submitters::submitter_id, submitters::ip_address, submitters::banned)>;
-type WithIp<'a> = ::diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
-type ByIp<'a> = ::diesel::dsl::Filter<All, WithIp<'a>>;
+type All = diesel::dsl::Select<submitters::table, (submitters::submitter_id, submitters::ip_address, submitters::banned)>;
+type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
+type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
 
 impl Submitter {
     pub fn all() -> All {
@@ -46,6 +47,10 @@ impl Submitter {
         let new = NewSubmitter { ip };
 
         insert_into(submitters::table).values(&new).get_result(conn)
+    }
+
+    pub fn id(&self) -> i32 {
+        self.id
     }
 
     pub fn banned(&self) -> bool {

@@ -7,6 +7,7 @@ use gdcf::{
 };
 use gdcf_dbcache::cache::{DatabaseCache, Pg};
 use gdrs::BoomlingsClient;
+use log::error;
 use tokio::{self, prelude::future::Future};
 
 pub struct GdcfActor(Gdcf<BoomlingsClient, DatabaseCache<Pg>>);

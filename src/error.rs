@@ -2,6 +2,8 @@ use actix_web::{
     http::{Method, StatusCode},
     ResponseError,
 };
+use crate::model::record::RecordStatus;
+use failure::Fail;
 
 #[derive(Debug, Fail)]
 pub enum PointercrateError {
@@ -58,6 +60,21 @@ pub enum PointercrateError {
     #[fail(display = "The request was well-formed but was unable to be followed due to semeantic errors.")]
     UnprocessableEntity,
 
+    #[fail(display = "Record progress must lie between {} and 100%!", requirement)]
+    InvalidProgress { requirement: i16 },
+
+    #[fail(display = "This record has already been {}", status)]
+    SubmissionExists { status: RecordStatus },
+
+    #[fail(display = "The given player is banned!")]
+    PlayerBanned,
+
+    #[fail(display = "You cannot submit records for legacy demons")]
+    SubmitLegacy,
+
+    #[fail(display = "Only 100% records can be submitted for the extended section of the list")]
+    Non100Extended,
+
     #[fail(display = "This request is required to be conditional; try using \"If-Match\"")]
     PreconditionRequired,
 
@@ -92,11 +109,15 @@ impl PointercrateError {
             PointercrateError::PayloadTooLarge => 41300,
             PointercrateError::UnsupportedMediaType { .. } => 41500,
             PointercrateError::UnprocessableEntity => 42200,
+            PointercrateError::InvalidProgress { .. } => 42215,
+            PointercrateError::PlayerBanned => 42218,
+            PointercrateError::SubmitLegacy => 42219,
+            PointercrateError::Non100Extended => 42220,
             PointercrateError::PreconditionRequired => 42800,
             PointercrateError::InternalServerError => 50000,
             PointercrateError::DatabaseError => 50003,
             PointercrateError::DatabaseConnectionError => 50005,
-            //_ => unimplemented!(),
+            _ => unimplemented!(),
         }
     }
 

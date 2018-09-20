@@ -1,10 +1,13 @@
 use actix_web::{dev::FormConfig, error::UrlencodedError, Error, Form, FromRequest, HttpRequest, Responder};
-use crate::actor::database::{ResolveSubmission, SubmitterByIp};
-use crate::error::PointercrateError;
+use crate::{
+    actor::demonlist::{ProcessSubmission, ResolveSubmissionData, SubmitterByIp},
+    error::PointercrateError,
+    model::Submitter,
+    DemonlistState,
+};
 use ipnetwork::IpNetwork;
-use crate::model::Submitter;
+use serde_derive::Deserialize;
 use tokio::prelude::future::Future;
-use crate::DemonlistState;
 
 #[derive(Deserialize)]
 pub struct Submission {
@@ -42,29 +45,13 @@ pub fn submit(req: &HttpRequest<DemonlistState>) -> impl Responder {
                 .database
                 .send(SubmitterByIp(remote_addr))
                 .map_err(|_| PointercrateError::InternalServerError.into())
-                .and_then(|result| Ok((submission, result?)))
+                .and_then(move |result| Ok((submission, result?)))
         }).and_then(|(submission, submitter): (Submission, Submitter)| {
-            if submitter.banned() {
-                return Err(PointercrateError::BannedFromSubmissions)?
-            }
-
-            Ok(submission)
-        }).and_then(|submission| {
             req.state()
                 .database
-                .send(ResolveSubmission(submission))
+                .send(ProcessSubmission(submission, submitter))
                 .map_err(|_| PointercrateError::InternalServerError.into())
                 .and_then(move |result| result.map_err(Into::into))
-        }).and_then(|(progress, player, demon, _video, _verify_only)| {
-            let state = req.state();
-            if player.banned() {}
-
-            if demon.position() > state.extended_list_size {}
-
-            if demon.position() > state.list_size && progress != 100 {}
-
-            if progress > 100 || progress < demon.requirement() {}
-            Ok(())
-        });
+        }); //TODO: generate JSON response
     "Hello World"
 }

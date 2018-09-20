@@ -1,3 +1,4 @@
+use crate::schema::*;
 use diesel::{
     backend::Backend,
     expression::Expression,
@@ -8,14 +9,14 @@ use diesel::{
 use failure::Fail;
 use gdcf::chrono::NaiveDateTime;
 use ipnetwork::IpNetwork;
-use crate::schema::*;
 use std::{error::Error, io::Write};
 
 pub mod demon;
 pub mod player;
+pub mod record;
 pub mod submitter;
 
-pub use self::{demon::Demon, player::Player, submitter::Submitter};
+pub use self::{demon::Demon, player::Player, record::Record, submitter::Submitter};
 
 #[derive(Debug, AsExpression)]
 pub enum AuditOperation {
@@ -73,44 +74,6 @@ where
     }
 }
 
-#[derive(Debug, AsExpression)]
-pub enum RecordStatus {
-    Submitted,
-    Approved,
-    Rejected,
-}
-
-impl Expression for RecordStatus {
-    type SqlType = Text;
-}
-
-impl<DB: Backend> ToSql<Text, DB> for RecordStatus {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> Result<IsNull, Box<Error + Send + Sync + 'static>> {
-        <str as ToSql<Text, DB>>::to_sql(
-            match self {
-                RecordStatus::Submitted => "SUBMITTED",
-                RecordStatus::Approved => "APPROVED",
-                RecordStatus::Rejected => "REJECTED",
-            },
-            out,
-        )
-    }
-}
-
-impl<DB: Backend> FromSql<Text, DB> for RecordStatus
-where
-    String: FromSql<Text, DB>,
-{
-    fn from_sql(bytes: Option<&DB::RawValue>) -> Result<Self, Box<Error + Send + Sync + 'static>> {
-        Ok(match <String as FromSql<Text, DB>>::from_sql(bytes)?.as_ref() {
-            "SUBMITTED" => RecordStatus::Submitted,
-            "APPROVED" => RecordStatus::Approved,
-            "REJECTED" => RecordStatus::Rejected,
-            _ => unreachable!(),
-        })
-    }
-}
-
 #[derive(Queryable, Insertable, Debug)]
 #[table_name = "members"]
 pub struct User {
@@ -126,22 +89,6 @@ pub struct User {
 
     // TODO: deal with this
     permissions: Vec<u8>,
-}
-
-#[derive(Queryable, Insertable, Debug, Identifiable, Associations)]
-#[table_name = "records"]
-#[belongs_to(Player, foreign_key = "player")]
-#[belongs_to(Submitter, foreign_key = "submitter")]
-#[belongs_to(Demon, foreign_key = "demon")]
-pub struct Record {
-    id: i32,
-    progress: i16,
-    video: Option<String>,
-    #[column_name = "status_"]
-    status: RecordStatus,
-    player: i32,
-    submitter: i32,
-    demon: String,
 }
 
 #[derive(Queryable, Insertable, Debug, Identifiable)]
