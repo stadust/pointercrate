@@ -19,10 +19,9 @@ use diesel::{
 use std::{
     error::Error,
     fmt::{Display, Formatter},
-    hash::Hash,
+    hash::{Hash, Hasher},
     io::Write,
 };
-use std::hash::Hasher;
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash)]
 pub enum RecordStatus {
@@ -188,17 +187,16 @@ impl Record {
         Record::all().filter(records::id.eq(id))
     }
 
+    pub fn with_player_and_demon(player: i32, demon: &str) -> WithPlayerAndDemon {
+        records::player.eq(player).and(records::demon.eq(demon))
+    }
+
     pub fn by_player_and_demon(player: i32, demon: &str) -> ByPlayerAndDemon {
-        Record::all().filter(records::player.eq(player).and(records::demon.eq(demon)))
+        Record::all().filter(Record::with_player_and_demon(player, demon))
     }
 
     pub fn get_existing<'a>(player: i32, demon: &'a str, video: &'a str) -> ByExisting<'a> {
-        Record::all().filter(
-            records::player
-                .eq(player)
-                .and(records::demon.eq(demon))
-                .or(records::video.eq(Some(video))),
-        )
+        Record::all().filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
     pub fn insert(

@@ -112,11 +112,11 @@ impl Handler<ResolveSubmissionData> for DatabaseActor {
 }
 
 impl Message for ProcessSubmission {
-    type Result = Result<Record, PointercrateError>;
+    type Result = Result<Option<Record>, PointercrateError>;
 }
 
 impl Handler<ProcessSubmission> for DatabaseActor {
-    type Result = Result<Record, PointercrateError>;
+    type Result = Result<Option<Record>, PointercrateError>;
 
     fn handle(&mut self, msg: ProcessSubmission, ctx: &mut Self::Context) -> Self::Result {
         if msg.1.banned() {
@@ -161,16 +161,29 @@ impl Handler<ProcessSubmission> for DatabaseActor {
         match record {
             Ok(record) =>
                 if record.status() == RecordStatus::Submitted || record.status() == RecordStatus::Approved && record.progress() < progress {
-                    record.delete(connection).map_err(|_| PointercrateError::DatabaseError)?;
+                    if verify_only {
+                        return Ok(None)
+                    }
+
+                    if record.status() == RecordStatus::Submitted {
+                        record.delete(connection).map_err(|_| PointercrateError::DatabaseError)?;
+                    }
 
                     Record::insert(connection, progress, video, player.id(), msg.1.id(), demon.name())
                         .map_err(|_| PointercrateError::DatabaseError)
+                        .map(Some)
                 } else {
                     Err(PointercrateError::SubmissionExists { status: record.status() })
                 },
-            Err(Error::NotFound) =>
+            Err(Error::NotFound) => {
+                if verify_only {
+                    return Ok(None)
+                }
+
                 Record::insert(connection, progress, video, player.id(), msg.1.id(), demon.name())
-                    .map_err(|_| PointercrateError::DatabaseError),
+                    .map_err(|_| PointercrateError::DatabaseError)
+                    .map(Some)
+            },
             Err(_) => Err(PointercrateError::DatabaseError),
         }
     }

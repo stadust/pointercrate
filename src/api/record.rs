@@ -51,7 +51,7 @@ pub fn submit(req: &HttpRequest<DemonlistState>) -> impl Responder {
                 .database
                 .send(ProcessSubmission(submission, submitter))
                 .map_err(|_| PointercrateError::InternalServerError.into())
-                .and_then(move |result| result.map_err(Into::into))
+                .and_then(|result| result.map_err(Into::into))
         }); //TODO: generate JSON response
     "Hello World"
 }
