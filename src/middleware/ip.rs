@@ -2,7 +2,7 @@ use actix_web::{
     middleware::{Middleware, Started},
     HttpRequest, Result,
 };
-use error::PointercrateError;
+use crate::error::PointercrateError;
 use ipnetwork::IpNetwork;
 use std::net::{IpAddr, Ipv4Addr};
 

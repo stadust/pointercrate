@@ -8,7 +8,7 @@ use diesel::{
 use failure::Fail;
 use gdcf::chrono::NaiveDateTime;
 use ipnetwork::IpNetwork;
-use schema::*;
+use crate::schema::*;
 use std::{error::Error, io::Write};
 
 pub mod demon;

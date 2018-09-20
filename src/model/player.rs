@@ -1,5 +1,5 @@
 use diesel::{expression::bound::Bound, *};
-use schema::players;
+use crate::schema::players;
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "players"]

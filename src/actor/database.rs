@@ -1,14 +1,14 @@
 use actix::{Actor, Context, Handler, Message, SyncContext};
-use api::record::Submission;
+use crate::api::record::Submission;
 use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool},
     result::Error,
     RunQueryDsl,
 };
-use error::PointercrateError;
+use crate::error::PointercrateError;
 use ipnetwork::IpNetwork;
-use model::{Demon, Player, Submitter};
+use crate::model::{Demon, Player, Submitter};
 
 pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
 

@@ -1,10 +1,10 @@
 use actix_web::{dev::FormConfig, error::UrlencodedError, Error, Form, FromRequest, HttpRequest, Responder};
-use actor::database::{ResolveSubmission, SubmitterByIp};
-use error::PointercrateError;
+use crate::actor::database::{ResolveSubmission, SubmitterByIp};
+use crate::error::PointercrateError;
 use ipnetwork::IpNetwork;
-use model::Submitter;
+use crate::model::Submitter;
 use tokio::prelude::future::Future;
-use DemonlistState;
+use crate::DemonlistState;
 
 #[derive(Deserialize)]
 pub struct Submission {

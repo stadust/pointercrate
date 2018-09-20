@@ -8,7 +8,7 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
-use schema::submitters;
+use crate::schema::submitters;
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
