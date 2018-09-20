@@ -16,6 +16,7 @@ impl GdcfActor {
         GdcfActor(Gdcf::new(client, cache))
     }
 }
+
 impl Actor for GdcfActor {
     type Context = Context<Self>;
 }

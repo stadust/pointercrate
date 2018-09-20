@@ -11,6 +11,12 @@ use ipnetwork::IpNetwork;
 use schema::*;
 use std::{error::Error, io::Write};
 
+pub mod demon;
+pub mod player;
+pub mod submitter;
+
+pub use self::{demon::Demon, player::Player, submitter::Submitter};
+
 #[derive(Debug, AsExpression)]
 pub enum AuditOperation {
     AddDemon,
@@ -105,26 +111,6 @@ where
     }
 }
 
-#[derive(Queryable, Insertable, Debug, Identifiable)]
-#[table_name = "players"]
-pub struct Player {
-    id: i32,
-    name: String,
-    banned: bool,
-}
-
-#[derive(Queryable, Insertable, Debug, Identifiable)]
-#[table_name = "submitters"]
-#[primary_key("submitter_id")]
-pub struct Submitter {
-    #[column_name = "submitter_id"]
-    id: i32,
-
-    #[column_name = "ip_address"]
-    ip: IpNetwork,
-    banned: bool,
-}
-
 #[derive(Queryable, Insertable, Debug)]
 #[table_name = "members"]
 pub struct User {
@@ -140,19 +126,6 @@ pub struct User {
 
     // TODO: deal with this
     permissions: Vec<u8>,
-}
-
-#[derive(Queryable, Insertable, Debug, Identifiable)]
-#[table_name = "demons"]
-#[primary_key("name")]
-pub struct Demon {
-    name: String,
-    position: i16,
-    requirement: i16,
-    description: Option<String>,
-    notes: Option<String>,
-    verifier: i32,
-    publisher: i32,
 }
 
 #[derive(Queryable, Insertable, Debug, Identifiable, Associations)]
