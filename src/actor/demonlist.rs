@@ -119,7 +119,7 @@ impl Handler<ProcessSubmission> for DatabaseActor {
     type Result = Result<Option<Record>, PointercrateError>;
 
     fn handle(&mut self, msg: ProcessSubmission, ctx: &mut Self::Context) -> Self::Result {
-        if msg.1.banned() {
+        if msg.1.banned {
             return Err(PointercrateError::BannedFromSubmissions)?
         }
 
@@ -137,26 +137,28 @@ impl Handler<ProcessSubmission> for DatabaseActor {
             return Err(PointercrateError::PlayerBanned)
         }
 
-        if demon.position() > EXTENDED_LIST_SIZE {
+        if demon.position > EXTENDED_LIST_SIZE {
             return Err(PointercrateError::SubmitLegacy)
         }
 
-        if demon.position() > LIST_SIZE && progress != 100 {
+        if demon.position > LIST_SIZE && progress != 100 {
             return Err(PointercrateError::Non100Extended)
         }
 
-        if progress > 100 || progress < demon.requirement() {
+        if progress > 100 || progress < demon.requirement {
             return Err(PointercrateError::InvalidProgress {
-                requirement: demon.requirement(),
+                requirement: demon.requirement,
             })?
         }
 
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         let record: Result<Record, _> = match video {
-            Some(ref video) => Record::get_existing(player.id, demon.name(), video).first(connection),
-            None => Record::by_player_and_demon(player.id, demon.name()).first(connection),
+            Some(ref video) => Record::get_existing(player.id, &demon.name, video).first(connection),
+            None => Record::by_player_and_demon(player.id, &demon.name).first(connection),
         };
+
+        let video_ref = video.as_ref().map(AsRef::as_ref);
 
         let id = match record {
             Ok(record) =>
@@ -169,7 +171,7 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                         record.delete(connection).map_err(|_| PointercrateError::DatabaseError)?;
                     }
 
-                    Record::insert(connection, progress, video, player.id, msg.1.id(), demon.name())
+                    Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name)
                         .map_err(|_| PointercrateError::DatabaseError)?
                 } else {
                     return Err(PointercrateError::SubmissionExists { status: record.status() })
@@ -179,16 +181,20 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                     return Ok(None)
                 }
 
-                Record::insert(connection, progress, video, player.id, msg.1.id(), demon.name())
+                Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name)
                     .map_err(|_| PointercrateError::DatabaseError)?
             },
             Err(_) => return Err(PointercrateError::DatabaseError),
         };
 
-        // TODO: maybe don't re-query the database but instead construct a Record object from the data
-        // we already have.
-        Record::by_id(id).first(connection)
-            .map_err(|_| PointercrateError::DatabaseError)
-            .map(Some)
+        Ok(Some(Record {
+            id,
+            progress,
+            video,
+            status: RecordStatus::Submitted,
+            player,
+            submitter: msg.1.id,
+            demon: demon.into(),
+        }))
     }
 }

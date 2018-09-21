@@ -10,15 +10,15 @@ use std::fmt::Display;
 #[table_name = "demons"]
 #[primary_key("name")]
 pub struct Demon {
-    name: String,
-    position: i16,
-    requirement: i16,
+    pub name: String,
+    pub position: i16,
+    pub requirement: i16,
     // TODO: remove this fields
     description: Option<String>,
     // TODO: remove this field
     notes: Option<String>,
-    verifier: i32,
-    publisher: i32,
+    pub verifier: i32,
+    pub publisher: i32,
 }
 
 #[derive(Debug, Queryable, Identifiable, Hash, Eq, PartialEq, Associations)]
@@ -89,10 +89,16 @@ const ALL_COLUMNS: AllColumns = (
     demons::publisher,
 );
 
+type PartialColumns = (demons::name, demons::position);
+
+const PARTIAL_COLUMNS: PartialColumns = (demons::name, demons::position);
+
 type All = diesel::dsl::Select<demons::table, AllColumns>;
+//type Partial = diesel::dsl::Select<demons::table, PartialColumns>;
 
 type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+//type ByNamePartial<'a> = diesel::dsl::Filter<Partial, WithName<'a>>;
 
 type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
@@ -109,16 +115,23 @@ impl Demon {
     pub fn by_position(position: i16) -> ByPosition {
         Demon::all().filter(demons::position.eq(position))
     }
+}
 
-    pub fn position(&self) -> i16 {
-        self.position
+/*impl PartialDemon {
+    pub fn all() -> All {
+        demons::table.select(PARTIAL_COLUMNS)
     }
 
-    pub fn requirement(&self) -> i16 {
-        self.requirement
+    pub fn by_name(name: &str) -> ByNamePartial {
+        PartialDemon::all().filter(demons::name.eq(name))
     }
+}*/
 
-    pub fn name(&self) -> &str {
-        &self.name
+impl Into<PartialDemon> for Demon {
+    fn into(self) -> PartialDemon {
+        PartialDemon {
+            name: self.name,
+            position: self.position,
+        }
     }
 }

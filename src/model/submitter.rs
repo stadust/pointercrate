@@ -13,9 +13,9 @@ use ipnetwork::IpNetwork;
 #[table_name = "submitters"]
 #[primary_key("submitter_id")]
 pub struct Submitter {
-    id: i32,
-    ip: IpNetwork,
-    banned: bool,
+    pub id: i32,
+    pub ip: IpNetwork,
+    pub banned: bool,
 }
 
 #[derive(Insertable, Debug)]
@@ -42,13 +42,5 @@ impl Submitter {
         let new = NewSubmitter { ip };
 
         insert_into(submitters::table).values(&new).get_result(conn)
-    }
-
-    pub fn id(&self) -> i32 {
-        self.id
-    }
-
-    pub fn banned(&self) -> bool {
-        self.banned
     }
 }

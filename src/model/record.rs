@@ -1,7 +1,7 @@
 use super::{Demon, Player, Submitter};
 use crate::{
     model::demon::PartialDemon,
-    schema::{demons, records, players},
+    schema::{demons, players, records},
 };
 use diesel::{
     delete,
@@ -110,13 +110,13 @@ impl Queryable<Text, Pg> for RecordStatus {
 #[belongs_to(Demon, foreign_key = "demon")]
 #[belongs_to(PartialDemon, foreign_key = "demon")]
 pub struct Record {
-    id: i32,
-    progress: i16,
-    video: Option<String>,
-    status: RecordStatus,
-    player: Player,
-    submitter: i32,
-    demon: PartialDemon,
+    pub id: i32,
+    pub progress: i16,
+    pub video: Option<String>,
+    pub status: RecordStatus,
+    pub player: Player,
+    pub submitter: i32,
+    pub demon: PartialDemon,
 }
 
 impl Hash for Record {
@@ -135,7 +135,7 @@ impl Hash for Record {
 #[table_name = "records"]
 struct NewRecord<'a> {
     progress: i16,
-    video: Option<String>,
+    video: Option<&'a str>,
     #[column_name = "status_"]
     status: RecordStatus, // TODO: add a DEFAULT 'SUBMITTED' to the column so this field wont be needed anymore
     player: i32,
@@ -205,7 +205,10 @@ type ByExisting<'a> = diesel::dsl::Filter<All, WithExisting<'a>>;
 
 impl Record {
     pub fn all() -> All {
-        records::table.inner_join(demons::table).inner_join(players::table).select(ALL_COLUMNS)
+        records::table
+            .inner_join(demons::table)
+            .inner_join(players::table)
+            .select(ALL_COLUMNS)
     }
 
     pub fn by_id(id: i32) -> ById {
@@ -224,7 +227,7 @@ impl Record {
         Record::all().filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
-    pub fn insert(conn: &PgConnection, progress: i16, video: Option<String>, player: i32, submitter: i32, demon: &str) -> QueryResult<i32> {
+    pub fn insert(conn: &PgConnection, progress: i16, video: Option<&str>, player: i32, submitter: i32, demon: &str) -> QueryResult<i32> {
         let new = NewRecord {
             progress,
             video,
@@ -262,7 +265,7 @@ impl Queryable<SqlType, Pg> for Record {
             player: Player {
                 id: row.4,
                 name: row.5,
-                banned: row.6
+                banned: row.6,
             },
             submitter: row.7,
             demon: PartialDemon {
