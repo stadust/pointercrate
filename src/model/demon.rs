@@ -1,5 +1,10 @@
-use crate::schema::demons;
+use crate::{
+    actor::demonlist::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    schema::demons,
+};
 use diesel::{expression::bound::Bound, *};
+use serde::{ser::SerializeMap, Serialize, Serializer};
+use std::fmt::Display;
 
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]
@@ -14,6 +19,54 @@ pub struct Demon {
     notes: Option<String>,
     verifier: i32,
     publisher: i32,
+}
+
+#[derive(Debug, Queryable, Identifiable, Hash, Eq, PartialEq, Associations)]
+#[table_name = "demons"]
+#[primary_key("name")]
+pub struct PartialDemon {
+    pub name: String,
+    pub position: i16,
+}
+
+impl Serialize for PartialDemon {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(3))?;
+        map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("position", &self.position)?;
+        map.serialize_entry("state", &list_state(self.position).to_string())?;
+        map.end()
+    }
+}
+
+fn list_state(position: i16) -> ListState {
+    if position <= LIST_SIZE {
+        ListState::Main
+    } else if position <= EXTENDED_LIST_SIZE {
+        ListState::Extended
+    } else {
+        ListState::Legacy
+    }
+}
+
+#[derive(Debug)]
+pub enum ListState {
+    Main,
+    Extended,
+    Legacy,
+}
+
+impl Display for ListState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        match self {
+            ListState::Main => write!(f, "MAIN"),
+            ListState::Extended => write!(f, "EXTENDED"),
+            ListState::Legacy => write!(f, "LEGACY"),
+        }
+    }
 }
 
 type AllColumns = (

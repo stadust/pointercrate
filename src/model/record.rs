@@ -1,5 +1,8 @@
 use super::{Demon, Player, Submitter};
-use crate::schema::records;
+use crate::{
+    model::demon::PartialDemon,
+    schema::{demons, records, players},
+};
 use diesel::{
     delete,
     deserialize::Queryable,
@@ -100,19 +103,20 @@ impl Queryable<Text, Pg> for RecordStatus {
     }
 }
 
-#[derive(Queryable, Debug, Identifiable, Associations)]
+#[derive(Debug, Identifiable, Associations)]
 #[table_name = "records"]
 #[belongs_to(Player, foreign_key = "player")]
 #[belongs_to(Submitter, foreign_key = "submitter")]
 #[belongs_to(Demon, foreign_key = "demon")]
+#[belongs_to(PartialDemon, foreign_key = "demon")]
 pub struct Record {
     id: i32,
     progress: i16,
     video: Option<String>,
     status: RecordStatus,
-    player: i32,
+    player: Player,
     submitter: i32,
-    demon: String,
+    demon: PartialDemon,
 }
 
 impl Hash for Record {
@@ -123,7 +127,7 @@ impl Hash for Record {
         self.status.hash(state);
         self.player.hash(state);
         self.submitter.hash(state);
-        self.demon.hash(state);
+        self.demon.name.hash(state);
     }
 }
 
@@ -144,9 +148,12 @@ type AllColumns = (
     records::progress,
     records::video,
     records::status_,
-    records::player,
+    players::id,
+    players::name,
+    players::banned,
     records::submitter,
-    records::demon,
+    demons::name,
+    demons::position,
 );
 
 const ALL_COLUMNS: AllColumns = (
@@ -154,12 +161,32 @@ const ALL_COLUMNS: AllColumns = (
     records::progress,
     records::video,
     records::status_,
-    records::player,
+    players::id,
+    players::name,
+    players::banned,
     records::submitter,
-    records::demon,
+    demons::name,
+    demons::position,
 );
 
-type All = diesel::dsl::Select<records::table, AllColumns>;
+type SqlType = (
+    // record
+    sql_types::Integer,
+    sql_types::SmallInt,
+    sql_types::Nullable<sql_types::Text>,
+    sql_types::Text,
+    // player
+    sql_types::Integer,
+    sql_types::Text,
+    sql_types::Bool,
+    // record
+    sql_types::Integer,
+    // demon
+    sql_types::Text,
+    sql_types::SmallInt,
+);
+
+type All = diesel::dsl::Select<diesel::dsl::InnerJoin<diesel::dsl::InnerJoin<records::table, demons::table>, players::table>, AllColumns>;
 
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All, WithId>;
@@ -178,7 +205,7 @@ type ByExisting<'a> = diesel::dsl::Filter<All, WithExisting<'a>>;
 
 impl Record {
     pub fn all() -> All {
-        records::table.select(ALL_COLUMNS)
+        records::table.inner_join(demons::table).inner_join(players::table).select(ALL_COLUMNS)
     }
 
     pub fn by_id(id: i32) -> ById {
@@ -197,9 +224,7 @@ impl Record {
         Record::all().filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
-    pub fn insert(
-        conn: &PgConnection, progress: i16, video: Option<String>, player: i32, submitter: i32, demon: &str,
-    ) -> QueryResult<Record> {
+    pub fn insert(conn: &PgConnection, progress: i16, video: Option<String>, player: i32, submitter: i32, demon: &str) -> QueryResult<i32> {
         let new = NewRecord {
             progress,
             video,
@@ -209,7 +234,7 @@ impl Record {
             demon,
         };
 
-        insert_into(records::table).values(&new).get_result(conn)
+        insert_into(records::table).values(&new).returning(records::id).get_result(conn)
     }
 
     pub fn progress(&self) -> i16 {
@@ -222,5 +247,28 @@ impl Record {
 
     pub fn delete(&self, conn: &PgConnection) -> QueryResult<()> {
         delete(records::table).filter(records::id.eq(self.id)).execute(conn).map(|_| ())
+    }
+}
+
+impl Queryable<SqlType, Pg> for Record {
+    type Row = (i32, i16, Option<String>, RecordStatus, i32, String, bool, i32, String, i16);
+
+    fn build(row: Self::Row) -> Self {
+        Record {
+            id: row.0,
+            progress: row.1,
+            video: row.2,
+            status: row.3,
+            player: Player {
+                id: row.4,
+                name: row.5,
+                banned: row.6
+            },
+            submitter: row.7,
+            demon: PartialDemon {
+                name: row.8,
+                position: row.9,
+            },
+        }
     }
 }

@@ -133,7 +133,7 @@ impl Handler<ProcessSubmission> for DatabaseActor {
 
         let (player, demon) = self.handle(ResolveSubmissionData(player, demon), ctx)?;
 
-        if player.banned() {
+        if player.banned {
             return Err(PointercrateError::PlayerBanned)
         }
 
@@ -154,11 +154,11 @@ impl Handler<ProcessSubmission> for DatabaseActor {
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         let record: Result<Record, _> = match video {
-            Some(ref video) => Record::get_existing(player.id(), demon.name(), video).first(connection),
-            None => Record::by_player_and_demon(player.id(), demon.name()).first(connection),
+            Some(ref video) => Record::get_existing(player.id, demon.name(), video).first(connection),
+            None => Record::by_player_and_demon(player.id, demon.name()).first(connection),
         };
 
-        match record {
+        let id = match record {
             Ok(record) =>
                 if record.status() == RecordStatus::Submitted || record.status() == RecordStatus::Approved && record.progress() < progress {
                     if verify_only {
@@ -169,22 +169,26 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                         record.delete(connection).map_err(|_| PointercrateError::DatabaseError)?;
                     }
 
-                    Record::insert(connection, progress, video, player.id(), msg.1.id(), demon.name())
-                        .map_err(|_| PointercrateError::DatabaseError)
-                        .map(Some)
+                    Record::insert(connection, progress, video, player.id, msg.1.id(), demon.name())
+                        .map_err(|_| PointercrateError::DatabaseError)?
                 } else {
-                    Err(PointercrateError::SubmissionExists { status: record.status() })
+                    return Err(PointercrateError::SubmissionExists { status: record.status() })
                 },
             Err(Error::NotFound) => {
                 if verify_only {
                     return Ok(None)
                 }
 
-                Record::insert(connection, progress, video, player.id(), msg.1.id(), demon.name())
-                    .map_err(|_| PointercrateError::DatabaseError)
-                    .map(Some)
+                Record::insert(connection, progress, video, player.id, msg.1.id(), demon.name())
+                    .map_err(|_| PointercrateError::DatabaseError)?
             },
-            Err(_) => Err(PointercrateError::DatabaseError),
-        }
+            Err(_) => return Err(PointercrateError::DatabaseError),
+        };
+
+        // TODO: maybe don't re-query the database but instead construct a Record object from the data
+        // we already have.
+        Record::by_id(id).first(connection)
+            .map_err(|_| PointercrateError::DatabaseError)
+            .map(Some)
     }
 }

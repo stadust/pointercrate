@@ -1,12 +1,13 @@
 use crate::schema::players;
 use diesel::{expression::bound::Bound, *};
+use serde_derive::Serialize;
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
 pub struct Player {
-    id: i32,
-    name: String,
-    banned: bool,
+    pub id: i32,
+    pub name: String,
+    pub banned: bool,
 }
 
 #[derive(Insertable, Debug)]
@@ -42,13 +43,5 @@ impl Player {
 
     pub fn insert(conn: &PgConnection, name: &str) -> QueryResult<Player> {
         insert_into(players::table).values(&NewPlayer { name }).get_result(conn)
-    }
-
-    pub fn id(&self) -> i32 {
-        self.id
-    }
-
-    pub fn banned(&self) -> bool {
-        self.banned
     }
 }
