@@ -11,7 +11,7 @@ use diesel::{
     RunQueryDsl,
 };
 use ipnetwork::IpNetwork;
-use log::info;
+use log::{debug, info};
 
 pub const LIST_SIZE: i16 = 50;
 pub const EXTENDED_LIST_SIZE: i16 = 100;
@@ -44,6 +44,8 @@ impl Handler<SubmitterByIp> for DatabaseActor {
     type Result = Result<Submitter, PointercrateError>;
 
     fn handle(&mut self, msg: SubmitterByIp, _ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempt to retrieve submitter with IP '{}', creating if not exists!", msg.0);
+
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Submitter::by_ip(&msg.0).first(connection) {
@@ -62,6 +64,8 @@ impl Handler<PlayerByName> for DatabaseActor {
     type Result = Result<Player, PointercrateError>;
 
     fn handle(&mut self, msg: PlayerByName, _ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempt to retrieve player with name '{}', creating if not exists!", msg.0);
+
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Player::by_name(&msg.0).first(connection) {
@@ -80,6 +84,8 @@ impl Handler<DemonByName> for DatabaseActor {
     type Result = Result<Demon, PointercrateError>;
 
     fn handle(&mut self, msg: DemonByName, _ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempting to retrieve demon with name '{}'!", msg.0);
+
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Demon::by_name(&msg.0).first(connection) {
@@ -102,6 +108,7 @@ impl Handler<ResolveSubmissionData> for DatabaseActor {
     type Result = Result<(Player, Demon), PointercrateError>;
 
     fn handle(&mut self, msg: ResolveSubmissionData, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempt to resolve player '{}' and demon '{}' for a submission!", msg.0, msg.1);
         let (player, demon) = (msg.0, msg.1);
 
         let player = self.handle(PlayerByName(player), ctx)?;
@@ -119,6 +126,8 @@ impl Handler<ProcessSubmission> for DatabaseActor {
     type Result = Result<Option<Record>, PointercrateError>;
 
     fn handle(&mut self, msg: ProcessSubmission, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Processing submission {:?}", msg.0);
+
         if msg.1.banned {
             return Err(PointercrateError::BannedFromSubmissions)?
         }

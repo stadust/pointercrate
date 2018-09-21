@@ -9,7 +9,7 @@ use ipnetwork::IpNetwork;
 use serde_derive::Deserialize;
 use tokio::prelude::future::Future;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Submission {
     pub progress: i16,
     pub player: String,
