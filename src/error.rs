@@ -1,14 +1,18 @@
 use actix_web::{
     http::{Method, StatusCode},
-    ResponseError,
+    HttpResponse, ResponseError, error::JsonPayloadError
 };
 use crate::model::record::RecordStatus;
 use failure::Fail;
+use serde::{ser::SerializeMap, Serialize, Serializer};
 
 #[derive(Debug, Fail)]
 pub enum PointercrateError {
     #[fail(display = "The browser (or proxy) sent a request that this server could not understand.")]
-    BadRequest,
+    GenericBadRequest,
+
+    #[fail(display = "{}", message)]
+    BadRequest { message: String },
 
     #[fail(display = "The value for the header {} could not be processed", header)]
     InvalidHeaderValue { header: &'static str },
@@ -52,10 +56,10 @@ pub enum PointercrateError {
     PayloadTooLarge,
 
     #[fail(
-        display = "The server does not support the media type transmitted in the request/no media type was specified. Expected one of: {:?}",
+        display = "The server does not support the media type transmitted in the request/no media type was specified. Expected one '{}'",
         expected
     )]
-    UnsupportedMediaType { expected: Vec<&'static str> },
+    UnsupportedMediaType { expected: &'static str },
 
     #[fail(display = "The request was well-formed but was unable to be followed due to semeantic errors.")]
     UnprocessableEntity,
@@ -95,7 +99,8 @@ pub enum PointercrateError {
 impl PointercrateError {
     pub fn error_code(&self) -> u16 {
         match self {
-            PointercrateError::BadRequest => 40000,
+            PointercrateError::GenericBadRequest => 40000,
+            PointercrateError::BadRequest { .. } => 40000,
             PointercrateError::InvalidHeaderValue { .. } => 40002,
             PointercrateError::Unauthorized => 40100,
             PointercrateError::Forbidden => 40300,
@@ -110,6 +115,7 @@ impl PointercrateError {
             PointercrateError::UnsupportedMediaType { .. } => 41500,
             PointercrateError::UnprocessableEntity => 42200,
             PointercrateError::InvalidProgress { .. } => 42215,
+            PointercrateError::SubmissionExists { .. } => 42217,
             PointercrateError::PlayerBanned => 42218,
             PointercrateError::SubmitLegacy => 42219,
             PointercrateError::Non100Extended => 42220,
@@ -129,6 +135,38 @@ impl PointercrateError {
     }
 }
 
+impl Serialize for PointercrateError {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // TODO: the data dictionary
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry("code", &self.error_code())?;
+        map.serialize_entry("message", &self.to_string())?;
+        map.end()
+    }
+}
+
 impl ResponseError for PointercrateError {
-    // TODO: impl
+    fn error_response(&self) -> HttpResponse {
+        HttpResponse::build(self.status_code()).json(self)
+    }
+}
+
+impl From<JsonPayloadError> for PointercrateError {
+    fn from(error: JsonPayloadError) -> Self {
+        match error {
+            JsonPayloadError::ContentType =>
+                PointercrateError::UnsupportedMediaType {
+                    expected: "application/json",
+                },
+            JsonPayloadError::Overflow => PointercrateError::PayloadTooLarge,
+            JsonPayloadError::Payload(_) => PointercrateError::GenericBadRequest,
+            JsonPayloadError::Deserialize(inner) =>
+                PointercrateError::BadRequest {
+                    message: inner.to_string(),
+                },
+        }
+    }
 }

@@ -4,6 +4,7 @@ use actix_web::{
 };
 use crate::error::PointercrateError;
 use ipnetwork::IpNetwork;
+use log::{error, warn};
 use std::net::{IpAddr, Ipv4Addr};
 
 pub struct IpResolve;
@@ -22,12 +23,23 @@ impl<S> Middleware<S> for IpResolve {
 
                     req.extensions_mut().insert::<IpNetwork>(remote_addr.into());
                 } else {
-                    return Err(PointercrateError::Unauthorized.into())
+                    if cfg!(debug_assertions) {
+                        warn!("Request from local machine, but no 'X-FORWARDED-FOR' header is set. Allowing, since this is a debug build");
+
+                        req.extensions_mut()
+                            .insert::<IpNetwork>(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)).into());
+                    } else {
+                        error!("Request from local machine, but no 'X-FORWARDED-FOR' header is set. Since this is a release build, this is a configuration error!");
+
+                        return Err(PointercrateError::InternalServerError.into())
+                    }
                 }
             } else {
                 req.extensions_mut().insert::<IpNetwork>(sockaddr.ip().into())
             }
         } else {
+            warn!("Remote address for request to {} not retrievable, aborting!", req.uri());
+
             return Err(PointercrateError::Unauthorized.into())
         }
 
