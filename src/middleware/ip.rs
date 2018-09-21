@@ -6,7 +6,7 @@ use crate::error::PointercrateError;
 use ipnetwork::IpNetwork;
 use std::net::{IpAddr, Ipv4Addr};
 
-struct IpResolve;
+pub struct IpResolve;
 
 impl<S> Middleware<S> for IpResolve {
     fn start(&self, req: &HttpRequest<S>) -> Result<Started> {

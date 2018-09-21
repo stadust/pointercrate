@@ -1,6 +1,5 @@
 use crate::schema::demons;
 use diesel::{expression::bound::Bound, *};
-use ipnetwork::IpNetwork;
 
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]

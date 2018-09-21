@@ -1,6 +1,5 @@
 use crate::schema::submitters;
 use diesel::{
-    connection::Connection,
     expression::bound::Bound,
     insert_into,
     pg::PgConnection,
@@ -19,7 +18,7 @@ pub struct Submitter {
     banned: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[table_name = "submitters"]
 struct NewSubmitter<'a> {
     #[column_name = "ip_address"]

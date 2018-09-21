@@ -1,18 +1,16 @@
 use super::{Demon, Player, Submitter};
 use crate::schema::records;
 use diesel::{
-    backend::Backend,
     delete,
     deserialize::Queryable,
-    expression::{bound::Bound, AppearsOnTable, AsExpression, Expression},
+    expression::{bound::Bound, AsExpression},
     insert_into,
     pg::{Pg, PgConnection},
-    query_builder::{AstPass, QueryFragment},
     query_dsl::{QueryDsl, RunQueryDsl},
     result::QueryResult,
     row::Row,
     serialize::Output,
-    sql_types::{self, HasSqlType, SingleValue, Text},
+    sql_types::{self, Text},
     types::{FromSql, FromSqlRow, IsNull, ToSql},
     BoolExpressionMethods, ExpressionMethods,
 };
@@ -43,7 +41,7 @@ impl Display for RecordStatus {
 // Diesel trait impls
 
 impl FromSql<Text, Pg> for RecordStatus {
-    fn from_sql(bytes: Option<&[u8]>) -> Result<Self, Box<Error + Send + Sync + 'static>> {
+    fn from_sql(bytes: Option<&[u8]>) -> Result<Self, Box<dyn Error + Send + Sync + 'static>> {
         let as_string: String = FromSql::<Text, Pg>::from_sql(bytes)?;
 
         Ok(match as_string.as_ref() {
@@ -55,13 +53,13 @@ impl FromSql<Text, Pg> for RecordStatus {
     }
 }
 impl FromSqlRow<Text, Pg> for RecordStatus {
-    fn build_from_row<R: Row<Pg>>(row: &mut R) -> Result<Self, Box<Error + Send + Sync + 'static>> {
+    fn build_from_row<R: Row<Pg>>(row: &mut R) -> Result<Self, Box<dyn Error + Send + Sync + 'static>> {
         FromSql::<Text, Pg>::from_sql(row.take())
     }
 }
 
 impl ToSql<Text, Pg> for RecordStatus {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> Result<IsNull, Box<Error + Send + Sync + 'static>> {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> Result<IsNull, Box<dyn Error + Send + Sync + 'static>> {
         <str as ToSql<Text, Pg>>::to_sql(
             match self {
                 RecordStatus::Submitted => "SUBMITTED",
@@ -129,7 +127,7 @@ impl Hash for Record {
     }
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[table_name = "records"]
 struct NewRecord<'a> {
     progress: i16,

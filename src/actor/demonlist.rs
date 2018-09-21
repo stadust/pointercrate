@@ -1,4 +1,4 @@
-use actix::{Actor, Context, Handler, Message, SyncContext};
+use actix::{Actor, Handler, Message, SyncContext};
 use crate::{
     api::record::Submission,
     error::PointercrateError,

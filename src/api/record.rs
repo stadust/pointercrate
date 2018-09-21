@@ -1,9 +1,9 @@
 use actix_web::{dev::FormConfig, error::UrlencodedError, Error, Form, FromRequest, HttpRequest, Responder};
 use crate::{
-    actor::demonlist::{ProcessSubmission, ResolveSubmissionData, SubmitterByIp},
+    actor::demonlist::{ProcessSubmission, SubmitterByIp},
     error::PointercrateError,
     model::Submitter,
-    DemonlistState,
+    PointercrateState,
 };
 use ipnetwork::IpNetwork;
 use serde_derive::Deserialize;
@@ -20,7 +20,7 @@ pub struct Submission {
     pub verify_only: bool,
 }
 
-fn submit_form_error_handler(error: UrlencodedError, _req: &HttpRequest<DemonlistState>) -> Error {
+fn submit_form_error_handler(error: UrlencodedError, _req: &HttpRequest<PointercrateState>) -> Error {
     match error {
         UrlencodedError::UnknownLength => PointercrateError::LengthRequired,
         UrlencodedError::ContentType =>
@@ -32,7 +32,7 @@ fn submit_form_error_handler(error: UrlencodedError, _req: &HttpRequest<Demonlis
     }.into()
 }
 
-pub fn submit(req: &HttpRequest<DemonlistState>) -> impl Responder {
+pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
     let mut form_config = FormConfig::default();
     form_config.error_handler(submit_form_error_handler);
 

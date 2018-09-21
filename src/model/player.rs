@@ -9,7 +9,7 @@ pub struct Player {
     banned: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[table_name = "players"]
 struct NewPlayer<'a> {
     name: &'a str,

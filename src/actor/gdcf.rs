@@ -10,6 +10,7 @@ use gdrs::BoomlingsClient;
 use log::error;
 use tokio::{self, prelude::future::Future};
 
+#[derive(Debug)]
 pub struct GdcfActor(Gdcf<BoomlingsClient, DatabaseCache<Pg>>);
 
 impl GdcfActor {
@@ -22,6 +23,7 @@ impl Actor for GdcfActor {
     type Context = Context<Self>;
 }
 
+#[derive(Debug)]
 pub struct UserRequestMessage(pub UserRequest);
 
 impl Into<UserRequestMessage> for UserRequest {
@@ -51,6 +53,7 @@ impl Handler<UserRequestMessage> for GdcfActor {
     }
 }
 
+#[derive(Debug)]
 pub struct LevelsRequestMessage(pub LevelsRequest);
 
 impl Into<LevelsRequestMessage> for LevelsRequest {

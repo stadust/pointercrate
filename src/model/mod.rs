@@ -6,9 +6,7 @@ use diesel::{
     sql_types::Text,
     types::{FromSql, IsNull, ToSql},
 };
-use failure::Fail;
 use gdcf::chrono::NaiveDateTime;
-use ipnetwork::IpNetwork;
 use std::{error::Error, io::Write};
 
 pub mod demon;
@@ -36,7 +34,7 @@ impl Expression for AuditOperation {
 }
 
 impl<DB: Backend> ToSql<Text, DB> for AuditOperation {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> Result<IsNull, Box<Error + Send + Sync + 'static>> {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> Result<IsNull, Box<dyn Error + Send + Sync + 'static>> {
         <str as ToSql<Text, DB>>::to_sql(
             match self {
                 AuditOperation::AddDemon => "ADD_DEMON",
@@ -58,7 +56,7 @@ impl<DB: Backend> FromSql<Text, DB> for AuditOperation
 where
     String: FromSql<Text, DB>,
 {
-    fn from_sql(bytes: Option<&DB::RawValue>) -> Result<Self, Box<Error + Send + Sync + 'static>> {
+    fn from_sql(bytes: Option<&DB::RawValue>) -> Result<Self, Box<dyn Error + Send + Sync + 'static>> {
         Ok(match <String as FromSql<Text, DB>>::from_sql(bytes)?.as_ref() {
             "ADD_DEMON" => AuditOperation::AddDemon,
             "PATCH_DEMON" => AuditOperation::PatchDemon,
