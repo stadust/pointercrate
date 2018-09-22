@@ -37,6 +37,7 @@ pub struct DemonByName(pub String);
 pub struct ResolveSubmissionData(pub String, pub String);
 pub struct ProcessSubmission(pub Submission, pub Submitter);
 pub struct RecordById(pub i32);
+pub struct DeleteRecordById(pub i32);
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -249,5 +250,22 @@ impl Handler<RecordById> for DatabaseActor {
                 }),
             Err(err) => Err(PointercrateError::database(err)),
         }
+    }
+}
+
+impl Message for DeleteRecordById {
+    type Result = Result<(), PointercrateError>;
+}
+
+impl Handler<DeleteRecordById> for DatabaseActor {
+    type Result = Result<(), PointercrateError>;
+
+    fn handle(&mut self, msg: DeleteRecordById, ctx: &mut Self::Context) -> Self::Result {
+        info!("Deleting record with ID {}!", msg.0);
+
+        self.0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)
+            .and_then(|connection| Record::delete_by_id(&connection, msg.0).map_err(PointercrateError::database))
     }
 }

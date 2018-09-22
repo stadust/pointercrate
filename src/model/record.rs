@@ -199,8 +199,13 @@ impl Record {
         self.status
     }
 
+    pub fn delete_by_id(conn: &PgConnection, id: i32) -> QueryResult<()> {
+        delete(records::table).filter(records::id.eq(id)).execute(conn).map(|_| ())
+    }
+
     pub fn delete(&self, conn: &PgConnection) -> QueryResult<()> {
-        delete(records::table).filter(records::id.eq(self.id)).execute(conn).map(|_| ())
+        Record::delete_by_id(conn, self.id)
+        //delete(records::table).filter(records::id.eq(self.id)).execute(conn).map(|_| ())
     }
 }
 
