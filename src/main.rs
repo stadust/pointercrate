@@ -29,13 +29,14 @@ use diesel::{
 use gdcf::chrono::Duration;
 use gdcf_dbcache::cache::{DatabaseCache, DatabaseCacheConfig};
 use gdrs::BoomlingsClient;
-use hyper::client::{Client, HttpConnector};
+use hyper::{
+    client::{Client, HttpConnector},
+    Body, Request,
+};
 use hyper_tls::HttpsConnector;
 use log::*;
-use std::env;
-use std::sync::Arc;
-use tokio::prelude::future::{Either, result, Future};
-use hyper::{Body, Request};
+use std::{env, sync::Arc};
+use tokio::prelude::future::{result, Either, Future};
 
 mod actor;
 mod api;
@@ -56,7 +57,7 @@ pub struct Http {
 pub struct PointercrateState {
     database: Addr<DatabaseActor>,
     gdcf: Addr<GdcfActor>,
-    http: Http
+    http: Http,
 }
 
 impl Http {
@@ -69,7 +70,8 @@ impl Http {
                 .body(Body::from(data.to_string()))
                 .unwrap();
 
-            let future = self.http_client
+            let future = self
+                .http_client
                 .request(request)
                 .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}", error))
                 .map(|_| debug!("Successfully executed discord webhook"));
@@ -80,12 +82,12 @@ impl Http {
         }
     }
 
+    /// Creates a future that resolves to `()` if a `HEAD` request to the given URL receives a
+    /// non-error response status code.
     pub fn if_exists(&self, url: &String) -> impl Future<Item = (), Error = ()> {
         debug!("Verifying {} response to HEAD request with successful status code", url);
 
-        let request = Request::head(url)
-            .body(Body::empty())
-            .unwrap();
+        let request = Request::head(url).body(Body::empty()).unwrap();
 
         self.http_client
             .request(request)
@@ -101,7 +103,6 @@ impl Http {
             })
     }
 }
-
 
 fn main() {
     dotenv::dotenv().expect("Failed to initialize .env file!");
@@ -131,14 +132,14 @@ fn main() {
 
     let http = Http {
         http_client: Client::builder().build(HttpsConnector::new(4).unwrap()),
-        discord_webhook_url: Arc::new(env::var("DISCORD_WEBHOOK").ok())
+        discord_webhook_url: Arc::new(env::var("DISCORD_WEBHOOK").ok()),
     };
 
     let app_factory = move || {
         let state = PointercrateState {
             database: db_addr.clone(),
             gdcf: gdcf_addr.clone(),
-            http: http.clone()
+            http: http.clone(),
         };
 
         App::with_state(state)

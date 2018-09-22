@@ -73,22 +73,19 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
-fn post_process_record(
-    record: &Record, PointercrateState { database, http,.. }: PointercrateState,
-) -> impl Future<Item = (), Error = ()> {
+fn post_process_record(record: &Record, PointercrateState { database, http, .. }: PointercrateState) -> impl Future<Item = (), Error = ()> {
     let record_id = record.id;
 
     let future = if let Some(ref video) = record.video {
-        Either::A(http.if_exists(video)
-            .or_else(move |_| {
-                warn!("A HEAD request to video yielded an error response, automatically deleting submission!");
+        Either::A(http.if_exists(video).or_else(move |_| {
+            warn!("A HEAD request to video yielded an error response, automatically deleting submission!");
 
-                database
-                    .send(DeleteRecordById(record_id))
-                    .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to delete record {} - {:?}!", record_id, error))
-                    .map(|_| ())
-                    .and_then(|_| Err(()))
-            }))
+            database
+                .send(DeleteRecordById(record_id))
+                .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to delete record {} - {:?}!", record_id, error))
+                .map(|_| ())
+                .and_then(|_| Err(()))
+        }))
     } else {
         Either::B(Ok(()).into_future())
     };
@@ -121,5 +118,5 @@ fn post_process_record(
         ]
     });
 
-    future.and_then(move |_|http.execute_discord_webhook(payload))
+    future.and_then(move |_| http.execute_discord_webhook(payload))
 }
