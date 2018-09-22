@@ -3,6 +3,7 @@ use crate::{
     api::record::Submission,
     error::PointercrateError,
     model::{record::RecordStatus, Demon, Player, Record, Submitter},
+    video,
 };
 use diesel::{
     pg::PgConnection,
@@ -26,7 +27,7 @@ impl Actor for DatabaseActor {
     }
 
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        info!("Stopped pointercrate database actor! We ca no longer interact with the database! :(")
+        info!("Stopped pointercrate database actor! We can no longer interact with the database! :(")
     }
 }
 
@@ -35,6 +36,7 @@ pub struct PlayerByName(pub String);
 pub struct DemonByName(pub String);
 pub struct ResolveSubmissionData(pub String, pub String);
 pub struct ProcessSubmission(pub Submission, pub Submitter);
+pub struct RecordById(pub i32);
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -50,8 +52,8 @@ impl Handler<SubmitterByIp> for DatabaseActor {
 
         match Submitter::by_ip(&msg.0).first(connection) {
             Ok(submitter) => Ok(submitter),
-            Err(Error::NotFound) => Submitter::insert(connection, &msg.0).map_err(|_| PointercrateError::DatabaseError),
-            Err(_) => Err(PointercrateError::DatabaseError),
+            Err(Error::NotFound) => Submitter::insert(connection, &msg.0).map_err(PointercrateError::database),
+            Err(err) => return Err(PointercrateError::database(err)),
         }
     }
 }
@@ -70,8 +72,8 @@ impl Handler<PlayerByName> for DatabaseActor {
 
         match Player::by_name(&msg.0).first(connection) {
             Ok(player) => Ok(player),
-            Err(Error::NotFound) => Player::insert(connection, &msg.0).map_err(|_| PointercrateError::DatabaseError),
-            Err(_) => Err(PointercrateError::DatabaseError),
+            Err(Error::NotFound) => Player::insert(connection, &msg.0).map_err(PointercrateError::database),
+            Err(err) => return Err(PointercrateError::database(err)),
         }
     }
 }
@@ -95,7 +97,7 @@ impl Handler<DemonByName> for DatabaseActor {
                     model: "Demon",
                     identified_by: msg.0,
                 }),
-            Err(_) => Err(PointercrateError::DatabaseError),
+            Err(err) => return Err(PointercrateError::database(err)),
         }
     }
 }
@@ -109,6 +111,7 @@ impl Handler<ResolveSubmissionData> for DatabaseActor {
 
     fn handle(&mut self, msg: ResolveSubmissionData, ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve player '{}' and demon '{}' for a submission!", msg.0, msg.1);
+
         let (player, demon) = (msg.0, msg.1);
 
         let player = self.handle(PlayerByName(player), ctx)?;
@@ -140,6 +143,11 @@ impl Handler<ProcessSubmission> for DatabaseActor {
             verify_only,
         } = msg.0;
 
+        let video = match video {
+            Some(ref video) => Some(video::validate(video)?),
+            None => None,
+        };
+
         let (player, demon) = self.handle(ResolveSubmissionData(player, demon), ctx)?;
 
         if player.banned {
@@ -160,6 +168,8 @@ impl Handler<ProcessSubmission> for DatabaseActor {
             })?
         }
 
+        debug!("Submission is valid, checking for duplicates!");
+
         let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         let record: Result<Record, _> = match video {
@@ -171,30 +181,40 @@ impl Handler<ProcessSubmission> for DatabaseActor {
 
         let id = match record {
             Ok(record) =>
-                if record.status() == RecordStatus::Submitted || record.status() == RecordStatus::Approved && record.progress() < progress {
+                if record.status() != RecordStatus::Rejected && record.progress() < progress {
                     if verify_only {
                         return Ok(None)
                     }
 
                     if record.status() == RecordStatus::Submitted {
-                        record.delete(connection).map_err(|_| PointercrateError::DatabaseError)?;
+                        debug!(
+                            "The submission is duplicated, but new one has higher progress. Deleting old with id {}!",
+                            record.id
+                        );
+
+                        record.delete(connection).map_err(PointercrateError::database)?;
                     }
 
+                    debug!("Duplicate {} either already accepted, or has lower progress, accepting!", record.id);
+
                     Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name)
-                        .map_err(|_| PointercrateError::DatabaseError)?
+                        .map_err(PointercrateError::database)?
                 } else {
                     return Err(PointercrateError::SubmissionExists { status: record.status() })
                 },
             Err(Error::NotFound) => {
+                debug!("No duplicate found, accepting!");
+
                 if verify_only {
                     return Ok(None)
                 }
 
-                Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name)
-                    .map_err(|_| PointercrateError::DatabaseError)?
+                Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name).map_err(PointercrateError::database)?
             },
-            Err(_) => return Err(PointercrateError::DatabaseError),
+            Err(err) => return Err(PointercrateError::database(err)),
         };
+
+        info!("Submission successful! Created new record with ID {}", id);
 
         Ok(Some(Record {
             id,
@@ -205,5 +225,29 @@ impl Handler<ProcessSubmission> for DatabaseActor {
             submitter: msg.1.id,
             demon: demon.into(),
         }))
+    }
+}
+
+impl Message for RecordById {
+    type Result = Result<Record, PointercrateError>;
+}
+
+impl Handler<RecordById> for DatabaseActor {
+    type Result = Result<Record, PointercrateError>;
+
+    fn handle(&mut self, msg: RecordById, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempt to resolve record by id {}", msg.0);
+
+        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        match Record::by_id(msg.0).first(connection) {
+            Ok(record) => Ok(record),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Record",
+                    identified_by: msg.0.to_string(),
+                }),
+            Err(err) => return Err(PointercrateError::database(err)),
+        }
     }
 }

@@ -1,9 +1,11 @@
 use actix_web::{
+    error::JsonPayloadError,
     http::{Method, StatusCode},
-    HttpResponse, ResponseError, error::JsonPayloadError
+    HttpResponse, ResponseError,
 };
 use crate::model::record::RecordStatus;
 use failure::Fail;
+use log::error;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
 #[derive(Debug, Fail)]
@@ -38,6 +40,7 @@ pub enum PointercrateError {
     #[fail(display = "No '{}' identified by '{}' found!", model, identified_by)]
     ModelNotFound { model: &'static str, identified_by: String },
 
+    // TODO: do something with allowed_methods
     #[fail(display = "The method is not allowed for the requested URL.")]
     MethodNotAllowed { allowed_methods: Vec<Method> },
 
@@ -63,6 +66,21 @@ pub enum PointercrateError {
 
     #[fail(display = "The request was well-formed but was unable to be followed due to semeantic errors.")]
     UnprocessableEntity,
+
+    #[fail(display = "Invalid URL scheme. Only 'http' and 'https' are supported")]
+    InvalidUrlScheme,
+
+    #[fail(display = "The provided URL contains authentication information. For security reasons it has been rejected")]
+    UrlAuthenticated,
+
+    #[fail(display = "The given video host is not supported. Supported are 'youtube', 'vimeo', 'everyplay', 'twitch' and 'bilibili'")]
+    UnsupportedVideoHost,
+
+    #[fail(
+        display = "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
+        expected
+    )]
+    InvalidUrlFormat { expected: &'static str },
 
     #[fail(display = "Record progress must lie between {} and 100%!", requirement)]
     InvalidProgress { requirement: i16 },
@@ -97,33 +115,67 @@ pub enum PointercrateError {
 }
 
 impl PointercrateError {
+    pub fn database<E: Fail>(error: E) -> PointercrateError {
+        error!("Error while accessing database: {0}\t\tDebug output: {0:?}", error);
+
+        PointercrateError::DatabaseError
+    }
+
+    pub fn internal<E: Fail>(error: E) -> PointercrateError {
+        error!("Internal server error: {0}!\t\tDebug output: {0:?}", error);
+
+        PointercrateError::InternalServerError
+    }
+
+    pub fn bad_request(message: &'static str) -> PointercrateError {
+        PointercrateError::BadRequest {
+            message: message.to_string(),
+        }
+    }
+
     pub fn error_code(&self) -> u16 {
         match self {
             PointercrateError::GenericBadRequest => 40000,
             PointercrateError::BadRequest { .. } => 40000,
             PointercrateError::InvalidHeaderValue { .. } => 40002,
+
             PointercrateError::Unauthorized => 40100,
+
             PointercrateError::Forbidden => 40300,
             PointercrateError::BannedFromSubmissions => 40304,
+
             PointercrateError::NotFound => 40400,
             PointercrateError::ModelNotFound { .. } => 40401,
+
             PointercrateError::MethodNotAllowed { .. } => 40500,
+
             PointercrateError::Conflict => 40900,
+
             PointercrateError::LengthRequired => 41100,
+
             PointercrateError::PreconditionFailed => 41200,
+
             PointercrateError::PayloadTooLarge => 41300,
+
             PointercrateError::UnsupportedMediaType { .. } => 41500,
+
             PointercrateError::UnprocessableEntity => 42200,
             PointercrateError::InvalidProgress { .. } => 42215,
             PointercrateError::SubmissionExists { .. } => 42217,
             PointercrateError::PlayerBanned => 42218,
             PointercrateError::SubmitLegacy => 42219,
             PointercrateError::Non100Extended => 42220,
+            PointercrateError::InvalidUrlScheme => 42222,
+            PointercrateError::UrlAuthenticated => 42223,
+            PointercrateError::UnsupportedVideoHost => 42224,
+            PointercrateError::InvalidUrlFormat { .. } => 42225,
+
             PointercrateError::PreconditionRequired => 42800,
+
             PointercrateError::InternalServerError => 50000,
             PointercrateError::DatabaseError => 50003,
             PointercrateError::DatabaseConnectionError => 50005,
-            _ => unimplemented!(),
+            //_ => unimplemented!(),
         }
     }
 

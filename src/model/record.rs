@@ -6,28 +6,31 @@ use crate::{
 use diesel::{
     delete,
     deserialize::Queryable,
-    expression::{bound::Bound, AsExpression},
+    expression::bound::Bound,
     insert_into,
     pg::{Pg, PgConnection},
     query_dsl::{QueryDsl, RunQueryDsl},
     result::QueryResult,
-    row::Row,
-    serialize::Output,
-    sql_types::{self, Text},
-    types::{FromSql, FromSqlRow, IsNull, ToSql},
-    BoolExpressionMethods, ExpressionMethods,
+    sql_types, BoolExpressionMethods, ExpressionMethods,
 };
+use diesel_derive_enum::DbEnum;
+use serde::{Serialize, Serializer};
+use serde_derive::Serialize;
 use std::{
-    error::Error,
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
-    io::Write,
 };
 
-#[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
+#[DieselType = "Record_status"]
 pub enum RecordStatus {
+    #[db_rename = "SUBMITTED"]
     Submitted,
+
+    #[db_rename = "APPROVED"]
     Approved,
+
+    #[db_rename = "REJECTED"]
     Rejected,
 }
 
@@ -41,69 +44,16 @@ impl Display for RecordStatus {
     }
 }
 
-// Diesel trait impls
-
-impl FromSql<Text, Pg> for RecordStatus {
-    fn from_sql(bytes: Option<&[u8]>) -> Result<Self, Box<dyn Error + Send + Sync + 'static>> {
-        let as_string: String = FromSql::<Text, Pg>::from_sql(bytes)?;
-
-        Ok(match as_string.as_ref() {
-            "SUBMITTED" => RecordStatus::Submitted,
-            "APPROVED" => RecordStatus::Approved,
-            "REJECTED" => RecordStatus::Rejected,
-            _ => unreachable!(),
-        })
-    }
-}
-impl FromSqlRow<Text, Pg> for RecordStatus {
-    fn build_from_row<R: Row<Pg>>(row: &mut R) -> Result<Self, Box<dyn Error + Send + Sync + 'static>> {
-        FromSql::<Text, Pg>::from_sql(row.take())
+impl Serialize for RecordStatus {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
     }
 }
 
-impl ToSql<Text, Pg> for RecordStatus {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> Result<IsNull, Box<dyn Error + Send + Sync + 'static>> {
-        <str as ToSql<Text, Pg>>::to_sql(
-            match self {
-                RecordStatus::Submitted => "SUBMITTED",
-                RecordStatus::Approved => "APPROVED",
-                RecordStatus::Rejected => "REJECTED",
-            },
-            out,
-        )
-    }
-}
-
-impl AsExpression<Text> for RecordStatus {
-    type Expression = diesel::expression::bound::Bound<Text, RecordStatus>;
-
-    fn as_expression(self) -> Self::Expression {
-        diesel::expression::bound::Bound::new(self)
-    }
-}
-
-impl<'a> AsExpression<Text> for &'a RecordStatus {
-    type Expression = diesel::expression::bound::Bound<Text, &'a RecordStatus>;
-
-    fn as_expression(self) -> Self::Expression {
-        diesel::expression::bound::Bound::new(self)
-    }
-}
-
-impl Queryable<Text, Pg> for RecordStatus {
-    type Row = String;
-
-    fn build(row: Self::Row) -> Self {
-        match row.as_ref() {
-            "SUBMITTED" => RecordStatus::Submitted,
-            "APPROVED" => RecordStatus::Approved,
-            "REJECTED" => RecordStatus::Rejected,
-            _ => unreachable!(),
-        }
-    }
-}
-
-#[derive(Debug, Identifiable, Associations)]
+#[derive(Debug, Identifiable, Associations, Serialize)]
 #[table_name = "records"]
 #[belongs_to(Player, foreign_key = "player")]
 #[belongs_to(Submitter, foreign_key = "submitter")]
@@ -125,7 +75,7 @@ impl Hash for Record {
         self.progress.hash(state);
         self.video.hash(state);
         self.status.hash(state);
-        self.player.hash(state);
+        self.player.id.hash(state);
         self.submitter.hash(state);
         self.demon.name.hash(state);
     }
@@ -174,7 +124,8 @@ type SqlType = (
     sql_types::Integer,
     sql_types::SmallInt,
     sql_types::Nullable<sql_types::Text>,
-    sql_types::Text,
+    //sql_types::Text,
+    Record_status,
     // player
     sql_types::Integer,
     sql_types::Text,
