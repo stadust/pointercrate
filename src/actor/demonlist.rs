@@ -53,7 +53,7 @@ impl Handler<SubmitterByIp> for DatabaseActor {
         match Submitter::by_ip(&msg.0).first(connection) {
             Ok(submitter) => Ok(submitter),
             Err(Error::NotFound) => Submitter::insert(connection, &msg.0).map_err(PointercrateError::database),
-            Err(err) => return Err(PointercrateError::database(err)),
+            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }
@@ -73,7 +73,7 @@ impl Handler<PlayerByName> for DatabaseActor {
         match Player::by_name(&msg.0).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) => Player::insert(connection, &msg.0).map_err(PointercrateError::database),
-            Err(err) => return Err(PointercrateError::database(err)),
+            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }
@@ -97,7 +97,7 @@ impl Handler<DemonByName> for DatabaseActor {
                     model: "Demon",
                     identified_by: msg.0,
                 }),
-            Err(err) => return Err(PointercrateError::database(err)),
+            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }
@@ -247,7 +247,7 @@ impl Handler<RecordById> for DatabaseActor {
                     model: "Record",
                     identified_by: msg.0.to_string(),
                 }),
-            Err(err) => return Err(PointercrateError::database(err)),
+            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }

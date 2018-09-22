@@ -22,17 +22,15 @@ impl<S> Middleware<S> for IpResolve {
                         .map_err(|_| PointercrateError::InvalidHeaderValue { header: "X-FORWARDED-FOR" })?;
 
                     req.extensions_mut().insert::<IpNetwork>(remote_addr.into());
+                } else if cfg!(debug_assertions) {
+                    warn!("Request from local machine, but no 'X-FORWARDED-FOR' header is set. Allowing, since this is a debug build");
+
+                    req.extensions_mut()
+                        .insert::<IpNetwork>(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)).into());
                 } else {
-                    if cfg!(debug_assertions) {
-                        warn!("Request from local machine, but no 'X-FORWARDED-FOR' header is set. Allowing, since this is a debug build");
+                    error!("Request from local machine, but no 'X-FORWARDED-FOR' header is set. Since this is a release build, this is a configuration error!");
 
-                        req.extensions_mut()
-                            .insert::<IpNetwork>(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)).into());
-                    } else {
-                        error!("Request from local machine, but no 'X-FORWARDED-FOR' header is set. Since this is a release build, this is a configuration error!");
-
-                        return Err(PointercrateError::InternalServerError.into())
-                    }
+                    return Err(PointercrateError::InternalServerError.into())
                 }
             } else {
                 req.extensions_mut().insert::<IpNetwork>(sockaddr.ip().into())
