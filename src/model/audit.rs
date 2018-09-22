@@ -1,5 +1,5 @@
-use diesel_derive_enum::DbEnum;
 use crate::schema::audit_log;
+use diesel_derive_enum::DbEnum;
 use gdcf::chrono::NaiveDateTime;
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]

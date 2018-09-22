@@ -7,11 +7,33 @@ use gdcf::{
 };
 use gdcf_dbcache::cache::{DatabaseCache, Pg};
 use gdrs::BoomlingsClient;
-use log::error;
+use log::{error, info};
 use tokio::{self, prelude::future::Future};
+
+use actix::Addr;
+use gdcf::chrono::Duration;
+use gdcf_dbcache::cache::DatabaseCacheConfig;
 
 #[derive(Debug)]
 pub struct GdcfActor(Gdcf<BoomlingsClient, DatabaseCache<Pg>>);
+
+impl GdcfActor {
+    pub fn from_env() -> Addr<Self> {
+        info!("Initalizing GDCF from environment data");
+
+        let gdcf_url = std::env::var("GDCF_DATABASE_URL").expect("GDCF_DATABASE_URL is not set");
+
+        let mut config = DatabaseCacheConfig::postgres_config(&gdcf_url);
+        config.invalidate_after(Duration::minutes(30));
+
+        let cache = DatabaseCache::new(config);
+        let client = BoomlingsClient::new();
+
+        let actor = GdcfActor::new(client, cache);
+
+        actor.start()
+    }
+}
 
 impl GdcfActor {
     pub fn new(client: BoomlingsClient, cache: DatabaseCache<Pg>) -> GdcfActor {

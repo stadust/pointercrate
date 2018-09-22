@@ -1,4 +1,4 @@
-use actix::{Actor, Handler, Message, SyncContext};
+use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use crate::{
     api::record::Submission,
     error::PointercrateError,
@@ -18,6 +18,18 @@ pub const LIST_SIZE: i16 = 50;
 pub const EXTENDED_LIST_SIZE: i16 = 100;
 
 pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
+
+impl DatabaseActor {
+    pub fn from_env() -> Addr<Self> {
+        info!("Initializing pointercrate database connection pool");
+
+        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
+        let manager = ConnectionManager::<PgConnection>::new(database_url);
+        let pool = Pool::builder().build(manager).expect("Failed to create database connection pool");
+
+        SyncArbiter::start(4, move || DatabaseActor(pool.clone()))
+    }
+}
 
 impl Actor for DatabaseActor {
     type Context = SyncContext<Self>;

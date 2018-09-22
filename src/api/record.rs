@@ -3,7 +3,7 @@ use crate::{
     actor::demonlist::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
     error::PointercrateError,
     model::{Record, Submitter},
-    PointercrateState,
+    state::PointercrateState,
 };
 use ipnetwork::IpNetwork;
 use log::{error, info, warn};
