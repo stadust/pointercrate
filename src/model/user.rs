@@ -66,8 +66,8 @@ impl User {
     // ALRIGHT. the following code is really fucking weird. Here's why:
     // - I need to keep backwards-compatibility with the python code I wrote 2 years ago
     // - Said python code was based on some misunderstanding about bcrypt
-    // - The key tokens are signed with is a part of the bcrypt hash of the users password (the salt)
-    // concatenated with the app's secret key - I store the bcrypt hashes as BYTEA
+    // - The key tokens are signed with is a part of the bcrypt hash of the users password (the
+    // salt) concatenated with the app's secret key - I store the bcrypt hashes as BYTEA
     // - I use the non-base64 encoded salt as part of the token key
     // All this leads to the following fucked up code.
 
@@ -85,9 +85,13 @@ impl User {
             (split[0], split[1])
         };
 
-        jsonwebtoken::verify(signature, signing_input, &secret, jsonwebtoken::Algorithm::HS256)
-            .map_err(|_| PointercrateError::Unauthorized)
-            .map(move |_| self)
+        jsonwebtoken::verify(
+            signature,
+            signing_input,
+            &secret,
+            jsonwebtoken::Algorithm::HS256,
+        ).map_err(|_| PointercrateError::Unauthorized)
+        .map(move |_| self)
     }
 
     fn password_hash(&self) -> String {
@@ -105,7 +109,8 @@ impl User {
     }
 
     pub fn verify_password(self, password: &str) -> Result<Self, PointercrateError> {
-        let valid = bcrypt::verify(&password, &self.password_hash()).map_err(|_| PointercrateError::Unauthorized)?;
+        let valid = bcrypt::verify(&password, &self.password_hash())
+            .map_err(|_| PointercrateError::Unauthorized)?;
 
         if valid {
             Ok(self)

@@ -19,7 +19,11 @@ impl<S> Middleware<S> for IpResolve {
                         .to_str()
                         .map_err(|_| ())
                         .and_then(|addr| addr.parse().map_err(|_| ()))
-                        .map_err(|_| PointercrateError::InvalidHeaderValue { header: "X-FORWARDED-FOR" })?;
+                        .map_err(|_| {
+                            PointercrateError::InvalidHeaderValue {
+                                header: "X-FORWARDED-FOR",
+                            }
+                        })?;
 
                     req.extensions_mut().insert::<IpNetwork>(remote_addr.into());
                 } else if cfg!(debug_assertions) {
@@ -33,10 +37,14 @@ impl<S> Middleware<S> for IpResolve {
                     return Err(PointercrateError::InternalServerError.into())
                 }
             } else {
-                req.extensions_mut().insert::<IpNetwork>(sockaddr.ip().into())
+                req.extensions_mut()
+                    .insert::<IpNetwork>(sockaddr.ip().into())
             }
         } else {
-            warn!("Remote address for request to {} not retrievable, aborting!", req.uri());
+            warn!(
+                "Remote address for request to {} not retrievable, aborting!",
+                req.uri()
+            );
 
             return Err(PointercrateError::Unauthorized.into())
         }

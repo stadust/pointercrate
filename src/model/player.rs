@@ -42,6 +42,8 @@ impl Player {
     }
 
     pub fn insert(conn: &PgConnection, name: &str) -> QueryResult<Player> {
-        insert_into(players::table).values(&NewPlayer { name }).get_result(conn)
+        insert_into(players::table)
+            .values(&NewPlayer { name })
+            .get_result(conn)
     }
 }

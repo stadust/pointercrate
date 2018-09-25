@@ -72,5 +72,8 @@ fn main() {
             })
     };
 
-    server::new(app_factory).bind("127.0.0.1:8088").unwrap().run();
+    server::new(app_factory)
+        .bind("127.0.0.1:8088")
+        .unwrap()
+        .run();
 }

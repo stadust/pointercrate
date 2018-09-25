@@ -44,7 +44,8 @@ pub struct AuditLogEntry {
     #[column_name = "time_"]
     time: NaiveDateTime,
     #[column_name = "list_mod"]
-    user: Option<String>, // TODO: I have no idea why the fuck this is referencing a string column, what the fuck. the fuck. why past-me???
+    user: Option<String>, /* TODO: I have no idea why the fuck this is referencing a string
+                           * column, what the fuck. the fuck. why past-me??? */
     demon: Option<String>,
     record: Option<i32>,
     player: Option<i32>,

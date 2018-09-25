@@ -31,7 +31,9 @@ impl Http {
         }
     }
 
-    pub fn execute_discord_webhook(&self, data: serde_json::Value) -> impl Future<Item = (), Error = ()> {
+    pub fn execute_discord_webhook(
+        &self, data: serde_json::Value,
+    ) -> impl Future<Item = (), Error = ()> {
         if let Some(ref uri) = *self.discord_webhook_url {
             info!("Executing discord webhook!");
 
@@ -43,8 +45,12 @@ impl Http {
             let future = self
                 .http_client
                 .request(request)
-                .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}", error))
-                .map(|_| debug!("Successfully executed discord webhook"));
+                .map_err(move |error| {
+                    error!(
+                        "INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}",
+                        error
+                    )
+                }).map(|_| debug!("Successfully executed discord webhook"));
 
             Either::A(future)
         } else {
@@ -55,7 +61,10 @@ impl Http {
     /// Creates a future that resolves to `()` if a `HEAD` request to the given URL receives a
     /// non-error response status code.
     pub fn if_exists(&self, url: &String) -> impl Future<Item = (), Error = ()> {
-        debug!("Verifying {} response to HEAD request with successful status code", url);
+        debug!(
+            "Verifying {} response to HEAD request with successful status code",
+            url
+        );
 
         let request = Request::head(url).body(Body::empty()).unwrap();
 

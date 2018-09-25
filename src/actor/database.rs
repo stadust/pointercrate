@@ -26,7 +26,9 @@ impl DatabaseActor {
 
         let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
         let manager = ConnectionManager::<PgConnection>::new(database_url);
-        let pool = Pool::builder().build(manager).expect("Failed to create database connection pool");
+        let pool = Pool::builder()
+            .build(manager)
+            .expect("Failed to create database connection pool");
 
         SyncArbiter::start(4, move || DatabaseActor(pool.clone()))
     }
@@ -40,7 +42,9 @@ impl Actor for DatabaseActor {
     }
 
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        info!("Stopped pointercrate database actor! We can no longer interact with the database! :(")
+        info!(
+            "Stopped pointercrate database actor! We can no longer interact with the database! :("
+        )
     }
 }
 
@@ -69,13 +73,20 @@ impl Handler<SubmitterByIp> for DatabaseActor {
     type Result = Result<Submitter, PointercrateError>;
 
     fn handle(&mut self, msg: SubmitterByIp, _ctx: &mut Self::Context) -> Self::Result {
-        debug!("Attempt to retrieve submitter with IP '{}', creating if not exists!", msg.0);
+        debug!(
+            "Attempt to retrieve submitter with IP '{}', creating if not exists!",
+            msg.0
+        );
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Submitter::by_ip(&msg.0).first(connection) {
             Ok(submitter) => Ok(submitter),
-            Err(Error::NotFound) => Submitter::insert(connection, &msg.0).map_err(PointercrateError::database),
+            Err(Error::NotFound) =>
+                Submitter::insert(connection, &msg.0).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
     }
@@ -89,13 +100,20 @@ impl Handler<PlayerByName> for DatabaseActor {
     type Result = Result<Player, PointercrateError>;
 
     fn handle(&mut self, msg: PlayerByName, _ctx: &mut Self::Context) -> Self::Result {
-        debug!("Attempt to retrieve player with name '{}', creating if not exists!", msg.0);
+        debug!(
+            "Attempt to retrieve player with name '{}', creating if not exists!",
+            msg.0
+        );
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Player::by_name(&msg.0).first(connection) {
             Ok(player) => Ok(player),
-            Err(Error::NotFound) => Player::insert(connection, &msg.0).map_err(PointercrateError::database),
+            Err(Error::NotFound) =>
+                Player::insert(connection, &msg.0).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
     }
@@ -111,7 +129,10 @@ impl Handler<DemonByName> for DatabaseActor {
     fn handle(&mut self, msg: DemonByName, _ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempting to retrieve demon with name '{}'!", msg.0);
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Demon::by_name(&msg.0).first(connection) {
             Ok(demon) => Ok(demon),
@@ -133,7 +154,10 @@ impl Handler<ResolveSubmissionData> for DatabaseActor {
     type Result = Result<(Player, Demon), PointercrateError>;
 
     fn handle(&mut self, msg: ResolveSubmissionData, ctx: &mut Self::Context) -> Self::Result {
-        debug!("Attempt to resolve player '{}' and demon '{}' for a submission!", msg.0, msg.1);
+        debug!(
+            "Attempt to resolve player '{}' and demon '{}' for a submission!",
+            msg.0, msg.1
+        );
 
         let (player, demon) = (msg.0, msg.1);
 
@@ -193,10 +217,14 @@ impl Handler<ProcessSubmission> for DatabaseActor {
 
         debug!("Submission is valid, checking for duplicates!");
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         let record: Result<Record, _> = match video {
-            Some(ref video) => Record::get_existing(player.id, &demon.name, video).first(connection),
+            Some(ref video) =>
+                Record::get_existing(player.id, &demon.name, video).first(connection),
             None => Record::by_player_and_demon(player.id, &demon.name).first(connection),
         };
 
@@ -215,15 +243,28 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                             record.id
                         );
 
-                        record.delete(connection).map_err(PointercrateError::database)?;
+                        record
+                            .delete(connection)
+                            .map_err(PointercrateError::database)?;
                     }
 
-                    debug!("Duplicate {} either already accepted, or has lower progress, accepting!", record.id);
+                    debug!(
+                        "Duplicate {} either already accepted, or has lower progress, accepting!",
+                        record.id
+                    );
 
-                    Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name)
-                        .map_err(PointercrateError::database)?
+                    Record::insert(
+                        connection,
+                        progress,
+                        video_ref,
+                        player.id,
+                        msg.1.id,
+                        &demon.name,
+                    ).map_err(PointercrateError::database)?
                 } else {
-                    return Err(PointercrateError::SubmissionExists { status: record.status() })
+                    return Err(PointercrateError::SubmissionExists {
+                        status: record.status(),
+                    })
                 },
             Err(Error::NotFound) => {
                 debug!("No duplicate found, accepting!");
@@ -232,7 +273,14 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                     return Ok(None)
                 }
 
-                Record::insert(connection, progress, video_ref, player.id, msg.1.id, &demon.name).map_err(PointercrateError::database)?
+                Record::insert(
+                    connection,
+                    progress,
+                    video_ref,
+                    player.id,
+                    msg.1.id,
+                    &demon.name,
+                ).map_err(PointercrateError::database)?
             },
             Err(err) => return Err(PointercrateError::database(err)),
         };
@@ -261,7 +309,10 @@ impl Handler<RecordById> for DatabaseActor {
     fn handle(&mut self, msg: RecordById, ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve record by id {}", msg.0);
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match Record::by_id(msg.0).first(connection) {
             Ok(record) => Ok(record),
@@ -288,7 +339,9 @@ impl Handler<DeleteRecordById> for DatabaseActor {
         self.0
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)
-            .and_then(|connection| Record::delete_by_id(&connection, msg.0).map_err(PointercrateError::database))
+            .and_then(|connection| {
+                Record::delete_by_id(&connection, msg.0).map_err(PointercrateError::database)
+            })
     }
 }
 
@@ -302,7 +355,10 @@ impl Handler<UserById> for DatabaseActor {
     fn handle(&mut self, msg: UserById, ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve user by id {}", msg.0);
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match User::by_id(msg.0).first(connection) {
             Ok(user) => Ok(user),
@@ -326,7 +382,10 @@ impl Handler<UserByName> for DatabaseActor {
     fn handle(&mut self, msg: UserByName, ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve user by name {}", msg.0);
 
-        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         match User::by_name(&msg.0).first(connection) {
             Ok(user) => Ok(user),
@@ -353,15 +412,17 @@ impl Handler<TokenAuth> for DatabaseActor {
         debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
 
         if let Authorization::Token(token) = msg.0 {
-            // Well this is reassuring. Also we directly deconstruct it and only save the ID so we don't
-            // accidentally use unsafe values later on
+            // Well this is reassuring. Also we directly deconstruct it and only save the ID so we
+            // don't accidentally use unsafe values later on
             let Claims { id, .. } = jsonwebtoken::dangerous_unsafe_decode::<Claims>(&token)
                 .map_err(|_| PointercrateError::Unauthorized)?
                 .claims;
 
             debug!("The token identified the user with id {}", id);
 
-            let user = self.handle(UserById(id), ctx).map_err(|_| PointercrateError::Unauthorized)?;
+            let user = self
+                .handle(UserById(id), ctx)
+                .map_err(|_| PointercrateError::Unauthorized)?;
 
             user.validate_token(&token)
         } else {
@@ -381,7 +442,10 @@ impl Handler<BasicAuth> for DatabaseActor {
         debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
 
         if let Authorization::Basic(username, password) = msg.0 {
-            debug!("Trying to authorize user {} (still not logging the password)", username);
+            debug!(
+                "Trying to authorize user {} (still not logging the password)",
+                username
+            );
 
             let user = self
                 .handle(UserByName(username), ctx)

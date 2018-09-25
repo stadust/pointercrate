@@ -25,13 +25,24 @@ struct NewSubmitter<'a> {
     ip: &'a IpNetwork,
 }
 
-type All = diesel::dsl::Select<submitters::table, (submitters::submitter_id, submitters::ip_address, submitters::banned)>;
+type All = diesel::dsl::Select<
+    submitters::table,
+    (
+        submitters::submitter_id,
+        submitters::ip_address,
+        submitters::banned,
+    ),
+>;
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
 type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
 
 impl Submitter {
     pub fn all() -> All {
-        submitters::table.select((submitters::submitter_id, submitters::ip_address, submitters::banned))
+        submitters::table.select((
+            submitters::submitter_id,
+            submitters::ip_address,
+            submitters::banned,
+        ))
     }
 
     pub fn by_ip(ip: &IpNetwork) -> ByIp {

@@ -87,7 +87,8 @@ struct NewRecord<'a> {
     progress: i16,
     video: Option<&'a str>,
     #[column_name = "status_"]
-    status: RecordStatus, // TODO: add a DEFAULT 'SUBMITTED' to the column so this field wont be needed anymore
+    status: RecordStatus, /* TODO: add a DEFAULT 'SUBMITTED' to the column so this field wont
+                           * be needed anymore */
     player: i32,
     submitter: i32,
     demon: &'a str,
@@ -148,12 +149,16 @@ type SqlType = (
     sql_types::SmallInt,
 );
 
-type All = diesel::dsl::Select<diesel::dsl::InnerJoin<diesel::dsl::InnerJoin<records::table, demons::table>, players::table>, AllColumns>;
+type All = diesel::dsl::Select<
+    diesel::dsl::InnerJoin<diesel::dsl::InnerJoin<records::table, demons::table>, players::table>,
+    AllColumns,
+>;
 
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All, WithId>;
 
-type WithVideo<'a> = diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
+type WithVideo<'a> =
+    diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
 type ByVideo<'a> = diesel::dsl::Filter<All, WithVideo<'a>>;
 
 type WithPlayerAndDemon<'a> = diesel::dsl::And<
@@ -186,10 +191,14 @@ impl Record {
     }
 
     pub fn get_existing<'a>(player: i32, demon: &'a str, video: &'a str) -> ByExisting<'a> {
-        Record::all().filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
+        Record::all()
+            .filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
-    pub fn insert(conn: &PgConnection, progress: i16, video: Option<&str>, player: i32, submitter: i32, demon: &str) -> QueryResult<i32> {
+    pub fn insert(
+        conn: &PgConnection, progress: i16, video: Option<&str>, player: i32, submitter: i32,
+        demon: &str,
+    ) -> QueryResult<i32> {
         let new = NewRecord {
             progress,
             video,
@@ -199,7 +208,10 @@ impl Record {
             demon,
         };
 
-        insert_into(records::table).values(&new).returning(records::id).get_result(conn)
+        insert_into(records::table)
+            .values(&new)
+            .returning(records::id)
+            .get_result(conn)
     }
 
     pub fn progress(&self) -> i16 {
@@ -211,7 +223,10 @@ impl Record {
     }
 
     pub fn delete_by_id(conn: &PgConnection, id: i32) -> QueryResult<()> {
-        delete(records::table).filter(records::id.eq(id)).execute(conn).map(|_| ())
+        delete(records::table)
+            .filter(records::id.eq(id))
+            .execute(conn)
+            .map(|_| ())
     }
 
     pub fn delete(&self, conn: &PgConnection) -> QueryResult<()> {
@@ -221,7 +236,18 @@ impl Record {
 }
 
 impl Queryable<SqlType, Pg> for Record {
-    type Row = (i32, i16, Option<String>, RecordStatus, i32, String, bool, i32, String, i16);
+    type Row = (
+        i32,
+        i16,
+        Option<String>,
+        RecordStatus,
+        i32,
+        String,
+        bool,
+        i32,
+        String,
+        i16,
+    );
 
     fn build(row: Self::Row) -> Self {
         Record {

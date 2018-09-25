@@ -10,13 +10,18 @@ use serde::{ser::SerializeMap, Serialize, Serializer};
 
 #[derive(Debug, Fail)]
 pub enum PointercrateError {
-    #[fail(display = "The browser (or proxy) sent a request that this server could not understand.")]
+    #[fail(
+        display = "The browser (or proxy) sent a request that this server could not understand."
+    )]
     GenericBadRequest,
 
     #[fail(display = "{}", message)]
     BadRequest { message: String },
 
-    #[fail(display = "The value for the header {} could not be processed", header)]
+    #[fail(
+        display = "The value for the header {} could not be processed",
+        header
+    )]
     InvalidHeaderValue { header: &'static str },
 
     #[fail(
@@ -37,8 +42,15 @@ pub enum PointercrateError {
     )]
     NotFound,
 
-    #[fail(display = "No '{}' identified by '{}' found!", model, identified_by)]
-    ModelNotFound { model: &'static str, identified_by: String },
+    #[fail(
+        display = "No '{}' identified by '{}' found!",
+        model,
+        identified_by
+    )]
+    ModelNotFound {
+        model: &'static str,
+        identified_by: String,
+    },
 
     // TODO: do something with allowed_methods
     #[fail(display = "The method is not allowed for the requested URL.")]
@@ -64,16 +76,22 @@ pub enum PointercrateError {
     )]
     UnsupportedMediaType { expected: &'static str },
 
-    #[fail(display = "The request was well-formed but was unable to be followed due to semeantic errors.")]
+    #[fail(
+        display = "The request was well-formed but was unable to be followed due to semeantic errors."
+    )]
     UnprocessableEntity,
 
     #[fail(display = "Invalid URL scheme. Only 'http' and 'https' are supported")]
     InvalidUrlScheme,
 
-    #[fail(display = "The provided URL contains authentication information. For security reasons it has been rejected")]
+    #[fail(
+        display = "The provided URL contains authentication information. For security reasons it has been rejected"
+    )]
     UrlAuthenticated,
 
-    #[fail(display = "The given video host is not supported. Supported are 'youtube', 'vimeo', 'everyplay', 'twitch' and 'bilibili'")]
+    #[fail(
+        display = "The given video host is not supported. Supported are 'youtube', 'vimeo', 'everyplay', 'twitch' and 'bilibili'"
+    )]
     UnsupportedVideoHost,
 
     #[fail(
@@ -82,7 +100,10 @@ pub enum PointercrateError {
     )]
     InvalidUrlFormat { expected: &'static str },
 
-    #[fail(display = "Record progress must lie between {} and 100%!", requirement)]
+    #[fail(
+        display = "Record progress must lie between {} and 100%!",
+        requirement
+    )]
     InvalidProgress { requirement: i16 },
 
     #[fail(display = "This record has already been {}", status)]
@@ -110,13 +131,18 @@ pub enum PointercrateError {
     )]
     DatabaseError,
 
-    #[fail(display = "Failed to retrieve connection to the database. The server might be temporarily overloaded.")]
+    #[fail(
+        display = "Failed to retrieve connection to the database. The server might be temporarily overloaded."
+    )]
     DatabaseConnectionError,
 }
 
 impl PointercrateError {
     pub fn database<E: Fail>(error: E) -> PointercrateError {
-        error!("Error while accessing database: {0}\t\tDebug output: {0:?}", error);
+        error!(
+            "Error while accessing database: {0}\t\tDebug output: {0:?}",
+            error
+        );
 
         PointercrateError::DatabaseError
     }

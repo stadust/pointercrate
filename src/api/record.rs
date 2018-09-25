@@ -1,4 +1,6 @@
-use actix_web::{AsyncResponder, Error, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder};
+use actix_web::{
+    AsyncResponder, Error, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
+};
 use crate::{
     actor::database::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
     error::PointercrateError,
@@ -61,7 +63,9 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
-fn post_process_record(record: &Record, PointercrateState { database, http, .. }: PointercrateState) -> impl Future<Item = (), Error = ()> {
+fn post_process_record(
+    record: &Record, PointercrateState { database, http, .. }: PointercrateState,
+) -> impl Future<Item = (), Error = ()> {
     let record_id = record.id;
 
     let future = if let Some(ref video) = record.video {

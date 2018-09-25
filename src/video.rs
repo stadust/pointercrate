@@ -32,39 +32,54 @@ pub fn validate(url: &str) -> Result<String, PointercrateError> {
         match host {
             "www.youtube.com" | "m.youtube.com" | "youtube.com" => {
                 if url.path() == "/watch" {
-                    if let Some(video_id) = url
-                        .query_pairs()
-                        .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
+                    if let Some(video_id) =
+                        url.query_pairs()
+                            .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
                     {
                         return Ok(format!("https://www.youtube.com/watch?v={}", video_id))
                     }
                 }
 
-                Err(PointercrateError::InvalidUrlFormat { expected: YOUTUBE_FORMAT })
+                Err(PointercrateError::InvalidUrlFormat {
+                    expected: YOUTUBE_FORMAT,
+                })
             },
             "youtu.be" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         [video_id] => Ok(format!("https://www.youtube.com/watch?v={}", video_id)),
-                        _ => Err(PointercrateError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }),
+                        _ =>
+                            Err(PointercrateError::InvalidUrlFormat {
+                                expected: YOUTUBE_FORMAT,
+                            }),
                     }
                 } else {
-                    Err(PointercrateError::InvalidUrlFormat { expected: YOUTUBE_FORMAT })
+                    Err(PointercrateError::InvalidUrlFormat {
+                        expected: YOUTUBE_FORMAT,
+                    })
                 },
             "www.twitch.tv" | "twitch.tv" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
-                        ["videos", video_id] => Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
-                        [_, "v", video_id] => Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
-                        _ => Err(PointercrateError::InvalidUrlFormat { expected: TWITCH_FORMAT }),
+                        ["videos", video_id] =>
+                            Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
+                        [_, "v", video_id] =>
+                            Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
+                        _ =>
+                            Err(PointercrateError::InvalidUrlFormat {
+                                expected: TWITCH_FORMAT,
+                            }),
                     }
                 } else {
-                    Err(PointercrateError::InvalidUrlFormat { expected: TWITCH_FORMAT })
+                    Err(PointercrateError::InvalidUrlFormat {
+                        expected: TWITCH_FORMAT,
+                    })
                 },
             "everyplay.com" | "www.everyplay.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
-                        ["videos", video_id] => Ok(format!("https://everyplay.com/videos/{}", video_id)),
+                        ["videos", video_id] =>
+                            Ok(format!("https://everyplay.com/videos/{}", video_id)),
                         _ =>
                             Err(PointercrateError::InvalidUrlFormat {
                                 expected: EVERYPLAY_FORMAT,
@@ -78,20 +93,31 @@ pub fn validate(url: &str) -> Result<String, PointercrateError> {
             "www.bilibili.com" | "bilibili.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
-                        ["video", video_id] => Ok(format!("https://www.bilibili.com/video/{}", video_id)),
-                        _ => Err(PointercrateError::InvalidUrlFormat { expected: BILIBILI_FORMAT }),
+                        ["video", video_id] =>
+                            Ok(format!("https://www.bilibili.com/video/{}", video_id)),
+                        _ =>
+                            Err(PointercrateError::InvalidUrlFormat {
+                                expected: BILIBILI_FORMAT,
+                            }),
                     }
                 } else {
-                    Err(PointercrateError::InvalidUrlFormat { expected: BILIBILI_FORMAT })
+                    Err(PointercrateError::InvalidUrlFormat {
+                        expected: BILIBILI_FORMAT,
+                    })
                 },
             "vimeo.com" | "www.vimeo.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         [video_id] => Ok(format!("https://vimeo.com/{}", video_id)),
-                        _ => Err(PointercrateError::InvalidUrlFormat { expected: VIMEO_FORMAT }),
+                        _ =>
+                            Err(PointercrateError::InvalidUrlFormat {
+                                expected: VIMEO_FORMAT,
+                            }),
                     }
                 } else {
-                    Err(PointercrateError::InvalidUrlFormat { expected: VIMEO_FORMAT })
+                    Err(PointercrateError::InvalidUrlFormat {
+                        expected: VIMEO_FORMAT,
+                    })
                 },
             _ => Err(PointercrateError::UnsupportedVideoHost),
         }
