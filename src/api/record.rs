@@ -2,25 +2,13 @@ use actix_web::{AsyncResponder, Error, FromRequest, HttpMessage, HttpRequest, Ht
 use crate::{
     actor::database::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
     error::PointercrateError,
-    model::{Record, Submitter},
+    model::{record::Submission, Record, Submitter},
     state::PointercrateState,
 };
 use ipnetwork::IpNetwork;
 use log::{error, info, warn};
-use serde_derive::Deserialize;
 use serde_json::json;
 use tokio::prelude::future::{Either, Future, IntoFuture};
-
-#[derive(Deserialize, Debug)]
-pub struct Submission {
-    pub progress: i16,
-    pub player: String,
-    pub demon: String,
-    #[serde(default)]
-    pub video: Option<String>,
-    #[serde(rename = "check", default)]
-    pub verify_only: bool,
-}
 
 pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("POST /api/v1/records/");

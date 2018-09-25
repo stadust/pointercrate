@@ -15,7 +15,7 @@ use diesel::{
 };
 use diesel_derive_enum::DbEnum;
 use serde::{Serialize, Serializer};
-use serde_derive::Serialize;
+use serde_derive::{Deserialize, Serialize};
 use std::{
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
@@ -91,6 +91,17 @@ struct NewRecord<'a> {
     player: i32,
     submitter: i32,
     demon: &'a str,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Submission {
+    pub progress: i16,
+    pub player: String,
+    pub demon: String,
+    #[serde(default)]
+    pub video: Option<String>,
+    #[serde(rename = "check", default)]
+    pub verify_only: bool,
 }
 
 type AllColumns = (

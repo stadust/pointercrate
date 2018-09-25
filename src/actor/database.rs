@@ -1,10 +1,12 @@
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use crate::{
-    api::record::Submission,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     middleware::auth::{Authorization, Claims},
-    model::{record::RecordStatus, Demon, Player, Record, Submitter, User},
+    model::{
+        record::{RecordStatus, Submission},
+        Demon, Player, Record, Submitter, User,
+    },
     video,
 };
 use diesel::{
