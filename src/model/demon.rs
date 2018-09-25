@@ -1,5 +1,5 @@
 use crate::{
-    actor::database::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     schema::demons,
 };
 use diesel::{expression::bound::Bound, *};
@@ -43,9 +43,9 @@ impl Serialize for PartialDemon {
 }
 
 fn list_state(position: i16) -> ListState {
-    if position <= LIST_SIZE {
+    if position <= *LIST_SIZE {
         ListState::Main
-    } else if position <= EXTENDED_LIST_SIZE {
+    } else if position <= *EXTENDED_LIST_SIZE {
         ListState::Extended
     } else {
         ListState::Legacy

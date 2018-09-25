@@ -26,7 +26,7 @@ use crate::{
 
 mod actor;
 mod api;
-mod auth;
+//mod auth;
 mod config;
 mod error;
 mod middleware;

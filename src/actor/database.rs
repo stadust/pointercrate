@@ -1,8 +1,9 @@
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use crate::{
     api::record::Submission,
-    auth::{Authorization, Claims},
+    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
+    middleware::auth::{Authorization, Claims},
     model::{record::RecordStatus, Demon, Player, Record, Submitter, User},
     video,
 };
@@ -14,9 +15,6 @@ use diesel::{
 };
 use ipnetwork::IpNetwork;
 use log::{debug, info};
-
-pub const LIST_SIZE: i16 = 50;
-pub const EXTENDED_LIST_SIZE: i16 = 100;
 
 pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
 
@@ -177,11 +175,11 @@ impl Handler<ProcessSubmission> for DatabaseActor {
             return Err(PointercrateError::PlayerBanned)
         }
 
-        if demon.position > EXTENDED_LIST_SIZE {
+        if demon.position > *EXTENDED_LIST_SIZE {
             return Err(PointercrateError::SubmitLegacy)
         }
 
-        if demon.position > LIST_SIZE && progress != 100 {
+        if demon.position > *LIST_SIZE && progress != 100 {
             return Err(PointercrateError::Non100Extended)
         }
 

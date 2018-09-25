@@ -2,7 +2,20 @@ use actix_web::{
     middleware::{Middleware, Started},
     Error, HttpRequest,
 };
-use crate::{auth::Authorization, error::PointercrateError, state::PointercrateState};
+use crate::{error::PointercrateError, state::PointercrateState};
+use serde_derive::Deserialize;
+
+#[derive(Debug)]
+pub enum Authorization {
+    Unauthorized,
+    Basic(String, String),
+    Token(String),
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Claims {
+    pub id: i32,
+}
 
 pub struct Authorizer;
 
