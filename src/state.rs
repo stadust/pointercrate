@@ -1,5 +1,5 @@
 use actix::Addr;
-use crate::actor::{demonlist::DatabaseActor, gdcf::GdcfActor};
+use crate::actor::{database::DatabaseActor, gdcf::GdcfActor};
 use hyper::{
     client::{Client, HttpConnector},
     Body, Request,

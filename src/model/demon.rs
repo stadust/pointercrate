@@ -1,5 +1,5 @@
 use crate::{
-    actor::demonlist::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    actor::database::{EXTENDED_LIST_SIZE, LIST_SIZE},
     schema::demons,
 };
 use diesel::{expression::bound::Bound, *};

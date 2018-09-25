@@ -1,6 +1,6 @@
 use actix_web::{AsyncResponder, Error, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder};
 use crate::{
-    actor::demonlist::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
+    actor::database::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
     error::PointercrateError,
     model::{Record, Submitter},
     state::PointercrateState,

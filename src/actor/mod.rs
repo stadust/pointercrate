@@ -1,2 +1,2 @@
-pub mod demonlist;
+pub mod database;
 pub mod gdcf;

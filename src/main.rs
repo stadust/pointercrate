@@ -18,7 +18,7 @@ extern crate diesel;
 use actix::System;
 use actix_web::{error::ResponseError, http::Method, server, App};
 use crate::{
-    actor::{demonlist::DatabaseActor, gdcf::GdcfActor},
+    actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
     middleware::{auth::Authorizer, ip::IpResolve},
     state::{Http, PointercrateState},
@@ -27,6 +27,7 @@ use crate::{
 mod actor;
 mod api;
 mod auth;
+mod config;
 mod error;
 mod middleware;
 mod model;

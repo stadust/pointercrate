@@ -1,8 +1,9 @@
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use crate::{
     api::record::Submission,
+    auth::{Authorization, Claims},
     error::PointercrateError,
-    model::{record::RecordStatus, Demon, Player, Record, Submitter},
+    model::{record::RecordStatus, Demon, Player, Record, Submitter, User},
     video,
 };
 use diesel::{
@@ -44,12 +45,21 @@ impl Actor for DatabaseActor {
 }
 
 pub struct SubmitterByIp(pub IpNetwork);
+
 pub struct PlayerByName(pub String);
+
 pub struct DemonByName(pub String);
+
 pub struct ResolveSubmissionData(pub String, pub String);
 pub struct ProcessSubmission(pub Submission, pub Submitter);
 pub struct RecordById(pub i32);
 pub struct DeleteRecordById(pub i32);
+
+pub struct UserById(pub i32);
+pub struct UserByName(pub String);
+
+pub struct TokenAuth(pub Authorization, pub Vec<u8>);
+pub struct BasicAuth(pub Authorization);
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -279,5 +289,107 @@ impl Handler<DeleteRecordById> for DatabaseActor {
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)
             .and_then(|connection| Record::delete_by_id(&connection, msg.0).map_err(PointercrateError::database))
+    }
+}
+
+impl Message for UserById {
+    type Result = Result<User, PointercrateError>;
+}
+
+impl Handler<UserById> for DatabaseActor {
+    type Result = Result<User, PointercrateError>;
+
+    fn handle(&mut self, msg: UserById, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempt to resolve user by id {}", msg.0);
+
+        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        match User::by_id(msg.0).first(connection) {
+            Ok(user) => Ok(user),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "User",
+                    identified_by: msg.0.to_string(),
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Message for UserByName {
+    type Result = Result<User, PointercrateError>;
+}
+
+impl Handler<UserByName> for DatabaseActor {
+    type Result = Result<User, PointercrateError>;
+
+    fn handle(&mut self, msg: UserByName, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempt to resolve user by name {}", msg.0);
+
+        let connection = &*self.0.get().map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        match User::by_name(&msg.0).first(connection) {
+            Ok(user) => Ok(user),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "User",
+                    identified_by: msg.0,
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Message for TokenAuth {
+    type Result = Result<User, PointercrateError>;
+}
+
+// During authorization, all and every error that might come up will be converted into
+// `PointercrateError::Unauthorized`
+impl Handler<TokenAuth> for DatabaseActor {
+    type Result = Result<User, PointercrateError>;
+
+    fn handle(&mut self, msg: TokenAuth, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
+
+        if let Authorization::Token(token) = msg.0 {
+            // Well this is reassuring. Also we directly deconstruct it and only save the ID so we don't
+            // accidentally use unsafe values later on
+            let Claims { id, .. } = jsonwebtoken::dangerous_unsafe_decode::<Claims>(&token)
+                .map_err(|_| PointercrateError::Unauthorized)?
+                .claims;
+
+            debug!("The token identified the user with id {}", id);
+
+            let user = self.handle(UserById(id), ctx).map_err(|_| PointercrateError::Unauthorized)?;
+
+            user.validate_token(&token)
+        } else {
+            Err(PointercrateError::Unauthorized)
+        }
+    }
+}
+
+impl Message for BasicAuth {
+    type Result = Result<User, PointercrateError>;
+}
+
+impl Handler<BasicAuth> for DatabaseActor {
+    type Result = Result<User, PointercrateError>;
+
+    fn handle(&mut self, msg: BasicAuth, ctx: &mut Self::Context) -> Self::Result {
+        debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
+
+        if let Authorization::Basic(username, password) = msg.0 {
+            debug!("Trying to authorize user {} (still not logging the password)", username);
+
+            let user = self
+                .handle(UserByName(username), ctx)
+                .map_err(|_| PointercrateError::Unauthorized)?;
+
+            user.verify_password(&password)
+        } else {
+            Err(PointercrateError::Unauthorized)
+        }
     }
 }
