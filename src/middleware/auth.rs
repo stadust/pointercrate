@@ -21,13 +21,7 @@ pub struct Authorizer;
 
 impl Middleware<PointercrateState> for Authorizer {
     fn start(&self, req: &HttpRequest<PointercrateState>) -> Result<Started, Error> {
-        let authorization = if let Some(auth) = req.headers().get("Authorization") {
-            let auth = auth.to_str().map_err(|_| {
-                PointercrateError::InvalidHeaderValue {
-                    header: "Authorization",
-                }
-            })?;
-
+        let authorization = if let Some(auth) = header!(req, "Authorization") {
             let parts = auth.split(' ').collect::<Vec<_>>();
 
             match &parts[..] {

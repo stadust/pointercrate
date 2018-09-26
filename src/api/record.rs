@@ -38,8 +38,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 },
                 None => HttpResponse::NoContent().finish(),
             }
-        })
-        .responder()
+        }).responder()
 }
 
 pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {

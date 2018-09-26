@@ -14,16 +14,12 @@ impl<S> Middleware<S> for IpResolve {
         if let Some(sockaddr) = req.peer_addr() {
             // We'll have apache reverse-proxying for us, so we gotta check this
             if IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)) == sockaddr.ip() {
-                if let Some(forwarded_for) = req.headers().get("X-FORWARDED-FOR") {
-                    let remote_addr: IpAddr = forwarded_for
-                        .to_str()
-                        .map_err(|_| ())
-                        .and_then(|addr| addr.parse().map_err(|_| ()))
-                        .map_err(|_| {
-                            PointercrateError::InvalidHeaderValue {
-                                header: "X-FORWARDED-FOR",
-                            }
-                        })?;
+                if let Some(forwarded_for) = header!(req, "X-FORWARDED-FOR") {
+                    let remote_addr: IpAddr = forwarded_for.parse().map_err(|_| {
+                        PointercrateError::InvalidHeaderValue {
+                            header: "X-FORWARDED-FOR",
+                        }
+                    })?;
 
                     req.extensions_mut().insert::<IpNetwork>(remote_addr.into());
                 } else if cfg!(debug_assertions) {
