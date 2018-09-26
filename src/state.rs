@@ -1,5 +1,8 @@
-use actix::Addr;
-use crate::actor::{database::DatabaseActor, gdcf::GdcfActor};
+use actix::{Addr, Handler, Message};
+use crate::{
+    actor::{database::DatabaseActor, gdcf::GdcfActor},
+    error::PointercrateError,
+};
 use hyper::{
     client::{Client, HttpConnector},
     Body, Request,
@@ -21,6 +24,20 @@ pub struct PointercrateState {
     pub database: Addr<DatabaseActor>,
     pub gdcf: Addr<GdcfActor>,
     pub http: Http,
+}
+
+impl PointercrateState {
+    pub fn database<Msg, T>(&self, msg: Msg) -> impl Future<Item = T, Error = PointercrateError>
+    where
+        T: Send + 'static,
+        Msg: Message<Result = Result<T, PointercrateError>> + Send + 'static,
+        DatabaseActor: Handler<Msg>,
+    {
+        self.database
+            .send(msg)
+            .map_err(PointercrateError::internal)
+            .flatten()
+    }
 }
 
 impl Http {

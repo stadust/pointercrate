@@ -1,5 +1,5 @@
 use actix_web::{
-    AsyncResponder, Error, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
+    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
     actor::database::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
@@ -16,53 +16,44 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("POST /api/v1/records/");
 
     let state = req.state().clone();
-    let database = req.state().database.clone();
+    let state2 = state.clone();
     let remote_addr = req.extensions_mut().remove::<IpNetwork>().unwrap();
 
     req.json()
         .from_err()
         .and_then(move |submission: Submission| {
-            database
-                .send(SubmitterByIp(remote_addr))
-                .map_err(PointercrateError::internal)
-                .flatten()
+            state
+                .database(SubmitterByIp(remote_addr))
                 .and_then(move |submitter: Submitter| {
-                    database
-                        .send(ProcessSubmission(submission, submitter))
-                        .map_err(PointercrateError::internal)
-                        .flatten()
+                    state.database(ProcessSubmission(submission, submitter))
                 })
         }).map(|record: Option<Record>| {
             match record {
                 Some(record) => {
-                    tokio::spawn(post_process_record(&record, state));
-
+                    tokio::spawn(post_process_record(&record, state2));
                     // TODO: ETags
 
                     // TODO: conditional header processing (middleware)
-                    HttpResponse::Ok().json(record)
+                    HttpResponse::Created().json(record)
                 },
                 None => HttpResponse::NoContent().finish(),
             }
-        }).from_err::<Error>()
+        })
         .responder()
 }
 
 pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/records/{{record_id}}/");
 
-    let database = req.state().database.clone();
+    // TODO: Etags and conditional requests
+
+    let state = req.state().clone();
 
     Path::<i32>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Record ID must be integer"))
         .into_future()
-        .and_then(move |record_id| {
-            database
-                .send(RecordById(record_id.into_inner()))
-                .map_err(PointercrateError::internal)
-        }).flatten()
+        .and_then(move |record_id| state.database(RecordById(record_id.into_inner())))
         .map(|record: Record| HttpResponse::Ok().json(record))
-        .from_err::<Error>()
         .responder()
 }
 
