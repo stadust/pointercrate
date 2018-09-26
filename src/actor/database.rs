@@ -5,6 +5,7 @@ use crate::{
     middleware::auth::{Authorization, Claims},
     model::{
         record::{RecordStatus, Submission},
+        user::Registration,
         Demon, Player, Record, Submitter, User,
     },
     video,
@@ -59,6 +60,7 @@ pub struct ProcessSubmission(pub Submission, pub Submitter);
 pub struct RecordById(pub i32);
 pub struct DeleteRecordById(pub i32);
 
+pub struct Register(pub Registration);
 pub struct UserById(pub i32);
 pub struct UserByName(pub String);
 
@@ -454,6 +456,28 @@ impl Handler<BasicAuth> for DatabaseActor {
             user.verify_password(&password)
         } else {
             Err(PointercrateError::Unauthorized)
+        }
+    }
+}
+
+impl Message for Register {
+    type Result = Result<User, PointercrateError>;
+}
+
+impl Handler<Register> for DatabaseActor {
+    type Result = Result<User, PointercrateError>;
+
+    fn handle(&mut self, msg: Register, ctx: &mut Self::Context) -> Self::Result {
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        match User::by_name(&msg.0.name).first::<User>(connection) {
+            Ok(user) => Err(PointercrateError::NameTaken),
+            Err(Error::NotFound) =>
+                User::register(connection, &msg.0).map_err(PointercrateError::database),
+            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }

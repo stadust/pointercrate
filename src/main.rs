@@ -69,6 +69,13 @@ fn main() {
                         allowed_methods: vec![Method::GET],
                     }.error_response()
                 })
+            }).resource("/apo/v1/auth/register/", |r| {
+                r.post().f(api::auth::register);
+                r.route().f(|_| {
+                    PointercrateError::MethodNotAllowed {
+                        allowed_methods: vec![Method::POST],
+                    }.error_response()
+                })
             })
     };
 

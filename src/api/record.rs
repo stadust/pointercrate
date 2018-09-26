@@ -37,6 +37,9 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 Some(record) => {
                     tokio::spawn(post_process_record(&record, state));
 
+                    // TODO: ETags
+
+                    // TODO: conditional header processing (middleware)
                     HttpResponse::Ok().json(record)
                 },
                 None => HttpResponse::NoContent().finish(),

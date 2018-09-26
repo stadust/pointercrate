@@ -61,6 +61,9 @@ pub enum PointercrateError {
     )]
     Conflict,
 
+    #[fail(display = "The chosen username is already taken")]
+    NameTaken,
+
     #[fail(display = "A request with this methods requires a valid 'Content-Length' header")]
     LengthRequired,
 
@@ -176,6 +179,7 @@ impl PointercrateError {
             PointercrateError::MethodNotAllowed { .. } => 40500,
 
             PointercrateError::Conflict => 40900,
+            PointercrateError::NameTaken => 40902,
 
             PointercrateError::LengthRequired => 41100,
 

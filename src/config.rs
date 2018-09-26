@@ -11,13 +11,6 @@ lazy_static! {
     };
 }
 
-fn from_env<T: FromStr>(key: &str) -> T
-where
-    <T as FromStr>::Err: Debug,
-{
-    std::env::var(key).unwrap().parse().unwrap()
-}
-
 fn from_env_or_default<T: FromStr>(key: &str, default: T) -> T
 where
     <T as FromStr>::Err: Debug,

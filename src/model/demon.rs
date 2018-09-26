@@ -89,16 +89,10 @@ const ALL_COLUMNS: AllColumns = (
     demons::publisher,
 );
 
-type PartialColumns = (demons::name, demons::position);
-
-const PARTIAL_COLUMNS: PartialColumns = (demons::name, demons::position);
-
 type All = diesel::dsl::Select<demons::table, AllColumns>;
-//type Partial = diesel::dsl::Select<demons::table, PartialColumns>;
 
 type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
-//type ByNamePartial<'a> = diesel::dsl::Filter<Partial, WithName<'a>>;
 
 type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
@@ -116,16 +110,6 @@ impl Demon {
         Demon::all().filter(demons::position.eq(position))
     }
 }
-
-/*impl PartialDemon {
-    pub fn all() -> All {
-        demons::table.select(PARTIAL_COLUMNS)
-    }
-
-    pub fn by_name(name: &str) -> ByNamePartial {
-        PartialDemon::all().filter(demons::name.eq(name))
-    }
-}*/
 
 impl Into<PartialDemon> for Demon {
     fn into(self) -> PartialDemon {

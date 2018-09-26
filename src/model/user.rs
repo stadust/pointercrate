@@ -1,10 +1,13 @@
 use crate::{config::SECRET, error::PointercrateError, schema::members};
-use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
+use diesel::{
+    expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types, ExpressionMethods,
+    PgConnection, QueryResult, RunQueryDsl,
+};
+use serde::{ser::SerializeMap, Serialize, Serializer};
+use serde_derive::Deserialize;
 
-#[derive(Queryable, Insertable, Debug)]
-#[table_name = "members"]
+#[derive(Queryable, Debug)]
 pub struct User {
-    #[column_name = "member_id"]
     pub id: i32,
 
     pub name: String,
@@ -20,6 +23,35 @@ pub struct User {
 
     // TODO: deal with this
     permissions: Vec<u8>,
+}
+
+impl Serialize for User {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(3))?;
+        map.serialize_entry("id", &self.id)?;
+        map.serialize_entry("name", &self.name)?;
+        // TODO: map.serialize_entry("permissions")
+        map.serialize_entry("display_name", &self.display_name)?;
+        map.serialize_entry("youtube_channel", &self.youtube_channel)?;
+        map.end()
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Registration {
+    pub name: String,
+    pub password: String,
+}
+
+#[derive(Insertable, Debug)]
+#[table_name = "members"]
+struct NewUser<'a> {
+    name: &'a str,
+    password_hash: &'a [u8],
+    password_salt: Vec<u8>,
 }
 
 type AllColumns = (
@@ -61,6 +93,18 @@ impl User {
 
     pub fn by_id(id: i32) -> ById {
         User::all().filter(members::member_id.eq(id))
+    }
+
+    pub fn register(conn: &PgConnection, registration: &Registration) -> QueryResult<User> {
+        let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
+
+        let new = NewUser {
+            name: &registration.name,
+            password_hash: hash.as_bytes(),
+            password_salt: Vec::new(),
+        };
+
+        insert_into(members::table).values(&new).get_result(conn)
     }
 
     // ALRIGHT. the following code is really fucking weird. Here's why:
