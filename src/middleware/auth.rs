@@ -3,8 +3,8 @@ use actix_web::{
     Error, HttpRequest,
 };
 use crate::{error::PointercrateError, state::PointercrateState};
-use serde_derive::{Deserialize, Serialize};
 use log::debug;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum Authorization {

@@ -72,6 +72,8 @@ fn post_process_record(
         Either::B(Ok(()).into_future())
     };
 
+    let progress = record.progress as f32 / 100f32;
+
     let payload = json!({
         "content": format!("**New record submitted! ID: {}**", record_id),
         "embeds": [
@@ -82,7 +84,7 @@ fn post_process_record(
                 "footer": {
                     "text": format!("This record has been submitted by submitter #{}", record.submitter)
                 },
-                "color": (0x9e0000i32 * (record.progress as i32) / 100) & 0xFF0000i32 + (0x00e000i32 * (record.progress as i32) / 100) & 0x00FF00i32,
+                "color": (0x9e0000 as f32 * progress) as i32 & 0xFF0000i32 + (0x00e000 as f32 * progress) as i32 & 0x00FF00i32,
                 "author": {
                     "name": format!("{} (ID: {})", record.player.name, record.player.id),
                     "url": record.video

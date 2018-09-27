@@ -473,6 +473,8 @@ impl Handler<Register> for DatabaseActor {
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
+        // TODO: username and password validation (long enough, etc)
+
         match User::by_name(&msg.0.name).first::<User>(connection) {
             Ok(user) => Err(PointercrateError::NameTaken),
             Err(Error::NotFound) =>

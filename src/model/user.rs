@@ -3,6 +3,7 @@ use diesel::{
     expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types, ExpressionMethods,
     PgConnection, QueryResult, RunQueryDsl,
 };
+use log::info;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Deserialize;
 use std::hash::{Hash, Hasher};
@@ -107,6 +108,8 @@ impl User {
     }
 
     pub fn register(conn: &PgConnection, registration: &Registration) -> QueryResult<User> {
+        info!("Registering new user with name {}", registration.name);
+
         let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
 
         let new = NewUser {
