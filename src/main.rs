@@ -84,6 +84,10 @@ fn main() {
                             }).resource("/register", |r| {
                                 r.post().f(api::auth::register);
                                 r.route().f(mna!(Method::POST))
+                            }).resource("/me", |r| {
+                                r.get().f(api::auth::me);
+                                r.route()
+                                    .f(mna!(Method::GET, Method::PATCH, Method::DELETE))
                             })
                     })
             })

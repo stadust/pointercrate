@@ -64,7 +64,7 @@ pub struct Register(pub Registration);
 pub struct UserById(pub i32);
 pub struct UserByName(pub String);
 
-pub struct TokenAuth(pub Authorization, pub Vec<u8>);
+pub struct TokenAuth(pub Authorization);
 pub struct BasicAuth(pub Authorization);
 
 impl Message for SubmitterByIp {

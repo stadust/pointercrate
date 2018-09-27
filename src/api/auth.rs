@@ -1,6 +1,6 @@
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
-    actor::database::{BasicAuth, Register},
+    actor::database::{BasicAuth, Register, TokenAuth},
     middleware::cond::HttpResponseBuilderExt,
     model::user::{Registration, User},
     state::PointercrateState,
@@ -35,4 +35,13 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 "token": user.generate_token()
             }))
         }).responder()
+}
+
+pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("GET /api/v1/auth/me/");
+
+    req.state()
+        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
+        .map(|user: User| HttpResponse::Ok().json_with_etag(user))
+        .responder()
 }
