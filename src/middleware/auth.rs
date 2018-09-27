@@ -3,7 +3,7 @@ use actix_web::{
     Error, HttpRequest,
 };
 use crate::{error::PointercrateError, state::PointercrateState};
-use serde_derive::Deserialize;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum Authorization {
@@ -12,7 +12,7 @@ pub enum Authorization {
     Token(String),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub id: i32,
 }

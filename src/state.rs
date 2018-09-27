@@ -2,6 +2,7 @@ use actix::{Addr, Handler, Message};
 use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
+    middleware::cond::IfMatch,
 };
 use hyper::{
     client::{Client, HttpConnector},
@@ -15,7 +16,6 @@ use std::{
     sync::Arc,
 };
 use tokio::prelude::future::{result, Either, Future};
-use crate::middleware::cond::IfMatch;
 
 #[derive(Debug, Clone)]
 pub struct Http {

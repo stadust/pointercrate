@@ -1,10 +1,11 @@
-use crate::{config::SECRET, error::PointercrateError, schema::members};
+use crate::{config::SECRET, error::PointercrateError, middleware::auth::Claims, schema::members};
 use diesel::{
     expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types, ExpressionMethods,
     PgConnection, QueryResult, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Deserialize;
+use std::hash::{Hash, Hasher};
 
 #[derive(Queryable, Debug)]
 pub struct User {
@@ -23,6 +24,16 @@ pub struct User {
 
     // TODO: deal with this
     permissions: Vec<u8>,
+}
+
+impl Hash for User {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.name.hash(state);
+        self.display_name.hash(state);
+        self.youtube_channel.hash(state);
+        // TODO: self.permissions.hash(state);
+    }
 }
 
 impl Serialize for User {
@@ -115,12 +126,21 @@ impl User {
     // - I use the non-base64 encoded salt as part of the token key
     // All this leads to the following fucked up code.
 
+    fn jwt_secret(&self) -> Vec<u8> {
+        let mut vec = SECRET.clone();
+        vec.extend(&self.password_salt());
+        vec
+    }
+
+    pub fn generate_token(&self) -> String {
+        jsonwebtoken::encode(
+            &jsonwebtoken::Header::default(),
+            &Claims { id: self.id },
+            &self.jwt_secret(),
+        ).unwrap()
+    }
+
     pub fn validate_token(self, token: &str) -> Result<Self, PointercrateError> {
-        let secret = {
-            let mut vec = SECRET.clone();
-            vec.extend(&self.password_salt());
-            vec
-        };
         let (signing_input, signature) = {
             let split = token.rsplitn(2, ' ').collect::<Vec<_>>();
             if split.len() != 2 {
@@ -132,7 +152,7 @@ impl User {
         jsonwebtoken::verify(
             signature,
             signing_input,
-            &secret,
+            &self.jwt_secret(),
             jsonwebtoken::Algorithm::HS256,
         ).map_err(|_| PointercrateError::Unauthorized)
         .map(move |_| self)

@@ -1,10 +1,12 @@
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
-    actor::database::Register,
+    actor::database::{BasicAuth, Register},
+    middleware::cond::HttpResponseBuilderExt,
     model::user::{Registration, User},
     state::PointercrateState,
 };
 use log::info;
+use serde_json::json;
 use tokio::prelude::future::Future;
 
 pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
@@ -18,6 +20,19 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .map(|user: User| {
             HttpResponse::Created()
                 .header("Location", "/auth/me/")
-                .json(user)
+                .json_with_etag(user)
+        }).responder()
+}
+
+pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("POST /api/v1/auth/");
+
+    req.state()
+        .database(BasicAuth(req.extensions_mut().remove().unwrap()))
+        .map(|user: User| {
+            HttpResponse::Ok().etag(&user).json(json!({
+                "data": user,
+                "token": user.generate_token()
+            }))
         }).responder()
 }

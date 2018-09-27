@@ -34,6 +34,16 @@ mod schema;
 mod state;
 mod video;
 
+macro_rules! mna {
+    ($($method: expr),*) => {
+        |_| {
+            PointercrateError::MethodNotAllowed {
+                allowed_methods: vec![$($method,)*]
+            }.error_response()
+        }
+    }
+}
+
 fn main() {
     dotenv::dotenv().expect("Failed to initialize .env file!");
     env_logger::init().expect("Failed to initialize logging environment!");
@@ -55,27 +65,27 @@ fn main() {
             .middleware(IpResolve)
             .middleware(Authorizer)
             .middleware(Precondition)
-            .resource("/api/v1/records/", |r| {
-                r.post().f(api::record::submit);
-                r.route().f(|_| {
-                    PointercrateError::MethodNotAllowed {
-                        allowed_methods: vec![Method::POST],
-                    }.error_response()
-                })
-            }).resource("/api/v1/records/{record_id}/", |r| {
-                r.get().f(api::record::get);
-                r.route().f(|_| {
-                    PointercrateError::MethodNotAllowed {
-                        allowed_methods: vec![Method::GET],
-                    }.error_response()
-                })
-            }).resource("/apo/v1/auth/register/", |r| {
-                r.post().f(api::auth::register);
-                r.route().f(|_| {
-                    PointercrateError::MethodNotAllowed {
-                        allowed_methods: vec![Method::POST],
-                    }.error_response()
-                })
+            .scope("/api/v1", |api_scope| {
+                api_scope
+                    .nested("/records", |record_scope| {
+                        record_scope
+                            .resource("/", |r| {
+                                r.post().f(api::record::submit);
+                                r.route().f(mna!(Method::POST))
+                            }).resource("/{record_id/", |r| {
+                                r.get().f(api::record::get);
+                                r.route().f(mna!(Method::GET))
+                            })
+                    }).nested("/auth", |auth_scope| {
+                        auth_scope
+                            .resource("/", |r| {
+                                r.post().f(api::auth::login);
+                                r.route().f(mna!(Method::POST))
+                            }).resource("/register", |r| {
+                                r.post().f(api::auth::register);
+                                r.route().f(mna!(Method::POST))
+                            })
+                    })
             })
     };
 
