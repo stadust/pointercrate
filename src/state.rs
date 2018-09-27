@@ -9,8 +9,13 @@ use hyper::{
 };
 use hyper_tls::HttpsConnector;
 use log::{debug, error, info};
-use std::sync::Arc;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+    sync::Arc,
+};
 use tokio::prelude::future::{result, Either, Future};
+use crate::middleware::cond::IfMatch;
 
 #[derive(Debug, Clone)]
 pub struct Http {
@@ -37,6 +42,26 @@ impl PointercrateState {
             .send(msg)
             .map_err(PointercrateError::internal)
             .flatten()
+    }
+
+    pub fn database_if_match<Msg, T>(
+        &self, msg: Msg, if_match: IfMatch,
+    ) -> impl Future<Item = T, Error = PointercrateError>
+    where
+        T: Send + Hash + 'static,
+        Msg: Message<Result = Result<T, PointercrateError>> + Send + 'static,
+        DatabaseActor: Handler<Msg>,
+    {
+        self.database(msg).and_then(move |t: T| {
+            let mut hasher = DefaultHasher::new();
+            t.hash(&mut hasher);
+
+            if if_match.met(hasher.finish()) {
+                Ok(t)
+            } else {
+                Err(PointercrateError::PreconditionFailed)
+            }
+        })
     }
 }
 

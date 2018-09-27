@@ -14,6 +14,7 @@ use std::{
 };
 
 pub struct Precondition;
+pub struct IfMatch(Vec<u64>);
 
 impl<S> Middleware<S> for Precondition {
     fn start(&self, req: &HttpRequest<S>) -> Result<Started, Error> {
@@ -23,12 +24,29 @@ impl<S> Middleware<S> for Precondition {
         // here and then storing them in the request because we'd just add the overhead of cloning
         // the headers)
         let if_match = header!(req, "If-Match");
-        let if_none_match = header!(req, "If-None-Match");
+        let _ = header!(req, "If-None-Match");
 
         // PATCH requires `If-Match`, always. Actually checking if they match is up to the
         // actual endpoing though!
-        if req.method() == Method::PATCH && if_match.is_none() {
-            return Err(PointercrateError::PreconditionRequired)?
+        if req.method() == Method::PATCH {
+            match if_match {
+                None => return Err(PointercrateError::PreconditionRequired)?,
+                Some(if_match) => {
+                    let mut hashes = Vec::new();
+
+                    for hash in if_match.split(',') {
+                        match hash.parse::<u64>() {
+                            Err(_) =>
+                                return Err(PointercrateError::InvalidHeaderValue {
+                                    header: "If-Match",
+                                })?,
+                            Ok(hash) => hashes.push(hash),
+                        }
+                    }
+
+                    req.extensions_mut().insert(IfMatch(hashes));
+                },
+            }
         }
 
         Ok(Started::Done)
@@ -55,6 +73,12 @@ impl<S> Middleware<S> for Precondition {
         } else {
             Ok(Response::Done(resp))
         }
+    }
+}
+
+impl IfMatch {
+    pub fn met(&self, etag: u64) -> bool {
+        self.0.contains(&etag)
     }
 }
 
