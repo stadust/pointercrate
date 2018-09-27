@@ -28,7 +28,7 @@ impl<S> Middleware<S> for Precondition {
 
         // PATCH requires `If-Match`, always. Actually checking if they match is up to the
         // actual endpoing though!
-        if req.method() == Method::PATCH {
+        if req.method() == Method::PATCH || req.method() == Method::DELETE {
             match if_match {
                 None => return Err(PointercrateError::PreconditionRequired)?,
                 Some(if_match) => {
