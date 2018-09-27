@@ -4,6 +4,7 @@ use actix_web::{
 use crate::{
     actor::database::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
     error::PointercrateError,
+    middleware::cond::HttpResponseBuilderExt,
     model::{record::Submission, Record, Submitter},
     state::PointercrateState,
 };
@@ -31,10 +32,8 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
             match record {
                 Some(record) => {
                     tokio::spawn(post_process_record(&record, state2));
-                    // TODO: ETags
 
-                    // TODO: conditional header processing (middleware)
-                    HttpResponse::Created().json(record)
+                    HttpResponse::Created().json_with_etag(record)
                 },
                 None => HttpResponse::NoContent().finish(),
             }
@@ -44,15 +43,13 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
 pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/records/{{record_id}}/");
 
-    // TODO: Etags and conditional requests
-
     let state = req.state().clone();
 
     Path::<i32>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Record ID must be integer"))
         .into_future()
         .and_then(move |record_id| state.database(RecordById(record_id.into_inner())))
-        .map(|record: Record| HttpResponse::Ok().json(record))
+        .map(|record: Record| HttpResponse::Ok().json_with_etag(record))
         .responder()
 }
 

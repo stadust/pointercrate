@@ -16,10 +16,7 @@ use diesel::{
 use diesel_derive_enum::DbEnum;
 use serde::{Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
-use std::{
-    fmt::{Display, Formatter},
-    hash::{Hash, Hasher},
-};
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -53,7 +50,7 @@ impl Serialize for RecordStatus {
     }
 }
 
-#[derive(Debug, Identifiable, Associations, Serialize)]
+#[derive(Debug, Identifiable, Associations, Serialize, Hash)]
 #[table_name = "records"]
 #[belongs_to(Player, foreign_key = "player")]
 #[belongs_to(Submitter, foreign_key = "submitter")]
@@ -67,18 +64,6 @@ pub struct Record {
     pub player: Player,
     pub submitter: i32,
     pub demon: PartialDemon,
-}
-
-impl Hash for Record {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-        self.progress.hash(state);
-        self.video.hash(state);
-        self.status.hash(state);
-        self.player.id.hash(state);
-        self.submitter.hash(state);
-        self.demon.name.hash(state);
-    }
 }
 
 #[derive(Insertable, Debug)]

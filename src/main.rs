@@ -14,20 +14,18 @@
 // idk why we still need this extern crate, but removing it break the diesel derives
 #[macro_use]
 extern crate diesel;
-//extern crate actix_web;
 
 use actix::System;
 use actix_web::{error::ResponseError, http::Method, server, App};
 use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
-    middleware::{auth::Authorizer, ip::IpResolve},
+    middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve},
     state::{Http, PointercrateState},
 };
 
 mod actor;
 mod api;
-//mod auth;
 mod config;
 mod error;
 mod middleware;
@@ -56,6 +54,7 @@ fn main() {
         App::with_state(state)
             .middleware(IpResolve)
             .middleware(Authorizer)
+            .middleware(Precondition)
             .resource("/api/v1/records/", |r| {
                 r.post().f(api::record::submit);
                 r.route().f(|_| {

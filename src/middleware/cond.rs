@@ -1,11 +1,17 @@
 //! Module containing middleware for dealing with HTTP preconditions
 
 use actix_web::{
+    dev::HttpResponseBuilder,
     http::Method,
     middleware::{Middleware, Response, Started},
     Error, HttpRequest, HttpResponse,
 };
 use crate::error::PointercrateError;
+use serde::Serialize;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 pub struct Precondition;
 
@@ -49,5 +55,23 @@ impl<S> Middleware<S> for Precondition {
         } else {
             Ok(Response::Done(resp))
         }
+    }
+}
+
+pub trait HttpResponseBuilderExt {
+    fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self;
+    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse;
+}
+
+impl HttpResponseBuilderExt for HttpResponseBuilder {
+    fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self {
+        let mut hasher = DefaultHasher::new();
+        obj.hash(&mut hasher);
+        self.header("ETag", hasher.finish().to_string());
+        self
+    }
+
+    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse {
+        self.etag(&obj).json(obj)
     }
 }
