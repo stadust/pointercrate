@@ -27,7 +27,7 @@ impl<S> Middleware<S> for Precondition {
         let _ = header!(req, "If-None-Match");
 
         // PATCH requires `If-Match`, always. Actually checking if they match is up to the
-        // actual endpoing though!
+        // actual endpoint though!
         if req.method() == Method::PATCH || req.method() == Method::DELETE {
             match if_match {
                 None => return Err(PointercrateError::PreconditionRequired)?,
@@ -64,7 +64,7 @@ impl<S> Middleware<S> for Precondition {
 
         if let Some(etag) = header!(resp, "ETag") {
             match *req.method() {
-                Method::GET if !if_match.contains(&etag) || if_none_match.contains(&etag) =>
+                Method::GET if if_none_match.contains(&etag) =>
                     Ok(Response::Done(HttpResponse::NotModified().finish())),
                 Method::PATCH if if_match.contains(&etag) =>
                     Ok(Response::Done(HttpResponse::NotModified().finish())),

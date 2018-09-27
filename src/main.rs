@@ -72,7 +72,7 @@ fn main() {
                             .resource("/", |r| {
                                 r.post().f(api::record::submit);
                                 r.route().f(mna!(Method::POST))
-                            }).resource("/{record_id/", |r| {
+                            }).resource("/{record_id}/", |r| {
                                 r.get().f(api::record::get);
                                 r.route().f(mna!(Method::GET))
                             })
@@ -81,10 +81,10 @@ fn main() {
                             .resource("/", |r| {
                                 r.post().f(api::auth::login);
                                 r.route().f(mna!(Method::POST))
-                            }).resource("/register", |r| {
+                            }).resource("/register/", |r| {
                                 r.post().f(api::auth::register);
                                 r.route().f(mna!(Method::POST))
-                            }).resource("/me", |r| {
+                            }).resource("/me/", |r| {
                                 r.get().f(api::auth::me);
                                 r.route()
                                     .f(mna!(Method::GET, Method::PATCH, Method::DELETE))

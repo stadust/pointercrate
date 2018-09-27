@@ -4,6 +4,7 @@ use actix_web::{
 };
 use crate::{error::PointercrateError, state::PointercrateState};
 use serde_derive::{Deserialize, Serialize};
+use log::debug;
 
 #[derive(Debug)]
 pub enum Authorization {
@@ -36,6 +37,8 @@ impl Middleware<PointercrateState> for Authorizer {
                         })?;
 
                     if let [username, password] = &decoded.split(':').collect::<Vec<_>>()[..] {
+                        debug!("Found basic authorization!");
+
                         Authorization::Basic(username.to_string(), password.to_string())
                     } else {
                         return Err(PointercrateError::InvalidHeaderValue {
@@ -43,13 +46,19 @@ impl Middleware<PointercrateState> for Authorizer {
                         })?
                     }
                 },
-                ["Bearer", token] => Authorization::Token(token.to_string()),
+                ["Bearer", token] => {
+                    debug!("Found token (Bearer) authorization");
+
+                    Authorization::Token(token.to_string())
+                },
                 _ =>
                     return Err(PointercrateError::InvalidHeaderValue {
                         header: "Authorization",
                     })?,
             }
         } else {
+            debug!("Found no authorization!");
+
             Authorization::Unauthorized
         };
 
