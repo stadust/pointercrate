@@ -1,6 +1,6 @@
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
-    actor::database::{BasicAuth, Register, TokenAuth},
+    actor::database::{BasicAuth, DeleteUserById, Register, TokenAuth},
     middleware::cond::HttpResponseBuilderExt,
     model::user::{Registration, User},
     state::PointercrateState,
@@ -43,5 +43,19 @@ pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
     req.state()
         .database(TokenAuth(req.extensions_mut().remove().unwrap()))
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
+        .responder()
+}
+
+pub fn delete_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("DELETE /api/v1/auth/me/");
+
+    let state = req.state().clone();
+
+    state
+        .database_if_match(
+            BasicAuth(req.extensions_mut().remove().unwrap()),
+            req.extensions_mut().remove().unwrap(),
+        ).and_then(move |user: User| state.database(DeleteUserById(user.id)))
+        .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

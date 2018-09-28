@@ -86,6 +86,7 @@ fn main() {
                                 r.route().f(mna!(Method::POST))
                             }).resource("/me/", |r| {
                                 r.get().f(api::auth::me);
+                                r.delete().f(api::auth::delete_me);
                                 r.route()
                                     .f(mna!(Method::GET, Method::PATCH, Method::DELETE))
                             })

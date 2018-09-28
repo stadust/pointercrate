@@ -216,7 +216,6 @@ impl Record {
 
     pub fn delete(&self, conn: &PgConnection) -> QueryResult<()> {
         Record::delete_by_id(conn, self.id)
-        //delete(records::table).filter(records::id.eq(self.id)).execute(conn).map(|_| ())
     }
 }
 

@@ -63,6 +63,7 @@ pub struct DeleteRecordById(pub i32);
 pub struct Register(pub Registration);
 pub struct UserById(pub i32);
 pub struct UserByName(pub String);
+pub struct DeleteUserById(pub i32);
 
 pub struct TokenAuth(pub Authorization);
 pub struct BasicAuth(pub Authorization);
@@ -481,5 +482,24 @@ impl Handler<Register> for DatabaseActor {
                 User::register(connection, &msg.0).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
+    }
+}
+
+impl Message for DeleteUserById {
+    type Result = Result<(), PointercrateError>;
+}
+
+impl Handler<DeleteUserById> for DatabaseActor {
+    type Result = Result<(), PointercrateError>;
+
+    fn handle(&mut self, msg: DeleteUserById, ctx: &mut Self::Context) -> Self::Result {
+        info!("Deleting user with ID {}!", msg.0);
+
+        self.0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)
+            .and_then(|connection| {
+                User::delete_by_id(&connection, msg.0).map_err(PointercrateError::database)
+            })
     }
 }

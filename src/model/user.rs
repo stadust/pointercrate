@@ -1,7 +1,7 @@
 use crate::{config::SECRET, error::PointercrateError, middleware::auth::Claims, schema::members};
 use diesel::{
-    expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types, ExpressionMethods,
-    PgConnection, QueryResult, RunQueryDsl,
+    delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types,
+    ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
 };
 use log::info;
 use serde::{ser::SerializeMap, Serialize, Serializer};
@@ -119,6 +119,13 @@ impl User {
         };
 
         insert_into(members::table).values(&new).get_result(conn)
+    }
+
+    pub fn delete_by_id(conn: &PgConnection, id: i32) -> QueryResult<()> {
+        delete(members::table)
+            .filter(members::member_id.eq(id))
+            .execute(conn)
+            .map(|_| ())
     }
 
     // ALRIGHT. the following code is really fucking weird. Here's why:
