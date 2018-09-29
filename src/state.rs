@@ -65,6 +65,8 @@ impl PointercrateState {
     }
 }
 
+// TODO: we might wanna consider putting the DISCORD_WEBHOOK into a lazy_static.
+
 impl Http {
     pub fn from_env() -> Self {
         Http {

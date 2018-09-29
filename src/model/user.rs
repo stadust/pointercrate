@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use crate::{config::SECRET, error::PointercrateError, middleware::auth::Claims, schema::members};
 use diesel::{
     delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types,
@@ -7,6 +8,31 @@ use log::info;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Deserialize;
 use std::hash::{Hash, Hasher};
+
+bitflags! {
+    pub struct Permissions: u16 {
+        const ExtendedAccess = 0b0000000000000001;
+        const ListHelper = 0b0000000000000010;
+        const ListModerator = 0b0000000000000100;
+        const ListAdministrator = 0b0000000000001000;
+        const Moderator = 0b0000000000010000;
+        const Administrator = 0b0000000000100000;
+    }
+}
+
+impl Permissions {
+    pub fn assigns(&self) -> Permissions {
+        match *self {
+            Permissions::ListAdministrator => Permissions::ListHelper | Permissions::ListModerator,
+            Permissions::Administrator => Permissions::Moderator | Permissions::ListAdministrator,
+            _ => Permissions::empty(),
+        }
+    }
+
+    pub fn can_assign(&self, permissions: Permissions) -> bool {
+        self.assigns() & permissions == permissions
+    }
+}
 
 #[derive(Queryable, Debug)]
 pub struct User {
@@ -126,6 +152,16 @@ impl User {
             .filter(members::member_id.eq(id))
             .execute(conn)
             .map(|_| ())
+    }
+
+    pub fn permissions(&self) -> Permissions {
+        Permissions::from_bits_truncate(
+            (self.permissions[0] as u16) << 8 | self.permissions[1] as u16,
+        )
+    }
+
+    pub fn set_permissions(&mut self, permissions: Permissions) {
+        self.permissions = vec![(permissions.bits >> 8) as u8, permissions.bits as u8];
     }
 
     // ALRIGHT. the following code is really fucking weird. Here's why:

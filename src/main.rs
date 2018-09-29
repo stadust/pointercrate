@@ -35,10 +35,10 @@ mod state;
 mod video;
 
 macro_rules! mna {
-    ($($method: expr),*) => {
+    ($($allowed: expr),*) => {
         |_| {
             PointercrateError::MethodNotAllowed {
-                allowed_methods: vec![$($method,)*]
+                allowed_methods: vec![$($allowed,)*]
             }.error_response()
         }
     }
