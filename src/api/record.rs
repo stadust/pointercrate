@@ -28,7 +28,8 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 .and_then(move |submitter: Submitter| {
                     state.database(ProcessSubmission(submission, submitter))
                 })
-        }).map(|record: Option<Record>| {
+        })
+        .map(|record: Option<Record>| {
             match record {
                 Some(record) => {
                     tokio::spawn(post_process_record(&record, state2));
@@ -37,7 +38,8 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 },
                 None => HttpResponse::NoContent().finish(),
             }
-        }).responder()
+        })
+        .responder()
 }
 
 pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {

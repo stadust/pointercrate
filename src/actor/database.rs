@@ -8,7 +8,7 @@ use crate::{
         user::{PatchMe, Registration},
         Demon, Player, Record, Submitter, User,
     },
-    patch::{Patchable, UpdateDatabase},
+    patch::{Patch as PatchField, Patchable, UpdateDatabase},
     video,
 };
 use diesel::{
@@ -68,6 +68,7 @@ pub struct DeleteUserById(pub i32);
 
 pub struct TokenAuth(pub Authorization);
 pub struct BasicAuth(pub Authorization);
+pub struct Invalidate(pub Authorization);
 
 pub struct Patch<Target, Patch>(pub User, pub Target, pub Patch)
 where
@@ -273,7 +274,8 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                         player.id,
                         msg.1.id,
                         &demon.name,
-                    ).map_err(PointercrateError::database)?
+                    )
+                    .map_err(PointercrateError::database)?
                 } else {
                     return Err(PointercrateError::SubmissionExists {
                         status: record.status(),
@@ -293,7 +295,8 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                     player.id,
                     msg.1.id,
                     &demon.name,
-                ).map_err(PointercrateError::database)?
+                )
+                .map_err(PointercrateError::database)?
             },
             Err(err) => return Err(PointercrateError::database(err)),
         };
@@ -567,5 +570,31 @@ impl Handler<PatchCurrentUser> for DatabaseActor {
         msg.0
             .update(connection)
             .map_err(PointercrateError::database)
+    }
+}
+
+impl Message for Invalidate {
+    type Result = Result<(), PointercrateError>;
+}
+
+impl Handler<Invalidate> for DatabaseActor {
+    type Result = Result<(), PointercrateError>;
+
+    fn handle(&mut self, msg: Invalidate, ctx: &mut Self::Context) -> Self::Result {
+        let password = if let Authorization::Basic(_, ref password) = msg.0 {
+            password.clone()
+        } else {
+            return Err(PointercrateError::Unauthorized)
+        };
+
+        let user = self.handle(BasicAuth(msg.0), ctx)?;
+
+        let patch = PatchMe {
+            password: PatchField::Some(password),
+            display_name: PatchField::Absent,
+            youtube_channel: PatchField::Absent,
+        };
+
+        self.handle(PatchCurrentUser(user, patch), ctx).map(|_| ())
     }
 }

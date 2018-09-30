@@ -57,7 +57,7 @@ impl Permissions {
     fn bitstring(self) -> Bits {
         Bits {
             length: 16,
-            bits: vec![(self.bits >> 8) as u8, self.bits as u8]
+            bits: vec![(self.bits >> 8) as u8, self.bits as u8],
         }
     }
 }
@@ -138,7 +138,8 @@ impl UpdateDatabase for User {
                 members::youtube_channel.eq(&self.youtube_channel),
                 members::password_hash.eq(&self.password_hash),
                 members::permissions.eq(&self.permissions),
-            )).get_result(connection)
+            ))
+            .get_result(connection)
     }
 }
 
@@ -217,6 +218,7 @@ impl User {
             .execute(conn)
             .map(|_| ())
     }
+
     pub fn permissions(&self) -> Permissions {
         Permissions::from_bitstring(&self.permissions)
     }
@@ -244,7 +246,8 @@ impl User {
             &jsonwebtoken::Header::default(),
             &Claims { id: self.id },
             &self.jwt_secret(),
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     pub fn validate_token(self, token: &str) -> Result<Self, PointercrateError> {
@@ -263,7 +266,8 @@ impl User {
             signing_input,
             &self.jwt_secret(),
             jsonwebtoken::Algorithm::HS256,
-        ).map_err(|_| PointercrateError::Unauthorized)
+        )
+        .map_err(|_| PointercrateError::Unauthorized)
         .map(move |_| self)
     }
 

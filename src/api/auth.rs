@@ -1,6 +1,8 @@
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
-    actor::database::{BasicAuth, DeleteUserById, PatchCurrentUser, Register, TokenAuth},
+    actor::database::{
+        BasicAuth, DeleteUserById, Invalidate, PatchCurrentUser, Register, TokenAuth,
+    },
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,
@@ -21,7 +23,8 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
             HttpResponse::Created()
                 .header("Location", "/auth/me/")
                 .json_with_etag(user)
-        }).responder()
+        })
+        .responder()
 }
 
 pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
@@ -34,7 +37,17 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 "data": user,
                 "token": user.generate_token()
             }))
-        }).responder()
+        })
+        .responder()
+}
+
+pub fn invalidate(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("POST /api/v1/auth/invalidate/");
+
+    req.state()
+        .database(Invalidate(req.extensions_mut().remove().unwrap()))
+        .map(|_| HttpResponse::NoContent().finish())
+        .responder()
 }
 
 pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
@@ -59,7 +72,8 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
             state
                 .database_if_match(BasicAuth(auth), if_match)
                 .and_then(move |user: User| state.database(PatchCurrentUser(user, patch)))
-        }).map(|user: User| HttpResponse::Ok().json_with_etag(user))
+        })
+        .map(|user: User| HttpResponse::Ok().json_with_etag(user))
         .responder()
 }
 
@@ -72,7 +86,8 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .database_if_match(
             BasicAuth(req.extensions_mut().remove().unwrap()),
             req.extensions_mut().remove().unwrap(),
-        ).and_then(move |user: User| state.database(DeleteUserById(user.id)))
+        )
+        .and_then(move |user: User| state.database(DeleteUserById(user.id)))
         .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

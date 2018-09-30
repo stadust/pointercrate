@@ -94,7 +94,8 @@ impl Http {
                         "INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}",
                         error
                     )
-                }).map(|_| debug!("Successfully executed discord webhook"));
+                })
+                .map(|_| debug!("Successfully executed discord webhook"));
 
             Either::A(future)
         } else {

@@ -50,7 +50,7 @@ macro_rules! make_patch {
         pub struct $name {
             $(
                 #[serde(default, deserialize_with = "deserialize_patch")]
-                $field: Patch<$t>,
+                pub $field: Patch<$t>,
             )*
         }
     }
