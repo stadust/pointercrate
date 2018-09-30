@@ -8,6 +8,8 @@ use failure::Fail;
 use log::error;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
+// TODO: Data field in response
+
 #[derive(Debug, Fail)]
 pub enum PointercrateError {
     #[fail(
@@ -109,6 +111,9 @@ pub enum PointercrateError {
     )]
     InvalidUrlFormat { expected: &'static str },
 
+    #[fail(display = "Unexpected NULL value for field {}", field)]
+    UnexpectedNull { field: &'static str },
+
     #[fail(
         display = "Record progress must lie between {} and 100%!",
         requirement
@@ -131,7 +136,7 @@ pub enum PointercrateError {
     PreconditionRequired,
 
     #[fail(
-        display = "The server encountered an internal error and was unable to complete your requests. Either the server is overloaded or there is an error in the application. Please notify a server administrator and have them look at the server logs!"
+        display = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application. Please notify a server administrator and have them look at the server logs!"
     )]
     InternalServerError,
 
@@ -197,6 +202,7 @@ impl PointercrateError {
             PointercrateError::UnsupportedMediaType { .. } => 41500,
 
             PointercrateError::UnprocessableEntity => 42200,
+            PointercrateError::UnexpectedNull { .. } => 42211,
             PointercrateError::InvalidProgress { .. } => 42215,
             PointercrateError::SubmissionExists { .. } => 42217,
             PointercrateError::PlayerBanned => 42218,

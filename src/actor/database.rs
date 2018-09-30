@@ -5,9 +5,10 @@ use crate::{
     middleware::auth::{Authorization, Claims},
     model::{
         record::{RecordStatus, Submission},
-        user::Registration,
-        Demon, Patchable, Player, Record, Submitter, UpdateDatabase, User,
+        user::{PatchMe, Registration},
+        Demon, Player, Record, Submitter, User,
     },
+    patch::{Patchable, UpdateDatabase},
     video,
 };
 use diesel::{
@@ -68,9 +69,14 @@ pub struct DeleteUserById(pub i32);
 pub struct TokenAuth(pub Authorization);
 pub struct BasicAuth(pub Authorization);
 
-pub struct Patch<Target, Patch>(User, Target, Patch)
+pub struct Patch<Target, Patch>(pub User, pub Target, pub Patch)
 where
     Target: Patchable<Patch> + UpdateDatabase;
+
+// We cannot use the above struct for this, because both 'User' and 'Target' need to be the same
+// object, something the ownership system obviously doesn't allow. The alternative would be cloning
+// the user once but that's just ugly, so we have this dedicated struct!
+pub struct PatchCurrentUser(pub User, pub PatchMe);
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -538,6 +544,27 @@ where
 
         // Store the modified object in the database
         msg.1
+            .update(connection)
+            .map_err(PointercrateError::database)
+    }
+}
+
+impl Message for PatchCurrentUser {
+    type Result = Result<User, PointercrateError>;
+}
+
+impl Handler<PatchCurrentUser> for DatabaseActor {
+    type Result = Result<User, PointercrateError>;
+
+    fn handle(&mut self, mut msg: PatchCurrentUser, ctx: &mut Self::Context) -> Self::Result {
+        msg.0.apply_patch(msg.1)?;
+
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        msg.0
             .update(connection)
             .map_err(PointercrateError::database)
     }

@@ -24,8 +24,11 @@ use crate::{
     state::{Http, PointercrateState},
 };
 
+#[macro_use]
+mod patch;
 mod actor;
 mod api;
+mod bitstring;
 mod config;
 mod error;
 mod middleware;
@@ -87,6 +90,7 @@ fn main() {
                             }).resource("/me/", |r| {
                                 r.get().f(api::auth::me);
                                 r.delete().f(api::auth::delete_me);
+                                r.method(Method::PATCH).f(api::auth::patch_me);
                                 r.route()
                                     .f(mna!(Method::GET, Method::PATCH, Method::DELETE))
                             })

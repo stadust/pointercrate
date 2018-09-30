@@ -1,11 +1,17 @@
-use super::{deserialize_patch, Patch, Patchable, UpdateDatabase};
 use bitflags::bitflags;
-use crate::{config::SECRET, error::PointercrateError, middleware::auth::Claims, schema::members};
+use crate::{
+    bitstring::Bits,
+    config::SECRET,
+    error::PointercrateError,
+    middleware::auth::Claims,
+    patch::{deserialize_patch, Patch, Patchable, UpdateDatabase},
+    schema::members,
+};
 use diesel::{
     delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types,
     ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
 };
-use log::info;
+use log::{debug, info};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Deserialize;
 use std::hash::{Hash, Hasher};
@@ -16,8 +22,11 @@ bitflags! {
         const ListHelper = 0b0000000000000010;
         const ListModerator = 0b0000000000000100;
         const ListAdministrator = 0b0000000000001000;
-        const Moderator = 0b0000000000010000;
-        const Administrator = 0b0000000000100000;
+        const LeaderboardModerator = 0b0000000000010000;
+        const LeaderboardAdministrator = 0b0000000000100000;
+        const Moderator = 0b0010000000000000;
+        const Administrator = 0b0100000000000000;
+        const ItIsImpossibleToGainThisPermission = 0b1000000000000000;
     }
 }
 
@@ -28,7 +37,9 @@ impl Permissions {
             Permissions::Administrator =>
                 Permissions::Moderator
                     | Permissions::ListAdministrator
+                    | Permissions::LeaderboardAdministrator
                     | Permissions::ExtendedAccess,
+            Permissions::LeaderboardAdministrator => Permissions::LeaderboardModerator,
             _ => Permissions::empty(),
         }
     }
@@ -36,9 +47,31 @@ impl Permissions {
     pub fn can_assign(&self, permissions: Permissions) -> bool {
         self.assigns() & permissions == permissions
     }
+
+    fn from_bitstring(bits: &Bits) -> Self {
+        assert!(bits.length == 16);
+
+        Permissions::from_bits_truncate((bits.bits[0] as u16) << 8 | bits.bits[1] as u16)
+    }
+
+    fn bitstring(&self) -> Bits {
+        Bits {
+            length: 16,
+            bits: vec![(self.bits >> 8) as u8, self.bits as u8]
+        }
+
+    }
+
+    /*pub(crate) fn lower(&self) -> u8 {
+        self.bits as u8
+    }
+
+    pub(crate) fn upper(&self) -> u8 {
+        (self.bits >> 8) as u8
+    }*/
 }
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Clone)]
 #[table_name = "members"]
 pub struct User {
     pub id: i32,
@@ -55,7 +88,8 @@ pub struct User {
     password_salt: Vec<u8>,
 
     // TODO: deal with this
-    permissions: Vec<u8>,
+    //permissions: Vec<u8>,
+    permissions: Bits,
 }
 
 impl Hash for User {
@@ -64,7 +98,7 @@ impl Hash for User {
         self.name.hash(state);
         self.display_name.hash(state);
         self.youtube_channel.hash(state);
-        // TODO: self.permissions.hash(state);
+        self.permissions.hash(state);
     }
 }
 
@@ -83,21 +117,23 @@ impl Serialize for User {
     }
 }
 
-#[derive(Deserialize, Debug)]
-pub struct PatchMe {
-    #[serde(default, deserialize_with = "deserialize_patch")]
-    password: Patch<String>,
-
-    #[serde(default, deserialize_with = "deserialize_patch")]
-    display_name: Patch<String>,
-
-    #[serde(default, deserialize_with = "deserialize_patch")]
-    youtube_channel: Patch<String>,
+make_patch! {
+    struct PatchMe {
+        password: String,
+        display_name: String,
+        youtube_channel: String
+    }
 }
 
 impl Patchable<PatchMe> for User {
     fn apply_patch(&mut self, patch: PatchMe) -> Result<(), PointercrateError> {
-        unimplemented!()
+        // TODO: validate password (length, etc.)
+
+        patch_not_null!(self, patch, password, set_password);
+        patch!(self, patch, display_name);
+        patch!(self, patch, youtube_channel);
+
+        Ok(())
     }
 
     fn required_permissions(&self) -> Permissions {
@@ -192,8 +228,20 @@ impl User {
             .execute(conn)
             .map(|_| ())
     }
-
     pub fn permissions(&self) -> Permissions {
+        Permissions::from_bitstring(&self.permissions)
+    }
+
+    pub fn set_permissions(&mut self, permissions: Permissions) {
+        self.permissions = permissions.bitstring()
+    }
+
+/*
+    pub fn permissions(&self) -> Permissions {
+        self.permissions
+    }*/
+
+    /*pub fn permissions(&self) -> Permissions {
         Permissions::from_bits_truncate(
             (self.permissions[0] as u16) << 8 | self.permissions[1] as u16,
         )
@@ -201,7 +249,7 @@ impl User {
 
     pub fn set_permissions(&mut self, permissions: Permissions) {
         self.permissions = vec![(permissions.bits >> 8) as u8, permissions.bits as u8];
-    }
+    }*/
 
     // ALRIGHT. the following code is really fucking weird. Here's why:
     // - I need to keep backwards-compatibility with the python code I wrote 2 years ago
@@ -226,8 +274,10 @@ impl User {
     }
 
     pub fn validate_token(self, token: &str) -> Result<Self, PointercrateError> {
+        debug!("Validating a token!");
+
         let (signing_input, signature) = {
-            let split = token.rsplitn(2, ' ').collect::<Vec<_>>();
+            let split = token.rsplitn(2, '.').collect::<Vec<_>>();
             if split.len() != 2 {
                 return Err(PointercrateError::Unauthorized)
             }
@@ -257,7 +307,20 @@ impl User {
         }
     }
 
+    pub fn set_password(&mut self, password: &str) {
+        // it is safe to unwrap here because the only errors that can happen are
+        // 'BcryptError::CostNotAllowed' (won't happen because DEFAULT_COST is obviously allowed)
+        // or errors that happen during internally parsing the hash the library itself just
+        // generated. Obviously, an error there is a bug in the library, so we might as
+        // well panic
+        self.password_hash = bcrypt::hash(password, bcrypt::DEFAULT_COST)
+            .unwrap()
+            .into_bytes();
+    }
+
     pub fn verify_password(self, password: &str) -> Result<Self, PointercrateError> {
+        debug!("Verifying a password!");
+
         let valid = bcrypt::verify(&password, &self.password_hash())
             .map_err(|_| PointercrateError::Unauthorized)?;
 
