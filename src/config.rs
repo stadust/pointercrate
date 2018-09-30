@@ -17,6 +17,6 @@ where
 {
     match std::env::var(key) {
         Ok(value) => value.parse().unwrap(),
-        Err(err) => default,
+        Err(_) => default,
     }
 }

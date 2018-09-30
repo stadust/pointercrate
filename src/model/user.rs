@@ -18,21 +18,21 @@ use std::hash::{Hash, Hasher};
 
 bitflags! {
     pub struct Permissions: u16 {
-        const ExtendedAccess = 0b0000000000000001;
-        const ListHelper = 0b0000000000000010;
-        const ListModerator = 0b0000000000000100;
-        const ListAdministrator = 0b0000000000001000;
-        const LeaderboardModerator = 0b0000000000010000;
-        const LeaderboardAdministrator = 0b0000000000100000;
-        const Moderator = 0b0010000000000000;
-        const Administrator = 0b0100000000000000;
-        const ItIsImpossibleToGainThisPermission = 0b1000000000000000;
+        const ExtendedAccess = 0b0000_0000_0000_0001;
+        const ListHelper = 0b0000_0000_0000_0010;
+        const ListModerator = 0b0000_0000_0000_0100;
+        const ListAdministrator = 0b0000_0000_0000_1000;
+        const LeaderboardModerator = 0b0000_0000_0001_0000;
+        const LeaderboardAdministrator = 0b0000_0000_0010_0000;
+        const Moderator = 0b0010_0000_0000_0000;
+        const Administrator = 0b0100_0000_0000_0000;
+        const ItIsImpossibleToGainThisPermission = 0b1000_0000_0000_0000;
     }
 }
 
 impl Permissions {
-    pub fn assigns(&self) -> Permissions {
-        match *self {
+    pub fn assigns(self) -> Permissions {
+        match self {
             Permissions::ListAdministrator => Permissions::ListHelper | Permissions::ListModerator,
             Permissions::Administrator =>
                 Permissions::Moderator
@@ -44,7 +44,7 @@ impl Permissions {
         }
     }
 
-    pub fn can_assign(&self, permissions: Permissions) -> bool {
+    pub fn can_assign(self, permissions: Permissions) -> bool {
         self.assigns() & permissions == permissions
     }
 
@@ -54,24 +54,15 @@ impl Permissions {
         Permissions::from_bits_truncate((bits.bits[0] as u16) << 8 | bits.bits[1] as u16)
     }
 
-    fn bitstring(&self) -> Bits {
+    fn bitstring(self) -> Bits {
         Bits {
             length: 16,
             bits: vec![(self.bits >> 8) as u8, self.bits as u8]
         }
-
     }
-
-    /*pub(crate) fn lower(&self) -> u8 {
-        self.bits as u8
-    }
-
-    pub(crate) fn upper(&self) -> u8 {
-        (self.bits >> 8) as u8
-    }*/
 }
 
-#[derive(Queryable, Debug, Identifiable, Clone)]
+#[derive(Queryable, Debug, Identifiable)]
 #[table_name = "members"]
 pub struct User {
     pub id: i32,
@@ -87,8 +78,6 @@ pub struct User {
     #[deprecated(note = "I was really fucking stupid when I wrote the database")]
     password_salt: Vec<u8>,
 
-    // TODO: deal with this
-    //permissions: Vec<u8>,
     permissions: Bits,
 }
 
@@ -235,21 +224,6 @@ impl User {
     pub fn set_permissions(&mut self, permissions: Permissions) {
         self.permissions = permissions.bitstring()
     }
-
-/*
-    pub fn permissions(&self) -> Permissions {
-        self.permissions
-    }*/
-
-    /*pub fn permissions(&self) -> Permissions {
-        Permissions::from_bits_truncate(
-            (self.permissions[0] as u16) << 8 | self.permissions[1] as u16,
-        )
-    }
-
-    pub fn set_permissions(&mut self, permissions: Permissions) {
-        self.permissions = vec![(permissions.bits >> 8) as u8, permissions.bits as u8];
-    }*/
 
     // ALRIGHT. the following code is really fucking weird. Here's why:
     // - I need to keep backwards-compatibility with the python code I wrote 2 years ago

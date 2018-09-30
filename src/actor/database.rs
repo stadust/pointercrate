@@ -319,7 +319,7 @@ impl Message for RecordById {
 impl Handler<RecordById> for DatabaseActor {
     type Result = Result<Record, PointercrateError>;
 
-    fn handle(&mut self, msg: RecordById, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: RecordById, _: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve record by id {}", msg.0);
 
         let connection = &*self
@@ -346,7 +346,7 @@ impl Message for DeleteRecordById {
 impl Handler<DeleteRecordById> for DatabaseActor {
     type Result = Result<(), PointercrateError>;
 
-    fn handle(&mut self, msg: DeleteRecordById, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: DeleteRecordById, _: &mut Self::Context) -> Self::Result {
         info!("Deleting record with ID {}!", msg.0);
 
         self.0
@@ -365,7 +365,7 @@ impl Message for UserById {
 impl Handler<UserById> for DatabaseActor {
     type Result = Result<User, PointercrateError>;
 
-    fn handle(&mut self, msg: UserById, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: UserById, _: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve user by id {}", msg.0);
 
         let connection = &*self
@@ -392,7 +392,7 @@ impl Message for UserByName {
 impl Handler<UserByName> for DatabaseActor {
     type Result = Result<User, PointercrateError>;
 
-    fn handle(&mut self, msg: UserByName, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: UserByName, _: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve user by name {}", msg.0);
 
         let connection = &*self
@@ -478,7 +478,7 @@ impl Message for Register {
 impl Handler<Register> for DatabaseActor {
     type Result = Result<User, PointercrateError>;
 
-    fn handle(&mut self, msg: Register, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: Register, _: &mut Self::Context) -> Self::Result {
         let connection = &*self
             .0
             .get()
@@ -487,7 +487,7 @@ impl Handler<Register> for DatabaseActor {
         // TODO: username and password validation (long enough, etc)
 
         match User::by_name(&msg.0.name).first::<User>(connection) {
-            Ok(user) => Err(PointercrateError::NameTaken),
+            Ok(_) => Err(PointercrateError::NameTaken),
             Err(Error::NotFound) =>
                 User::register(connection, &msg.0).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
@@ -502,7 +502,7 @@ impl Message for DeleteUserById {
 impl Handler<DeleteUserById> for DatabaseActor {
     type Result = Result<(), PointercrateError>;
 
-    fn handle(&mut self, msg: DeleteUserById, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: DeleteUserById, _: &mut Self::Context) -> Self::Result {
         info!("Deleting user with ID {}!", msg.0);
 
         self.0
@@ -527,7 +527,7 @@ where
 {
     type Result = Result<T, PointercrateError>;
 
-    fn handle(&mut self, mut msg: Patch<T, P>, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, mut msg: Patch<T, P>, _: &mut Self::Context) -> Self::Result {
         let required = msg.1.required_permissions();
 
         if msg.0.permissions() & required != required {
@@ -556,7 +556,7 @@ impl Message for PatchCurrentUser {
 impl Handler<PatchCurrentUser> for DatabaseActor {
     type Result = Result<User, PointercrateError>;
 
-    fn handle(&mut self, mut msg: PatchCurrentUser, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, mut msg: PatchCurrentUser, _: &mut Self::Context) -> Self::Result {
         msg.0.apply_patch(msg.1)?;
 
         let connection = &*self

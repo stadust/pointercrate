@@ -104,7 +104,7 @@ impl Http {
 
     /// Creates a future that resolves to `()` if a `HEAD` request to the given URL receives a
     /// non-error response status code.
-    pub fn if_exists(&self, url: &String) -> impl Future<Item = (), Error = ()> {
+    pub fn if_exists(&self, url: &str) -> impl Future<Item = (), Error = ()> {
         debug!(
             "Verifying {} response to HEAD request with successful status code",
             url

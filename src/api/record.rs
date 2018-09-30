@@ -84,7 +84,7 @@ fn post_process_record(
                 "footer": {
                     "text": format!("This record has been submitted by submitter #{}", record.submitter)
                 },
-                "color": (0x9e0000 as f32 * progress) as i32 & 0xFF0000i32 + (0x00e000 as f32 * progress) as i32 & 0x00FF00i32,
+                "color": (0x9e0000 as f32 * progress) as i32 & 0xFF0000 + (0x00e000 as f32 * progress) as i32 & 0x00FF00,
                 "author": {
                     "name": format!("{} (ID: {})", record.player.name, record.player.id),
                     "url": record.video
