@@ -12,9 +12,13 @@ use diesel::{
     ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
 };
 use log::{debug, info};
-use serde::{ser::SerializeMap, Serialize, Serializer};
+use serde::{
+    ser::{SerializeMap, SerializeSeq},
+    Serialize, Serializer,
+};
 use serde_derive::Deserialize;
 use std::{
+    collections::HashSet,
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
 };
@@ -65,18 +69,44 @@ impl Permissions {
     }
 }
 
-#[derive(Debug)]
-pub struct FormatPermissions {
-    pub perms: Vec<Permissions>,
-}
-
-impl FormatPermissions {
-    pub fn one(perm: Permissions) -> Self {
-        FormatPermissions { perms: vec![perm] }
+impl Serialize for Permissions {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u16(self.bits)
     }
 }
 
-impl Display for FormatPermissions {
+#[derive(Debug)]
+pub struct PermissionsSet {
+    pub perms: HashSet<Permissions>,
+}
+
+impl Serialize for PermissionsSet {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.perms.len()))?;
+        for e in &self.perms {
+            seq.serialize_element(e)?;
+        }
+        seq.end()
+    }
+}
+
+impl PermissionsSet {
+    pub fn one(perm: Permissions) -> Self {
+        let mut set = HashSet::new();
+
+        set.insert(perm);
+
+        PermissionsSet { perms: set }
+    }
+}
+
+impl Display for PermissionsSet {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         let mut sep = "";
 
@@ -96,29 +126,22 @@ macro_rules! demand_perms {
         {
             use crate::model::user::{FormatPermissions, Permissions};
             use crate::error::PointercrateError;
+            use std::collections::HashSet;
 
-            loop {
-                let user_perms = $user.permissions();
+            let mut perm_set = HashSet::new();
 
-                $(
-                    {
-                        let perms = $(Permissions::$perm|)+ Permissions::empty();
+            $(
+                perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
+            ),*
 
-                        if perms & user_perms == perms {
-                            break
-                        }
-                    }
-                )*
+            let perm_set = PermissionsSet {
+                perms: perm_set
+            };
 
-                return Err(PointercrateError::MissingPermissions {
-                    required: FormatPermissions {
-                        perms: vec![
-                            $(
-                                $(Permissions::$perm|)+ Permissions::empty()
-                            ),*
-                        ]
-                    }
-                })
+            if !$user.has_any(&perm_set) {
+                return PointercrateError::MissingPermissions {
+                    perms: perm_set
+                }
             }
         }
     }
@@ -287,6 +310,12 @@ impl User {
 
     pub fn set_permissions(&mut self, permissions: Permissions) {
         self.permissions = permissions.bitstring()
+    }
+
+    pub fn has_any(&self, perms: &PermissionsSet) -> bool {
+        let own_perms = self.permissions();
+
+        perms.perms.iter().any(|perm| own_perms & *perm == *perm)
     }
 
     // ALRIGHT. the following code is really fucking weird. Here's why:

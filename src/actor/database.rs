@@ -5,7 +5,7 @@ use crate::{
     middleware::auth::{Authorization, Claims},
     model::{
         record::{RecordStatus, Submission},
-        user::{FormatPermissions, PatchMe, Registration},
+        user::{PatchMe, PermissionsSet, Registration},
         Demon, Player, Record, Submitter, User,
     },
     patch::{Patch as PatchField, Patchable, UpdateDatabase},
@@ -279,6 +279,7 @@ impl Handler<ProcessSubmission> for DatabaseActor {
                 } else {
                     return Err(PointercrateError::SubmissionExists {
                         status: record.status(),
+                        existing: record.id,
                     })
                 },
             Err(Error::NotFound) => {
@@ -535,7 +536,7 @@ where
 
         if msg.0.permissions() & required != required {
             return Err(PointercrateError::MissingPermissions {
-                required: FormatPermissions::one(required),
+                required: PermissionsSet::one(required),
             })
         }
 

@@ -3,14 +3,16 @@ use actix_web::{
     http::{Method, StatusCode},
     HttpResponse, ResponseError,
 };
-use crate::model::{record::RecordStatus, user::FormatPermissions};
+use crate::model::{record::RecordStatus, user::PermissionsSet};
 use failure::Fail;
 use log::error;
-use serde::{ser::SerializeMap, Serialize, Serializer};
+use serde_derive::Serialize;
+use serde_json::{json};
 
 // TODO: Data field in response
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, Serialize)]
+#[serde(untagged)]
 pub enum PointercrateError {
     #[fail(
         display = "The browser (or proxy) sent a request that this server could not understand."
@@ -18,7 +20,10 @@ pub enum PointercrateError {
     GenericBadRequest,
 
     #[fail(display = "{}", message)]
-    BadRequest { message: String },
+    BadRequest {
+        #[serde(skip)]
+        message: String,
+    },
 
     #[fail(
         display = "The value for the header {} could not be processed",
@@ -40,7 +45,7 @@ pub enum PointercrateError {
         display = "You do not have the pointercrate permissions to perform this request. Required are: {}",
         required
     )]
-    MissingPermissions { required: FormatPermissions },
+    MissingPermissions { required: PermissionsSet },
 
     #[fail(display = "You are banned from submitting records to the demonlist!")]
     BannedFromSubmissions,
@@ -56,13 +61,18 @@ pub enum PointercrateError {
         identified_by
     )]
     ModelNotFound {
+        #[serde(skip)]
         model: &'static str,
+        #[serde(skip)]
         identified_by: String,
     },
 
     // TODO: do something with allowed_methods
     #[fail(display = "The method is not allowed for the requested URL.")]
-    MethodNotAllowed { allowed_methods: Vec<Method> },
+    MethodNotAllowed {
+        #[serde(skip)]
+        allowed_methods: Vec<Method>,
+    },
 
     #[fail(
         display = "A conflict happened while processing the request. The resource might have been modified while the request was being processed."
@@ -121,7 +131,11 @@ pub enum PointercrateError {
     InvalidProgress { requirement: i16 },
 
     #[fail(display = "This record has already been {}", status)]
-    SubmissionExists { status: RecordStatus },
+    SubmissionExists {
+        #[serde(skip)]
+        status: RecordStatus,
+        existing: i32,
+    },
 
     #[fail(display = "The given player is banned!")]
     PlayerBanned,
@@ -218,7 +232,6 @@ impl PointercrateError {
             PointercrateError::InternalServerError => 50000,
             PointercrateError::DatabaseError => 50003,
             PointercrateError::DatabaseConnectionError => 50005,
-            //_ => unimplemented!(),
         }
     }
 
@@ -230,22 +243,13 @@ impl PointercrateError {
     }
 }
 
-impl Serialize for PointercrateError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        // TODO: the data dictionary
-        let mut map = serializer.serialize_map(Some(2))?;
-        map.serialize_entry("code", &self.error_code())?;
-        map.serialize_entry("message", &self.to_string())?;
-        map.end()
-    }
-}
-
 impl ResponseError for PointercrateError {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).json(self)
+        HttpResponse::build(self.status_code()).json(json!({
+            "code": self.error_code(),
+            "message": self.to_string(),
+            "data": self
+        }))
     }
 }
 
