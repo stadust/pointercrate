@@ -14,8 +14,8 @@ const EVERYPLAY_FORMAT: &str = "https://everyplay.com/videos/{video_id}' or\
                                 'https://www.everyplay.com/videos/{video_id}";
 const VIMEO_FORMAT: &str = "https://vimeo.com/{video_id}' or\
                             'https://www.vimeo.com/{video_id}";
-const BILIBILI_FORMAT: &str = "https://www.bilibili.com/video/{video_id}' or\
-                               https://bilibili.com/video/{video_id}";
+const BILIBILI_FORMAT: &str = "'https://www.bilibili.com/video/{video_id}' or\
+                               'https://bilibili.com/video/{video_id}";
 
 pub fn validate(url: &str) -> Result<String, PointercrateError> {
     let url = Url::parse(url).map_err(|_| PointercrateError::bad_request("Malformed video URL"))?;

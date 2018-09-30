@@ -1,3 +1,4 @@
+use super::{deserialize_patch, Patch, Patchable, UpdateDatabase};
 use bitflags::bitflags;
 use crate::{config::SECRET, error::PointercrateError, middleware::auth::Claims, schema::members};
 use diesel::{
@@ -24,7 +25,10 @@ impl Permissions {
     pub fn assigns(&self) -> Permissions {
         match *self {
             Permissions::ListAdministrator => Permissions::ListHelper | Permissions::ListModerator,
-            Permissions::Administrator => Permissions::Moderator | Permissions::ListAdministrator,
+            Permissions::Administrator =>
+                Permissions::Moderator
+                    | Permissions::ListAdministrator
+                    | Permissions::ExtendedAccess,
             _ => Permissions::empty(),
         }
     }
@@ -34,7 +38,8 @@ impl Permissions {
     }
 }
 
-#[derive(Queryable, Debug)]
+#[derive(Queryable, Debug, Identifiable)]
+#[table_name = "members"]
 pub struct User {
     pub id: i32,
 
@@ -68,13 +73,47 @@ impl Serialize for User {
     where
         S: Serializer,
     {
-        let mut map = serializer.serialize_map(Some(3))?;
+        let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.id)?;
         map.serialize_entry("name", &self.name)?;
-        // TODO: map.serialize_entry("permissions")
+        map.serialize_entry("permissions", &self.permissions().bits)?;
         map.serialize_entry("display_name", &self.display_name)?;
         map.serialize_entry("youtube_channel", &self.youtube_channel)?;
         map.end()
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct PatchMe {
+    #[serde(default, deserialize_with = "deserialize_patch")]
+    password: Patch<String>,
+
+    #[serde(default, deserialize_with = "deserialize_patch")]
+    display_name: Patch<String>,
+
+    #[serde(default, deserialize_with = "deserialize_patch")]
+    youtube_channel: Patch<String>,
+}
+
+impl Patchable<PatchMe> for User {
+    fn apply_patch(&mut self, patch: PatchMe) -> Result<(), PointercrateError> {
+        unimplemented!()
+    }
+
+    fn required_permissions(&self) -> Permissions {
+        Permissions::empty()
+    }
+}
+
+impl UpdateDatabase for User {
+    fn update(self, connection: &PgConnection) -> QueryResult<Self> {
+        diesel::update(&self)
+            .set((
+                members::display_name.eq(&self.display_name),
+                members::youtube_channel.eq(&self.youtube_channel),
+                members::password_hash.eq(&self.password_hash),
+                members::permissions.eq(&self.permissions),
+            )).get_result(connection)
     }
 }
 

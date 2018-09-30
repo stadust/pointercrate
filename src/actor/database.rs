@@ -6,7 +6,7 @@ use crate::{
     model::{
         record::{RecordStatus, Submission},
         user::Registration,
-        Demon, Player, Record, Submitter, User,
+        Demon, Patchable, Player, Record, Submitter, UpdateDatabase, User,
     },
     video,
 };
@@ -67,6 +67,10 @@ pub struct DeleteUserById(pub i32);
 
 pub struct TokenAuth(pub Authorization);
 pub struct BasicAuth(pub Authorization);
+
+pub struct Patch<Target, Patch>(User, Target, Patch)
+where
+    Target: Patchable<Patch> + UpdateDatabase;
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -501,5 +505,40 @@ impl Handler<DeleteUserById> for DatabaseActor {
             .and_then(|connection| {
                 User::delete_by_id(&connection, msg.0).map_err(PointercrateError::database)
             })
+    }
+}
+
+impl<T, P> Message for Patch<T, P>
+where
+    T: Patchable<P> + UpdateDatabase + 'static,
+{
+    type Result = Result<T, PointercrateError>;
+}
+
+impl<T, P> Handler<Patch<T, P>> for DatabaseActor
+where
+    T: Patchable<P> + UpdateDatabase + 'static,
+{
+    type Result = Result<T, PointercrateError>;
+
+    fn handle(&mut self, mut msg: Patch<T, P>, ctx: &mut Self::Context) -> Self::Result {
+        let required = msg.1.required_permissions();
+
+        if msg.0.permissions() & required != required {
+            return Err(PointercrateError::MissingPermissions { required })
+        }
+
+        // Modify the object we're currently working with to validate the values
+        msg.1.apply_patch(msg.2)?;
+
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        // Store the modified object in the database
+        msg.1
+            .update(connection)
+            .map_err(PointercrateError::database)
     }
 }
