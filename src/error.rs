@@ -3,7 +3,7 @@ use actix_web::{
     http::{Method, StatusCode},
     HttpResponse, ResponseError,
 };
-use crate::model::{record::RecordStatus, user::Permissions};
+use crate::model::{record::RecordStatus, user::FormatPermissions};
 use failure::Fail;
 use log::error;
 use serde::{ser::SerializeMap, Serialize, Serializer};
@@ -37,10 +37,10 @@ pub enum PointercrateError {
     Forbidden,
 
     #[fail(
-        display = "You do not have the pointercrate permissions to perform this request. Required are: {:?}",
+        display = "You do not have the pointercrate permissions to perform this request. Required are: {}",
         required
     )]
-    MissingPermissions { required: Permissions },
+    MissingPermissions { required: FormatPermissions },
 
     #[fail(display = "You are banned from submitting records to the demonlist!")]
     BannedFromSubmissions,

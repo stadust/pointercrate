@@ -5,7 +5,7 @@ use crate::{
     middleware::auth::{Authorization, Claims},
     model::{
         record::{RecordStatus, Submission},
-        user::{PatchMe, Registration},
+        user::{FormatPermissions, PatchMe, Registration},
         Demon, Player, Record, Submitter, User,
     },
     patch::{Patch as PatchField, Patchable, UpdateDatabase},
@@ -534,7 +534,9 @@ where
         let required = msg.1.required_permissions();
 
         if msg.0.permissions() & required != required {
-            return Err(PointercrateError::MissingPermissions { required })
+            return Err(PointercrateError::MissingPermissions {
+                required: FormatPermissions::one(required),
+            })
         }
 
         // Modify the object we're currently working with to validate the values

@@ -14,7 +14,10 @@ use diesel::{
 use log::{debug, info};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Deserialize;
-use std::hash::{Hash, Hasher};
+use std::{
+    fmt::{Display, Formatter},
+    hash::{Hash, Hasher},
+};
 
 bitflags! {
     pub struct Permissions: u16 {
@@ -58,6 +61,65 @@ impl Permissions {
         Bits {
             length: 16,
             bits: vec![(self.bits >> 8) as u8, self.bits as u8],
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct FormatPermissions {
+    pub perms: Vec<Permissions>,
+}
+
+impl FormatPermissions {
+    pub fn one(perm: Permissions) -> Self {
+        FormatPermissions { perms: vec![perm] }
+    }
+}
+
+impl Display for FormatPermissions {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        let mut sep = "";
+
+        write!(f, "'");
+
+        for perm in &self.perms {
+            write!(f, "{}{:?}", sep, perm);
+            sep = "' or '"
+        }
+
+        write!(f, "'")
+    }
+}
+
+macro_rules! demand_perms {
+    ($user: ident, $($($perm: ident),+)or*) => {
+        {
+            use crate::model::user::{FormatPermissions, Permissions};
+            use crate::error::PointercrateError;
+
+            loop {
+                let user_perms = $user.permissions();
+
+                $(
+                    {
+                        let perms = $(Permissions::$perm|)+ Permissions::empty();
+
+                        if perms & user_perms == perms {
+                            break
+                        }
+                    }
+                )*
+
+                return Err(PointercrateError::MissingPermissions {
+                    required: FormatPermissions {
+                        perms: vec![
+                            $(
+                                $(Permissions::$perm|)+ Permissions::empty()
+                            ),*
+                        ]
+                    }
+                })
+            }
         }
     }
 }

@@ -28,13 +28,14 @@ use crate::{
 
 #[macro_use]
 mod patch;
+#[macro_use]
+mod model;
 mod actor;
 mod api;
 mod bitstring;
 mod config;
 mod error;
 mod middleware;
-mod model;
 mod schema;
 mod state;
 mod video;
