@@ -8,6 +8,8 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
+use pointercrate_derive::Paginatable;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
@@ -23,6 +25,20 @@ pub struct Submitter {
 struct NewSubmitter<'a> {
     #[column_name = "ip_address"]
     ip: &'a IpNetwork,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
+#[database_table = "submitters"]
+pub struct SubmitterPagination {
+    #[database_column = "submitter_id"]
+    before: Option<i32>,
+
+    #[database_column = "submitter_id"]
+    after: Option<i32>,
+
+    limit: Option<i32>,
+
+    banned: Option<bool>,
 }
 
 type All = diesel::dsl::Select<

@@ -17,6 +17,8 @@
 #[macro_use]
 extern crate diesel;
 
+// TODO: type Result<T> = result::Result<T, PointercrateError>;
+
 use actix::System;
 use actix_web::{error::ResponseError, http::Method, server, App};
 use crate::{
@@ -36,6 +38,7 @@ mod bitstring;
 mod config;
 mod error;
 mod middleware;
+mod pagination;
 mod schema;
 mod state;
 mod video;

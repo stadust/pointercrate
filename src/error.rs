@@ -7,9 +7,7 @@ use crate::model::{record::RecordStatus, user::PermissionsSet};
 use failure::Fail;
 use log::error;
 use serde_derive::Serialize;
-use serde_json::{json};
-
-// TODO: Data field in response
+use serde_json::json;
 
 #[derive(Debug, Fail, Serialize)]
 #[serde(untagged)]
@@ -131,11 +129,7 @@ pub enum PointercrateError {
     InvalidProgress { requirement: i16 },
 
     #[fail(display = "This record has already been {}", status)]
-    SubmissionExists {
-        #[serde(skip)]
-        status: RecordStatus,
-        existing: i32,
-    },
+    SubmissionExists { status: RecordStatus, existing: i32 },
 
     #[fail(display = "The given player is banned!")]
     PlayerBanned,

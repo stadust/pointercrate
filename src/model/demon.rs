@@ -5,6 +5,8 @@ use crate::{
 use diesel::{expression::bound::Bound, *};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use std::fmt::Display;
+/*use serde_derive::{Serialize, Deserialize};
+use pointercrate_derive::Paginatable;*/
 
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]
@@ -28,6 +30,21 @@ pub struct PartialDemon {
     pub name: String,
     pub position: i16,
 }
+
+/*
+#[derive(Serialize, Deserialize, Clone, Paginatable, Debug)]
+#[database_table = "demons"]
+pub struct DemonPagination {
+    #[database_column = "position"]
+    before: Option<i16>,
+
+    #[database_column = "position"]
+    after: Option<i16>,
+
+    limit: Option<i32>,
+
+
+}*/
 
 impl Serialize for PartialDemon {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

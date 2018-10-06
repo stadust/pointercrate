@@ -1,6 +1,7 @@
 use crate::schema::players;
 use diesel::{expression::bound::Bound, *};
-use serde_derive::Serialize;
+use serde_derive::{Deserialize, Serialize};
+use pointercrate_derive::Paginatable;
 
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
@@ -14,6 +15,21 @@ pub struct Player {
 #[table_name = "players"]
 struct NewPlayer<'a> {
     name: &'a str,
+}
+
+#[derive(Serialize, Deserialize, Paginatable, Clone, Debug)]
+#[database_table = "players"]
+pub struct PlayerPagination {
+    #[database_column = "id"]
+    before: Option<i32>,
+
+    #[database_column = "id"]
+    after: Option<i32>,
+
+    limit: Option<i32>,
+
+    name: Option<String>,
+    banned: Option<bool>
 }
 
 type AllColumns = (players::id, players::name, players::banned);

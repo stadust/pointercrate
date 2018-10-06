@@ -14,7 +14,8 @@ use diesel::{
     sql_types, BoolExpressionMethods, ExpressionMethods,
 };
 use diesel_derive_enum::DbEnum;
-use serde::{Serialize, Serializer};
+use pointercrate_derive::Paginatable;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
@@ -47,6 +48,43 @@ impl Serialize for RecordStatus {
         S: Serializer,
     {
         serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl<'de> Deserialize<'de> for RecordStatus {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct _Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for _Visitor {
+            type Value = String;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(formatter, "a string")
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<String, E>
+            where
+                E: std::error::Error,
+            {
+                Ok(v.into())
+            }
+        }
+
+        let string = deserializer.deserialize_str(_Visitor)?.to_lowercase();
+
+        match &string[..] {
+            "approved" => Ok(RecordStatus::Approved),
+            "submitted" => Ok(RecordStatus::Submitted),
+            "rejected" => Ok(RecordStatus::Rejected),
+            _ =>
+                Err(serde::de::Error::invalid_value(
+                    serde::de::Unexpected::Str(&string),
+                    &"'approved', 'submitted' or 'rejected'",
+                )),
+        }
     }
 }
 
@@ -88,6 +126,29 @@ pub struct Submission {
     pub video: Option<String>,
     #[serde(rename = "check", default)]
     pub verify_only: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
+#[database_table = "records"]
+#[allow(non_snake_case)]
+pub struct RecordPagination {
+    #[database_column = "id"]
+    before: Option<i32>,
+
+    #[database_column = "id"]
+    after: Option<i32>,
+
+    limit: Option<i32>,
+
+    progress: Option<i16>,
+    progress__lt: Option<i16>,
+    progress__gt: Option<i16>,
+
+    #[database_column = "status_"]
+    status: Option<RecordStatus>,
+
+    player: Option<i32>,
+    demon: Option<String>,
 }
 
 type AllColumns = (

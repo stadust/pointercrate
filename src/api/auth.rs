@@ -21,7 +21,7 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(move |registration: Registration| state.database(Register(registration)))
         .map(|user: User| {
             HttpResponse::Created()
-                .header("Location", "/auth/me/")
+                .header("Location", "/api/v1/auth/me/")
                 .json_with_etag(user)
         })
         .responder()
