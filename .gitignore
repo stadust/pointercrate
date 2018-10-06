@@ -1,7 +1,5 @@
-/.idea
-**/*.iml
-/target
-**/*.rs.bk
-.env
-.secret
-*
+/*
+!/src
+!/Cargo.toml
+!/rustfmt.tomal
+!/migrations
