@@ -12,6 +12,7 @@ use diesel::{
     ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
 };
 use log::{debug, info};
+//use pointercrate_derive::Paginatable;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
     Serialize, Serializer,
@@ -165,6 +166,23 @@ pub struct User {
 
     permissions: Bits,
 }
+/*
+#[derive(Serialize, Deserialize, Paginatable, Debug, Clone)]
+#[database_table = "members"]
+#[result = "User"]
+pub struct UserPagination {
+    #[database_column = "member_id"]
+    before: Option<i32>,
+
+    #[database_column = "member_id"]
+    after: Option<i32>,
+
+    limit: Option<i32>,
+
+    name: Option<String>,
+    display_name: Option<String>,
+    // TODO: pagination for permissions (maybe some sort of custom_filter attribute???)
+}*/
 
 impl Hash for User {
     fn hash<H: Hasher>(&self, state: &mut H) {

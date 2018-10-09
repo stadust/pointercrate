@@ -1,12 +1,13 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    model::Model,
     schema::demons,
 };
 use diesel::{expression::bound::Bound, *};
+use pointercrate_derive::Paginatable;
 use serde::{ser::SerializeMap, Serialize, Serializer};
+use serde_derive::{Deserialize, Serialize};
 use std::fmt::Display;
-/*use serde_derive::{Serialize, Deserialize};
-use pointercrate_derive::Paginatable;*/
 
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]
@@ -31,9 +32,11 @@ pub struct PartialDemon {
     pub position: i16,
 }
 
-/*
 #[derive(Serialize, Deserialize, Clone, Paginatable, Debug)]
 #[database_table = "demons"]
+#[column_type = "i16"]
+#[result = "PartialDemon"]
+#[allow(non_snake_case)]
 pub struct DemonPagination {
     #[database_column = "position"]
     before: Option<i16>,
@@ -43,8 +46,12 @@ pub struct DemonPagination {
 
     limit: Option<i32>,
 
+    name: Option<String>,
 
-}*/
+    requirement: Option<i16>,
+    requirement__lt: Option<i16>,
+    requirement__gt: Option<i16>,
+}
 
 impl Serialize for PartialDemon {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -115,16 +122,30 @@ type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
 
 impl Demon {
-    pub fn all() -> All {
-        demons::table.select(ALL_COLUMNS)
-    }
-
     pub fn by_name(name: &str) -> ByName {
         Demon::all().filter(demons::name.eq(name))
     }
 
     pub fn by_position(position: i16) -> ByPosition {
         Demon::all().filter(demons::position.eq(position))
+    }
+}
+
+impl Model for Demon {
+    type Columns = AllColumns;
+    type Table = demons::table;
+
+    fn all() -> All {
+        demons::table.select(ALL_COLUMNS)
+    }
+}
+
+impl Model for PartialDemon {
+    type Columns = (demons::name, demons::position);
+    type Table = demons::table;
+
+    fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
+        demons::table.select((demons::name, demons::position))
     }
 }
 

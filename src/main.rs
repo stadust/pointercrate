@@ -12,6 +12,7 @@
 )]
 #![cfg_attr(feature = "cargo-clippy", feature(tool_lints))]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::all))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 
 // idk why we still need this extern crate, but removing it break the diesel derives
 #[macro_use]

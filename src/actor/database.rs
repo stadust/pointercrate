@@ -8,6 +8,7 @@ use crate::{
         user::{PatchMe, PermissionsSet, Registration},
         Demon, Player, Record, Submitter, User,
     },
+    pagination::Paginatable,
     patch::{Patch as PatchField, Patchable, UpdateDatabase},
     video,
 };
@@ -78,6 +79,8 @@ where
 // object, something the ownership system obviously doesn't allow. The alternative would be cloning
 // the user once but that's just ugly, so we have this dedicated struct!
 pub struct PatchCurrentUser(pub User, pub PatchMe);
+
+pub struct Paginate<P: Paginatable>(P);
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -599,5 +602,17 @@ impl Handler<Invalidate> for DatabaseActor {
         };
 
         self.handle(PatchCurrentUser(user, patch), ctx).map(|_| ())
+    }
+}
+
+impl<P: Paginatable + 'static> Message for Paginate<P> {
+    type Result = Result<Vec<P::Result>, PointercrateError>;
+}
+
+impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
+    type Result = Result<Vec<P::Result>, PointercrateError>;
+
+    fn handle(&mut self, msg: Paginate<P>, _: &mut Self::Context) -> Self::Result {
+        unimplemented!()
     }
 }

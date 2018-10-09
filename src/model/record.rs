@@ -1,6 +1,6 @@
 use super::{Demon, Player, Submitter};
 use crate::{
-    model::demon::PartialDemon,
+    model::{demon::PartialDemon, Model},
     schema::{demons, players, records},
 };
 use diesel::{
@@ -104,6 +104,18 @@ pub struct Record {
     pub demon: PartialDemon,
 }
 
+#[derive(Debug, Identifiable, Serialize, Hash, Queryable)]
+#[table_name = "records"]
+pub struct PartialRecord {
+    pub id: i32,
+    pub progress: i16,
+    pub video: Option<String>,
+    pub status: RecordStatus,
+    pub player: i32,
+    pub submitter: i32,
+    pub demon: String,
+}
+
 #[derive(Insertable, Debug)]
 #[table_name = "records"]
 struct NewRecord<'a> {
@@ -130,6 +142,7 @@ pub struct Submission {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
 #[database_table = "records"]
+#[result = "PartialRecord"]
 #[allow(non_snake_case)]
 pub struct RecordPagination {
     #[database_column = "id"]
@@ -205,7 +218,6 @@ type ById = diesel::dsl::Filter<All, WithId>;
 
 type WithVideo<'a> =
     diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
-type ByVideo<'a> = diesel::dsl::Filter<All, WithVideo<'a>>;
 
 type WithPlayerAndDemon<'a> = diesel::dsl::And<
     diesel::dsl::Eq<records::player, Bound<sql_types::Int4, i32>>,
@@ -311,5 +323,16 @@ impl Queryable<SqlType, Pg> for Record {
                 position: row.9,
             },
         }
+    }
+}
+
+impl Model for PartialRecord {
+    type Columns = <records::table as diesel::Table>::AllColumns;
+    type Table = records::table;
+
+    fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
+        use diesel::Table;
+
+        records::table.select(records::table::all_columns())
     }
 }

@@ -1,4 +1,4 @@
-use crate::schema::submitters;
+use crate::{model::Model, schema::submitters};
 use diesel::{
     expression::bound::Bound,
     insert_into,
@@ -29,6 +29,7 @@ struct NewSubmitter<'a> {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
 #[database_table = "submitters"]
+#[result = "Submitter"]
 pub struct SubmitterPagination {
     #[database_column = "submitter_id"]
     before: Option<i32>,
@@ -41,26 +42,17 @@ pub struct SubmitterPagination {
     banned: Option<bool>,
 }
 
-type All = diesel::dsl::Select<
-    submitters::table,
-    (
-        submitters::submitter_id,
-        submitters::ip_address,
-        submitters::banned,
-    ),
->;
+type AllColumns = (
+    submitters::submitter_id,
+    submitters::ip_address,
+    submitters::banned,
+);
+
+type All = diesel::dsl::Select<submitters::table, AllColumns>;
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
 type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
 
 impl Submitter {
-    pub fn all() -> All {
-        submitters::table.select((
-            submitters::submitter_id,
-            submitters::ip_address,
-            submitters::banned,
-        ))
-    }
-
     pub fn by_ip(ip: &IpNetwork) -> ByIp {
         Submitter::all().filter(submitters::ip_address.eq(ip))
     }
@@ -69,5 +61,18 @@ impl Submitter {
         let new = NewSubmitter { ip };
 
         insert_into(submitters::table).values(&new).get_result(conn)
+    }
+}
+
+impl Model for Submitter {
+    type Columns = AllColumns;
+    type Table = submitters::table;
+
+    fn all() -> All {
+        submitters::table.select((
+            submitters::submitter_id,
+            submitters::ip_address,
+            submitters::banned,
+        ))
     }
 }

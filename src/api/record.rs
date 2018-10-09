@@ -74,7 +74,7 @@ fn post_process_record(
         Either::B(Ok(()).into_future())
     };
 
-    let progress = record.progress as f32 / 100f32;
+    let progress = f32::from(record.progress) / 100f32;
 
     let payload = json!({
         "content": format!("**New record submitted! ID: {}**", record_id),
