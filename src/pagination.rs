@@ -24,10 +24,8 @@ pub trait Paginatable: Clone {
 
     fn result(&self, connection: &PgConnection) -> Result<Vec<Self::Result>, PointercrateError>
     where
-        Self::Result: diesel::Queryable<
-            <<Self::Result as Model>::Columns as Expression>::SqlType,
-            Pg,
-        >,
+        Self::Result:
+            diesel::Queryable<<<Self::Result as Model>::Columns as Expression>::SqlType, Pg>,
         Pg: HasSqlType<<<Self::Result as Model>::Columns as Expression>::SqlType>,
         <<Self::Result as Model>::Table as QuerySource>::FromClause: QueryFragment<diesel::pg::Pg>,
     {

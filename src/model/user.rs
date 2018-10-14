@@ -12,12 +12,12 @@ use diesel::{
     ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
 };
 use log::{debug, info};
-//use pointercrate_derive::Paginatable;
+use pointercrate_derive::Paginatable;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
     Serialize, Serializer,
 };
-use serde_derive::Deserialize;
+use serde_derive::{Deserialize, Serialize};
 use std::{
     collections::HashSet,
     fmt::{Display, Formatter},
@@ -166,10 +166,41 @@ pub struct User {
 
     permissions: Bits,
 }
-/*
+
+#[derive(Queryable, Debug, Identifiable)]
+#[table_name = "members"]
+pub struct PartialUser {
+    pub id: i32,
+    pub name: String,
+    pub display_name: Option<String>,
+    pub youtube_channel: Option<String>,
+    pub permissions: Bits,
+}
+
+impl super::Model for PartialUser {
+    type Columns = (
+        members::member_id,
+        members::name,
+        members::display_name,
+        members::youtube_channel,
+        members::permissions,
+    );
+    type Table = members::table;
+
+    fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
+        members::table.select((
+            members::member_id,
+            members::name,
+            members::display_name,
+            members::youtube_channel,
+            members::permissions,
+        ))
+    }
+}
+
 #[derive(Serialize, Deserialize, Paginatable, Debug, Clone)]
 #[database_table = "members"]
-#[result = "User"]
+#[result = "PartialUser"]
 pub struct UserPagination {
     #[database_column = "member_id"]
     before: Option<i32>,
@@ -182,7 +213,7 @@ pub struct UserPagination {
     name: Option<String>,
     display_name: Option<String>,
     // TODO: pagination for permissions (maybe some sort of custom_filter attribute???)
-}*/
+}
 
 impl Hash for User {
     fn hash<H: Hasher>(&self, state: &mut H) {
