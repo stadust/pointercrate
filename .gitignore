@@ -3,3 +3,4 @@
 !/Cargo.toml
 !/rustfmt.toml
 !/migrations
+!/build_documentation.rs
