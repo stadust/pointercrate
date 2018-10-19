@@ -1,11 +1,10 @@
 use crate::{error::PointercrateError, model::Model};
-use diesel::{
-    pg::Pg,
-    query_builder::{BoxedSelectStatement, QueryFragment},
-    sql_types::HasSqlType,
-    Expression, PgConnection, QuerySource,
-};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, Expression, PgConnection};
 
+// This trait could, in theory, be implemented as a generic trait with default implementations for
+// most of the trait-methods. Sadly, I can't figure out how to do that since the diesel type-bounds
+// on the trait and functions are freaking insane and cause the compiler to overflow while
+// evaluating them (it completely looses its mind). So its a proc-macro. Sorry.
 pub trait Paginatable: Clone {
     type ColumnType;
     type Result: Model;
@@ -22,19 +21,7 @@ pub trait Paginatable: Clone {
         Pg,
     >;
 
-    fn result(&self, connection: &PgConnection) -> Result<Vec<Self::Result>, PointercrateError>
-    where
-        Self::Result:
-            diesel::Queryable<<<Self::Result as Model>::Columns as Expression>::SqlType, Pg>,
-        Pg: HasSqlType<<<Self::Result as Model>::Columns as Expression>::SqlType>,
-        <<Self::Result as Model>::Table as QuerySource>::FromClause: QueryFragment<diesel::pg::Pg>,
-    {
-        use diesel::RunQueryDsl;
-
-        self.query()
-            .load(connection)
-            .map_err(PointercrateError::database)
-    }
+    fn result(&self, connection: &PgConnection) -> Result<Vec<Self::Result>, PointercrateError>;
 
     /// Gets the `after` value for the query in the `next` link
     ///

@@ -613,6 +613,17 @@ impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
     type Result = Result<Vec<P::Result>, PointercrateError>;
 
     fn handle(&mut self, msg: Paginate<P>, _: &mut Self::Context) -> Self::Result {
+        let connection = &*self
+            .0
+            .get()
+            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
+
+        let first = msg.0.first(connection)?;
+        let last = msg.0.last(connection)?;
+        let next = msg.0.next_after(connection)?;
+        let prev = msg.0.prev_before(connection)?;
+
+        let result = msg.0.result(connection);
         unimplemented!()
     }
 }
