@@ -125,7 +125,7 @@ impl Display for PermissionsSet {
 macro_rules! demand_perms {
     ($user: ident, $($($perm: ident),+)or*) => {
         {
-            use crate::model::user::{FormatPermissions, Permissions};
+            use crate::model::user::{PermissionsSet, Permissions};
             use crate::error::PointercrateError;
             use std::collections::HashSet;
 
@@ -140,9 +140,9 @@ macro_rules! demand_perms {
             };
 
             if !$user.has_any(&perm_set) {
-                return PointercrateError::MissingPermissions {
-                    perms: perm_set
-                }
+                return Err(PointercrateError::MissingPermissions {
+                    required: perm_set
+                })
             }
         }
     }
@@ -175,6 +175,19 @@ pub struct PartialUser {
     pub display_name: Option<String>,
     pub youtube_channel: Option<String>,
     pub permissions: Bits,
+}
+
+impl Serialize for PartialUser {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(3))?;
+        map.serialize_entry("id", &self.id)?;
+        map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("permissions", &Permissions::from_bitstring(&self.permissions))?;
+        map.end()
+    }
 }
 
 impl super::Model for PartialUser {

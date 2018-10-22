@@ -1,12 +1,13 @@
 use crate::{error::PointercrateError, model::Model};
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, Expression, PgConnection};
+use serde::Serialize;
 
 // This trait could, in theory, be implemented as a generic trait with default implementations for
 // most of the trait-methods. Sadly, I can't figure out how to do that since the diesel type-bounds
 // on the trait and functions are freaking insane and cause the compiler to overflow while
 // evaluating them (it completely looses its mind). So its a proc-macro. Sorry.
 pub trait Paginatable: Clone {
-    type ColumnType;
+    type ColumnType: Serialize;
     type Result: Model;
 
     fn filter<'a, ST>(

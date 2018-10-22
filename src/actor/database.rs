@@ -80,7 +80,7 @@ where
 // the user once but that's just ugly, so we have this dedicated struct!
 pub struct PatchCurrentUser(pub User, pub PatchMe);
 
-pub struct Paginate<P: Paginatable>(P);
+pub struct Paginate<P: Paginatable>(pub P);
 
 impl Message for SubmitterByIp {
     type Result = Result<Submitter, PointercrateError>;
@@ -606,11 +606,11 @@ impl Handler<Invalidate> for DatabaseActor {
 }
 
 impl<P: Paginatable + 'static> Message for Paginate<P> {
-    type Result = Result<Vec<P::Result>, PointercrateError>;
+    type Result = Result<(Vec<P::Result>, String), PointercrateError>;
 }
 
 impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
-    type Result = Result<Vec<P::Result>, PointercrateError>;
+    type Result = Result<(Vec<P::Result>, String), PointercrateError>;
 
     fn handle(&mut self, msg: Paginate<P>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self
@@ -623,7 +623,19 @@ impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
         let next = msg.0.next_after(connection)?;
         let prev = msg.0.prev_before(connection)?;
 
-        let result = msg.0.result(connection);
-        unimplemented!()
+        let result = msg.0.result(connection)?;
+
+        // TODO: compare last thing in our list with last and first thing in our list with first
+        // and then only generate the needed headers
+
+        let header = format! {
+            "<{}>; rel=first,<{}>; rel=prev,<{}>; rel=next,<{}>; rel=last",
+            serde_urlencoded::ser::to_string(first).unwrap(),
+            serde_urlencoded::ser::to_string(prev).unwrap(),
+            serde_urlencoded::ser::to_string(next).unwrap(),
+            serde_urlencoded::ser::to_string(last).unwrap(),
+        };
+
+        Ok((result, header))
     }
 }
