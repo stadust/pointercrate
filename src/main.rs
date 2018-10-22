@@ -78,7 +78,9 @@ fn main() {
             .scope("/api/v1", |api_scope| {
                 api_scope
                     .nested("/users", |user_scope| {
-                        user_scope.resource("/", |r| r.get().f(api::user::paginate))
+                        user_scope
+                            .resource("/", |r| r.get().f(api::user::paginate))
+                            .resource("/{user_id}/", |r| r.get().f(api::user::user))
                     })
                     .nested("/records", |record_scope| {
                         record_scope
