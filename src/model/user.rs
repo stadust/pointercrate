@@ -4,7 +4,7 @@ use crate::{
     config::SECRET,
     error::PointercrateError,
     middleware::auth::Claims,
-    patch::{deserialize_patch, Patch, Patchable, UpdateDatabase},
+    patch::{deserialize_patch, PatchField, Patchable, UpdateDatabase, Patch},
     schema::members,
 };
 use diesel::{
@@ -40,17 +40,59 @@ bitflags! {
 }
 
 impl Permissions {
+    /// Gets a [`Permissions`] object that has all permissions set that would be required to assign
+    /// all the permissions stored in this object
+    pub fn assignable_from(self) -> Permissions {
+        let mut from = Permissions::empty();
+
+        if (Permissions::ListHelper | Permissions::ListModerator) & self != Permissions::empty() {
+            from.insert(Permissions::ListAdministrator)
+        }
+
+        if (Permissions::Moderator
+            | Permissions::ListModerator
+            | Permissions::LeaderboardAdministrator
+            | Permissions::ExtendedAccess)
+            & self
+            != Permissions::empty()
+        {
+            from.insert(Permissions::Administrator)
+        }
+
+        if Permissions::LeaderboardModerator & self != Permissions::empty() {
+            from.insert(Permissions::LeaderboardAdministrator)
+        }
+
+        if Permissions::Administrator & self != Permissions::empty() {
+            from.insert(Permissions::ItIsImpossibleToGainThisPermission)
+        }
+
+        from
+    }
+
+    /// Gets a [`Permissions`] object containing all the permissions you can assign if you have the
+    /// permissions stored in this object.
     pub fn assigns(self) -> Permissions {
-        match self {
-            Permissions::ListAdministrator => Permissions::ListHelper | Permissions::ListModerator,
-            Permissions::Administrator =>
+        let mut perms = Permissions::empty();
+
+        if Permissions::ListAdministrator & self != Permissions::empty() {
+            perms.insert(Permissions::ListHelper | Permissions::ListModerator)
+        }
+
+        if Permissions::Administrator & self != Permissions::empty() {
+            perms.insert(
                 Permissions::Moderator
                     | Permissions::ListAdministrator
                     | Permissions::LeaderboardAdministrator
                     | Permissions::ExtendedAccess,
-            Permissions::LeaderboardAdministrator => Permissions::LeaderboardModerator,
-            _ => Permissions::empty(),
+            )
         }
+
+        if Permissions::LeaderboardAdministrator & self != Permissions::empty() {
+            perms.insert(Permissions::LeaderboardModerator)
+        }
+
+        perms
     }
 
     pub fn can_assign(self, permissions: Permissions) -> bool {
@@ -188,7 +230,10 @@ impl Serialize for PartialUser {
         let mut map = serializer.serialize_map(Some(3))?;
         map.serialize_entry("id", &self.id)?;
         map.serialize_entry("name", &self.name)?;
-        map.serialize_entry("permissions", &Permissions::from_bitstring(&self.permissions))?;
+        map.serialize_entry(
+            "permissions",
+            &Permissions::from_bitstring(&self.permissions),
+        )?;
         map.end()
     }
 }
@@ -264,10 +309,22 @@ make_patch! {
     }
 }
 
+impl Patch for PatchMe {}
+
 make_patch! {
     struct PatchUser {
         display_name: String,
         permissions: Permissions
+    }
+}
+
+impl Patch for PatchUser {
+    fn required_permissions(&self) -> Permissions {
+        if let PatchField::Some(perms) = self.permissions {
+            perms.assignable_from()
+        } else {
+            Permissions::empty()
+        }
     }
 }
 
@@ -281,9 +338,14 @@ impl Patchable<PatchMe> for User {
 
         Ok(())
     }
+}
 
-    fn required_permissions(&self) -> Permissions {
-        Permissions::empty()
+impl Patchable<PatchUser> for User {
+    fn apply_patch(&mut self, patch: PatchUser) -> Result<(), PointercrateError> {
+        patch!(self, patch, display_name);
+        patch_not_null!(self, patch, permissions, *set_permissions);
+
+        Ok(())
     }
 }
 

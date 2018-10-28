@@ -10,7 +10,6 @@
     unused_imports,
     unused_parens
 )]
-#![cfg_attr(feature = "cargo-clippy", feature(tool_lints))]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::all))]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 

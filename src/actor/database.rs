@@ -9,7 +9,7 @@ use crate::{
         Demon, Player, Record, Submitter, User,
     },
     pagination::Paginatable,
-    patch::{Patch as PatchField, Patchable, UpdateDatabase},
+    patch::{Patch as PatchTrait, PatchField, Patchable, UpdateDatabase},
     video,
 };
 use diesel::{
@@ -73,7 +73,8 @@ pub struct Invalidate(pub Authorization);
 
 pub struct Patch<Target, Patch>(pub User, pub Target, pub Patch)
 where
-    Target: Patchable<Patch> + UpdateDatabase;
+    Target: Patchable<Patch> + UpdateDatabase,
+    Patch: PatchTrait;
 
 // We cannot use the above struct for this, because both 'User' and 'Target' need to be the same
 // object, something the ownership system obviously doesn't allow. The alternative would be cloning
@@ -524,6 +525,7 @@ impl Handler<DeleteUserById> for DatabaseActor {
 impl<T, P> Message for Patch<T, P>
 where
     T: Patchable<P> + UpdateDatabase + 'static,
+    P: PatchTrait
 {
     type Result = Result<T, PointercrateError>;
 }
@@ -531,11 +533,12 @@ where
 impl<T, P> Handler<Patch<T, P>> for DatabaseActor
 where
     T: Patchable<P> + UpdateDatabase + 'static,
+    P: PatchTrait,
 {
     type Result = Result<T, PointercrateError>;
 
     fn handle(&mut self, mut msg: Patch<T, P>, _: &mut Self::Context) -> Self::Result {
-        let required = msg.1.required_permissions();
+        let required = msg.2.required_permissions();
 
         if msg.0.permissions() & required != required {
             return Err(PointercrateError::MissingPermissions {

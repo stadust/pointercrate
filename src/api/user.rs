@@ -5,7 +5,7 @@ use crate::{
     actor::database::{Paginate, Patch, TokenAuth, UserById},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::user::{User, UserPagination},
+    model::user::{User, UserPagination, PatchUser},
     state::PointercrateState,
 };
 use log::info;
@@ -57,9 +57,9 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
 
     state
         .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(move |user| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
+        .and_then(move |user: User| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
         .and_then(move |(user, user_id)| {
-            body.from_err().and_then(move |patch| {
+            body.from_err().and_then(move |patch: PatchUser| {
                 state
                     .database_if_match(UserById(user_id.into_inner()), if_match)
                     .and_then(move |target| state.database(Patch(user, target, patch)))

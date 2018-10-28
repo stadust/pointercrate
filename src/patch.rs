@@ -5,16 +5,16 @@ use serde::{Deserialize, Deserializer};
 macro_rules! patch {
     ($target: expr, $patch: ident, $field: ident) => {
         match $patch.$field {
-            Patch::Some($field) => $target.$field = Some($field),
-            Patch::Null => $target.$field = None,
+            PatchField::Some($field) => $target.$field = Some($field),
+            PatchField::Null => $target.$field = None,
             _ => (),
         }
     };
 
     ($target: expr, $patch: ident, $field: ident, $method: ident) => {
         match $patch.$field {
-            Patch::Some($field) => $target.$method(&$field),
-            Patch::Null => $target.$field = None,
+            PatchField::Some($field) => $target.$method(&$field),
+            PatchField::Null => $target.$field = None,
             _ => (),
         }
     };
@@ -23,8 +23,8 @@ macro_rules! patch {
 macro_rules! patch_not_null {
     ($target: expr, $patch: ident, $field: ident) => {
         match $patch.$field {
-            Patch::Some($field) => $target.$field = Some($field),
-            Patch::Null =>
+            PatchField::Some($field) => $target.$field = $field,
+            PatchField::Null =>
                 return Err(PointercrateError::UnexpectedNull {
                     field: stringify!($field),
                 }),
@@ -34,8 +34,19 @@ macro_rules! patch_not_null {
 
     ($target: expr, $patch: ident, $field: ident, $method: ident) => {
         match $patch.$field {
-            Patch::Some($field) => $target.$method(&$field),
-            Patch::Null =>
+            PatchField::Some($field) => $target.$method(&$field),
+            PatchField::Null =>
+                return Err(PointercrateError::UnexpectedNull {
+                    field: stringify!($field),
+                }),
+            _ => (),
+        }
+    };
+
+    ($target: expr, $patch: ident, $field: ident, *$method: ident) => {
+        match $patch.$field {
+            PatchField::Some($field) => $target.$method($field),
+            PatchField::Null =>
                 return Err(PointercrateError::UnexpectedNull {
                     field: stringify!($field),
                 }),
@@ -50,7 +61,7 @@ macro_rules! make_patch {
         pub struct $name {
             $(
                 #[serde(default, deserialize_with = "deserialize_patch")]
-                pub $field: Patch<$t>,
+                pub $field: PatchField<$t>,
             )*
         }
     }
@@ -58,28 +69,33 @@ macro_rules! make_patch {
 
 pub trait Patchable<T> {
     fn apply_patch(&mut self, patch: T) -> Result<(), PointercrateError>;
-
-    fn required_permissions(&self) -> Permissions;
 }
+
+pub trait Patch {
+    fn required_permissions(&self) -> Permissions {
+        Permissions::empty()
+    }
+}
+
 
 pub trait UpdateDatabase: Sized {
     fn update(self, connection: &PgConnection) -> QueryResult<Self>;
 }
 
 #[derive(Debug)]
-pub enum Patch<T> {
+pub enum PatchField<T> {
     Null,
     Absent,
     Some(T),
 }
 
-impl<T> Default for Patch<T> {
+impl<T> Default for PatchField<T> {
     fn default() -> Self {
-        Patch::Absent
+        PatchField::Absent
     }
 }
 
-pub(crate) fn deserialize_patch<'de, T, D>(deserializer: D) -> Result<Patch<T>, D::Error>
+pub(crate) fn deserialize_patch<'de, T, D>(deserializer: D) -> Result<PatchField<T>, D::Error>
 where
     T: Deserialize<'de>,
     D: Deserializer<'de>,
@@ -87,7 +103,7 @@ where
     let value: Option<T> = Deserialize::deserialize(deserializer)?;
 
     match value {
-        Some(t) => Ok(Patch::Some(t)),
-        None => Ok(Patch::Null),
+        Some(t) => Ok(PatchField::Some(t)),
+        None => Ok(PatchField::Null),
     }
 }
