@@ -14,6 +14,9 @@
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::all))]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 
+// TODO: manual deserialization of json and urlencoded (for pagaination) request data so we can
+// provided better error reporting
+
 // idk why we still need this extern crate, but removing it break the diesel derives
 #[macro_use]
 extern crate diesel;
@@ -80,7 +83,11 @@ fn main() {
                     .nested("/users", |user_scope| {
                         user_scope
                             .resource("/", |r| r.get().f(api::user::paginate))
-                            .resource("/{user_id}/", |r| r.get().f(api::user::user))
+                            .resource("/{user_id}/", |r| {
+                                r.get().f(api::user::user);
+                                r.method(Method::PATCH).f(api::user::patch);
+                                r.route().f(mna!(Method::GET, Method::PATCH))
+                            })
                     })
                     .nested("/records", |record_scope| {
                         record_scope

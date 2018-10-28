@@ -25,6 +25,7 @@ use std::{
 };
 
 bitflags! {
+    #[derive(Deserialize)]
     pub struct Permissions: u16 {
         const ExtendedAccess = 0b0000_0000_0000_0001;
         const ListHelper = 0b0000_0000_0000_0010;
@@ -133,7 +134,7 @@ macro_rules! demand_perms {
 
             $(
                 perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
-            ),*
+            )*
 
             let perm_set = PermissionsSet {
                 perms: perm_set
@@ -144,6 +145,8 @@ macro_rules! demand_perms {
                     required: perm_set
                 })
             }
+
+            $user
         }
     }
 }
@@ -258,6 +261,13 @@ make_patch! {
         password: String,
         display_name: String,
         youtube_channel: String
+    }
+}
+
+make_patch! {
+    struct PatchUser {
+        display_name: String,
+        permissions: Permissions
     }
 }
 
