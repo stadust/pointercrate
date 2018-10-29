@@ -175,7 +175,7 @@ impl PointercrateError {
         PointercrateError::InternalServerError
     }
 
-    pub fn bad_request(message: &'static str) -> PointercrateError {
+    pub fn bad_request(message: &str) -> PointercrateError {
         PointercrateError::BadRequest {
             message: message.to_string(),
         }

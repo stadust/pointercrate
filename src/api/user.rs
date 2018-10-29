@@ -2,7 +2,7 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
-    actor::database::{Paginate, Patch, TokenAuth, UserById, DeleteUserById},
+    actor::database::{DeleteUserById, Paginate, Patch, TokenAuth, UserById},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchUser, User, UserPagination},
@@ -15,15 +15,16 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/users/");
 
     let query_string = req.query_string();
-    let pagination: UserPagination =
-        serde_urlencoded::from_str(query_string).expect("TODO: error handling");
+    let pagination = serde_urlencoded::from_str(query_string)
+        .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
 
     state
         .database(TokenAuth(req.extensions_mut().remove().unwrap()))
         .and_then(|user| Ok(demand_perms!(user, Moderator)))
-        .and_then(move |_| state.database(Paginate(pagination)))
+        .and_then(move |_| pagination)
+        .and_then(move |pagination: UserPagination| state.database(Paginate(pagination)))
         .map(|users| HttpResponse::Ok().json(users))
         .responder()
 }

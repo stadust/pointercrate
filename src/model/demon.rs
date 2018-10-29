@@ -2,6 +2,7 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     model::Model,
     schema::demons,
+    patch::{deserialize_patch, PatchField, Patchable, UpdateDatabase, Patch},
 };
 use diesel::{expression::bound::Bound, *};
 use pointercrate_derive::Paginatable;
@@ -63,6 +64,16 @@ impl Serialize for PartialDemon {
         map.serialize_entry("position", &self.position)?;
         map.serialize_entry("state", &list_state(self.position).to_string())?;
         map.end()
+    }
+}
+
+make_patch! {
+    struct PatchDemon {
+        name: String,
+        position: i16,
+        requirement: i16,
+        verifier: i32,
+        publisher: i32
     }
 }
 

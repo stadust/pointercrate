@@ -7,7 +7,7 @@
     stable_features,
     unknown_lints,
     unused_features,
-    unused_imports,
+    //unused_imports,
     unused_parens
 )]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::all))]
@@ -86,8 +86,12 @@ fn main() {
                                 r.get().f(api::user::user);
                                 r.method(Method::PATCH).f(api::user::patch);
                                 r.delete().f(api::user::delete);
-                                r.route().f(mna!(Method::GET, Method::PATCH, Method::DELETE))
+                                r.route()
+                                    .f(mna!(Method::GET, Method::PATCH, Method::DELETE))
                             })
+                    })
+                    .nested("/demons", |demon_scope| {
+                        demon_scope.resource("/", |r| r.get().f(api::demon::paginate))
                     })
                     .nested("/records", |record_scope| {
                         record_scope
