@@ -85,7 +85,8 @@ fn main() {
                             .resource("/{user_id}/", |r| {
                                 r.get().f(api::user::user);
                                 r.method(Method::PATCH).f(api::user::patch);
-                                r.route().f(mna!(Method::GET, Method::PATCH))
+                                r.delete().f(api::user::delete);
+                                r.route().f(mna!(Method::GET, Method::PATCH, Method::DELETE))
                             })
                     })
                     .nested("/records", |record_scope| {
