@@ -331,7 +331,11 @@ impl Patch for PatchUser {
 
 impl Patchable<PatchMe> for User {
     fn apply_patch(&mut self, patch: PatchMe) -> Result<()> {
-        // TODO: validate password (length, etc.)
+        if let PatchField::Some(ref password) = patch.password {
+            if password.len() < 10 {
+                return Err(PointercrateError::InvalidPassword)
+            }
+        }
 
         patch_not_null!(self, patch, password, set_password);
         patch!(self, patch, display_name);

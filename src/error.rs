@@ -93,6 +93,12 @@ pub enum PointercrateError {
     )]
     UnprocessableEntity,
 
+    #[fail(display = "Invalid username! The username must be at least 3 characters long and not start/end with a space")]
+    InvalidUsername,
+
+    #[fail(display = "Invalid password! The password must be at least 10 characters long")]
+    InvalidPassword,
+
     #[fail(display = "Invalid URL scheme. Only 'http' and 'https' are supported")]
     InvalidUrlScheme,
 
@@ -200,6 +206,8 @@ impl PointercrateError {
             PointercrateError::UnsupportedMediaType { .. } => 41500,
 
             PointercrateError::UnprocessableEntity => 42200,
+            PointercrateError::InvalidUsername => 42202,
+            PointercrateError::InvalidPassword => 42204,
             PointercrateError::UnexpectedNull { .. } => 42211,
             PointercrateError::InvalidProgress { .. } => 42215,
             PointercrateError::SubmissionExists { .. } => 42217,

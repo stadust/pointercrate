@@ -21,6 +21,7 @@ use diesel::{
 use ipnetwork::IpNetwork;
 use log::{debug, info};
 
+/// Actor that executes database related actions on a thread pool
 pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
 
 impl DatabaseActor {
@@ -51,20 +52,91 @@ impl Actor for DatabaseActor {
     }
 }
 
+/// Message that indicates the [`DatabaseActor`] to retrieve a [`Submitter`] object based on the
+/// given [IP-Address](`IpNetwork`).
+///
+/// If no submitter with the given IP is known, a new object will be crated an inserted into the
+/// database
 pub struct SubmitterByIp(pub IpNetwork);
 
+/// Message that indicates the [`DatabaseActor`] to retrieve a [`Player`] object with the given name
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no player with the given name exist.
 pub struct PlayerByName(pub String);
 
+/// Message that indicates the [`DatabaseActor`] to retrieve a [`Demon`] object with the given name
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no demon with the given name exist.
 pub struct DemonByName(pub String);
 
+/// Message that indicates the [`DatabaseActor`] to retrieve a `(Player, Demon)` pair whose names
+/// match the given string.
+///
+/// This is basically the same as sending a [`PlayerByName`] message followed by a [`DemonByName`]
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should either not player or no demon with the given name
+/// exist.
 pub struct ResolveSubmissionData(pub String, pub String);
+
+/// Message that indicates the [`DatabaseActor`] that a record has been submitted by the given
+/// [`Submitter`] and should be processed
+///
+/// ## Errors
+/// + [`PointercrateError::BannedFromSubmissions`]: The given submitter has been banned from
+/// submitting records
+/// + [`PointercrateError::PlayerBanned`]: The player the record was submitted
+/// for has been banned from having records on the list
+/// + [`PointercrateError::SubmitLegacy`]: The demon the record was submitted for is on the legacy
+/// list
+/// + [`PointercrateError::Non100Extended`]: The demon the record was submitted for is on the
+/// extended list, and `progress` isn't 100
+/// + [`PointercrateError::InvalidProgress `]: The submission progress is lower than the
+/// demons `record_requirement`
+/// + [`PointercrateError::SubmissionExists`]: If a matching record is
+/// already in the database, and it's either [rejected](`RecordStatus::Rejected`), or has higher
+/// progress than the submission.
+/// + Any error returned by [`video::validate`]
 pub struct ProcessSubmission(pub Submission, pub Submitter);
+
+/// Message that indicates the [`DatabaseActor`] to retrieve a [`Record`] object with the given id.
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no record with the given id exist.
 pub struct RecordById(pub i32);
+
+/// Message that indicates the [`DatabaseActor`] to delete the [`Record`] object with the given id.
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no record with the given id exist.
 pub struct DeleteRecordById(pub i32);
 
+/// Message that indicates the [`DatabaseActor`] to process the given [`Registration`]
+///
+/// ## Errors
+/// + [`PointercrateError::InvalidUsername`]: If the username is shorter than 3 characters or starts/end with spaces
+/// + [`PointercrateError::InvalidPassword`]: If the password is shorter than 10 characters
+/// + [`PointercrateError::NameTaken`]: If the username is already in use by another account
 pub struct Register(pub Registration);
+
+/// Message that indicates the [`DatabaseActor`] to retrieve a [`User`] object with the given id.
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no user with the given id exist.
 pub struct UserById(pub i32);
+
+/// Message that indicates the [`DatabaseActor`] to retrieve a [`User`] object with the given name.
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no user with the given name exist.
 pub struct UserByName(pub String);
+
+/// Message that indicates the [`DatabaseActor`] to delete the [`User`] object with the given id.
+///
+/// ## Errors
+/// + [`PointercrateError::ModelNotFound`]: Should no user with the given id exist.
 pub struct DeleteUserById(pub i32);
 
 pub struct TokenAuth(pub Authorization);
@@ -487,12 +559,18 @@ impl Handler<Register> for DatabaseActor {
     type Result = Result<User>;
 
     fn handle(&mut self, msg: Register, _: &mut Self::Context) -> Self::Result {
+        if msg.0.name.len() < 3 || msg.0.name != msg.0.name.trim() {
+            return Err(PointercrateError::InvalidUsername)
+        }
+
+        if msg.0.password.len() < 10 {
+            return Err(PointercrateError::InvalidPassword)
+        }
+
         let connection = &*self
             .0
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)?;
-
-        // TODO: username and password validation (long enough, etc)
 
         match User::by_name(&msg.0.name).first::<User>(connection) {
             Ok(_) => Err(PointercrateError::NameTaken),

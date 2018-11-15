@@ -1,7 +1,7 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 #![deny(
     bare_trait_objects,
-    missing_debug_implementations,
+    //missing_debug_implementations,
     unused_extern_crates,
     patterns_in_fns_without_body,
     stable_features,
@@ -32,19 +32,19 @@ use crate::{
 };
 
 #[macro_use]
-mod patch;
+pub mod patch;
 #[macro_use]
-mod model;
-mod actor;
-mod api;
-mod bitstring;
-mod config;
-mod error;
-mod middleware;
-mod pagination;
-mod schema;
-mod state;
-mod video;
+pub mod model;
+pub mod actor;
+pub mod api;
+pub mod bitstring;
+pub mod config;
+pub mod error;
+pub mod middleware;
+pub mod pagination;
+pub mod schema;
+pub mod state;
+pub mod video;
 
 macro_rules! mna {
     ($($allowed: expr),*) => {
