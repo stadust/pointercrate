@@ -4,8 +4,9 @@ use crate::{
     config::SECRET,
     error::PointercrateError,
     middleware::auth::Claims,
-    patch::{deserialize_patch, PatchField, Patchable, UpdateDatabase, Patch},
+    patch::{deserialize_patch, Patch, PatchField, Patchable, UpdateDatabase},
     schema::members,
+    Result,
 };
 use diesel::{
     delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types,
@@ -114,7 +115,7 @@ impl Permissions {
 }
 
 impl Serialize for Permissions {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -128,7 +129,7 @@ pub struct PermissionsSet {
 }
 
 impl Serialize for PermissionsSet {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -223,7 +224,7 @@ pub struct PartialUser {
 }
 
 impl Serialize for PartialUser {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -287,7 +288,7 @@ impl Hash for User {
 }
 
 impl Serialize for User {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -329,7 +330,7 @@ impl Patch for PatchUser {
 }
 
 impl Patchable<PatchMe> for User {
-    fn apply_patch(&mut self, patch: PatchMe) -> Result<(), PointercrateError> {
+    fn apply_patch(&mut self, patch: PatchMe) -> Result<()> {
         // TODO: validate password (length, etc.)
 
         patch_not_null!(self, patch, password, set_password);
@@ -341,7 +342,7 @@ impl Patchable<PatchMe> for User {
 }
 
 impl Patchable<PatchUser> for User {
-    fn apply_patch(&mut self, patch: PatchUser) -> Result<(), PointercrateError> {
+    fn apply_patch(&mut self, patch: PatchUser) -> Result<()> {
         patch!(self, patch, display_name);
         patch_not_null!(self, patch, permissions, *set_permissions);
 
@@ -475,7 +476,7 @@ impl User {
         .unwrap()
     }
 
-    pub fn validate_token(self, token: &str) -> Result<Self, PointercrateError> {
+    pub fn validate_token(self, token: &str) -> Result<Self> {
         debug!("Validating a token!");
 
         let (signing_input, signature) = {
@@ -521,7 +522,7 @@ impl User {
             .into_bytes();
     }
 
-    pub fn verify_password(self, password: &str) -> Result<Self, PointercrateError> {
+    pub fn verify_password(self, password: &str) -> Result<Self> {
         debug!("Verifying a password!");
 
         let valid = bcrypt::verify(&password, &self.password_hash())

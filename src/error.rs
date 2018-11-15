@@ -23,10 +23,7 @@ pub enum PointercrateError {
         message: String,
     },
 
-    #[fail(
-        display = "The value for the header {} could not be processed",
-        header
-    )]
+    #[fail(display = "The value for the header {} could not be processed", header)]
     InvalidHeaderValue { header: &'static str },
 
     #[fail(
@@ -53,11 +50,7 @@ pub enum PointercrateError {
     )]
     NotFound,
 
-    #[fail(
-        display = "No '{}' identified by '{}' found!",
-        model,
-        identified_by
-    )]
+    #[fail(display = "No '{}' identified by '{}' found!", model, identified_by)]
     ModelNotFound {
         #[serde(skip)]
         model: &'static str,
@@ -122,10 +115,7 @@ pub enum PointercrateError {
     #[fail(display = "Unexpected NULL value for field {}", field)]
     UnexpectedNull { field: &'static str },
 
-    #[fail(
-        display = "Record progress must lie between {} and 100%!",
-        requirement
-    )]
+    #[fail(display = "Record progress must lie between {} and 100%!", requirement)]
     InvalidProgress { requirement: i16 },
 
     #[fail(display = "This record has already been {}", status)]

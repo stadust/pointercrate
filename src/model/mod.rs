@@ -15,6 +15,4 @@ pub trait Model {
     type Table: SelectDsl<Self::Columns> + QuerySource;
 
     fn all() -> diesel::dsl::Select<Self::Table, Self::Columns>;
-
-
 }

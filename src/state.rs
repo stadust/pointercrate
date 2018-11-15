@@ -3,6 +3,7 @@ use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
     middleware::cond::IfMatch,
+    Result,
 };
 use hyper::{
     client::{Client, HttpConnector},
@@ -35,7 +36,7 @@ impl PointercrateState {
     pub fn database<Msg, T>(&self, msg: Msg) -> impl Future<Item = T, Error = PointercrateError>
     where
         T: Send + 'static,
-        Msg: Message<Result = Result<T, PointercrateError>> + Send + 'static,
+        Msg: Message<Result = Result<T>> + Send + 'static,
         DatabaseActor: Handler<Msg>,
     {
         self.database
@@ -49,7 +50,7 @@ impl PointercrateState {
     ) -> impl Future<Item = T, Error = PointercrateError>
     where
         T: Send + Hash + 'static,
-        Msg: Message<Result = Result<T, PointercrateError>> + Send + 'static,
+        Msg: Message<Result = Result<T>> + Send + 'static,
         DatabaseActor: Handler<Msg>,
     {
         self.database(msg).and_then(move |t: T| {

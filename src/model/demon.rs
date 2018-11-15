@@ -1,8 +1,8 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     model::Model,
+    patch::{deserialize_patch, Patch, PatchField, Patchable, UpdateDatabase},
     schema::demons,
-    patch::{deserialize_patch, PatchField, Patchable, UpdateDatabase, Patch},
 };
 use diesel::{expression::bound::Bound, *};
 use pointercrate_derive::Paginatable;

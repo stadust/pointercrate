@@ -20,7 +20,7 @@
 #[macro_use]
 extern crate diesel;
 
-// TODO: type Result<T> = result::Result<T, PointercrateError>;
+type Result<T> = std::result::Result<T, PointercrateError>;
 
 use actix::System;
 use actix_web::{error::ResponseError, http::Method, server, App};

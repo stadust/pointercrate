@@ -1,4 +1,4 @@
-use crate::error::PointercrateError;
+use crate::{error::PointercrateError, Result};
 use url::Url;
 
 const SCHEMES: [&str; 2] = ["http", "https"];
@@ -17,7 +17,7 @@ const VIMEO_FORMAT: &str = "https://vimeo.com/{video_id}' or\
 const BILIBILI_FORMAT: &str = "'https://www.bilibili.com/video/{video_id}' or\
                                'https://bilibili.com/video/{video_id}";
 
-pub fn validate(url: &str) -> Result<String, PointercrateError> {
+pub fn validate(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| PointercrateError::bad_request("Malformed video URL"))?;
 
     if !SCHEMES.contains(&url.scheme()) {

@@ -10,7 +10,7 @@ use crate::{
     },
     pagination::Paginatable,
     patch::{Patch as PatchTrait, PatchField, Patchable, UpdateDatabase},
-    video,
+    video, Result,
 };
 use diesel::{
     pg::PgConnection,
@@ -84,11 +84,11 @@ pub struct PatchCurrentUser(pub User, pub PatchMe);
 pub struct Paginate<P: Paginatable>(pub P);
 
 impl Message for SubmitterByIp {
-    type Result = Result<Submitter, PointercrateError>;
+    type Result = Result<Submitter>;
 }
 
 impl Handler<SubmitterByIp> for DatabaseActor {
-    type Result = Result<Submitter, PointercrateError>;
+    type Result = Result<Submitter>;
 
     fn handle(&mut self, msg: SubmitterByIp, _ctx: &mut Self::Context) -> Self::Result {
         debug!(
@@ -111,11 +111,11 @@ impl Handler<SubmitterByIp> for DatabaseActor {
 }
 
 impl Message for PlayerByName {
-    type Result = Result<Player, PointercrateError>;
+    type Result = Result<Player>;
 }
 
 impl Handler<PlayerByName> for DatabaseActor {
-    type Result = Result<Player, PointercrateError>;
+    type Result = Result<Player>;
 
     fn handle(&mut self, msg: PlayerByName, _ctx: &mut Self::Context) -> Self::Result {
         debug!(
@@ -138,11 +138,11 @@ impl Handler<PlayerByName> for DatabaseActor {
 }
 
 impl Message for DemonByName {
-    type Result = Result<Demon, PointercrateError>;
+    type Result = Result<Demon>;
 }
 
 impl Handler<DemonByName> for DatabaseActor {
-    type Result = Result<Demon, PointercrateError>;
+    type Result = Result<Demon>;
 
     fn handle(&mut self, msg: DemonByName, _ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempting to retrieve demon with name '{}'!", msg.0);
@@ -165,11 +165,11 @@ impl Handler<DemonByName> for DatabaseActor {
 }
 
 impl Message for ResolveSubmissionData {
-    type Result = Result<(Player, Demon), PointercrateError>;
+    type Result = Result<(Player, Demon)>;
 }
 
 impl Handler<ResolveSubmissionData> for DatabaseActor {
-    type Result = Result<(Player, Demon), PointercrateError>;
+    type Result = Result<(Player, Demon)>;
 
     fn handle(&mut self, msg: ResolveSubmissionData, ctx: &mut Self::Context) -> Self::Result {
         debug!(
@@ -187,11 +187,11 @@ impl Handler<ResolveSubmissionData> for DatabaseActor {
 }
 
 impl Message for ProcessSubmission {
-    type Result = Result<Option<Record>, PointercrateError>;
+    type Result = Result<Option<Record>>;
 }
 
 impl Handler<ProcessSubmission> for DatabaseActor {
-    type Result = Result<Option<Record>, PointercrateError>;
+    type Result = Result<Option<Record>>;
 
     fn handle(&mut self, msg: ProcessSubmission, ctx: &mut Self::Context) -> Self::Result {
         debug!("Processing submission {:?}", msg.0);
@@ -240,7 +240,7 @@ impl Handler<ProcessSubmission> for DatabaseActor {
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
-        let record: Result<Record, _> = match video {
+        let record: std::result::Result<Record, _> = match video {
             Some(ref video) =>
                 Record::get_existing(player.id, &demon.name, video).first(connection),
             None => Record::by_player_and_demon(player.id, &demon.name).first(connection),
@@ -321,11 +321,11 @@ impl Handler<ProcessSubmission> for DatabaseActor {
 }
 
 impl Message for RecordById {
-    type Result = Result<Record, PointercrateError>;
+    type Result = Result<Record>;
 }
 
 impl Handler<RecordById> for DatabaseActor {
-    type Result = Result<Record, PointercrateError>;
+    type Result = Result<Record>;
 
     fn handle(&mut self, msg: RecordById, _: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve record by id {}", msg.0);
@@ -348,11 +348,11 @@ impl Handler<RecordById> for DatabaseActor {
 }
 
 impl Message for DeleteRecordById {
-    type Result = Result<(), PointercrateError>;
+    type Result = Result<()>;
 }
 
 impl Handler<DeleteRecordById> for DatabaseActor {
-    type Result = Result<(), PointercrateError>;
+    type Result = Result<()>;
 
     fn handle(&mut self, msg: DeleteRecordById, _: &mut Self::Context) -> Self::Result {
         info!("Deleting record with ID {}!", msg.0);
@@ -367,11 +367,11 @@ impl Handler<DeleteRecordById> for DatabaseActor {
 }
 
 impl Message for UserById {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 }
 
 impl Handler<UserById> for DatabaseActor {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 
     fn handle(&mut self, msg: UserById, _: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve user by id {}", msg.0);
@@ -394,11 +394,11 @@ impl Handler<UserById> for DatabaseActor {
 }
 
 impl Message for UserByName {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 }
 
 impl Handler<UserByName> for DatabaseActor {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 
     fn handle(&mut self, msg: UserByName, _: &mut Self::Context) -> Self::Result {
         debug!("Attempt to resolve user by name {}", msg.0);
@@ -421,13 +421,13 @@ impl Handler<UserByName> for DatabaseActor {
 }
 
 impl Message for TokenAuth {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 }
 
 // During authorization, all and every error that might come up will be converted into
 // `PointercrateError::Unauthorized`
 impl Handler<TokenAuth> for DatabaseActor {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 
     fn handle(&mut self, msg: TokenAuth, ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
@@ -453,11 +453,11 @@ impl Handler<TokenAuth> for DatabaseActor {
 }
 
 impl Message for BasicAuth {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 }
 
 impl Handler<BasicAuth> for DatabaseActor {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 
     fn handle(&mut self, msg: BasicAuth, ctx: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
@@ -480,11 +480,11 @@ impl Handler<BasicAuth> for DatabaseActor {
 }
 
 impl Message for Register {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 }
 
 impl Handler<Register> for DatabaseActor {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 
     fn handle(&mut self, msg: Register, _: &mut Self::Context) -> Self::Result {
         let connection = &*self
@@ -504,11 +504,11 @@ impl Handler<Register> for DatabaseActor {
 }
 
 impl Message for DeleteUserById {
-    type Result = Result<(), PointercrateError>;
+    type Result = Result<()>;
 }
 
 impl Handler<DeleteUserById> for DatabaseActor {
-    type Result = Result<(), PointercrateError>;
+    type Result = Result<()>;
 
     fn handle(&mut self, msg: DeleteUserById, _: &mut Self::Context) -> Self::Result {
         info!("Deleting user with ID {}!", msg.0);
@@ -525,9 +525,9 @@ impl Handler<DeleteUserById> for DatabaseActor {
 impl<T, P> Message for Patch<T, P>
 where
     T: Patchable<P> + UpdateDatabase + 'static,
-    P: PatchTrait
+    P: PatchTrait,
 {
-    type Result = Result<T, PointercrateError>;
+    type Result = Result<T>;
 }
 
 impl<T, P> Handler<Patch<T, P>> for DatabaseActor
@@ -535,7 +535,7 @@ where
     T: Patchable<P> + UpdateDatabase + 'static,
     P: PatchTrait,
 {
-    type Result = Result<T, PointercrateError>;
+    type Result = Result<T>;
 
     fn handle(&mut self, mut msg: Patch<T, P>, _: &mut Self::Context) -> Self::Result {
         let required = msg.2.required_permissions();
@@ -562,11 +562,11 @@ where
 }
 
 impl Message for PatchCurrentUser {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 }
 
 impl Handler<PatchCurrentUser> for DatabaseActor {
-    type Result = Result<User, PointercrateError>;
+    type Result = Result<User>;
 
     fn handle(&mut self, mut msg: PatchCurrentUser, _: &mut Self::Context) -> Self::Result {
         msg.0.apply_patch(msg.1)?;
@@ -583,11 +583,11 @@ impl Handler<PatchCurrentUser> for DatabaseActor {
 }
 
 impl Message for Invalidate {
-    type Result = Result<(), PointercrateError>;
+    type Result = Result<()>;
 }
 
 impl Handler<Invalidate> for DatabaseActor {
-    type Result = Result<(), PointercrateError>;
+    type Result = Result<()>;
 
     fn handle(&mut self, msg: Invalidate, ctx: &mut Self::Context) -> Self::Result {
         let password = if let Authorization::Basic(_, ref password) = msg.0 {
@@ -609,11 +609,11 @@ impl Handler<Invalidate> for DatabaseActor {
 }
 
 impl<P: Paginatable + 'static> Message for Paginate<P> {
-    type Result = Result<(Vec<P::Result>, String), PointercrateError>;
+    type Result = Result<(Vec<P::Result>, String)>;
 }
 
 impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
-    type Result = Result<(Vec<P::Result>, String), PointercrateError>;
+    type Result = Result<(Vec<P::Result>, String)>;
 
     fn handle(&mut self, msg: Paginate<P>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self

@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, model::user::Permissions};
+use crate::{error::PointercrateError, model::user::Permissions, Result};
 use diesel::{PgConnection, QueryResult};
 use serde::{Deserialize, Deserializer};
 
@@ -68,7 +68,7 @@ macro_rules! make_patch {
 }
 
 pub trait Patchable<T> {
-    fn apply_patch(&mut self, patch: T) -> Result<(), PointercrateError>;
+    fn apply_patch(&mut self, patch: T) -> Result<()>;
 }
 
 pub trait Patch {
@@ -76,7 +76,6 @@ pub trait Patch {
         Permissions::empty()
     }
 }
-
 
 pub trait UpdateDatabase: Sized {
     fn update(self, connection: &PgConnection) -> QueryResult<Self>;
@@ -95,7 +94,9 @@ impl<T> Default for PatchField<T> {
     }
 }
 
-pub(crate) fn deserialize_patch<'de, T, D>(deserializer: D) -> Result<PatchField<T>, D::Error>
+pub(crate) fn deserialize_patch<'de, T, D>(
+    deserializer: D,
+) -> std::result::Result<PatchField<T>, D::Error>
 where
     T: Deserialize<'de>,
     D: Deserializer<'de>,
