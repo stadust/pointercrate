@@ -18,6 +18,7 @@ pub struct Claims {
     pub id: i32,
 }
 
+#[derive(Debug)]
 pub struct Authorizer;
 
 impl Middleware<PointercrateState> for Authorizer {

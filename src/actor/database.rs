@@ -22,6 +22,7 @@ use ipnetwork::IpNetwork;
 use log::{debug, info};
 
 /// Actor that executes database related actions on a thread pool
+#[allow(missing_debug_implementations)]
 pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
 
 impl DatabaseActor {
@@ -57,18 +58,21 @@ impl Actor for DatabaseActor {
 ///
 /// If no submitter with the given IP is known, a new object will be crated an inserted into the
 /// database
+#[derive(Debug)]
 pub struct SubmitterByIp(pub IpNetwork);
 
 /// Message that indicates the [`DatabaseActor`] to retrieve a [`Player`] object with the given name
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no player with the given name exist.
+#[derive(Debug)]
 pub struct PlayerByName(pub String);
 
 /// Message that indicates the [`DatabaseActor`] to retrieve a [`Demon`] object with the given name
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no demon with the given name exist.
+#[derive(Debug)]
 pub struct DemonByName(pub String);
 
 /// Message that indicates the [`DatabaseActor`] to retrieve a `(Player, Demon)` pair whose names
@@ -79,6 +83,7 @@ pub struct DemonByName(pub String);
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should either not player or no demon with the given name
 /// exist.
+#[derive(Debug)]
 pub struct ResolveSubmissionData(pub String, pub String);
 
 /// Message that indicates the [`DatabaseActor`] that a record has been submitted by the given
@@ -99,60 +104,104 @@ pub struct ResolveSubmissionData(pub String, pub String);
 /// already in the database, and it's either [rejected](`RecordStatus::Rejected`), or has higher
 /// progress than the submission.
 /// + Any error returned by [`video::validate`]
+#[derive(Debug)]
 pub struct ProcessSubmission(pub Submission, pub Submitter);
 
 /// Message that indicates the [`DatabaseActor`] to retrieve a [`Record`] object with the given id.
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no record with the given id exist.
+#[derive(Debug)]
 pub struct RecordById(pub i32);
 
 /// Message that indicates the [`DatabaseActor`] to delete the [`Record`] object with the given id.
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no record with the given id exist.
+#[derive(Debug)]
 pub struct DeleteRecordById(pub i32);
 
 /// Message that indicates the [`DatabaseActor`] to process the given [`Registration`]
 ///
 /// ## Errors
-/// + [`PointercrateError::InvalidUsername`]: If the username is shorter than 3 characters or starts/end with spaces
-/// + [`PointercrateError::InvalidPassword`]: If the password is shorter than 10 characters
-/// + [`PointercrateError::NameTaken`]: If the username is already in use by another account
+/// + [`PointercrateError::InvalidUsername`]: If the username is shorter than 3 characters or
+/// starts/end with spaces
+/// + [`PointercrateError::InvalidPassword`]: If the password is shorter than
+/// 10 characters
+/// + [`PointercrateError::NameTaken`]: If the username is already in use by another
+/// account
+#[derive(Debug)]
 pub struct Register(pub Registration);
 
 /// Message that indicates the [`DatabaseActor`] to retrieve a [`User`] object with the given id.
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no user with the given id exist.
+#[derive(Debug)]
 pub struct UserById(pub i32);
 
 /// Message that indicates the [`DatabaseActor`] to retrieve a [`User`] object with the given name.
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no user with the given name exist.
+#[derive(Debug)]
 pub struct UserByName(pub String);
 
 /// Message that indicates the [`DatabaseActor`] to delete the [`User`] object with the given id.
 ///
 /// ## Errors
 /// + [`PointercrateError::ModelNotFound`]: Should no user with the given id exist.
+#[derive(Debug)]
 pub struct DeleteUserById(pub i32);
 
+/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] by access token
+///
+/// ## Errors
+/// + [`PointercrateError::Unauthorized`]: Authorization failed
+#[derive(Debug)]
 pub struct TokenAuth(pub Authorization);
+
+/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] using basic auth
+///
+/// ## Errors
+/// + [`PointercrateError::Unauthorized`]: Authorization failed
+#[derive(Debug)]
 pub struct BasicAuth(pub Authorization);
+
+/// Message that indicates the [`DatabaseActor`] to invalidate all access tokens to the account
+/// authorized by the given [`Authorization`] object. The [`Authorization`] object must be of type
+/// [`Authorization::Basic] for this.
+///
+/// Invalidation is done by re-randomizing the salt used for hashing the user's password (since the
+/// key tokens are signed with contains the salt, this will invalidate all old access tokens).
+///
+/// ## Errors
+/// + [`PointercrateError::Unauthorized`]: Authorization failed
+#[derive(Debug)]
 pub struct Invalidate(pub Authorization);
 
+/// Message that indicates the [`DatabaseActor`] to perform an patch
+///
+/// A Patch is done in 3 steps:
+/// + First, we check if the given [`User`] has the required permissions to perform the patch
+/// (Authorization)
+/// + Second, we perform the patch in-memory on the given target, validating it
+/// + Last, we write the successfull patch into the database
+#[allow(missing_debug_implementations)]
 pub struct Patch<Target, Patch>(pub User, pub Target, pub Patch)
 where
     Target: Patchable<Patch> + UpdateDatabase,
     Patch: PatchTrait;
 
-// We cannot use the above struct for this, because both 'User' and 'Target' need to be the same
-// object, something the ownership system obviously doesn't allow. The alternative would be cloning
-// the user once but that's just ugly, so we have this dedicated struct!
+/// Specialized patch message used when patch target is the user performing the patch
+///
+/// This is needed because `User` and `Target` in [`Patch`] would have to be the same object,
+/// something the rust ownership (rightfully so) doesn't allow. To prevent a needless clone of the
+/// user object, we introduce this specialized message
+#[derive(Debug)]
 pub struct PatchCurrentUser(pub User, pub PatchMe);
 
+#[derive(Debug)]
 pub struct Paginate<P: Paginatable>(pub P);
 
 impl Message for SubmitterByIp {

@@ -1,7 +1,7 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 #![deny(
     bare_trait_objects,
-    //missing_debug_implementations,
+    missing_debug_implementations,
     unused_extern_crates,
     patterns_in_fns_without_body,
     stable_features,

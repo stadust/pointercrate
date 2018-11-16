@@ -13,7 +13,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+#[derive(Debug)]
 pub struct Precondition;
+#[derive(Debug)]
 pub struct IfMatch(Vec<u64>);
 
 impl<S> Middleware<S> for Precondition {
