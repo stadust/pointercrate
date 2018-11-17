@@ -6,7 +6,7 @@ use crate::{
     },
     error::PointercrateError,
     middleware::cond::IfMatch,
-    model::{Delete, Get, Hotfix, Patch, Post, User},
+    model::{user::PermissionsSet, Delete, Get, Hotfix, Patch, Post, User},
     Result,
 };
 use hyper::{
@@ -107,7 +107,9 @@ impl PointercrateState {
         let required_permissions = fix.required_permissions();
 
         if patcher.permissions() & required_permissions != required_permissions {
-            Either::A(result(Err(PointercrateError::Unauthorized)))
+            Either::A(result(Err(PointercrateError::MissingPermissions {
+                required: PermissionsSet::one(required_permissions),
+            })))
         } else {
             Either::B(self.database(PatchMessage(key, fix, Some(condition), PhantomData)))
         }
