@@ -6,10 +6,16 @@ use crate::{error::PointercrateError, state::PointercrateState};
 use log::debug;
 use serde_derive::{Deserialize, Serialize};
 
+/// Enum representing a parsed `Authorization` header
 #[derive(Debug)]
 pub enum Authorization {
+    /// No `Authorization` header has been provided
     Unauthorized,
+
+    /// The chosen authorization method was `Basic`
     Basic(String, String),
+
+    /// The chosen authorization method was `Bearer`
     Token(String),
 }
 
@@ -18,6 +24,24 @@ pub struct Claims {
     pub id: i32,
 }
 
+/// Actix-Web Middleware that deals with Authorization headers
+///
+/// This middleware tries to process any `Authorization` header before the request itself is
+/// processed and stores an [`Authorization`] object in the [`HttpRequest`]'s extension map.
+///
+/// + Basic Authorization: In case of basic authorization, this middleware strips the `Basic`
+/// identifier, base64 decodes the header value, extracts the username and password combo and
+/// constructs an [`Authorization::Basic`] variant. Should the header not be valid base64, or the
+/// decoded header not be valid UTF-8, or the `username:password` be somehow malformed,
+/// [`PointercrateError::InvalidHeaderValue`] is returned and request processing is aborted
+/// + Token Authorization: In case of token authorization, this middleware strips the `Bearer`
+/// identifier and constructs a [`Authorization::Token`] variant with the remaining string. Should
+/// he header for some reason only consists of the string `Bearer`,
+/// [`PointercrateError::InvalidHeaderValue`] is returned and request processing is aborted.
+/// + Random nonsense in the header: [`PointercrateError::InvalidHeaderValue`] is returned and
+/// request processing is aborted.
+/// + No authorization: The [`Authorization::Unauthoried`] variant is
+/// constructed
 #[derive(Debug)]
 pub struct Authorizer;
 

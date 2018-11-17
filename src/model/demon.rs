@@ -1,7 +1,7 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     model::Model,
-    patch::{deserialize_patch, Patch, PatchField, Patchable, UpdateDatabase},
+    patch::{deserialize_patch, Patch, PatchField, Patchable},
     schema::demons,
 };
 use diesel::{expression::bound::Bound, *};
@@ -10,21 +10,39 @@ use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
 use std::fmt::Display;
 
+/// Struct modelling a demon in the database
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]
 #[primary_key("name")]
 pub struct Demon {
+    /// The [`Demon`]'s Geometry Dash level name
     pub name: String,
+
+    /// The [`Demon`]'s position on the demonlist
+    ///
+    /// Positions for consecutive demons are always consecutive positive integers
     pub position: i16,
+
+    /// The minimal progress a [`Player`] must achieve on this [`Demon`] to have their record
+    /// accepted
     pub requirement: i16,
+
     // TODO: remove this fields
     description: Option<String>,
     // TODO: remove this field
     notes: Option<String>,
+
+    /// The player-ID of this [`Demon`]'s verifer
     pub verifier: i32,
+
+    /// The player-ID of this [`Demon`]'s publisher
     pub publisher: i32,
 }
 
+/// Struct modelling a minimal representation of a [`Demon`] in the database
+///
+/// These representations are used whenever a different object references a demon, or when a list of
+/// demons is requested
 #[derive(Debug, Queryable, Identifiable, Hash, Eq, PartialEq, Associations)]
 #[table_name = "demons"]
 #[primary_key("name")]
@@ -62,7 +80,7 @@ impl Serialize for PartialDemon {
         let mut map = serializer.serialize_map(Some(3))?;
         map.serialize_entry("name", &self.name)?;
         map.serialize_entry("position", &self.position)?;
-        map.serialize_entry("state", &list_state(self.position).to_string())?;
+        map.serialize_entry("state", &ListState::from(self.position).to_string())?;
         map.end()
     }
 }
@@ -77,21 +95,33 @@ make_patch! {
     }
 }
 
-fn list_state(position: i16) -> ListState {
-    if position <= *LIST_SIZE {
-        ListState::Main
-    } else if position <= *EXTENDED_LIST_SIZE {
-        ListState::Extended
-    } else {
-        ListState::Legacy
-    }
-}
-
+/// Enum encoding the 3 different parts of the demonlist
 #[derive(Debug)]
 pub enum ListState {
+    /// The main part of the demonlist, ranging from position 1 onwards to [`LIST_SIZE`]
+    /// (inclusive)
     Main,
+
+    /// The extended part of the demonlist, ranging from [`LIST_SIZE`] (exclusive) onwards to
+    /// [`EXTENDED_LIST_SIZE`] (inclusive)
     Extended,
+
+    /// The legacy part of the demonlist, starting at [`EXTENDED_LIST_SIZE`] (exclusive) and being
+    /// theoretically unbounded
     Legacy,
+}
+
+impl From<i16> for ListState {
+    /// Calculates the [`ListState`] of [`Demon`] based on its [`Demon::position`]
+    fn from(position: i16) -> ListState {
+        if position <= *LIST_SIZE {
+            ListState::Main
+        } else if position <= *EXTENDED_LIST_SIZE {
+            ListState::Extended
+        } else {
+            ListState::Legacy
+        }
+    }
 }
 
 impl Display for ListState {
@@ -133,10 +163,13 @@ type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
 
 impl Demon {
+    /// Constructs a diesel query returning all columns of demons whose name matches the given
+    /// string
     pub fn by_name(name: &str) -> ByName {
         Demon::all().filter(demons::name.eq(name))
     }
 
+    /// Constructs a diesel query returning all columns of position whose name matches the given i16
     pub fn by_position(position: i16) -> ByPosition {
         Demon::all().filter(demons::position.eq(position))
     }

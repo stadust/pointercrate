@@ -4,7 +4,7 @@ use crate::{
     config::SECRET,
     error::PointercrateError,
     middleware::auth::Claims,
-    patch::{deserialize_patch, Patch, PatchField, Patchable, UpdateDatabase},
+    patch::{deserialize_patch, Patch, PatchField, Patchable},
     schema::members,
     Result,
 };
@@ -26,6 +26,12 @@ use std::{
 };
 
 bitflags! {
+    /// Permissions bitmask used for authorisation.
+    ///
+    /// A `Permissions` object can be see as a 16-ary boolean function that evaluate to true if,
+    /// and only if, **all** bits that are set in the [`Permissions`] object are also set in the input.
+    ///
+    /// Consult the [pointercrate API documentation](https://pointercrate.com/documentation#permissions) for more details
     #[derive(Deserialize)]
     pub struct Permissions: u16 {
         const ExtendedAccess = 0b0000_0000_0000_0001;
@@ -96,16 +102,23 @@ impl Permissions {
         perms
     }
 
+    /// Checks whether a user with the current permission set can assign `permissions` to another
+    /// user
     pub fn can_assign(self, permissions: Permissions) -> bool {
         self.assigns() & permissions == permissions
     }
 
+    /// Converts a 16-Bit [`Bits`] value to a [`Permissions`] object
+    ///
+    /// ## Panics
+    /// Panics if [`Bits::length`] is unequal to 16
     fn from_bitstring(bits: &Bits) -> Self {
         assert!(bits.length == 16);
 
         Permissions::from_bits_truncate((bits.bits[0] as u16) << 8 | bits.bits[1] as u16)
     }
 
+    /// Converts this [`Permissions`] object into a [`Bits`] object of length 16
     fn bitstring(self) -> Bits {
         Bits {
             length: 16,
@@ -123,8 +136,13 @@ impl Serialize for Permissions {
     }
 }
 
+/// Struct representing a set of [`Permissions`].
+///
+/// A [`PermissionsSet`] object can be seen as a boolean function that evaluates to true if, and
+/// only if, any of the contained [`Permissions`] objects evaluate to true for the given input.
 #[derive(Debug)]
 pub struct PermissionsSet {
+    /// The contained permissions
     pub perms: HashSet<Permissions>,
 }
 
@@ -142,6 +160,7 @@ impl Serialize for PermissionsSet {
 }
 
 impl PermissionsSet {
+    /// Construts a singleton [`PermissionsSet`] containing only the given [`Permissions`] object
     pub fn one(perm: Permissions) -> Self {
         let mut set = HashSet::new();
 
@@ -155,10 +174,10 @@ impl Display for PermissionsSet {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         let mut sep = "";
 
-        write!(f, "'");
+        write!(f, "'")?;
 
         for perm in &self.perms {
-            write!(f, "{}{:?}", sep, perm);
+            write!(f, "{}{:?}", sep, perm)?;
             sep = "' or '"
         }
 
@@ -194,13 +213,24 @@ macro_rules! demand_perms {
     }
 }
 
+/// Model representing a user in the database
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "members"]
 pub struct User {
+    /// The [`User`]'s unique ID. This is used to identify users and cannot be changed.
     pub id: i32,
 
+    /// The [`User`]'s unique username. This is used to log-in and cannot be changed.
     pub name: String,
+
+    /// A user-customizable name for each [`User`].
+    ///
+    /// If set to anything other than [`None`], the value set here will be displayed everywhere the
+    /// username would be displayed otherwise. This value is not guaranteed to be unique and
+    /// cannot be used to identify a user. In particular, this value cannot be used for log-in
     pub display_name: Option<String>,
+
+    /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
 
     // TODO: change this to a string PLEASE
@@ -343,6 +373,18 @@ impl Patchable<PatchMe> for User {
 
         Ok(())
     }
+
+    fn update_database(&self, connection: &PgConnection) -> Result<()> {
+        diesel::update(self)
+            .set((
+                members::password_hash.eq(self.password_hash),
+                members::display_name.eq(self.display_name),
+                members::youtube_channel.eq(self.youtube_channel),
+            ))
+            .execute(connection)
+            .map_err(PointercrateError::database)
+            .map(|_| ())
+    }
 }
 
 impl Patchable<PatchUser> for User {
@@ -352,18 +394,16 @@ impl Patchable<PatchUser> for User {
 
         Ok(())
     }
-}
 
-impl UpdateDatabase for User {
-    fn update(self, connection: &PgConnection) -> QueryResult<Self> {
-        diesel::update(&self)
+    fn update_database(&self, connection: &PgConnection) -> Result<()> {
+        diesel::update(self)
             .set((
-                members::display_name.eq(&self.display_name),
-                members::youtube_channel.eq(&self.youtube_channel),
-                members::password_hash.eq(&self.password_hash),
-                members::permissions.eq(&self.permissions),
+                members::display_name.eq(self.display_name),
+                members::permissions.eq(self.permissions),
             ))
-            .get_result(connection)
+            .execute(connection)
+            .map_err(PointercrateError::database)
+            .map(|_| ())
     }
 }
 

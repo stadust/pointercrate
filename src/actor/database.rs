@@ -9,7 +9,7 @@ use crate::{
         Demon, Player, Record, Submitter, User,
     },
     pagination::Paginatable,
-    patch::{Patch as PatchTrait, PatchField, Patchable, UpdateDatabase},
+    patch::{Patch as PatchTrait, PatchField, Patchable},
     video, Result,
 };
 use diesel::{
@@ -190,7 +190,7 @@ pub struct Invalidate(pub Authorization);
 #[allow(missing_debug_implementations)]
 pub struct Patch<Target, Patch>(pub User, pub Target, pub Patch)
 where
-    Target: Patchable<Patch> + UpdateDatabase,
+    Target: Patchable<Patch>,
     Patch: PatchTrait;
 
 /// Specialized patch message used when patch target is the user performing the patch
@@ -651,7 +651,7 @@ impl Handler<DeleteUserById> for DatabaseActor {
 
 impl<T, P> Message for Patch<T, P>
 where
-    T: Patchable<P> + UpdateDatabase + 'static,
+    T: Patchable<P> + 'static,
     P: PatchTrait,
 {
     type Result = Result<T>;
@@ -659,12 +659,13 @@ where
 
 impl<T, P> Handler<Patch<T, P>> for DatabaseActor
 where
-    T: Patchable<P> + UpdateDatabase + 'static,
+    T: Patchable<P> + 'static,
     P: PatchTrait,
 {
     type Result = Result<T>;
 
     fn handle(&mut self, mut msg: Patch<T, P>, _: &mut Self::Context) -> Self::Result {
+        // TODO: use transactions here and return 409 CONFLICT in case of transaction failure
         let required = msg.2.required_permissions();
 
         if msg.0.permissions() & required != required {
@@ -682,9 +683,9 @@ where
             .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
         // Store the modified object in the database
-        msg.1
-            .update(connection)
-            .map_err(PointercrateError::database)
+        msg.1.update_database(connection)?;
+
+        Ok(msg.1)
     }
 }
 
@@ -696,6 +697,7 @@ impl Handler<PatchCurrentUser> for DatabaseActor {
     type Result = Result<User>;
 
     fn handle(&mut self, mut msg: PatchCurrentUser, _: &mut Self::Context) -> Self::Result {
+        // TODO: transaction
         msg.0.apply_patch(msg.1)?;
 
         let connection = &*self
@@ -703,9 +705,9 @@ impl Handler<PatchCurrentUser> for DatabaseActor {
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)?;
 
-        msg.0
-            .update(connection)
-            .map_err(PointercrateError::database)
+        msg.0.update_database(connection)?;
+
+        Ok(msg.0)
     }
 }
 

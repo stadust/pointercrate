@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, model::user::Permissions, Result};
+use crate::{model::user::Permissions, Result};
 use diesel::{PgConnection, QueryResult};
 use serde::{Deserialize, Deserializer};
 
@@ -67,18 +67,31 @@ macro_rules! make_patch {
     }
 }
 
-pub trait Patchable<T> {
+/// Trait that indicates that an object can be patched using some patch-data `T`
+pub trait Patchable<T>
+where
+    T: Patch,
+{
+    /// Applies the given patch in-place.
+    ///
+    /// ## Errors
+    /// If the patch was semantically invalid, an [`Err`] should be returned.
     fn apply_patch(&mut self, patch: T) -> Result<()>;
+
+    /// Updates the database copy of this [`Patchable`] by updating every field that might have
+    /// changed
+    fn update_database(&self, connection: &PgConnection) -> Result<()>;
 }
 
+/// Trait marking its implementors as containing patch data which can be applied to a matching
+/// [`Patchable`]
 pub trait Patch {
+    /// The level of authorization required to perform this [`Patch`]
+    ///
+    /// The default implementation allows all patches without any authorization
     fn required_permissions(&self) -> Permissions {
         Permissions::empty()
     }
-}
-
-pub trait UpdateDatabase: Sized {
-    fn update(self, connection: &PgConnection) -> QueryResult<Self>;
 }
 
 #[derive(Debug)]

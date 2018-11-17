@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, model::Model};
+use crate::{error::PointercrateError, model::Model, Result};
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, Expression, PgConnection};
 use serde::Serialize;
 
@@ -22,7 +22,8 @@ pub trait Paginatable: Clone {
         Pg,
     >;
 
-    fn result(&self, connection: &PgConnection) -> Result<Vec<Self::Result>, PointercrateError>;
+    /// Queries the database and actually returnes the result of this pagination
+    fn result(&self, connection: &PgConnection) -> Result<Vec<Self::Result>>;
 
     /// Gets the `after` value for the query in the `next` link
     ///
@@ -30,9 +31,7 @@ pub trait Paginatable: Clone {
     /// any object with `id >= before`, or `None` otherwise
     /// + Otherwise, we try to get `limit.unwrap_or(50) + 1` objects and either return the ID of
     /// the (limits + 1)th object - 1, or `None` if the object doesn't exist
-    fn next_after(
-        &self, conn: &PgConnection,
-    ) -> Result<Option<Self::ColumnType>, PointercrateError>;
+    fn next_after(&self, conn: &PgConnection) -> Result<Option<Self::ColumnType>>;
 
     /// Gets the `before` value for the query in the `prev` link
     ///
@@ -40,12 +39,10 @@ pub trait Paginatable: Clone {
     /// any object with `id <= after` or `None` otherwise
     /// + Otherwise, we try to get `limit.unwrap_or(50) + 1` objects in reversed order and
     /// either return the (limits + 1)th object + 1, or `None` if the object doesn't exist
-    fn prev_before(
-        &self, conn: &PgConnection,
-    ) -> Result<Option<Self::ColumnType>, PointercrateError>;
+    fn prev_before(&self, conn: &PgConnection) -> Result<Option<Self::ColumnType>>;
 
-    fn first(&self, conn: &PgConnection) -> Result<Option<Self::ColumnType>, PointercrateError>;
-    fn last(&self, conn: &PgConnection) -> Result<Option<Self::ColumnType>, PointercrateError>;
+    fn first(&self, conn: &PgConnection) -> Result<Option<Self::ColumnType>>;
+    fn last(&self, conn: &PgConnection) -> Result<Option<Self::ColumnType>>;
 
     fn clone_with(&self, after: Option<Self::ColumnType>, before: Option<Self::ColumnType>)
         -> Self;
