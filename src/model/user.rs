@@ -377,9 +377,9 @@ impl Patchable<PatchMe> for User {
     fn update_database(&self, connection: &PgConnection) -> Result<()> {
         diesel::update(self)
             .set((
-                members::password_hash.eq(self.password_hash),
-                members::display_name.eq(self.display_name),
-                members::youtube_channel.eq(self.youtube_channel),
+                members::password_hash.eq(&self.password_hash),
+                members::display_name.eq(&self.display_name),
+                members::youtube_channel.eq(&self.youtube_channel),
             ))
             .execute(connection)
             .map_err(PointercrateError::database)
@@ -398,8 +398,8 @@ impl Patchable<PatchUser> for User {
     fn update_database(&self, connection: &PgConnection) -> Result<()> {
         diesel::update(self)
             .set((
-                members::display_name.eq(self.display_name),
-                members::permissions.eq(self.permissions),
+                members::display_name.eq(&self.display_name),
+                members::permissions.eq(&self.permissions),
             ))
             .execute(connection)
             .map_err(PointercrateError::database)
