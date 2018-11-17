@@ -14,6 +14,8 @@ use actix::Addr;
 use gdcf::chrono::Duration;
 use gdcf_dbcache::cache::DatabaseCacheConfig;
 
+// TODO: make use of AsyncActor, current impl is nonsense
+
 #[derive(Debug)]
 pub struct GdcfActor(Gdcf<BoomlingsClient, DatabaseCache<Pg>>);
 
