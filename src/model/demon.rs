@@ -1,10 +1,12 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
-    model::Model,
+    error::PointercrateError,
+    model::{Get, Model},
     patch::{deserialize_patch, Patch, PatchField, Patchable},
     schema::demons,
+    Result,
 };
-use diesel::{expression::bound::Bound, *};
+use diesel::{expression::bound::Bound, result::Error, *};
 use pointercrate_derive::Paginatable;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
@@ -73,7 +75,7 @@ pub struct DemonPagination {
 }
 
 impl Serialize for PartialDemon {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -125,7 +127,7 @@ impl From<i16> for ListState {
 }
 
 impl Display for ListState {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             ListState::Main => write!(f, "MAIN"),
             ListState::Extended => write!(f, "EXTENDED"),
@@ -198,6 +200,20 @@ impl Into<PartialDemon> for Demon {
         PartialDemon {
             name: self.name,
             position: self.position,
+        }
+    }
+}
+
+impl Get<String> for Demon {
+    fn get(name: String, connection: &PgConnection) -> Result<Self> {
+        match Demon::by_name(&name).first(connection) {
+            Ok(demon) => Ok(demon),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Demon",
+                    identified_by: name,
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }

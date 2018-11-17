@@ -1,7 +1,10 @@
-use super::{Demon, Player, Submitter};
+use super::{Demon, Player, Post, Submitter};
 use crate::{
-    model::{demon::PartialDemon, Model},
+    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    error::PointercrateError,
+    model::{demon::PartialDemon, Delete, Get, Model},
     schema::{demons, players, records},
+    video, Result,
 };
 use diesel::{
     delete,
@@ -10,10 +13,11 @@ use diesel::{
     insert_into,
     pg::{Pg, PgConnection},
     query_dsl::{QueryDsl, RunQueryDsl},
-    result::QueryResult,
+    result::{Error, QueryResult},
     sql_types, BoolExpressionMethods, ExpressionMethods,
 };
 use diesel_derive_enum::DbEnum;
+use log::{debug, info};
 use pointercrate_derive::Paginatable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
@@ -33,7 +37,7 @@ pub enum RecordStatus {
 }
 
 impl Display for RecordStatus {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
             RecordStatus::Submitted => write!(f, "submitted"),
             RecordStatus::Approved => write!(f, "approved"),
@@ -43,7 +47,7 @@ impl Display for RecordStatus {
 }
 
 impl Serialize for RecordStatus {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -52,7 +56,7 @@ impl Serialize for RecordStatus {
 }
 
 impl<'de> Deserialize<'de> for RecordStatus {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -65,7 +69,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
                 write!(formatter, "a string")
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<String, E>
+            fn visit_str<E>(self, v: &str) -> std::result::Result<String, E>
             where
                 E: std::error::Error,
             {
@@ -253,6 +257,7 @@ impl Record {
             .filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
+    // TODO: what have I done here?????
     pub fn insert(
         conn: &PgConnection, progress: i16, video: Option<&str>, player: i32, submitter: i32,
         demon: &str,
@@ -278,17 +283,6 @@ impl Record {
 
     pub fn status(&self) -> RecordStatus {
         self.status
-    }
-
-    pub fn delete_by_id(conn: &PgConnection, id: i32) -> QueryResult<()> {
-        delete(records::table)
-            .filter(records::id.eq(id))
-            .execute(conn)
-            .map(|_| ())
-    }
-
-    pub fn delete(&self, conn: &PgConnection) -> QueryResult<()> {
-        Record::delete_by_id(conn, self.id)
     }
 }
 
@@ -334,5 +328,155 @@ impl Model for PartialRecord {
         use diesel::Table;
 
         records::table.select(records::table::all_columns())
+    }
+}
+
+impl Get<i32> for Record {
+    fn get(id: i32, connection: &PgConnection) -> Result<Self> {
+        match Record::by_id(id).first(connection) {
+            Ok(record) => Ok(record),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Record",
+                    identified_by: id.to_string(),
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Post<(Submission, Submitter)> for Option<Record> {
+    fn create_from(
+        (
+            Submission {
+                progress,
+                player,
+                demon,
+                video,
+                verify_only,
+            },
+            submitter,
+        ): (Submission, Submitter),
+        connection: &PgConnection,
+    ) -> Result<Self> {
+        if submitter.banned {
+            return Err(PointercrateError::BannedFromSubmissions)?
+        }
+
+        let video = match video {
+            Some(ref video) => Some(video::validate(video)?),
+            None => None,
+        };
+
+        let player = Player::get(player, connection)?;
+        let demon = Demon::get(demon, connection)?;
+
+        if player.banned {
+            return Err(PointercrateError::PlayerBanned)
+        }
+
+        if demon.position > *EXTENDED_LIST_SIZE {
+            return Err(PointercrateError::SubmitLegacy)
+        }
+
+        if demon.position > *LIST_SIZE && progress != 100 {
+            return Err(PointercrateError::Non100Extended)
+        }
+
+        if progress > 100 || progress < demon.requirement {
+            return Err(PointercrateError::InvalidProgress {
+                requirement: demon.requirement,
+            })?
+        }
+
+        debug!("Submission is valid, checking for duplicates!");
+
+        let record: std::result::Result<Record, _> = match video {
+            Some(ref video) =>
+                Record::get_existing(player.id, &demon.name, video).first(connection),
+            None => Record::by_player_and_demon(player.id, &demon.name).first(connection),
+        };
+
+        let video_ref = video.as_ref().map(AsRef::as_ref);
+
+        let id = match record {
+            Ok(record) =>
+                if record.status() != RecordStatus::Rejected && record.progress() < progress {
+                    if verify_only {
+                        return Ok(None)
+                    }
+
+                    let record_id = record.id;
+
+                    if record.status() == RecordStatus::Submitted {
+                        debug!(
+                            "The submission is duplicated, but new one has higher progress. Deleting old with id {}!",
+                            record_id
+                        );
+
+                        record.delete(connection)?
+                    }
+
+                    debug!(
+                        "Duplicate {} either already accepted, or has lower progress, accepting!",
+                        record_id
+                    );
+
+                    Record::insert(
+                        connection,
+                        progress,
+                        video_ref,
+                        player.id,
+                        submitter.id,
+                        &demon.name,
+                    )
+                    .map_err(PointercrateError::database)?
+                } else {
+                    return Err(PointercrateError::SubmissionExists {
+                        status: record.status(),
+                        existing: record.id,
+                    })
+                },
+            Err(Error::NotFound) => {
+                debug!("No duplicate found, accepting!");
+
+                if verify_only {
+                    return Ok(None)
+                }
+
+                Record::insert(
+                    connection,
+                    progress,
+                    video_ref,
+                    player.id,
+                    submitter.id,
+                    &demon.name,
+                )
+                .map_err(PointercrateError::database)?
+            },
+            Err(err) => return Err(PointercrateError::database(err)),
+        };
+
+        info!("Submission successful! Created new record with ID {}", id);
+
+        Ok(Some(Record {
+            id,
+            progress,
+            video,
+            status: RecordStatus::Submitted,
+            player,
+            submitter: submitter.id,
+            demon: demon.into(),
+        }))
+    }
+}
+
+impl Delete for Record {
+    fn delete(self, connection: &PgConnection) -> Result<()> {
+        delete(records::table)
+            .filter(records::id.eq(self.id))
+            .execute(connection)
+            .map(|_| ())
+            .map_err(PointercrateError::database)
     }
 }

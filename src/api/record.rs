@@ -2,10 +2,10 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
-    actor::database::{DeleteRecordById, ProcessSubmission, RecordById, SubmitterByIp},
+    actor::database::{DeleteMessage, DeleteRecordUnchecked},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::{record::Submission, Record, Submitter},
+    model::{record::Submission, Delete, Record, Submitter},
     state::PointercrateState,
 };
 use ipnetwork::IpNetwork;
@@ -24,10 +24,8 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .from_err()
         .and_then(move |submission: Submission| {
             state
-                .database(SubmitterByIp(remote_addr))
-                .and_then(move |submitter: Submitter| {
-                    state.database(ProcessSubmission(submission, submitter))
-                })
+                .get(remote_addr)
+                .and_then(move |submitter: Submitter| state.post((submission, submitter)))
         })
         .map(|record: Option<Record>| {
             match record {
@@ -50,7 +48,7 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
     Path::<i32>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Record ID must be integer"))
         .into_future()
-        .and_then(move |record_id| state.database(RecordById(record_id.into_inner())))
+        .and_then(move |record_id| state.get(record_id.into_inner()))
         .map(|record: Record| HttpResponse::Ok().json_with_etag(record))
         .responder()
 }
@@ -65,7 +63,7 @@ fn post_process_record(
             warn!("A HEAD request to video yielded an error response, automatically deleting submission!");
 
             database
-                .send(DeleteRecordById(record_id))
+                .send(DeleteMessage::<i32, Record>::unconditional(record_id))
                 .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to delete record {} - {:?}!", record_id, error))
                 .map(|_| ())
                 .and_then(|_| Err(()))

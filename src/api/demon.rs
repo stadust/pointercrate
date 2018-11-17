@@ -2,7 +2,7 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
-    actor::database::{DeleteUserById, Paginate, Patch, TokenAuth, UserById},
+    actor::database::{Paginate, TokenAuth},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::demon::{Demon, DemonPagination, PatchDemon},

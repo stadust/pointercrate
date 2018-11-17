@@ -1,5 +1,6 @@
-use crate::{model::Model, schema::players};
-use diesel::{expression::bound::Bound, *};
+use super::Get;
+use crate::{error::PointercrateError, model::Model, schema::players, Result};
+use diesel::{expression::bound::Bound, result::Error, *};
 use pointercrate_derive::Paginatable;
 use serde_derive::{Deserialize, Serialize};
 
@@ -67,5 +68,16 @@ impl Model for Player {
 
     fn all() -> All {
         players::table.select(ALL_COLUMNS)
+    }
+}
+
+impl Get<String> for Player {
+    fn get(name: String, connection: &PgConnection) -> Result<Self> {
+        match Player::by_name(&name).first(connection) {
+            Ok(player) => Ok(player),
+            Err(Error::NotFound) =>
+                Player::insert(connection, &name).map_err(PointercrateError::database),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
     }
 }

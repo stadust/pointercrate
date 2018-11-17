@@ -1,8 +1,12 @@
 use actix::{Addr, Handler, Message};
 use crate::{
-    actor::{database::DatabaseActor, gdcf::GdcfActor},
+    actor::{
+        database::{DatabaseActor, DeleteMessage, GetMessage, PatchMessage, PostMessage},
+        gdcf::GdcfActor,
+    },
     error::PointercrateError,
     middleware::cond::IfMatch,
+    model::{Delete, Get, Hotfix, Patch, Post, User},
     Result,
 };
 use hyper::{
@@ -14,6 +18,7 @@ use log::{debug, error, info};
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
+    marker::PhantomData,
     sync::Arc,
 };
 use tokio::prelude::future::{result, Either, Future};
@@ -63,6 +68,49 @@ impl PointercrateState {
                 Err(PointercrateError::PreconditionFailed)
             }
         })
+    }
+
+    pub fn get<Key, G>(&self, key: Key) -> impl Future<Item = G, Error = PointercrateError>
+    where
+        Key: Send + 'static,
+        G: Get<Key> + Send + 'static,
+    {
+        self.database(GetMessage(key, PhantomData))
+    }
+
+    pub fn post<T, P>(&self, t: T) -> impl Future<Item = P, Error = PointercrateError>
+    where
+        T: Send + 'static,
+        P: Post<T> + Send + 'static,
+    {
+        self.database(PostMessage(t, PhantomData))
+    }
+
+    pub fn delete<Key, D>(
+        &self, key: Key, condition: IfMatch,
+    ) -> impl Future<Item = (), Error = PointercrateError>
+    where
+        Key: Send + 'static,
+        D: Get<Key> + Delete + Hash + Send + 'static,
+    {
+        self.database(DeleteMessage::<Key, D>(key, Some(condition), PhantomData))
+    }
+
+    pub fn patch<Key, P, H>(
+        &self, patcher: User, key: Key, fix: H, condition: IfMatch,
+    ) -> impl Future<Item = P, Error = PointercrateError>
+    where
+        Key: Send + 'static,
+        H: Hotfix + Send + 'static,
+        P: Get<Key> + Patch<H> + Send + Hash + 'static,
+    {
+        let required_permissions = fix.required_permissions();
+
+        if patcher.permissions() & required_permissions != required_permissions {
+            Either::A(result(Err(PointercrateError::Unauthorized)))
+        } else {
+            Either::B(self.database(PatchMessage(key, fix, Some(condition), PhantomData)))
+        }
     }
 }
 

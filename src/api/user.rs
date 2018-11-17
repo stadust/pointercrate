@@ -2,7 +2,7 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
-    actor::database::{DeleteUserById, Paginate, Patch, TokenAuth, UserById},
+    actor::database::{Paginate, TokenAuth},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchUser, User, UserPagination},
@@ -41,7 +41,7 @@ pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .database(TokenAuth(req.extensions_mut().remove().unwrap()))
         .and_then(|user| Ok(demand_perms!(user, Moderator)))
         .and_then(move |_| user_id)
-        .and_then(move |user_id| state.database(UserById(user_id.into_inner())))
+        .and_then(move |user_id| state.get(user_id.into_inner()))
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
         .responder()
 }
@@ -61,9 +61,7 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(move |user: User| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
         .and_then(move |(user, user_id)| {
             body.from_err().and_then(move |patch: PatchUser| {
-                state
-                    .database_if_match(UserById(user_id.into_inner()), if_match)
-                    .and_then(move |target| state.database(Patch(user, target, patch)))
+                state.patch(user, user_id.into_inner(), patch, if_match,)
             })
         })
         .map(|updated: User| HttpResponse::Ok().json_with_etag(updated))
@@ -84,8 +82,7 @@ pub fn delete(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(move |_| user_id)
         .and_then(move |user_id| {
             state
-                .database_if_match(UserById(user_id.into_inner()), if_match)
-                .and_then(move |user| state.database(DeleteUserById(user.id)))
+                .delete::<i32, User>(user_id.into_inner(), if_match)
                 .map(|_| HttpResponse::NoContent().finish())
         })
         .responder()

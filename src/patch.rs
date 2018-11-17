@@ -2,6 +2,8 @@ use crate::{model::user::Permissions, Result};
 use diesel::{PgConnection, QueryResult};
 use serde::{Deserialize, Deserializer};
 
+pub use crate::model::Hotfix as Patch;
+
 macro_rules! patch {
     ($target: expr, $patch: ident, $field: ident) => {
         match $patch.$field {
@@ -81,17 +83,6 @@ where
     /// Updates the database copy of this [`Patchable`] by updating every field that might have
     /// changed
     fn update_database(&self, connection: &PgConnection) -> Result<()>;
-}
-
-/// Trait marking its implementors as containing patch data which can be applied to a matching
-/// [`Patchable`]
-pub trait Patch {
-    /// The level of authorization required to perform this [`Patch`]
-    ///
-    /// The default implementation allows all patches without any authorization
-    fn required_permissions(&self) -> Permissions {
-        Permissions::empty()
-    }
 }
 
 #[derive(Debug)]

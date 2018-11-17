@@ -1,11 +1,12 @@
-use crate::{model::Model, schema::submitters};
+use super::Get;
+use crate::{Result, error::PointercrateError, model::Model, schema::submitters};
 use diesel::{
     expression::bound::Bound,
     insert_into,
     pg::PgConnection,
     query_dsl::{QueryDsl, RunQueryDsl},
     result::QueryResult,
-    sql_types, ExpressionMethods,
+    sql_types, result::Error, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
 use pointercrate_derive::Paginatable;
@@ -74,5 +75,16 @@ impl Model for Submitter {
             submitters::ip_address,
             submitters::banned,
         ))
+    }
+}
+
+impl Get<IpNetwork> for Submitter {
+    fn get(ip: IpNetwork, connection: &PgConnection) -> Result<Self> {
+        match Submitter::by_ip(&ip).first(connection) {
+            Ok(submitter) => Ok(submitter),
+            Err(Error::NotFound) =>
+                Submitter::insert(connection, &ip).map_err(PointercrateError::database),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
     }
 }

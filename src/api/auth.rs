@@ -1,8 +1,6 @@
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
-    actor::database::{
-        BasicAuth, DeleteUserById, Invalidate, PatchCurrentUser, Register, TokenAuth,
-    },
+    actor::database::{BasicAuth, Invalidate, TokenAuth},
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,
@@ -18,7 +16,7 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
 
     req.json()
         .from_err()
-        .and_then(move |registration: Registration| state.database(Register(registration)))
+        .and_then(move |registration: Registration| state.post(registration))
         .map(|user: User| {
             HttpResponse::Created()
                 .header("Location", "/api/v1/auth/me/")
@@ -69,9 +67,10 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
     req.json()
         .from_err()
         .and_then(move |patch: PatchMe| {
-            state
-                .database_if_match(BasicAuth(auth), if_match)
-                .and_then(move |user: User| state.database(PatchCurrentUser(user, patch)))
+            state.database(BasicAuth(auth)).and_then(move |user: User| {
+                let user_id = user.id;  // AAA silly moving rules are silly
+                state.patch(user, user_id, patch, if_match)
+            })
         })
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
         .responder()
@@ -81,13 +80,11 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("DELETE /api/v1/auth/me/");
 
     let state = req.state().clone();
+    let if_match = req.extensions_mut().remove().unwrap();
 
     state
-        .database_if_match(
-            BasicAuth(req.extensions_mut().remove().unwrap()),
-            req.extensions_mut().remove().unwrap(),
-        )
-        .and_then(move |user: User| state.database(DeleteUserById(user.id)))
+        .database(BasicAuth(req.extensions_mut().remove().unwrap()))
+        .and_then(move |user: User| state.delete::<i32, User>(user.id, if_match))
         .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

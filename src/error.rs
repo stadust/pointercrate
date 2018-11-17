@@ -4,6 +4,7 @@ use actix_web::{
     HttpResponse, ResponseError,
 };
 use crate::model::{record::RecordStatus, user::PermissionsSet};
+use diesel::result::Error;
 use failure::Fail;
 use log::error;
 use serde_derive::Serialize;
@@ -93,7 +94,9 @@ pub enum PointercrateError {
     )]
     UnprocessableEntity,
 
-    #[fail(display = "Invalid username! The username must be at least 3 characters long and not start/end with a space")]
+    #[fail(
+        display = "Invalid display- or username! The name must be at least 3 characters long and not start/end with a space"
+    )]
     InvalidUsername,
 
     #[fail(display = "Invalid password! The password must be at least 10 characters long")]
@@ -258,6 +261,15 @@ impl From<JsonPayloadError> for PointercrateError {
                 PointercrateError::BadRequest {
                     message: inner.to_string(),
                 },
+        }
+    }
+}
+
+impl From<Error> for PointercrateError {
+    fn from(error: Error) -> Self {
+        match error {
+            Error::RollbackTransaction => PointercrateError::Conflict,
+            err => PointercrateError::database(err),
         }
     }
 }

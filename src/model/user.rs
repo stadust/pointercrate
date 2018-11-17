@@ -1,15 +1,16 @@
+use super::{Delete, Get, Hotfix, Patch, Post};
 use bitflags::bitflags;
 use crate::{
     bitstring::Bits,
     config::SECRET,
     error::PointercrateError,
     middleware::auth::Claims,
-    patch::{deserialize_patch, Patch, PatchField, Patchable},
+    patch::{deserialize_patch, PatchField},
     schema::members,
     Result,
 };
 use diesel::{
-    delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, sql_types,
+    delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, result::Error, sql_types,
     ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
 };
 use log::{debug, info};
@@ -340,70 +341,10 @@ make_patch! {
     }
 }
 
-impl Patch for PatchMe {}
-
 make_patch! {
     struct PatchUser {
         display_name: String,
         permissions: Permissions
-    }
-}
-
-impl Patch for PatchUser {
-    fn required_permissions(&self) -> Permissions {
-        if let PatchField::Some(perms) = self.permissions {
-            perms.assignable_from()
-        } else {
-            Permissions::empty()
-        }
-    }
-}
-
-impl Patchable<PatchMe> for User {
-    fn apply_patch(&mut self, patch: PatchMe) -> Result<()> {
-        if let PatchField::Some(ref password) = patch.password {
-            if password.len() < 10 {
-                return Err(PointercrateError::InvalidPassword)
-            }
-        }
-
-        patch_not_null!(self, patch, password, set_password);
-        patch!(self, patch, display_name);
-        patch!(self, patch, youtube_channel);
-
-        Ok(())
-    }
-
-    fn update_database(&self, connection: &PgConnection) -> Result<()> {
-        diesel::update(self)
-            .set((
-                members::password_hash.eq(&self.password_hash),
-                members::display_name.eq(&self.display_name),
-                members::youtube_channel.eq(&self.youtube_channel),
-            ))
-            .execute(connection)
-            .map_err(PointercrateError::database)
-            .map(|_| ())
-    }
-}
-
-impl Patchable<PatchUser> for User {
-    fn apply_patch(&mut self, patch: PatchUser) -> Result<()> {
-        patch!(self, patch, display_name);
-        patch_not_null!(self, patch, permissions, *set_permissions);
-
-        Ok(())
-    }
-
-    fn update_database(&self, connection: &PgConnection) -> Result<()> {
-        diesel::update(self)
-            .set((
-                members::display_name.eq(&self.display_name),
-                members::permissions.eq(&self.permissions),
-            ))
-            .execute(connection)
-            .map_err(PointercrateError::database)
-            .map(|_| ())
     }
 }
 
@@ -419,6 +360,134 @@ struct NewUser<'a> {
     name: &'a str,
     password_hash: &'a [u8],
     password_salt: Vec<u8>,
+}
+
+impl Get<i32> for User {
+    fn get(id: i32, connection: &PgConnection) -> Result<User> {
+        match User::by_id(id).first(connection) {
+            Ok(user) => Ok(user),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "User",
+                    identified_by: id.to_string(),
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Get<String> for User {
+    fn get(name: String, connection: &PgConnection) -> Result<User> {
+        match User::by_name(&name).first(connection) {
+            Ok(user) => Ok(user),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "User",
+                    identified_by: name,
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Post<Registration> for User {
+    fn create_from(registration: Registration, connection: &PgConnection) -> Result<User> {
+        if registration.name.len() < 3 || registration.name != registration.name.trim() {
+            return Err(PointercrateError::InvalidUsername)
+        }
+
+        if registration.password.len() < 10 {
+            return Err(PointercrateError::InvalidPassword)
+        }
+
+        match User::by_name(&registration.name).first::<User>(connection) {
+            Ok(_) => Err(PointercrateError::NameTaken),
+            Err(Error::NotFound) => {
+                info!("Registering new user with name {}", registration.name);
+
+                let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
+
+                let new = NewUser {
+                    name: &registration.name,
+                    password_hash: hash.as_bytes(),
+                    password_salt: Vec::new(),
+                };
+
+                insert_into(members::table)
+                    .values(&new)
+                    .get_result(connection)
+                    .map_err(PointercrateError::database)
+            },
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Delete for User {
+    fn delete(self, connection: &PgConnection) -> Result<()> {
+        delete(members::table)
+            .filter(members::member_id.eq(self.id))
+            .execute(connection)
+            .map(|_| ())
+            .map_err(PointercrateError::database)
+    }
+}
+
+impl Hotfix for PatchMe {}
+
+impl Patch<PatchMe> for User {
+    fn patch(mut self, patch: PatchMe, connection: &PgConnection) -> Result<Self> {
+        if let PatchField::Some(ref password) = patch.password {
+            if password.len() < 10 {
+                return Err(PointercrateError::InvalidPassword)
+            }
+        }
+
+        patch_not_null!(self, patch, password, set_password);
+        patch!(self, patch, display_name);
+        patch!(self, patch, youtube_channel);
+
+        diesel::update(&self)
+            .set((
+                members::password_hash.eq(&self.password_hash),
+                members::display_name.eq(&self.display_name),
+                members::youtube_channel.eq(&self.youtube_channel),
+            ))
+            .execute(connection)?;
+
+        Ok(self)
+    }
+}
+
+impl Hotfix for PatchUser {
+    fn required_permissions(&self) -> Permissions {
+        if let PatchField::Some(perms) = self.permissions {
+            perms.assignable_from()
+        } else {
+            Permissions::empty()
+        }
+    }
+}
+
+impl Patch<PatchUser> for User {
+    fn patch(mut self, patch: PatchUser, connection: &PgConnection) -> Result<Self> {
+        if let PatchField::Some(ref display_name) = patch.display_name {
+            if display_name.len() < 3 || display_name != display_name.trim() {
+                return Err(PointercrateError::InvalidUsername)
+            }
+        }
+        patch!(self, patch, display_name);
+        patch_not_null!(self, patch, permissions, *set_permissions);
+
+        diesel::update(&self)
+            .set((
+                members::display_name.eq(&self.display_name),
+                members::permissions.eq(&self.permissions),
+            ))
+            .execute(connection)?;
+
+        Ok(self)
+    }
 }
 
 type AllColumns = (
@@ -460,27 +529,6 @@ impl User {
 
     pub fn by_id(id: i32) -> ById {
         User::all().filter(members::member_id.eq(id))
-    }
-
-    pub fn register(conn: &PgConnection, registration: &Registration) -> QueryResult<User> {
-        info!("Registering new user with name {}", registration.name);
-
-        let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
-
-        let new = NewUser {
-            name: &registration.name,
-            password_hash: hash.as_bytes(),
-            password_salt: Vec::new(),
-        };
-
-        insert_into(members::table).values(&new).get_result(conn)
-    }
-
-    pub fn delete_by_id(conn: &PgConnection, id: i32) -> QueryResult<()> {
-        delete(members::table)
-            .filter(members::member_id.eq(id))
-            .execute(conn)
-            .map(|_| ())
     }
 
     pub fn permissions(&self) -> Permissions {
