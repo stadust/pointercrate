@@ -1,33 +1,22 @@
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use crate::{
-    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     middleware::{
         auth::{Authorization, Claims},
         cond::IfMatch,
     },
-    model::{
-        record::{RecordStatus, Submission},
-        user::{PatchMe, PermissionsSet, Registration},
-        Delete, Demon, Get, Hotfix, Patch, Player, Post, Record, Submitter, User,
-    },
+    model::{user::PatchMe, Delete, Get, Hotfix, Patch, Post, User},
     pagination::Paginatable,
-    patch::{Patch as PatchTrait, PatchField, Patchable},
-    video, Result,
+    patch::PatchField,
+    Result,
 };
 use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool, PooledConnection},
-    result::Error,
     Connection, RunQueryDsl,
 };
-use ipnetwork::IpNetwork;
 use log::{debug, info};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    marker::PhantomData,
-};
+use std::{hash::Hash, marker::PhantomData};
 
 /// Actor that executes database related actions on a thread pool
 #[allow(missing_debug_implementations)]
@@ -67,89 +56,6 @@ impl Actor for DatabaseActor {
     }
 }
 
-/// Message that indicates the [`DatabaseActor`] to retrieve a [`Submitter`] object based on the
-/// given [IP-Address](`IpNetwork`).
-///
-/// If no submitter with the given IP is known, a new object will be crated an inserted into the
-/// database
-//#[derive(Debug)]
-//pub struct SubmitterByIp(pub IpNetwork);
-
-/// Message that indicates the [`DatabaseActor`] to retrieve a [`Player`] object with the given name
-///
-/// ## Errors
-/// + [`PointercrateError::ModelNotFound`]: Should no player with the given name exist.
-//#[derive(Debug)]
-//pub struct PlayerByName(pub String);
-
-/// Message that indicates the [`DatabaseActor`] to retrieve a [`Demon`] object with the given name
-///
-/// ## Errors
-/// + [`PointercrateError::ModelNotFound`]: Should no demon with the given name exist.
-//#[derive(Debug)]
-//pub struct DemonByName(pub String);
-
-/// Message that indicates the [`DatabaseActor`] that a record has been submitted by the given
-/// [`Submitter`] and should be processed
-///
-/// ## Errors
-/// + [`PointercrateError::BannedFromSubmissions`]: The given submitter has been banned from
-/// submitting records
-/// + [`PointercrateError::PlayerBanned`]: The player the record was submitted
-/// for has been banned from having records on the list
-/// + [`PointercrateError::SubmitLegacy`]: The demon the record was submitted for is on the legacy
-/// list
-/// + [`PointercrateError::Non100Extended`]: The demon the record was submitted for is on the
-/// extended list, and `progress` isn't 100
-/// + [`PointercrateError::InvalidProgress `]: The submission progress is lower than the
-/// demons `record_requirement`
-/// + [`PointercrateError::SubmissionExists`]: If a matching record is
-/// already in the database, and it's either [rejected](`RecordStatus::Rejected`), or has higher
-/// progress than the submission.
-/// + Any error returned by [`video::validate`]
-//#[derive(Debug)]
-//pub struct ProcessSubmission(pub Submission, pub Submitter);
-
-/// Message that indicates the [`DatabaseActor`] to retrieve a [`Record`] object with the given id.
-///
-/// ## Errors
-/// + [`PointercrateError::ModelNotFound`]: Should no record with the given id exist.
-//#[derive(Debug)]
-//pub struct RecordById(pub i32);
-
-/// Message that indicates the [`DatabaseActor`] to delete the [`Record`] object with the given id.
-///
-/// ## Errors
-/// + [`PointercrateError::ModelNotFound`]: Should no record with the given id exist.
-//#[derive(Debug)]
-//pub struct DeleteRecordById(pub i32, pub IfMatch);
-
-/// Message that indicates the [`DatabaseActor`] to process the given [`Registration`]
-///
-/// ## Errors
-/// + [`PointercrateError::InvalidUsername`]: If the username is shorter than 3 characters or
-/// starts/end with spaces
-/// + [`PointercrateError::InvalidPassword`]: If the password is shorter than
-/// 10 characters
-/// + [`PointercrateError::NameTaken`]: If the username is already in use by another
-/// account
-//#[derive(Debug)]
-//pub struct Register(pub Registration);
-
-/// Message that indicates the [`DatabaseActor`] to retrieve a [`User`] object with the given id.
-///
-/// ## Errors
-/// + [`PointercrateError::ModelNotFound`]: Should no user with the given id exist.
-//#[derive(Debug)]
-//pub struct UserById(pub i32);
-
-/// Message that indicates the [`DatabaseActor`] to retrieve a [`User`] object with the given name.
-///
-/// ## Errors
-/// + [`PointercrateError::ModelNotFound`]: Should no user with the given name exist.
-//#[derive(Debug)]
-//pub struct UserByName(pub String);
-
 /// Message that indicates the [`DatabaseActor`] to delete the [`User`] object with the given id.
 ///
 /// ## Errors
@@ -182,27 +88,6 @@ pub struct BasicAuth(pub Authorization);
 /// + [`PointercrateError::Unauthorized`]: Authorization failed
 #[derive(Debug)]
 pub struct Invalidate(pub Authorization);
-
-/// Message that indicates the [`DatabaseActor`] to perform an patch
-///
-/// A Patch is done in 3 steps:
-/// + First, we check if the given [`User`] has the required permissions to perform the patch
-/// (Authorization)
-/// + Second, we perform the patch in-memory on the given target, validating it
-/// + Last, we write the successfull patch into the database
-/*#[allow(missing_debug_implementations)]
-pub struct Patch<Target, Patch>(pub User, pub Target, pub Patch)
-where
-    Target: Patchable<Patch>,
-    Patch: PatchTrait;*/
-
-/// Specialized patch message used when patch target is the user performing the patch
-///
-/// This is needed because `User` and `Target` in [`Patch`] would have to be the same object,
-/// something the rust ownership (rightfully so) doesn't allow. To prevent a needless clone of the
-/// user object, we introduce this specialized message
-/*#[derive(Debug)]
-pub struct PatchCurrentUser(pub User, pub PatchMe);*/
 
 #[derive(Debug)]
 pub struct Paginate<P: Paginatable>(pub P);
@@ -239,7 +124,7 @@ impl Message for TokenAuth {
 impl Handler<TokenAuth> for DatabaseActor {
     type Result = Result<User>;
 
-    fn handle(&mut self, msg: TokenAuth, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: TokenAuth, _: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
 
         if let Authorization::Token(token) = msg.0 {
@@ -296,7 +181,7 @@ impl Message for BasicAuth {
 impl Handler<BasicAuth> for DatabaseActor {
     type Result = Result<User>;
 
-    fn handle(&mut self, msg: BasicAuth, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: BasicAuth, _: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
 
         if let Authorization::Basic(username, password) = msg.0 {

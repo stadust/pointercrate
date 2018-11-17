@@ -15,12 +15,7 @@ use hyper::{
 };
 use hyper_tls::HttpsConnector;
 use log::{debug, error, info};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    marker::PhantomData,
-    sync::Arc,
-};
+use std::{hash::Hash, marker::PhantomData, sync::Arc};
 use tokio::prelude::future::{result, Either, Future};
 
 #[derive(Debug, Clone)]
@@ -48,26 +43,6 @@ impl PointercrateState {
             .send(msg)
             .map_err(PointercrateError::internal)
             .flatten()
-    }
-
-    pub fn database_if_match<Msg, T>(
-        &self, msg: Msg, if_match: IfMatch,
-    ) -> impl Future<Item = T, Error = PointercrateError>
-    where
-        T: Send + Hash + 'static,
-        Msg: Message<Result = Result<T>> + Send + 'static,
-        DatabaseActor: Handler<Msg>,
-    {
-        self.database(msg).and_then(move |t: T| {
-            let mut hasher = DefaultHasher::new();
-            t.hash(&mut hasher);
-
-            if if_match.met(hasher.finish()) {
-                Ok(t)
-            } else {
-                Err(PointercrateError::PreconditionFailed)
-            }
-        })
     }
 
     pub fn get<Key, G>(&self, key: Key) -> impl Future<Item = G, Error = PointercrateError>

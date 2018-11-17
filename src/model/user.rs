@@ -11,7 +11,7 @@ use crate::{
 };
 use diesel::{
     delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, result::Error, sql_types,
-    ExpressionMethods, PgConnection, QueryResult, RunQueryDsl,
+    ExpressionMethods, PgConnection, RunQueryDsl,
 };
 use log::{debug, info};
 use pointercrate_derive::Paginatable;

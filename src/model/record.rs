@@ -14,7 +14,7 @@ use diesel::{
     pg::{Pg, PgConnection},
     query_dsl::{QueryDsl, RunQueryDsl},
     result::{Error, QueryResult},
-    sql_types, BoolExpressionMethods, ExpressionMethods,
+    sql_types, BoolExpressionMethods, Connection, ExpressionMethods,
 };
 use diesel_derive_enum::DbEnum;
 use log::{debug, info};
@@ -359,115 +359,114 @@ impl Post<(Submission, Submitter)> for Option<Record> {
         ): (Submission, Submitter),
         connection: &PgConnection,
     ) -> Result<Self> {
+        // Banned submitters cannot submit records
         if submitter.banned {
             return Err(PointercrateError::BannedFromSubmissions)?
         }
 
+        // Check if a video exists and validate it
         let video = match video {
             Some(ref video) => Some(video::validate(video)?),
             None => None,
         };
 
-        let player = Player::get(player, connection)?;
-        let demon = Demon::get(demon, connection)?;
+        connection.transaction(||{
+            // Resolved player and demon name against the database
+            let player = Player::get(player, connection)?;
+            let demon = Demon::get(demon, connection)?;
 
-        if player.banned {
-            return Err(PointercrateError::PlayerBanned)
-        }
+            // Banned player can't have records on the list
+            if player.banned {
+                return Err(PointercrateError::PlayerBanned)
+            }
 
-        if demon.position > *EXTENDED_LIST_SIZE {
-            return Err(PointercrateError::SubmitLegacy)
-        }
+            // Cannot submit records for the legacy lsit
+            if demon.position > *EXTENDED_LIST_SIZE {
+                return Err(PointercrateError::SubmitLegacy)
+            }
 
-        if demon.position > *LIST_SIZE && progress != 100 {
-            return Err(PointercrateError::Non100Extended)
-        }
+            // Can only submit 100% records for the extended list
+            if demon.position > *LIST_SIZE && progress != 100 {
+                return Err(PointercrateError::Non100Extended)
+            }
 
-        if progress > 100 || progress < demon.requirement {
-            return Err(PointercrateError::InvalidProgress {
-                requirement: demon.requirement,
-            })?
-        }
+            // Check if the record meets the record requirement for this demon
+            if progress > 100 || progress < demon.requirement {
+                return Err(PointercrateError::InvalidProgress {
+                    requirement: demon.requirement,
+                })?
+            }
 
-        debug!("Submission is valid, checking for duplicates!");
+            debug!("Submission is valid, checking for duplicates!");
 
-        let record: std::result::Result<Record, _> = match video {
-            Some(ref video) =>
-                Record::get_existing(player.id, &demon.name, video).first(connection),
-            None => Record::by_player_and_demon(player.id, &demon.name).first(connection),
-        };
+            // Search for existing records. If no video is provided, we check if a record with the same
+            // (demon, player) combination exists. If a video exists, we also check if a record with
+            // exactly that video exists. Note that in the second case, two records can be matched,
+            // which is why we need the loop here
+            let records: Vec<Record> = match video {
+                Some(ref video) =>
+                    Record::get_existing(player.id, &demon.name, video).get_results(connection)?,
+                None => Record::by_player_and_demon(player.id, &demon.name).get_results(connection)?,
+            };
 
-        let video_ref = video.as_ref().map(AsRef::as_ref);
+            let video_ref = video.as_ref().map(AsRef::as_ref);
+            let mut to_delete = Vec::new();
 
-        let id = match record {
-            Ok(record) =>
+            for record in records {
+                // If we have a duplicate it has one of the three record stats. If its rejected, we
+                // reject the submission instantly. If it approved, we reject the submission if the
+                // approved record has higher progress than the submission. If its submitted, we do the
+                // same, but at the same time, we mark the existing submission with lower progress for
+                // deleting.
                 if record.status() != RecordStatus::Rejected && record.progress() < progress {
-                    if verify_only {
-                        return Ok(None)
-                    }
-
-                    let record_id = record.id;
-
                     if record.status() == RecordStatus::Submitted {
-                        debug!(
-                            "The submission is duplicated, but new one has higher progress. Deleting old with id {}!",
-                            record_id
-                        );
-
-                        record.delete(connection)?
+                        to_delete.push(record)
                     }
-
-                    debug!(
-                        "Duplicate {} either already accepted, or has lower progress, accepting!",
-                        record_id
-                    );
-
-                    Record::insert(
-                        connection,
-                        progress,
-                        video_ref,
-                        player.id,
-                        submitter.id,
-                        &demon.name,
-                    )
-                    .map_err(PointercrateError::database)?
                 } else {
                     return Err(PointercrateError::SubmissionExists {
                         status: record.status(),
                         existing: record.id,
                     })
-                },
-            Err(Error::NotFound) => {
-                debug!("No duplicate found, accepting!");
-
-                if verify_only {
-                    return Ok(None)
                 }
+            }
 
-                Record::insert(
-                    connection,
-                    progress,
-                    video_ref,
-                    player.id,
-                    submitter.id,
-                    &demon.name,
-                )
-                .map_err(PointercrateError::database)?
-            },
-            Err(err) => return Err(PointercrateError::database(err)),
-        };
+            if verify_only {
+                return Ok(None)
+            }
 
-        info!("Submission successful! Created new record with ID {}", id);
+            // If none of the duplicates caused us to reject the submission, we now delete submissions marked for deleting
+            for record in to_delete {
+                debug!(
+                    "The submission is duplicated, but new one has higher progress. Deleting old with id {}!",
+                    record.id
+                );
 
-        Ok(Some(Record {
-            id,
-            progress,
-            video,
-            status: RecordStatus::Submitted,
-            player,
-            submitter: submitter.id,
-            demon: demon.into(),
-        }))
+                record.delete(connection)?;
+            }
+
+            debug!("All duplicates either already accepted, or has lower progress, accepting!");
+
+            let id = Record::insert(
+                connection,
+                progress,
+                video_ref,
+                player.id,
+                submitter.id,
+                &demon.name,
+            )?;
+
+            info!("Submission successful! Created new record with ID {}", id);
+
+            Ok(Some(Record {
+                id,
+                progress,
+                video,
+                status: RecordStatus::Submitted,
+                player,
+                submitter: submitter.id,
+                demon: demon.into(),
+            }))
+        })
     }
 }
 

@@ -1,8 +1,6 @@
-use crate::{model::user::Permissions, Result};
-use diesel::{PgConnection, QueryResult};
-use serde::{Deserialize, Deserializer};
+// TODO: move all of this somewhere else, it doesnt need its own module
 
-pub use crate::model::Hotfix as Patch;
+use serde::{Deserialize, Deserializer};
 
 macro_rules! patch {
     ($target: expr, $patch: ident, $field: ident) => {
@@ -67,22 +65,6 @@ macro_rules! make_patch {
             )*
         }
     }
-}
-
-/// Trait that indicates that an object can be patched using some patch-data `T`
-pub trait Patchable<T>
-where
-    T: Patch,
-{
-    /// Applies the given patch in-place.
-    ///
-    /// ## Errors
-    /// If the patch was semantically invalid, an [`Err`] should be returned.
-    fn apply_patch(&mut self, patch: T) -> Result<()>;
-
-    /// Updates the database copy of this [`Patchable`] by updating every field that might have
-    /// changed
-    fn update_database(&self, connection: &PgConnection) -> Result<()>;
 }
 
 #[derive(Debug)]

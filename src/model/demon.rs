@@ -2,7 +2,7 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{Get, Model},
-    patch::{deserialize_patch, Patch, PatchField, Patchable},
+    patch::{deserialize_patch, PatchField},
     schema::demons,
     Result,
 };

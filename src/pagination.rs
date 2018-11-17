@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, model::Model, Result};
+use crate::{model::Model, Result};
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, Expression, PgConnection};
 use serde::Serialize;
 
