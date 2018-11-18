@@ -2,17 +2,18 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
-    actor::database::{Paginate, TokenAuth},
+    actor::database::TokenAuth,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::user::{PatchUser, User, UserPagination},
+    model::user::{PatchUser, User},
     state::PointercrateState,
 };
 use log::info;
 use tokio::prelude::future::Future;
 
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
-    info!("GET /api/v1/users/");
+    "hi"
+    /*info!("GET /api/v1/users/");
 
     let query_string = req.query_string();
     let pagination = serde_urlencoded::from_str(query_string)
@@ -26,7 +27,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(move |_| pagination)
         .and_then(move |pagination: UserPagination| state.database(Paginate(pagination)))
         .map(|users| HttpResponse::Ok().json(users))
-        .responder()
+        .responder()*/
 }
 
 pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {
@@ -61,7 +62,7 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(move |user: User| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
         .and_then(move |(user, user_id)| {
             body.from_err().and_then(move |patch: PatchUser| {
-                state.patch(user, user_id.into_inner(), patch, if_match,)
+                state.patch(user, user_id.into_inner(), patch, if_match)
             })
         })
         .map(|updated: User| HttpResponse::Ok().json_with_etag(updated))

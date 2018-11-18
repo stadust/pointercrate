@@ -5,7 +5,8 @@ use crate::{
     actor::database::DeleteMessage,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::{record::Submission, Delete, Record, Submitter},
+    model::{record::Submission, Record, Submitter},
+    operation::Delete,
     state::PointercrateState,
 };
 use ipnetwork::IpNetwork;

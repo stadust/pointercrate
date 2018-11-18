@@ -1,8 +1,9 @@
-use super::Get;
-use crate::{error::PointercrateError, model::Model, schema::players, Result};
+use crate::{error::PointercrateError, operation::Get, schema::players, Result};
 use diesel::{expression::bound::Bound, result::Error, *};
 use pointercrate_derive::Paginatable;
 use serde_derive::{Deserialize, Serialize};
+
+mod get;
 
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
@@ -17,7 +18,7 @@ pub struct Player {
 struct NewPlayer<'a> {
     name: &'a str,
 }
-
+/*
 #[derive(Serialize, Deserialize, Paginatable, Clone, Debug)]
 #[database_table = "players"]
 #[result = "Player"]
@@ -32,7 +33,7 @@ pub struct PlayerPagination {
 
     name: Option<String>,
     banned: Option<bool>,
-}
+}*/
 
 type AllColumns = (players::id, players::name, players::banned);
 
@@ -47,6 +48,10 @@ type WithId = diesel::dsl::Eq<players::id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All, WithId>;
 
 impl Player {
+    fn all() -> All {
+        players::table.select(ALL_COLUMNS)
+    }
+
     pub fn by_name(name: &str) -> ByName {
         Player::all().filter(players::name.eq(name))
     }
@@ -61,7 +66,7 @@ impl Player {
             .get_result(conn)
     }
 }
-
+/*
 impl Model for Player {
     type Columns = AllColumns;
     type Table = players::table;
@@ -70,14 +75,4 @@ impl Model for Player {
         players::table.select(ALL_COLUMNS)
     }
 }
-
-impl Get<String> for Player {
-    fn get(name: String, connection: &PgConnection) -> Result<Self> {
-        match Player::by_name(&name).first(connection) {
-            Ok(player) => Ok(player),
-            Err(Error::NotFound) =>
-                Player::insert(connection, &name).map_err(PointercrateError::database),
-            Err(err) => Err(PointercrateError::database(err)),
-        }
-    }
-}
+*/

@@ -32,16 +32,20 @@ use crate::{
 };
 
 #[macro_use]
-pub mod patch;
+pub mod operation;
 #[macro_use]
 pub mod model;
+
+//#[macro_use]
+//pub mod patch;
+//#[macro_use]
 pub mod actor;
 pub mod api;
 pub mod bitstring;
 pub mod config;
 pub mod error;
 pub mod middleware;
-pub mod pagination;
+//pub mod pagination;
 pub mod schema;
 pub mod state;
 pub mod video;

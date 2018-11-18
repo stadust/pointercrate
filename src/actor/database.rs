@@ -5,9 +5,8 @@ use crate::{
         auth::{Authorization, Claims},
         cond::IfMatch,
     },
-    model::{user::PatchMe, Delete, Get, Hotfix, Patch, Post, User},
-    pagination::Paginatable,
-    patch::PatchField,
+    model::{user::PatchMe, User},
+    operation::{Delete, Get, Hotfix, Patch, PatchField, Post},
     Result,
 };
 use diesel::{
@@ -89,9 +88,9 @@ pub struct BasicAuth(pub Authorization);
 #[derive(Debug)]
 pub struct Invalidate(pub Authorization);
 
-#[derive(Debug)]
+/*#[derive(Debug)]
 pub struct Paginate<P: Paginatable>(pub P);
-
+*/
 impl Message for TokenAuth {
     type Result = Result<User>;
 }
@@ -176,7 +175,7 @@ impl Handler<BasicAuth> for DatabaseActor {
         }
     }
 }
-
+/*
 impl<P: Paginatable + 'static> Message for Paginate<P> {
     type Result = Result<(Vec<P::Result>, String)>;
 }
@@ -210,7 +209,7 @@ impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
 
         Ok((result, header))
     }
-}
+}*/
 
 #[derive(Debug)]
 pub struct GetMessage<Key, G: Get<Key>>(pub Key, pub PhantomData<G>);

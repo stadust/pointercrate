@@ -1,11 +1,10 @@
-use super::{Delete, Get, Hotfix, Patch, Post};
 use bitflags::bitflags;
 use crate::{
     bitstring::Bits,
     config::SECRET,
     error::PointercrateError,
     middleware::auth::Claims,
-    patch::{deserialize_patch, PatchField},
+    operation::{Delete, Get, Hotfix, Patch, Post},
     schema::members,
     Result,
 };
@@ -24,6 +23,17 @@ use std::{
     collections::HashSet,
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
+};
+
+mod delete;
+mod get;
+mod paginate;
+mod patch;
+mod post;
+
+pub use self::{
+    patch::{PatchMe, PatchUser},
+    post::Registration,
 };
 
 bitflags! {
@@ -269,7 +279,7 @@ impl Serialize for PartialUser {
         map.end()
     }
 }
-
+/*
 impl super::Model for PartialUser {
     type Columns = (
         members::member_id,
@@ -306,7 +316,7 @@ pub struct UserPagination {
     name: Option<String>,
     display_name: Option<String>,
     // TODO: pagination for permissions (maybe some sort of custom_filter attribute???)
-}
+}*/
 
 impl Hash for User {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -330,163 +340,6 @@ impl Serialize for User {
         map.serialize_entry("display_name", &self.display_name)?;
         map.serialize_entry("youtube_channel", &self.youtube_channel)?;
         map.end()
-    }
-}
-
-make_patch! {
-    struct PatchMe {
-        password: String,
-        display_name: String,
-        youtube_channel: String
-    }
-}
-
-make_patch! {
-    struct PatchUser {
-        display_name: String,
-        permissions: Permissions
-    }
-}
-
-#[derive(Deserialize, Debug)]
-pub struct Registration {
-    pub name: String,
-    pub password: String,
-}
-
-#[derive(Insertable, Debug)]
-#[table_name = "members"]
-struct NewUser<'a> {
-    name: &'a str,
-    password_hash: &'a [u8],
-    password_salt: Vec<u8>,
-}
-
-impl Get<i32> for User {
-    fn get(id: i32, connection: &PgConnection) -> Result<User> {
-        match User::by_id(id).first(connection) {
-            Ok(user) => Ok(user),
-            Err(Error::NotFound) =>
-                Err(PointercrateError::ModelNotFound {
-                    model: "User",
-                    identified_by: id.to_string(),
-                }),
-            Err(err) => Err(PointercrateError::database(err)),
-        }
-    }
-}
-
-impl Get<String> for User {
-    fn get(name: String, connection: &PgConnection) -> Result<User> {
-        match User::by_name(&name).first(connection) {
-            Ok(user) => Ok(user),
-            Err(Error::NotFound) =>
-                Err(PointercrateError::ModelNotFound {
-                    model: "User",
-                    identified_by: name,
-                }),
-            Err(err) => Err(PointercrateError::database(err)),
-        }
-    }
-}
-
-impl Post<Registration> for User {
-    fn create_from(registration: Registration, connection: &PgConnection) -> Result<User> {
-        if registration.name.len() < 3 || registration.name != registration.name.trim() {
-            return Err(PointercrateError::InvalidUsername)
-        }
-
-        if registration.password.len() < 10 {
-            return Err(PointercrateError::InvalidPassword)
-        }
-
-        match User::by_name(&registration.name).first::<User>(connection) {
-            Ok(_) => Err(PointercrateError::NameTaken),
-            Err(Error::NotFound) => {
-                info!("Registering new user with name {}", registration.name);
-
-                let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
-
-                let new = NewUser {
-                    name: &registration.name,
-                    password_hash: hash.as_bytes(),
-                    password_salt: Vec::new(),
-                };
-
-                insert_into(members::table)
-                    .values(&new)
-                    .get_result(connection)
-                    .map_err(PointercrateError::database)
-            },
-            Err(err) => Err(PointercrateError::database(err)),
-        }
-    }
-}
-
-impl Delete for User {
-    fn delete(self, connection: &PgConnection) -> Result<()> {
-        delete(members::table)
-            .filter(members::member_id.eq(self.id))
-            .execute(connection)
-            .map(|_| ())
-            .map_err(PointercrateError::database)
-    }
-}
-
-impl Hotfix for PatchMe {}
-
-impl Patch<PatchMe> for User {
-    fn patch(mut self, patch: PatchMe, connection: &PgConnection) -> Result<Self> {
-        if let PatchField::Some(ref password) = patch.password {
-            if password.len() < 10 {
-                return Err(PointercrateError::InvalidPassword)
-            }
-        }
-
-        patch_not_null!(self, patch, password, set_password);
-        patch!(self, patch, display_name);
-        patch!(self, patch, youtube_channel);
-
-        diesel::update(&self)
-            .set((
-                members::password_hash.eq(&self.password_hash),
-                members::display_name.eq(&self.display_name),
-                members::youtube_channel.eq(&self.youtube_channel),
-            ))
-            .execute(connection)?;
-
-        Ok(self)
-    }
-}
-
-impl Hotfix for PatchUser {
-    fn required_permissions(&self) -> Permissions {
-        if let PatchField::Some(perms) = self.permissions {
-            perms.assignable_from()
-        } else {
-            Permissions::empty()
-        }
-    }
-}
-
-impl Patch<PatchUser> for User {
-    fn patch(mut self, patch: PatchUser, connection: &PgConnection) -> Result<Self> {
-        if let PatchField::Some(ref display_name) = patch.display_name {
-            if display_name.len() < 3 || display_name != display_name.trim() {
-                return Err(PointercrateError::InvalidUsername)
-            }
-        }
-        patch!(self, patch, display_name);
-        patch_not_null!(self, patch, permissions, *set_permissions);
-
-        diesel::update(&self)
-            .set((
-                members::display_name.eq(&self.display_name),
-                members::permissions.eq(&self.permissions),
-            ))
-            .execute(connection)?;
-
-        Ok(self)
     }
 }
 

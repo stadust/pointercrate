@@ -6,7 +6,8 @@ use crate::{
     },
     error::PointercrateError,
     middleware::cond::IfMatch,
-    model::{user::PermissionsSet, Delete, Get, Hotfix, Patch, Post, User},
+    model::user::{PermissionsSet, User},
+    operation::{Delete, Get, Hotfix, Patch, Post},
     Result,
 };
 use hyper::{

@@ -1,8 +1,7 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{Get, Model},
-    patch::{deserialize_patch, PatchField},
+    operation::{deserialize_patch, Get, PatchField},
     schema::demons,
     Result,
 };
@@ -11,6 +10,8 @@ use pointercrate_derive::Paginatable;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
 use std::fmt::Display;
+
+mod get;
 
 /// Struct modelling a demon in the database
 #[derive(Queryable, Insertable, Debug, Identifiable)]
@@ -52,7 +53,7 @@ pub struct PartialDemon {
     pub name: String,
     pub position: i16,
 }
-
+/*
 #[derive(Serialize, Deserialize, Clone, Paginatable, Debug)]
 #[database_table = "demons"]
 #[column_type = "i16"]
@@ -72,7 +73,7 @@ pub struct DemonPagination {
     requirement: Option<i16>,
     requirement__lt: Option<i16>,
     requirement__gt: Option<i16>,
-}
+}**/
 
 impl Serialize for PartialDemon {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
@@ -87,7 +88,7 @@ impl Serialize for PartialDemon {
     }
 }
 
-make_patch! {
+/*make_patch! {
     struct PatchDemon {
         name: String,
         position: i16,
@@ -95,7 +96,7 @@ make_patch! {
         verifier: i32,
         publisher: i32
     }
-}
+}*/
 
 /// Enum encoding the 3 different parts of the demonlist
 #[derive(Debug)]
@@ -165,6 +166,10 @@ type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
 
 impl Demon {
+    fn all() -> All {
+        demons::table.select(ALL_COLUMNS)
+    }
+
     /// Constructs a diesel query returning all columns of demons whose name matches the given
     /// string
     pub fn by_name(name: &str) -> ByName {
@@ -176,7 +181,7 @@ impl Demon {
         Demon::all().filter(demons::position.eq(position))
     }
 }
-
+/*
 impl Model for Demon {
     type Columns = AllColumns;
     type Table = demons::table;
@@ -193,27 +198,13 @@ impl Model for PartialDemon {
     fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
         demons::table.select((demons::name, demons::position))
     }
-}
+}*/
 
 impl Into<PartialDemon> for Demon {
     fn into(self) -> PartialDemon {
         PartialDemon {
             name: self.name,
             position: self.position,
-        }
-    }
-}
-
-impl Get<String> for Demon {
-    fn get(name: String, connection: &PgConnection) -> Result<Self> {
-        match Demon::by_name(&name).first(connection) {
-            Ok(demon) => Ok(demon),
-            Err(Error::NotFound) =>
-                Err(PointercrateError::ModelNotFound {
-                    model: "Demon",
-                    identified_by: name,
-                }),
-            Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }

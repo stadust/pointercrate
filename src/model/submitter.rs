@@ -1,16 +1,17 @@
-use super::Get;
-use crate::{Result, error::PointercrateError, model::Model, schema::submitters};
+use crate::{error::PointercrateError, operation::Get, schema::submitters, Result};
 use diesel::{
     expression::bound::Bound,
     insert_into,
     pg::PgConnection,
     query_dsl::{QueryDsl, RunQueryDsl},
-    result::QueryResult,
-    sql_types, result::Error, ExpressionMethods,
+    result::{Error, QueryResult},
+    sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
 use pointercrate_derive::Paginatable;
 use serde_derive::{Deserialize, Serialize};
+
+mod get;
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
@@ -27,7 +28,7 @@ struct NewSubmitter<'a> {
     #[column_name = "ip_address"]
     ip: &'a IpNetwork,
 }
-
+/*
 #[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
 #[database_table = "submitters"]
 #[result = "Submitter"]
@@ -41,7 +42,7 @@ pub struct SubmitterPagination {
     limit: Option<i32>,
 
     banned: Option<bool>,
-}
+}*/
 
 type AllColumns = (
     submitters::submitter_id,
@@ -54,6 +55,14 @@ type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet,
 type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
 
 impl Submitter {
+    fn all() -> All {
+        submitters::table.select((
+            submitters::submitter_id,
+            submitters::ip_address,
+            submitters::banned,
+        ))
+    }
+
     pub fn by_ip(ip: &IpNetwork) -> ByIp {
         Submitter::all().filter(submitters::ip_address.eq(ip))
     }
@@ -64,7 +73,7 @@ impl Submitter {
         insert_into(submitters::table).values(&new).get_result(conn)
     }
 }
-
+/*
 impl Model for Submitter {
     type Columns = AllColumns;
     type Table = submitters::table;
@@ -77,14 +86,4 @@ impl Model for Submitter {
         ))
     }
 }
-
-impl Get<IpNetwork> for Submitter {
-    fn get(ip: IpNetwork, connection: &PgConnection) -> Result<Self> {
-        match Submitter::by_ip(&ip).first(connection) {
-            Ok(submitter) => Ok(submitter),
-            Err(Error::NotFound) =>
-                Submitter::insert(connection, &ip).map_err(PointercrateError::database),
-            Err(err) => Err(PointercrateError::database(err)),
-        }
-    }
-}
+*/

@@ -1,0 +1,64 @@
+use super::{Permissions, User};
+use crate::{
+    error::PointercrateError,
+    operation::{Paginate, Paginator},
+    schema::members,
+    Result,
+};
+use diesel::{
+    dsl::{exists, max, min},
+    pg::Pg,
+    query_builder::BoxedSelectStatement,
+    select, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl,
+};
+use serde_derive::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct UserPagination {
+    before_id: Option<i32>,
+    after_id: Option<i32>,
+    limit: Option<i64>,
+
+    name: Option<String>,
+    display_name: Option<String>,
+    // TODO: this
+    has_permissions: Option<Permissions>,
+}
+
+impl UserPagination {
+    filter_method!(members[
+        name = name,
+        display_name = display_name
+    ]);
+}
+
+impl Paginator for UserPagination {
+    navigation!(members, member_id, before_id, after_id);
+}
+
+impl Paginate<UserPagination> for User {
+    fn load(&self, pagination: UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+        let mut query = pagination.filter(User::all().into_boxed());
+
+        filter!(query[
+            members::member_id > pagination.after_id,
+            members::member_id < pagination.before_id
+        ]);
+
+        query
+            .limit(pagination.limit.unwrap_or(50))
+            .load(connection)
+            .map_err(PointercrateError::database)
+    }
+}
+
+/*fn filter<'a, ST>(
+    &'a self, mut query: BoxedSelectStatement<'a, ST, members::table, Pg>,
+) -> BoxedSelectStatement<'a, ST, members::table, Pg> {
+    filter!(query[
+        members::name = self.name,
+        members::display_name = self.display_name
+    ]);
+
+    query
+}*/
