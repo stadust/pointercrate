@@ -36,7 +36,7 @@ impl Paginator for UserPagination {
 }
 
 impl Paginate<UserPagination> for User {
-    fn load(&self, pagination: UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
         let mut query = pagination.filter(User::all().into_boxed());
 
         filter!(query[

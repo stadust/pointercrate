@@ -43,7 +43,7 @@ impl Paginator for DemonPagination {
 }
 
 impl Paginate<DemonPagination> for PartialDemon {
-    fn load(&self, pagination: DemonPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(pagination: &DemonPagination, connection: &PgConnection) -> Result<Vec<Self>> {
         let mut query = pagination.filter(PartialDemon::all().into_boxed());
 
         filter!(query[

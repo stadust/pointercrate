@@ -5,15 +5,14 @@ use crate::{
     actor::database::TokenAuth,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::user::{PatchUser, User},
+    model::user::{PatchUser, User, UserPagination},
     state::PointercrateState,
 };
 use log::info;
 use tokio::prelude::future::Future;
 
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
-    "hi"
-    /*info!("GET /api/v1/users/");
+    info!("GET /api/v1/users/");
 
     let query_string = req.query_string();
     let pagination = serde_urlencoded::from_str(query_string)
@@ -25,9 +24,9 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .database(TokenAuth(req.extensions_mut().remove().unwrap()))
         .and_then(|user| Ok(demand_perms!(user, Moderator)))
         .and_then(move |_| pagination)
-        .and_then(move |pagination: UserPagination| state.database(Paginate(pagination)))
-        .map(|users| HttpResponse::Ok().json(users))
-        .responder()*/
+        .and_then(move |pagination: UserPagination| state.paginate::<User, _>(pagination))
+        .map(|(users, links)| HttpResponse::Ok().header("Links", links).json(users))
+        .responder()
 }
 
 pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {

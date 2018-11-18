@@ -4,6 +4,7 @@ use crate::{
 };
 use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl};
 use serde::{ser::SerializeMap, Serialize, Serializer};
+use serde_derive::Serialize;
 use std::fmt::Display;
 
 mod get;
@@ -13,7 +14,7 @@ mod patch;
 pub use self::paginate::DemonPagination;
 
 /// Struct modelling a demon in the database
-#[derive(Queryable, Insertable, Debug, Identifiable)]
+#[derive(Queryable, Insertable, Debug, Identifiable, Serialize)]
 #[table_name = "demons"]
 #[primary_key("name")]
 pub struct Demon {

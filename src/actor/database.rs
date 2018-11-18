@@ -6,7 +6,7 @@ use crate::{
         cond::IfMatch,
     },
     model::{user::PatchMe, User},
-    operation::{Delete, Get, Hotfix, Patch, PatchField, Post},
+    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, PatchField, Post},
     Result,
 };
 use diesel::{
@@ -14,6 +14,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool, PooledConnection},
     Connection,
 };
+use joinery::Joinable;
 use log::{debug, info};
 use std::{hash::Hash, marker::PhantomData};
 
@@ -88,9 +89,6 @@ pub struct BasicAuth(pub Authorization);
 #[derive(Debug)]
 pub struct Invalidate(pub Authorization);
 
-/*#[derive(Debug)]
-pub struct Paginate<P: Paginatable>(pub P);
-*/
 impl Message for TokenAuth {
     type Result = Result<User>;
 }
@@ -175,41 +173,6 @@ impl Handler<BasicAuth> for DatabaseActor {
         }
     }
 }
-/*
-impl<P: Paginatable + 'static> Message for Paginate<P> {
-    type Result = Result<(Vec<P::Result>, String)>;
-}
-
-impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
-    type Result = Result<(Vec<P::Result>, String)>;
-
-    fn handle(&mut self, msg: Paginate<P>, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self
-            .0
-            .get()
-            .map_err(|_| PointercrateError::DatabaseConnectionError)?;
-
-        let first = msg.0.first(connection)?;
-        let last = msg.0.last(connection)?;
-        let next = msg.0.next_after(connection)?;
-        let prev = msg.0.prev_before(connection)?;
-
-        let result = msg.0.result(connection)?;
-
-        // TODO: compare last thing in our list with last and first thing in our list with first
-        // and then only generate the needed headers
-
-        let header = format! {
-            "<{}>; rel=first,<{}>; rel=prev,<{}>; rel=next,<{}>; rel=last",
-            serde_urlencoded::ser::to_string(first).unwrap(),
-            serde_urlencoded::ser::to_string(prev).unwrap(),
-            serde_urlencoded::ser::to_string(next).unwrap(),
-            serde_urlencoded::ser::to_string(last).unwrap(),
-        };
-
-        Ok((result, header))
-    }
-}*/
 
 #[derive(Debug)]
 pub struct GetMessage<Key, G: Get<Key>>(pub Key, pub PhantomData<G>);
@@ -324,5 +287,65 @@ where
                 None => target.patch(msg.1, connection),
             }
         })
+    }
+}
+
+#[derive(Debug)]
+pub struct PaginateMessage<P, D>(pub D, pub PhantomData<P>)
+where
+    D: Paginator,
+    P: Paginate<D>;
+
+impl<P, D> Message for PaginateMessage<P, D>
+where
+    D: Paginator,
+    P: Paginate<D> + 'static,
+{
+    type Result = Result<(Vec<P>, String)>;
+}
+
+impl<P, D> Handler<PaginateMessage<P, D>> for DatabaseActor
+where
+    D: Paginator,
+    P: Paginate<D> + 'static,
+{
+    type Result = Result<(Vec<P>, String)>;
+
+    fn handle(&mut self, msg: PaginateMessage<P, D>, _: &mut Self::Context) -> Self::Result {
+        let connection = &*self.connection()?;
+        let result = P::load(&msg.0, connection)?;
+
+        let first = msg.0.first(connection)?.map(|d| {
+            format!(
+                "<{}>; rel=first",
+                serde_urlencoded::ser::to_string(d).unwrap()
+            )
+        });
+        let last = msg.0.last(connection)?.map(|d| {
+            format!(
+                "<{}>; rel=last",
+                serde_urlencoded::ser::to_string(d).unwrap()
+            )
+        });
+        let next = msg.0.next(connection)?.map(|d| {
+            format!(
+                "<{}>; rel=next",
+                serde_urlencoded::ser::to_string(d).unwrap()
+            )
+        });
+        let prev = msg.0.prev(connection)?.map(|d| {
+            format!(
+                "<{}>; rel=prev",
+                serde_urlencoded::ser::to_string(d).unwrap()
+            )
+        });
+
+        let header = vec![first, next, prev, last]
+            .into_iter()
+            .filter_map(|x| x)
+            .join_with(",")
+            .to_string();
+
+        Ok((result, header))
     }
 }

@@ -34,7 +34,7 @@ impl Paginator for PlayerPagination {
 }
 
 impl Paginate<PlayerPagination> for Player {
-    fn load(&self, pagination: PlayerPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(pagination: &PlayerPagination, connection: &PgConnection) -> Result<Vec<Self>> {
         let mut query = pagination.filter(Player::all().into_boxed());
 
         filter!(query[

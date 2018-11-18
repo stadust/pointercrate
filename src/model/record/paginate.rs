@@ -50,7 +50,7 @@ impl Paginator for RecordPagination {
 }
 
 impl Paginate<RecordPagination> for PartialRecord {
-    fn load(&self, pagination: RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
         let select = records::table.select((
             records::id,
             records::progress,

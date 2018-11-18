@@ -29,6 +29,7 @@ bitflags = "1.0.4"
 byteorder = "1.2.6"
 pointercrate_derive = { path = "../pointercrate_derive" }
 serde_urlencoded = "0.5.3"
+joinery = "1.2.2"
 
 [dependencies.diesel-derive-enum]
 version = "0.4.4"

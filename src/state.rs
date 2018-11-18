@@ -1,13 +1,15 @@
 use actix::{Addr, Handler, Message};
 use crate::{
     actor::{
-        database::{DatabaseActor, DeleteMessage, GetMessage, PatchMessage, PostMessage},
+        database::{
+            DatabaseActor, DeleteMessage, GetMessage, PaginateMessage, PatchMessage, PostMessage,
+        },
         gdcf::GdcfActor,
     },
     error::PointercrateError,
     middleware::cond::IfMatch,
     model::user::{PermissionsSet, User},
-    operation::{Delete, Get, Hotfix, Patch, Post},
+    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post},
     Result,
 };
 use hyper::{
@@ -89,6 +91,16 @@ impl PointercrateState {
         } else {
             Either::B(self.database(PatchMessage(key, fix, Some(condition), PhantomData)))
         }
+    }
+
+    pub fn paginate<P, D>(
+        &self, data: D,
+    ) -> impl Future<Item = (Vec<P>, String), Error = PointercrateError>
+    where
+        D: Paginator + Send + 'static,
+        P: Paginate<D> + Send + 'static,
+    {
+        self.database(PaginateMessage(data, PhantomData))
     }
 }
 

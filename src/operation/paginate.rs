@@ -1,7 +1,11 @@
 use crate::Result;
 use diesel::pg::PgConnection;
+use serde::{Deserialize, Serialize};
 
-pub trait Paginator: Sized {
+pub trait Paginator: Sized + Serialize
+where
+    for<'de> Self: Deserialize<'de>,
+{
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn first(&self, connection: &PgConnection) -> Result<Option<Self>>;
@@ -9,7 +13,7 @@ pub trait Paginator: Sized {
 }
 
 pub trait Paginate<P: Paginator>: Sized {
-    fn load(&self, paginator: P, connection: &PgConnection) -> Result<Vec<Self>>;
+    fn load(paginator: &P, connection: &PgConnection) -> Result<Vec<Self>>;
 }
 
 macro_rules! __op {
