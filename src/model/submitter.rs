@@ -1,15 +1,13 @@
-use crate::{error::PointercrateError, operation::Get, schema::submitters, Result};
+use crate::schema::submitters;
 use diesel::{
     expression::bound::Bound,
     insert_into,
     pg::PgConnection,
     query_dsl::{QueryDsl, RunQueryDsl},
-    result::{Error, QueryResult},
+    result::QueryResult,
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
-use pointercrate_derive::Paginatable;
-use serde_derive::{Deserialize, Serialize};
 
 mod get;
 

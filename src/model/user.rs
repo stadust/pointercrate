@@ -1,24 +1,15 @@
 use bitflags::bitflags;
 use crate::{
-    bitstring::Bits,
-    config::SECRET,
-    error::PointercrateError,
-    middleware::auth::Claims,
-    operation::{Delete, Get, Hotfix, Patch, Post},
-    schema::members,
-    Result,
+    bitstring::Bits, config::SECRET, error::PointercrateError, middleware::auth::Claims,
+    schema::members, Result,
 };
-use diesel::{
-    delete, expression::bound::Bound, insert_into, query_dsl::QueryDsl, result::Error, sql_types,
-    ExpressionMethods, PgConnection, RunQueryDsl,
-};
-use log::{debug, info};
-use pointercrate_derive::Paginatable;
+use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
+use log::debug;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
     Serialize, Serializer,
 };
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Deserialize;
 use std::{
     collections::HashSet,
     fmt::{Display, Formatter},

@@ -1,27 +1,20 @@
 use super::{Demon, Player, Submitter};
 use crate::{
-    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
-    error::PointercrateError,
     model::demon::PartialDemon,
-    operation::{Delete, Get, Post},
     schema::{demons, players, records},
-    video, Result,
 };
 use diesel::{
-    delete,
     deserialize::Queryable,
     expression::bound::Bound,
     insert_into,
     pg::{Pg, PgConnection},
     query_dsl::{QueryDsl, RunQueryDsl},
-    result::{Error, QueryResult},
-    sql_types, BoolExpressionMethods, Connection, ExpressionMethods,
+    result::QueryResult,
+    sql_types, BoolExpressionMethods, ExpressionMethods,
 };
 use diesel_derive_enum::DbEnum;
-use log::{debug, info};
-use pointercrate_derive::Paginatable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
 
 mod delete;

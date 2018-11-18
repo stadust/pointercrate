@@ -12,7 +12,7 @@ use crate::{
 use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool, PooledConnection},
-    Connection, RunQueryDsl,
+    Connection,
 };
 use log::{debug, info};
 use std::{hash::Hash, marker::PhantomData};

@@ -6,7 +6,6 @@ use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{record::Submission, Record, Submitter},
-    operation::Delete,
     state::PointercrateState,
 };
 use ipnetwork::IpNetwork;
