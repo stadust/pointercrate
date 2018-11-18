@@ -52,9 +52,9 @@ impl Patch<PatchMe> for User {
 impl Hotfix for PatchUser {
     fn required_permissions(&self) -> Permissions {
         if let PatchField::Some(perms) = self.permissions {
-            perms.assignable_from()
+            perms.assignable_from() | Permissions::Moderator
         } else {
-            Permissions::empty()
+            Permissions::Moderator
         }
     }
 }

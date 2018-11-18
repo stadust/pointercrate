@@ -4,6 +4,7 @@ use pointercrate_derive::Paginatable;
 use serde_derive::{Deserialize, Serialize};
 
 mod get;
+mod paginate;
 
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
@@ -18,22 +19,6 @@ pub struct Player {
 struct NewPlayer<'a> {
     name: &'a str,
 }
-/*
-#[derive(Serialize, Deserialize, Paginatable, Clone, Debug)]
-#[database_table = "players"]
-#[result = "Player"]
-pub struct PlayerPagination {
-    #[database_column = "id"]
-    before: Option<i32>,
-
-    #[database_column = "id"]
-    after: Option<i32>,
-
-    limit: Option<i32>,
-
-    name: Option<String>,
-    banned: Option<bool>,
-}*/
 
 type AllColumns = (players::id, players::name, players::banned);
 
@@ -66,13 +51,3 @@ impl Player {
             .get_result(conn)
     }
 }
-/*
-impl Model for Player {
-    type Columns = AllColumns;
-    type Table = players::table;
-
-    fn all() -> All {
-        players::table.select(ALL_COLUMNS)
-    }
-}
-*/

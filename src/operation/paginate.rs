@@ -17,21 +17,23 @@ macro_rules! __op {
         $table::$column.eq($value)
     };
     ($table: ident :: $column: ident < $value: expr) => {
-        members::$column.lt($value)
+        $table::$column.lt($value)
     };
     ($table: ident :: $column: ident > $value: expr) => {
-        members::$column.gt($value)
+        $table::$column.gt($value)
     };
     ($table: ident :: $column: ident <= $value: expr) => {
-        members::$column.le($value)
+        $table::$column.le($value)
     };
     ($table: ident :: $column: ident >= $value: expr) => {
-        members::$column.ge($value)
+        $table::$column.ge($value)
     };
 }
 
 macro_rules! filter {
     ($query: ident[$($table: ident :: $column: ident $op: tt $value: expr),+]) => {
+        use diesel::ExpressionMethods;
+
         $(
             if let Some(ref value) = $value {
                 $query = $query.filter(__op!($table :: $column $op value))
@@ -66,6 +68,8 @@ macro_rules! navigation {
 
     ($table: ident, $column: ident, $column_type: ty, $before: ident, $after: ident) => {
         fn next(&self, connection: &PgConnection) -> Result<Option<Self>> {
+            use diesel::{ExpressionMethods, QueryDsl, select, dsl::exists, RunQueryDsl, OptionalExtension};
+
             let after = if let Some(id) = self.$before {
                 if select(exists(self.filter($table::table.filter($table::$column.ge(id)).into_boxed()))).get_result(connection)? {
                     id - 1
@@ -102,6 +106,8 @@ macro_rules! navigation {
         }
 
         fn prev(&self, connection: &PgConnection) -> Result<Option<Self>> {
+            use diesel::{ExpressionMethods, QueryDsl, select, dsl::exists, RunQueryDsl, OptionalExtension};
+
             let before = if let Some(id) = self.$after {
                 if select(exists(self.filter($table::table.filter($table::$column.le(id)).into_boxed()))).get_result(connection)? {
                     id + 1
@@ -139,10 +145,12 @@ macro_rules! navigation {
         }
 
         fn first(&self, connection: &PgConnection) -> Result<Option<Self>> {
+            use diesel::{dsl::min, QueryDsl};
             Ok(self.filter($table::table.select(min($table::$column)).into_boxed()).get_result::<Option<$column_type>>(connection)?.map(|id: $column_type| Self{$after: Some(id - 1), $before:None,..self.clone()}))
         }
 
         fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
+            use diesel::{dsl::max, QueryDsl};
             Ok(self.filter($table::table.select(max($table::$column)).into_boxed()).get_result::<Option<$column_type>>(connection)?.map(|id: $column_type| Self{$before: Some(id + 1), $after:None, ..self.clone()}))
         }
     };

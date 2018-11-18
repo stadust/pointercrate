@@ -12,6 +12,8 @@ use serde_derive::{Deserialize, Serialize};
 use std::fmt::Display;
 
 mod get;
+mod paginate;
+mod patch;
 
 /// Struct modelling a demon in the database
 #[derive(Queryable, Insertable, Debug, Identifiable)]
@@ -53,28 +55,6 @@ pub struct PartialDemon {
     pub name: String,
     pub position: i16,
 }
-/*
-#[derive(Serialize, Deserialize, Clone, Paginatable, Debug)]
-#[database_table = "demons"]
-#[column_type = "i16"]
-#[result = "PartialDemon"]
-#[allow(non_snake_case)]
-pub struct DemonPagination {
-    #[database_column = "position"]
-    before: Option<i16>,
-
-    #[database_column = "position"]
-    after: Option<i16>,
-
-    limit: Option<i32>,
-
-    name: Option<String>,
-
-    requirement: Option<i16>,
-    requirement__lt: Option<i16>,
-    requirement__gt: Option<i16>,
-}**/
-
 impl Serialize for PartialDemon {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -87,16 +67,6 @@ impl Serialize for PartialDemon {
         map.end()
     }
 }
-
-/*make_patch! {
-    struct PatchDemon {
-        name: String,
-        position: i16,
-        requirement: i16,
-        verifier: i32,
-        publisher: i32
-    }
-}*/
 
 /// Enum encoding the 3 different parts of the demonlist
 #[derive(Debug)]
@@ -181,24 +151,12 @@ impl Demon {
         Demon::all().filter(demons::position.eq(position))
     }
 }
-/*
-impl Model for Demon {
-    type Columns = AllColumns;
-    type Table = demons::table;
 
-    fn all() -> All {
-        demons::table.select(ALL_COLUMNS)
-    }
-}
-
-impl Model for PartialDemon {
-    type Columns = (demons::name, demons::position);
-    type Table = demons::table;
-
-    fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
+impl PartialDemon {
+    fn all() -> diesel::dsl::Select<demons::table, (demons::name, demons::position)> {
         demons::table.select((demons::name, demons::position))
     }
-}*/
+}
 
 impl Into<PartialDemon> for Demon {
     fn into(self) -> PartialDemon {

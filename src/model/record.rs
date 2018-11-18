@@ -26,6 +26,7 @@ use std::fmt::{Display, Formatter};
 
 mod delete;
 mod get;
+mod paginate;
 mod post;
 
 pub use self::post::Submission;
@@ -139,31 +140,6 @@ struct NewRecord<'a> {
     submitter: i32,
     demon: &'a str,
 }
-/*
-#[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
-#[database_table = "records"]
-#[result = "PartialRecord"]
-#[allow(non_snake_case)]
-pub struct RecordPagination {
-    #[database_column = "id"]
-    before: Option<i32>,
-
-    #[database_column = "id"]
-    after: Option<i32>,
-
-    limit: Option<i32>,
-
-    progress: Option<i16>,
-    progress__lt: Option<i16>,
-    progress__gt: Option<i16>,
-
-    #[database_column = "status_"]
-    status: Option<RecordStatus>,
-
-    player: Option<i32>,
-    demon: Option<String>,
-}
-*/
 
 type AllColumns = (
     records::id,
@@ -316,15 +292,3 @@ impl Queryable<SqlType, Pg> for Record {
         }
     }
 }
-/*
-impl Model for PartialRecord {
-    type Columns = <records::table as diesel::Table>::AllColumns;
-    type Table = records::table;
-
-    fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
-        use diesel::Table;
-
-        records::table.select(records::table::all_columns())
-    }
-}
-*/

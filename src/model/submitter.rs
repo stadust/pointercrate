@@ -28,21 +28,6 @@ struct NewSubmitter<'a> {
     #[column_name = "ip_address"]
     ip: &'a IpNetwork,
 }
-/*
-#[derive(Clone, Debug, Serialize, Deserialize, Paginatable)]
-#[database_table = "submitters"]
-#[result = "Submitter"]
-pub struct SubmitterPagination {
-    #[database_column = "submitter_id"]
-    before: Option<i32>,
-
-    #[database_column = "submitter_id"]
-    after: Option<i32>,
-
-    limit: Option<i32>,
-
-    banned: Option<bool>,
-}*/
 
 type AllColumns = (
     submitters::submitter_id,
@@ -73,17 +58,3 @@ impl Submitter {
         insert_into(submitters::table).values(&new).get_result(conn)
     }
 }
-/*
-impl Model for Submitter {
-    type Columns = AllColumns;
-    type Table = submitters::table;
-
-    fn all() -> All {
-        submitters::table.select((
-            submitters::submitter_id,
-            submitters::ip_address,
-            submitters::banned,
-        ))
-    }
-}
-*/

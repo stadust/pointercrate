@@ -5,18 +5,17 @@ use crate::{
     schema::members,
     Result,
 };
-use diesel::{
-    dsl::{exists, max, min},
-    pg::Pg,
-    query_builder::BoxedSelectStatement,
-    select, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl,
-};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserPagination {
+    #[serde(rename = "before")]
     before_id: Option<i32>,
+
+    #[serde(rename = "after")]
     after_id: Option<i32>,
+
     limit: Option<i64>,
 
     name: Option<String>,
