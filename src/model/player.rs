@@ -6,6 +6,8 @@ use serde_derive::{Deserialize, Serialize};
 mod get;
 mod paginate;
 
+pub use self::paginate::PlayerPagination;
+
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
 pub struct Player {

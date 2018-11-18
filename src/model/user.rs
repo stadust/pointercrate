@@ -32,6 +32,7 @@ mod patch;
 mod post;
 
 pub use self::{
+    paginate::UserPagination,
     patch::{PatchMe, PatchUser},
     post::Registration,
 };

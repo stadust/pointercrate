@@ -15,6 +15,8 @@ mod get;
 mod paginate;
 mod patch;
 
+pub use self::paginate::DemonPagination;
+
 /// Struct modelling a demon in the database
 #[derive(Queryable, Insertable, Debug, Identifiable)]
 #[table_name = "demons"]

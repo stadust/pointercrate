@@ -29,7 +29,7 @@ mod get;
 mod paginate;
 mod post;
 
-pub use self::post::Submission;
+pub use self::{paginate::RecordPagination, post::Submission};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -230,6 +230,7 @@ impl Record {
             .filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
+    // TODO: find out why I put the other todo here
     // TODO: what have I done here?????
     pub fn insert(
         conn: &PgConnection, progress: i16, video: Option<&str>, player: i32, submitter: i32,
