@@ -215,7 +215,7 @@ impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
 #[derive(Debug)]
 pub struct GetMessage<Key, G: Get<Key>>(pub Key, pub PhantomData<G>);
 
-impl<Key, G: Get<Key> + 'static> Message for GeIntellitMessage<Key, G> {
+impl<Key, G: Get<Key> + 'static> Message for GetMessage<Key, G> {
     type Result = Result<G>;
 }
 
