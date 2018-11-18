@@ -2,7 +2,7 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use crate::{
-    actor::database::{DeleteMessage, DeleteRecordUnchecked},
+    actor::database::DeleteMessage,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{record::Submission, Delete, Record, Submitter},

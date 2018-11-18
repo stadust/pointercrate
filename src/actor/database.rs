@@ -92,29 +92,6 @@ pub struct Invalidate(pub Authorization);
 #[derive(Debug)]
 pub struct Paginate<P: Paginatable>(pub P);
 
-#[derive(Debug)]
-pub struct DeleteRecordUnchecked(pub i32);
-
-impl Message for DeleteRecordUnchecked {
-    type Result = Result<()>;
-}
-
-impl Handler<DeleteRecordUnchecked> for DatabaseActor {
-    type Result = Result<()>;
-
-    fn handle(&mut self, msg: DeleteRecordUnchecked, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.connection()?;
-
-        use diesel::ExpressionMethods;
-
-        diesel::delete(crate::schema::records::table)
-            .filter(crate::schema::records::id.eq(msg.0))
-            .execute(connection)
-            .map(|_| ())
-            .map_err(PointercrateError::database)
-    }
-}
-
 impl Message for TokenAuth {
     type Result = Result<User>;
 }
@@ -238,7 +215,7 @@ impl<P: Paginatable + 'static> Handler<Paginate<P>> for DatabaseActor {
 #[derive(Debug)]
 pub struct GetMessage<Key, G: Get<Key>>(pub Key, pub PhantomData<G>);
 
-impl<Key, G: Get<Key> + 'static> Message for GetMessage<Key, G> {
+impl<Key, G: Get<Key> + 'static> Message for GeIntellitMessage<Key, G> {
     type Result = Result<G>;
 }
 
