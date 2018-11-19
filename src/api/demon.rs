@@ -1,3 +1,5 @@
+//! Module containing all the actix request handlers for the `/api/v1/demons/` endpoints
+
 use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
@@ -11,6 +13,7 @@ use crate::{
 use log::info;
 use tokio::prelude::future::{Future, IntoFuture};
 
+/// `GET /api/v1/demons/` handler
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/demons/");
 

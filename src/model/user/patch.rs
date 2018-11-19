@@ -66,6 +66,7 @@ impl Patch<PatchUser> for User {
                 return Err(PointercrateError::InvalidUsername)
             }
         }
+
         patch!(self, patch, display_name);
         patch_not_null!(self, patch, permissions, *set_permissions);
 

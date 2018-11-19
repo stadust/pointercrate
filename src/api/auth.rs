@@ -1,3 +1,5 @@
+//! Module containing all the actix request handlers for the `/api/v1/auth/` endpoints
+
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
     actor::database::{BasicAuth, Invalidate, TokenAuth},
@@ -9,6 +11,7 @@ use log::info;
 use serde_json::json;
 use tokio::prelude::future::Future;
 
+/// `POST /api/v1/auth/register/` handler
 pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("POST /api/v1/auth/register/");
 
@@ -25,6 +28,7 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `POST /api/v1/auth/` handler
 pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("POST /api/v1/auth/");
 
@@ -39,6 +43,7 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `POST /api/v1/auth/invalidate/` handler
 pub fn invalidate(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("POST /api/v1/auth/invalidate/");
 
@@ -48,6 +53,7 @@ pub fn invalidate(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `GET /api/v1/auth/me/` handler
 pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/auth/me/");
 
@@ -57,6 +63,7 @@ pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `PATCH /api/v1/auth/me/` handler
 pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("PATCH /api/v1/auth/me/");
 
@@ -68,7 +75,7 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .from_err()
         .and_then(move |patch: PatchMe| {
             state.database(BasicAuth(auth)).and_then(move |user: User| {
-                let user_id = user.id;  // AAA silly moving rules are silly
+                let user_id = user.id; // AAA silly moving rules are silly
                 state.patch(user, user_id, patch, if_match)
             })
         })
@@ -76,6 +83,7 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `DELETE /api/v1/auth/me/` handler
 pub fn delete_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("DELETE /api/v1/auth/me/");
 

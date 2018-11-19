@@ -1,3 +1,5 @@
+//! Module containing all the actix request handlers for the `/api/v1/users/` endpoints
+
 use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
@@ -11,6 +13,7 @@ use crate::{
 use log::info;
 use tokio::prelude::future::Future;
 
+/// `GET /api/v1/users/` handler
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/users/");
 
@@ -29,6 +32,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `GET /api/v1/users/[id]/` handler
 pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/users/{{user_id}}/");
 
@@ -46,6 +50,7 @@ pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `PATCH /api/v1/users/[id]/` handler
 pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("PATCH /api/v1/users/{{user_id}}/");
 
@@ -68,6 +73,7 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `DELETE /api/v1/users/[id]/` handler
 pub fn delete(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("DELETE /api/v1/users/{{user_id}}/");
 

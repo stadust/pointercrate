@@ -1,3 +1,5 @@
+//! Module containing all the actix request handlers for the `/api/v1/records/` endpoints
+
 use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
@@ -13,6 +15,7 @@ use log::{error, info, warn};
 use serde_json::json;
 use tokio::prelude::future::{Either, Future, IntoFuture};
 
+/// `POST /api/v1/records/` handler
 pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("POST /api/v1/records/");
 
@@ -40,6 +43,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
+/// `GET /api/v1/records/[id]/` handler
 pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/records/{{record_id}}/");
 
