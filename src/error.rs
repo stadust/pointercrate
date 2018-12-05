@@ -102,7 +102,7 @@ pub enum PointercrateError {
     },
 
     // TODO: do something with allowed_methods
-    /// `405 METHODE NOT ALLOWED`
+    /// `405 METHOD NOT ALLOWED`
     ///
     /// Error Code `40500`
     #[fail(display = "The method is not allowed for the requested URL.")]
@@ -127,6 +127,19 @@ pub enum PointercrateError {
     #[fail(display = "The chosen username is already taken")]
     NameTaken,
 
+    /// `409 CONFLICT` error returned if a someone tries to add a demon with a name that's already
+    /// taken by an existing demon
+    ///
+    /// Error Code: `40904`
+    #[fail(
+        display = "A demon with the given name already exists at position {}",
+        position
+    )]
+    DemonExists {
+        /// The position of the existing [`Demon`]
+        position: i16,
+    },
+
     /// `411 LENGTH REQUIRED`
     ///
     /// Error Code `41100`
@@ -140,97 +153,171 @@ pub enum PointercrateError {
     #[fail(display = "The precondition on the request for the URL failed positive evaluation")]
     PreconditionFailed,
 
+    /// `413 PAYLOAD TOO LARGE`
     ///
+    /// Error Code `41300`
     #[fail(display = "The data value transmitted exceeds the capacity limit.")]
     PayloadTooLarge,
 
+    /// `415 UNSUPPORTED MEDIA TYPE`
     ///
+    /// Error Code `41500`
     #[fail(
         display = "The server does not support the media type transmitted in the request/no media type was specified. Expected one '{}'",
         expected
     )]
-    UnsupportedMediaType { expected: &'static str },
+    UnsupportedMediaType {
+        /// The expected media type for the request body
+        expected: &'static str,
+    },
 
+    /// `422 UNPROCESSABLE ENTITY`
     ///
+    /// Error Code `42200`
     #[fail(
         display = "The request was well-formed but was unable to be followed due to semeantic errors."
     )]
     UnprocessableEntity,
 
+    /// `422 UNPROCESSABLE ENTITIY` variant returned if the username provided during registration
+    /// is either shorter than 3 letters of contains trailing or leading whitespaces
     ///
+    /// Error Code: `42202`
     #[fail(
         display = "Invalid display- or username! The name must be at least 3 characters long and not start/end with a space"
     )]
     InvalidUsername,
 
+    /// `422 UNPROCESSABLE ENTITY` variant returned if the password provided during registration
+    /// (or account update) is shorter than 10 characters
     ///
+    /// Error Code `42204`
     #[fail(display = "Invalid password! The password must be at least 10 characters long")]
     InvalidPassword,
 
+    /// `422 UNPROCESSABLE ENTITY` variant
     ///
+    /// Error Code `42211`
+    #[fail(display = "Unexpected NULL value for field {}", field)]
+    UnexpectedNull { field: &'static str },
+
+    /// `422 UNPROCESSABLE ENTITY` variant returned if attempted to create a demon with a record
+    /// requirements outside of [0, 100]
+    ///
+    /// Error Code `42212`
+    #[fail(display = "Record requirement needs to be greater than -1 and smaller than 101")]
+    InvalidRequirement,
+
+    /// `422 UNPROCESSABLE ENTITY` variant returned if attempted to create a demon with a position,
+    /// that would leave "holes" in the list, or is smaller than 1
+    ///
+    /// Error Code `42213`
+    #[fail(
+        display = "Demon position needs to be greater than or equal to 1 and smaller than or equal to {}",
+        maximal
+    )]
+    InvalidPosition {
+        /// The maximal position a new demon can be added at
+        maximal: i16,
+    },
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42215`
+    #[fail(display = "Record progress must lie between {} and 100%!", requirement)]
+    InvalidProgress {
+        /// The [`Demon`]'s record requirement
+        requirement: i16,
+    },
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42217`
+    #[fail(display = "This record has already been {}", status)]
+    SubmissionExists {
+        /// The [`RecordStatus`] of the existing [`Record`]
+        status: RecordStatus,
+
+        /// The ID of the existing [`Record`]
+        existing: i32,
+    },
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42218`
+    #[fail(display = "The given player is banned!")]
+    PlayerBanned,
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code 42219
+    #[fail(display = "You cannot submit records for legacy demons")]
+    SubmitLegacy,
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code 42220
+    #[fail(display = "Only 100% records can be submitted for the extended section of the list")]
+    Non100Extended,
+
+    ///`422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42222`
     #[fail(display = "Invalid URL scheme. Only 'http' and 'https' are supported")]
     InvalidUrlScheme,
 
+    ///`422 UNPROCESSABLE ENTITY` variant
     ///
+    /// Error Code `42223`
     #[fail(
         display = "The provided URL contains authentication information. For security reasons it has been rejected"
     )]
     UrlAuthenticated,
 
+    /// `422 UNPROCESSABLE ENTITY` variant
     ///
+    /// Error Code `42224`
     #[fail(
         display = "The given video host is not supported. Supported are 'youtube', 'vimeo', 'everyplay', 'twitch' and 'bilibili'"
     )]
     UnsupportedVideoHost,
 
+    /// `422 UNPROCESSABLE ENTITY` variant
     ///
+    /// Error Code `42225`
     #[fail(
         display = "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
         expected
     )]
-    InvalidUrlFormat { expected: &'static str },
+    InvalidUrlFormat {
+        /// A hint as to how the format is expected to look
+        expected: &'static str,
+    },
 
+    /// `428 PRECONDITION REQUIRED`
     ///
-    #[fail(display = "Unexpected NULL value for field {}", field)]
-    UnexpectedNull { field: &'static str },
-
-    ///
-    #[fail(display = "Record progress must lie between {} and 100%!", requirement)]
-    InvalidProgress { requirement: i16 },
-
-    ///
-    #[fail(display = "This record has already been {}", status)]
-    SubmissionExists { status: RecordStatus, existing: i32 },
-
-    ///
-    #[fail(display = "The given player is banned!")]
-    PlayerBanned,
-
-    ///
-    #[fail(display = "You cannot submit records for legacy demons")]
-    SubmitLegacy,
-
-    ///
-    #[fail(display = "Only 100% records can be submitted for the extended section of the list")]
-    Non100Extended,
-
-    ///
+    /// Error Code `42800`
     #[fail(display = "This request is required to be conditional; try using \"If-Match\"")]
     PreconditionRequired,
 
-    ///
+    /// `500 INTERNAL SERVER ERROR`
     #[fail(
         display = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application. Please notify a server administrator and have them look at the server logs!"
     )]
     InternalServerError,
 
+    /// `500 INTERNAL SERVER ERROR`
     ///
+    /// Error Code `50003`
     #[fail(
         display = "Internally, an invalid database access has been made. Please notify a server administrator and have them look at the server logs!"
     )]
     DatabaseError,
 
+    /// `500 INTERNAL SERVER ERROR` variant returned if the server fails to acquire a database
+    /// connection
     ///
+    /// Error Code `50005`
     #[fail(
         display = "Failed to retrieve connection to the database. The server might be temporarily overloaded."
     )]
@@ -278,6 +365,7 @@ impl PointercrateError {
 
             PointercrateError::Conflict => 40900,
             PointercrateError::NameTaken => 40902,
+            PointercrateError::DemonExists { .. } => 40904,
 
             PointercrateError::LengthRequired => 41100,
 
@@ -291,6 +379,8 @@ impl PointercrateError {
             PointercrateError::InvalidUsername => 42202,
             PointercrateError::InvalidPassword => 42204,
             PointercrateError::UnexpectedNull { .. } => 42211,
+            PointercrateError::InvalidRequirement => 42212,
+            PointercrateError::InvalidPosition { .. } => 42213,
             PointercrateError::InvalidProgress { .. } => 42215,
             PointercrateError::SubmissionExists { .. } => 42217,
             PointercrateError::PlayerBanned => 42218,
