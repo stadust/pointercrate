@@ -1,5 +1,6 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    model::player::Player,
     schema::demons,
 };
 use diesel::{

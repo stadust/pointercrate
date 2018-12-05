@@ -93,6 +93,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
+// TODO: I'm pretty sure none of these associations actually work
 #[derive(Debug, Identifiable, Associations, Serialize, Hash)]
 #[table_name = "records"]
 #[belongs_to(Player, foreign_key = "player")]

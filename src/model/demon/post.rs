@@ -1,7 +1,7 @@
 use super::Demon;
 use crate::{
     error::PointercrateError,
-    model::Player,
+    model::{creator::Creator, Player},
     operation::{Get, Post},
     schema::demons,
     video, Result,
@@ -85,7 +85,9 @@ impl Post<PostDemon> for Demon {
                 .values(&new)
                 .get_result::<Demon>(connection)?;
 
-            // TODO: handle creators
+            for creator in data.creators {
+                Creator::create_from((inserted_demon.name.clone(), creator), connection)?;
+            }
 
             Ok(inserted_demon)
         })

@@ -1,6 +1,7 @@
 #[macro_use]
 pub mod user;
 pub mod audit;
+pub mod creator;
 pub mod demon;
 pub mod player;
 pub mod record;
