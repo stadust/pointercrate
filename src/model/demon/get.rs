@@ -15,3 +15,17 @@ impl Get<String> for Demon {
         }
     }
 }
+
+impl Get<i16> for Demon {
+    fn get(position: i16, connection: &PgConnection) -> Result<Self> {
+        match Demon::by_position(position).first(connection) {
+            Ok(demon) => Ok(demon),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Demon",
+                    identified_by: position.to_string(),
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
