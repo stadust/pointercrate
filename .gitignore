@@ -4,3 +4,4 @@
 !/rustfmt.toml
 !/migrations
 !/build_documentation.rs
+!/README.md
