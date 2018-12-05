@@ -2,7 +2,10 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     schema::demons,
 };
-use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl};
+use diesel::{
+    expression::bound::Bound, sql_types, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
+    RunQueryDsl,
+};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
 use std::fmt::Display;
@@ -153,6 +156,26 @@ impl Demon {
     /// Constructs a diesel query returning all columns of position whose name matches the given i16
     pub fn by_position(position: i16) -> ByPosition {
         Demon::all().filter(demons::position.eq(position))
+    }
+
+    /// Increments the position of all demons with positions equal to or greater than the given one,
+    /// by one.
+    pub fn shift_down(connection: &PgConnection, starting_at: i16) -> QueryResult<()> {
+        diesel::update(demons::table)
+            .filter(demons::position.ge(starting_at))
+            .set(demons::position.eq(demons::position + 1))
+            .execute(connection)
+            .map(|_| ())
+    }
+
+    /// Decrements the position of all demons with positions equal to or smaller than the given one,
+    /// by one.
+    pub fn shift_up(connection: &PgConnection, until: i16) -> QueryResult<()> {
+        diesel::update(demons::table)
+            .filter(demons::position.le(until))
+            .set(demons::position.eq(demons::position - 1))
+            .execute(connection)
+            .map(|_| ())
     }
 }
 

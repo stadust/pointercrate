@@ -79,6 +79,8 @@ impl Post<PostDemon> for Demon {
                 video: video.as_ref(),
             };
 
+            Demon::shift_down(connection, new.position)?;
+
             let inserted_demon = insert_into(demons::table)
                 .values(&new)
                 .get_result::<Demon>(connection)?;
