@@ -1,6 +1,6 @@
 use super::User;
 use crate::{error::PointercrateError, operation::Post, schema::members, Result};
-use diesel::{insert_into, result::Error, PgConnection, RunQueryDsl};
+use diesel::{insert_into, result::Error, Connection, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -28,25 +28,27 @@ impl Post<Registration> for User {
             return Err(PointercrateError::InvalidPassword)
         }
 
-        match User::by_name(&registration.name).first::<User>(connection) {
-            Ok(_) => Err(PointercrateError::NameTaken),
-            Err(Error::NotFound) => {
-                info!("Registering new user with name {}", registration.name);
+        connection.transaction(|| {
+            match User::by_name(&registration.name).first::<User>(connection) {
+                Ok(_) => Err(PointercrateError::NameTaken),
+                Err(Error::NotFound) => {
+                    info!("Registering new user with name {}", registration.name);
 
-                let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
+                    let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
 
-                let new = NewUser {
-                    name: &registration.name,
-                    password_hash: hash.as_bytes(),
-                    password_salt: Vec::new(),
-                };
+                    let new = NewUser {
+                        name: &registration.name,
+                        password_hash: hash.as_bytes(),
+                        password_salt: Vec::new(),
+                    };
 
-                insert_into(members::table)
-                    .values(&new)
-                    .get_result(connection)
-                    .map_err(PointercrateError::database)
-            },
-            Err(err) => Err(PointercrateError::database(err)),
-        }
+                    insert_into(members::table)
+                        .values(&new)
+                        .get_result(connection)
+                        .map_err(PointercrateError::database)
+                },
+                Err(err) => Err(PointercrateError::database(err)),
+            }
+        })
     }
 }

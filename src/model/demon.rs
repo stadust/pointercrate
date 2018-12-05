@@ -10,6 +10,7 @@ use std::fmt::Display;
 mod get;
 mod paginate;
 mod patch;
+mod post;
 
 pub use self::paginate::DemonPagination;
 
@@ -29,6 +30,8 @@ pub struct Demon {
     /// The minimal progress a [`Player`] must achieve on this [`Demon`] to have their record
     /// accepted
     pub requirement: i16,
+
+    pub video: Option<String>,
 
     // TODO: remove this fields
     description: Option<String>,
@@ -53,6 +56,7 @@ pub struct PartialDemon {
     pub name: String,
     pub position: i16,
 }
+
 impl Serialize for PartialDemon {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -109,6 +113,7 @@ type AllColumns = (
     demons::name,
     demons::position,
     demons::requirement,
+    demons::video,
     demons::description,
     demons::notes,
     demons::verifier,
@@ -119,6 +124,7 @@ const ALL_COLUMNS: AllColumns = (
     demons::name,
     demons::position,
     demons::requirement,
+    demons::video,
     demons::description,
     demons::notes,
     demons::verifier,
