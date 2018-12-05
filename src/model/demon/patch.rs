@@ -13,6 +13,7 @@ make_patch! {
     struct PatchDemon {
         name: String,
         position: i16,
+        video: String,
         requirement: i16,
         verifier: i32,
         publisher: i32
