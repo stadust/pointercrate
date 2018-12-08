@@ -5,3 +5,8 @@
 !/migrations
 !/build_documentation.rs
 !/README.md
+!/static
+
+# Really not sure if I'm allowed to push this, so lets just not
+# TODO: manually send this to the server
+*.otf

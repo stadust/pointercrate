@@ -1,0 +1,449 @@
+/* Default Button style */
+
+.button {
+  padding: 10px 20px;
+  display: inline-block;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button.disabled,
+.button[disabled] {
+  cursor: not-allowed;
+}
+
+.button.fade {
+  box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.2);
+}
+
+.button.hover:not(.disabled):not(.no-shadow):not([disabled]):hover {
+  box-shadow: 5px 5px 20px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Link styles */
+
+a.link {
+  color: blue;
+}
+
+a.link:after {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+
+  display: inline-block;
+
+  text-decoration: inherit;
+
+  margin: auto 3px;
+}
+
+a.link:after {
+  content: "\f08e";
+  text-decoration: none;
+}
+
+/* Default header styles */
+
+body,
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.2em;
+  margin: 0.6em 0;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin: 0.5em 0;
+}
+
+h3 {
+  font-size: 1em;
+  margin: 0.3em 0;
+}
+
+h4 {
+  font-size: 0.8em;
+  margin: 0.4em 0;
+}
+
+@media (max-width: 767px) {
+  h1 {
+    font-size: 1.9em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  h3 {
+    font-size: 1.1em;
+  }
+}
+
+/* Misc element styles */
+
+iframe {
+  border: none;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+input {
+  border: 1px solid #ddd;
+}
+
+*:focus {
+  outline: none;
+}
+
+/* Flex layout classes */
+
+.flex {
+  display: flex;
+  justify-content: flex-start;
+  position: relative;
+  max-width: 100%;
+  flex-flow: row nowrap;
+}
+
+.flex.wrap {
+  flex-wrap: wrap;
+}
+
+.flex.col {
+  flex-direction: column;
+}
+
+.flex.space {
+  justify-content: space-between;
+}
+
+.flex.cen {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex:not(.no-stretch) > * {
+  flex-grow: 1;
+}
+
+/* Panel styles */
+
+.panel {
+  padding: 20px 20px;
+  margin-top: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+
+  background: white;
+  text-align: center;
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+.feature-panel {
+  display: flex;
+
+  flex-flow: row wrap;
+  justify-content: center;
+  align-content: space-around;
+  text-align: center;
+}
+
+.feature-panel .feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 24px 1%;
+  margin: 5px 0.6%;
+}
+
+.feature-panel > :not(.feature) {
+  flex-basis: 100%;
+}
+
+.feature * {
+  margin: 2%;
+}
+
+@media (max-width: 1023px) {
+  .feature-panel .feature {
+    min-width: 150px;
+  }
+}
+
+/* Roman list */
+
+ul.roman {
+  list-style-position: inside;
+}
+
+ul.roman li {
+  font-weight: bolder;
+  list-style-type: upper-roman;
+  margin: 8px 0px;
+}
+
+/* Search UI Element */
+
+.search {
+  margin: 10px;
+  background: #fff;
+  padding: 0px 4px;
+
+  border: 1px solid #999;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.search.small {
+  padding: 0px 4px;
+}
+
+.search.small input {
+  height: 1em;
+  padding: 10 0;
+}
+
+.search:before,
+.search:after {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+
+  display: inline-block;
+
+  text-decoration: inherit;
+
+  margin: auto 3px;
+}
+
+.search:before {
+  content: "\f002";
+}
+
+.search:after {
+  content: "\f057";
+}
+
+.search input {
+  min-width: 0; /* Firefox and Egde need this */
+  min-height: 1em;
+
+  height: 2em;
+
+  margin: 5px;
+
+  border: 0;
+
+  background: rgba(0, 0, 0, 0);
+
+  flex-grow: 2;
+}
+
+.search.seperated input {
+  border-left: 1px solid #888;
+  border-right: 1px solid #888;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+
+.search input:focus {
+  outline: none;
+}
+
+/* Overlay Dialog */
+
+.overlay {
+  top: 0;
+  right: 0;
+
+  position: fixed;
+
+  width: 100%;
+  height: 100%;
+
+  background: rgba(255, 255, 255, 0.4);
+
+  display: none;
+  z-index: 1000;
+}
+
+.overlay .dialog {
+  margin: auto;
+  display: flex;
+  min-width: 768px;
+  width: 50%;
+  height: 70%;
+}
+
+@media (max-width: 1023px) {
+  .overlay .dialog {
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    min-width: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .overlay .dialog-close {
+    display: none;
+  }
+}
+
+/* DropDown styles */
+.dropdown {
+  z-index: 10;
+  width: 100%;
+  position: absolute;
+  display: none;
+  left: 0;
+}
+
+/*
+ * Tooltip stuff
+ */
+
+.tooltip {
+  position: static;
+  display: inline-block;
+  border-bottom: 1px dotted #555;
+}
+
+.tooltip .tooltiptext {
+  opacity: 0;
+  font-weight: normal;
+  font-size: 0.9em;
+  text-align: center;
+
+  visibility: hidden;
+  z-index: 9;
+
+  border: 3px solid #ddd;
+  background: #fff;
+
+  left: 50%;
+  transform: translateX(-50%);
+
+  padding: 5px;
+  margin: 5px;
+
+  position: absolute;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 0.9;
+  transition: 1s opacity;
+}
+
+/* (Under)lines */
+.underlined {
+  margin-bottom: 5px;
+
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(211, 211, 211, 1) 15%,
+      rgba(211, 211, 211, 1) 85%,
+      rgba(0, 0, 0, 0) 100%
+    )
+    1;
+}
+
+.underlined.pad {
+  padding-bottom: 10px;
+}
+
+.leftlined {
+  margin-left: 5px;
+
+  border-left: 1px solid transparent;
+  border-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(211, 211, 211, 1) 15%,
+      rgba(211, 211, 211, 1) 85%,
+      rgba(0, 0, 0, 0) 100%
+    )
+    1;
+}
+
+.leftlined.pad {
+  padding-left: 10px;
+}
+
+.rightlined {
+  margin-right: 5px;
+
+  border-right: 1px solid transparent;
+  border-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(211, 211, 211, 1) 15%,
+      rgba(211, 211, 211, 1) 85%,
+      rgba(0, 0, 0, 0) 100%
+    )
+    1;
+}
+
+.rightlined.pad {
+  padding-right: 10px;
+}
+
+.overlined {
+  margin-top: 5px;
+
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(211, 211, 211, 1) 15%,
+      rgba(211, 211, 211, 1) 85%,
+      rgba(0, 0, 0, 0) 100%
+    )
+    1;
+}
+
+.overlined.pad {
+  padding-top: 10px;
+}

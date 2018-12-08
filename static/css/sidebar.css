@@ -1,0 +1,27 @@
+.left {
+  max-width: 70%;
+}
+
+.right {
+  max-width: 30%;
+}
+
+@media (max-width: 1023px) {
+  #container {
+    flex-wrap: wrap;
+  }
+
+  .left {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .right {
+    max-width: 100%;
+    min-width: 100%;
+
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+  }
+}

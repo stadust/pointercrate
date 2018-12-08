@@ -1,3 +1,4 @@
+#![feature(proc_macro_hygiene)]
 #![allow(proc_macro_derive_resolution_fallback)]
 #![deny(
     bare_trait_objects,
@@ -12,6 +13,7 @@
 )]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::all))]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
+#![recursion_limit = "512"]
 
 // TODO: manual deserialization of json and urlencoded (for pagaination) request data so we can
 // provided better error reporting
@@ -23,12 +25,13 @@ extern crate diesel;
 type Result<T> = std::result::Result<T, PointercrateError>;
 
 use actix::System;
-use actix_web::{error::ResponseError, http::Method, server, App};
+use actix_web::{error::ResponseError, fs, http::Method, server, App};
 use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve},
     state::{Http, PointercrateState},
+    view::{home::Homepage, Page},
 };
 
 #[macro_use]
@@ -44,6 +47,7 @@ pub mod middleware;
 pub mod schema;
 pub mod state;
 pub mod video;
+pub mod view;
 
 macro_rules! mna {
     ($($allowed: expr),*) => {
@@ -76,6 +80,11 @@ fn main() {
             .middleware(IpResolve)
             .middleware(Authorizer)
             .middleware(Precondition)
+            .handler(
+                "/static",
+                fs::StaticFiles::new("static").unwrap().show_files_listing(),
+            )
+            .resource("/", |r| r.get().f(|_| Homepage.render()))
             .scope("/api/v1", |api_scope| {
                 api_scope
                     .nested("/users", |user_scope| {

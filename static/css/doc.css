@@ -1,0 +1,183 @@
+h1 {
+  font-size: 1.9em;
+}
+
+h2 {
+  font-size: 1.6em;
+}
+
+h3 {
+  font-size: 1.3em;
+}
+
+.panel {
+  text-align: left;
+}
+
+h3,
+h4 {
+  text-align: left;
+}
+
+.link-anchor {
+  font-size: 0.7em;
+  margin-left: 10px;
+  margin-right: 10px;
+  opacity: 0;
+  transition: all 0.4s ease;
+  margin-bottom: 2px;
+}
+
+h1:hover > .link-anchor {
+  opacity: 1;
+}
+
+.link-anchor:hover {
+  color: #111116;
+}
+
+code {
+  font-size: 110%;
+}
+
+.verb {
+  padding: 3px 5px;
+}
+
+.param {
+  margin: 0 -11px;
+  color: #777;
+}
+
+table {
+  width: 100%;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+th {
+  height: 1.5em;
+  padding: 6px;
+  min-width: 20%;
+  background: #f5f5f5;
+}
+
+code {
+  background: #eee;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 0px 2px;
+}
+
+h2 > code:not(.verb) {
+  background: white;
+  border: none;
+}
+
+tr.odd {
+  background: #fafafa;
+}
+
+tr.even {
+  background: #f5f5f5;
+}
+
+td {
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-left: 6px;
+}
+
+pre {
+  background: #eee;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+pre > code {
+  border: initial;
+  padding: initial;
+}
+
+.info-green {
+  background: #ddffdd;
+  border: 1px solid #a8ff93;
+  border-radius: 10px;
+  padding: 0px 15px;
+  color: #074d07;
+  margin: 25px 0px;
+}
+
+.info-green a {
+  color: #68bf0b !important;
+}
+
+.info-yellow {
+  background: #fffadd;
+  border: 1px solid #e0e37b;
+  border-radius: 10px;
+  padding: 0px 15px;
+  color: #4d4707;
+  margin: 25px 0px;
+}
+
+.info-red {
+  background: #fdd;
+  border: 1px solid #ff9393;
+  border-radius: 10px;
+  padding: 0px 15px;
+  color: #4d0707;
+  margin: 25px 0px;
+}
+
+.panel a:not(.link-anchor) {
+  color: #ff6c00;
+  font-weight: bold;
+}
+
+li {
+  margin: 5px 0px;
+}
+
+ul {
+  margin-left: 30px;
+  margin-bottom: 30px;
+  list-style: unset;
+}
+
+#toc {
+  font-size: 85%;
+}
+
+#toc ol {
+  counter-reset: item;
+}
+
+#toc li {
+  display: block;
+}
+
+#toc li:before {
+  content: counters(item, ".") ". ";
+  counter-increment: item;
+  font-weight: bold;
+}
+
+@media (max-width: 1023px) {
+  .right {
+    order: -1;
+  }
+
+  #toc {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  table,
+  pre {
+    overflow-x: scroll;
+    display: block;
+  }
+}

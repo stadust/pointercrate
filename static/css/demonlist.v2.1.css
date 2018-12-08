@@ -1,0 +1,184 @@
+table {
+  width: 90%;
+  margin: 0 5%;
+}
+
+th {
+  height: 3em;
+  padding: 6px;
+
+  background: #0083ff;
+  color: #fff;
+}
+
+td {
+  line-height: 2em;
+  text-indent: 5px;
+}
+
+tr {
+  background: #fefeff;
+}
+
+tr:nth-child(even) {
+  background: #e6eeff;
+}
+
+#editors li {
+  display: inline-block;
+  margin: 2px;
+}
+
+#editors ul {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-content: center;
+
+  margin: 0% 5%;
+
+  font-variant: small-caps;
+}
+
+.right p,
+.right span {
+  font-size: 0.8em;
+  font-weight: normal;
+}
+
+.left {
+  max-width: 70%;
+}
+
+.right {
+  align-items: flex-start;
+  max-width: 30%;
+  margin-bottom: 50px;
+}
+
+@media (max-width: 1023px) {
+  #rules {
+    order: -1;
+  }
+
+  #editors,
+  #submit,
+  #stats {
+    min-width: 200px;
+    width: 30%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 768px) {
+  #editors,
+  #submit,
+  #stats {
+    width: 100%;
+  }
+
+  .video-link {
+    display: none;
+  }
+
+  #stats-viewer-cont {
+    flex-wrap: wrap;
+  }
+}
+
+.dropdown {
+  background: white;
+  text-align: center;
+}
+
+.dropdown li {
+  padding: 10px calc(10px + 0.52434444444444%);
+  min-width: 200px;
+  width: 200px;
+  flex-grow: 1;
+}
+
+.dropdown i {
+  font-variant: small-caps;
+  font-size: 0.8em;
+}
+
+#lists .button {
+  font-weight: 600;
+}
+
+/* Statsview Styles */
+
+@media (min-width: 768px) {
+  #player-selection {
+    max-width: 40%;
+  }
+}
+
+#statsviewer ul {
+  max-height: 400px;
+  min-height: 400px;
+
+  margin: 10px;
+  padding: 0;
+
+  background: white;
+  color: black;
+
+  border: 1px solid #999;
+
+  overflow: auto;
+}
+
+#statsviewer li {
+  cursor: pointer;
+  text-align: left;
+  padding: 5px;
+}
+
+#statsviewer li i {
+  padding-left: 5px;
+
+  color: #444;
+
+  font-size: 70%;
+  font-variant: small-caps;
+}
+
+.container {
+  margin: 5px 0%;
+}
+
+.container > * {
+  margin: 5px 1%;
+}
+
+.container b {
+  font-size: 110%;
+}
+
+.container :not(b) {
+  font-size: 90%;
+}
+
+/* Submission form styles */
+
+#submitter input:not([type="submit"]) {
+  padding: 0px 5px;
+}
+
+#submitter input:not([type="submit"]):not([type="checkbox"]) {
+  height: 2em;
+  width: 98%;
+}
+
+#submission-form h3 {
+  margin: 20px 0px 10px 0px;
+}
+
+#submission-form p {
+  margin: 5px 0;
+
+  font-size: 90%;
+  text-align: center;
+}
