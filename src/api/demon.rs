@@ -42,6 +42,6 @@ pub fn post(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(|user| Ok(demand_perms!(user, ListModerator)))
         .and_then(|_| json)
         .and_then(move |demon: PostDemon| state.post(demon))
-        .map(|demon: Demon| HttpResponse::Ok().json_with_etag(demon))
+        .map(|demon: Demon| HttpResponse::Created().json_with_etag(demon))
         .responder()
 }
