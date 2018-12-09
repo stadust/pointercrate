@@ -59,6 +59,8 @@ macro_rules! mna {
     }
 }
 
+// TODO: custom 404 handling, how does it work??????
+
 fn main() {
     dotenv::dotenv().expect("Failed to initialize .env file!");
     env_logger::init().expect("Failed to initialize logging environment!");
@@ -99,10 +101,12 @@ fn main() {
                             })
                     })
                     .nested("/demons", |demon_scope| {
-                        demon_scope.resource("/", |r| {
-                            r.get().f(api::demon::paginate);
-                            r.post().f(api::demon::post)
-                        })
+                        demon_scope
+                            .resource("/", |r| {
+                                r.get().f(api::demon::paginate);
+                                r.post().f(api::demon::post)
+                            })
+                            .resource("/{position}/", |r| r.get().f(api::demon::get))
                     })
                     .nested("/records", |record_scope| {
                         record_scope

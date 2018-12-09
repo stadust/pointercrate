@@ -45,3 +45,17 @@ pub fn post(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .map(|demon: Demon| HttpResponse::Created().json_with_etag(demon))
         .responder()
 }
+
+/// `GET /api/v1/demons/[id]/` handler
+pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("GET /api/v1/records/{{record_id}}/");
+
+    let state = req.state().clone();
+
+    Path::<i16>::extract(req)
+        .map_err(|_| PointercrateError::bad_request("Demon position must be integer"))
+        .into_future()
+        .and_then(move |position| state.get(position.into_inner()))
+        .map(|demon: Demon| HttpResponse::Ok().json_with_etag(demon))
+        .responder()
+}
