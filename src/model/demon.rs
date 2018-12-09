@@ -16,10 +16,10 @@ mod paginate;
 mod patch;
 mod post;
 
-pub use self::paginate::DemonPagination;
+pub use self::{paginate::DemonPagination, post::PostDemon};
 
 /// Struct modelling a demon in the database
-#[derive(Queryable, Insertable, Debug, Identifiable, Serialize)]
+#[derive(Queryable, Insertable, Debug, Identifiable, Serialize, Hash)]
 #[table_name = "demons"]
 #[primary_key("name")]
 pub struct Demon {

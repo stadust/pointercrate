@@ -3,6 +3,8 @@ use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod home;
 
+// _TODO: maybe do this with `url_for()`
+
 pub const STATIC: &str = "/static/";
 pub const HOME: &str = "/";
 pub const DEMONLIST: &str = "/demonlist/";

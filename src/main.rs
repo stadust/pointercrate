@@ -99,7 +99,10 @@ fn main() {
                             })
                     })
                     .nested("/demons", |demon_scope| {
-                        demon_scope.resource("/", |r| r.get().f(api::demon::paginate))
+                        demon_scope.resource("/", |r| {
+                            r.get().f(api::demon::paginate);
+                            r.post().f(api::demon::post)
+                        })
                     })
                     .nested("/records", |record_scope| {
                         record_scope
