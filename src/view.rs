@@ -1,6 +1,7 @@
 use crate::config::{EXTENDED_LIST_SIZE, LIST_SIZE};
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
+pub mod demonlist;
 pub mod home;
 
 // _TODO: maybe do this with `url_for()`
