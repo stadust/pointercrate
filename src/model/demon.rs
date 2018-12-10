@@ -4,8 +4,8 @@ use crate::{
     schema::demons,
 };
 use diesel::{
-    expression::bound::Bound, sql_types, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
-    RunQueryDsl,
+    expression::bound::Bound, sql_types, Connection, ExpressionMethods, PgConnection, QueryDsl,
+    QueryResult, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
@@ -177,6 +177,34 @@ impl Demon {
             .set(demons::position.eq(demons::position - 1))
             .execute(connection)
             .map(|_| ())
+    }
+
+    pub fn mv(&self, connection: &PgConnection, to: i16) -> QueryResult<()> {
+        connection.transaction(|| {
+            if to > self.position {
+                diesel::update(demons::table)
+                    .filter(demons::position.gt(self.position))
+                    .filter(demons::position.le(to))
+                    .set(demons::position.eq(demons::position - 1))
+                    .execute(connection)?;
+            } else if to < self.position {
+                diesel::update(demons::table)
+                    .filter(demons::position.ge(to))
+                    .filter(demons::position.gt(self.position))
+                    .set(demons::position.eq(demons::position + 1))
+                    .execute(connection)?;
+            }
+
+            if to != self.position {
+                // alright, diesel::update(self) errors out for some reason
+                diesel::update(demons::table)
+                    .filter(demons::name.eq(&self.name))
+                    .set(demons::position.eq(to))
+                    .execute(connection)?;
+            }
+
+            Ok(())
+        })
     }
 }
 
