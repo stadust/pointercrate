@@ -84,9 +84,15 @@ fn main() {
             .middleware(Precondition)
             .handler(
                 "/static",
-                fs::StaticFiles::new("static").unwrap().show_files_listing(),
+                fs::StaticFiles::new("static").unwrap(),
             )
-            .resource("/", |r| r.get().f(|_| Homepage.render()))
+            .resource("/", |r| {
+                r.name("home");
+                r.get().f(|req| Homepage.render(req))
+            })
+            .resource("/demonlist/{position}/", |r| r.name("demonlist"))
+            .resource("/about/", |r| r.name("about"))  // TODO: this
+            .resource("/documentation/", |r| r.name("documentation")) // TODO: this
             .scope("/api/v1", |api_scope| {
                 api_scope
                     .nested("/users", |user_scope| {

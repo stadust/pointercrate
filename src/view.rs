@@ -1,4 +1,8 @@
-use crate::config::{EXTENDED_LIST_SIZE, LIST_SIZE};
+use actix_web::HttpRequest;
+use crate::{
+    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    state::PointercrateState,
+};
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod demonlist;
@@ -7,8 +11,6 @@ pub mod home;
 // _TODO: maybe do this with `url_for()`
 
 pub const STATIC: &str = "/static/";
-pub const HOME: &str = "/";
-pub const DEMONLIST: &str = "/demonlist/";
 
 pub trait Page {
     fn title(&self) -> &str;
@@ -17,11 +19,11 @@ pub trait Page {
     fn scripts(&self) -> Vec<&str>;
     fn stylesheets(&self) -> Vec<&str>;
 
-    fn body(&self) -> Markup;
+    fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup;
 
-    fn head(&self) -> Vec<Markup>;
+    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup>;
 
-    fn render(&self) -> Markup {
+    fn render(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html!{
             (DOCTYPE)
             html lang="en" prefix="og: http://opg.me/ns#" {
@@ -40,7 +42,7 @@ pub trait Page {
                     meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top" {}
                     meta name="description" content = (self.description()) {}
 
-                    @for markup in self.head() {
+                    @for markup in self.head(req) {
                         {(markup)}
                     }
 
@@ -70,38 +72,38 @@ pub trait Page {
                     }
                 }
                 body style={"background-image: url(" (STATIC) "images/squares3.png)"}{
-                    (nav_bar())
+                    (nav_bar(req))
                     div {}
-                    (self.body())
-                    (footer())
+                    (self.body(req))
+                    (footer(req))
                 }
             }
         }
     }
 }
 
-pub fn nav_bar() -> Markup {
+pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
     html! {
         div.nav.center.collapse.underlined.see-through {
             div.nav-icon {
-                a href = (HOME) {
+                a href = (url_helper::url(req, "home")) {
                     img src = {(STATIC) "images/pointercrate2.png"} style="height:15px";
                 }
             }
             div.nav-group-right.nav-group {
-                a.nav-item.hover.white href = {(HOME)"documentation"} {
+                a.nav-item.hover.white href = {(url_helper::url(req, "documentation"))} {
                      pan style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"REST API"}
                         span {"Documentation"}
                     }
                 }
-                a.nav-item.hover.white hrec = {(HOME) "demonlist"} title = "Geometry Dash Demonlist" {
+                a.nav-item.hover.white href = {(url_helper::demon(req, 1))} title = "Geometry Dash Demonlist" {
                     span style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"Geometry Dash"}
                         span {"DEMONLIST"}
                     }
                 }
-                a.nav-item.hover.white href = {(HOME) "about"} title="About" {
+                a.nav-item.hover.white href = {(url_helper::url(req, "about"))} title="About" {
                     i.fa.fa-info-circle{} (PreEscaped("&nbsp;")) "ABOUT"
                 }
                 div.nav-item.collapse-button {
@@ -117,7 +119,10 @@ pub fn nav_bar() -> Markup {
     }
 }
 
-pub fn footer() -> Markup {
+pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
+    let first_extended = &*LIST_SIZE + 1;
+    let first_legacy = &*EXTENDED_LIST_SIZE + 1;
+
     html! {
         div.footer.center.fade {
             span.overline.pad style="text-align:center" {
@@ -132,15 +137,15 @@ pub fn footer() -> Markup {
                     h2 {
                         "pointercrate"
                     }
-                    a.link href={ (DEMONLIST) "1"} title = "Hardest demon" {
+                    a.link href={ (url_helper::demon(req, 1)) } title = "Hardest demon" {
                         "Current top demon"
                     }
                     br;
-                    a.link href = {(DEMONLIST) ({&*LIST_SIZE + 1})} title="Extended list" {
+                    a.link href = {(url_helper::demon(req, first_extended))} title="Extended list" {
                         "Extended list"
                     }
                     br;
-                    a.link href = {(DEMONLIST) ({&*EXTENDED_LIST_SIZE + 1})} title="Legacy list" {
+                    a.link href = {(url_helper::demon(req, first_legacy))} title="Legacy list" {
                         "Legacy List"
                     }
                 }
@@ -157,5 +162,32 @@ pub fn footer() -> Markup {
                 }
             }
         }
+    }
+}
+
+pub mod url_helper {
+    use actix_web::HttpRequest;
+    use crate::state::PointercrateState;
+    use log::error;
+    use url::Url;
+
+    pub fn demon(req: &HttpRequest<PointercrateState>, position: i16) -> Url {
+        url_with(req, "demonlist", &[position])
+    }
+
+    pub fn url(req: &HttpRequest<PointercrateState>, name: &str) -> Url {
+        req.url_for_static(name)
+            .map_err(|_| error!("Internal Error: Attempt to retrieve url for non-existing page"))
+            .unwrap()
+    }
+
+    pub fn url_with<U, I>(req: &HttpRequest<PointercrateState>, name: &str, params: U) -> Url
+    where
+        U: IntoIterator<Item = I>,
+        I: ToString,
+    {
+        req.url_for(name, params.into_iter().map(|i| i.to_string()))
+            .map_err(|_| error!("Internal Error: Attempt to retrieve url for non-existing page"))
+            .unwrap()
     }
 }

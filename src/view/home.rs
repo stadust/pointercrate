@@ -1,4 +1,6 @@
-use super::{Page, DEMONLIST};
+use super::{url_helper, Page};
+use actix_web::HttpRequest;
+use crate::state::PointercrateState;
 use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]
@@ -21,7 +23,7 @@ impl Page for Homepage {
         vec![]
     }
 
-    fn body(&self) -> Markup {
+    fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html!{
             div.panel.feature-panel.fade style="max-width:800px; margin-left:auto; margin-right: auto; font-size: 0.9em" {
                 h3 style="font-size: 1.5em; margin-bottom: 0px;" {
@@ -52,7 +54,7 @@ impl Page for Homepage {
                     h3.b2 {"States Viewer"}
                     "Compare yourself to the very best players all around the world in the stats viewer, where a score is calculated based on all your beaten demons!"
                 }
-                a.big.blue.hover.button.slightly-round.fade.js-scroll-anim data-anim="fade" href = {(DEMONLIST)} style = "margin: 20px 40% 0px; min-width: 100px" {
+                a.big.blue.hover.button.slightly-round.fade.js-scroll-anim data-anim="fade" href = {(url_helper::demon(req, 1))} style = "margin: 20px 40% 0px; min-width: 100px" {
                     "Check it out"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
                     i.fa.fa-arrow-right aria-hidden="true" {}
                 }
@@ -60,7 +62,7 @@ impl Page for Homepage {
         }
     }
 
-    fn head(&self) -> Vec<Markup> {
+    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup> {
         vec![html! {
             (PreEscaped(r#"
 <script type="application/ld+json">
