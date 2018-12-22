@@ -47,28 +47,21 @@ pub enum PatchField<T> {
 impl<T> PatchField<T> {
     pub fn validate<F>(&mut self, f: F) -> Result<()>
     where
-        F: FnOnce(T) -> Result<T>,
+        F: FnOnce(&mut T) -> Result<()>,
     {
-        // TODO: there's got the be a prettier way for this
-        if self.is_some() {
-            let t = std::mem::replace(self, PatchField::Null).unwrap();
-            std::mem::replace(self, PatchField::Some(f(t)?));
-        }
-
-        Ok(())
-    }
-
-    fn is_some(&self) -> bool {
         match self {
-            PatchField::Some(_) => true,
-            _ => false,
+            PatchField::Some(ref mut t) => f(t),
+            _ => Ok(()),
         }
     }
 
-    fn unwrap(self) -> T {
+    pub fn validate_against_database<F>(&mut self, f: F, connection: &PgConnection) -> Result<()>
+    where
+        F: FnOnce(&mut T, &PgConnection) -> Result<()>,
+    {
         match self {
-            PatchField::Some(t) => t,
-            _ => panic!(),
+            PatchField::Some(ref mut t) => f(t, connection),
+            _ => Ok(()),
         }
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     model::user::Permissions,
     operation::{deserialize_patch, Hotfix, Patch, PatchField},
     schema::demons,
-    Result,
+    video, Result,
 };
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
 use serde_derive::Deserialize;
@@ -27,7 +27,15 @@ impl Hotfix for PatchDemon {
 }
 
 impl Patch<PatchDemon> for Demon {
-    fn patch(mut self, patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+        patch
+            .name
+            .validate_against_database(Demon::validate_name, connection)?;
+        patch
+            .position
+            .validate_against_database(Demon::validate_position, connection)?;
+        patch.video.validate(Demon::validate_video)?;
+
         unimplemented!()
     }
 }

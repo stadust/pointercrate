@@ -36,8 +36,8 @@ pub struct NewDemon<'a> {
 }
 
 impl Post<PostDemon> for Demon {
-    fn create_from(data: PostDemon, connection: &PgConnection) -> Result<Demon> {
-        Demon::validate_requirement(data.requirement)?;
+    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Demon> {
+        Demon::validate_requirement(&mut data.requirement)?;
 
         let video = match data.video {
             Some(ref video) => Some(video::validate(video)?),
@@ -45,20 +45,8 @@ impl Post<PostDemon> for Demon {
         };
 
         connection.transaction(|| {
-            match Demon::get(data.name.as_ref(), connection) {
-                Ok(demon) =>
-                    return Err(PointercrateError::DemonExists {
-                        position: demon.position,
-                    }),
-                Err(PointercrateError::ModelNotFound { .. }) => (),
-                err => return err,
-            }
-
-            let maximal = Demon::max_position(connection)? + 1;
-
-            if data.position < 1 || data.position > maximal {
-                return Err(PointercrateError::InvalidPosition { maximal })
-            }
+            Demon::validate_name(&mut data.name, connection)?;
+            Demon::validate_position(&mut data.position, connection)?;
 
             let publisher = Player::get(&data.publisher, connection)?;
             let verifier = Player::get(&data.verifier, connection)?;

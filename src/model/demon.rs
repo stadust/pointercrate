@@ -2,6 +2,7 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::player::Player,
+    operation::Get,
     schema::demons,
     Result,
 };
@@ -217,12 +218,41 @@ impl Demon {
         Ok(option.unwrap_or(0))
     }
 
-    pub fn validate_requirement(requirement: i16) -> Result<i16> {
-        if requirement < 0 || requirement > 100 {
+    pub fn validate_requirement(requirement: &mut i16) -> Result<()> {
+        if *requirement < 0 || *requirement > 100 {
             return Err(PointercrateError::InvalidRequirement)
         }
 
-        Ok(requirement)
+        Ok(())
+    }
+
+    pub fn validate_name(name: &mut String, connection: &PgConnection) -> Result<()> {
+        *name = name.trim().to_string();
+
+        match Demon::get(name.as_ref(), connection) {
+            Ok(demon) =>
+                Err(PointercrateError::DemonExists {
+                    position: demon.position,
+                }),
+            Err(PointercrateError::ModelNotFound { .. }) => Ok(()),
+            Err(err) => Err(err),
+        }
+    }
+
+    pub fn validate_position(position: &mut i16, connection: &PgConnection) -> Result<()> {
+        let maximal = Demon::max_position(connection)? + 1;
+
+        if *position < 1 || *position > maximal {
+            return Err(PointercrateError::InvalidPosition { maximal })
+        }
+
+        Ok(())
+    }
+
+    pub fn validate_video(video: &mut String) -> Result<()> {
+        *video = crate::video::validate(video)?;
+
+        Ok(())
     }
 }
 

@@ -390,18 +390,21 @@ impl User {
         perms.perms.iter().any(|perm| own_perms & *perm == *perm)
     }
 
-    pub fn validate_name(name: String) -> Result<String> {
+    pub fn validate_name(name: &mut String) -> Result<()> {
         if name.len() < 3 || name != name.trim() {
             return Err(PointercrateError::InvalidUsername)
         }
-        Ok(name.trim().to_string())
+
+        *name = name.trim().to_string();
+
+        Ok(())
     }
 
-    pub fn validate_password(password: String) -> Result<String> {
+    pub fn validate_password(password: &mut String) -> Result<()> {
         if password.len() < 10 {
             return Err(PointercrateError::InvalidPassword)
         }
-        Ok(password)
+        Ok(())
     }
 
     // ALRIGHT. the following code is really fucking weird. Here's why:

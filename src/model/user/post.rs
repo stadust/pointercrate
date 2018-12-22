@@ -20,8 +20,8 @@ struct NewUser<'a> {
 
 impl Post<Registration> for User {
     fn create_from(mut registration: Registration, connection: &PgConnection) -> Result<User> {
-        registration.name = User::validate_name(registration.name)?;
-        registration.password = User::validate_password(registration.password)?;
+        User::validate_name(&mut registration.name)?;
+        User::validate_password(&mut registration.password)?;
 
         connection.transaction(|| {
             match User::by_name(&registration.name).first::<User>(connection) {
