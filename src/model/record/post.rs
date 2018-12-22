@@ -47,9 +47,9 @@ impl Post<(Submission, Submitter)> for Option<Record> {
         };
 
         connection.transaction(||{
-            // Resolved player and demon name against the database
-            let player = Player::get(player, connection)?;
-            let demon = Demon::get(demon, connection)?;
+            // Resolve player and demon name against the database
+            let player = Player::get(&player, connection)?;
+            let demon = Demon::get(demon.as_ref(), connection)?;
 
             // Banned player can't have records on the list
             if player.banned {

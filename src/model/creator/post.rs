@@ -15,9 +15,9 @@ struct NewCreator<'a> {
     creator: i32,
 }
 
-impl<'a> Post<(String, String)> for Creator {
+impl<'a> Post<(&'a str, &'a str)> for Creator {
     fn create_from(
-        (demon, player): (String, String), connection: &PgConnection,
+        (demon, player): (&'a str, &'a str), connection: &PgConnection,
     ) -> Result<Creator> {
         connection.transaction(|| {
             let demon = Demon::get(demon, connection)?;

@@ -45,14 +45,13 @@ impl Post<PostDemon> for Demon {
         };
 
         connection.transaction(|| {
-            let existing = demons::table
-                .select(demons::position)
-                .filter(demons::name.eq(&data.name))
-                .get_result(connection)
-                .optional()?;
-
-            if let Some(position) = existing {
-                return Err(PointercrateError::DemonExists { position })
+            match Demon::get(data.name.as_ref(), connection) {
+                Ok(demon) =>
+                    return Err(PointercrateError::DemonExists {
+                        position: demon.position,
+                    }),
+                Err(PointercrateError::ModelNotFound { .. }) => (),
+                err => return err,
             }
 
             let maximal = Demon::max_position(connection)? + 1;
@@ -61,8 +60,8 @@ impl Post<PostDemon> for Demon {
                 return Err(PointercrateError::InvalidPosition { maximal })
             }
 
-            let publisher = Player::get(data.publisher, connection)?;
-            let verifier = Player::get(data.verifier, connection)?;
+            let publisher = Player::get(&data.publisher, connection)?;
+            let verifier = Player::get(&data.verifier, connection)?;
 
             let new = NewDemon {
                 name: &data.name,
@@ -79,8 +78,8 @@ impl Post<PostDemon> for Demon {
                 .values(&new)
                 .get_result::<Demon>(connection)?;
 
-            for creator in data.creators {
-                Creator::create_from((inserted_demon.name.clone(), creator), connection)?;
+            for creator in &data.creators {
+                Creator::create_from((&inserted_demon.name, creator), connection)?;
             }
 
             Ok(inserted_demon)
