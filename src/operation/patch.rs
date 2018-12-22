@@ -44,6 +44,35 @@ pub enum PatchField<T> {
     Some(T),
 }
 
+impl<T> PatchField<T> {
+    pub fn validate<F>(&mut self, f: F) -> Result<()>
+    where
+        F: FnOnce(T) -> Result<T>,
+    {
+        // TODO: there's got the be a prettier way for this
+        if self.is_some() {
+            let t = std::mem::replace(self, PatchField::Null).unwrap();
+            std::mem::replace(self, PatchField::Some(f(t)?));
+        }
+
+        Ok(())
+    }
+
+    fn is_some(&self) -> bool {
+        match self {
+            PatchField::Some(_) => true,
+            _ => false,
+        }
+    }
+
+    fn unwrap(self) -> T {
+        match self {
+            PatchField::Some(t) => t,
+            _ => panic!(),
+        }
+    }
+}
+
 impl<T> Default for PatchField<T> {
     fn default() -> Self {
         PatchField::Absent

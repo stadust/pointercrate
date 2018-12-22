@@ -19,14 +19,9 @@ struct NewUser<'a> {
 }
 
 impl Post<Registration> for User {
-    fn create_from(registration: Registration, connection: &PgConnection) -> Result<User> {
-        if registration.name.len() < 3 || registration.name != registration.name.trim() {
-            return Err(PointercrateError::InvalidUsername)
-        }
-
-        if registration.password.len() < 10 {
-            return Err(PointercrateError::InvalidPassword)
-        }
+    fn create_from(mut registration: Registration, connection: &PgConnection) -> Result<User> {
+        registration.name = User::validate_name(registration.name)?;
+        registration.password = User::validate_password(registration.password)?;
 
         connection.transaction(|| {
             match User::by_name(&registration.name).first::<User>(connection) {

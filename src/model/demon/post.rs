@@ -37,9 +37,7 @@ pub struct NewDemon<'a> {
 
 impl Post<PostDemon> for Demon {
     fn create_from(data: PostDemon, connection: &PgConnection) -> Result<Demon> {
-        if data.requirement < 0 || data.requirement > 100 {
-            return Err(PointercrateError::InvalidRequirement)
-        }
+        Demon::validate_requirement(data.requirement)?;
 
         let video = match data.video {
             Some(ref video) => Some(video::validate(video)?),
@@ -57,11 +55,7 @@ impl Post<PostDemon> for Demon {
                 return Err(PointercrateError::DemonExists { position })
             }
 
-            let maximal = demons::table
-                .select(max(demons::position))
-                .get_result::<Option<i16>>(connection)?
-                .unwrap_or(0)
-                + 1;
+            let maximal = Demon::max_position(connection)? + 1;
 
             if data.position < 1 || data.position > maximal {
                 return Err(PointercrateError::InvalidPosition { maximal })

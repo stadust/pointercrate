@@ -1,8 +1,8 @@
-use bitflags::bitflags;
 use crate::{
     bitstring::Bits, config::SECRET, error::PointercrateError, middleware::auth::Claims,
     schema::members, Result,
 };
+use bitflags::bitflags;
 use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
 use log::debug;
 use serde::{
@@ -388,6 +388,20 @@ impl User {
         let own_perms = self.permissions();
 
         perms.perms.iter().any(|perm| own_perms & *perm == *perm)
+    }
+
+    pub fn validate_name(name: String) -> Result<String> {
+        if name.len() < 3 || name != name.trim() {
+            return Err(PointercrateError::InvalidUsername)
+        }
+        Ok(name.trim().to_string())
+    }
+
+    pub fn validate_password(password: String) -> Result<String> {
+        if password.len() < 10 {
+            return Err(PointercrateError::InvalidPassword)
+        }
+        Ok(password)
     }
 
     // ALRIGHT. the following code is really fucking weird. Here's why:

@@ -1,11 +1,13 @@
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    error::PointercrateError,
     model::player::Player,
     schema::demons,
+    Result,
 };
 use diesel::{
-    expression::bound::Bound, sql_types, Connection, ExpressionMethods, PgConnection, QueryDsl,
-    QueryResult, RunQueryDsl,
+    dsl::max, expression::bound::Bound, sql_types, Connection, ExpressionMethods, PgConnection,
+    QueryDsl, QueryResult, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
@@ -205,6 +207,22 @@ impl Demon {
 
             Ok(())
         })
+    }
+
+    pub fn max_position(connection: &PgConnection) -> Result<i16> {
+        let option = demons::table
+            .select(max(demons::position))
+            .get_result::<Option<i16>>(connection)?;
+
+        Ok(option.unwrap_or(0))
+    }
+
+    pub fn validate_requirement(requirement: i16) -> Result<i16> {
+        if requirement < 0 || requirement > 100 {
+            return Err(PointercrateError::InvalidRequirement)
+        }
+
+        Ok(requirement)
     }
 }
 

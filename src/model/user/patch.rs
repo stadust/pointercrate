@@ -26,12 +26,8 @@ make_patch! {
 impl Hotfix for PatchMe {}
 
 impl Patch<PatchMe> for User {
-    fn patch(mut self, patch: PatchMe, connection: &PgConnection) -> Result<Self> {
-        if let PatchField::Some(ref password) = patch.password {
-            if password.len() < 10 {
-                return Err(PointercrateError::InvalidPassword)
-            }
-        }
+    fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
+        patch.password.validate(User::validate_password)?;
 
         patch_not_null!(self, patch, password, set_password);
         patch!(self, patch, display_name);
@@ -60,12 +56,8 @@ impl Hotfix for PatchUser {
 }
 
 impl Patch<PatchUser> for User {
-    fn patch(mut self, patch: PatchUser, connection: &PgConnection) -> Result<Self> {
-        if let PatchField::Some(ref display_name) = patch.display_name {
-            if display_name.len() < 3 || display_name != display_name.trim() {
-                return Err(PointercrateError::InvalidUsername)
-            }
-        }
+    fn patch(mut self, mut patch: PatchUser, connection: &PgConnection) -> Result<Self> {
+        patch.display_name.validate(User::validate_name)?;
 
         patch!(self, patch, display_name);
         patch_not_null!(self, patch, permissions, *set_permissions);
