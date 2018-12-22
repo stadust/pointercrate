@@ -1,20 +1,21 @@
-use actix::{Actor, Context, Handler, Message};
+use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message};
 use gdcf::{
-    api::request::{LevelsRequest, UserRequest},
+    api::request::{
+        level::{LevelsRequest, SearchFilters},
+        UserRequest,
+    },
     cache::CachedObject,
-    model::{PartialLevel, User},
+    chrono::Duration,
+    model::{
+        level::{DemonRating, LevelRating},
+        PartialLevel, User,
+    },
     Gdcf, GdcfFuture,
 };
-use gdcf_dbcache::cache::{DatabaseCache, Pg};
+use gdcf_dbcache::cache::{DatabaseCache, DatabaseCacheConfig, Pg};
 use gdrs::BoomlingsClient;
 use log::{error, info};
 use tokio::{self, prelude::future::Future};
-
-use actix::Addr;
-use gdcf::chrono::Duration;
-use gdcf_dbcache::cache::DatabaseCacheConfig;
-
-// TODO: make use of AsyncActor, current impl is nonsense
 
 #[derive(Debug)]
 pub struct GdcfActor(Gdcf<BoomlingsClient, DatabaseCache<Pg>>);
@@ -48,64 +49,43 @@ impl Actor for GdcfActor {
 }
 
 #[derive(Debug)]
-pub struct UserRequestMessage(pub UserRequest);
+pub struct GetDemonDescription(pub String);
 
-impl Into<UserRequestMessage> for UserRequest {
-    fn into(self) -> UserRequestMessage {
-        UserRequestMessage(self)
-    }
-}
-impl Message for UserRequestMessage {
-    type Result = Option<User>;
+impl Message for GetDemonDescription {
+    type Result = Option<String>;
 }
 
-impl Handler<UserRequestMessage> for GdcfActor {
-    type Result = Option<User>;
+impl Handler<GetDemonDescription> for GdcfActor {
+    type Result = Option<String>;
 
-    fn handle(&mut self, msg: UserRequestMessage, _ctx: &mut Context<Self>) -> Option<User> {
-        let GdcfFuture { cached, inner } = self.0.user(msg.0);
+    fn handle(&mut self, msg: GetDemonDescription, ctx: &mut Context<Self>) -> Option<String> {
+        let GdcfFuture { cached, inner } = self.0.levels::<u64, u64>(
+            LevelsRequest::default()
+                .search(msg.0)
+                .with_rating(LevelRating::Demon(DemonRating::Hard))
+                .filter(SearchFilters::default().rated()),
+        );
 
         if let Some(inner) = inner {
-            tokio::spawn(
+            ctx.spawn(
                 inner
                     .map(|_| ())
-                    .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err)),
+                    .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
+                    .into_actor(self),
             );
         }
 
-        cached.map(CachedObject::extract)
-    }
-}
+        match cached {
+            Some(inner) => {
+                let mut inner = inner.extract();
 
-#[derive(Debug)]
-pub struct LevelsRequestMessage(pub LevelsRequest);
-
-impl Into<LevelsRequestMessage> for LevelsRequest {
-    fn into(self) -> LevelsRequestMessage {
-        LevelsRequestMessage(self)
-    }
-}
-
-impl Message for LevelsRequestMessage {
-    type Result = Option<Vec<PartialLevel<u64, u64>>>;
-}
-
-impl Handler<LevelsRequestMessage> for GdcfActor {
-    type Result = Option<Vec<PartialLevel<u64, u64>>>;
-
-    fn handle(
-        &mut self, msg: LevelsRequestMessage, _ctx: &mut Context<Self>,
-    ) -> Option<Vec<PartialLevel<u64, u64>>> {
-        let GdcfFuture { cached, inner } = self.0.levels(msg.0);
-
-        if let Some(inner) = inner {
-            tokio::spawn(
-                inner
-                    .map(|_| ())
-                    .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err)),
-            );
+                if inner.len() > 0 {
+                    inner.remove(0).description
+                } else {
+                    None
+                }
+            },
+            None => None,
         }
-
-        cached.map(CachedObject::extract)
     }
 }

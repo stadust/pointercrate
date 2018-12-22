@@ -1,14 +1,14 @@
-use actix_web::HttpRequest;
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     state::PointercrateState,
 };
+use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod demonlist;
 pub mod home;
 
-// _TODO: maybe do this with `url_for()`
+// TODO: maybe do this with `url_for()`
 
 pub const STATIC: &str = "/static/";
 
@@ -24,7 +24,7 @@ pub trait Page {
     fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup>;
 
     fn render(&self, req: &HttpRequest<PointercrateState>) -> Markup {
-        html!{
+        html! {
             (DOCTYPE)
             html lang="en" prefix="og: http://opg.me/ns#" {
                 head {
@@ -166,8 +166,8 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
 }
 
 pub mod url_helper {
-    use actix_web::HttpRequest;
     use crate::state::PointercrateState;
+    use actix_web::HttpRequest;
     use log::error;
     use url::Url;
 
