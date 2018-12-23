@@ -8,7 +8,7 @@ impl Get<IpNetwork> for Submitter {
         match Submitter::by_ip(&ip).first(connection) {
             Ok(submitter) => Ok(submitter),
             Err(Error::NotFound) =>
-                Submitter::insert(connection, &ip).map_err(PointercrateError::database),
+                Submitter::insert(&ip, connection).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
     }

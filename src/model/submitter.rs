@@ -50,7 +50,7 @@ impl Submitter {
         Submitter::all().filter(submitters::ip_address.eq(ip))
     }
 
-    pub fn insert(conn: &PgConnection, ip: &IpNetwork) -> QueryResult<Submitter> {
+    pub fn insert(ip: &IpNetwork, conn: &PgConnection) -> QueryResult<Submitter> {
         let new = NewSubmitter { ip };
 
         insert_into(submitters::table).values(&new).get_result(conn)

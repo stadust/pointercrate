@@ -164,7 +164,7 @@ impl Demon {
 
     /// Increments the position of all demons with positions equal to or greater than the given one,
     /// by one.
-    pub fn shift_down(connection: &PgConnection, starting_at: i16) -> QueryResult<()> {
+    pub fn shift_down(starting_at: i16, connection: &PgConnection) -> QueryResult<()> {
         diesel::update(demons::table)
             .filter(demons::position.ge(starting_at))
             .set(demons::position.eq(demons::position + 1))
@@ -174,7 +174,7 @@ impl Demon {
 
     /// Decrements the position of all demons with positions equal to or smaller than the given one,
     /// by one.
-    pub fn shift_up(connection: &PgConnection, until: i16) -> QueryResult<()> {
+    pub fn shift_up(until: i16, connection: &PgConnection) -> QueryResult<()> {
         diesel::update(demons::table)
             .filter(demons::position.le(until))
             .set(demons::position.eq(demons::position - 1))
@@ -182,7 +182,7 @@ impl Demon {
             .map(|_| ())
     }
 
-    pub fn mv(&self, connection: &PgConnection, to: i16) -> QueryResult<()> {
+    pub fn mv(&self, to: i16, connection: &PgConnection) -> QueryResult<()> {
         if to > self.position {
             diesel::update(demons::table)
                 .filter(demons::position.gt(self.position))

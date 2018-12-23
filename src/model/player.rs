@@ -49,7 +49,7 @@ impl Player {
         Player::all().filter(players::id.eq(id))
     }
 
-    pub fn insert(conn: &PgConnection, name: &str) -> QueryResult<Player> {
+    pub fn insert(name: &str, conn: &PgConnection) -> QueryResult<Player> {
         insert_into(players::table)
             .values(&NewPlayer { name })
             .get_result(conn)

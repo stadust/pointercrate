@@ -42,7 +42,7 @@ impl Patch<PatchDemon> for Demon {
 
         connection.transaction(move || {
             if let Some(position) = position {
-                self.mv(connection, position)?
+                self.mv(position, connection)?
             }
 
             // alright, diesel::update(self) errors out for some reason

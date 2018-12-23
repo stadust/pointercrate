@@ -227,8 +227,8 @@ impl Record {
     // TODO: find out why I put the other todo here
     // TODO: what have I done here?????
     pub fn insert(
-        conn: &PgConnection, progress: i16, video: Option<&str>, player: i32, submitter: i32,
-        demon: &str,
+        progress: i16, video: Option<&str>, player: i32, submitter: i32, demon: &str,
+        conn: &PgConnection,
     ) -> QueryResult<i32> {
         let new = NewRecord {
             progress,

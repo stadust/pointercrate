@@ -123,12 +123,12 @@ impl Post<(Submission, Submitter)> for Option<Record> {
             debug!("All duplicates either already accepted, or has lower progress, accepting!");
 
             let id = Record::insert(
-                connection,
                 progress,
                 video_ref,
                 player.id,
                 submitter.id,
                 &demon.name,
+                connection
             )?;
 
             info!("Submission successful! Created new record with ID {}", id);
