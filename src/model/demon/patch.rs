@@ -6,7 +6,7 @@ use crate::{
     schema::demons,
     video, Result,
 };
-use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
 use serde_derive::Deserialize;
 
 make_patch! {
@@ -36,6 +36,28 @@ impl Patch<PatchDemon> for Demon {
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);
 
-        unimplemented!()
+        // We cannot move the PatchDemon object into the closure because we already moved data out
+        // of it
+        let position = patch.position;
+
+        connection.transaction(move || {
+            if let Some(position) = position {
+                self.mv(connection, position)?
+            }
+
+            // alright, diesel::update(self) errors out for some reason
+            diesel::update(demons::table)
+                .filter(demons::name.eq(&self.name))
+                .set((
+                    demons::name.eq(&self.name),
+                    demons::video.eq(&self.video),
+                    demons::requirement.eq(&self.requirement),
+                    demons::verifier.eq(&self.verifier),
+                    demons::publisher.eq(&self.publisher),
+                ))
+                .execute(connection)?;
+
+            Ok(self)
+        })
     }
 }

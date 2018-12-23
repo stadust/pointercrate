@@ -183,31 +183,29 @@ impl Demon {
     }
 
     pub fn mv(&self, connection: &PgConnection, to: i16) -> QueryResult<()> {
-        connection.transaction(|| {
-            if to > self.position {
-                diesel::update(demons::table)
-                    .filter(demons::position.gt(self.position))
-                    .filter(demons::position.le(to))
-                    .set(demons::position.eq(demons::position - 1))
-                    .execute(connection)?;
-            } else if to < self.position {
-                diesel::update(demons::table)
-                    .filter(demons::position.ge(to))
-                    .filter(demons::position.gt(self.position))
-                    .set(demons::position.eq(demons::position + 1))
-                    .execute(connection)?;
-            }
+        if to > self.position {
+            diesel::update(demons::table)
+                .filter(demons::position.gt(self.position))
+                .filter(demons::position.le(to))
+                .set(demons::position.eq(demons::position - 1))
+                .execute(connection)?;
+        } else if to < self.position {
+            diesel::update(demons::table)
+                .filter(demons::position.ge(to))
+                .filter(demons::position.gt(self.position))
+                .set(demons::position.eq(demons::position + 1))
+                .execute(connection)?;
+        }
 
-            if to != self.position {
-                // alright, diesel::update(self) errors out for some reason
-                diesel::update(demons::table)
-                    .filter(demons::name.eq(&self.name))
-                    .set(demons::position.eq(to))
-                    .execute(connection)?;
-            }
+        if to != self.position {
+            // alright, diesel::update(self) errors out for some reason
+            diesel::update(demons::table)
+                .filter(demons::name.eq(&self.name))
+                .set(demons::position.eq(to))
+                .execute(connection)?;
+        }
 
-            Ok(())
-        })
+        Ok(())
     }
 
     pub fn max_position(connection: &PgConnection) -> Result<i16> {
