@@ -19,7 +19,7 @@ mod paginate;
 mod patch;
 mod post;
 
-pub use self::{paginate::DemonPagination, post::PostDemon};
+pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 
 /// Struct modelling a demon in the database
 #[derive(Queryable, Insertable, Debug, Identifiable, Serialize, Hash)]
