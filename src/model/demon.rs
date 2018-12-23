@@ -16,7 +16,7 @@ use std::fmt::Display;
 
 mod get;
 mod paginate;
-pub mod patch;
+mod patch;
 mod post;
 
 pub use self::{paginate::DemonPagination, post::PostDemon};
