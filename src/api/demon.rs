@@ -5,6 +5,7 @@ use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
+        creator::{Creator, PostCreator},
         demon::{Demon, DemonPagination, PartialDemon, PatchDemon, PostDemon},
         user::User,
     },
@@ -49,7 +50,7 @@ pub fn post(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
-/// `GET /api/v1/demons/[id]/` handler
+/// `GET /api/v1/demons/[position]/` handler
 pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("GET /api/v1/demons/{{position}}/");
 
@@ -63,7 +64,7 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
-/// `PATCH /api/v1/users/[id]/` handler
+/// `PATCH /api/v1/demons/[position]/` handler
 pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
     info!("PATCH /api/v1/demons/{{position}}/");
 
@@ -88,5 +89,31 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
             })
         })
         .map(|updated: Demon| HttpResponse::Ok().json_with_etag(updated))
+        .responder()
+}
+
+pub fn post_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("POST /api/v1/demons/{{position}}/creators/");
+
+    let state = req.state().clone();
+    let body = req.json();
+    let position = Path::<i16>::extract(req)
+        .map_err(|_| PointercrateError::bad_request("Demon position must be integer"));
+
+    state
+        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
+        .and_then(move |user: User| {
+            demand_perms!(user, ListModerator or ListAdministrator);
+            position
+        })
+        .and_then(move |position| {
+            state
+                .get(position.into_inner())
+                .and_then(move |demon: Demon| {
+                    body.from_err()
+                        .and_then(move |post: PostCreator| state.post((demon.name, post.creator)))
+                })
+        })
+        .map(|_: Creator| HttpResponse::Created().finish())
         .responder()
 }

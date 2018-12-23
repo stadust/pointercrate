@@ -15,6 +15,8 @@ mod delete;
 mod get;
 mod post;
 
+pub use self::post::PostCreator;
+
 pub(crate) struct Creators(pub(crate) Vec<Player>);
 
 #[derive(Debug, Queryable)]

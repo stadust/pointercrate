@@ -7,6 +7,12 @@ use crate::{
     Result,
 };
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
+use serde_derive::Deserialize;
+
+#[derive(Debug, Deserialize)]
+pub struct PostCreator {
+    pub creator: String,
+}
 
 #[derive(Debug, Insertable)]
 #[table_name = "creators"]
@@ -31,5 +37,13 @@ impl<'a> Post<(&'a str, &'a str)> for Creator {
                 .get_result(connection)
                 .map_err(PointercrateError::database)
         })
+    }
+}
+
+impl Post<(String, String)> for Creator {
+    fn create_from(
+        (demon, player): (String, String), connection: &PgConnection,
+    ) -> Result<Creator> {
+        Creator::create_from((demon.as_ref(), player.as_ref()), connection)
     }
 }

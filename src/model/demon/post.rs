@@ -67,7 +67,7 @@ impl Post<PostDemon> for Demon {
                 .get_result::<Demon>(connection)?;
 
             for creator in &data.creators {
-                Creator::create_from((&inserted_demon.name, creator), connection)?;
+                Creator::create_from((&inserted_demon.name[..], &creator[..]), connection)?;
             }
 
             Ok(inserted_demon)

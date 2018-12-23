@@ -114,7 +114,10 @@ fn main() {
                                 r.get().f(api::demon::paginate);
                                 r.post().f(api::demon::post)
                             })
-                            .resource("/{position}/", |r| r.get().f(api::demon::get))
+                            .resource("/{position}/", |r| {
+                                r.get().f(api::demon::get);
+                                r.method(Method::PATCH).f(api::demon::patch)
+                            })
                     })
                     .nested("/records", |record_scope| {
                         record_scope
