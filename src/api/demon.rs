@@ -108,12 +108,9 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
             position
         })
         .and_then(move |position| {
-            state
-                .get(position.into_inner())
-                .and_then(move |demon: Demon| {
-                    body.from_err()
-                        .and_then(move |post: PostCreator| state.post((demon.name, post.creator)))
-                })
+            body.from_err().and_then(move |post: PostCreator| {
+                state.post((position.into_inner(), post.creator))
+            })
         })
         .map(|_: Creator| HttpResponse::Created().finish())
         .responder()

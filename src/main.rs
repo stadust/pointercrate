@@ -118,6 +118,7 @@ fn main() {
                                 r.get().f(api::demon::get);
                                 r.method(Method::PATCH).f(api::demon::patch)
                             })
+                            .resource("/{position}/creators/", |r| r.post().f(api::demon::post_creator))
                             .resource("/{position}/creators/{player_id}/", |r| r.delete().f(api::demon::delete_creator))
                     })
                     .nested("/records", |record_scope| {
