@@ -19,7 +19,7 @@ pub use self::post::PostCreator;
 
 pub(crate) struct Creators(pub(crate) Vec<Player>);
 
-#[derive(Debug, Queryable)]
+#[derive(Debug, Queryable, Hash)]
 pub struct Creator {
     demon: String,
     creator: i32,

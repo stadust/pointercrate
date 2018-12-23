@@ -47,3 +47,17 @@ impl Post<(String, String)> for Creator {
         Creator::create_from((demon.as_ref(), player.as_ref()), connection)
     }
 }
+
+impl<'a> Post<(i16, &'a str)> for Creator {
+    fn create_from((position, player): (i16, &'a str), connection: &PgConnection) -> Result<Self> {
+        let demon = Demon::get(position, connection)?;
+
+        Creator::create_from((&demon.name[..], player), connection)
+    }
+}
+
+impl Post<(i16, String)> for Creator {
+    fn create_from((position, player): (i16, String), connection: &PgConnection) -> Result<Self> {
+        Creator::create_from((position, &player[..]), connection)
+    }
+}

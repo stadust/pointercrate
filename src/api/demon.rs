@@ -1,7 +1,7 @@
 //! Module containing all the actix request handlers for the `/api/v1/demons/` endpoints
 
 use crate::{
-    actor::database::{PaginateMessage, TokenAuth},
+    actor::database::{DeleteMessage, PaginateMessage, TokenAuth},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
@@ -15,6 +15,7 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use log::info;
+use std::marker::PhantomData;
 use tokio::prelude::future::{Future, IntoFuture};
 
 /// `GET /api/v1/demons/` handler
@@ -115,5 +116,31 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 })
         })
         .map(|_: Creator| HttpResponse::Created().finish())
+        .responder()
+}
+
+pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    info!("DELETE /api/v1/demons/{{position}}/creators/{{player_id}}/");
+
+    let state = req.state().clone();
+    let url_params = Path::<(i16, i32)>::extract(req).map_err(|_| {
+        PointercrateError::bad_request("Demons position and player ID must be intergers")
+    });
+
+    state
+        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
+        .and_then(move |user: User| {
+            demand_perms!(user, ListModerator or ListAdministrator);
+            url_params
+        })
+        .and_then(move |key| {
+            state
+                .database(DeleteMessage::<_, Creator>(
+                    key.into_inner(),
+                    None,
+                    PhantomData,
+                ))
+                .map(|_| HttpResponse::NoContent().finish())
+        })
         .responder()
 }
