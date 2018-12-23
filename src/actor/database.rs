@@ -1,4 +1,3 @@
-use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use crate::{
     error::PointercrateError,
     middleware::{
@@ -6,9 +5,10 @@ use crate::{
         cond::IfMatch,
     },
     model::{user::PatchMe, User},
-    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, PatchField, Post},
+    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post},
     Result,
 };
+use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool, PooledConnection},
@@ -132,9 +132,9 @@ impl Handler<Invalidate> for DatabaseActor {
             let password = password.clone();
             let user = self.handle(BasicAuth(msg.0), ctx)?;
             let patch = PatchMe {
-                password: PatchField::Some(password),
-                display_name: PatchField::Absent,
-                youtube_channel: PatchField::Absent,
+                password: Some(password),
+                display_name: None,
+                youtube_channel: None,
             };
 
             self.handle(

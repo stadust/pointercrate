@@ -1,8 +1,8 @@
 use crate::{
     error::PointercrateError, middleware::cond::IfMatch, model::user::Permissions, Result,
 };
-use diesel::{pg::PgConnection, query_dsl::methods::SelectDsl, Expression, QuerySource};
-use serde::{Deserialize, Deserializer};
+use diesel::pg::PgConnection;
+use serde::{de::Error, Deserialize, Deserializer};
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -37,115 +37,179 @@ pub trait Patch<P: Hotfix>: Sized {
     }
 }
 
-#[derive(Debug)]
-pub enum PatchField<T> {
-    Null,
-    Absent,
-    Some(T),
-}
-
-impl<T> PatchField<T> {
-    pub fn validate<F>(&mut self, f: F) -> Result<()>
-    where
-        F: FnOnce(&mut T) -> Result<()>,
-    {
-        match self {
-            PatchField::Some(ref mut t) => f(t),
-            _ => Ok(()),
-        }
-    }
-
-    pub fn validate_against_database<F>(&mut self, f: F, connection: &PgConnection) -> Result<()>
-    where
-        F: FnOnce(&mut T, &PgConnection) -> Result<()>,
-    {
-        match self {
-            PatchField::Some(ref mut t) => f(t, connection),
-            _ => Ok(()),
-        }
-    }
-}
-
-impl<T> Default for PatchField<T> {
-    fn default() -> Self {
-        PatchField::Absent
-    }
-}
-
-pub fn deserialize_patch<'de, T, D>(deserializer: D) -> std::result::Result<PatchField<T>, D::Error>
+pub fn deserialize_optional<'de, T, D>(
+    deserializer: D,
+) -> std::result::Result<Option<Option<T>>, D::Error>
 where
-    T: Deserialize<'de>,
     D: Deserializer<'de>,
+    T: Deserialize<'de>,
 {
-    let value: Option<T> = Deserialize::deserialize(deserializer)?;
+    Ok(Some(Option::deserialize(deserializer)?))
+}
 
-    match value {
-        Some(t) => Ok(PatchField::Some(t)),
-        None => Ok(PatchField::Null),
+pub fn deserialize_non_optional<'de, T, D>(
+    deseralizer: D,
+) -> std::result::Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    match Option::deserialize(deseralizer)? {
+        None =>
+            Err(<D as Deserializer<'de>>::Error::custom(
+                "null value on non-nullable field",
+            )),
+        some => Ok(some),
     }
-}
-
-macro_rules! patch {
-    ($target: expr, $patch: ident, $field: ident) => {
-        match $patch.$field {
-            PatchField::Some($field) => $target.$field = Some($field),
-            PatchField::Null => $target.$field = None,
-            _ => (),
-        }
-    };
-
-    ($target: expr, $patch: ident, $field: ident, $method: ident) => {
-        match $patch.$field {
-            PatchField::Some($field) => $target.$method(&$field),
-            PatchField::Null => $target.$field = None,
-            _ => (),
-        }
-    };
-}
-
-macro_rules! patch_not_null {
-    ($target: expr, $patch: ident, $field: ident) => {
-        match $patch.$field {
-            PatchField::Some($field) => $target.$field = $field,
-            PatchField::Null =>
-                return Err(PointercrateError::UnexpectedNull {
-                    field: stringify!($field),
-                }),
-            _ => (),
-        }
-    };
-
-    ($target: expr, $patch: ident, $field: ident, $method: ident) => {
-        match $patch.$field {
-            PatchField::Some($field) => $target.$method(&$field),
-            PatchField::Null =>
-                return Err(PointercrateError::UnexpectedNull {
-                    field: stringify!($field),
-                }),
-            _ => (),
-        }
-    };
-
-    ($target: expr, $patch: ident, $field: ident, *$method: ident) => {
-        match $patch.$field {
-            PatchField::Some($field) => $target.$method($field),
-            PatchField::Null =>
-                return Err(PointercrateError::UnexpectedNull {
-                    field: stringify!($field),
-                }),
-            _ => (),
-        }
-    };
 }
 
 macro_rules! make_patch {
-    (struct $name: ident {$($field: ident:$t:ty),*}) => {
+    (struct $name: ident {
+        $($fields: tt)*
+    }) => {
+        make_patch!(@$name, [], $($fields)*);
+    };
+
+    (@$name: ident, [$(($d: expr, $f: ident, $t: ty)),*], $field: ident: Option<$inner_type: ty>, $($fields: tt)*) => {
+        make_patch!(@$name, [$(($d, $f, $t),)* ("deserialize_optional", $field, Option<$inner_type>)], $($fields)*);
+    };
+
+    (@$name: ident, [$(($d: expr, $f: ident, $t: ty)),*], $field: ident: $inner_type: ty, $($fields: tt)*) => {
+        make_patch!(@$name, [$(($d, $f, $t),)* ("deserialize_non_optional", $field, $inner_type)], $($fields)*);
+    };
+
+    (@$name: ident, [$(($d: expr, $f: ident, $t: ty)),*], $field: ident: Option<$inner_type: ty>) => {
+        make_patch!(@$name, [$(($d, $f, $t),)* ("deserialize_optional", $field, Option<$inner_type>)]);
+    };
+
+    (@$name: ident, [$(($d: expr, $f: ident, $t: ty)),*], $field: ident: $inner_type: ty) => {
+        make_patch!(@$name, [$(($d, $f, $t),)* ("deserialize_non_optional", $field, $inner_type)]);
+    };
+    (@$name: ident, [$(($d: expr, $f: ident, $t: ty)),*],) => {
+        make_patch!(@$name, [$(($d, $f, $t)),*]);
+    };
+
+    (@$name: ident, [$(($deserialize_with: expr, $field: ident, $type: ty)),*]) => {
         #[derive(Deserialize, Debug)]
         pub struct $name {
             $(
-                #[serde(default, deserialize_with = "deserialize_patch")]
-                pub $field: PatchField<$t>,
+                #[serde(default, deserialize_with = $deserialize_with)]
+                pub $field: Option<$type>,
             )*
         }
+    };
+}
+
+macro_rules! patch {
+    ($target: expr, $patch: ident: $($field: ident),+) => {
+        $(
+            if let Some(value) = $patch.$field {
+                $target.$field = value;
+            }
+        )+
+    };
+}
+
+macro_rules! patch_with {
+    ($target: expr, $patch: ident: $($method: ident($field: ident)),+) => {
+        $(
+            if let Some(value) = $patch.$field {
+                $target.$method(value);
+            }
+        )+
+    };
+
+    ($target: expr, $patch: ident: $($method: ident(&$field: ident)),+) => {
+        $(
+            if let Some(ref value) = $patch.$field {
+                $target.$method(value);
+            }
+        )+
+    };
+}
+
+macro_rules! map_patch {
+    ($target: expr, $patch: ident: $($map: expr => $field: ident),+) => {
+        $(
+            if let Some(ref value) = $patch.$field {
+                $target.$field = $map(value);
+            }
+        )+
+    };
+}
+
+macro_rules! map_patch_with {
+    ($target: expr, $patch: ident: $($map: expr => $method: ident(&$field: ident)),+) => {
+        $(
+            if let Some(ref value) = $patch.$field {
+                $target.$method($map(value));
+            }
+        )+
+    };
+
+    ($target: expr, $patch: ident: $($map: expr => $method: ident($field: ident)),+) => {
+        $(
+            if let Some(value) = $patch.$field {
+                $target.$method($map(value));
+            }
+        )+
+    };
+}
+
+macro_rules! try_map_patch {
+    ($target: expr, $patch: ident: $($map: expr => $field: ident),+) => {
+        $(
+            if let Some(ref value) = $patch.$field {
+                $target.$field = $map(value)?;
+            }
+        )+
+    };
+}
+
+macro_rules! try_map_patch_with {
+    ($target: expr, $patch: ident: $($map: expr => $method: ident(&$field: ident)),+) => {
+        $(
+            if let Some(ref value) = $patch.$field {
+                $target.$method($map(value)?);
+            }
+        )+
+    };
+
+    ($target: expr, $patch: ident: $($map: expr => $method: ident($field: ident)),+) => {
+        $(
+            if let Some(value) = $patch.$field {
+                $target.$method($map(value)?);
+            }
+        )+
+    };
+}
+
+macro_rules! validate {
+    ($patch: ident: $($validator: path[$field: ident]),+) => {
+        $(
+            if let Some(ref mut value) = $patch.$field {
+                $validator(value)?
+            }
+        )+
+    }
+}
+
+macro_rules! validate_db {
+    ($patch: ident, $conn: ident: $($validator: path[$field: ident]),+) => {
+        $(
+            if let Some(ref mut value) = $patch.$field {
+                $validator(value, $conn)?
+            }
+        )+
+    }
+}
+
+macro_rules! validate_nullable {
+    ($patch: ident: $($validator: path[$field: ident]),+) => {
+        $(
+            if let Some(Some(ref mut value)) = $patch.$field {
+                $validator(value)?
+            }
+        )+
     }
 }

@@ -1,8 +1,8 @@
 use super::Demon;
 use crate::{
     error::PointercrateError,
-    model::user::Permissions,
-    operation::{deserialize_patch, Hotfix, Patch, PatchField},
+    model::{player::Player, user::Permissions},
+    operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
     schema::demons,
     video, Result,
 };
@@ -13,10 +13,10 @@ make_patch! {
     struct PatchDemon {
         name: String,
         position: i16,
-        video: String,
+        video: Option<String>,
         requirement: i16,
-        verifier: i32,
-        publisher: i32
+        verifier: String,
+        publisher: String
     }
 }
 
@@ -28,13 +28,13 @@ impl Hotfix for PatchDemon {
 
 impl Patch<PatchDemon> for Demon {
     fn patch(mut self, mut patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
-        patch
-            .name
-            .validate_against_database(Demon::validate_name, connection)?;
-        patch
-            .position
-            .validate_against_database(Demon::validate_position, connection)?;
-        patch.video.validate(Demon::validate_video)?;
+        validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
+        validate_nullable!(patch: Demon::validate_video[video]);
+
+        let map = |name| Player::name_to_id(name, connection);
+
+        patch!(self, patch: name, video, requirement);
+        try_map_patch!(self, patch: map => verifier, map => publisher);
 
         unimplemented!()
     }

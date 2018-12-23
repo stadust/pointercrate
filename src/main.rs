@@ -24,8 +24,6 @@ extern crate diesel;
 
 type Result<T> = std::result::Result<T, PointercrateError>;
 
-use actix::System;
-use actix_web::{error::ResponseError, fs, http::Method, server, App};
 use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
@@ -33,6 +31,8 @@ use crate::{
     state::{Http, PointercrateState},
     view::{home::Homepage, Page},
 };
+use actix::System;
+use actix_web::{error::ResponseError, fs, http::Method, server, App};
 
 #[macro_use]
 pub mod operation;
@@ -58,6 +58,8 @@ macro_rules! mna {
         }
     }
 }
+
+// TODO: for all database code: fucking fix the order of the PgConnection parameter (and the others)
 
 // TODO: custom 404 handling, how does it work??????
 

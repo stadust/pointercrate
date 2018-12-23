@@ -1,4 +1,4 @@
-use crate::schema::players;
+use crate::{operation::Get, schema::players, Result};
 use diesel::{
     expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
     QueryResult, RunQueryDsl,
@@ -53,5 +53,9 @@ impl Player {
         insert_into(players::table)
             .values(&NewPlayer { name })
             .get_result(conn)
+    }
+
+    pub fn name_to_id(name: &str, connection: &PgConnection) -> Result<i32> {
+        Ok(Player::get(name, connection)?.id)
     }
 }

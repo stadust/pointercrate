@@ -16,7 +16,7 @@ use std::fmt::Display;
 
 mod get;
 mod paginate;
-mod patch;
+pub mod patch;
 mod post;
 
 pub use self::{paginate::DemonPagination, post::PostDemon};
@@ -40,7 +40,7 @@ pub struct Demon {
 
     pub video: Option<String>,
 
-    // TODO: remove this fields
+    // TODO: remove this field
     description: Option<String>,
     // TODO: remove this field
     notes: Option<String>,
