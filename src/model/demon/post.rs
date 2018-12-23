@@ -48,8 +48,8 @@ impl Post<PostDemon> for Demon {
             Demon::validate_name(&mut data.name, connection)?;
             Demon::validate_position(&mut data.position, connection)?;
 
-            let publisher = Player::get(&data.publisher, connection)?;
-            let verifier = Player::get(&data.verifier, connection)?;
+            let publisher = Player::get(data.publisher.as_ref(), connection)?;
+            let verifier = Player::get(data.verifier.as_ref(), connection)?;
 
             let new = NewDemon {
                 name: &data.name,
@@ -67,7 +67,7 @@ impl Post<PostDemon> for Demon {
                 .get_result::<Demon>(connection)?;
 
             for creator in &data.creators {
-                Creator::create_from((&inserted_demon.name[..], &creator[..]), connection)?;
+                Creator::create_from((inserted_demon.name.as_ref(), creator.as_ref()), connection)?;
             }
 
             Ok(inserted_demon)
