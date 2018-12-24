@@ -1,0 +1,7 @@
+.tab-content:not(.tab-content-active) {
+  display: none;
+}
+
+.tab {
+  cursor: pointer;
+}

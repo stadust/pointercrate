@@ -41,6 +41,7 @@ pub trait Page {
                     meta name="author" content = "stadust, GunnerBones" {}
                     meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top" {}
                     meta name="description" content = (self.description()) {}
+                    meta charset = "utf-8" {}
 
                     @for markup in self.head(req) {
                         {(markup)}
@@ -52,6 +53,7 @@ pub trait Page {
                     script src = {(STATIC) "js/nav.v2.js"} {}
                     script src = {(STATIC) "js/misc.v2.js"} {}
                     script src = {(STATIC) "js/ui.v2.js"} {}
+                    script src = {(STATIC) "js/tab.js"} {}
 
                     @for script in self.scripts() {
                         script src = {(STATIC)(script)} {}
@@ -66,6 +68,7 @@ pub trait Page {
                     link rel = "stylesheet" href = {(STATIC) "css/core/ui.v2.1.css"} {}
                     link rel = "stylesheet" href = {(STATIC) "css/core/core.v2.css"} {}
                     link rel = "stylesheet" href = {(STATIC) "css/main.v2.1.css"} {}
+                    link rel = "stylesheet" href = {(STATIC) "css/core/tab.css"} {}
 
                     @for sheet in self.stylesheets() {
                         link rel = "stylsheet" href = {(STATIC) (sheet)} {}
