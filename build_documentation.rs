@@ -45,10 +45,7 @@ fn main() {
             command.arg(md.path());
         }
 
-        let output = command
-            .stdout(file)
-            .output()
-            .unwrap();
+        let output = command.stdout(file).output().unwrap();
 
         eprint!("{}", String::from_utf8_lossy(&output.stderr));
     }

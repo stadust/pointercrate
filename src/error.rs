@@ -1,11 +1,11 @@
 //! Moduling containing the [`PointercrateError`] enum.
 
+use crate::model::{record::RecordStatus, user::PermissionsSet};
 use actix_web::{
     error::JsonPayloadError,
     http::{Method, StatusCode},
     HttpResponse, ResponseError,
 };
-use crate::model::{record::RecordStatus, user::PermissionsSet};
 use diesel::result::Error;
 use failure::Fail;
 use log::error;

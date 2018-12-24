@@ -1,14 +1,14 @@
 //! Module containing all the actix request handlers for the `/api/v1/users/` endpoints
 
-use actix_web::{
-    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
-};
 use crate::{
     actor::database::TokenAuth,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchUser, User, UserPagination},
     state::PointercrateState,
+};
+use actix_web::{
+    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use log::info;
 use tokio::prelude::future::Future;

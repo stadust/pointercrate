@@ -1,12 +1,12 @@
 //! Module containing all the actix request handlers for the `/api/v1/auth/` endpoints
 
-use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use crate::{
     actor::database::{BasicAuth, Invalidate, TokenAuth},
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,
 };
+use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
 use log::info;
 use serde_json::json;
 use tokio::prelude::future::Future;

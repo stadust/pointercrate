@@ -1,12 +1,12 @@
 //! Module containing middleware for dealing with HTTP preconditions
 
+use crate::error::PointercrateError;
 use actix_web::{
     dev::HttpResponseBuilder,
     http::Method,
     middleware::{Middleware, Response, Started},
     Error, HttpRequest, HttpResponse,
 };
-use crate::error::PointercrateError;
 use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,

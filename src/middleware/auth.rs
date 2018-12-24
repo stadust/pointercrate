@@ -1,8 +1,8 @@
+use crate::{error::PointercrateError, state::PointercrateState};
 use actix_web::{
     middleware::{Middleware, Started},
     Error, HttpRequest,
 };
-use crate::{error::PointercrateError, state::PointercrateState};
 use log::debug;
 use serde_derive::{Deserialize, Serialize};
 

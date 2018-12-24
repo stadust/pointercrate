@@ -1,14 +1,14 @@
 //! Module containing all the actix request handlers for the `/api/v1/records/` endpoints
 
-use actix_web::{
-    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
-};
 use crate::{
     actor::database::DeleteMessage,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{record::Submission, Record, Submitter},
     state::PointercrateState,
+};
+use actix_web::{
+    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use ipnetwork::IpNetwork;
 use log::{error, info, warn};

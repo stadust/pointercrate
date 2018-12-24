@@ -32,7 +32,12 @@ use crate::{
     view::{documentation::Documentation, home::Homepage, Page},
 };
 use actix::System;
-use actix_web::{error::ResponseError, fs, http::Method, server, App};
+use actix_web::{
+    error::ResponseError,
+    fs,
+    http::{Method, NormalizePath},
+    server, App,
+};
 use std::sync::Arc;
 
 #[macro_use]
@@ -184,6 +189,7 @@ fn main() {
                             })
                     })
             })
+            .default_resource(|r| r.h(NormalizePath::default()))
     };
 
     server::new(app_factory)
