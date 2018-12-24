@@ -37,7 +37,7 @@ use actix_web::{
     error::ResponseError,
     fs,
     http::{Method, NormalizePath, StatusCode},
-    server, App,
+    server, App, FromRequest, Path,
 };
 use std::sync::Arc;
 
@@ -129,6 +129,14 @@ fn main() {
             .resource("/documentation/", |r| {
                 r.name("documentation");
                 r.get().f(|req| Documentation::new(req.state(), "index").map(|d|d.render(req)))
+            })
+            .resource("/documentation/{page}/", |r| {
+                r.get().f(|req|{
+                    Path::<String>::extract(req)
+                        .map(|page| page.into_inner())
+                        .and_then(|page| Documentation::new(req.state(), &page).map_err(Into::into))
+                        .map(|d|d.render(req))
+                })
             })
             .scope("/api/v1", |api_scope| {
                 api_scope

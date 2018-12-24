@@ -26,13 +26,16 @@ fn main() {
         let file = File::create(file).unwrap();
 
         if name != "index" {
-            let mut name = name.to_string();
-            if let Some(r) = name.get_mut(0..1) {
+            let mut title_name = name.to_string();
+            if let Some(r) = title_name.get_mut(0..1) {
                 r.make_ascii_uppercase()
             }
-            print!("<li><a href='/documentation/{0}'>{0}</a><ol>", name);
+            print!(
+                "<li><a href='/documentation/{}'>{}</a><ol>",
+                name, title_name
+            );
         }
-        for li in process_directory(&dir, "index") {
+        for li in process_directory(&dir, name) {
             print!("{}", li);
         }
         if name != "index" {
