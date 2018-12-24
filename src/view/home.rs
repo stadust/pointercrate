@@ -42,7 +42,7 @@ impl Page for Homepage {
                                 "The demonlist stats viewer assigns each player a score based on how many demons they've beaten and then ranks them, showing exactly who's the best!"
                             }
                             div.tab-content data-tab-id = "3" {
-                                "Each submitted record on the demonlist is manually accepted or rejected checked by our competent list editors!"
+                                "Each submitted record on the demonlist is manually accepted or rejected by our competent list editors!"
                             }
                             div.tab-content data-tab-id = "4" {
                                 "Thanks to our specialized way of connecting to the Geometry Dash servers we are able to display a whole range of information about the demons, including their description, download count and much more!"
@@ -90,7 +90,7 @@ impl Page for Homepage {
             }
             div.center style = "background-color: rgba(255,255,255, 0.3); display:flex; justify-content: center; height: 300px; font-size: 110%" {
                 div style="padding-top:50px; padding-bottom: 50px; display: flex; flex-flow: row; margin-left: 20px; justify-content: space-between; max-width: 1024px; align-items: center" {
-                    a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = "https://github.com/stadust/pointercrate" style="height: 50px" {
+                    a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = "https://github.com/stadust/pointercrate" style="height: 50px" target = "_blank"{
                         i.fa.fa-github aria-hidden="true" {}
                         (PreEscaped("&nbsp;&nbsp;&nbsp;"))
                         "To the repository"
