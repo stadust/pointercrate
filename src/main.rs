@@ -191,8 +191,10 @@ fn main() {
                     })
             })
             .default_resource(|r|{
-                r.get().f(|request| {
-                    let normalized = NormalizePath::default().handle(request);
+                let normalizer = NormalizePath::default();
+
+                r.get().f(move |request| {
+                    let normalized = normalizer.handle(request);
 
                     if normalized.status() == StatusCode::NOT_FOUND {
                         return Err(PointercrateError::NotFound)
