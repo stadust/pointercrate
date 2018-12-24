@@ -1,6 +1,6 @@
 use super::{url_helper, Page};
-use actix_web::HttpRequest;
 use crate::state::PointercrateState;
+use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]
@@ -24,7 +24,7 @@ impl Page for Homepage {
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
-        html!{
+        html! {
             div.panel.feature-panel.fade style="max-width:800px; margin-left:auto; margin-right: auto; font-size: 0.9em" {
                 h3 style="font-size: 1.5em; margin-bottom: 0px;" {
                     "Home of the official Geometry Dash Demonlist!"

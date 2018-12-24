@@ -6,7 +6,6 @@ use std::{
 
 fn main() {
     let doc_directory = Path::new("./doc");
-    let template_file = doc_directory.join("template.html");
     let out_directory = std::env::var("OUT_DIR").unwrap();
     let out_directory = Path::new(&out_directory);
 
@@ -27,13 +26,17 @@ fn main() {
         let file = File::create(file).unwrap();
 
         if name != "index" {
-            print!("<ol>");
+            let mut name = name.to_string();
+            if let Some(r) = name.get_mut(0..1) {
+                r.make_ascii_uppercase()
+            }
+            print!("<li><a href='/documentation/{0}'>{0}</a><ol>", name);
         }
         for li in process_directory(&dir, "index") {
             print!("{}", li);
         }
         if name != "index" {
-            print!("</ol>");
+            print!("</ol></li>");
         }
 
         let mut command = Command::new("pandoc");
@@ -43,7 +46,6 @@ fn main() {
         }
 
         let output = command
-            .arg(&format!("--template={}", template_file.to_str().unwrap()))
             .stdout(file)
             .output()
             .unwrap();
@@ -52,6 +54,7 @@ fn main() {
     }
 
     print!("</ol>");
+    print!("</div>");
 }
 
 fn sorted_dir_entries<F: FnMut(&DirEntry) -> bool, P: AsRef<Path>>(path: P, f: F) -> Vec<DirEntry> {
@@ -102,7 +105,7 @@ fn process_directory(entry: &DirEntry, name: &str) -> Vec<String> {
         .map(|entry| find_title(entry.path()))
         .map(|(id, title)| {
             format!(
-                "<li><href = '/documentation/{}#{}>{}</a></li>",
+                "<li><a href = '/documentation/{}#{}'>{}</a></li>",
                 name, id, title
             )
         })

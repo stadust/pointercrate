@@ -6,6 +6,7 @@ use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod demonlist;
+pub mod documentation;
 pub mod home;
 
 // TODO: maybe do this with `url_for()`
@@ -41,6 +42,8 @@ pub trait Page {
                     meta name="author" content = "stadust, GunnerBones" {}
                     meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top" {}
                     meta name="description" content = (self.description()) {}
+                    meta http-equiv="Content-Type" content = "text/html; charset=utf-8" {}
+                    meta http-equiv="Content-Style-Type" content="text/css" {}
 
                     @for markup in self.head(req) {
                         {(markup)}
@@ -68,7 +71,7 @@ pub trait Page {
                     link rel = "stylesheet" href = {(STATIC) "css/main.v2.1.css"} {}
 
                     @for sheet in self.stylesheets() {
-                        link rel = "stylsheet" href = {(STATIC) (sheet)} {}
+                        link rel = "stylesheet" href = {(STATIC) (sheet)} {}
                     }
                 }
                 body style={"background-image: url(" (STATIC) "images/squares3.png)"}{

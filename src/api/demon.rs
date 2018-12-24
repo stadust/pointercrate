@@ -132,11 +132,7 @@ pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
         })
         .and_then(move |key| {
             state
-                .database(DeleteMessage::<_, Creator>(
-                    key.into_inner(),
-                    None,
-                    PhantomData,
-                ))
+                .database(DeleteMessage::<_, Creator>::unconditional(key.into_inner()))
                 .map(|_| HttpResponse::NoContent().finish())
         })
         .responder()

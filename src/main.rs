@@ -29,10 +29,11 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve},
     state::{Http, PointercrateState},
-    view::{home::Homepage, Page},
+    view::{documentation::Documentation, home::Homepage, Page},
 };
 use actix::System;
 use actix_web::{error::ResponseError, fs, http::Method, server, App};
+use std::sync::Arc;
 
 #[macro_use]
 pub mod operation;
@@ -74,10 +75,35 @@ fn main() {
     let http = Http::from_env();
 
     let app_factory = move || {
+        let doc_files_location = env!("OUT_DIR");
+        let doc_files_location = std::path::Path::new(&doc_files_location);
+
+        let toc = std::fs::read_to_string(doc_files_location.join("../output")).unwrap();
+        let mut map = std::collections::HashMap::new();
+        for entry in std::fs::read_dir(doc_files_location).unwrap() {
+            let entry = entry.unwrap();
+            if let Some("html") = entry.path().extension().and_then(std::ffi::OsStr::to_str) {
+                let cnt = std::fs::read_to_string(entry.path()).unwrap();
+
+                map.insert(
+                    entry
+                        .path()
+                        .file_stem()
+                        .and_then(std::ffi::OsStr::to_str)
+                        .unwrap()
+                        .to_string(),
+                    cnt,
+                );
+            }
+        }
+
         let state = PointercrateState {
             database: database.clone(),
             gdcf: gdcf.clone(),
             http: http.clone(),
+
+            documentation_toc: Arc::new(toc),
+            documentation_topics: Arc::new(map),
         };
 
         App::with_state(state)
@@ -94,7 +120,10 @@ fn main() {
             })
             .resource("/demonlist/{position}/", |r| r.name("demonlist"))
             .resource("/about/", |r| r.name("about"))  // TODO: this
-            .resource("/documentation/", |r| r.name("documentation")) // TODO: this
+            .resource("/documentation/", |r| {
+                r.name("documentation");
+                r.get().f(|req| Documentation::new(req.state(), "index").map(|d|d.render(req)))
+            })
             .scope("/api/v1", |api_scope| {
                 api_scope
                     .nested("/users", |user_scope| {

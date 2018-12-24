@@ -1,4 +1,3 @@
-use actix::{Addr, Handler, Message};
 use crate::{
     actor::{
         database::{
@@ -12,13 +11,14 @@ use crate::{
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post},
     Result,
 };
+use actix::{Addr, Handler, Message};
 use hyper::{
     client::{Client, HttpConnector},
     Body, Request,
 };
 use hyper_tls::HttpsConnector;
 use log::{debug, error, info};
-use std::{hash::Hash, marker::PhantomData, sync::Arc};
+use std::{collections::HashMap, hash::Hash, marker::PhantomData, sync::Arc};
 use tokio::prelude::future::{result, Either, Future};
 
 #[derive(Debug, Clone)]
@@ -33,6 +33,9 @@ pub struct PointercrateState {
     pub database: Addr<DatabaseActor>,
     pub gdcf: Addr<GdcfActor>,
     pub http: Http,
+
+    pub documentation_toc: Arc<String>,
+    pub documentation_topics: Arc<HashMap<String, String>>,
 }
 
 impl PointercrateState {
