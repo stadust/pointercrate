@@ -33,9 +33,10 @@ use crate::{
 };
 use actix::System;
 use actix_web::{
+    dev::Handler,
     error::ResponseError,
     fs,
-    http::{Method, NormalizePath},
+    http::{Method, NormalizePath, StatusCode},
     server, App,
 };
 use std::sync::Arc;
@@ -189,7 +190,18 @@ fn main() {
                             })
                     })
             })
-            .default_resource(|r| r.h(NormalizePath::default()))
+            .default_resource(|r|{
+                r.get().f(|request| {
+                    let normalized = NormalizePath::default().handle(request);
+
+                    if normalized.status() == StatusCode::NOT_FOUND {
+                        return Err(PointercrateError::NotFound)
+                    }
+
+                    Ok(normalized)
+                });
+                r.route().f(|_| Err::<String, _>(PointercrateError::NotFound))}
+             )
     };
 
     server::new(app_factory)
