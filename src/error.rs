@@ -145,6 +145,7 @@ pub enum PointercrateError {
     /// Error Code `41100`
     #[fail(display = "A request with this methods requires a valid 'Content-Length' header")]
     LengthRequired,
+
     /// `412 PRECONDITION FAILED`. This variant is returned if a `DELETE` or `PATCH` request is
     /// made, but the provided `If-Match` header doesn't match the hash of the object currently
     /// in the database
