@@ -127,6 +127,7 @@ pub enum PointercrateError {
     #[fail(display = "The chosen username is already taken")]
     NameTaken,
 
+    // TODO: I don't think this is actually verified. Whoops
     /// `409 CONFLICT` error returned if a someone tries to add a demon with a name that's already
     /// taken by an existing demon
     ///

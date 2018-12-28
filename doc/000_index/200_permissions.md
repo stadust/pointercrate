@@ -36,8 +36,8 @@ Access to this endpoint requires at least `LIST_HELPER` permissions.
 
 These error conditions can occur at any endpoint expecting requiring specific access permissions and are thus not listed specifically for each of them.
 
-| Status code | Error code | Description                                  | Data                                                                                             |
-| ----------- | ---------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 403         | 40301      | You are missing required access permissions. | `required`: A list containing all combinations of permissions that allow to perform this request |
+| Status code | Error code | Description                                                      | Data                                                                                  |
+| ----------- | ---------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 403         | 40301      | You do not have the permissions required to perform this request | `required`: A list of permission-bitmasks that would allow you to perform the request |
 
 </div>

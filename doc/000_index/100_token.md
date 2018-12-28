@@ -22,8 +22,8 @@ followed by your access token.
 
 These error conditions apply to any endpoint that require authentication and are thus not repeated for every one of them.
 
-| Status code | Error code | Description                                                                                        |
-| ----------- | ---------- | -------------------------------------------------------------------------------------------------- |
-| 401         | 40100      | Authorization failed (e.g. because of a bad username, wrong password, wrong authorization method ) |
+| Status code | Error code | Description                                                                                                                                            |
+| ----------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 401         | 40100      | A generic `401 UNAUTHORIZED` error, indicating that authorization failed (e.g. because of a bad username, wrong password, wrong authorization method ) |
 
 </div>

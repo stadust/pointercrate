@@ -1,4 +1,127 @@
+use super::{url_helper, Page};
+use crate::{
+    model::demon::{Demon, PartialDemon},
+    state::PointercrateState,
+};
+use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped};
+
+#[derive(Debug)]
+pub struct Demonlist {
+    title: String,
+    current_demon: Demon,
+    all_demons: Vec<PartialDemon>,
+}
+
+impl Demonlist {
+    pub fn new(demon: Demon) -> Demonlist {
+        Demonlist {
+            title: format!(
+                "#{} - {} - Geometry Dash Demonlist",
+                demon.position, demon.name
+            ),
+            current_demon: demon,
+            all_demons: Vec::new(),
+        }
+    }
+}
+
+impl Page for Demonlist {
+    fn title(&self) -> &str {
+        &self.title
+    }
+
+    fn description(&self) -> &str {
+        ""
+        //self.current_demon.description.as_ref().unwrap_or("")
+    }
+
+    fn scripts(&self) -> Vec<&str> {
+        vec![]
+    }
+
+    fn stylesheets(&self) -> Vec<&str> {
+        vec![]
+    }
+
+    fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
+        html! {
+            // The bar of dropdown lists at the top of the page:
+            div.flex.wrap.m-center.fade#lists style="text-align: center;" {
+                // The drop down for the main list:
+                div.button.white.hover.no-shadow.js-toggle data-toggle-group="0" onclick="javascript:void(DropDown.toggleDropDown('mainlist'))" {
+                    "Main List"
+                }
+
+                // Drop down content:
+                div.see-through.fade.dropdown#mainlist {
+                    div.search.seperated {
+                        input placeholder="Filter" {}
+                    }
+                    ul.flex.wrap.space {
+                        @for demon in &self.all_demons {
+                            @if demon.position == self.current_demon.position {
+                                li.hover.white.active title={"#" (demon.position) " - " (demon.name)} {
+                                    a href = (url_helper::demon(req, demon.position)) {
+                                        {"#" (demon.position) " - " (demon.name)}
+                                    }
+                                }
+                            } else {
+                                li.hover.white title={"#" (demon.position) " - " (demon.name)} {
+                                    a href = (url_helper::demon(req, demon.position)) {
+                                        {"#" (demon.position) " - " (demon.name)}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup> {
+        vec![html! {
+            (PreEscaped(format!(r#"
+<script type="application/ld+json">
+{{
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "breadcrumb": {{
+        "@type": "BreadcrumbList",
+        "itemListElement": [{{
+                "@type": "ListItem",
+                "position": 1,
+                "item": {{
+                    "@id": "https://pointercrate.com/",
+                    "name": "pointercrate"
+                }}
+            }},{{
+                "@type": "ListItem",
+                "position": 2,
+                "item": {{
+                    "@id": "https://pointercrate.com/demonlist/",
+                    "name": "demonlist"
+                }}
+            }},{{
+                "@type": "ListItem",
+                "position": 3,
+                "item": {{
+                    "@id": "https://pointercrate.com/demonlist/{0}/",
+                    "name": "{1}"
+                }}
+            }}
+        ]
+    }},
+    "name": "\#{0} - {1}",
+    "description": "", // TODO: description
+    "url": "https://pointercrate.com/demonlist/{0}/"
+}}
+</script>
+            "#, self.current_demon.position, self.current_demon.name)))
+        }]
+    }
+}
 
 fn rules_panel() -> Markup {
     html! {
