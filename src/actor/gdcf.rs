@@ -79,7 +79,7 @@ impl Handler<GetDemon> for GdcfActor {
             Some(inner) => {
                 let mut inner = inner.extract();
 
-                if inner.len() > 0 {
+                if !inner.is_empty() {
                     Some(inner.remove(0))
                 } else {
                     None
