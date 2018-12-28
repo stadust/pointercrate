@@ -5,7 +5,10 @@ use crate::{
     schema::players,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    expression::Expression, pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl,
+    RunQueryDsl,
+};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -31,15 +34,13 @@ impl PlayerPagination {
 
 impl Paginator for PlayerPagination {
     type QuerySource = players::table;
-    type Selection = <crate::model::player::AllColumns as diesel::expression::Expression>::SqlType;
+    type Selection = crate::model::player::AllColumns;
 
     navigation!(players, id, before_id, after_id);
 
-    fn source() -> Self::QuerySource {
-        players::table
-    }
-
-    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+    fn base<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
         Player::all().into_boxed()
     }
 }

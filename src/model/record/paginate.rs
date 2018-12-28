@@ -5,7 +5,10 @@ use crate::{
     schema::records,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    expression::Expression, pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl,
+    RunQueryDsl,
+};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -47,7 +50,7 @@ impl RecordPagination {
 
 impl Paginator for RecordPagination {
     type QuerySource = records::table;
-    type Selection = <(
+    type Selection = (
         records::id,
         records::progress,
         records::video,
@@ -55,15 +58,13 @@ impl Paginator for RecordPagination {
         records::player,
         records::submitter,
         records::demon,
-    ) as diesel::expression::Expression>::SqlType;
+    );
 
     navigation!(records, id, before_id, after_id);
 
-    fn source() -> Self::QuerySource {
-        records::table
-    }
-
-    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+    fn base<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
         records::table
             .select((
                 records::id,

@@ -1,5 +1,6 @@
 use crate::Result;
 use diesel::{
+    expression::Expression,
     pg::{Pg, PgConnection},
     query_builder::BoxedSelectStatement,
 };
@@ -9,11 +10,11 @@ pub trait Paginator: Sized + Serialize
 where
     for<'de> Self: Deserialize<'de>,
 {
-    type Selection;
+    type Selection: Expression;
     type QuerySource;
 
-    fn source() -> Self::QuerySource;
-    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg>;
+    fn base<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>;
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;

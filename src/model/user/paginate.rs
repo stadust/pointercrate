@@ -5,7 +5,10 @@ use crate::{
     schema::members,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    expression::Expression, pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl,
+    RunQueryDsl,
+};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -33,15 +36,13 @@ impl UserPagination {
 
 impl Paginator for UserPagination {
     type QuerySource = members::table;
-    type Selection = <crate::model::user::AllColumns as diesel::expression::Expression>::SqlType;
+    type Selection = crate::model::user::AllColumns;
 
     navigation!(members, member_id, before_id, after_id);
 
-    fn source() -> Self::QuerySource {
-        members::table
-    }
-
-    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+    fn base<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
         User::all().into_boxed()
     }
 }

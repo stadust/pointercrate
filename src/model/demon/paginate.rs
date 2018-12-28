@@ -6,8 +6,8 @@ use crate::{
     Result,
 };
 use diesel::{
-    pg::Pg, query_builder::BoxedSelectStatement, ExpressionMethods, JoinOnDsl, PgConnection,
-    QueryDsl, RunQueryDsl,
+    expression::Expression, pg::Pg, query_builder::BoxedSelectStatement, ExpressionMethods,
+    JoinOnDsl, PgConnection, QueryDsl, RunQueryDsl,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -50,20 +50,13 @@ impl Paginator for DemonPagination {
         >,
         diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
     >;
-    type Selection = <(demons::name, demons::position, players::name) as diesel::expression::Expression>::SqlType;
+    type Selection = (demons::name, demons::position, players::name);
 
     navigation!(demons, position, i16, before_position, after_position);
 
-    fn source() -> Self::QuerySource {
-        diesel::query_source::joins::Join::new(
-            demons::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        )
-        .on(demons::publisher.eq(players::id))
-    }
-
-    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+    fn base<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
         demons::table
             .inner_join(players::table.on(demons::publisher.eq(players::id)))
             .select((demons::name, demons::position, players::name))
