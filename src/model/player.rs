@@ -24,7 +24,7 @@ struct NewPlayer<'a> {
     name: &'a str,
 }
 
-type AllColumns = (players::id, players::name, players::banned);
+pub type AllColumns = (players::id, players::name, players::banned);
 
 const ALL_COLUMNS: AllColumns = (players::id, players::name, players::banned);
 

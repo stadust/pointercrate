@@ -30,7 +30,18 @@ impl PlayerPagination {
 }
 
 impl Paginator for PlayerPagination {
+    type QuerySource = players::table;
+    type Selection = <crate::model::player::AllColumns as diesel::expression::Expression>::SqlType;
+
     navigation!(players, id, before_id, after_id);
+
+    fn source() -> Self::QuerySource {
+        players::table
+    }
+
+    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+        Player::all().into_boxed()
+    }
 }
 
 impl Paginate<PlayerPagination> for Player {

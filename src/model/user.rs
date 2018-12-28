@@ -271,44 +271,6 @@ impl Serialize for PartialUser {
         map.end()
     }
 }
-/*
-impl super::Model for PartialUser {
-    type Columns = (
-        members::member_id,
-        members::name,
-        members::display_name,
-        members::youtube_channel,
-        members::permissions,
-    );
-    type Table = members::table;
-
-    fn all() -> diesel::dsl::Select<Self::Table, Self::Columns> {
-        members::table.select((
-            members::member_id,
-            members::name,
-            members::display_name,
-            members::youtube_channel,
-            members::permissions,
-        ))
-    }
-}
-
-#[derive(Serialize, Deserialize, Paginatable, Debug, Clone)]
-#[database_table = "members"]
-#[result = "PartialUser"]
-pub struct UserPagination {
-    #[database_column = "member_id"]
-    before: Option<i32>,
-
-    #[database_column = "member_id"]
-    after: Option<i32>,
-
-    limit: Option<i32>,
-
-    name: Option<String>,
-    display_name: Option<String>,
-    // TODO: pagination for permissions (maybe some sort of custom_filter attribute???)
-}*/
 
 impl Hash for User {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -335,7 +297,7 @@ impl Serialize for User {
     }
 }
 
-type AllColumns = (
+pub type AllColumns = (
     members::member_id,
     members::name,
     members::display_name,

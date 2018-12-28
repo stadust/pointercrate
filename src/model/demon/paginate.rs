@@ -2,10 +2,13 @@ use super::PartialDemon;
 use crate::{
     error::PointercrateError,
     operation::{Paginate, Paginator},
-    schema::demons,
+    schema::{demons, players},
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    pg::Pg, query_builder::BoxedSelectStatement, ExpressionMethods, JoinOnDsl, PgConnection,
+    QueryDsl, RunQueryDsl,
+};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -39,12 +42,38 @@ impl DemonPagination {
 }
 
 impl Paginator for DemonPagination {
+    type QuerySource = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
+    >;
+    type Selection = <(demons::name, demons::position, players::name) as diesel::expression::Expression>::SqlType;
+
     navigation!(demons, position, i16, before_position, after_position);
+
+    fn source() -> Self::QuerySource {
+        diesel::query_source::joins::Join::new(
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(demons::publisher.eq(players::id))
+    }
+
+    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+        demons::table
+            .inner_join(players::table.on(demons::publisher.eq(players::id)))
+            .select((demons::name, demons::position, players::name))
+            .into_boxed()
+    }
 }
 
 impl Paginate<DemonPagination> for PartialDemon {
     fn load(pagination: &DemonPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(PartialDemon::all().into_boxed());
+        let mut query = pagination.filter(DemonPagination::base());
 
         filter!(query[
             demons::position > pagination.after_position,

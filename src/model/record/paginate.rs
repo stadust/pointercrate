@@ -46,22 +46,41 @@ impl RecordPagination {
 }
 
 impl Paginator for RecordPagination {
+    type QuerySource = records::table;
+    type Selection = <(
+        records::id,
+        records::progress,
+        records::video,
+        records::status_,
+        records::player,
+        records::submitter,
+        records::demon,
+    ) as diesel::expression::Expression>::SqlType;
+
     navigation!(records, id, before_id, after_id);
+
+    fn source() -> Self::QuerySource {
+        records::table
+    }
+
+    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+        records::table
+            .select((
+                records::id,
+                records::progress,
+                records::video,
+                records::status_,
+                records::player,
+                records::submitter,
+                records::demon,
+            ))
+            .into_boxed()
+    }
 }
 
 impl Paginate<RecordPagination> for PartialRecord {
     fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let select = records::table.select((
-            records::id,
-            records::progress,
-            records::video,
-            records::status_,
-            records::player,
-            records::submitter,
-            records::demon,
-        ));
-
-        let mut query = pagination.filter(select.into_boxed());
+        let mut query = pagination.filter(RecordPagination::base());
 
         filter!(query[
             records::id > pagination.after_id,

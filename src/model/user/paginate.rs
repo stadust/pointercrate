@@ -32,7 +32,18 @@ impl UserPagination {
 }
 
 impl Paginator for UserPagination {
+    type QuerySource = members::table;
+    type Selection = <crate::model::user::AllColumns as diesel::expression::Expression>::SqlType;
+
     navigation!(members, member_id, before_id, after_id);
+
+    fn source() -> Self::QuerySource {
+        members::table
+    }
+
+    fn base<'a>() -> BoxedSelectStatement<'a, Self::Selection, Self::QuerySource, Pg> {
+        User::all().into_boxed()
+    }
 }
 
 impl Paginate<UserPagination> for User {

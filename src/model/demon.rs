@@ -279,16 +279,18 @@ type AllPartial = diesel::dsl::Select<
     (demons::name, demons::position, players::name),
 >;
 */
+/*
+pub type PartialDemonSource = diesel::query_source::joins::JoinOn<
+    diesel::query_source::joins::Join<
+        demons::table,
+        players::table,
+        diesel::query_source::joins::Inner,
+    >,
+    diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
+>;
 
 type AllPartial = diesel::query_builder::SelectStatement<
-    diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            demons::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
-    >,
+    PartialDemonSource,
     diesel::query_builder::select_clause::SelectClause<(
         demons::columns::name,
         demons::columns::position,
@@ -304,7 +306,7 @@ impl PartialDemon {
             .inner_join(players::table.on(demons::publisher.eq(players::id)))
             .select((demons::name, demons::position, players::name))
     }
-}
+}*/
 
 impl Into<PartialDemon> for Demon {
     fn into(self) -> PartialDemon {
