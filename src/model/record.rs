@@ -283,6 +283,7 @@ impl Queryable<SqlType, Pg> for Record {
             demon: PartialDemon {
                 name: row.8,
                 position: row.9,
+                publisher: String::new(), // TODO:
             },
         }
     }

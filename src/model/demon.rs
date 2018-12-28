@@ -3,12 +3,12 @@ use crate::{
     error::PointercrateError,
     model::player::Player,
     operation::Get,
-    schema::demons,
+    schema::{demons, players},
     Result,
 };
 use diesel::{
-    dsl::max, expression::bound::Bound, sql_types, Connection, ExpressionMethods, PgConnection,
-    QueryDsl, QueryResult, RunQueryDsl,
+    dsl::max, expression::bound::Bound, pg::Pg, sql_types, Connection, ExpressionMethods,
+    JoinOnDsl, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
@@ -56,12 +56,24 @@ pub struct Demon {
 ///
 /// These representations are used whenever a different object references a demon, or when a list of
 /// demons is requested
-#[derive(Debug, Queryable, Identifiable, Hash, Eq, PartialEq, Associations)]
-#[table_name = "demons"]
-#[primary_key("name")]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct PartialDemon {
     pub name: String,
     pub position: i16,
+    // TODO: when implemented return host here instead of publisher
+    pub publisher: String,
+}
+
+impl Queryable<(sql_types::Text, sql_types::SmallInt, sql_types::Text), Pg> for PartialDemon {
+    type Row = (String, i16, String);
+
+    fn build(row: Self::Row) -> Self {
+        PartialDemon {
+            name: row.0,
+            position: row.1,
+            publisher: row.2,
+        }
+    }
 }
 
 impl Serialize for PartialDemon {
@@ -69,9 +81,10 @@ impl Serialize for PartialDemon {
     where
         S: Serializer,
     {
-        let mut map = serializer.serialize_map(Some(3))?;
+        let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("name", &self.name)?;
         map.serialize_entry("position", &self.position)?;
+        map.serialize_entry("publisher", &self.publisher)?;
         map.serialize_entry("state", &ListState::from(self.position).to_string())?;
         map.end()
     }
@@ -253,10 +266,43 @@ impl Demon {
         Ok(())
     }
 }
+/*
+type AllPartial = diesel::dsl::Select<
+    diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<demons::publisher, players::id>,
+    >,
+    (demons::name, demons::position, players::name),
+>;
+*/
+
+type AllPartial = diesel::query_builder::SelectStatement<
+    diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
+    >,
+    diesel::query_builder::select_clause::SelectClause<(
+        demons::columns::name,
+        demons::columns::position,
+        players::columns::name,
+    )>,
+>;
+
+use diesel::query_builder::BoxedSelectStatement;
 
 impl PartialDemon {
-    fn all() -> diesel::dsl::Select<demons::table, (demons::name, demons::position)> {
-        demons::table.select((demons::name, demons::position))
+    fn all() -> AllPartial {
+        demons::table
+            .inner_join(players::table.on(demons::publisher.eq(players::id)))
+            .select((demons::name, demons::position, players::name))
     }
 }
 
@@ -265,6 +311,7 @@ impl Into<PartialDemon> for Demon {
         PartialDemon {
             name: self.name,
             position: self.position,
+            publisher: String::new(), // TODO: publisher here
         }
     }
 }
