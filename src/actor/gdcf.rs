@@ -49,16 +49,16 @@ impl Actor for GdcfActor {
 }
 
 #[derive(Debug)]
-pub struct GetDemonDescription(pub String);
+pub struct GetDemon(pub String);
 
-impl Message for GetDemonDescription {
-    type Result = Option<String>;
+impl Message for GetDemon {
+    type Result = Option<PartialLevel<u64, u64>>;
 }
 
-impl Handler<GetDemonDescription> for GdcfActor {
-    type Result = Option<String>;
+impl Handler<GetDemon> for GdcfActor {
+    type Result = Option<PartialLevel<u64, u64>>;
 
-    fn handle(&mut self, msg: GetDemonDescription, ctx: &mut Context<Self>) -> Option<String> {
+    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Option<PartialLevel<u64, u64>> {
         let GdcfFuture { cached, inner } = self.0.levels::<u64, u64>(
             LevelsRequest::default()
                 .search(msg.0)
@@ -80,7 +80,7 @@ impl Handler<GetDemonDescription> for GdcfActor {
                 let mut inner = inner.extract();
 
                 if inner.len() > 0 {
-                    inner.remove(0).description
+                    Some(inner.remove(0))
                 } else {
                     None
                 }
