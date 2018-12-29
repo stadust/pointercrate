@@ -11,6 +11,9 @@ use diesel::{
 use ipnetwork::IpNetwork;
 
 mod get;
+mod paginate;
+
+pub use self::paginate::SubmitterPagination;
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
