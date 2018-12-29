@@ -12,8 +12,9 @@ use ipnetwork::IpNetwork;
 
 mod get;
 mod paginate;
+mod patch;
 
-pub use self::paginate::SubmitterPagination;
+pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
