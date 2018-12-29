@@ -33,7 +33,11 @@ pub struct RecordPagination {
     video: Option<String>,
 }
 
-impl RecordPagination {
+impl Paginator for RecordPagination {
+    type Model = PartialRecord;
+
+    navigation!(records, id, before_id, after_id);
+
     filter_method!(records[
         progress = progress,
         progress < progress_lt,
@@ -44,12 +48,6 @@ impl RecordPagination {
         demon = demon,
         video = video
     ]);
-}
-
-impl Paginator for RecordPagination {
-    type Model = PartialRecord;
-
-    navigation!(records, id, before_id, after_id);
 }
 
 impl Paginate<RecordPagination> for PartialRecord {

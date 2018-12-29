@@ -30,19 +30,17 @@ pub struct DemonPagination {
     requirement_lt: Option<i16>,
 }
 
-impl DemonPagination {
+impl Paginator for DemonPagination {
+    type Model = PartialDemon;
+
+    navigation!(demons, position, i16, before_position, after_position);
+
     filter_method!(demons[
         name = name,
         requirement = requirement,
         requirement < requirement_lt,
         requirement > requirement_gt
     ]);
-}
-
-impl Paginator for DemonPagination {
-    type Model = PartialDemon;
-
-    navigation!(demons, position, i16, before_position, after_position);
 }
 
 impl Paginate<DemonPagination> for PartialDemon {

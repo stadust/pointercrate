@@ -25,17 +25,15 @@ pub struct UserPagination {
     has_permissions: Option<Permissions>,
 }
 
-impl UserPagination {
-    filter_method!(members[
-        name = name,
-        display_name = display_name
-    ]);
-}
-
 impl Paginator for UserPagination {
     type Model = User;
 
     navigation!(members, member_id, before_id, after_id);
+
+    filter_method!(members[
+        name = name,
+        display_name = display_name
+    ]);
 }
 
 impl Paginate<UserPagination> for User {

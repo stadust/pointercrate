@@ -1,5 +1,8 @@
 use crate::{model::Model, Result};
-use diesel::pg::PgConnection;
+use diesel::{
+    pg::{Pg, PgConnection},
+    query_builder::BoxedSelectStatement,
+};
 use serde::{Deserialize, Serialize};
 
 pub trait Paginator: Sized + Serialize
@@ -7,11 +10,32 @@ where
     for<'de> Self: Deserialize<'de>,
 {
     type Model: Model;
+    //type PrimaryColumn;
+    //type PrimaryColumnType;
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn first(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn last(&self, connection: &PgConnection) -> Result<Option<Self>>;
+
+    fn filter<'a, ST>(
+        &'a self,
+        query: BoxedSelectStatement<
+            'a,
+            ST,
+            <<Self as Paginator>::Model as crate::model::Model>::From,
+            Pg,
+        >,
+    ) -> BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::From, Pg>;
+    /*fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        use diesel::{dsl::max, QueryDsl};
+
+        Ok(
+            self.filter(Self::Model::boxed_all().select(max(Self::PrimaryColumn)))
+                .get_result::<Option<Self::PrimaryColumnType>>(connection)?
+                .map(|id: Self::PrimaryColumnType| Self{$before: Some(id + 1), $after:None, ..self.clone()})
+        )
+    }*/
 }
 
 pub trait Paginate<P: Paginator<Model = Self>>: Model + Sized {
