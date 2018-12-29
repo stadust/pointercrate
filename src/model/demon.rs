@@ -1,3 +1,4 @@
+use super::Model;
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
@@ -7,8 +8,9 @@ use crate::{
     Result,
 };
 use diesel::{
-    dsl::max, expression::bound::Bound, pg::Pg, sql_types, Connection, ExpressionMethods,
-    JoinOnDsl, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
+    dsl::max, expression::bound::Bound, pg::Pg, query_builder::BoxedSelectStatement, sql_types,
+    Connection, Expression, ExpressionMethods, JoinOnDsl, PgConnection, QueryDsl, QueryResult,
+    Queryable, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
@@ -87,6 +89,27 @@ impl Serialize for PartialDemon {
         map.serialize_entry("publisher", &self.publisher)?;
         map.serialize_entry("state", &ListState::from(self.position).to_string())?;
         map.end()
+    }
+}
+
+impl Model for PartialDemon {
+    type QuerySource = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
+    >;
+    type Selection = (demons::name, demons::position, players::name);
+
+    fn boxed_all<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
+        demons::table
+            .inner_join(players::table.on(demons::publisher.eq(players::id)))
+            .select((demons::name, demons::position, players::name))
+            .into_boxed()
     }
 }
 
@@ -266,47 +289,6 @@ impl Demon {
         Ok(())
     }
 }
-/*
-type AllPartial = diesel::dsl::Select<
-    diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            demons::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<demons::publisher, players::id>,
-    >,
-    (demons::name, demons::position, players::name),
->;
-*/
-/*
-pub type PartialDemonSource = diesel::query_source::joins::JoinOn<
-    diesel::query_source::joins::Join<
-        demons::table,
-        players::table,
-        diesel::query_source::joins::Inner,
-    >,
-    diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
->;
-
-type AllPartial = diesel::query_builder::SelectStatement<
-    PartialDemonSource,
-    diesel::query_builder::select_clause::SelectClause<(
-        demons::columns::name,
-        demons::columns::position,
-        players::columns::name,
-    )>,
->;
-
-use diesel::query_builder::BoxedSelectStatement;
-
-impl PartialDemon {
-    fn all() -> AllPartial {
-        demons::table
-            .inner_join(players::table.on(demons::publisher.eq(players::id)))
-            .select((demons::name, demons::position, players::name))
-    }
-}*/
 
 impl Into<PartialDemon> for Demon {
     fn into(self) -> PartialDemon {

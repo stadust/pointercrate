@@ -1,7 +1,8 @@
+use super::Model;
 use crate::{operation::Get, schema::players, Result};
 use diesel::{
-    expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
-    QueryResult, RunQueryDsl,
+    expression::bound::Bound, insert_into, pg::Pg, query_builder::BoxedSelectStatement, sql_types,
+    Expression, ExpressionMethods, PgConnection, QueryDsl, QueryResult, RunQueryDsl,
 };
 use serde_derive::Serialize;
 
@@ -57,5 +58,15 @@ impl Player {
 
     pub fn name_to_id(name: &str, connection: &PgConnection) -> Result<i32> {
         Ok(Player::get(name, connection)?.id)
+    }
+}
+
+impl Model for Player {
+    type QuerySource = players::table;
+    type Selection = AllColumns;
+
+    fn boxed_all<'a>(
+    ) -> BoxedSelectStatement<'a, <AllColumns as Expression>::SqlType, players::table, Pg> {
+        Self::all().into_boxed()
     }
 }

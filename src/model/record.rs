@@ -1,4 +1,4 @@
-use super::{Demon, Player, Submitter};
+use super::{Demon, Model, Player, Submitter};
 use crate::{
     model::demon::PartialDemon,
     schema::{demons, players, records},
@@ -8,9 +8,10 @@ use diesel::{
     expression::bound::Bound,
     insert_into,
     pg::{Pg, PgConnection},
+    query_builder::BoxedSelectStatement,
     query_dsl::{QueryDsl, RunQueryDsl},
     result::QueryResult,
-    sql_types, BoolExpressionMethods, ExpressionMethods,
+    sql_types, BoolExpressionMethods, Expression, ExpressionMethods,
 };
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -134,6 +135,16 @@ struct NewRecord<'a> {
     submitter: i32,
     demon: &'a str,
 }
+
+type PartialColumns = (
+    records::id,
+    records::progress,
+    records::video,
+    records::status_,
+    records::player,
+    records::submitter,
+    records::demon,
+);
 
 type AllColumns = (
     records::id,
@@ -286,5 +297,26 @@ impl Queryable<SqlType, Pg> for Record {
                 publisher: String::new(), // TODO:
             },
         }
+    }
+}
+
+impl Model for PartialRecord {
+    type QuerySource = records::table;
+    type Selection = PartialColumns;
+
+    fn boxed_all<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
+        records::table
+            .select((
+                records::id,
+                records::progress,
+                records::video,
+                records::status_,
+                records::player,
+                records::submitter,
+                records::demon,
+            ))
+            .into_boxed()
     }
 }

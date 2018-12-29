@@ -164,8 +164,8 @@ macro_rules! navigation {
 
             Ok(
                 self.filter(Self::base().select(min($table::$column)))
-                .get_result::<Option<$column_type>>(connection)?
-                .map(|id: $column_type| Self{$after: Some(id - 1), $before:None,..self.clone()})
+                    .get_result::<Option<$column_type>>(connection)?
+                    .map(|id: $column_type| Self{$after: Some(id - 1), $before:None,..self.clone()})
             )
         }
 

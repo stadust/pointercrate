@@ -1,9 +1,13 @@
+use super::Model;
 use crate::{
     bitstring::Bits, config::SECRET, error::PointercrateError, middleware::auth::Claims,
     schema::members, Result,
 };
 use bitflags::bitflags;
-use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
+use diesel::{
+    expression::bound::Bound, pg::Pg, query_builder::BoxedSelectStatement, query_dsl::QueryDsl,
+    sql_types, Expression, ExpressionMethods,
+};
 use log::debug;
 use serde::{
     ser::{SerializeMap, SerializeSeq},
@@ -294,6 +298,17 @@ impl Serialize for User {
         map.serialize_entry("display_name", &self.display_name)?;
         map.serialize_entry("youtube_channel", &self.youtube_channel)?;
         map.end()
+    }
+}
+
+impl Model for User {
+    type QuerySource = members::table;
+    type Selection = crate::model::user::AllColumns;
+
+    fn boxed_all<'a>(
+    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
+    {
+        User::all().into_boxed()
     }
 }
 
