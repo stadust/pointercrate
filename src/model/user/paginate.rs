@@ -21,7 +21,6 @@ pub struct UserPagination {
 
     name: Option<String>,
     display_name: Option<String>,
-    // TODO: this
     has_permissions: Option<Permissions>,
 }
 
@@ -62,6 +61,14 @@ impl Paginator for UserPagination {
 impl Paginate<UserPagination> for User {
     fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
         let mut query = pagination.filter(User::boxed_all());
+
+        if let Some(permissions) = pagination.has_permissions {
+            // FIXME: raw inline SQL is a bad idea
+            query = query.filter(diesel::dsl::sql(&format!(
+                "permissions & {0}::Bit(16) = {0}::Bit(16)",
+                permissions.bits
+            )));
+        }
 
         filter!(query[
             members::member_id > pagination.after_id,
