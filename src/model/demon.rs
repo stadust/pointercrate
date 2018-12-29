@@ -24,7 +24,7 @@ mod post;
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 
 /// Struct modelling a demon in the database
-#[derive(Queryable, Debug, Identifiable, Serialize, Hash)]
+#[derive(Debug, Identifiable, Serialize, Hash)]
 #[table_name = "demons"]
 #[primary_key("name")]
 pub struct Demon {
@@ -74,6 +74,44 @@ impl Queryable<(sql_types::Text, sql_types::SmallInt, sql_types::Text), Pg> for 
             name: row.0,
             position: row.1,
             publisher: row.2,
+        }
+    }
+}
+
+impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Demon {
+    type Row = (
+        String,
+        i16,
+        i16,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        String,
+        i32,
+        bool,
+        String,
+        i32,
+        bool,
+    );
+
+    fn build(row: Self::Row) -> Self {
+        Demon {
+            name: row.0,
+            position: row.1,
+            requirement: row.2,
+            video: row.3,
+            description: row.4,
+            notes: row.5,
+            verifier: Player {
+                name: row.6,
+                id: row.7,
+                banned: row.8,
+            },
+            publisher: Player {
+                name: row.9,
+                id: row.10,
+                banned: row.11,
+            },
         }
     }
 }
@@ -156,6 +194,43 @@ impl Display for ListState {
     }
 }
 
+impl Model for Demon {
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            diesel::query_source::joins::JoinOn<
+                diesel::query_source::joins::Join<
+                    demons::table,
+                    players::table,
+                    diesel::query_source::joins::Inner,
+                >,
+                diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
+            >,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<demons::verifier, players::id>,
+    >;
+    type Selection = AllColumns;
+
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            diesel::query_source::joins::Join::new(
+                demons::table,
+                players::table,
+                diesel::query_source::joins::Inner,
+            )
+            .on(demons::publisher.eq(players::id)),
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(demons::verifier.eq(players::id))
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
+    }
+}
+
 type AllColumns = (
     demons::name,
     demons::position,
@@ -163,11 +238,11 @@ type AllColumns = (
     demons::video,
     demons::description,
     demons::notes,
-    players::id,
     players::name,
+    players::id,
     players::banned,
-    players::id,
     players::name,
+    players::id,
     players::banned,
 );
 
@@ -178,37 +253,15 @@ const ALL_COLUMNS: AllColumns = (
     demons::video,
     demons::description,
     demons::notes,
-    players::id,
     players::name,
+    players::id,
     players::banned,
-    players::id,
     players::name,
+    players::id,
     players::banned,
 );
 
-type All = diesel::dsl::Select<
-    diesel::query_builder::SelectStatement<
-        diesel::query_source::joins::JoinOn<
-            diesel::query_source::joins::Join<
-                diesel::query_source::joins::JoinOn<
-                    diesel::query_source::joins::Join<
-                        demons::table,
-                        players::table,
-                        diesel::query_source::joins::Inner,
-                    >,
-                    diesel::expression::operators::Eq<
-                        demons::columns::publisher,
-                        players::columns::id,
-                    >,
-                >,
-                players::table,
-                diesel::query_source::joins::Inner,
-            >,
-            diesel::expression::operators::Eq<demons::verifier, players::id>,
-        >,
-    >,
-    AllColumns,
->;
+type All = diesel::dsl::Select<super::From<Demon>, AllColumns>;
 
 type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
@@ -217,13 +270,13 @@ type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
 
 impl Demon {
-    fn all() -> All {
+    /*fn all() -> All {
         demons::table
             .inner_join(players::table.on(demons::publisher.eq(players::id)))
             .inner_join(players::table.on(demons::verifiert.eq(players::id)))
             .select(ALL_COLUMNS)
         //demons::table.select(ALL_COLUMNS)
-    }
+    }*/
 
     /// Constructs a diesel query returning all columns of demons whose name matches the given
     /// string
