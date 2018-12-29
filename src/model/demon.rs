@@ -91,27 +91,6 @@ impl Serialize for PartialDemon {
         map.end()
     }
 }
-/*
-impl Model for PartialDemon {
-    type QuerySource = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            demons::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
-    >;
-    type Selection = (demons::name, demons::position, players::name);
-
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        demons::table
-            .inner_join(players::table.on(demons::publisher.eq(players::id)))
-            .select((demons::name, demons::position, players::name))
-            .into_boxed()
-    }
-}*/
 
 impl Model for PartialDemon {
     type From = diesel::query_source::joins::JoinOn<
@@ -137,11 +116,6 @@ impl Model for PartialDemon {
         (demons::name, demons::position, players::name)
     }
 }
-
-/*fn test(connection: &PgConnection) -> Vec<PartialDemon> {
-    demons::table.inner_join(players::table.on(demons::publisher.eq(players::id)))
-    //.select((demons::name, demons::position, players::name))
-}*/
 
 /// Enum encoding the 3 different parts of the demonlist
 #[derive(Debug)]
