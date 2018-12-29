@@ -31,7 +31,7 @@ impl Patch<PatchDemon> for Demon {
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name| Player::name_to_id(name, connection);
+        let map = |name: &str| Player::get(name, connection);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);
@@ -52,8 +52,8 @@ impl Patch<PatchDemon> for Demon {
                     demons::name.eq(&self.name),
                     demons::video.eq(&self.video),
                     demons::requirement.eq(&self.requirement),
-                    demons::verifier.eq(&self.verifier),
-                    demons::publisher.eq(&self.publisher),
+                    demons::verifier.eq(&self.verifier.id),
+                    demons::publisher.eq(&self.publisher.id),
                 ))
                 .execute(connection)?;
 

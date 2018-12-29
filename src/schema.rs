@@ -37,6 +37,17 @@ table! {
 }
 
 table! {
+    demon_publisher_verifier_join (pid, vid) {
+        pname -> Text,
+        pid -> Int4,
+        pbanned -> Bool,
+        vname -> Text,
+        vid -> Int4,
+        vbanned -> Bool,
+    }
+}
+
+table! {
     use diesel::sql_types::*;
     use crate::bitstring::BitString;
 
@@ -92,5 +103,12 @@ joinable!(records -> players (player));
 joinable!(records -> submitters (submitter));
 
 allow_tables_to_appear_in_same_query!(
-    audit_log, creators, demons, members, players, records, submitters,
+    audit_log,
+    creators,
+    demons,
+    members,
+    players,
+    records,
+    submitters,
+    demon_publisher_verifier_join
 );

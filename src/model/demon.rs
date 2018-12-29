@@ -4,13 +4,13 @@ use crate::{
     error::PointercrateError,
     model::player::Player,
     operation::Get,
-    schema::{demons, players},
+    schema::{demon_publisher_verifier_join, demons, players},
     Result,
 };
 use diesel::{
     dsl::max, expression::bound::Bound, pg::Pg, query_builder::BoxedSelectStatement, sql_types,
-    Connection, Expression, ExpressionMethods, JoinOnDsl, PgConnection, QueryDsl, QueryResult,
-    Queryable, RunQueryDsl,
+    BoolExpressionMethods, Connection, Expression, ExpressionMethods, JoinOnDsl, PgConnection,
+    QueryDsl, QueryResult, Queryable, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
@@ -195,7 +195,7 @@ impl Display for ListState {
 }
 
 impl Model for Demon {
-    type From = diesel::query_source::joins::JoinOn<
+    /*type From = diesel::query_source::joins::JoinOn<
         diesel::query_source::joins::Join<
             diesel::query_source::joins::JoinOn<
                 diesel::query_source::joins::Join<
@@ -209,21 +209,32 @@ impl Model for Demon {
             diesel::query_source::joins::Inner,
         >,
         diesel::expression::operators::Eq<demons::verifier, players::id>,
+    >;*/
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            demon_publisher_verifier_join::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::dsl::And<
+            diesel::expression::operators::Eq<
+                demons::publisher,
+                demon_publisher_verifier_join::pid,
+            >,
+            diesel::expression::operators::Eq<demons::verifier, demon_publisher_verifier_join::vid>,
+        >,
     >;
     type Selection = AllColumns;
 
     fn from() -> Self::From {
         diesel::query_source::joins::Join::new(
-            diesel::query_source::joins::Join::new(
-                demons::table,
-                players::table,
-                diesel::query_source::joins::Inner,
-            )
-            .on(demons::publisher.eq(players::id)),
-            players::table,
+            demons::table,
+            demon_publisher_verifier_join::table,
             diesel::query_source::joins::Inner,
         )
-        .on(demons::verifier.eq(players::id))
+        .on(demons::publisher
+            .eq(demon_publisher_verifier_join::pid)
+            .and(demons::verifier.eq(demon_publisher_verifier_join::vid)))
     }
 
     fn selection() -> Self::Selection {
@@ -238,12 +249,12 @@ type AllColumns = (
     demons::video,
     demons::description,
     demons::notes,
-    players::name,
-    players::id,
-    players::banned,
-    players::name,
-    players::id,
-    players::banned,
+    demon_publisher_verifier_join::pname,
+    demon_publisher_verifier_join::pid,
+    demon_publisher_verifier_join::pbanned,
+    demon_publisher_verifier_join::vname,
+    demon_publisher_verifier_join::vid,
+    demon_publisher_verifier_join::vbanned,
 );
 
 const ALL_COLUMNS: AllColumns = (
@@ -253,12 +264,12 @@ const ALL_COLUMNS: AllColumns = (
     demons::video,
     demons::description,
     demons::notes,
-    players::name,
-    players::id,
-    players::banned,
-    players::name,
-    players::id,
-    players::banned,
+    demon_publisher_verifier_join::pname,
+    demon_publisher_verifier_join::pid,
+    demon_publisher_verifier_join::pbanned,
+    demon_publisher_verifier_join::vname,
+    demon_publisher_verifier_join::vid,
+    demon_publisher_verifier_join::vbanned,
 );
 
 type All = diesel::dsl::Select<super::From<Demon>, AllColumns>;

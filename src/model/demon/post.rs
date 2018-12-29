@@ -62,15 +62,16 @@ impl Post<PostDemon> for Demon {
 
             Demon::shift_down(new.position, connection)?;
 
-            let inserted_demon = insert_into(demons::table)
+            insert_into(demons::table)
                 .values(&new)
-                .get_result::<Demon>(connection)?;
+                .execute(connection)?;
 
             for creator in &data.creators {
-                Creator::create_from((inserted_demon.name.as_ref(), creator.as_ref()), connection)?;
+                Creator::create_from((data.name.as_ref(), creator.as_ref()), connection)?;
             }
 
-            Ok(inserted_demon)
+            // TODO: construct the object from data we already have instead of re-querying
+            Demon::get(data.name.as_ref(), connection)
         })
     }
 }
