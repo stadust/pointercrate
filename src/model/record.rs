@@ -1,4 +1,4 @@
-use super::{All, Demon, Model, Player, Submitter};
+use super::{All, Model, Player};
 use crate::{
     model::demon::PartialDemon,
     schema::{demons, players, records},
@@ -8,7 +8,6 @@ use diesel::{
     expression::bound::Bound,
     insert_into,
     pg::{Pg, PgConnection},
-    query_builder::BoxedSelectStatement,
     query_dsl::{QueryDsl, RunQueryDsl},
     result::QueryResult,
     sql_types, BoolExpressionMethods, Expression, ExpressionMethods,

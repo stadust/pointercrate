@@ -1,8 +1,8 @@
 use super::{All, Model};
 use crate::{operation::Get, schema::players, Result};
 use diesel::{
-    expression::bound::Bound, insert_into, pg::Pg, query_builder::BoxedSelectStatement, sql_types,
-    Expression, ExpressionMethods, PgConnection, QueryDsl, QueryResult, RunQueryDsl,
+    expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
+    QueryResult, RunQueryDsl,
 };
 use serde_derive::Serialize;
 

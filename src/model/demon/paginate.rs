@@ -3,13 +3,10 @@ use crate::{
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
-    schema::{demons, players},
+    schema::demons,
     Result,
 };
-use diesel::{
-    expression::Expression, pg::Pg, query_builder::BoxedSelectStatement, ExpressionMethods,
-    JoinOnDsl, PgConnection, QueryDsl, RunQueryDsl,
-};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

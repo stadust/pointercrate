@@ -1,9 +1,5 @@
 use crate::{model::Model, Result};
-use diesel::{
-    expression::Expression,
-    pg::{Pg, PgConnection},
-    query_builder::BoxedSelectStatement,
-};
+use diesel::pg::PgConnection;
 use serde::{Deserialize, Serialize};
 
 pub trait Paginator: Sized + Serialize

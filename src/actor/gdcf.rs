@@ -1,14 +1,10 @@
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message};
 use gdcf::{
-    api::request::{
-        level::{LevelsRequest, SearchFilters},
-        UserRequest,
-    },
-    cache::CachedObject,
+    api::request::level::{LevelsRequest, SearchFilters},
     chrono::Duration,
     model::{
         level::{DemonRating, LevelRating},
-        PartialLevel, User,
+        PartialLevel,
     },
     Gdcf, GdcfFuture,
 };

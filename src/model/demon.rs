@@ -8,9 +8,8 @@ use crate::{
     Result,
 };
 use diesel::{
-    dsl::max, expression::bound::Bound, pg::Pg, query_builder::BoxedSelectStatement, sql_types,
-    BoolExpressionMethods, Connection, Expression, ExpressionMethods, JoinOnDsl, PgConnection,
-    QueryDsl, QueryResult, Queryable, RunQueryDsl,
+    dsl::max, expression::bound::Bound, pg::Pg, sql_types, BoolExpressionMethods, Expression,
+    ExpressionMethods, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
 };
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;

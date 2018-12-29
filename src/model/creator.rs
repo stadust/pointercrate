@@ -1,15 +1,8 @@
 use crate::{
-    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
-    model::{
-        demon::{Demon, PartialDemon},
-        player::Player,
-    },
+    model::player::Player,
     schema::{creators, demons, players},
 };
-use diesel::{
-    expression::bound::Bound, pg::Pg, sql_types, ExpressionMethods, PgConnection, QueryDsl,
-    QueryResult, Queryable, RunQueryDsl,
-};
+use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl, Queryable};
 
 mod delete;
 mod get;

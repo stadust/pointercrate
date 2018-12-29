@@ -1,4 +1,4 @@
-use super::{url_helper, Page};
+use super::Page;
 use crate::{error::PointercrateError, state::PointercrateState, Result};
 use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped};

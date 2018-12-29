@@ -1,10 +1,9 @@
 use super::Demon;
 use crate::{
-    error::PointercrateError,
     model::{player::Player, user::Permissions},
     operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
     schema::demons,
-    video, Result,
+    Result,
 };
 use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
 use serde_derive::Deserialize;

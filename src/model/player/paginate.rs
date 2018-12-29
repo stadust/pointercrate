@@ -6,10 +6,7 @@ use crate::{
     schema::players,
     Result,
 };
-use diesel::{
-    expression::Expression, pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl,
-    RunQueryDsl,
-};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

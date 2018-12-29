@@ -4,10 +4,7 @@ use crate::{
     schema::members, Result,
 };
 use bitflags::bitflags;
-use diesel::{
-    expression::bound::Bound, pg::Pg, query_builder::BoxedSelectStatement, query_dsl::QueryDsl,
-    sql_types, Expression, ExpressionMethods,
-};
+use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
 use log::debug;
 use serde::{
     ser::{SerializeMap, SerializeSeq},

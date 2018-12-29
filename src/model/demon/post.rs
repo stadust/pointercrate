@@ -1,16 +1,11 @@
 use super::Demon;
 use crate::{
-    error::PointercrateError,
     model::{creator::Creator, Player},
     operation::{Get, Post},
     schema::demons,
     video, Result,
 };
-use diesel::{
-    dsl::max, insert_into, result::Error, select, Connection, Expression, ExpressionMethods,
-    OptionalExtension, PgConnection, QueryDsl, RunQueryDsl,
-};
-use log::info;
+use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 use serde_derive::Deserialize;
 
 #[derive(Deserialize, Debug)]

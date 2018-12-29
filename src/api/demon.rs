@@ -1,7 +1,7 @@
 //! Module containing all the actix request handlers for the `/api/v1/demons/` endpoints
 
 use crate::{
-    actor::database::{DeleteMessage, PaginateMessage, TokenAuth},
+    actor::database::{DeleteMessage, TokenAuth},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
@@ -15,7 +15,6 @@ use actix_web::{
     AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
 };
 use log::info;
-use std::marker::PhantomData;
 use tokio::prelude::future::{Future, IntoFuture};
 
 /// `GET /api/v1/demons/` handler

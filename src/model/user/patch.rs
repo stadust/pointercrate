@@ -1,6 +1,5 @@
 use super::{Permissions, User};
 use crate::{
-    error::PointercrateError,
     operation::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
     schema::members,
     Result,

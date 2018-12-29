@@ -1,15 +1,6 @@
 use super::{Creator, Creators};
-use crate::{
-    error::PointercrateError,
-    model::{Demon, Player},
-    operation::Get,
-    schema::creators,
-    Result,
-};
-use diesel::{
-    expression::bound::Bound, pg::Pg, sql_types, ExpressionMethods, PgConnection, QueryDsl,
-    QueryResult, Queryable, RunQueryDsl,
-};
+use crate::{error::PointercrateError, model::Demon, operation::Get, schema::creators, Result};
+use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a str> for Creators {
     fn get(name: &'a str, connection: &PgConnection) -> Result<Self> {
