@@ -276,13 +276,15 @@ impl Serialize for User {
 }
 
 impl Model for User {
-    type QuerySource = members::table;
+    type From = members::table;
     type Selection = crate::model::user::AllColumns;
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        User::all().into_boxed()
+    fn from() -> Self::From {
+        members::table
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
     }
 }
 
@@ -306,7 +308,7 @@ const ALL_COLUMNS: AllColumns = (
     members::permissions,
 );
 
-type All = diesel::dsl::Select<members::table, AllColumns>;
+type All = diesel::dsl::Select<super::From<User>, AllColumns>;
 
 type WithName<'a> = diesel::dsl::Eq<members::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
@@ -315,10 +317,6 @@ type WithId = diesel::dsl::Eq<members::member_id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All, WithId>;
 
 impl User {
-    pub fn all() -> All {
-        members::table.select(ALL_COLUMNS)
-    }
-
     pub fn by_name(name: &str) -> ByName {
         User::all().filter(members::name.eq(name))
     }

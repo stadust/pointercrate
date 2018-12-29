@@ -1,3 +1,4 @@
+use super::Model;
 use crate::schema::submitters;
 use diesel::{
     expression::bound::Bound,
@@ -33,19 +34,11 @@ type AllColumns = (
     submitters::banned,
 );
 
-type All = diesel::dsl::Select<submitters::table, AllColumns>;
+type All = diesel::dsl::Select<super::From<Submitter>, AllColumns>;
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
 type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
 
 impl Submitter {
-    fn all() -> All {
-        submitters::table.select((
-            submitters::submitter_id,
-            submitters::ip_address,
-            submitters::banned,
-        ))
-    }
-
     pub fn by_ip(ip: &IpNetwork) -> ByIp {
         Submitter::all().filter(submitters::ip_address.eq(ip))
     }
@@ -54,5 +47,22 @@ impl Submitter {
         let new = NewSubmitter { ip };
 
         insert_into(submitters::table).values(&new).get_result(conn)
+    }
+}
+
+impl Model for Submitter {
+    type From = submitters::table;
+    type Selection = AllColumns;
+
+    fn from() -> Self::From {
+        submitters::table
+    }
+
+    fn selection() -> Self::Selection {
+        (
+            submitters::submitter_id,
+            submitters::ip_address,
+            submitters::banned,
+        )
     }
 }

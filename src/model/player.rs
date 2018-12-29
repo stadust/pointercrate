@@ -29,7 +29,7 @@ pub type AllColumns = (players::id, players::name, players::banned);
 
 const ALL_COLUMNS: AllColumns = (players::id, players::name, players::banned);
 
-type All = diesel::dsl::Select<players::table, AllColumns>;
+type All = diesel::dsl::Select<super::From<Player>, AllColumns>;
 
 type WithName<'a> = diesel::dsl::Eq<players::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
@@ -62,11 +62,14 @@ impl Player {
 }
 
 impl Model for Player {
-    type QuerySource = players::table;
+    type From = players::table;
     type Selection = AllColumns;
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <AllColumns as Expression>::SqlType, players::table, Pg> {
-        Self::all().into_boxed()
+    fn from() -> Self::From {
+        players::table
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
     }
 }

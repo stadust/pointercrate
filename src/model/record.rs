@@ -167,10 +167,7 @@ const ALL_COLUMNS: AllColumns = (
     demons::position,
 );
 
-type All = diesel::dsl::Select<
-    diesel::dsl::InnerJoin<diesel::dsl::InnerJoin<records::table, demons::table>, players::table>,
-    AllColumns,
->;
+type All = diesel::dsl::Select<super::From<Record>, AllColumns>;
 
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All, WithId>;
@@ -188,13 +185,6 @@ type WithExisting<'a> = diesel::dsl::Or<WithPlayerAndDemon<'a>, WithVideo<'a>>;
 type ByExisting<'a> = diesel::dsl::Filter<All, WithExisting<'a>>;
 
 impl Record {
-    pub fn all() -> All {
-        records::table
-            .inner_join(demons::table)
-            .inner_join(players::table)
-            .select(ALL_COLUMNS)
-    }
-
     pub fn by_id(id: i32) -> ById {
         Record::all().filter(records::id.eq(id))
     }
@@ -278,22 +268,59 @@ impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Record {
 }
 
 impl Model for PartialRecord {
-    type QuerySource = records::table;
+    type From = records::table;
     type Selection = PartialColumns;
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
+    fn from() -> Self::From {
         records::table
-            .select((
-                records::id,
-                records::progress,
-                records::video,
-                records::status_,
-                records::player,
-                records::submitter,
-                records::demon,
-            ))
-            .into_boxed()
+    }
+
+    fn selection() -> Self::Selection {
+        (
+            records::id,
+            records::progress,
+            records::video,
+            records::status_,
+            records::player,
+            records::submitter,
+            records::demon,
+        )
+    }
+}
+
+impl Model for Record {
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            diesel::query_source::joins::JoinOn<
+                diesel::query_source::joins::Join<
+                    records::table,
+                    demons::table,
+                    diesel::query_source::joins::Inner,
+                >,
+                diesel::expression::operators::Eq<records::demon, demons::name>,
+            >,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<records::player, players::id>,
+    >;
+    type Selection = AllColumns;
+
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            diesel::query_source::joins::Join::new(
+                records::table,
+                demons::table,
+                diesel::query_source::joins::Inner,
+            )
+            .on(records::demon.eq(demons::name)),
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(records::player.eq(players::id))
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
     }
 }

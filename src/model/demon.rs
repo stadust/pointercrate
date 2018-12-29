@@ -93,7 +93,7 @@ impl Serialize for PartialDemon {
 }
 
 impl Model for PartialDemon {
-    type QuerySource = diesel::query_source::joins::JoinOn<
+    type From = diesel::query_source::joins::JoinOn<
         diesel::query_source::joins::Join<
             demons::table,
             players::table,
@@ -103,13 +103,17 @@ impl Model for PartialDemon {
     >;
     type Selection = (demons::name, demons::position, players::name);
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        demons::table
-            .inner_join(players::table.on(demons::publisher.eq(players::id)))
-            .select((demons::name, demons::position, players::name))
-            .into_boxed()
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(demons::publisher.eq(players::id))
+    }
+
+    fn selection() -> Self::Selection {
+        (demons::name, demons::position, players::name)
     }
 }
 

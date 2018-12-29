@@ -54,7 +54,7 @@ macro_rules! filter {
 
 macro_rules! filter_method {
     ($table: ident[$($column: ident $op: tt $value: ident),+]) => {
-        fn filter<'a, ST>(&'a self, mut query: BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::QuerySource, Pg>) -> BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::QuerySource, Pg>
+        fn filter<'a, ST>(&'a self, mut query: BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::From, Pg>) -> BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::From, Pg>
         {
             filter!(query[
                 $(
