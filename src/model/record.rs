@@ -94,13 +94,8 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-// TODO: I'm pretty sure none of these associations actually work
 #[derive(Debug, Identifiable, Associations, Serialize, Hash)]
 #[table_name = "records"]
-#[belongs_to(Player, foreign_key = "player")]
-#[belongs_to(Submitter, foreign_key = "submitter")]
-#[belongs_to(Demon, foreign_key = "demon")]
-#[belongs_to(PartialDemon, foreign_key = "demon")]
 pub struct Record {
     pub id: i32,
     pub progress: i16,
@@ -170,24 +165,6 @@ const ALL_COLUMNS: AllColumns = (
     records::submitter,
     demons::name,
     demons::position,
-);
-
-type SqlType = (
-    // record
-    sql_types::Integer,
-    sql_types::SmallInt,
-    sql_types::Nullable<sql_types::Text>,
-    //sql_types::Text,
-    Record_status,
-    // player
-    sql_types::Integer,
-    sql_types::Text,
-    sql_types::Bool,
-    // record
-    sql_types::Integer,
-    // demon
-    sql_types::Text,
-    sql_types::SmallInt,
 );
 
 type All = diesel::dsl::Select<
@@ -265,7 +242,7 @@ impl Record {
     }
 }
 
-impl Queryable<SqlType, Pg> for Record {
+impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Record {
     type Row = (
         i32,
         i16,

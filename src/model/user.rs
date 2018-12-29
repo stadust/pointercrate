@@ -250,32 +250,6 @@ pub struct User {
     permissions: Bits,
 }
 
-#[derive(Queryable, Debug, Identifiable)]
-#[table_name = "members"]
-pub struct PartialUser {
-    pub id: i32,
-    pub name: String,
-    pub display_name: Option<String>,
-    pub youtube_channel: Option<String>,
-    pub permissions: Bits,
-}
-
-impl Serialize for PartialUser {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut map = serializer.serialize_map(Some(3))?;
-        map.serialize_entry("id", &self.id)?;
-        map.serialize_entry("name", &self.name)?;
-        map.serialize_entry(
-            "permissions",
-            &Permissions::from_bitstring(&self.permissions),
-        )?;
-        map.end()
-    }
-}
-
 impl Hash for User {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
