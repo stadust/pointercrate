@@ -66,8 +66,6 @@ macro_rules! mna {
     }
 }
 
-// TODO: for all database code: fucking fix the order of the PgConnection parameter (and the others)
-
 // TODO: custom 404 handling, how does it work??????
 
 fn main() {

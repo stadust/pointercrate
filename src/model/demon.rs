@@ -155,6 +155,39 @@ impl Model for PartialDemon {
     }
 }
 
+impl Model for Demon {
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            demon_publisher_verifier_join::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::dsl::And<
+            diesel::expression::operators::Eq<
+                demons::publisher,
+                demon_publisher_verifier_join::pid,
+            >,
+            diesel::expression::operators::Eq<demons::verifier, demon_publisher_verifier_join::vid>,
+        >,
+    >;
+    type Selection = AllColumns;
+
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            demons::table,
+            demon_publisher_verifier_join::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(demons::publisher
+            .eq(demon_publisher_verifier_join::pid)
+            .and(demons::verifier.eq(demon_publisher_verifier_join::vid)))
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
+    }
+}
+
 /// Enum encoding the 3 different parts of the demonlist
 #[derive(Debug)]
 pub enum ListState {
@@ -191,54 +224,6 @@ impl Display for ListState {
             ListState::Extended => write!(f, "EXTENDED"),
             ListState::Legacy => write!(f, "LEGACY"),
         }
-    }
-}
-
-impl Model for Demon {
-    /*type From = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            diesel::query_source::joins::JoinOn<
-                diesel::query_source::joins::Join<
-                    demons::table,
-                    players::table,
-                    diesel::query_source::joins::Inner,
-                >,
-                diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
-            >,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<demons::verifier, players::id>,
-    >;*/
-    type From = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            demons::table,
-            demon_publisher_verifier_join::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::dsl::And<
-            diesel::expression::operators::Eq<
-                demons::publisher,
-                demon_publisher_verifier_join::pid,
-            >,
-            diesel::expression::operators::Eq<demons::verifier, demon_publisher_verifier_join::vid>,
-        >,
-    >;
-    type Selection = AllColumns;
-
-    fn from() -> Self::From {
-        diesel::query_source::joins::Join::new(
-            demons::table,
-            demon_publisher_verifier_join::table,
-            diesel::query_source::joins::Inner,
-        )
-        .on(demons::publisher
-            .eq(demon_publisher_verifier_join::pid)
-            .and(demons::verifier.eq(demon_publisher_verifier_join::vid)))
-    }
-
-    fn selection() -> Self::Selection {
-        ALL_COLUMNS
     }
 }
 
@@ -281,14 +266,6 @@ type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16
 type ByPosition = diesel::dsl::Filter<All, WithPosition>;
 
 impl Demon {
-    /*fn all() -> All {
-        demons::table
-            .inner_join(players::table.on(demons::publisher.eq(players::id)))
-            .inner_join(players::table.on(demons::verifiert.eq(players::id)))
-            .select(ALL_COLUMNS)
-        //demons::table.select(ALL_COLUMNS)
-    }*/
-
     /// Constructs a diesel query returning all columns of demons whose name matches the given
     /// string
     pub fn by_name(name: &str) -> ByName {
@@ -397,7 +374,7 @@ impl Into<PartialDemon> for Demon {
         PartialDemon {
             name: self.name,
             position: self.position,
-            publisher: String::new(), // TODO: publisher here
+            publisher: self.publisher.name,
         }
     }
 }

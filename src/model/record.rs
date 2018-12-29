@@ -261,7 +261,7 @@ impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Record {
             demon: PartialDemon {
                 name: row.8,
                 position: row.9,
-                publisher: String::new(), // TODO:
+                publisher: String::new(), // TODO: either omit here or write another view
             },
         }
     }
