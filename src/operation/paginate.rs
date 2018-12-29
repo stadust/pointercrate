@@ -14,7 +14,7 @@ where
     fn last(&self, connection: &PgConnection) -> Result<Option<Self>>;
 }
 
-pub trait Paginate<P: Paginator>: Sized {
+pub trait Paginate<P: Paginator<Model = Self>>: Model + Sized {
     fn load(paginator: &P, connection: &PgConnection) -> Result<Vec<Self>>;
 }
 

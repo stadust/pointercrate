@@ -100,7 +100,7 @@ impl PointercrateState {
         &self, data: D,
     ) -> impl Future<Item = (Vec<P>, String), Error = PointercrateError>
     where
-        D: Paginator + Send + 'static,
+        D: Paginator<Model = P> + Send + 'static,
         P: Paginate<D> + Send + 'static,
     {
         self.database(PaginateMessage(data, PhantomData))

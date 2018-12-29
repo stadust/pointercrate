@@ -293,12 +293,12 @@ where
 #[derive(Debug)]
 pub struct PaginateMessage<P, D>(pub D, pub PhantomData<P>)
 where
-    D: Paginator,
+    D: Paginator<Model = P>,
     P: Paginate<D>;
 
 impl<P, D> Message for PaginateMessage<P, D>
 where
-    D: Paginator,
+    D: Paginator<Model = P>,
     P: Paginate<D> + 'static,
 {
     type Result = Result<(Vec<P>, String)>;
@@ -306,7 +306,7 @@ where
 
 impl<P, D> Handler<PaginateMessage<P, D>> for DatabaseActor
 where
-    D: Paginator,
+    D: Paginator<Model = P>,
     P: Paginate<D> + 'static,
 {
     type Result = Result<(Vec<P>, String)>;
