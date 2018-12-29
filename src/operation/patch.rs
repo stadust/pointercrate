@@ -1,3 +1,8 @@
+// We're gonna allow unused_macros here because they unused onces are here for completeness sake and
+// not having them fucks with my OCD. And we might need them one day if we implement crazy weird
+// patch operations, who knows
+#![allow(unused_macros)]
+
 use crate::{
     error::PointercrateError, middleware::cond::IfMatch, model::user::Permissions, Result,
 };

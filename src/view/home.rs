@@ -62,7 +62,7 @@ impl Page for Homepage {
         }
     }
 
-    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup> {
+    fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
         vec![html! {
             (PreEscaped(r#"
 <script type="application/ld+json">

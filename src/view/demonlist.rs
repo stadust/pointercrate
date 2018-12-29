@@ -80,7 +80,7 @@ impl Page for Demonlist {
         }
     }
 
-    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup> {
+    fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
         vec![html! {
             (PreEscaped(format!(r#"
 <script type="application/ld+json">

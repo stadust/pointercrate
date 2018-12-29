@@ -42,7 +42,7 @@ impl<'a> Page for Documentation<'a> {
         vec!["css/sidebar.css", "css/doc.css"]
     }
 
-    fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
+    fn body(&self, _: &HttpRequest<PointercrateState>) -> Markup {
         html! {
             div#container class="m-center flex" {
                 div.left {
@@ -55,7 +55,7 @@ impl<'a> Page for Documentation<'a> {
         }
     }
 
-    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup> {
+    fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
         vec![html! {
             (PreEscaped(r#"
 <style type="text/css">
