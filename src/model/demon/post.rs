@@ -70,8 +70,16 @@ impl Post<PostDemon> for Demon {
                 Creator::create_from((data.name.as_ref(), creator.as_ref()), connection)?;
             }
 
-            // TODO: construct the object from data we already have instead of re-querying
-            Demon::get(data.name.as_ref(), connection)
+            Ok(Demon {
+                name: data.name,
+                position: data.position,
+                requirement: data.requirement,
+                video: data.video,
+                notes: None,
+                description: None,
+                publisher,
+                verifier,
+            })
         })
     }
 }
