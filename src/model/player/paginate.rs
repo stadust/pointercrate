@@ -28,8 +28,6 @@ impl Paginator for PlayerPagination {
     type PaginationColumn = players::id;
     type PaginationColumnType = i32;
 
-    navigation!(players, id, before_id, after_id);
-
     filter_method!(players[
         name = name,
         banned = banned

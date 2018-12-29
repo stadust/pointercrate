@@ -30,8 +30,6 @@ impl Paginator for UserPagination {
     type PaginationColumn = members::member_id;
     type PaginationColumnType = i32;
 
-    navigation!(members, member_id, before_id, after_id);
-
     filter_method!(members[
         name = name,
         display_name = display_name

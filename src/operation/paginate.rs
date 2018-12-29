@@ -37,9 +37,6 @@ where
         >
         + Clone;
 
-    fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
-    //fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
-
     fn filter<'a, ST>(
         &'a self,
         query: BoxedSelectStatement<
@@ -73,10 +70,41 @@ where
             .map(|id| self.page(Some(id), None)))
     }
 
+    fn next(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        let after = if let Some(id) = self.before() {
+            if select(exists(self.filter(Self::Model::boxed_all().filter(Self::PaginationColumn::default().ge(id.clone()))))).get_result(connection)? {
+                id
+            } else {
+                return Ok(None)
+            }
+        }else {
+            let limit = self.limit();
+
+            let mut base = self.filter(Self::Model::boxed_all().select(Self::PaginationColumn::default()));
+
+            if let Some(after) = self.after() {
+                base = base.filter(Self::PaginationColumn::default().gt(after));
+            }
+
+            let after = base
+                .offset(limit)
+                .limit(limit + 1)
+                .get_result(connection)
+                .optional()?;
+
+            match after {
+                Some(id) => id,
+                None => return Ok(None)
+            }
+        };
+
+        Ok(Some(self.page(None, Some(after))))
+    }
+
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>> {
         let before = if let Some(id) = self.after() {
             if select(exists(self.filter(
-                Self::Model::boxed_all().filter(Self::PaginationColumn::default().le(id.clone())),  // TODO: one day eliminate this clone by passing a reference
+                Self::Model::boxed_all().filter(Self::PaginationColumn::default().le(id.clone())),
             )))
             .get_result(connection)?
             {
@@ -173,96 +201,6 @@ macro_rules! filter_method {
             ]);
 
             query
-        }
-    };
-}
-
-macro_rules! navigation {
-    // TODO: maybe do the same with limit just for completeness sake
-    ($table: ident, $column: ident) => {
-        navigation!($table, $column, i32, before, after);
-    };
-
-    ($table: ident, $column: ident, $before: ident, $after: ident) => {
-        navigation!($table, $column, i32, $before, $after);
-    };
-
-    ($table: ident, $column: ident, $column_type: ty, $before: ident, $after: ident) => {
-        fn next(&self, connection: &PgConnection) -> Result<Option<Self>> {
-            use diesel::{ExpressionMethods, QueryDsl, select, dsl::exists, RunQueryDsl, OptionalExtension};
-
-            let after = if let Some(id) = self.$before {
-                if select(exists(self.filter(Self::Model::boxed_all().filter($table::$column.ge(id))))).get_result(connection)? {
-                    id - 1
-                } else {
-                    return Ok(None)
-                }
-            }else {
-                let limit = self.limit.unwrap_or(50);
-
-                let mut base = self.filter(Self::Model::boxed_all().select($table::$column));
-
-                if let Some(after) = self.$after {
-                    base = base.filter($table::$column.gt(after));
-                }
-
-                let after = base
-                    .offset(limit)
-                    .limit(limit + 1)
-                    .get_result(connection)
-                    .map(|id: $column_type| id - 1)
-                    .optional()?;
-
-                match after {
-                    Some(id) => id,
-                    None => return Ok(None)
-                }
-            };
-
-            Ok(Some(Self {
-                $after: Some(after),
-                $before:None,
-                ..self.clone()
-            }))
-        }
-
-        fn prev(&self, connection: &PgConnection) -> Result<Option<Self>> {
-            use diesel::{ExpressionMethods, QueryDsl, select, dsl::exists, RunQueryDsl, OptionalExtension};
-
-            let before = if let Some(id) = self.$after {
-                if select(exists(self.filter(Self::Model::boxed_all().filter($table::$column.le(id))))).get_result(connection)? {
-                    id + 1
-                } else {
-                    return Ok(None)
-                }
-            }else {
-                let limit = self.limit.unwrap_or(50);
-
-                let mut base = self.filter(Self::Model::boxed_all().select($table::$column));
-
-                if let Some(before) = self.$before {
-                    base = base.filter($table::$column.lt(before));
-                }
-
-                let before = base
-                    .order_by($table::$column.desc())
-                    .offset(limit)
-                    .limit(limit + 1)
-                    .get_result(connection)
-                    .map(|id: $column_type| id + 1)
-                    .optional()?;
-
-                match before {
-                    Some(id) => id,
-                    None => return Ok(None)
-                }
-            };
-
-            Ok(Some(Self {
-                $before: Some(before),
-                $after: None,
-                ..self.clone()
-            }))
         }
     };
 }

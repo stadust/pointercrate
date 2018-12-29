@@ -35,8 +35,6 @@ impl Paginator for DemonPagination {
     type PaginationColumn = demons::position;
     type PaginationColumnType = i16;
 
-    navigation!(demons, position, i16, before_position, after_position);
-
     filter_method!(demons[
         name = name,
         requirement = requirement,

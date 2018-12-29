@@ -38,8 +38,6 @@ impl Paginator for RecordPagination {
     type PaginationColumn = records::id;
     type PaginationColumnType = i32;
 
-    navigation!(records, id, before_id, after_id);
-
     filter_method!(records[
         progress = progress,
         progress < progress_lt,
