@@ -10,11 +10,12 @@ use crate::{
 };
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use diesel::{
+    expression::{AsExpression, NonAggregate},
     pg::{Pg, PgConnection},
     query_builder::QueryFragment,
     r2d2::{ConnectionManager, Pool, PooledConnection},
     sql_types::{HasSqlType, NotNull, SqlOrd},
-    Connection, Expression, QuerySource, SelectableExpression,
+    AppearsOnTable, Connection, Expression, QuerySource, SelectableExpression,
 };
 use joinery::Joinable;
 use log::{debug, info};
@@ -300,7 +301,17 @@ where
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
-    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>;
+    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: NonAggregate,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: QueryFragment<Pg>;
 
 impl<P, D> Message for PaginateMessage<P, D>
 where
@@ -310,6 +321,16 @@ where
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
     D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+        D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: NonAggregate,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: QueryFragment<Pg>,
 {
     type Result = Result<(Vec<P>, String)>;
 }
@@ -322,6 +343,16 @@ where
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
     D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: NonAggregate,
+    <D::PaginationColumnType as AsExpression<
+        <D::PaginationColumn as Expression>::SqlType,
+    >>::Expression: QueryFragment<Pg>,
 {
     type Result = Result<(Vec<P>, String)>;
 

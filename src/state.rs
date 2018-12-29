@@ -16,10 +16,11 @@ use crate::{
 };
 use actix::{Addr, Handler, Message};
 use diesel::{
+    expression::{AsExpression, NonAggregate},
     pg::Pg,
     query_builder::QueryFragment,
     sql_types::{HasSqlType, NotNull, SqlOrd},
-    Expression, QuerySource, SelectableExpression,
+    AppearsOnTable, Expression, QuerySource, SelectableExpression,
 };
 use hyper::{
     client::{Client, HttpConnector},
@@ -115,6 +116,15 @@ impl PointercrateState {
         <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
         Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
         D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
+        <D::PaginationColumnType as AsExpression<
+            <D::PaginationColumn as Expression>::SqlType,
+        >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
+        <D::PaginationColumnType as AsExpression<
+            <D::PaginationColumn as Expression>::SqlType,
+        >>::Expression: NonAggregate,
+        <D::PaginationColumnType as AsExpression<
+            <D::PaginationColumn as Expression>::SqlType,
+        >>::Expression: QueryFragment<Pg>,
     {
         self.database(PaginateMessage(data, PhantomData))
     }

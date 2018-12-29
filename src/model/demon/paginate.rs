@@ -54,6 +54,18 @@ impl Paginator for DemonPagination {
             ..self.clone()
         }
     }
+
+    fn limit(&self) -> i64 {
+        self.limit.unwrap_or(50)
+    }
+
+    fn before(&self) -> Option<i16> {
+        self.before_position
+    }
+
+    fn after(&self) -> Option<i16> {
+        self.after_position
+    }
 }
 
 impl Paginate<DemonPagination> for PartialDemon {

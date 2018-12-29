@@ -1,10 +1,13 @@
 use crate::{model::Model, Result};
 use diesel::{
-    dsl::{max, min},
+    dsl::{exists, max, min},
+    expression::{AsExpression, NonAggregate},
     pg::{Pg, PgConnection},
     query_builder::{BoxedSelectStatement, QueryFragment},
+    select,
     sql_types::{HasSqlType, NotNull, SqlOrd},
-    Expression, QueryDsl, QuerySource, Queryable, RunQueryDsl, SelectableExpression,
+    AppearsOnTable, Expression, ExpressionMethods, OptionalExtension, QueryDsl, QuerySource,
+    Queryable, RunQueryDsl, SelectableExpression,
 };
 use serde::{Deserialize, Serialize};
 
@@ -14,16 +17,28 @@ where
     <Self::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<Self::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<Self::PaginationColumn as Expression>::SqlType>,
+    <Self::PaginationColumnType as AsExpression<
+        <Self::PaginationColumn as Expression>::SqlType,
+    >>::Expression: AppearsOnTable<
+        <Self::Model as Model>::From,
+    >,
+    <Self::PaginationColumnType as AsExpression<<Self::PaginationColumn as Expression>::SqlType>>::Expression: NonAggregate,
+    <Self::PaginationColumnType as AsExpression<<Self::PaginationColumn as Expression>::SqlType>>::Expression: QueryFragment<Pg>
 {
     type Model: Model;
     // Columns are effectively unit structs and diesel always derives Default for them
     type PaginationColumn: Default
         + SelectableExpression<<Self::Model as Model>::From>
-        + QueryFragment<Pg>;
-    type PaginationColumnType: Queryable<<Self::PaginationColumn as Expression>::SqlType, Pg>;
+        + QueryFragment<Pg>
+        + ExpressionMethods + NonAggregate;
+    type PaginationColumnType: Queryable<<Self::PaginationColumn as Expression>::SqlType, Pg>
+        + diesel::expression::AsExpression<
+            <Self::PaginationColumn as Expression>::SqlType,
+        >
+        + Clone;
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
-    fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
+    //fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
 
     fn filter<'a, ST>(
         &'a self,
@@ -40,6 +55,10 @@ where
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self;
 
+    fn limit(&self) -> i64;
+    fn before(&self) -> Option<Self::PaginationColumnType>;
+    fn after(&self) -> Option<Self::PaginationColumnType>;
+
     fn first(&self, connection: &PgConnection) -> Result<Option<Self>> {
         Ok(self
             .filter(Self::Model::boxed_all().select(min(Self::PaginationColumn::default())))
@@ -53,6 +72,43 @@ where
             .get_result::<Option<Self::PaginationColumnType>>(connection)?
             .map(|id| self.page(Some(id), None)))
     }
+
+    fn prev(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        let before = if let Some(id) = self.after() {
+            if select(exists(self.filter(
+                Self::Model::boxed_all().filter(Self::PaginationColumn::default().le(id.clone())),  // TODO: one day eliminate this clone by passing a reference
+            )))
+            .get_result(connection)?
+            {
+                id
+            } else {
+                return Ok(None)
+            }
+        } else {
+            let limit = self.limit();
+
+            let mut base =
+                self.filter(Self::Model::boxed_all().select(Self::PaginationColumn::default()));
+
+            if let Some(before) = self.before() {
+                base = base.filter(Self::PaginationColumn::default().lt(before));
+            }
+
+            let before = base
+                .order_by(Self::PaginationColumn::default().desc())
+                .offset(limit)
+                .limit(limit + 1)
+                .get_result(connection)
+                .optional()?;
+
+            match before {
+                Some(id) => id,
+                None => return Ok(None),
+            }
+        };
+
+        Ok(Some(self.page(Some(before), None)))
+    }
 }
 
 pub trait Paginate<P: Paginator<Model = Self>>: Model + Sized
@@ -62,6 +118,16 @@ where
     Pg: HasSqlType<<P::PaginationColumn as Expression>::SqlType>,
     P::PaginationColumn:
         Default + SelectableExpression<<P::Model as Model>::From> + QueryFragment<Pg>,
+    P::PaginationColumn: SelectableExpression<<P::Model as Model>::From>,
+    <P::PaginationColumnType as AsExpression<
+        <P::PaginationColumn as Expression>::SqlType,
+    >>::Expression: AppearsOnTable<<P::Model as Model>::From>,
+    <P::PaginationColumnType as AsExpression<
+        <P::PaginationColumn as Expression>::SqlType,
+    >>::Expression: NonAggregate,
+    <P::PaginationColumnType as AsExpression<
+        <P::PaginationColumn as Expression>::SqlType,
+    >>::Expression: QueryFragment<Pg>,
 {
     fn load(paginator: &P, connection: &PgConnection) -> Result<Vec<Self>>;
 }

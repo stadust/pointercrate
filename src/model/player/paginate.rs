@@ -45,6 +45,18 @@ impl Paginator for PlayerPagination {
             ..self.clone()
         }
     }
+
+    fn limit(&self) -> i64 {
+        self.limit.unwrap_or(50)
+    }
+
+    fn before(&self) -> Option<i32> {
+        self.before_id
+    }
+
+    fn after(&self) -> Option<i32> {
+        self.after_id
+    }
 }
 
 impl Paginate<PlayerPagination> for Player {
