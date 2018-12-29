@@ -1,9 +1,10 @@
 use crate::{model::Model, Result};
 use diesel::{
+    dsl::{max, min},
     pg::{Pg, PgConnection},
     query_builder::{BoxedSelectStatement, QueryFragment},
     sql_types::{HasSqlType, NotNull, SqlOrd},
-    Expression, QuerySource, Queryable, SelectableExpression,
+    Expression, QueryDsl, QuerySource, Queryable, RunQueryDsl, SelectableExpression,
 };
 use serde::{Deserialize, Serialize};
 
@@ -23,8 +24,6 @@ where
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
-    fn first(&self, connection: &PgConnection) -> Result<Option<Self>>;
-    //fn last(&self, connection: &PgConnection) -> Result<Option<Self>>;
 
     fn filter<'a, ST>(
         &'a self,
@@ -41,9 +40,14 @@ where
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self;
 
-    fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
-        use diesel::{dsl::max, QueryDsl, RunQueryDsl};
+    fn first(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        Ok(self
+            .filter(Self::Model::boxed_all().select(min(Self::PaginationColumn::default())))
+            .get_result::<Option<Self::PaginationColumnType>>(connection)?
+            .map(|id| self.page(None, Some(id))))
+    }
 
+    fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
         Ok(self
             .filter(Self::Model::boxed_all().select(max(Self::PaginationColumn::default())))
             .get_result::<Option<Self::PaginationColumnType>>(connection)?
@@ -194,25 +198,5 @@ macro_rules! navigation {
                 ..self.clone()
             }))
         }
-
-        fn first(&self, connection: &PgConnection) -> Result<Option<Self>> {
-            use diesel::{dsl::min, QueryDsl};
-
-            Ok(
-                self.filter(Self::Model::boxed_all().select(min($table::$column)))
-                    .get_result::<Option<$column_type>>(connection)?
-                    .map(|id: $column_type| Self{$after: Some(id - 1), $before:None,..self.clone()})
-            )
-        }
-
-        /*fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
-            use diesel::{dsl::max, QueryDsl};
-
-            Ok(
-                self.filter(Self::Model::boxed_all().select(max($table::$column)))
-                    .get_result::<Option<$column_type>>(connection)?
-                    .map(|id: $column_type| Self{$before: Some(id + 1), $after:None, ..self.clone()})
-            )
-        }*/
     };
 }
