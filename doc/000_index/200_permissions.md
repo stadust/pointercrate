@@ -26,8 +26,8 @@ Access to this endpoint requires at least `LIST_HELPER` permissions.
 | `LIST_HELPER`        | 0x2    | Users that help out in managing the demonlist by reviewing records                                                                                     |
 | `LIST_MODERATOR`     | 0x4    | Users that moderate the demonlist and manage the demon placements                                                                                      |
 | `LIST_ADMINISTRATOR` | 0x8    | Users that administrate the demonlist.                                                                                                                 |
-| `RESERVED1`          | 0x16   | _Reserved for future use_                                                                                                                              |
-| `RESERVED2`          | 0x32   | _Reserved for future use_                                                                                                                              |
+| `RESERVED1`          | 0x10   | _Reserved for future use_                                                                                                                              |
+| `RESERVED2`          | 0x20   | _Reserved for future use_                                                                                                                              |
 | `MODERATOR`          | 0x2000 | Users that have access to the pointercrate user list                                                                                                   |
 | `ADMINISTRATOR`      | 0x4000 | Users that can manage other users, including granting them permissions                                                                                 |
 | `-`                  | 0x8000 | A permission users cannot have, but is required to assign certain other permissions, effectively preventing those permissions from ever being assigned |
