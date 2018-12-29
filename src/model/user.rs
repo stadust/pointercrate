@@ -1,4 +1,4 @@
-use super::Model;
+use super::{All, Model};
 use crate::{
     bitstring::Bits, config::SECRET, error::PointercrateError, middleware::auth::Claims,
     schema::members, Result,
@@ -308,13 +308,11 @@ const ALL_COLUMNS: AllColumns = (
     members::permissions,
 );
 
-type All = diesel::dsl::Select<super::From<User>, AllColumns>;
-
 type WithName<'a> = diesel::dsl::Eq<members::name, Bound<sql_types::Text, &'a str>>;
-type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+type ByName<'a> = diesel::dsl::Filter<All<User>, WithName<'a>>;
 
 type WithId = diesel::dsl::Eq<members::member_id, Bound<sql_types::Int4, i32>>;
-type ById = diesel::dsl::Filter<All, WithId>;
+type ById = diesel::dsl::Filter<All<User>, WithId>;
 
 impl User {
     pub fn by_name(name: &str) -> ByName {

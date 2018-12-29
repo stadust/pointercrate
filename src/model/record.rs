@@ -1,4 +1,4 @@
-use super::{Demon, Model, Player, Submitter};
+use super::{All, Demon, Model, Player, Submitter};
 use crate::{
     model::demon::PartialDemon,
     schema::{demons, players, records},
@@ -167,10 +167,8 @@ const ALL_COLUMNS: AllColumns = (
     demons::position,
 );
 
-type All = diesel::dsl::Select<super::From<Record>, AllColumns>;
-
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
-type ById = diesel::dsl::Filter<All, WithId>;
+type ById = diesel::dsl::Filter<All<Record>, WithId>;
 
 type WithVideo<'a> =
     diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
@@ -179,10 +177,10 @@ type WithPlayerAndDemon<'a> = diesel::dsl::And<
     diesel::dsl::Eq<records::player, Bound<sql_types::Int4, i32>>,
     diesel::dsl::Eq<records::demon, Bound<sql_types::Text, &'a str>>,
 >;
-type ByPlayerAndDemon<'a> = diesel::dsl::Filter<All, WithPlayerAndDemon<'a>>;
+type ByPlayerAndDemon<'a> = diesel::dsl::Filter<All<Record>, WithPlayerAndDemon<'a>>;
 
 type WithExisting<'a> = diesel::dsl::Or<WithPlayerAndDemon<'a>, WithVideo<'a>>;
-type ByExisting<'a> = diesel::dsl::Filter<All, WithExisting<'a>>;
+type ByExisting<'a> = diesel::dsl::Filter<All<Record>, WithExisting<'a>>;
 
 impl Record {
     pub fn by_id(id: i32) -> ById {

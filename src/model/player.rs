@@ -1,4 +1,4 @@
-use super::Model;
+use super::{All, Model};
 use crate::{operation::Get, schema::players, Result};
 use diesel::{
     expression::bound::Bound, insert_into, pg::Pg, query_builder::BoxedSelectStatement, sql_types,
@@ -29,19 +29,13 @@ pub type AllColumns = (players::id, players::name, players::banned);
 
 const ALL_COLUMNS: AllColumns = (players::id, players::name, players::banned);
 
-type All = diesel::dsl::Select<super::From<Player>, AllColumns>;
-
 type WithName<'a> = diesel::dsl::Eq<players::name, Bound<sql_types::Text, &'a str>>;
-type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+type ByName<'a> = diesel::dsl::Filter<All<Player>, WithName<'a>>;
 
 type WithId = diesel::dsl::Eq<players::id, Bound<sql_types::Int4, i32>>;
-type ById = diesel::dsl::Filter<All, WithId>;
+type ById = diesel::dsl::Filter<All<Player>, WithId>;
 
 impl Player {
-    fn all() -> All {
-        players::table.select(ALL_COLUMNS)
-    }
-
     pub fn by_name(name: &str) -> ByName {
         Player::all().filter(players::name.eq(name))
     }

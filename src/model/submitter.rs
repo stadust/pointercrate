@@ -1,4 +1,4 @@
-use super::Model;
+use super::{All, Model};
 use crate::schema::submitters;
 use diesel::{
     expression::bound::Bound,
@@ -34,9 +34,8 @@ type AllColumns = (
     submitters::banned,
 );
 
-type All = diesel::dsl::Select<super::From<Submitter>, AllColumns>;
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
-type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
+type ByIp<'a> = diesel::dsl::Filter<All<Submitter>, WithIp<'a>>;
 
 impl Submitter {
     pub fn by_ip(ip: &IpNetwork) -> ByIp {

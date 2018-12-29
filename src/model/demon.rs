@@ -1,4 +1,4 @@
-use super::Model;
+use super::{All, Model};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
@@ -257,13 +257,11 @@ const ALL_COLUMNS: AllColumns = (
     demon_publisher_verifier_join::vbanned,
 );
 
-type All = diesel::dsl::Select<super::From<Demon>, AllColumns>;
-
 type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
-type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+type ByName<'a> = diesel::dsl::Filter<All<Demon>, WithName<'a>>;
 
 type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
-type ByPosition = diesel::dsl::Filter<All, WithPosition>;
+type ByPosition = diesel::dsl::Filter<All<Demon>, WithPosition>;
 
 impl Demon {
     /// Constructs a diesel query returning all columns of demons whose name matches the given

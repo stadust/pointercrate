@@ -24,7 +24,7 @@ use diesel::{
     QuerySource,
 };
 
-type From<M: Model> = SelectStatement<<M as Model>::From>;
+pub type All<M> = Select<SelectStatement<<M as Model>::From>, <M as Model>::Selection>;
 
 pub trait Model {
     type From: QuerySource;
