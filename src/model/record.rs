@@ -278,22 +278,22 @@ impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Record {
 }
 
 impl Model for PartialRecord {
-    type QuerySource = records::table;
+    type From = records::table;
     type Selection = PartialColumns;
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
+    fn from() -> Self::From {
         records::table
-            .select((
-                records::id,
-                records::progress,
-                records::video,
-                records::status_,
-                records::player,
-                records::submitter,
-                records::demon,
-            ))
-            .into_boxed()
+    }
+
+    fn selection() -> Self::Selection {
+        (
+            records::id,
+            records::progress,
+            records::video,
+            records::status_,
+            records::player,
+            records::submitter,
+            records::demon,
+        )
     }
 }

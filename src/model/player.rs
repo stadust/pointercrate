@@ -62,11 +62,14 @@ impl Player {
 }
 
 impl Model for Player {
-    type QuerySource = players::table;
+    type From = players::table;
     type Selection = AllColumns;
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <AllColumns as Expression>::SqlType, players::table, Pg> {
-        Self::all().into_boxed()
+    fn from() -> Self::From {
+        players::table
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
     }
 }

@@ -276,13 +276,15 @@ impl Serialize for User {
 }
 
 impl Model for User {
-    type QuerySource = members::table;
+    type From = members::table;
     type Selection = crate::model::user::AllColumns;
 
-    fn boxed_all<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        User::all().into_boxed()
+    fn from() -> Self::From {
+        members::table
+    }
+
+    fn selection() -> Self::Selection {
+        ALL_COLUMNS
     }
 }
 
