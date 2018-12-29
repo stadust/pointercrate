@@ -43,6 +43,17 @@ impl Paginator for DemonPagination {
         requirement < requirement_lt,
         requirement > requirement_gt
     ]);
+
+    fn page(
+        &self, last_on_page: Option<Self::PaginationColumnType>,
+        first_on_page: Option<Self::PaginationColumnType>,
+    ) -> Self {
+        DemonPagination {
+            before_position: last_on_page.map(|i| i + 1),
+            after_position: first_on_page.map(|i| i - 1),
+            ..self.clone()
+        }
+    }
 }
 
 impl Paginate<DemonPagination> for PartialDemon {

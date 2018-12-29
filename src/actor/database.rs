@@ -4,15 +4,17 @@ use crate::{
         auth::{Authorization, Claims},
         cond::IfMatch,
     },
-    model::{user::PatchMe, User},
+    model::{user::PatchMe, Model, User},
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post},
     Result,
 };
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use diesel::{
-    pg::PgConnection,
+    pg::{Pg, PgConnection},
+    query_builder::QueryFragment,
     r2d2::{ConnectionManager, Pool, PooledConnection},
-    Connection,
+    sql_types::{HasSqlType, NotNull, SqlOrd},
+    Connection, Expression, QuerySource, SelectableExpression,
 };
 use joinery::Joinable;
 use log::{debug, info};
@@ -294,12 +296,20 @@ where
 pub struct PaginateMessage<P, D>(pub D, pub PhantomData<P>)
 where
     D: Paginator<Model = P>,
-    P: Paginate<D>;
+    P: Paginate<D>,
+    <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
+    <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
+    Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
+    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>;
 
 impl<P, D> Message for PaginateMessage<P, D>
 where
     D: Paginator<Model = P>,
     P: Paginate<D> + 'static,
+    <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
+    <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
+    Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
+    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
 {
     type Result = Result<(Vec<P>, String)>;
 }
@@ -308,6 +318,10 @@ impl<P, D> Handler<PaginateMessage<P, D>> for DatabaseActor
 where
     D: Paginator<Model = P>,
     P: Paginate<D> + 'static,
+    <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
+    <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
+    Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
+    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
 {
     type Result = Result<(Vec<P>, String)>;
 

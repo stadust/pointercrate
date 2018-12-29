@@ -7,11 +7,20 @@ use crate::{
     },
     error::PointercrateError,
     middleware::cond::IfMatch,
-    model::user::{PermissionsSet, User},
+    model::{
+        user::{PermissionsSet, User},
+        Model,
+    },
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post},
     Result,
 };
 use actix::{Addr, Handler, Message};
+use diesel::{
+    pg::Pg,
+    query_builder::QueryFragment,
+    sql_types::{HasSqlType, NotNull, SqlOrd},
+    Expression, QuerySource, SelectableExpression,
+};
 use hyper::{
     client::{Client, HttpConnector},
     Body, Request,
@@ -102,6 +111,10 @@ impl PointercrateState {
     where
         D: Paginator<Model = P> + Send + 'static,
         P: Paginate<D> + Send + 'static,
+        <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
+        <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
+        Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
+        D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
     {
         self.database(PaginateMessage(data, PhantomData))
     }

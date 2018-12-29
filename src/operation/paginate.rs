@@ -1,23 +1,30 @@
 use crate::{model::Model, Result};
 use diesel::{
     pg::{Pg, PgConnection},
-    query_builder::BoxedSelectStatement,
+    query_builder::{BoxedSelectStatement, QueryFragment},
+    sql_types::{HasSqlType, NotNull, SqlOrd},
+    Expression, QuerySource, Queryable, SelectableExpression,
 };
 use serde::{Deserialize, Serialize};
 
 pub trait Paginator: Sized + Serialize
 where
     for<'de> Self: Deserialize<'de>,
+    <Self::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
+    <<Self::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
+    Pg: HasSqlType<<Self::PaginationColumn as Expression>::SqlType>,
 {
     type Model: Model;
     // Columns are effectively unit structs and diesel always derives Default for them
-    type PaginationColumn: Default;
-    type PaginationColumnType;
+    type PaginationColumn: Default
+        + SelectableExpression<<Self::Model as Model>::From>
+        + QueryFragment<Pg>;
+    type PaginationColumnType: Queryable<<Self::PaginationColumn as Expression>::SqlType, Pg>;
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn first(&self, connection: &PgConnection) -> Result<Option<Self>>;
-    fn last(&self, connection: &PgConnection) -> Result<Option<Self>>;
+    //fn last(&self, connection: &PgConnection) -> Result<Option<Self>>;
 
     fn filter<'a, ST>(
         &'a self,
@@ -28,18 +35,30 @@ where
             Pg,
         >,
     ) -> BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::From, Pg>;
-    /*fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
-        use diesel::{dsl::max, QueryDsl};
 
-        Ok(
-            self.filter(Self::Model::boxed_all().select(max(Self::PrimaryColumn)))
-                .get_result::<Option<Self::PrimaryColumnType>>(connection)?
-                .map(|id: Self::PrimaryColumnType| Self{$before: Some(id + 1), $after:None, ..self.clone()})
-        )
-    }*/
+    fn page(
+        &self, last_on_page: Option<Self::PaginationColumnType>,
+        first_on_page: Option<Self::PaginationColumnType>,
+    ) -> Self;
+
+    fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        use diesel::{dsl::max, QueryDsl, RunQueryDsl};
+
+        Ok(self
+            .filter(Self::Model::boxed_all().select(max(Self::PaginationColumn::default())))
+            .get_result::<Option<Self::PaginationColumnType>>(connection)?
+            .map(|id| self.page(Some(id), None)))
+    }
 }
 
-pub trait Paginate<P: Paginator<Model = Self>>: Model + Sized {
+pub trait Paginate<P: Paginator<Model = Self>>: Model + Sized
+where
+    <P::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
+    <<P::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
+    Pg: HasSqlType<<P::PaginationColumn as Expression>::SqlType>,
+    P::PaginationColumn:
+        Default + SelectableExpression<<P::Model as Model>::From> + QueryFragment<Pg>,
+{
     fn load(paginator: &P, connection: &PgConnection) -> Result<Vec<Self>>;
 }
 
@@ -186,7 +205,7 @@ macro_rules! navigation {
             )
         }
 
-        fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        /*fn last(&self, connection: &PgConnection) -> Result<Option<Self>> {
             use diesel::{dsl::max, QueryDsl};
 
             Ok(
@@ -194,6 +213,6 @@ macro_rules! navigation {
                     .get_result::<Option<$column_type>>(connection)?
                     .map(|id: $column_type| Self{$before: Some(id + 1), $after:None, ..self.clone()})
             )
-        }
+        }*/
     };
 }

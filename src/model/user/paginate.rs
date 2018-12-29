@@ -36,6 +36,17 @@ impl Paginator for UserPagination {
         name = name,
         display_name = display_name
     ]);
+
+    fn page(
+        &self, last_on_page: Option<Self::PaginationColumnType>,
+        first_on_page: Option<Self::PaginationColumnType>,
+    ) -> Self {
+        UserPagination {
+            before_id: last_on_page.map(|i| i + 1),
+            after_id: first_on_page.map(|i| i - 1),
+            ..self.clone()
+        }
+    }
 }
 
 impl Paginate<UserPagination> for User {

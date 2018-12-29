@@ -34,6 +34,17 @@ impl Paginator for PlayerPagination {
         name = name,
         banned = banned
     ]);
+
+    fn page(
+        &self, last_on_page: Option<Self::PaginationColumnType>,
+        first_on_page: Option<Self::PaginationColumnType>,
+    ) -> Self {
+        PlayerPagination {
+            before_id: last_on_page.map(|i| i + 1),
+            after_id: first_on_page.map(|i| i - 1),
+            ..self.clone()
+        }
+    }
 }
 
 impl Paginate<PlayerPagination> for Player {
