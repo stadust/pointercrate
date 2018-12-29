@@ -1,6 +1,7 @@
 use super::Player;
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Paginate, Paginator},
     schema::players,
     Result,
@@ -33,21 +34,14 @@ impl PlayerPagination {
 }
 
 impl Paginator for PlayerPagination {
-    type QuerySource = players::table;
-    type Selection = crate::model::player::AllColumns;
+    type Model = Player;
 
     navigation!(players, id, before_id, after_id);
-
-    fn base<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        Player::all().into_boxed()
-    }
 }
 
 impl Paginate<PlayerPagination> for Player {
     fn load(pagination: &PlayerPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(Player::all().into_boxed());
+        let mut query = pagination.filter(Player::boxed_all());
 
         filter!(query[
             players::id > pagination.after_id,

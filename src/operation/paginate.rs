@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::{model::Model, Result};
 use diesel::{
     expression::Expression,
     pg::{Pg, PgConnection},
@@ -10,11 +10,7 @@ pub trait Paginator: Sized + Serialize
 where
     for<'de> Self: Deserialize<'de>,
 {
-    type Selection: Expression;
-    type QuerySource;
-
-    fn base<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>;
+    type Model: Model;
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;
@@ -58,7 +54,7 @@ macro_rules! filter {
 
 macro_rules! filter_method {
     ($table: ident[$($column: ident $op: tt $value: ident),+]) => {
-        fn filter<'a, ST>(&'a self, mut query: BoxedSelectStatement<'a, ST, <Self as Paginator>::QuerySource, Pg>) -> BoxedSelectStatement<'a, ST, <Self as Paginator>::QuerySource, Pg>
+        fn filter<'a, ST>(&'a self, mut query: BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::QuerySource, Pg>) -> BoxedSelectStatement<'a, ST, <<Self as Paginator>::Model as crate::model::Model>::QuerySource, Pg>
         {
             filter!(query[
                 $(
@@ -86,7 +82,7 @@ macro_rules! navigation {
             use diesel::{ExpressionMethods, QueryDsl, select, dsl::exists, RunQueryDsl, OptionalExtension};
 
             let after = if let Some(id) = self.$before {
-                if select(exists(self.filter(Self::base().filter($table::$column.ge(id))))).get_result(connection)? {
+                if select(exists(self.filter(Self::Model::boxed_all().filter($table::$column.ge(id))))).get_result(connection)? {
                     id - 1
                 } else {
                     return Ok(None)
@@ -94,7 +90,7 @@ macro_rules! navigation {
             }else {
                 let limit = self.limit.unwrap_or(50);
 
-                let mut base = self.filter(Self::base().select($table::$column));
+                let mut base = self.filter(Self::Model::boxed_all().select($table::$column));
 
                 if let Some(after) = self.$after {
                     base = base.filter($table::$column.gt(after));
@@ -124,7 +120,7 @@ macro_rules! navigation {
             use diesel::{ExpressionMethods, QueryDsl, select, dsl::exists, RunQueryDsl, OptionalExtension};
 
             let before = if let Some(id) = self.$after {
-                if select(exists(self.filter(Self::base().filter($table::$column.le(id))))).get_result(connection)? {
+                if select(exists(self.filter(Self::Model::boxed_all().filter($table::$column.le(id))))).get_result(connection)? {
                     id + 1
                 } else {
                     return Ok(None)
@@ -132,7 +128,7 @@ macro_rules! navigation {
             }else {
                 let limit = self.limit.unwrap_or(50);
 
-                let mut base = self.filter(Self::base().select($table::$column));
+                let mut base = self.filter(Self::Model::boxed_all().select($table::$column));
 
                 if let Some(before) = self.$before {
                     base = base.filter($table::$column.lt(before));
@@ -163,7 +159,7 @@ macro_rules! navigation {
             use diesel::{dsl::min, QueryDsl};
 
             Ok(
-                self.filter(Self::base().select(min($table::$column)))
+                self.filter(Self::Model::boxed_all().select(min($table::$column)))
                     .get_result::<Option<$column_type>>(connection)?
                     .map(|id: $column_type| Self{$after: Some(id - 1), $before:None,..self.clone()})
             )
@@ -173,7 +169,7 @@ macro_rules! navigation {
             use diesel::{dsl::max, QueryDsl};
 
             Ok(
-                self.filter(Self::base().select(max($table::$column)))
+                self.filter(Self::Model::boxed_all().select(max($table::$column)))
                     .get_result::<Option<$column_type>>(connection)?
                     .map(|id: $column_type| Self{$before: Some(id + 1), $after:None, ..self.clone()})
             )

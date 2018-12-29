@@ -1,6 +1,7 @@
 use super::{PartialRecord, RecordStatus};
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Paginate, Paginator},
     schema::records,
     Result,
@@ -49,39 +50,14 @@ impl RecordPagination {
 }
 
 impl Paginator for RecordPagination {
-    type QuerySource = records::table;
-    type Selection = (
-        records::id,
-        records::progress,
-        records::video,
-        records::status_,
-        records::player,
-        records::submitter,
-        records::demon,
-    );
+    type Model = PartialRecord;
 
     navigation!(records, id, before_id, after_id);
-
-    fn base<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        records::table
-            .select((
-                records::id,
-                records::progress,
-                records::video,
-                records::status_,
-                records::player,
-                records::submitter,
-                records::demon,
-            ))
-            .into_boxed()
-    }
 }
 
 impl Paginate<RecordPagination> for PartialRecord {
     fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(RecordPagination::base());
+        let mut query = pagination.filter(PartialRecord::boxed_all());
 
         filter!(query[
             records::id > pagination.after_id,

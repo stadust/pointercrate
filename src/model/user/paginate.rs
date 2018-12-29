@@ -1,6 +1,7 @@
 use super::{Permissions, User};
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Paginate, Paginator},
     schema::members,
     Result,
@@ -35,21 +36,14 @@ impl UserPagination {
 }
 
 impl Paginator for UserPagination {
-    type QuerySource = members::table;
-    type Selection = crate::model::user::AllColumns;
+    type Model = User;
 
     navigation!(members, member_id, before_id, after_id);
-
-    fn base<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        User::all().into_boxed()
-    }
 }
 
 impl Paginate<UserPagination> for User {
     fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(User::all().into_boxed());
+        let mut query = pagination.filter(User::boxed_all());
 
         filter!(query[
             members::member_id > pagination.after_id,
@@ -62,14 +56,3 @@ impl Paginate<UserPagination> for User {
             .map_err(PointercrateError::database)
     }
 }
-
-/*fn filter<'a, ST>(
-    &'a self, mut query: BoxedSelectStatement<'a, ST, members::table, Pg>,
-) -> BoxedSelectStatement<'a, ST, members::table, Pg> {
-    filter!(query[
-        members::name = self.name,
-        members::display_name = self.display_name
-    ]);
-
-    query
-}*/

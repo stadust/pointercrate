@@ -1,6 +1,7 @@
 use super::PartialDemon;
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Paginate, Paginator},
     schema::{demons, players},
     Result,
@@ -42,31 +43,14 @@ impl DemonPagination {
 }
 
 impl Paginator for DemonPagination {
-    type QuerySource = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            demons::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
-    >;
-    type Selection = (demons::name, demons::position, players::name);
+    type Model = PartialDemon;
 
     navigation!(demons, position, i16, before_position, after_position);
-
-    fn base<'a>(
-    ) -> BoxedSelectStatement<'a, <Self::Selection as Expression>::SqlType, Self::QuerySource, Pg>
-    {
-        demons::table
-            .inner_join(players::table.on(demons::publisher.eq(players::id)))
-            .select((demons::name, demons::position, players::name))
-            .into_boxed()
-    }
 }
 
 impl Paginate<DemonPagination> for PartialDemon {
     fn load(pagination: &DemonPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(DemonPagination::base());
+        let mut query = pagination.filter(PartialDemon::boxed_all());
 
         filter!(query[
             demons::position > pagination.after_position,
