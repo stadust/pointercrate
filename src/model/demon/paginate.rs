@@ -32,6 +32,8 @@ pub struct DemonPagination {
 
 impl Paginator for DemonPagination {
     type Model = PartialDemon;
+    type PaginationColumn = demons::position;
+    type PaginationColumnType = i16;
 
     navigation!(demons, position, i16, before_position, after_position);
 

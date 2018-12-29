@@ -27,6 +27,8 @@ pub struct UserPagination {
 
 impl Paginator for UserPagination {
     type Model = User;
+    type PaginationColumn = members::member_id;
+    type PaginationColumnType = i32;
 
     navigation!(members, member_id, before_id, after_id);
 

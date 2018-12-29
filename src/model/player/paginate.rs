@@ -25,6 +25,8 @@ pub struct PlayerPagination {
 
 impl Paginator for PlayerPagination {
     type Model = Player;
+    type PaginationColumn = players::id;
+    type PaginationColumnType = i32;
 
     navigation!(players, id, before_id, after_id);
 

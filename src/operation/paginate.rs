@@ -10,8 +10,9 @@ where
     for<'de> Self: Deserialize<'de>,
 {
     type Model: Model;
-    //type PrimaryColumn;
-    //type PrimaryColumnType;
+    // Columns are effectively unit structs and diesel always derives Default for them
+    type PaginationColumn: Default;
+    type PaginationColumnType;
 
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>>;
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>>;

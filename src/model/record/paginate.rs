@@ -35,6 +35,8 @@ pub struct RecordPagination {
 
 impl Paginator for RecordPagination {
     type Model = PartialRecord;
+    type PaginationColumn = records::id;
+    type PaginationColumnType = i32;
 
     navigation!(records, id, before_id, after_id);
 
