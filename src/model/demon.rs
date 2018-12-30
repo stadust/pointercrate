@@ -22,6 +22,45 @@ mod post;
 
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 
+/// Enum encoding the 3 different parts of the demonlist
+#[derive(Debug)]
+pub enum ListState {
+    /// The main part of the demonlist, ranging from position 1 onwards to [`LIST_SIZE`]
+    /// (inclusive)
+    Main,
+
+    /// The extended part of the demonlist, ranging from [`LIST_SIZE`] (exclusive) onwards to
+    /// [`EXTENDED_LIST_SIZE`] (inclusive)
+    Extended,
+
+    /// The legacy part of the demonlist, starting at [`EXTENDED_LIST_SIZE`] (exclusive) and being
+    /// theoretically unbounded
+    Legacy,
+}
+
+impl From<i16> for ListState {
+    /// Calculates the [`ListState`] of [`Demon`] based on its [`Demon::position`]
+    fn from(position: i16) -> ListState {
+        if position <= *LIST_SIZE {
+            ListState::Main
+        } else if position <= *EXTENDED_LIST_SIZE {
+            ListState::Extended
+        } else {
+            ListState::Legacy
+        }
+    }
+}
+
+impl Display for ListState {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            ListState::Main => write!(f, "MAIN"),
+            ListState::Extended => write!(f, "EXTENDED"),
+            ListState::Legacy => write!(f, "LEGACY"),
+        }
+    }
+}
+
 /// Struct modelling a demon in the database
 #[derive(Debug, Identifiable, Serialize, Hash)]
 #[table_name = "demons"]
@@ -77,44 +116,6 @@ impl Queryable<(sql_types::Text, sql_types::SmallInt, sql_types::Text), Pg> for 
     }
 }
 
-impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Demon {
-    type Row = (
-        String,
-        i16,
-        i16,
-        Option<String>,
-        Option<String>,
-        Option<String>,
-        String,
-        i32,
-        bool,
-        String,
-        i32,
-        bool,
-    );
-
-    fn build(row: Self::Row) -> Self {
-        Demon {
-            name: row.0,
-            position: row.1,
-            requirement: row.2,
-            video: row.3,
-            description: row.4,
-            notes: row.5,
-            verifier: Player {
-                name: row.6,
-                id: row.7,
-                banned: row.8,
-            },
-            publisher: Player {
-                name: row.9,
-                id: row.10,
-                banned: row.11,
-            },
-        }
-    }
-}
-
 impl Serialize for PartialDemon {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -154,6 +155,44 @@ impl Model for PartialDemon {
     }
 }
 
+impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Demon {
+    type Row = (
+        String,
+        i16,
+        i16,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        String,
+        i32,
+        bool,
+        String,
+        i32,
+        bool,
+    );
+
+    fn build(row: Self::Row) -> Self {
+        Demon {
+            name: row.0,
+            position: row.1,
+            requirement: row.2,
+            video: row.3,
+            description: row.4,
+            notes: row.5,
+            verifier: Player {
+                name: row.6,
+                id: row.7,
+                banned: row.8,
+            },
+            publisher: Player {
+                name: row.9,
+                id: row.10,
+                banned: row.11,
+            },
+        }
+    }
+}
+
 impl Model for Demon {
     type From = diesel::query_source::joins::JoinOn<
         diesel::query_source::joins::Join<
@@ -169,7 +208,20 @@ impl Model for Demon {
             diesel::expression::operators::Eq<demons::verifier, demon_publisher_verifier_join::vid>,
         >,
     >;
-    type Selection = AllColumns;
+    type Selection = (
+        demons::name,
+        demons::position,
+        demons::requirement,
+        demons::video,
+        demons::description,
+        demons::notes,
+        demon_publisher_verifier_join::pname,
+        demon_publisher_verifier_join::pid,
+        demon_publisher_verifier_join::pbanned,
+        demon_publisher_verifier_join::vname,
+        demon_publisher_verifier_join::vid,
+        demon_publisher_verifier_join::vbanned,
+    );
 
     fn from() -> Self::From {
         diesel::query_source::joins::Join::new(
@@ -183,78 +235,9 @@ impl Model for Demon {
     }
 
     fn selection() -> Self::Selection {
-        ALL_COLUMNS
+        Self::Selection::default()
     }
 }
-
-/// Enum encoding the 3 different parts of the demonlist
-#[derive(Debug)]
-pub enum ListState {
-    /// The main part of the demonlist, ranging from position 1 onwards to [`LIST_SIZE`]
-    /// (inclusive)
-    Main,
-
-    /// The extended part of the demonlist, ranging from [`LIST_SIZE`] (exclusive) onwards to
-    /// [`EXTENDED_LIST_SIZE`] (inclusive)
-    Extended,
-
-    /// The legacy part of the demonlist, starting at [`EXTENDED_LIST_SIZE`] (exclusive) and being
-    /// theoretically unbounded
-    Legacy,
-}
-
-impl From<i16> for ListState {
-    /// Calculates the [`ListState`] of [`Demon`] based on its [`Demon::position`]
-    fn from(position: i16) -> ListState {
-        if position <= *LIST_SIZE {
-            ListState::Main
-        } else if position <= *EXTENDED_LIST_SIZE {
-            ListState::Extended
-        } else {
-            ListState::Legacy
-        }
-    }
-}
-
-impl Display for ListState {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            ListState::Main => write!(f, "MAIN"),
-            ListState::Extended => write!(f, "EXTENDED"),
-            ListState::Legacy => write!(f, "LEGACY"),
-        }
-    }
-}
-
-type AllColumns = (
-    demons::name,
-    demons::position,
-    demons::requirement,
-    demons::video,
-    demons::description,
-    demons::notes,
-    demon_publisher_verifier_join::pname,
-    demon_publisher_verifier_join::pid,
-    demon_publisher_verifier_join::pbanned,
-    demon_publisher_verifier_join::vname,
-    demon_publisher_verifier_join::vid,
-    demon_publisher_verifier_join::vbanned,
-);
-
-const ALL_COLUMNS: AllColumns = (
-    demons::name,
-    demons::position,
-    demons::requirement,
-    demons::video,
-    demons::description,
-    demons::notes,
-    demon_publisher_verifier_join::pname,
-    demon_publisher_verifier_join::pid,
-    demon_publisher_verifier_join::pbanned,
-    demon_publisher_verifier_join::vname,
-    demon_publisher_verifier_join::vid,
-    demon_publisher_verifier_join::vbanned,
-);
 
 type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All<Demon>, WithName<'a>>;

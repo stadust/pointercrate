@@ -25,10 +25,6 @@ struct NewPlayer<'a> {
     name: &'a str,
 }
 
-pub type AllColumns = (players::id, players::name, players::banned);
-
-const ALL_COLUMNS: AllColumns = (players::id, players::name, players::banned);
-
 type WithName<'a> = diesel::dsl::Eq<players::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All<Player>, WithName<'a>>;
 
@@ -57,13 +53,13 @@ impl Player {
 
 impl Model for Player {
     type From = players::table;
-    type Selection = AllColumns;
+    type Selection =  (players::id, players::name, players::banned);
 
     fn from() -> Self::From {
         players::table
     }
 
     fn selection() -> Self::Selection {
-        ALL_COLUMNS
+        Self::Selection::default()
     }
 }

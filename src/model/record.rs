@@ -130,42 +130,6 @@ struct NewRecord<'a> {
     demon: &'a str,
 }
 
-type PartialColumns = (
-    records::id,
-    records::progress,
-    records::video,
-    records::status_,
-    records::player,
-    records::submitter,
-    records::demon,
-);
-
-type AllColumns = (
-    records::id,
-    records::progress,
-    records::video,
-    records::status_,
-    players::id,
-    players::name,
-    players::banned,
-    records::submitter,
-    demons::name,
-    demons::position,
-);
-
-const ALL_COLUMNS: AllColumns = (
-    records::id,
-    records::progress,
-    records::video,
-    records::status_,
-    players::id,
-    players::name,
-    players::banned,
-    records::submitter,
-    demons::name,
-    demons::position,
-);
-
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All<Record>, WithId>;
 
@@ -227,7 +191,7 @@ impl Record {
     }
 }
 
-impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Record {
+impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Record {
     type Row = (
         i32,
         i16,
@@ -264,22 +228,22 @@ impl Queryable<<AllColumns as Expression>::SqlType, Pg> for Record {
 
 impl Model for PartialRecord {
     type From = records::table;
-    type Selection = PartialColumns;
+    type Selection = (
+        records::id,
+        records::progress,
+        records::video,
+        records::status_,
+        records::player,
+        records::submitter,
+        records::demon,
+    );
 
     fn from() -> Self::From {
         records::table
     }
 
     fn selection() -> Self::Selection {
-        (
-            records::id,
-            records::progress,
-            records::video,
-            records::status_,
-            records::player,
-            records::submitter,
-            records::demon,
-        )
+        Self::Selection::default()
     }
 }
 
@@ -299,7 +263,18 @@ impl Model for Record {
         >,
         diesel::expression::operators::Eq<records::player, players::id>,
     >;
-    type Selection = AllColumns;
+    type Selection = (
+        records::id,
+        records::progress,
+        records::video,
+        records::status_,
+        players::id,
+        players::name,
+        players::banned,
+        records::submitter,
+        demons::name,
+        demons::position,
+    );
 
     fn from() -> Self::From {
         diesel::query_source::joins::Join::new(
@@ -316,6 +291,6 @@ impl Model for Record {
     }
 
     fn selection() -> Self::Selection {
-        ALL_COLUMNS
+        Self::Selection::default()
     }
 }

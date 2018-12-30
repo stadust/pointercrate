@@ -108,7 +108,6 @@ pub enum PointercrateError {
     /// Error Code `40500`
     #[fail(display = "The method is not allowed for the requested URL.")]
     MethodNotAllowed {
-        //#[serde(skip)]
         #[serde(serialize_with = "serialize_method")]
         allowed_methods: Vec<Method>,
     },

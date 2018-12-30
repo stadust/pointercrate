@@ -32,12 +32,6 @@ struct NewSubmitter<'a> {
     ip: &'a IpNetwork,
 }
 
-type AllColumns = (
-    submitters::submitter_id,
-    submitters::ip_address,
-    submitters::banned,
-);
-
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
 type ByIp<'a> = diesel::dsl::Filter<All<Submitter>, WithIp<'a>>;
 
@@ -55,17 +49,17 @@ impl Submitter {
 
 impl Model for Submitter {
     type From = submitters::table;
-    type Selection = AllColumns;
+    type Selection = (
+        submitters::submitter_id,
+        submitters::ip_address,
+        submitters::banned,
+    );
 
     fn from() -> Self::From {
         submitters::table
     }
 
     fn selection() -> Self::Selection {
-        (
-            submitters::submitter_id,
-            submitters::ip_address,
-            submitters::banned,
-        )
+        Self::Selection::default()
     }
 }

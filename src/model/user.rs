@@ -274,36 +274,24 @@ impl Serialize for User {
 
 impl Model for User {
     type From = members::table;
-    type Selection = crate::model::user::AllColumns;
+    type Selection = (
+        members::member_id,
+        members::name,
+        members::display_name,
+        members::youtube_channel,
+        members::password_hash,
+        members::password_salt,
+        members::permissions,
+    );
 
     fn from() -> Self::From {
         members::table
     }
 
     fn selection() -> Self::Selection {
-        ALL_COLUMNS
+        Self::Selection::default()
     }
 }
-
-pub type AllColumns = (
-    members::member_id,
-    members::name,
-    members::display_name,
-    members::youtube_channel,
-    members::password_hash,
-    members::password_salt,
-    members::permissions,
-);
-
-const ALL_COLUMNS: AllColumns = (
-    members::member_id,
-    members::name,
-    members::display_name,
-    members::youtube_channel,
-    members::password_hash,
-    members::password_salt,
-    members::permissions,
-);
 
 type WithName<'a> = diesel::dsl::Eq<members::name, Bound<sql_types::Text, &'a str>>;
 type ByName<'a> = diesel::dsl::Filter<All<User>, WithName<'a>>;
