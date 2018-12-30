@@ -7,12 +7,12 @@ use maud::{html, Markup, PreEscaped};
 pub struct Homepage;
 
 impl Page for Homepage {
-    fn title(&self) -> &str {
-        "Home"
+    fn title(&self) -> String {
+        "Home".to_owned()
     }
 
-    fn description(&self) -> &str {
-        "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players"
+    fn description(&self) -> String {
+        "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {

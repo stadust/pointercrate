@@ -8,7 +8,6 @@ use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]
 pub struct Demonlist {
-    title: String,
     current_demon: Demon,
     all_demons: Vec<PartialDemon>,
 }
@@ -16,10 +15,6 @@ pub struct Demonlist {
 impl Demonlist {
     pub fn new(demon: Demon) -> Demonlist {
         Demonlist {
-            title: format!(
-                "#{} - {} - Geometry Dash Demonlist",
-                demon.position, demon.name
-            ),
             current_demon: demon,
             all_demons: Vec::new(),
         }
@@ -27,12 +22,15 @@ impl Demonlist {
 }
 
 impl Page for Demonlist {
-    fn title(&self) -> &str {
-        &self.title
+    fn title(&self) -> String {
+        format!(
+            "#{} - {} - Geometry Dash Demonlist",
+            self.current_demon.position, self.current_demon.name
+        )
     }
 
-    fn description(&self) -> &str {
-        ""
+    fn description(&self) -> String {
+        String::new()
         //self.current_demon.description.as_ref().unwrap_or("")
     }
 

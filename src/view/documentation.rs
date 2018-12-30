@@ -6,32 +6,33 @@ use maud::{html, Markup, PreEscaped};
 #[derive(Debug)]
 pub struct Documentation<'a> {
     toc: &'a str,
-    title: String,
     content: &'a str,
+    page: String,
 }
 
 impl<'a> Documentation<'a> {
-    pub fn new(state: &'a PointercrateState, page: &str) -> Result<Documentation<'a>> {
-        let content = match state.documentation_topics.get(page) {
+    pub fn new(state: &'a PointercrateState, page: String) -> Result<Documentation<'a>> {
+        let content = match state.documentation_topics.get(&page) {
             Some(cnt) => cnt,
             _ => return Err(PointercrateError::NotFound),
         };
 
         Ok(Documentation {
             toc: &*state.documentation_toc,
-            title: format!("API Documentation - {}", page),
             content,
+            page,
         })
     }
 }
 
 impl<'a> Page for Documentation<'a> {
-    fn title(&self) -> &str {
-        &self.title
+    fn title(&self) -> String {
+        format!("API Documentation - {}", self.page)
     }
 
-    fn description(&self) -> &str {
+    fn description(&self) -> String {
         "The pointercrate API, which allows you to programmatically interface with the demonlist"
+            .to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {

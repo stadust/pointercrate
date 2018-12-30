@@ -7,6 +7,7 @@ use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod demonlist;
 pub mod documentation;
+pub mod error;
 pub mod home;
 
 // TODO: maybe do this with `url_for()`
@@ -14,8 +15,8 @@ pub mod home;
 pub const STATIC: &str = "/static/";
 
 pub trait Page {
-    fn title(&self) -> &str;
-    fn description(&self) -> &str;
+    fn title(&self) -> String;
+    fn description(&self) -> String;
 
     fn scripts(&self) -> Vec<&str>;
     fn stylesheets(&self) -> Vec<&str>;

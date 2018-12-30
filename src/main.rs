@@ -124,14 +124,14 @@ fn main() {
             .resource("/about/", |r| r.name("about"))  // TODO: this
             .resource("/documentation/", |r| {
                 r.name("documentation");
-                r.get().f(|req| Documentation::new(req.state(), "index").map(|d|d.render(req)));
+                r.get().f(|req| Documentation::new(req.state(), "index".into()).map(|d|d.render(req)));
                 r.route().f(allowed!(GET))
             })
             .resource("/documentation/{page}/", |r| {
                 r.get().f(|req|{
                     Path::<String>::extract(req)
                         .map(|page| page.into_inner())
-                        .and_then(|page| Documentation::new(req.state(), &page).map_err(Into::into))
+                        .and_then(|page| Documentation::new(req.state(), page).map_err(Into::into))
                         .map(|d|d.render(req))
                 });
                 r.route().f(allowed!(GET))
