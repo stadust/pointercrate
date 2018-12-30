@@ -30,14 +30,15 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve, mime::MimeProcess},
     state::{Http, PointercrateState},
-    view::{documentation::Documentation, home::Homepage, Page},
+    view::{documentation::Documentation, error::ErrorPage, home::Homepage, Page},
 };
 use actix::System;
 use actix_web::{
     dev::Handler,
+    error::ResponseError,
     fs,
     http::{Method, NormalizePath, StatusCode},
-    server, App, FromRequest, Path,
+    server, App, FromRequest, HttpResponse, Path,
 };
 use std::sync::Arc;
 
@@ -56,16 +57,30 @@ pub mod state;
 pub mod video;
 pub mod view;
 
-// FIXME: this is horrible
-
-use actix_web::AsyncResponder;
-use tokio::prelude::future::IntoFuture;
-
 macro_rules! allowed {
     ($($allowed: ident),*) => {
-        wrap(|req| Err(PointercrateError::MethodNotAllowed {
-            allowed_methods: vec![$(Method::$allowed,)*]
-        }).into_future().responder())
+        |req| {
+            let error = PointercrateError::MethodNotAllowed {
+                allowed_methods: vec![$(Method::$allowed,)*]
+            };
+
+            // Specialized form of crate::api::wrap that doesnt have to deal with
+            // calling another handler function and thus doesnt have to bother with
+            // futures
+            crate::api::preferred_mime_type(req).map(|mime_type| {
+                match (mime_type.type_(), mime_type.subtype()) {
+                    (mime::TEXT, mime::HTML) => {
+                        let html = ErrorPage::new(&error).render(req);
+
+                        HttpResponse::Ok()
+                            .content_type("text/html; charset=utf-8")
+                            .body(html.0)
+                    },
+                    (mime::APPLICATION, mime::JSON) => error.error_response(),
+                    _ => unreachable!(),
+                }
+            })
+        }
     };
 }
 
