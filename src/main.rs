@@ -68,8 +68,6 @@ macro_rules! allowed {
     };
 }
 
-// TODO: custom 404 handling, how does it work??????
-
 fn main() {
     dotenv::dotenv().expect("Failed to initialize .env file!");
     env_logger::init().expect("Failed to initialize logging environment!");

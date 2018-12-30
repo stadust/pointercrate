@@ -1,15 +1,22 @@
 use super::{All, Model};
-use crate::{operation::Get, schema::players, Result};
+use crate::{
+    model::record::RecordStatus,
+    operation::Delete,
+    schema::{players, records},
+    Result,
+};
 use diesel::{
     expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
     QueryResult, RunQueryDsl,
 };
 use serde_derive::Serialize;
 
+mod delete;
 mod get;
 mod paginate;
+mod patch;
 
-pub use self::paginate::PlayerPagination;
+pub use self::{paginate::PlayerPagination, patch::PatchPlayer};
 
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
@@ -46,8 +53,52 @@ impl Player {
             .get_result(conn)
     }
 
-    pub fn name_to_id(name: &str, connection: &PgConnection) -> Result<i32> {
+    /*pub fn name_to_id(name: &str, connection: &PgConnection) -> Result<i32> {
         Ok(Player::get(name, connection)?.id)
+    }*/
+
+    pub fn ban(&self, conn: &PgConnection) -> QueryResult<()> {
+        // delete all submissions
+        diesel::delete(records::table)
+            .filter(records::player.eq(self.id))
+            .filter(records::status_.eq(RecordStatus::Submitted))
+            .execute(conn)?;
+
+        // Make sure the set of records the player has follows some stricter constraints
+        // By default, there is a UNIQUE (player, demon, status_) constraint
+        // The following query updates the table in a way that ensures that even a UNIQUE (player,
+        // demon) would hold for the current player, which is required for the next step to
+        // work
+        diesel::sql_query(format!(
+            include_str!("../../sql/prepare_player_ban.sql"),
+            self.id
+        ))
+        .execute(conn)?;
+
+        // Reject all records
+        diesel::update(records::table)
+            .filter(records::player.eq(&self.id))
+            .set(records::status_.eq(RecordStatus::Rejected))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
+    pub fn merge(&self, with: Player, conn: &PgConnection) -> Result<()> {
+        diesel::sql_query(format!(
+            include_str!("../../sql/prepare_player_merge.sql"),
+            self.id, with.id
+        ))
+        .execute(conn)?;
+
+        diesel::update(records::table)
+            .filter(records::player.eq(&with.id))
+            .set(records::player.eq(self.id))
+            .execute(conn)?;
+
+        with.delete(conn)?;
+
+        Ok(())
     }
 }
 
