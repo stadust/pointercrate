@@ -30,11 +30,9 @@ impl<S> Middleware<S> for MimeProcess {
                 accepts
                     .split(',')
                     .map(|accept| {
-                        accept.parse::<Mime>().map_err(|_| {
-                            PointercrateError::InvalidHeaderValue {
-                                header: "Content-Type",
-                            }
-                        })
+                        accept
+                            .parse::<Mime>()
+                            .map_err(|_| PointercrateError::InvalidHeaderValue { header: "Accept" })
                     })
                     .collect::<std::result::Result<Vec<Mime>, PointercrateError>>()?,
             None => Vec::new(),

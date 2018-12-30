@@ -26,6 +26,7 @@ type Result<T> = std::result::Result<T, PointercrateError>;
 
 use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
+    api::wrap,
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve, mime::MimeProcess},
     state::{Http, PointercrateState},
@@ -55,11 +56,16 @@ pub mod state;
 pub mod video;
 pub mod view;
 
+// FIXME: this is horrible
+
+use actix_web::AsyncResponder;
+use tokio::prelude::future::IntoFuture;
+
 macro_rules! allowed {
     ($($allowed: ident),*) => {
-        |req| crate::view::error::ErrorPage::new(PointercrateError::MethodNotAllowed {
+        wrap(|req| Err(PointercrateError::MethodNotAllowed {
             allowed_methods: vec![$(Method::$allowed,)*]
-        }).render(req)
+        }).into_future().responder())
     };
 }
 
@@ -142,7 +148,7 @@ fn main() {
                         user_scope
                             .resource("/", |r| r.get().f(api::user::paginate))
                             .resource("/{user_id}/", |r| {
-                                r.get().f(api::user::user);
+                                r.get().f(wrap(api::user::user));
                                 r.method(Method::PATCH).f(api::user::patch);
                                 r.delete().f(api::user::delete);
                                 r.route().f(allowed!(GET, PATCH, DELETE))

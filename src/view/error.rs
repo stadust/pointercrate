@@ -4,17 +4,17 @@ use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]
-pub struct ErrorPage {
-    error: PointercrateError,
+pub struct ErrorPage<'a> {
+    error: &'a PointercrateError,
 }
 
-impl ErrorPage {
-    pub fn new(error: PointercrateError) -> ErrorPage {
+impl ErrorPage<'_> {
+    pub fn new(error: &PointercrateError) -> ErrorPage {
         ErrorPage { error }
     }
 }
 
-impl Page for ErrorPage {
+impl Page for ErrorPage<'_> {
     fn title(&self) -> String {
         let status = self.error.status_code();
 
