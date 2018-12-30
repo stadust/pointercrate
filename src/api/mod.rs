@@ -81,3 +81,24 @@ pub fn preferred_mime_type(req: &HttpRequest<PointercrateState>) -> Result<mime:
         Ok(mime_type)
     }
 }
+
+// Specialized form of crate::api::wrap that doesnt have to deal with
+// calling another handler function and thus doesnt have to bother with
+// futures
+pub fn error(
+    req: &HttpRequest<PointercrateState>, error: PointercrateError,
+) -> Result<HttpResponse> {
+    preferred_mime_type(req).map(|mime_type| {
+        match (mime_type.type_(), mime_type.subtype()) {
+            (mime::TEXT, mime::HTML) => {
+                let html = ErrorPage::new(&error).render(req);
+
+                HttpResponse::Ok()
+                    .content_type("text/html; charset=utf-8")
+                    .body(html.0)
+            },
+            (mime::APPLICATION, mime::JSON) => error.error_response(),
+            _ => unreachable!(),
+        }
+    })
+}
