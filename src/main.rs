@@ -145,64 +145,64 @@ fn main() {
                 api_scope
                     .nested("/users", |user_scope| {
                         user_scope
-                            .resource("/", |r| r.get().f(api::user::paginate))
+                            .resource("/", |r| r.get().f(wrap(api::user::paginate)))
                             .resource("/{user_id}/", |r| {
                                 r.get().f(wrap(api::user::user));
-                                r.method(Method::PATCH).f(api::user::patch);
-                                r.delete().f(api::user::delete);
+                                r.method(Method::PATCH).f(wrap(api::user::patch));
+                                r.delete().f(wrap(api::user::delete));
                                 r.route().f(allowed!(GET, PATCH, DELETE))
                             })
                     })
                     .nested("/demons", |demon_scope| {
                         demon_scope
                             .resource("/", |r| {
-                                r.get().f(api::demon::paginate);
-                                r.post().f(api::demon::post);
+                                r.get().f(wrap(api::demon::paginate));
+                                r.post().f(wrap(api::demon::post));
                                 r.route().f(allowed!(GET, POST))
                             })
                             .resource("/{position}/", |r| {
-                                r.get().f(api::demon::get);
-                                r.method(Method::PATCH).f(api::demon::patch);
+                                r.get().f(wrap(api::demon::get));
+                                r.method(Method::PATCH).f(wrap(api::demon::patch));
                                 r.route().f(allowed!(GET, PATCH))
                             })
                             .resource("/{position}/creators/", |r| {
-                                r.post().f(api::demon::post_creator);
+                                r.post().f(wrap(api::demon::post_creator));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/{position}/creators/{player_id}/", |r| {
-                                r.delete().f(api::demon::delete_creator);
+                                r.delete().f(wrap(api::demon::delete_creator));
                                 r.route().f(allowed!(DELETE))
                             })
                     })
                     .nested("/records", |record_scope| {
                         record_scope
                             .resource("/", |r| {
-                                r.post().f(api::record::submit);
+                                r.post().f(wrap(api::record::submit));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/{record_id}/", |r| {
-                                r.get().f(api::record::get);
+                                r.get().f(wrap(api::record::get));
                                 r.route().f(allowed!(GET))
                             })
                     })
                     .nested("/auth", |auth_scope| {
                         auth_scope
                             .resource("/", |r| {
-                                r.post().f(api::auth::login);
+                                r.post().f(wrap(api::auth::login));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/register/", |r| {
-                                r.post().f(api::auth::register);
+                                r.post().f(wrap(api::auth::register));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/me/", |r| {
-                                r.get().f(api::auth::me);
-                                r.delete().f(api::auth::delete_me);
-                                r.method(Method::PATCH).f(api::auth::patch_me);
+                                r.get().f(wrap(api::auth::me));
+                                r.delete().f(wrap(api::auth::delete_me));
+                                r.method(Method::PATCH).f(wrap(api::auth::patch_me));
                                 r.route().f(allowed!(GET, PATCH, DELETE))
                             })
                             .resource("/invalidate/", |r| {
-                                r.post().f(api::auth::invalidate);
+                                r.post().f(wrap(api::auth::invalidate));
                                 r.route().f(allowed!(POST))
                             })
                     })
