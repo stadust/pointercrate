@@ -18,7 +18,11 @@ impl Page for ErrorPage {
     fn title(&self) -> String {
         let status = self.error.status_code();
 
-        format!("{} - {}", status.as_u16(), status.as_str())
+        format!(
+            "{} - {}",
+            status.as_u16(),
+            status.canonical_reason().unwrap_or("What the fuck?")
+        )
     }
 
     fn description(&self) -> String {
@@ -51,7 +55,7 @@ impl Page for ErrorPage {
                             "Oh No!"
                         }
                         h2 style="text-align: right; margin: 0px" {
-                            (self.error.status_code().as_str())
+                            (self.error.status_code().canonical_reason().unwrap_or("What the fuck?"))
                         }
                     }
                     p.leftlined.pad style = "max-width: 30%" {
@@ -59,7 +63,7 @@ impl Page for ErrorPage {
                     }
                 }
                 p style="text-align: center; font-size: .7em" {
-                    "Believe we've made a mistake in showing you this error?"
+                    "Believe we've made a mistake in showing you this error?"(PreEscaped("&nbsp;"))
                     a.link href = {(url_helper::url(req, "about")) "#contact"} {
                         "Contact us!"
                     }
@@ -74,7 +78,7 @@ impl Page for ErrorPage {
 <style>
     @font-face {
         font-family: 'norwester';
-        src: url(static/norwester.otf);
+        src: url(/static/norwester.otf);
     }
 
     *:not(svg){

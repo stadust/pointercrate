@@ -34,7 +34,6 @@ use crate::{
 use actix::System;
 use actix_web::{
     dev::Handler,
-    error::ResponseError,
     fs,
     http::{Method, NormalizePath, StatusCode},
     server, App, FromRequest, Path,
@@ -58,9 +57,9 @@ pub mod view;
 
 macro_rules! allowed {
     ($($allowed: ident),*) => {
-        |_| PointercrateError::MethodNotAllowed {
+        |req| crate::view::error::ErrorPage::new(PointercrateError::MethodNotAllowed {
             allowed_methods: vec![$(Method::$allowed,)*]
-        }.error_response()
+        }).render(req)
     };
 }
 
