@@ -47,7 +47,7 @@ Registering for an account does not provide an access token, it needs to be aqui
 
 ### Example request
 
-```http
+```
 POST /api/v1/auth/register/
 Accept: application/json
 Content-Type: application/json

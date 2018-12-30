@@ -40,7 +40,7 @@ Returned if the `If-None-Match` header is set, and the etag for the player objec
 
 ### Example request:
 
-```http
+```
 GET /api/v1/players/1/
 Accept: application/json
 ```

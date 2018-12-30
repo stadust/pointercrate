@@ -58,7 +58,7 @@ When `check` is set to `true`, and the record passed all internal validation, me
 
 ### Example request:
 
-```http
+```
 POST /api/v1/records/
 Accept: application/json
 Content-Type: application/json

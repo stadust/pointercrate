@@ -248,6 +248,7 @@ impl Model for PartialRecord {
 }
 
 impl Model for Record {
+    #[allow(clippy::type_complexity)]
     type From = diesel::query_source::joins::JoinOn<
         diesel::query_source::joins::Join<
             diesel::query_source::joins::JoinOn<

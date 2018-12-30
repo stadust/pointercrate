@@ -156,6 +156,7 @@ impl Model for PartialDemon {
 }
 
 impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Demon {
+    #[allow(clippy::type_complexity)]
     type Row = (
         String,
         i16,
@@ -194,6 +195,7 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
 }
 
 impl Model for Demon {
+    #[allow(clippy::type_complexity)]
     type From = diesel::query_source::joins::JoinOn<
         diesel::query_source::joins::Join<
             demons::table,

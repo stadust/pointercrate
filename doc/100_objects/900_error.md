@@ -14,7 +14,7 @@ Although each HTTP response comes with a status code, you can still calculate th
 
 ### Example object:
 
-```
+```json
 {
   "code": 42217,
   "data": {

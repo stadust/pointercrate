@@ -53,7 +53,7 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 
 ### Example request:
 
-```http
+```
 POST /api/v1/demons/
 Accept: application/json
 Authorization: Bearer <omitted>

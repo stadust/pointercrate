@@ -29,7 +29,7 @@ _Nothing_
 
 ### Example request:
 
-```http
+```
 DELETE /appi/v1/auth/me/
 Accept: application/json
 Authorization: Basic <omitted>

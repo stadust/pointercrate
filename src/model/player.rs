@@ -53,7 +53,7 @@ impl Player {
 
 impl Model for Player {
     type From = players::table;
-    type Selection =  (players::id, players::name, players::banned);
+    type Selection = (players::id, players::name, players::banned);
 
     fn from() -> Self::From {
         players::table

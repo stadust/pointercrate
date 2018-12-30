@@ -6,7 +6,7 @@
 
 Each pointercrate user is represented by a `User` object.
 
-If the display name is not `null`, it will replace a user's username wherever his name is displayed.
+If the display name is not `null`, it will replace a user's username wherever their name is displayed.
 Right now, that is only relevant to users with `LIST_HELPER` permissions or higher.
 
 | Field           | Type    | Description                                                  |
@@ -19,7 +19,7 @@ Right now, that is only relevant to users with `LIST_HELPER` permissions or high
 
 ### Example object:
 
-```
+```json
 {
   "display_name": "stadust",
   "id": 2,

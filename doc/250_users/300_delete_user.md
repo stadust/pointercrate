@@ -33,7 +33,7 @@ _Nothing_
 
 ### Example request:
 
-```http
+```
 DELETE /api/v1/users/1/
 Accept: application/json
 Authorization: Bearer <omitted>

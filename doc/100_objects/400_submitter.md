@@ -11,7 +11,7 @@ Everyone who submits a record gets assigned an incremental submitter id, interna
 
 ### Example object
 
-```
+```json
 {
   "banned": false,
   "id": 2

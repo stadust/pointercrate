@@ -18,7 +18,7 @@ _Nothing_
 
 ### Example request:
 
-```http
+```
 POST /api/v1/auth/invalidate/
 Accept: application/json
 Authorization: Basic <omitted>

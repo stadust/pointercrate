@@ -4,9 +4,9 @@
 
 Each demon on the list is represented by a `Demon` object. The following assumptions can be made about these:
 
-* The `requirement` value lies between `0` and `100`.
-* There are no holes in the positioning and the `position` value is greater than `0`
-* Every `video` value, if provided, is in one of the formats listed [here](/documentation/#video)
+- The `requirement` value lies between `0` and `100`.
+- There are no holes in the positioning and the `position` value is greater than `0`
+- Every `video` value, if provided, is in one of the formats listed [here](/documentation/#video)
 
 Note that although on the website the record requirement for demons on the extended list is always displayed as `100%`,
 `Demon` objects still save their requirement from when they were on the main list.
@@ -46,9 +46,9 @@ only a shorter representation of each demon is provided.
 
 ### Example object:
 
-```
+```json
 {
-  creators": [
+  "creators": [
     {
       "banned": false,
       "id": 2,

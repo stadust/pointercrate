@@ -58,7 +58,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 ### Example request:
 
-```http
+```
 PATCH /api/v1/players/1/
 Accept: application/json
 Authorization: Bearer <omitted>

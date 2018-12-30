@@ -58,12 +58,6 @@ impl<'a> Page for Documentation<'a> {
     fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
         vec![html! {
             (PreEscaped(r#"
-<style type="text/css">
-  code {
-    white-space: pre;
-  }
-</style>
-
 <script type="application/ld+json">
   {
     "@context": "http://schema.org",

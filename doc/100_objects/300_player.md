@@ -4,7 +4,7 @@
 
 Each player on the list is represented by a `Player` object. The following assumptions can be made about these:
 
-* If a player is banned, he does not have any approved or submitted records on the list
+- If a player is banned, he does not have any approved or submitted records on the list
 
 Note that it is not possible to retrieve a player's demonlist score via the API.
 
@@ -33,7 +33,7 @@ only a shorter representation of each player is provided.
 
 ### Example object:
 
-```
+```json
 {
   "banned": false,
   "beaten": [],

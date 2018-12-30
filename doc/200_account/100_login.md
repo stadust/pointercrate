@@ -26,7 +26,7 @@ Logs into an existing pointercrate user account, providing an acccess token upon
 
 ### Example request:
 
-```http
+```
 POST /api/v1/auth/
 Accept: application/json
 Authorization: Basic <omitted>

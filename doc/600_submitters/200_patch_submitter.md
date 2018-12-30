@@ -50,7 +50,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 ### Example request:
 
-```http
+```
 PATCH /api/v1/submitters/2/
 Accept: application/json
 Authorization: Bearer <omitted>

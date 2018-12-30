@@ -4,10 +4,10 @@
 
 Each record on the list is represented by a `Record` object. The following assumptions can be made about these:
 
-* The `progress` value lies within `demon.requirement` and `100`
-* Every `video` value is unique
-* Every combination of `demon`, `player` and `status` values is unique
-* Every `video` value is in one of the formats listed [here](/documentation/#video)
+- The `progress` value lies within `demon.requirement` and `100`
+- Every `video` value is unique
+- Every combination of `demon`, `player` and `status` values is unique
+- Every `video` value is in one of the formats listed [here](/documentation/#video)
 
 | Field     | Type                           | Description                                             |
 | --------- | ------------------------------ | ------------------------------------------------------- |
@@ -29,7 +29,7 @@ Each record on the list is represented by a `Record` object. The following assum
 
 ### Example object:
 
-```
+```json
 {
   "demon": {
     "name": "Cadrega City",
