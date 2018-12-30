@@ -1,5 +1,6 @@
 //! Module containing all the actix request handlers for the `/api/v1/records/` endpoints
 
+use super::PCResponder;
 use crate::{
     actor::database::DeleteMessage,
     error::PointercrateError,
@@ -7,16 +8,14 @@ use crate::{
     model::{record::Submission, Record, Submitter},
     state::PointercrateState,
 };
-use actix_web::{
-    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
-};
+use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
 use ipnetwork::IpNetwork;
 use log::{error, info, warn};
 use serde_json::json;
 use tokio::prelude::future::{Either, Future, IntoFuture};
 
 /// `POST /api/v1/records/` handler
-pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/records/");
 
     let state = req.state().clone();
@@ -44,7 +43,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `GET /api/v1/records/[id]/` handler
-pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/records/{{record_id}}/");
 
     let state = req.state().clone();

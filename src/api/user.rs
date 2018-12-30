@@ -1,5 +1,6 @@
 //! Module containing all the actix request handlers for the `/api/v1/users/` endpoints
 
+use super::PCResponder;
 use crate::{
     actor::database::TokenAuth,
     error::PointercrateError,
@@ -7,14 +8,12 @@ use crate::{
     model::user::{PatchUser, User, UserPagination},
     state::PointercrateState,
 };
-use actix_web::{
-    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
-};
+use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
 use log::info;
 use tokio::prelude::future::Future;
 
 /// `GET /api/v1/users/` handler
-pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/users/");
 
     let query_string = req.query_string();
@@ -33,7 +32,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `GET /api/v1/users/[id]/` handler
-pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn user(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/users/{{user_id}}/");
 
     let state = req.state().clone();
@@ -51,7 +50,7 @@ pub fn user(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `PATCH /api/v1/users/[id]/` handler
-pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn patch(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("PATCH /api/v1/users/{{user_id}}/");
 
     let state = req.state().clone();
@@ -74,7 +73,7 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `DELETE /api/v1/users/[id]/` handler
-pub fn delete(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn delete(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/users/{{user_id}}/");
 
     let state = req.state().clone();

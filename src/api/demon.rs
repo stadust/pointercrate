@@ -1,5 +1,6 @@
 //! Module containing all the actix request handlers for the `/api/v1/demons/` endpoints
 
+use super::PCResponder;
 use crate::{
     actor::database::{DeleteMessage, TokenAuth},
     error::PointercrateError,
@@ -11,14 +12,12 @@ use crate::{
     },
     state::PointercrateState,
 };
-use actix_web::{
-    AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path, Responder,
-};
+use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
 use log::info;
 use tokio::prelude::future::{Future, IntoFuture};
 
 /// `GET /api/v1/demons/` handler
-pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/demons/");
 
     let query_string = req.query_string();
@@ -35,7 +34,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `POST /api/v1/demons/` handler
-pub fn post(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn post(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/demons/");
 
     let state = req.state().clone();
@@ -51,7 +50,7 @@ pub fn post(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `GET /api/v1/demons/[position]/` handler
-pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/demons/{{position}}/");
 
     let state = req.state().clone();
@@ -65,7 +64,7 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `PATCH /api/v1/demons/[position]/` handler
-pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn patch(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("PATCH /api/v1/demons/{{position}}/");
 
     let state = req.state().clone();
@@ -92,7 +91,7 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
-pub fn post_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/demons/{{position}}/creators/");
 
     let state = req.state().clone();
@@ -115,7 +114,7 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .responder()
 }
 
-pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/demons/{{position}}/creators/{{player_id}}/");
 
     let state = req.state().clone();

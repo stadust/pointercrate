@@ -1,18 +1,19 @@
 //! Module containing all the actix request handlers for the `/api/v1/auth/` endpoints
 
+use super::PCResponder;
 use crate::{
     actor::database::{BasicAuth, Invalidate, TokenAuth},
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,
 };
-use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse, Responder};
+use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse};
 use log::info;
 use serde_json::json;
 use tokio::prelude::future::Future;
 
 /// `POST /api/v1/auth/register/` handler
-pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn register(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/auth/register/");
 
     let state = req.state().clone();
@@ -29,7 +30,7 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `POST /api/v1/auth/` handler
-pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn login(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/auth/");
 
     req.state()
@@ -44,7 +45,7 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `POST /api/v1/auth/invalidate/` handler
-pub fn invalidate(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn invalidate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/auth/invalidate/");
 
     req.state()
@@ -54,7 +55,7 @@ pub fn invalidate(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `GET /api/v1/auth/me/` handler
-pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/auth/me/");
 
     req.state()
@@ -64,7 +65,7 @@ pub fn me(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `PATCH /api/v1/auth/me/` handler
-pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("PATCH /api/v1/auth/me/");
 
     let state = req.state().clone();
@@ -84,7 +85,7 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
 }
 
 /// `DELETE /api/v1/auth/me/` handler
-pub fn delete_me(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn delete_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/auth/me/");
 
     let state = req.state().clone();
