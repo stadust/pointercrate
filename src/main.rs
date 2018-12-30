@@ -27,7 +27,7 @@ type Result<T> = std::result::Result<T, PointercrateError>;
 use crate::{
     actor::{database::DatabaseActor, gdcf::GdcfActor},
     error::PointercrateError,
-    middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve},
+    middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve, mime::MimeProcess},
     state::{Http, PointercrateState},
     view::{documentation::Documentation, home::Homepage, Page},
 };
@@ -111,6 +111,7 @@ fn main() {
             .middleware(IpResolve)
             .middleware(Authorizer)
             .middleware(Precondition)
+            .middleware(MimeProcess)
             .handler(
                 "/static",
                 fs::StaticFiles::new("static").unwrap(),
