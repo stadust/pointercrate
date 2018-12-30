@@ -56,14 +56,12 @@ pub mod state;
 pub mod video;
 pub mod view;
 
-macro_rules! mna {
-    ($($allowed: expr),*) => {
-        |_| {
-            PointercrateError::MethodNotAllowed {
-                allowed_methods: vec![$($allowed,)*]
-            }.error_response()
-        }
-    }
+macro_rules! allowed {
+    ($($allowed: ident),*) => {
+        |_| PointercrateError::MethodNotAllowed {
+            allowed_methods: vec![$(Method::$allowed,)*]
+        }.error_response()
+    };
 }
 
 // TODO: custom 404 handling, how does it work??????
@@ -126,7 +124,8 @@ fn main() {
             .resource("/about/", |r| r.name("about"))  // TODO: this
             .resource("/documentation/", |r| {
                 r.name("documentation");
-                r.get().f(|req| Documentation::new(req.state(), "index").map(|d|d.render(req)))
+                r.get().f(|req| Documentation::new(req.state(), "index").map(|d|d.render(req)));
+                r.route().f(allowed!(GET))
             })
             .resource("/documentation/{page}/", |r| {
                 r.get().f(|req|{
@@ -134,7 +133,8 @@ fn main() {
                         .map(|page| page.into_inner())
                         .and_then(|page| Documentation::new(req.state(), &page).map_err(Into::into))
                         .map(|d|d.render(req))
-                })
+                });
+                r.route().f(allowed!(GET))
             })
             .scope("/api/v1", |api_scope| {
                 api_scope
@@ -145,54 +145,60 @@ fn main() {
                                 r.get().f(api::user::user);
                                 r.method(Method::PATCH).f(api::user::patch);
                                 r.delete().f(api::user::delete);
-                                r.route()
-                                    .f(mna!(Method::GET, Method::PATCH, Method::DELETE))
+                                r.route().f(allowed!(GET, PATCH, DELETE))
                             })
                     })
                     .nested("/demons", |demon_scope| {
                         demon_scope
                             .resource("/", |r| {
                                 r.get().f(api::demon::paginate);
-                                r.post().f(api::demon::post)
+                                r.post().f(api::demon::post);
+                                r.route().f(allowed!(GET, POST))
                             })
                             .resource("/{position}/", |r| {
                                 r.get().f(api::demon::get);
-                                r.method(Method::PATCH).f(api::demon::patch)
+                                r.method(Method::PATCH).f(api::demon::patch);
+                                r.route().f(allowed!(GET, PATCH))
                             })
-                            .resource("/{position}/creators/", |r| r.post().f(api::demon::post_creator))
-                            .resource("/{position}/creators/{player_id}/", |r| r.delete().f(api::demon::delete_creator))
+                            .resource("/{position}/creators/", |r| {
+                                r.post().f(api::demon::post_creator);
+                                r.route().f(allowed!(POST))
+                            })
+                            .resource("/{position}/creators/{player_id}/", |r| {
+                                r.delete().f(api::demon::delete_creator);
+                                r.route().f(allowed!(DELETE))
+                            })
                     })
                     .nested("/records", |record_scope| {
                         record_scope
                             .resource("/", |r| {
                                 r.post().f(api::record::submit);
-                                r.route().f(mna!(Method::POST))
+                                r.route().f(allowed!(POST))
                             })
                             .resource("/{record_id}/", |r| {
                                 r.get().f(api::record::get);
-                                r.route().f(mna!(Method::GET))
+                                r.route().f(allowed!(GET))
                             })
                     })
                     .nested("/auth", |auth_scope| {
                         auth_scope
                             .resource("/", |r| {
                                 r.post().f(api::auth::login);
-                                r.route().f(mna!(Method::POST))
+                                r.route().f(allowed!(POST))
                             })
                             .resource("/register/", |r| {
                                 r.post().f(api::auth::register);
-                                r.route().f(mna!(Method::POST))
+                                r.route().f(allowed!(POST))
                             })
                             .resource("/me/", |r| {
                                 r.get().f(api::auth::me);
                                 r.delete().f(api::auth::delete_me);
                                 r.method(Method::PATCH).f(api::auth::patch_me);
-                                r.route()
-                                    .f(mna!(Method::GET, Method::PATCH, Method::DELETE))
+                                r.route().f(allowed!(GET, PATCH, DELETE))
                             })
                             .resource("/invalidate/", |r| {
                                 r.post().f(api::auth::invalidate);
-                                r.route().f(mna!(Method::POST))
+                                r.route().f(allowed!(POST))
                             })
                     })
             })
