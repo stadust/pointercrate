@@ -37,9 +37,10 @@ use actix_web::{
     dev::Handler,
     fs,
     http::{Method, NormalizePath, StatusCode},
-    server, App, FromRequest, Path,
+    server, App, AsyncResponder, FromRequest, Path,
 };
 use std::sync::Arc;
+use tokio::prelude::Future;
 
 #[macro_use]
 pub mod operation;
@@ -119,6 +120,7 @@ fn main() {
                 "/static",
                 fs::StaticFiles::new("static").unwrap(),
             )
+            .resource("/test/", |r| r.get().f(|req|req.state().database(crate::actor::database::ThisIsATest).map(|_| "The test worked!").responder()))
             .resource("/", |r| {
                 r.name("home");
                 r.get().f(|req| Homepage.render(req))

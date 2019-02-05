@@ -1,5 +1,11 @@
 use super::User;
-use crate::{error::PointercrateError, operation::Delete, schema::members, Result};
+use crate::{
+    error::PointercrateError,
+    model::user::PermissionsSet,
+    operation::{Delete, DeletePermissions},
+    schema::members,
+    Result,
+};
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 
 impl Delete for User {
@@ -9,5 +15,11 @@ impl Delete for User {
             .execute(connection)
             .map(|_| ())
             .map_err(PointercrateError::database)
+    }
+}
+
+impl DeletePermissions for User {
+    fn permissions() -> PermissionsSet {
+        perms!(Administrator)
     }
 }

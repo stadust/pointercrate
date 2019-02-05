@@ -2,9 +2,10 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::{BasicAuth, Invalidate, TokenAuth},
+    actor::database::{BasicAuth, Invalidate, PatchMessage, TokenAuth},
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchMe, Registration, User},
+    operation::Hotfix,
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse};
@@ -75,10 +76,11 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     req.json()
         .from_err()
         .and_then(move |patch: PatchMe| {
-            state.database(BasicAuth(auth)).and_then(move |user: User| {
-                let user_id = user.id; // AAA silly moving rules are silly
-                state.patch(user, user_id, patch, if_match)
-            })
+            state
+                .authorize_basic(auth, patch.required_permissions())
+                .and_then(move |user: User| {
+                    state.database(PatchMessage::new(user.id, patch, user, if_match))
+                })
         })
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
         .responder()

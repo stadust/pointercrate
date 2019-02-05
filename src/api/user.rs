@@ -10,7 +10,7 @@ use crate::{
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
 use log::info;
-use tokio::prelude::future::Future;
+use tokio::prelude::future::{Future, IntoFuture};
 
 /// `GET /api/v1/users/` handler
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -36,15 +36,14 @@ pub fn user(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/users/{{user_id}}/");
 
     let state = req.state().clone();
+    let auth = req.extensions_mut().remove().unwrap();
 
     let user_id = Path::<i32>::extract(req)
         .map_err(|_| PointercrateError::bad_request("User ID must be integer"));
 
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(|user| Ok(demand_perms!(user, Moderator)))
-        .and_then(move |_| user_id)
-        .and_then(move |user_id| state.get(user_id.into_inner()))
+    user_id
+        .into_future()
+        .and_then(move |user_id| state.get_authorized(user_id.into_inner(), auth))
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
         .responder()
 }
@@ -55,21 +54,27 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     let state = req.state().clone();
     let if_match = req.extensions_mut().remove().unwrap();
+    let auth = req.extensions_mut().remove().unwrap();
     let user_id = Path::<i32>::extract(req)
         .map_err(|_| PointercrateError::bad_request("User ID must be integer"));
 
-    let body = req.json();
-
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(move |user: User| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
-        .and_then(move |(user, user_id)| {
-            body.from_err().and_then(move |patch: PatchUser| {
-                state.patch(user, user_id.into_inner(), patch, if_match)
-            })
-        })
+    req.json()
+        .from_err()
+        .and_then(move |patch: PatchUser| Ok((patch, user_id?.into_inner())))
+        .and_then(move |(patch, user_id)| state.patch_authorized(auth, user_id, patch, if_match))
         .map(|updated: User| HttpResponse::Ok().json_with_etag(updated))
         .responder()
+
+    /*state
+    .database(TokenAuth(req.extensions_mut().remove().unwrap()))
+    .and_then(move |user: User| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
+    .and_then(move |(user, user_id)| {
+        body.from_err().and_then(move |patch: PatchUser| {
+            state.patch(user, user_id.into_inner(), patch, if_match)
+        })
+    })
+    .map(|updated: User| HttpResponse::Ok().json_with_etag(updated))
+    .responder()*/
 }
 
 /// `DELETE /api/v1/users/[id]/` handler
@@ -78,17 +83,14 @@ pub fn delete(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     let state = req.state().clone();
     let if_match = req.extensions_mut().remove().unwrap();
-    let user_id = Path::<i32>::extract(req)
-        .map_err(|_| PointercrateError::bad_request("User ID must be interger"));
+    let auth = req.extensions_mut().remove().unwrap();
 
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(|user: User| Ok(demand_perms!(user, Administrator)))
-        .and_then(move |_| user_id)
+    Path::<i32>::extract(req)
+        .map_err(|_| PointercrateError::bad_request("User ID must be interger"))
+        .into_future()
         .and_then(move |user_id| {
-            state
-                .delete::<i32, User>(user_id.into_inner(), if_match)
-                .map(|_| HttpResponse::NoContent().finish())
+            state.delete_authorized::<i32, User>(user_id.into_inner(), Some(if_match), auth)
         })
+        .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

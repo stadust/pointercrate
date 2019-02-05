@@ -2,13 +2,11 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::{DeleteMessage, TokenAuth},
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
         creator::{Creator, PostCreator},
         demon::{Demon, DemonPagination, PartialDemon, PatchDemon, PostDemon},
-        user::User,
     },
     state::PointercrateState,
 };
@@ -37,14 +35,12 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
 pub fn post(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/demons/");
 
+    let auth = req.extensions_mut().remove().unwrap();
     let state = req.state().clone();
-    let json = req.json().from_err();
 
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(|user| Ok(demand_perms!(user, ListModerator)))
-        .and_then(|_| json)
-        .and_then(move |demon: PostDemon| state.post(demon))
+    req.json()
+        .from_err()
+        .and_then(move |demon: PostDemon| state.post_authorized(demon, auth))
         .map(|demon: Demon| HttpResponse::Created().json_with_etag(demon))
         .responder()
 }
@@ -69,47 +65,46 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     let state = req.state().clone();
     let if_match = req.extensions_mut().remove().unwrap();
+    let auth = req.extensions_mut().remove().unwrap();
     let position = Path::<i16>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"));
 
-    let body = req.json();
-
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(move |user: User| {
-            Ok((
-                demand_perms!(user, ListModerator or ListAdministrator),
-                position?,
-            ))
-        })
-        .and_then(move |(user, position)| {
-            body.from_err().and_then(move |patch: PatchDemon| {
-                state.patch(user, position.into_inner(), patch, if_match)
-            })
-        })
+    req.json()
+        .from_err()
+        .and_then(move |patch: PatchDemon| Ok((patch, position?.into_inner())))
+        .and_then(move |(patch, position)| state.patch_authorized(auth, position, patch, if_match))
         .map(|updated: Demon| HttpResponse::Ok().json_with_etag(updated))
         .responder()
+
+    /*state
+    .database(TokenAuth(req.extensions_mut().remove().unwrap()))
+    .and_then(move |user: User| {
+        Ok((
+            demand_perms!(user, ListModerator or ListAdministrator),
+            position?,
+        ))
+    })
+    .and_then(move |(user, position)| {
+        body.from_err().and_then(move |patch: PatchDemon| {
+            state.patch(user, position.into_inner(), patch, if_match)
+        })
+    })
+    .map(|updated: Demon| HttpResponse::Ok().json_with_etag(updated))
+    .responder()*/
 }
 
 pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/demons/{{position}}/creators/");
 
     let state = req.state().clone();
-    let body = req.json();
+    let auth = req.extensions_mut().remove().unwrap();
     let position = Path::<i16>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"));
 
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(move |user: User| {
-            demand_perms!(user, ListModerator or ListAdministrator);
-            position
-        })
-        .and_then(move |position| {
-            body.from_err().and_then(move |post: PostCreator| {
-                state.post((position.into_inner(), post.creator))
-            })
-        })
+    req.json()
+        .from_err()
+        .and_then(move |post: PostCreator| Ok((position?.into_inner(), post.creator)))
+        .and_then(move |data| state.post_authorized(data, auth))
         .map(|_: Creator| HttpResponse::Created().finish())
         .responder()
 }
@@ -117,21 +112,15 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
 pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/demons/{{position}}/creators/{{player_id}}/");
 
+    let auth = req.extensions_mut().remove().unwrap();
     let state = req.state().clone();
-    let url_params = Path::<(i16, i32)>::extract(req).map_err(|_| {
-        PointercrateError::bad_request("Demons position and player ID must be intergers")
-    });
 
-    state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(move |user: User| {
-            demand_perms!(user, ListModerator or ListAdministrator);
-            url_params
+    Path::<(i16, i32)>::extract(req)
+        .map_err(|_| {
+            PointercrateError::bad_request("Demons position and player ID must be intergers")
         })
-        .and_then(move |key| {
-            state
-                .database(DeleteMessage::<_, Creator>::unconditional(key.into_inner()))
-                .map(|_| HttpResponse::NoContent().finish())
-        })
+        .into_future()
+        .and_then(move |data| state.delete_authorized::<_, Creator>(data.into_inner(), None, auth))
+        .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

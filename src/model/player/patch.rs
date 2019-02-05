@@ -1,4 +1,4 @@
-use super::{super::user::Permissions, Player};
+use super::{super::user::PermissionsSet, Player};
 use crate::{
     error::PointercrateError,
     operation::{deserialize_non_optional, Hotfix, Patch},
@@ -16,8 +16,8 @@ make_patch! {
 }
 
 impl Hotfix for PatchPlayer {
-    fn required_permissions(&self) -> Permissions {
-        Permissions::ListModerator
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }
 

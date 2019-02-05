@@ -85,6 +85,7 @@ impl Player {
     }
 
     pub fn merge(&self, with: Player, conn: &PgConnection) -> Result<()> {
+        // TODO: deal with the publisher, verifier, and creator references
         diesel::sql_query(format!(
             include_str!("../../sql/prepare_player_merge.sql"),
             self.id, with.id

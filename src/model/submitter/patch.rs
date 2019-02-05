@@ -1,4 +1,4 @@
-use super::{super::user::Permissions, Submitter};
+use super::{super::user::PermissionsSet, Submitter};
 use crate::{
     operation::{deserialize_non_optional, Hotfix, Patch},
     schema::submitters,
@@ -14,8 +14,8 @@ make_patch! {
 }
 
 impl Hotfix for PatchSubmitter {
-    fn required_permissions(&self) -> Permissions {
-        Permissions::ListModerator
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }
 

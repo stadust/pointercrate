@@ -4,7 +4,7 @@
 #![allow(unused_macros)]
 
 use crate::{
-    error::PointercrateError, middleware::cond::IfMatch, model::user::Permissions, Result,
+    error::PointercrateError, middleware::cond::IfMatch, model::user::PermissionsSet, Result,
 };
 use diesel::pg::PgConnection;
 use serde::{de::Error, Deserialize, Deserializer};
@@ -19,9 +19,7 @@ pub trait Hotfix {
     /// The level of authorization required to perform this [`HotFix`]
     ///
     /// The default implementation allows all patches without any authorization
-    fn required_permissions(&self) -> Permissions {
-        Permissions::empty()
-    }
+    fn required_permissions(&self) -> PermissionsSet;
 }
 
 pub trait Patch<P: Hotfix>: Sized {

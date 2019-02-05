@@ -4,32 +4,45 @@ mod paginate;
 mod patch;
 
 pub use self::{
-    delete::Delete,
-    get::Get,
+    delete::{Delete, DeletePermissions},
+    get::{Get, GetPermissions},
     paginate::{Paginate, Paginator},
     patch::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
-    post::Post,
+    post::{Post, PostData},
 };
 
 mod get {
-    use crate::Result;
+    use crate::{model::user::PermissionsSet, Result};
     use diesel::pg::PgConnection;
 
     pub trait Get<Key>: Sized {
         fn get(id: Key, connection: &PgConnection) -> Result<Self>;
     }
+
+    pub trait GetPermissions {
+        fn permissions() -> PermissionsSet {
+            PermissionsSet::default()
+        }
+    }
 }
+
 mod post {
-    use crate::Result;
+    use crate::{model::user::PermissionsSet, Result};
     use diesel::pg::PgConnection;
 
-    pub trait Post<T>: Sized {
+    pub trait Post<T: PostData>: Sized {
         fn create_from(from: T, connection: &PgConnection) -> Result<Self>;
+    }
+
+    pub trait PostData {
+        fn required_permissions(&self) -> PermissionsSet;
     }
 }
 
 mod delete {
-    use crate::{error::PointercrateError, middleware::cond::IfMatch, Result};
+    use crate::{
+        error::PointercrateError, middleware::cond::IfMatch, model::user::PermissionsSet, Result,
+    };
     use diesel::pg::PgConnection;
     use std::{
         collections::hash_map::DefaultHasher,
@@ -51,6 +64,12 @@ mod delete {
             } else {
                 Err(PointercrateError::PreconditionFailed)
             }
+        }
+    }
+
+    pub trait DeletePermissions {
+        fn permissions() -> PermissionsSet {
+            PermissionsSet::default()
         }
     }
 }

@@ -1,4 +1,4 @@
-use super::{Permissions, User};
+use super::{Permissions, PermissionsSet, User};
 use crate::{
     operation::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
     schema::members,
@@ -22,7 +22,12 @@ make_patch! {
     }
 }
 
-impl Hotfix for PatchMe {}
+impl Hotfix for PatchMe {
+    fn required_permissions(&self) -> PermissionsSet {
+        // We can always modify our own account
+        PermissionsSet::default()
+    }
+}
 
 impl Patch<PatchMe> for User {
     fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
@@ -45,11 +50,11 @@ impl Patch<PatchMe> for User {
 }
 
 impl Hotfix for PatchUser {
-    fn required_permissions(&self) -> Permissions {
+    fn required_permissions(&self) -> PermissionsSet {
         if let Some(perms) = self.permissions {
-            perms.assignable_from() | Permissions::Moderator
+            PermissionsSet::one(perms.assignable_from() | Permissions::Moderator)
         } else {
-            Permissions::Moderator
+            perms!(Moderator)
         }
     }
 }

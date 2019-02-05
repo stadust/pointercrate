@@ -2,8 +2,8 @@ use super::{Record, RecordStatus};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{Demon, Player, Submitter},
-    operation::{Delete, Get, Post},
+    model::{user::PermissionsSet, Demon, Player, Submitter},
+    operation::{Delete, Get, Post, PostData},
     video, Result,
 };
 use diesel::{Connection, PgConnection, RunQueryDsl};
@@ -19,6 +19,14 @@ pub struct Submission {
     pub video: Option<String>,
     #[serde(rename = "check", default)]
     pub verify_only: bool,
+}
+
+impl PostData for (Submission, Submitter) {
+    fn required_permissions(&self) -> PermissionsSet {
+        // TODO: we can use this to have people with `ListHelper` or higher add records without
+        // having to go through the submission process
+        PermissionsSet::default()
+    }
 }
 
 impl Post<(Submission, Submitter)> for Option<Record> {

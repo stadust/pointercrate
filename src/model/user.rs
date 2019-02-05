@@ -17,6 +17,26 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+// needs to be up here because we're using in the submodules FIXME:
+macro_rules! perms {
+    ($($($perm: ident),+)or*) => {
+        {
+            use crate::model::user::{PermissionsSet, Permissions};
+            use std::collections::HashSet;
+
+            let mut perm_set = HashSet::new();
+
+            $(
+                perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
+            )*
+
+            PermissionsSet {
+                perms: perm_set
+            }
+        }
+    };
+}
+
 mod delete;
 mod get;
 mod paginate;
@@ -144,7 +164,7 @@ impl Serialize for Permissions {
 ///
 /// A [`PermissionsSet`] object can be seen as a boolean function that evaluates to true if, and
 /// only if, any of the contained [`Permissions`] objects evaluate to true for the given input.
-#[derive(Debug)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct PermissionsSet {
     /// The contained permissions
     pub perms: HashSet<Permissions>,
@@ -186,6 +206,12 @@ impl Display for PermissionsSet {
         }
 
         write!(f, "'")
+    }
+}
+
+impl Into<PermissionsSet> for Permissions {
+    fn into(self) -> PermissionsSet {
+        PermissionsSet::one(self)
     }
 }
 

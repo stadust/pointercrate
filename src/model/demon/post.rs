@@ -1,7 +1,7 @@
 use super::Demon;
 use crate::{
-    model::{creator::Creator, Player},
-    operation::{Get, Post},
+    model::{creator::Creator, user::PermissionsSet, Player},
+    operation::{Get, Post, PostData},
     schema::demons,
     video, Result,
 };
@@ -76,5 +76,11 @@ impl Post<PostDemon> for Demon {
                 verifier,
             })
         })
+    }
+}
+
+impl PostData for PostDemon {
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }
