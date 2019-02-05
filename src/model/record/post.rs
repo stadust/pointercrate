@@ -2,8 +2,9 @@ use super::{Record, RecordStatus};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{user::PermissionsSet, Demon, Player, Submitter},
+    model::{Demon, Player, Submitter},
     operation::{Delete, Get, Post, PostData},
+    permissions::PermissionsSet,
     video, Result,
 };
 use diesel::{Connection, PgConnection, RunQueryDsl};

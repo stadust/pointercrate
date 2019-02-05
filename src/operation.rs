@@ -12,7 +12,7 @@ pub use self::{
 };
 
 mod get {
-    use crate::{model::user::PermissionsSet, Result};
+    use crate::{permissions::PermissionsSet, Result};
     use diesel::pg::PgConnection;
 
     pub trait Get<Key>: Sized {
@@ -27,7 +27,7 @@ mod get {
 }
 
 mod post {
-    use crate::{model::user::PermissionsSet, Result};
+    use crate::{permissions::PermissionsSet, Result};
     use diesel::pg::PgConnection;
 
     pub trait Post<T: PostData>: Sized {
@@ -41,7 +41,7 @@ mod post {
 
 mod delete {
     use crate::{
-        error::PointercrateError, middleware::cond::IfMatch, model::user::PermissionsSet, Result,
+        error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
     };
     use diesel::pg::PgConnection;
     use std::{

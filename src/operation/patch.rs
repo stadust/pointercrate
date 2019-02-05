@@ -4,7 +4,7 @@
 #![allow(unused_macros)]
 
 use crate::{
-    error::PointercrateError, middleware::cond::IfMatch, model::user::PermissionsSet, Result,
+    error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
 };
 use diesel::pg::PgConnection;
 use serde::{de::Error, Deserialize, Deserializer};

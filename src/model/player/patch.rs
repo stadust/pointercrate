@@ -1,7 +1,8 @@
-use super::{super::user::PermissionsSet, Player};
+use super::Player;
 use crate::{
     error::PointercrateError,
     operation::{deserialize_non_optional, Hotfix, Patch},
+    permissions::PermissionsSet,
     schema::players,
     Result,
 };

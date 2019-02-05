@@ -45,6 +45,8 @@ use tokio::prelude::Future;
 #[macro_use]
 pub mod operation;
 #[macro_use]
+pub mod permissions;
+#[macro_use]
 pub mod model;
 pub mod actor;
 pub mod api;

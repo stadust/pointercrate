@@ -1,6 +1,7 @@
-use super::{super::user::PermissionsSet, Submitter};
+use super::Submitter;
 use crate::{
     operation::{deserialize_non_optional, Hotfix, Patch},
+    permissions::PermissionsSet,
     schema::submitters,
     Result,
 };

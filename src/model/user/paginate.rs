@@ -66,7 +66,7 @@ impl Paginate<UserPagination> for User {
             // FIXME: raw inline SQL is a bad idea
             query = query.filter(diesel::dsl::sql(&format!(
                 "permissions & {0}::Bit(16) = {0}::Bit(16)",
-                permissions.bits
+                permissions.bits()
             )));
         }
 

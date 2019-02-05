@@ -1,8 +1,8 @@
 use super::User;
 use crate::{
     error::PointercrateError,
-    model::user::PermissionsSet,
     operation::{Delete, DeletePermissions},
+    permissions::PermissionsSet,
     schema::members,
     Result,
 };

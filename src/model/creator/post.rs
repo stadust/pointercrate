@@ -1,8 +1,9 @@
 use super::Creator;
 use crate::{
     error::PointercrateError,
-    model::{user::PermissionsSet, Demon, Player},
+    model::{Demon, Player},
     operation::{Get, Post, PostData},
+    permissions::PermissionsSet,
     schema::creators,
     Result,
 };

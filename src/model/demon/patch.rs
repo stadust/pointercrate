@@ -1,7 +1,8 @@
 use super::Demon;
 use crate::{
-    model::{player::Player, user::PermissionsSet},
+    model::player::Player,
     operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
+    permissions::PermissionsSet,
     schema::demons,
     Result,
 };

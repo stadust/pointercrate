@@ -1,7 +1,8 @@
 use super::Demon;
 use crate::{
-    model::{creator::Creator, user::PermissionsSet, Player},
+    model::{creator::Creator, Player},
     operation::{Get, Post, PostData},
+    permissions::PermissionsSet,
     schema::demons,
     video, Result,
 };

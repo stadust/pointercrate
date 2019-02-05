@@ -8,14 +8,12 @@ use crate::{
     },
     error::PointercrateError,
     middleware::{auth::Authorization, cond::IfMatch},
-    model::{
-        user::{PermissionsSet, User},
-        Model,
-    },
+    model::{user::User, Model},
     operation::{
         Delete, DeletePermissions, Get, GetPermissions, Hotfix, Paginate, Paginator, Patch, Post,
         PostData,
     },
+    permissions::PermissionsSet,
     Result,
 };
 use actix::{Addr, Handler, Message};

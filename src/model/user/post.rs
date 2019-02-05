@@ -1,7 +1,7 @@
 use super::User;
 use crate::{
     error::PointercrateError,
-    model::user::PermissionsSet,
+    permissions::PermissionsSet,
     operation::{Post, PostData},
     schema::members,
     Result,

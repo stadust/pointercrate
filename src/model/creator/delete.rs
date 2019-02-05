@@ -2,8 +2,9 @@ use super::Creator;
 use crate::{
     error::PointercrateError,
     operation::{Delete, DeletePermissions},
+    permissions::PermissionsSet,
     schema::creators,
-    Result, model::user::PermissionsSet
+    Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 

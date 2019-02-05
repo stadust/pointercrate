@@ -7,13 +7,7 @@ pub mod player;
 pub mod record;
 pub mod submitter;
 
-pub use self::{
-    demon::Demon,
-    player::Player,
-    record::Record,
-    submitter::Submitter,
-    user::{Permissions, User},
-};
+pub use self::{demon::Demon, player::Player, record::Record, submitter::Submitter, user::User};
 
 use diesel::{
     dsl::Select,
