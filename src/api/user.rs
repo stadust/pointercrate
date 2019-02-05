@@ -2,7 +2,6 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::TokenAuth,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::user::{PatchUser, User, UserPagination},
@@ -23,8 +22,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let state = req.state().clone();
 
     state
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(|user| Ok(demand_perms!(user, Moderator)))
+        .authorize(req.extensions_mut().remove().unwrap(), perms!(Moderator))
         .and_then(move |_| pagination)
         .and_then(move |pagination: UserPagination| state.paginate::<User, _>(pagination))
         .map(|(users, links)| HttpResponse::Ok().header("Links", links).json(users))
@@ -64,17 +62,6 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .and_then(move |(patch, user_id)| state.patch_authorized(auth, user_id, patch, if_match))
         .map(|updated: User| HttpResponse::Ok().json_with_etag(updated))
         .responder()
-
-    /*state
-    .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-    .and_then(move |user: User| Ok((demand_perms!(user, Moderator or Administrator), user_id?)))
-    .and_then(move |(user, user_id)| {
-        body.from_err().and_then(move |patch: PatchUser| {
-            state.patch(user, user_id.into_inner(), patch, if_match)
-        })
-    })
-    .map(|updated: User| HttpResponse::Ok().json_with_etag(updated))
-    .responder()*/
 }
 
 /// `DELETE /api/v1/users/[id]/` handler

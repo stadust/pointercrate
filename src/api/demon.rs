@@ -75,22 +75,6 @@ pub fn patch(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .and_then(move |(patch, position)| state.patch_authorized(auth, position, patch, if_match))
         .map(|updated: Demon| HttpResponse::Ok().json_with_etag(updated))
         .responder()
-
-    /*state
-    .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-    .and_then(move |user: User| {
-        Ok((
-            demand_perms!(user, ListModerator or ListAdministrator),
-            position?,
-        ))
-    })
-    .and_then(move |(user, position)| {
-        body.from_err().and_then(move |patch: PatchDemon| {
-            state.patch(user, position.into_inner(), patch, if_match)
-        })
-    })
-    .map(|updated: Demon| HttpResponse::Ok().json_with_etag(updated))
-    .responder()*/
 }
 
 pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {

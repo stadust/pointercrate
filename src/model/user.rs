@@ -215,34 +215,6 @@ impl Into<PermissionsSet> for Permissions {
     }
 }
 
-macro_rules! demand_perms {
-    ($user: ident, $($($perm: ident),+)or*) => {
-        {
-            use crate::model::user::{PermissionsSet, Permissions};
-            use crate::error::PointercrateError;
-            use std::collections::HashSet;
-
-            let mut perm_set = HashSet::new();
-
-            $(
-                perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
-            )*
-
-            let perm_set = PermissionsSet {
-                perms: perm_set
-            };
-
-            if !$user.has_any(&perm_set) {
-                return Err(PointercrateError::MissingPermissions {
-                    required: perm_set
-                })
-            }
-
-            $user
-        }
-    }
-}
-
 /// Model representing a user in the database
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "members"]
