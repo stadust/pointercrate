@@ -9,6 +9,7 @@ use diesel::{
     expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
     QueryResult, RunQueryDsl,
 };
+use log::info;
 use serde_derive::Serialize;
 
 mod delete;
@@ -48,14 +49,12 @@ impl Player {
     }
 
     pub fn insert(name: &str, conn: &PgConnection) -> QueryResult<Player> {
+        info!("Creating new player with name {}", name);
+
         insert_into(players::table)
             .values(&NewPlayer { name })
             .get_result(conn)
     }
-
-    /*pub fn name_to_id(name: &str, connection: &PgConnection) -> Result<i32> {
-        Ok(Player::get(name, connection)?.id)
-    }*/
 
     pub fn ban(&self, conn: &PgConnection) -> QueryResult<()> {
         // delete all submissions

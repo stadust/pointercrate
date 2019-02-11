@@ -18,7 +18,7 @@ use diesel::{
     AppearsOnTable, Connection, Expression, QuerySource, RunQueryDsl, SelectableExpression,
 };
 use joinery::Joinable;
-use log::{debug, info};
+use log::{debug, info, trace};
 use std::{hash::Hash, marker::PhantomData};
 
 /// Actor that executes database related actions on a thread pool
@@ -56,11 +56,19 @@ impl DatabaseActor {
     ) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
         let connection = self.connection()?;
 
-        diesel::sql_query("CREATE TEMPORARY TABLE IF NOT EXISTS test (column1 INTEGER);")
+        trace!(
+            "Creating connection of which usage will be attributed to user {} in audit logs",
+            active_user.id
+        );
+
+        diesel::sql_query("CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER);")
             .execute(&*connection)?;
-        diesel::sql_query("DELETE FROM test").execute(&*connection)?;
-        diesel::sql_query(format!("INSERT INTO test VALUES({});", active_user.id))
-            .execute(&*connection)?;
+        diesel::sql_query("DELETE FROM active_user").execute(&*connection)?;
+        diesel::sql_query(format!(
+            "INSERT INTO active_user VALUES({});",
+            active_user.id
+        ))
+        .execute(&*connection)?;
 
         Ok(connection)
     }

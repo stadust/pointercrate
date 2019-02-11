@@ -22,7 +22,10 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let state = req.state().clone();
 
     state
-        .authorize(req.extensions_mut().remove().unwrap(), perms!(Moderator))
+        .authorize(
+            req.extensions_mut().remove().unwrap(),
+            perms!(Moderator or Administrator),
+        )
         .and_then(move |_| pagination)
         .and_then(move |pagination: UserPagination| state.paginate::<User, _>(pagination))
         .map(|(users, links)| HttpResponse::Ok().header("Links", links).json(users))
