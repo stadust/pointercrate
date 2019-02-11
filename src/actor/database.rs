@@ -171,6 +171,8 @@ impl Handler<Invalidate> for DatabaseActor {
                 youtube_channel: None,
             };
 
+            info!("Invalidating all access tokens for user {}", user.id);
+
             self.handle(
                 PatchMessage::<_, User, _>::unconditional(user.id, patch, user),
                 ctx,
@@ -232,6 +234,8 @@ impl<Key, G: Get<Key> + 'static> Handler<GetMessage<Key, G>> for DatabaseActor {
 /// Messages that requests the addition of a `P` object, generated from the given `T` data, to the
 /// database. The user object (if provided) will be the user any generated audit log entries
 /// will be attributed to
+///
+/// Calls [`Post::create_from`] with the provided [`PostData`] when handled
 #[derive(Debug)]
 pub struct PostMessage<T: PostData, P: Post<T> + 'static>(
     pub T,
@@ -251,6 +255,9 @@ impl<T: PostData, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseA
     }
 }
 
+/// Message that requests the deletion of an object of type `D`
+///
+/// Called [`Delete::delete`] when handled
 #[derive(Debug)]
 pub struct DeleteMessage<Key, D>(
     pub Key,
@@ -460,32 +467,5 @@ where
             .to_string();
 
         Ok((result, header))
-    }
-}
-
-#[derive(Debug)]
-pub struct ThisIsATest;
-
-impl Message for ThisIsATest {
-    type Result = Result<()>;
-}
-
-impl Handler<ThisIsATest> for DatabaseActor {
-    type Result = Result<()>;
-
-    fn handle(&mut self, _: ThisIsATest, _: &mut Self::Context) -> Self::Result {
-        use diesel::RunQueryDsl;
-
-        for _ in 1..100 {
-            let connection = &*self.connection()?;
-            println!("It worked!");
-            diesel::sql_query("CREATE TEMPORARY TABLE IF NOT EXISTS test (column1 INTEGER);")
-                .execute(connection)?;
-            diesel::sql_query("DELETE FROM test").execute(connection)?;
-            diesel::sql_query("INSERT INTO test VALUES(2);").execute(connection)?;
-            diesel::sql_query("SELECT test2();").execute(connection)?;
-        }
-
-        Ok(())
     }
 }
