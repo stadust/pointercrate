@@ -101,7 +101,7 @@ pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     Path::<(i16, i32)>::extract(req)
         .map_err(|_| {
-            PointercrateError::bad_request("Demons position and player ID must be intergers")
+            PointercrateError::bad_request("Demons position and player ID must be integers")
         })
         .into_future()
         .and_then(move |data| state.delete_authorized::<_, Creator>(data.into_inner(), None, auth))

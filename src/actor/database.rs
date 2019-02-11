@@ -347,8 +347,6 @@ where
                 Some(condition) => target.patch_if_match(msg.patch_data, condition, connection),
                 None => target.patch(msg.patch_data, connection),
             }
-
-            // TODO: drop the temporary 'active_user' table again
         })
     }
 }

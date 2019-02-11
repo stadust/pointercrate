@@ -9,7 +9,7 @@ use crate::{
     Result,
 };
 use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
-use log::debug;
+use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use std::hash::{Hash, Hasher};
 
@@ -173,22 +173,17 @@ impl User {
     pub fn validate_token(self, token: &str) -> Result<Self> {
         debug!("Validating a token!");
 
-        let (signing_input, signature) = {
-            let split = token.rsplitn(2, '.').collect::<Vec<_>>();
-            if split.len() != 2 {
-                return Err(PointercrateError::Unauthorized)
-            }
-            (split[0], split[1])
-        };
+        // TODO: maybe one day do something with this
+        let mut validation = jsonwebtoken::Validation::default();
+        validation.validate_exp = false;
 
-        jsonwebtoken::verify(
-            signature,
-            signing_input,
-            &self.jwt_secret(),
-            jsonwebtoken::Algorithm::HS256,
-        )
-        .map_err(|_| PointercrateError::Unauthorized)
-        .map(move |_| self)
+        jsonwebtoken::decode::<Claims>(token, &self.jwt_secret(), &validation)
+            .map_err(|err| {
+                warn!("Token validation FAILED for account {}: {}", self.id, err);
+
+                PointercrateError::Unauthorized
+            })
+            .map(move |_| self)
     }
 
     fn password_hash(&self) -> String {
@@ -219,12 +214,25 @@ impl User {
     pub fn verify_password(self, password: &str) -> Result<Self> {
         debug!("Verifying a password!");
 
-        let valid = bcrypt::verify(&password, &self.password_hash())
-            .map_err(|_| PointercrateError::Unauthorized)?;
+        let valid = bcrypt::verify(&password, &self.password_hash()).map_err(|err| {
+            warn!(
+                "Password verification FAILED for account {}: {}",
+                self.id, err
+            );
+
+            PointercrateError::Unauthorized
+        })?;
 
         if valid {
+            debug!("Password correct, proceeding");
+
             Ok(self)
         } else {
+            warn!(
+                "Potentially malicious log-in attempt to account {}",
+                self.id
+            );
+
             Err(PointercrateError::Unauthorized)
         }
     }
