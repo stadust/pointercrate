@@ -76,6 +76,7 @@ impl Paginate<DemonPagination> for PartialDemon {
         ]);
 
         query
+            .order_by(demons::position)
             .limit(pagination.limit.unwrap_or(50))
             .load(connection)
             .map_err(PointercrateError::database)

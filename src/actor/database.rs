@@ -426,6 +426,8 @@ where
         let connection = &*self.connection()?;
         let result = P::load(&msg.0, connection)?;
 
+        // FIXME: we literally don't generate links here, its only the query string. why are we stupid
+
         let first = msg.0.first(connection)?.map(|d| {
             format!(
                 "<{}>; rel=first",
