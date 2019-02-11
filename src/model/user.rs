@@ -11,7 +11,10 @@ use crate::{
 use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
 use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
-use std::hash::{Hash, Hasher};
+use std::{
+    fmt::{Display, Formatter},
+    hash::{Hash, Hasher},
+};
 
 mod delete;
 mod get;
@@ -53,6 +56,15 @@ pub struct User {
     password_salt: Vec<u8>,
 
     permissions: Bits,
+}
+
+impl Display for User {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        match self.display_name {
+            Some(ref dn) => write!(f, "{} '{}' (ID: {})", self.name, dn, self.id),
+            None => write!(f, "{} (ID: {})", self.name, self.id),
+        }
+    }
 }
 
 impl Hash for User {
@@ -171,8 +183,6 @@ impl User {
     }
 
     pub fn validate_token(self, token: &str) -> Result<Self> {
-        debug!("Validating a token!");
-
         // TODO: maybe one day do something with this
         let mut validation = jsonwebtoken::Validation::default();
         validation.validate_exp = false;

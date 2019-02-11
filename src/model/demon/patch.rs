@@ -7,6 +7,7 @@ use crate::{
     Result,
 };
 use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 make_patch! {
@@ -28,6 +29,8 @@ impl Hotfix for PatchDemon {
 
 impl Patch<PatchDemon> for Demon {
     fn patch(mut self, mut patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+        info!("Patching demon {} with {}", self.name, patch);
+
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 

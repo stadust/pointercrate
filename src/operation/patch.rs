@@ -7,9 +7,11 @@ use crate::{
     error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
 };
 use diesel::pg::PgConnection;
+use log::info;
 use serde::{de::Error, Deserialize, Deserializer};
 use std::{
     collections::hash_map::DefaultHasher,
+    fmt::Display,
     hash::{Hash, Hasher},
 };
 
@@ -22,13 +24,15 @@ pub trait Hotfix {
     fn required_permissions(&self) -> PermissionsSet;
 }
 
-pub trait Patch<P: Hotfix>: Sized {
+pub trait Patch<P: Hotfix>: Display + Sized {
     fn patch(self, patch: P, connection: &PgConnection) -> Result<Self>;
 
     fn patch_if_match(self, patch: P, condition: IfMatch, connection: &PgConnection) -> Result<Self>
     where
         Self: Hash,
     {
+        info!("Patching {} only if {} is met", self, condition);
+
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
 
@@ -99,6 +103,18 @@ macro_rules! make_patch {
                 #[serde(default, deserialize_with = $deserialize_with)]
                 pub $field: Option<$type>,
             )*
+        }
+
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(f, "[ ")?;
+                $(
+                    if let Some(ref value) = self.$field {
+                        write!(f, "{} -> {:?} ", stringify!($field), value)?;
+                    }
+                )*
+                write!(f, "]")
+            }
         }
     };
 }

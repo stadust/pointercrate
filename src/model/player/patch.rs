@@ -7,6 +7,7 @@ use crate::{
     Result,
 };
 use diesel::{result::Error, Connection, ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 make_patch! {
@@ -24,6 +25,8 @@ impl Hotfix for PatchPlayer {
 
 impl Patch<PatchPlayer> for Player {
     fn patch(mut self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
+        info!("Patching player {} with {}", self, patch);
+
         connection.transaction(|| {
             if let Some(true) = patch.banned {
                 if !self.banned {

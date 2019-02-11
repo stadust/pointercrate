@@ -11,9 +11,10 @@ use diesel::{
     dsl::max, expression::bound::Bound, pg::Pg, sql_types, BoolExpressionMethods, Expression,
     ExpressionMethods, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
 };
+use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 
 mod get;
 mod paginate;
@@ -92,6 +93,12 @@ pub struct Demon {
     pub publisher: Player,
 }
 
+impl Display for Demon {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.name, self.position)
+    }
+}
+
 /// Struct modelling a minimal representation of a [`Demon`] in the database
 ///
 /// These representations are used whenever a different object references a demon, or when a list of
@@ -102,6 +109,12 @@ pub struct PartialDemon {
     pub position: i16,
     // TODO: when implemented return host here instead of publisher
     pub publisher: String,
+}
+
+impl Display for PartialDemon {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.name, self.position)
+    }
 }
 
 impl Queryable<(sql_types::Text, sql_types::SmallInt, sql_types::Text), Pg> for PartialDemon {
@@ -279,14 +292,38 @@ impl Demon {
             .map(|_| ())
     }
 
-    pub fn mv(&self, to: i16, connection: &PgConnection) -> QueryResult<()> {
+    pub fn mv(&mut self, to: i16, connection: &PgConnection) -> QueryResult<()> {
+        if to == self.position {
+            warn!("No-op move of demon {}", self.name);
+
+            return Ok(())
+        }
+
+        // FIXME: Temporarily move the demon somewhere else because otherwise the unique constraints
+        // complains. I actually dont know why, its DEFERRABLE INITIALLY IMMEDIATE (whatever the
+        // fuck that means, it made it work in the python version)
+        diesel::update(demons::table)
+            .filter(demons::name.eq(&self.name))
+            .set(demons::position.eq(-1))
+            .execute(connection)?;
+
         if to > self.position {
+            debug!(
+                "Target position {} is greater than current position {}, shifting demons towards lower position",
+                to, self.position
+            );
+
             diesel::update(demons::table)
                 .filter(demons::position.gt(self.position))
                 .filter(demons::position.le(to))
                 .set(demons::position.eq(demons::position - 1))
                 .execute(connection)?;
         } else if to < self.position {
+            debug!(
+                "Target position {} is lesser than current position {}, shifting demons towards higher position",
+                to, self.position
+            );
+
             diesel::update(demons::table)
                 .filter(demons::position.ge(to))
                 .filter(demons::position.gt(self.position))
@@ -294,13 +331,14 @@ impl Demon {
                 .execute(connection)?;
         }
 
-        if to != self.position {
-            // alright, diesel::update(self) errors out for some reason
-            diesel::update(demons::table)
-                .filter(demons::name.eq(&self.name))
-                .set(demons::position.eq(to))
-                .execute(connection)?;
-        }
+        debug!("Performing actual move to position {}", to);
+
+        diesel::update(demons::table)
+            .filter(demons::name.eq(&self.name))
+            .set(demons::position.eq(to))
+            .execute(connection)?;
+
+        self.position = to;
 
         Ok(())
     }

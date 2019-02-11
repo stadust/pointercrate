@@ -105,6 +105,16 @@ pub struct Record {
     pub demon: PartialDemon,
 }
 
+impl Display for Record {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {}% on {} (ID: {})",
+            self.player, self.progress, self.demon, self.id
+        )
+    }
+}
+
 #[derive(Debug, Identifiable, Serialize, Hash, Queryable)]
 #[table_name = "records"]
 pub struct PartialRecord {

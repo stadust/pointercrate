@@ -44,18 +44,22 @@ mod delete {
         error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
     };
     use diesel::pg::PgConnection;
+    use log::info;
     use std::{
         collections::hash_map::DefaultHasher,
+        fmt::Display,
         hash::{Hash, Hasher},
     };
 
-    pub trait Delete {
+    pub trait Delete: Display {
         fn delete(self, connection: &PgConnection) -> Result<()>;
 
         fn delete_if_match(self, condition: IfMatch, connection: &PgConnection) -> Result<()>
         where
             Self: Hash + Sized,
         {
+            info!("Patching {} only if {} is met", self, condition);
+
             let mut hasher = DefaultHasher::new();
             self.hash(&mut hasher);
 

@@ -1,8 +1,8 @@
 use super::User;
 use crate::{
     error::PointercrateError,
-    permissions::PermissionsSet,
     operation::{Post, PostData},
+    permissions::PermissionsSet,
     schema::members,
     Result,
 };
@@ -26,6 +26,8 @@ struct NewUser<'a> {
 
 impl Post<Registration> for User {
     fn create_from(mut registration: Registration, connection: &PgConnection) -> Result<User> {
+        info!("Creating new user from {:?}", registration);
+
         User::validate_name(&mut registration.name)?;
         User::validate_password(&mut registration.password)?;
 

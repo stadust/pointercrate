@@ -142,7 +142,10 @@ impl Handler<TokenAuth> for DatabaseActor {
                 .map_err(|_| PointercrateError::Unauthorized)?
                 .claims;
 
-            debug!("The token identified the user with id {}", id);
+            debug!(
+                "The token identified the user with id {}, validating...",
+                id
+            );
 
             let user =
                 User::get(id, &*self.connection()?).map_err(|_| PointercrateError::Unauthorized)?;

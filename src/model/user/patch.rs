@@ -5,6 +5,7 @@ use crate::{
     Result,
 };
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 make_patch! {
@@ -31,6 +32,8 @@ impl Hotfix for PatchMe {
 
 impl Patch<PatchMe> for User {
     fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
+        info!("Patching user {} with {}", self, patch);
+
         validate!(patch: User::validate_password[password]);
         //TODO: youtube channel url validation
 
@@ -61,6 +64,8 @@ impl Hotfix for PatchUser {
 
 impl Patch<PatchUser> for User {
     fn patch(mut self, mut patch: PatchUser, connection: &PgConnection) -> Result<Self> {
+        info!("Patching user {} with {}", self, patch);
+
         validate_nullable!(patch: User::validate_name[display_name]);
 
         patch!(self, patch: display_name);

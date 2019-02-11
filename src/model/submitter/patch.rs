@@ -5,6 +5,7 @@ use crate::{
     schema::submitters,
     Result,
 };
+use log::info;
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
 use serde_derive::Deserialize;
 
@@ -22,6 +23,8 @@ impl Hotfix for PatchSubmitter {
 
 impl Patch<PatchSubmitter> for Submitter {
     fn patch(mut self, patch: PatchSubmitter, connection: &PgConnection) -> Result<Self> {
+        info!("Patching player {} with {}", self.id, patch);
+
         patch!(self, patch: banned);
 
         diesel::update(submitters::table)

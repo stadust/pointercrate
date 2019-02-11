@@ -8,6 +8,7 @@ use crate::{
     Result,
 };
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -26,6 +27,8 @@ impl<'a> Post<(&'a str, &'a str)> for Creator {
     fn create_from(
         (demon, player): (&'a str, &'a str), connection: &PgConnection,
     ) -> Result<Creator> {
+        info!("Adding '{}' as creator of demon '{}'", player, demon);
+
         connection.transaction(|| {
             let demon = Demon::get(demon, connection)?;
             let player = Player::get(player, connection)?;

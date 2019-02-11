@@ -3,6 +3,7 @@ use crate::{
     schema::{creators, demons, players},
 };
 use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl, Queryable};
+use std::fmt::{Display, Formatter};
 
 mod delete;
 mod get;
@@ -16,6 +17,16 @@ pub(crate) struct Creators(pub(crate) Vec<Player>);
 pub struct Creator {
     demon: String,
     creator: i32,
+}
+
+impl Display for Creator {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "creator with id {} on demon {}",
+            self.creator, self.demon
+        )
+    }
 }
 
 type ByDemon<'a> = diesel::dsl::Eq<creators::demon, Bound<sql_types::Text, &'a str>>;

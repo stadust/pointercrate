@@ -7,9 +7,15 @@ use crate::{
     Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 
 impl Delete for Creator {
     fn delete(self, connection: &PgConnection) -> Result<()> {
+        info!(
+            "Removing creator {} from demon {}",
+            self.creator, self.demon
+        );
+
         delete(creators::table)
             .filter(creators::demon.eq(self.demon))
             .filter(creators::creator.eq(self.creator))

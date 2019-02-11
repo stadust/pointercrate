@@ -7,6 +7,7 @@ use crate::{
     video, Result,
 };
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -33,6 +34,8 @@ pub struct NewDemon<'a> {
 
 impl Post<PostDemon> for Demon {
     fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Demon> {
+        info!("Creating new demon from {:?}", data);
+
         Demon::validate_requirement(&mut data.requirement)?;
 
         let video = match data.video {

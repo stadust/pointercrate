@@ -9,6 +9,7 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
+use std::fmt::{Display, Formatter};
 
 mod get;
 mod paginate;
@@ -23,6 +24,12 @@ pub struct Submitter {
     pub id: i32,
     pub ip: IpNetwork,
     pub banned: bool,
+}
+
+impl Display for Submitter {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.id)
+    }
 }
 
 #[derive(Insertable, Debug)]

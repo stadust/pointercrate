@@ -11,6 +11,7 @@ use diesel::{
 };
 use log::info;
 use serde_derive::Serialize;
+use std::fmt::{Display, Formatter};
 
 mod delete;
 mod get;
@@ -25,6 +26,12 @@ pub struct Player {
     pub id: i32,
     pub name: String,
     pub banned: bool,
+}
+
+impl Display for Player {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (ID: {})", self.name, self.id)
+    }
 }
 
 #[derive(Insertable, Debug)]
