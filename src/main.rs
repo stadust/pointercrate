@@ -72,8 +72,8 @@ macro_rules! allowed {
 }
 
 fn main() {
+    env_logger::init();
     dotenv::dotenv().expect("Failed to initialize .env file!");
-    env_logger::init().expect("Failed to initialize logging environment!");
 
     let _system = System::new("pointercrate");
 
