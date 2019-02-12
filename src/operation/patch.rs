@@ -232,3 +232,40 @@ macro_rules! validate_nullable {
         )+
     }
 }
+
+macro_rules! patch_handler_with_authorization {
+    ($handler_name: ident, $endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
+        /// `PATCH` handler
+        pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
+            info!("PATCH {}", stringify!($endpoint));
+
+            let state = req.state().clone();
+            let if_match = req.extensions_mut().remove().unwrap();
+            let auth = req.extensions_mut().remove().unwrap();
+
+            let resource_id = Path::<$id_type>::extract(req).map_err(|_| {
+                PointercrateError::bad_request(&format!("{} must be integer", $localized_id))
+            });
+
+            req.json()
+                .from_err()
+                .and_then(move |patch: $patch_type| Ok((patch, resource_id?.into_inner())))
+                .and_then(move |(patch, resource_id)| {
+                    state.patch_authorized(auth, resource_id, patch, if_match)
+                })
+                .map(move |updated: $target_type| HttpResponse::Ok().json_with_etag(updated))
+                .responder()
+        }
+    };
+
+    ($endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
+        patch_handler_with_authorization!(
+            patch,
+            $endpoint,
+            $id_type,
+            $localized_id,
+            $patch_type,
+            $target_type
+        );
+    };
+}

@@ -147,7 +147,7 @@ fn main() {
                         user_scope
                             .resource("/", |r| r.get().f(wrap(api::user::paginate)))
                             .resource("/{user_id}/", |r| {
-                                r.get().f(wrap(api::user::user));
+                                r.get().f(wrap(api::user::get));
                                 r.method(Method::PATCH).f(wrap(api::user::patch));
                                 r.delete().f(wrap(api::user::delete));
                                 r.route().f(allowed!(GET, PATCH, DELETE))
@@ -174,15 +174,29 @@ fn main() {
                                 r.route().f(allowed!(DELETE))
                             })
                     })
+                    .nested("/players", |player_scope|{
+                        player_scope
+                            .resource("/", |r| {
+                                r.get().f(wrap(api::player::paginate));
+                                r.route().f(allowed!(GET))
+                            })
+                            .resource("/{player_id}/", |r|{
+                                r.get().f(wrap(api::player::get));
+                                r.method(Method::PATCH).f(wrap(api::player::patch));
+                                r.route().f(allowed!(GET, PATCH))
+                            })
+                    })
                     .nested("/records", |record_scope| {
                         record_scope
                             .resource("/", |r| {
+                                r.get().f(wrap(api::record::paginate));
                                 r.post().f(wrap(api::record::submit));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/{record_id}/", |r| {
                                 r.get().f(wrap(api::record::get));
-                                r.route().f(allowed!(GET))
+                                r.delete().f(wrap(api::record::delete));
+                                r.route().f(allowed!(GET, DELETE))
                             })
                     })
                     .nested("/auth", |auth_scope| {

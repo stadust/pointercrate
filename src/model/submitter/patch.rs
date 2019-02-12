@@ -5,8 +5,8 @@ use crate::{
     schema::submitters,
     Result,
 };
-use log::info;
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 make_patch! {

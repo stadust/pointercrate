@@ -5,7 +5,10 @@ use crate::{
     actor::database::DeleteMessage,
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::{record::Submission, Record, Submitter},
+    model::{
+        record::{PartialRecord, Record, RecordPagination, Submission},
+        Submitter,
+    },
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
@@ -13,6 +16,29 @@ use ipnetwork::IpNetwork;
 use log::{error, info, warn};
 use serde_json::json;
 use tokio::prelude::future::{Either, Future, IntoFuture};
+
+/// `GET /api/v1/records/` handler
+pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
+    info!("GET /api/v1/records/");
+
+    let query_string = req.query_string();
+    let pagination = serde_urlencoded::from_str(query_string)
+        .map_err(|err| PointercrateError::bad_request(&err.to_string()));
+
+    let state = req.state().clone();
+
+    state
+        .authorize(
+            req.extensions_mut().remove().unwrap(),
+            perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
+        )
+        .and_then(move |_| pagination)
+        .and_then(move |pagination: RecordPagination| {
+            state.paginate::<PartialRecord, _>(pagination)
+        })
+        .map(|(records, links)| HttpResponse::Ok().header("Links", links).json(records))
+        .responder()
+}
 
 /// `POST /api/v1/records/` handler
 pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -42,19 +68,10 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-/// `GET /api/v1/records/[id]/` handler
-pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
-    info!("GET /api/v1/records/{{record_id}}/");
-
-    let state = req.state().clone();
-
-    Path::<i32>::extract(req)
-        .map_err(|_| PointercrateError::bad_request("Record ID must be integer"))
-        .into_future()
-        .and_then(move |record_id| state.get(record_id.into_inner()))
-        .map(|record: Record| HttpResponse::Ok().json_with_etag(record))
-        .responder()
-}
+get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", Record);
+//patch_handler_with_authorization("/api/v1/records/[record id]/", i32, "Record ID", PatchRecord,
+// Record);
+delete_handler_with_authorization!("/api/v1/records/[record id]/", i32, "Record ID", Record);
 
 fn post_process_record(
     record: &Record, PointercrateState { database, http, .. }: PointercrateState,
