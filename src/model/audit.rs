@@ -2,7 +2,7 @@ use crate::schema::audit_log;
 use diesel_derive_enum::DbEnum;
 use gdcf::chrono::NaiveDateTime;
 
-// TODO: reimplement audit logs
+// TODO: reimplement audit logs on the rust side of things
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Audit_operation"]

@@ -18,15 +18,19 @@ pub struct Submission {
     pub demon: String,
     #[serde(default)]
     pub video: Option<String>,
+    #[serde(default)]
+    pub status: RecordStatus,
     #[serde(rename = "check", default)]
     pub verify_only: bool,
 }
 
 impl PostData for (Submission, Submitter) {
     fn required_permissions(&self) -> PermissionsSet {
-        // TODO: we can use this to have people with `ListHelper` or higher add records without
-        // having to go through the submission process
-        PermissionsSet::default()
+        if self.0.status != RecordStatus::Submitted {
+            perms!(ListHelper or ListModerator or ListAdministrator)
+        } else {
+            PermissionsSet::default()
+        }
     }
 }
 
@@ -38,6 +42,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 player,
                 demon,
                 video,
+                status,
                 verify_only,
             },
             submitter,
@@ -134,6 +139,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
             let id = Record::insert(
                 progress,
                 video_ref,
+                status,
                 player.id,
                 submitter.id,
                 &demon.name,
@@ -146,7 +152,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 id,
                 progress,
                 video,
-                status: RecordStatus::Submitted,
+                status,
                 player,
                 submitter: submitter.id,
                 demon: demon.into(),

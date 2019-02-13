@@ -7,10 +7,14 @@
 <div class='info-yellow'>
 <b>Rate Limits:</b><br>
 This endpoint is ratelimited at 5 requests per 10 minutes, unless you have at least `LIST_HELPER` permissions, or set the `check` field to `true`.
-
 </div>
 
-Submits a record to the list mods for approval. The record must meet the demons requirement and the holder in question needn't be banned.
+<div class='info-yellow'>
+<b>Access Restrictions:</b><br>
+Unless you set `status` to `SUBMITTED` (or omit the field), access to this endpoint requires at least `LIST_HELPER` permissions.
+</div>
+
+Either adds a record directly to the list, or submits a record to the list mods for approval. The record must meet the demons requirement and the holder in question needn't be banned.
 
 The `video` value, if provided, must meet the requirements specified [here](/documentation/#video).
 
@@ -20,13 +24,14 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | ------------ | ------------------------------------------- | -------- |
 | Content-Type | `application/json` or `multipart/form-data` | false    |
 
-| Field    | Type    | Description                                                                                                                                                      | Optional |
-| -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| progress | integer | The records progress                                                                                                                                             | false    |
-| player   | string  | The name of the player holding the record                                                                                                                        | false    |
-| demon    | string  | The name of the demon the record is made on                                                                                                                      | false    |
-| video    | URL     | The video of the record                                                                                                                                          | true     |
-| check    | boolean | Value indication whether the record to be submitted should only be validated, but not actually submitted. Checking records does not count towards the rate limit | true     |
+| Field    | Type                                                  | Description                                                                                                                                                      | Optional |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| progress | integer                                               | The records progress                                                                                                                                             | false    |
+| player   | string                                                | The name of the player holding the record                                                                                                                        | false    |
+| demon    | string                                                | The name of the demon the record is made on                                                                                                                      | false    |
+| video    | URL                                                   | The video of the record                                                                                                                                          | true     |
+| status   | [RecordStatus](/documentation/objects/#record-status) | The status the newly record should have, defaults to `SUBMITTED`                                                                                                 | true     |
+| check    | boolean                                               | Value indication whether the record to be submitted should only be validated, but not actually submitted. Checking records does not count towards the rate limit | true     |
 
 ### Response: `201 CREATED`
 

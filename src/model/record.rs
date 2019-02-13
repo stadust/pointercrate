@@ -37,6 +37,12 @@ pub enum RecordStatus {
     Rejected,
 }
 
+impl Default for RecordStatus {
+    fn default() -> Self {
+        RecordStatus::Submitted
+    }
+}
+
 impl Display for RecordStatus {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
@@ -133,8 +139,7 @@ struct NewRecord<'a> {
     progress: i16,
     video: Option<&'a str>,
     #[column_name = "status_"]
-    status: RecordStatus, /* TODO: add a DEFAULT 'SUBMITTED' to the column so this field wont
-                           * be needed anymore */
+    status: RecordStatus,
     player: i32,
     submitter: i32,
     demon: &'a str,
@@ -174,13 +179,13 @@ impl Record {
     }
 
     pub fn insert(
-        progress: i16, video: Option<&str>, player: i32, submitter: i32, demon: &str,
-        conn: &PgConnection,
+        progress: i16, video: Option<&str>, status: RecordStatus, player: i32, submitter: i32,
+        demon: &str, conn: &PgConnection,
     ) -> QueryResult<i32> {
         let new = NewRecord {
             progress,
             video,
-            status: RecordStatus::Submitted,
+            status,
             player,
             submitter,
             demon,
