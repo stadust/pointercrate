@@ -60,7 +60,7 @@ as you hashed password is not part of your user object hash.
 
 ### Example request:
 
-```
+```json
 PATCH /api/v1/auth/me/
 Accept: application/json
 Authorization: Basic <omitted>

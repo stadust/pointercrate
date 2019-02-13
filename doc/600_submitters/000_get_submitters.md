@@ -41,7 +41,7 @@ Pagination is done via the `submitter_id` field.
 
 ### Example request:
 
-```
+```json
 GET /api/v1/submitters/
 Accept: application/json
 Authorization: Bearer <omitted>

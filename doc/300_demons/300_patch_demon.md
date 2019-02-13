@@ -63,7 +63,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 ### Example request:
 
-```
+````json
 PATCH /api/v1/demons/1/
 Accept: application/json
 Authorization: Bearer <omitted>
@@ -75,6 +75,7 @@ If-Match: cPOrB3TM19Ffsm8PAkD2jNqB61A=
     "position": 17,
     "requirement": 45
 }
-```
+```json
 
 </div>
+````

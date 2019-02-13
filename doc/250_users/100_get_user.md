@@ -46,7 +46,7 @@ Returned if the `If-None-Match` header is set, and the etag for the user object 
 
 ### Example request:
 
-```
+```json
 GET /api/v1/users/1/
 Accept: application/json
 Authorization: Bearer <omitted>

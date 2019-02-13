@@ -19,14 +19,14 @@ Logs into an existing pointercrate user account, providing an acccess token upon
 | Content-Type | `application/json`                      |
 | ETag         | base64 encoded hash of your user object |
 
-| Field | Type                                             | Description                                                               |
-| ----- | ------------------------------------------------ | ------------------------------------------------------------------------- |
+| Field | Type                                                       | Description                                                               |
+| ----- | ---------------------------------------------------------- | ------------------------------------------------------------------------- |
 | data  | [User](/documentation/objects/#user)                       | A user object representing the account you just logged into               |
 | token | [Pointercrate access token](/documentation/#access-tokens) | Your access token to use when performing requests to the pointercrate api |
 
 ### Example request:
 
-```
+```json
 POST /api/v1/auth/
 Accept: application/json
 Authorization: Basic <omitted>

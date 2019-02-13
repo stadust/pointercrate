@@ -34,8 +34,8 @@ _Nothing_
 
 ### Example request:
 
-```
-DELETE {{api_base}}/records/1/
+```json
+DELETE /api/v1/records/1/
 Accept: application/json
 Authorization: Bearer <omitted>
 If-Match: FmdyN2c4jElWBIOVzGOuFKJhgrE=

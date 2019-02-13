@@ -43,7 +43,7 @@ Pagination is done via the `id` field.
 
 ### Example request:
 
-```
+```json
 GET /api/v1/players/
 Accept: application/json
 Authorization: Bearer <omitted>

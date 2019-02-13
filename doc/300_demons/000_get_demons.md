@@ -37,7 +37,7 @@ _No request data required_
 
 ### Example request:
 
-```
+```json
 GET /api/v1/demons/
 Accept: application/json
 ```

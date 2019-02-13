@@ -15,7 +15,7 @@ Deletes a player. This only works if the player is no longer referenced by any r
 
 | Header        | Expected Value                                                                             | Optional |
 | ------------- | ------------------------------------------------------------------------------------------ | -------- |
-| Authorization | [Pointercrate access token](/documentation/#access-tokens)                                           | false    |
+| Authorization | [Pointercrate access token](/documentation/#access-tokens)                                 | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the player object | false    |
 
 ### Response: `204 NO CONTENT`
@@ -33,7 +33,7 @@ _Nothing_
 
 ### Example request:
 
-```
+```json
 DELETE /api/v1/players/1/
 Accept: application/json
 Authorization: Bearer <omitted>

@@ -44,7 +44,7 @@ Returned if the `If-None-Match` header is set, and the etag for the submitter ob
 
 ### Example request:
 
-```
+```json
 GET /api/v1/submitters/2/
 Accept: application/json
 Authorization: Bearer <omitted>

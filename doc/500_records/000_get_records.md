@@ -41,7 +41,7 @@ Pagination is done via the `id` field.
 
 ### Example request:
 
-```
+```json
 GET /api/v1/records/
 Accept: application/json
 ```

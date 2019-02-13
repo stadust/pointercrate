@@ -10,7 +10,7 @@ Gets information about the currently logged in account (that is, the account who
 
 | Header        | Expected Value                                                                                                                                                                                              | Optional |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| Authorization | [Pointercrate access token](/documentation/#access-tokens)                                                                                                                                                            | false    |
+| Authorization | [Pointercrate access token](/documentation/#access-tokens)                                                                                                                                                  | false    |
 | If-Match      | Conditional request header. If the etag value of the requested data matches any of the here provided values, the data is returned as requested. Otherwise a `412 PRECONDITION FAILED` response is generated | true     |
 | If-None-Match | Conditional request header. If the etag value of the requested data does not match any of the here provided values, if it returned as requested. Otherwise, a `304 NOT MODIFED` response is generated       | true     |  |
 
@@ -21,8 +21,8 @@ Gets information about the currently logged in account (that is, the account who
 | Content-Type | `application/json`                      |
 | ETag         | base64 encoded hash of your user object |
 
-| Field | Type                       | Description                                                 |
-| ----- | -------------------------- | ----------------------------------------------------------- |
+| Field | Type                                 | Description                                                 |
+| ----- | ------------------------------------ | ----------------------------------------------------------- |
 | data  | [User](/documentation/objects/#user) | A user object representing the account you just logged into |
 
 ### Response: `304 NOT MODIFIED`
@@ -35,7 +35,7 @@ Returned if the `If-None-Match` header is set, and the etag for the user object 
 
 ### Example request:
 
-```
+```json
 GET /api/v1/auth/me/
 Accept: application/json
 Authorization: Bearer <omitted>

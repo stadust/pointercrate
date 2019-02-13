@@ -35,7 +35,7 @@ _Nothing_
 
 ### Example request:
 
-```
+```json
 POST /api/v1/demons/2/creators/
 Accept: application/json
 Authorization: Bearer <omitted>
