@@ -32,6 +32,14 @@ DROP TRIGGER player_deletion_trigger ON players;
 DROP FUNCTION audit_player_deletion();
 DROP TABLE player_deletions;
 
+DROP TRIGGER creator_addition_trigger ON creators;
+DROP FUNCTION audit_creator_addition();
+DROP TABLE creator_additions;
+
+DROP TRIGGER creator_deletion_trigger ON creators;
+DROP FUNCTION audit_creator_deletion();
+DROP TABLE creator_deletions;
+
 -- ...
 
 DROP TABLE audit_log2;

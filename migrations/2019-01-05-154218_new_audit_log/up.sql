@@ -239,4 +239,38 @@ $player_deletion_trigger$ LANGUAGE plpgsql;
 
 CREATE TRIGGER player_deletion_trigger AFTER DELETE ON players FOR EACH ROW EXECUTE PROCEDURE audit_player_deletion();
 
--- TODO: creator addition/removal, user account things, submitter handling
+CREATE TABLE creator_additions (
+    creator INTEGER NOT NULL,
+    demon CITEXT NOT NULL
+) INHERITS (audit_log2);
+
+CREATE FUNCTION audit_creator_addition() RETURNS trigger AS $audit_creator_addition$
+    BEGIN
+        INSERT INTO creator_additions (userid, creator, demon)
+            (SELECT id, NEW.creator, NEW.demon
+            FROM active_user LIMIT 1);
+
+        RETURN NEW;
+    END;
+$audit_creator_addition$ LANGUAGE plpgsql;
+
+CREATE TRIGGER creator_addition_trigger AFTER INSERT ON creators FOR EACH ROW EXECUTE PROCEDURE audit_creator_addition();
+
+CREATE TABLE creator_deletions(
+    creator INTEGER NOT NULL,
+    demon CITEXT NOT NULL
+) INHERITS (audit_log2);
+
+CREATE FUNCTION audit_creator_deletion() RETURNS trigger AS $creator_deletion_trigger$
+    BEGIN
+        INSERT INTO creator_deletions (userid, creator, demon)
+            (SELECT id, OLD.creator, OLD.demon
+            FROM active_user LIMIT 1);
+
+        RETURN NULL;
+    END;
+$creator_deletion_trigger$ LANGUAGE plpgsql;
+
+CREATE TRIGGER creator_deletion_trigger AFTER DELETE ON creators FOR EACH ROW EXECUTE PROCEDURE audit_creator_deletion();
+
+-- TODO: user account things, submitter handling
