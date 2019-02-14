@@ -43,12 +43,8 @@ pub trait Page {
                     meta name="author" content = "stadust, GunnerBones" {}
                     meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top" {}
                     meta name="description" content = (self.description()) {}
-<<<<<<< HEAD
-                    meta charset = "utf-8" {}
-=======
                     meta http-equiv="Content-Type" content = "text/html; charset=utf-8" {}
                     meta http-equiv="Content-Style-Type" content="text/css" {}
->>>>>>> master
 
                     @for markup in self.head(req) {
                         {(markup)}
@@ -113,9 +109,6 @@ pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
                         span {"DEMONLIST"}
                     }
                 }
-                a.nav-item.hover.white href = {(url_helper::url(req, "about"))} title="About" {
-                    i.fa.fa-info-circle{} (PreEscaped("&nbsp;")) "ABOUT"
-                }
                 div.nav-item.collapse-button {
                     div.hamburger.hover {
                         input type="checkbox"{}
@@ -136,7 +129,7 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
     html! {
         div.footer.center.fade {
             span.overline.pad style="text-align:center" {
-                "© Copyright 2017-2018 pointercrate.com"
+                "© Copyright 2017-2019 pointercrate.com"
                 br;
                 "All rights reserved"
                 br;
