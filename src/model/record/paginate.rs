@@ -1,6 +1,7 @@
 use super::{PartialRecord, RecordStatus};
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Paginate, Paginator},
     schema::records,
     Result,
@@ -32,7 +33,11 @@ pub struct RecordPagination {
     video: Option<String>,
 }
 
-impl RecordPagination {
+impl Paginator for RecordPagination {
+    type Model = PartialRecord;
+    type PaginationColumn = records::id;
+    type PaginationColumnType = i32;
+
     filter_method!(records[
         progress = progress,
         progress < progress_lt,
@@ -43,25 +48,34 @@ impl RecordPagination {
         demon = demon,
         video = video
     ]);
-}
 
-impl Paginator for RecordPagination {
-    navigation!(records, id, before_id, after_id);
+    fn page(
+        &self, last_on_page: Option<Self::PaginationColumnType>,
+        first_on_page: Option<Self::PaginationColumnType>,
+    ) -> Self {
+        RecordPagination {
+            before_id: last_on_page.map(|i| i + 1),
+            after_id: first_on_page.map(|i| i - 1),
+            ..self.clone()
+        }
+    }
+
+    fn limit(&self) -> i64 {
+        self.limit.unwrap_or(50)
+    }
+
+    fn before(&self) -> Option<i32> {
+        self.before_id
+    }
+
+    fn after(&self) -> Option<i32> {
+        self.after_id
+    }
 }
 
 impl Paginate<RecordPagination> for PartialRecord {
     fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let select = records::table.select((
-            records::id,
-            records::progress,
-            records::video,
-            records::status_,
-            records::player,
-            records::submitter,
-            records::demon,
-        ));
-
-        let mut query = pagination.filter(select.into_boxed());
+        let mut query = pagination.filter(PartialRecord::boxed_all());
 
         filter!(query[
             records::id > pagination.after_id,

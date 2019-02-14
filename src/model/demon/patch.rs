@@ -1,12 +1,13 @@
 use super::Demon;
 use crate::{
-    error::PointercrateError,
-    model::{player::Player, user::Permissions},
+    model::player::Player,
     operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
+    permissions::PermissionsSet,
     schema::demons,
-    video, Result,
+    Result,
 };
 use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 make_patch! {
@@ -21,17 +22,19 @@ make_patch! {
 }
 
 impl Hotfix for PatchDemon {
-    fn required_permissions(&self) -> Permissions {
-        Permissions::ListModerator
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }
 
 impl Patch<PatchDemon> for Demon {
     fn patch(mut self, mut patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+        info!("Patching demon {} with {}", self.name, patch);
+
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name| Player::name_to_id(name, connection);
+        let map = |name: &str| Player::get(name, connection);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);
@@ -52,8 +55,8 @@ impl Patch<PatchDemon> for Demon {
                     demons::name.eq(&self.name),
                     demons::video.eq(&self.video),
                     demons::requirement.eq(&self.requirement),
-                    demons::verifier.eq(&self.verifier),
-                    demons::publisher.eq(&self.publisher),
+                    demons::verifier.eq(&self.verifier.id),
+                    demons::publisher.eq(&self.publisher.id),
                 ))
                 .execute(connection)?;
 

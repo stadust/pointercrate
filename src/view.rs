@@ -6,6 +6,8 @@ use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod demonlist;
+pub mod documentation;
+pub mod error;
 pub mod home;
 
 // TODO: maybe do this with `url_for()`
@@ -13,8 +15,8 @@ pub mod home;
 pub const STATIC: &str = "/static/";
 
 pub trait Page {
-    fn title(&self) -> &str;
-    fn description(&self) -> &str;
+    fn title(&self) -> String;
+    fn description(&self) -> String;
 
     fn scripts(&self) -> Vec<&str>;
     fn stylesheets(&self) -> Vec<&str>;
@@ -41,7 +43,12 @@ pub trait Page {
                     meta name="author" content = "stadust, GunnerBones" {}
                     meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top" {}
                     meta name="description" content = (self.description()) {}
+<<<<<<< HEAD
                     meta charset = "utf-8" {}
+=======
+                    meta http-equiv="Content-Type" content = "text/html; charset=utf-8" {}
+                    meta http-equiv="Content-Style-Type" content="text/css" {}
+>>>>>>> master
 
                     @for markup in self.head(req) {
                         {(markup)}
@@ -71,7 +78,7 @@ pub trait Page {
                     link rel = "stylesheet" href = {(STATIC) "css/core/tab.css"} {}
 
                     @for sheet in self.stylesheets() {
-                        link rel = "stylsheet" href = {(STATIC) (sheet)} {}
+                        link rel = "stylesheet" href = {(STATIC) (sheet)} {}
                     }
                 }
                 body style={"background-image: url(" (STATIC) "images/squares3.png)"}{

@@ -1,5 +1,11 @@
 use super::User;
-use crate::{error::PointercrateError, operation::Post, schema::members, Result};
+use crate::{
+    error::PointercrateError,
+    operation::{Post, PostData},
+    permissions::PermissionsSet,
+    schema::members,
+    Result,
+};
 use diesel::{insert_into, result::Error, Connection, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
@@ -20,6 +26,8 @@ struct NewUser<'a> {
 
 impl Post<Registration> for User {
     fn create_from(mut registration: Registration, connection: &PgConnection) -> Result<User> {
+        info!("Creating new user from {:?}", registration);
+
         User::validate_name(&mut registration.name)?;
         User::validate_password(&mut registration.password)?;
 
@@ -45,5 +53,13 @@ impl Post<Registration> for User {
                 Err(err) => Err(PointercrateError::database(err)),
             }
         })
+    }
+}
+
+impl PostData for Registration {
+    fn required_permissions(&self) -> PermissionsSet {
+        // Obviously, you cannot have any permissions before registering, as you generally dont have
+        // an account (and if you're sending along authorization for an existing account, WHY??)
+        PermissionsSet::default()
     }
 }

@@ -1,9 +1,9 @@
+use crate::{error::PointercrateError, state::PointercrateState};
 use actix_web::{
     middleware::{Middleware, Started},
     Error, HttpRequest,
 };
-use crate::{error::PointercrateError, state::PointercrateState};
-use log::debug;
+use log::{debug, warn};
 use serde_derive::{Deserialize, Serialize};
 
 /// Enum representing a parsed `Authorization` header
@@ -56,6 +56,8 @@ impl Middleware<PointercrateState> for Authorizer {
                         .map_err(|_| ())
                         .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))
                         .map_err(|_| {
+                            warn!("Malformed 'Authorization' header");
+
                             PointercrateError::InvalidHeaderValue {
                                 header: "Authorization",
                             }
@@ -66,6 +68,8 @@ impl Middleware<PointercrateState> for Authorizer {
 
                         Authorization::Basic(username.to_string(), password.to_string())
                     } else {
+                        warn!("Malformed 'Authorization' header");
+
                         return Err(PointercrateError::InvalidHeaderValue {
                             header: "Authorization",
                         })?
@@ -76,10 +80,12 @@ impl Middleware<PointercrateState> for Authorizer {
 
                     Authorization::Token(token.to_string())
                 },
-                _ =>
+                _ => {
+                    warn!("Malformed 'Authorization' header");
                     return Err(PointercrateError::InvalidHeaderValue {
                         header: "Authorization",
-                    })?,
+                    })?
+                },
             }
         } else {
             debug!("Found no authorization!");

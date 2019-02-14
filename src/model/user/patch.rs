@@ -1,11 +1,11 @@
-use super::{Permissions, User};
+use super::{Permissions, PermissionsSet, User};
 use crate::{
-    error::PointercrateError,
     operation::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
     schema::members,
     Result,
 };
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 make_patch! {
@@ -23,10 +23,17 @@ make_patch! {
     }
 }
 
-impl Hotfix for PatchMe {}
+impl Hotfix for PatchMe {
+    fn required_permissions(&self) -> PermissionsSet {
+        // We can always modify our own account
+        PermissionsSet::default()
+    }
+}
 
 impl Patch<PatchMe> for User {
     fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
+        info!("Patching user {} with {}", self, patch);
+
         validate!(patch: User::validate_password[password]);
         //TODO: youtube channel url validation
 
@@ -46,17 +53,19 @@ impl Patch<PatchMe> for User {
 }
 
 impl Hotfix for PatchUser {
-    fn required_permissions(&self) -> Permissions {
+    fn required_permissions(&self) -> PermissionsSet {
         if let Some(perms) = self.permissions {
-            perms.assignable_from() | Permissions::Moderator
+            PermissionsSet::one(perms.assignable_from() | Permissions::Moderator)
         } else {
-            Permissions::Moderator
+            perms!(Moderator)
         }
     }
 }
 
 impl Patch<PatchUser> for User {
     fn patch(mut self, mut patch: PatchUser, connection: &PgConnection) -> Result<Self> {
+        info!("Patching user {} with {}", self, patch);
+
         validate_nullable!(patch: User::validate_name[display_name]);
 
         patch!(self, patch: display_name);

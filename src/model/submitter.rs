@@ -1,3 +1,4 @@
+use super::{All, Model};
 use crate::schema::submitters;
 use diesel::{
     expression::bound::Bound,
@@ -8,8 +9,13 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
+use std::fmt::{Display, Formatter};
 
 mod get;
+mod paginate;
+mod patch;
+
+pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 
 #[derive(Queryable, Debug, Identifiable)]
 #[table_name = "submitters"]
@@ -20,6 +26,12 @@ pub struct Submitter {
     pub banned: bool,
 }
 
+impl Display for Submitter {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.id)
+    }
+}
+
 #[derive(Insertable, Debug)]
 #[table_name = "submitters"]
 struct NewSubmitter<'a> {
@@ -27,25 +39,10 @@ struct NewSubmitter<'a> {
     ip: &'a IpNetwork,
 }
 
-type AllColumns = (
-    submitters::submitter_id,
-    submitters::ip_address,
-    submitters::banned,
-);
-
-type All = diesel::dsl::Select<submitters::table, AllColumns>;
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
-type ByIp<'a> = diesel::dsl::Filter<All, WithIp<'a>>;
+type ByIp<'a> = diesel::dsl::Filter<All<Submitter>, WithIp<'a>>;
 
 impl Submitter {
-    fn all() -> All {
-        submitters::table.select((
-            submitters::submitter_id,
-            submitters::ip_address,
-            submitters::banned,
-        ))
-    }
-
     pub fn by_ip(ip: &IpNetwork) -> ByIp {
         Submitter::all().filter(submitters::ip_address.eq(ip))
     }
@@ -54,5 +51,22 @@ impl Submitter {
         let new = NewSubmitter { ip };
 
         insert_into(submitters::table).values(&new).get_result(conn)
+    }
+}
+
+impl Model for Submitter {
+    type From = submitters::table;
+    type Selection = (
+        submitters::submitter_id,
+        submitters::ip_address,
+        submitters::banned,
+    );
+
+    fn from() -> Self::From {
+        submitters::table
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
     }
 }

@@ -1,15 +1,17 @@
 //! Module containing middleware for dealing with HTTP preconditions
 
+use crate::error::PointercrateError;
 use actix_web::{
     dev::HttpResponseBuilder,
     http::Method,
     middleware::{Middleware, Response, Started},
     Error, HttpRequest, HttpResponse,
 };
-use crate::error::PointercrateError;
+use log::warn;
 use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,
+    fmt::{Display, Formatter},
     hash::{Hash, Hasher},
 };
 
@@ -17,6 +19,12 @@ use std::{
 pub struct Precondition;
 #[derive(Debug)]
 pub struct IfMatch(Vec<u64>);
+
+impl Display for IfMatch {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "'object hash equal to any of {:?}'", self.0)
+    }
+}
 
 impl<S> Middleware<S> for Precondition {
     fn start(&self, req: &HttpRequest<S>) -> Result<Started, Error> {
@@ -32,16 +40,23 @@ impl<S> Middleware<S> for Precondition {
         // actual endpoint though!
         if req.method() == Method::PATCH || req.method() == Method::DELETE {
             match if_match {
-                None => return Err(PointercrateError::PreconditionRequired)?,
+                None => {
+                    warn!("PATCH or DELETE request without conditional header");
+
+                    return Err(PointercrateError::PreconditionRequired)?
+                },
                 Some(if_match) => {
                     let mut hashes = Vec::new();
 
                     for hash in if_match.split(',') {
                         match hash.parse::<u64>() {
-                            Err(_) =>
+                            Err(err) => {
+                                warn!("Malformed 'If-Match' header value {:?}: {}", hash, err);
+
                                 return Err(PointercrateError::InvalidHeaderValue {
                                     header: "If-Match",
-                                })?,
+                                })?
+                            },
                             Ok(hash) => hashes.push(hash),
                         }
                     }

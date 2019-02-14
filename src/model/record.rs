@@ -1,4 +1,4 @@
-use super::{Demon, Player, Submitter};
+use super::{All, Model, Player};
 use crate::{
     model::demon::PartialDemon,
     schema::{demons, players, records},
@@ -10,7 +10,7 @@ use diesel::{
     pg::{Pg, PgConnection},
     query_dsl::{QueryDsl, RunQueryDsl},
     result::QueryResult,
-    sql_types, BoolExpressionMethods, ExpressionMethods,
+    sql_types, BoolExpressionMethods, Expression, ExpressionMethods,
 };
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -35,6 +35,12 @@ pub enum RecordStatus {
 
     #[db_rename = "REJECTED"]
     Rejected,
+}
+
+impl Default for RecordStatus {
+    fn default() -> Self {
+        RecordStatus::Submitted
+    }
 }
 
 impl Display for RecordStatus {
@@ -93,13 +99,8 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-// TODO: I'm pretty sure none of these associations actually work
 #[derive(Debug, Identifiable, Associations, Serialize, Hash)]
 #[table_name = "records"]
-#[belongs_to(Player, foreign_key = "player")]
-#[belongs_to(Submitter, foreign_key = "submitter")]
-#[belongs_to(Demon, foreign_key = "demon")]
-#[belongs_to(PartialDemon, foreign_key = "demon")]
 pub struct Record {
     pub id: i32,
     pub progress: i16,
@@ -108,6 +109,16 @@ pub struct Record {
     pub player: Player,
     pub submitter: i32,
     pub demon: PartialDemon,
+}
+
+impl Display for Record {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {}% on {} (ID: {})",
+            self.player, self.progress, self.demon, self.id
+        )
+    }
 }
 
 #[derive(Debug, Identifiable, Serialize, Hash, Queryable)]
@@ -128,64 +139,14 @@ struct NewRecord<'a> {
     progress: i16,
     video: Option<&'a str>,
     #[column_name = "status_"]
-    status: RecordStatus, /* TODO: add a DEFAULT 'SUBMITTED' to the column so this field wont
-                           * be needed anymore */
+    status: RecordStatus,
     player: i32,
     submitter: i32,
     demon: &'a str,
 }
 
-type AllColumns = (
-    records::id,
-    records::progress,
-    records::video,
-    records::status_,
-    players::id,
-    players::name,
-    players::banned,
-    records::submitter,
-    demons::name,
-    demons::position,
-);
-
-const ALL_COLUMNS: AllColumns = (
-    records::id,
-    records::progress,
-    records::video,
-    records::status_,
-    players::id,
-    players::name,
-    players::banned,
-    records::submitter,
-    demons::name,
-    demons::position,
-);
-
-type SqlType = (
-    // record
-    sql_types::Integer,
-    sql_types::SmallInt,
-    sql_types::Nullable<sql_types::Text>,
-    //sql_types::Text,
-    Record_status,
-    // player
-    sql_types::Integer,
-    sql_types::Text,
-    sql_types::Bool,
-    // record
-    sql_types::Integer,
-    // demon
-    sql_types::Text,
-    sql_types::SmallInt,
-);
-
-type All = diesel::dsl::Select<
-    diesel::dsl::InnerJoin<diesel::dsl::InnerJoin<records::table, demons::table>, players::table>,
-    AllColumns,
->;
-
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
-type ById = diesel::dsl::Filter<All, WithId>;
+type ById = diesel::dsl::Filter<All<Record>, WithId>;
 
 type WithVideo<'a> =
     diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
@@ -194,19 +155,12 @@ type WithPlayerAndDemon<'a> = diesel::dsl::And<
     diesel::dsl::Eq<records::player, Bound<sql_types::Int4, i32>>,
     diesel::dsl::Eq<records::demon, Bound<sql_types::Text, &'a str>>,
 >;
-type ByPlayerAndDemon<'a> = diesel::dsl::Filter<All, WithPlayerAndDemon<'a>>;
+type ByPlayerAndDemon<'a> = diesel::dsl::Filter<All<Record>, WithPlayerAndDemon<'a>>;
 
 type WithExisting<'a> = diesel::dsl::Or<WithPlayerAndDemon<'a>, WithVideo<'a>>;
-type ByExisting<'a> = diesel::dsl::Filter<All, WithExisting<'a>>;
+type ByExisting<'a> = diesel::dsl::Filter<All<Record>, WithExisting<'a>>;
 
 impl Record {
-    pub fn all() -> All {
-        records::table
-            .inner_join(demons::table)
-            .inner_join(players::table)
-            .select(ALL_COLUMNS)
-    }
-
     pub fn by_id(id: i32) -> ById {
         Record::all().filter(records::id.eq(id))
     }
@@ -224,16 +178,14 @@ impl Record {
             .filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
 
-    // TODO: find out why I put the other todo here
-    // TODO: what have I done here?????
     pub fn insert(
-        progress: i16, video: Option<&str>, player: i32, submitter: i32, demon: &str,
-        conn: &PgConnection,
+        progress: i16, video: Option<&str>, status: RecordStatus, player: i32, submitter: i32,
+        demon: &str, conn: &PgConnection,
     ) -> QueryResult<i32> {
         let new = NewRecord {
             progress,
             video,
-            status: RecordStatus::Submitted,
+            status,
             player,
             submitter,
             demon,
@@ -254,7 +206,7 @@ impl Record {
     }
 }
 
-impl Queryable<SqlType, Pg> for Record {
+impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Record {
     type Row = (
         i32,
         i16,
@@ -283,7 +235,78 @@ impl Queryable<SqlType, Pg> for Record {
             demon: PartialDemon {
                 name: row.8,
                 position: row.9,
+                publisher: String::new(), // TODO: either omit here or write another view
             },
         }
+    }
+}
+
+impl Model for PartialRecord {
+    type From = records::table;
+    type Selection = (
+        records::id,
+        records::progress,
+        records::video,
+        records::status_,
+        records::player,
+        records::submitter,
+        records::demon,
+    );
+
+    fn from() -> Self::From {
+        records::table
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
+    }
+}
+
+impl Model for Record {
+    #[allow(clippy::type_complexity)]
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            diesel::query_source::joins::JoinOn<
+                diesel::query_source::joins::Join<
+                    records::table,
+                    demons::table,
+                    diesel::query_source::joins::Inner,
+                >,
+                diesel::expression::operators::Eq<records::demon, demons::name>,
+            >,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<records::player, players::id>,
+    >;
+    type Selection = (
+        records::id,
+        records::progress,
+        records::video,
+        records::status_,
+        players::id,
+        players::name,
+        players::banned,
+        records::submitter,
+        demons::name,
+        demons::position,
+    );
+
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            diesel::query_source::joins::Join::new(
+                records::table,
+                demons::table,
+                diesel::query_source::joins::Inner,
+            )
+            .on(records::demon.eq(demons::name)),
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(records::player.eq(players::id))
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
     }
 }

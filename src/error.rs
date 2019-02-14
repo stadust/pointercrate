@@ -1,14 +1,16 @@
 //! Moduling containing the [`PointercrateError`] enum.
 
+use crate::{model::record::RecordStatus, permissions::PermissionsSet};
 use actix_web::{
     error::JsonPayloadError,
     http::{Method, StatusCode},
     HttpResponse, ResponseError,
 };
-use crate::model::{record::RecordStatus, user::PermissionsSet};
 use diesel::result::Error;
 use failure::Fail;
+use joinery::Joinable;
 use log::error;
+use serde::ser::{SerializeSeq, Serializer};
 use serde_derive::Serialize;
 use serde_json::json;
 
@@ -101,13 +103,12 @@ pub enum PointercrateError {
         identified_by: String,
     },
 
-    // TODO: do something with allowed_methods
     /// `405 METHOD NOT ALLOWED`
     ///
     /// Error Code `40500`
     #[fail(display = "The method is not allowed for the requested URL.")]
     MethodNotAllowed {
-        #[serde(skip)]
+        #[serde(serialize_with = "serialize_method")]
         allowed_methods: Vec<Method>,
     },
 
@@ -145,6 +146,7 @@ pub enum PointercrateError {
     /// Error Code `41100`
     #[fail(display = "A request with this methods requires a valid 'Content-Length' header")]
     LengthRequired,
+
     /// `412 PRECONDITION FAILED`. This variant is returned if a `DELETE` or `PATCH` request is
     /// made, but the provided `If-Match` header doesn't match the hash of the object currently
     /// in the database
@@ -324,6 +326,17 @@ pub enum PointercrateError {
     DatabaseConnectionError,
 }
 
+fn serialize_method<S>(methods: &[Method], serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let mut seq = serializer.serialize_seq(Some(methods.len()))?;
+    for method in methods {
+        seq.serialize_element(&method.to_string())?;
+    }
+    seq.end()
+}
+
 impl PointercrateError {
     pub fn database<E: Fail>(error: E) -> PointercrateError {
         error!(
@@ -409,7 +422,13 @@ impl PointercrateError {
 
 impl ResponseError for PointercrateError {
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).json(json!({
+        let mut response = HttpResponse::build(self.status_code());
+
+        if let PointercrateError::MethodNotAllowed { allowed_methods } = self {
+            response.header("Allow", allowed_methods.join_with(",").to_string());
+        }
+
+        response.json(json!({
             "code": self.error_code(),
             "message": self.to_string(),
             "data": self

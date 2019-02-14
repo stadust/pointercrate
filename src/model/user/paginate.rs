@@ -1,6 +1,7 @@
 use super::{Permissions, User};
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Paginate, Paginator},
     schema::members,
     Result,
@@ -20,24 +21,54 @@ pub struct UserPagination {
 
     name: Option<String>,
     display_name: Option<String>,
-    // TODO: this
     has_permissions: Option<Permissions>,
 }
 
-impl UserPagination {
+impl Paginator for UserPagination {
+    type Model = User;
+    type PaginationColumn = members::member_id;
+    type PaginationColumnType = i32;
+
     filter_method!(members[
         name = name,
         display_name = display_name
     ]);
-}
 
-impl Paginator for UserPagination {
-    navigation!(members, member_id, before_id, after_id);
+    fn page(
+        &self, last_on_page: Option<Self::PaginationColumnType>,
+        first_on_page: Option<Self::PaginationColumnType>,
+    ) -> Self {
+        UserPagination {
+            before_id: last_on_page.map(|i| i + 1),
+            after_id: first_on_page.map(|i| i - 1),
+            ..self.clone()
+        }
+    }
+
+    fn limit(&self) -> i64 {
+        self.limit.unwrap_or(50)
+    }
+
+    fn before(&self) -> Option<i32> {
+        self.before_id
+    }
+
+    fn after(&self) -> Option<i32> {
+        self.after_id
+    }
 }
 
 impl Paginate<UserPagination> for User {
     fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(User::all().into_boxed());
+        let mut query = pagination.filter(User::boxed_all());
+
+        if let Some(permissions) = pagination.has_permissions {
+            // FIXME: raw inline SQL is a bad idea
+            query = query.filter(diesel::dsl::sql(&format!(
+                "permissions & {0}::Bit(16) = {0}::Bit(16)",
+                permissions.bits()
+            )));
+        }
 
         filter!(query[
             members::member_id > pagination.after_id,
@@ -50,14 +81,3 @@ impl Paginate<UserPagination> for User {
             .map_err(PointercrateError::database)
     }
 }
-
-/*fn filter<'a, ST>(
-    &'a self, mut query: BoxedSelectStatement<'a, ST, members::table, Pg>,
-) -> BoxedSelectStatement<'a, ST, members::table, Pg> {
-    filter!(query[
-        members::name = self.name,
-        members::display_name = self.display_name
-    ]);
-
-    query
-}*/

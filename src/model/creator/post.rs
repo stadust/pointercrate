@@ -2,11 +2,13 @@ use super::Creator;
 use crate::{
     error::PointercrateError,
     model::{Demon, Player},
-    operation::{Get, Post},
+    operation::{Get, Post, PostData},
+    permissions::PermissionsSet,
     schema::creators,
     Result,
 };
 use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
+use log::info;
 use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -25,6 +27,8 @@ impl<'a> Post<(&'a str, &'a str)> for Creator {
     fn create_from(
         (demon, player): (&'a str, &'a str), connection: &PgConnection,
     ) -> Result<Creator> {
+        info!("Adding '{}' as creator of demon '{}'", player, demon);
+
         connection.transaction(|| {
             let demon = Demon::get(demon, connection)?;
             let player = Player::get(player, connection)?;
@@ -59,5 +63,29 @@ impl<'a> Post<(i16, &'a str)> for Creator {
 impl Post<(i16, String)> for Creator {
     fn create_from((position, player): (i16, String), connection: &PgConnection) -> Result<Self> {
         Creator::create_from((position, player.as_ref()), connection)
+    }
+}
+
+impl PostData for (i16, String) {
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
+    }
+}
+
+impl<'a> PostData for (i16, &'a str) {
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
+    }
+}
+
+impl<'a> PostData for (&'a str, &'a str) {
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
+    }
+}
+
+impl<'a> PostData for (String, String) {
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }

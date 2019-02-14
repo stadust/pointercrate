@@ -1,15 +1,12 @@
 use super::Demon;
 use crate::{
-    error::PointercrateError,
     model::{creator::Creator, Player},
-    operation::{Get, Post},
+    operation::{Get, Post, PostData},
+    permissions::PermissionsSet,
     schema::demons,
     video, Result,
 };
-use diesel::{
-    dsl::max, insert_into, result::Error, select, Connection, Expression, ExpressionMethods,
-    OptionalExtension, PgConnection, QueryDsl, RunQueryDsl,
-};
+use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -37,6 +34,8 @@ pub struct NewDemon<'a> {
 
 impl Post<PostDemon> for Demon {
     fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Demon> {
+        info!("Creating new demon from {:?}", data);
+
         Demon::validate_requirement(&mut data.requirement)?;
 
         let video = match data.video {
@@ -62,15 +61,30 @@ impl Post<PostDemon> for Demon {
 
             Demon::shift_down(new.position, connection)?;
 
-            let inserted_demon = insert_into(demons::table)
+            insert_into(demons::table)
                 .values(&new)
-                .get_result::<Demon>(connection)?;
+                .execute(connection)?;
 
             for creator in &data.creators {
-                Creator::create_from((inserted_demon.name.as_ref(), creator.as_ref()), connection)?;
+                Creator::create_from((data.name.as_ref(), creator.as_ref()), connection)?;
             }
 
-            Ok(inserted_demon)
+            Ok(Demon {
+                name: data.name,
+                position: data.position,
+                requirement: data.requirement,
+                video: data.video,
+                notes: None,
+                description: None,
+                publisher,
+                verifier,
+            })
         })
+    }
+}
+
+impl PostData for PostDemon {
+    fn required_permissions(&self) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }

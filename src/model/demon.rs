@@ -1,18 +1,20 @@
+use super::{All, Model};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::player::Player,
     operation::Get,
-    schema::demons,
+    schema::{demon_publisher_verifier_join, demons, players},
     Result,
 };
 use diesel::{
-    dsl::max, expression::bound::Bound, sql_types, Connection, ExpressionMethods, PgConnection,
-    QueryDsl, QueryResult, RunQueryDsl,
+    dsl::max, expression::bound::Bound, pg::Pg, sql_types, BoolExpressionMethods, Expression,
+    ExpressionMethods, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
 };
+use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 
 mod get;
 mod paginate;
@@ -20,62 +22,6 @@ mod patch;
 mod post;
 
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
-
-/// Struct modelling a demon in the database
-#[derive(Queryable, Insertable, Debug, Identifiable, Serialize, Hash)]
-#[table_name = "demons"]
-#[primary_key("name")]
-pub struct Demon {
-    /// The [`Demon`]'s Geometry Dash level name
-    pub name: String,
-
-    /// The [`Demon`]'s position on the demonlist
-    ///
-    /// Positions for consecutive demons are always consecutive positive integers
-    pub position: i16,
-
-    /// The minimal progress a [`Player`] must achieve on this [`Demon`] to have their record
-    /// accepted
-    pub requirement: i16,
-
-    pub video: Option<String>,
-
-    // TODO: remove this field
-    description: Option<String>,
-    // TODO: remove this field
-    notes: Option<String>,
-
-    /// The player-ID of this [`Demon`]'s verifer
-    pub verifier: i32,
-
-    /// The player-ID of this [`Demon`]'s publisher
-    pub publisher: i32,
-}
-
-/// Struct modelling a minimal representation of a [`Demon`] in the database
-///
-/// These representations are used whenever a different object references a demon, or when a list of
-/// demons is requested
-#[derive(Debug, Queryable, Identifiable, Hash, Eq, PartialEq, Associations)]
-#[table_name = "demons"]
-#[primary_key("name")]
-pub struct PartialDemon {
-    pub name: String,
-    pub position: i16,
-}
-
-impl Serialize for PartialDemon {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut map = serializer.serialize_map(Some(3))?;
-        map.serialize_entry("name", &self.name)?;
-        map.serialize_entry("position", &self.position)?;
-        map.serialize_entry("state", &ListState::from(self.position).to_string())?;
-        map.end()
-    }
-}
 
 /// Enum encoding the 3 different parts of the demonlist
 #[derive(Debug)]
@@ -116,41 +62,205 @@ impl Display for ListState {
     }
 }
 
-type AllColumns = (
-    demons::name,
-    demons::position,
-    demons::requirement,
-    demons::video,
-    demons::description,
-    demons::notes,
-    demons::verifier,
-    demons::publisher,
-);
+/// Struct modelling a demon in the database
+#[derive(Debug, Identifiable, Serialize, Hash)]
+#[table_name = "demons"]
+#[primary_key("name")]
+pub struct Demon {
+    /// The [`Demon`]'s Geometry Dash level name
+    pub name: String,
 
-const ALL_COLUMNS: AllColumns = (
-    demons::name,
-    demons::position,
-    demons::requirement,
-    demons::video,
-    demons::description,
-    demons::notes,
-    demons::verifier,
-    demons::publisher,
-);
+    /// The [`Demon`]'s position on the demonlist
+    ///
+    /// Positions for consecutive demons are always consecutive positive integers
+    pub position: i16,
 
-type All = diesel::dsl::Select<demons::table, AllColumns>;
+    /// The minimal progress a [`Player`] must achieve on this [`Demon`] to have their record
+    /// accepted
+    pub requirement: i16,
 
-type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
-type ByName<'a> = diesel::dsl::Filter<All, WithName<'a>>;
+    pub video: Option<String>,
 
-type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
-type ByPosition = diesel::dsl::Filter<All, WithPosition>;
+    // TODO: remove this field
+    description: Option<String>,
+    // TODO: remove this field
+    notes: Option<String>,
 
-impl Demon {
-    fn all() -> All {
-        demons::table.select(ALL_COLUMNS)
+    /// The player-ID of this [`Demon`]'s verifer
+    pub verifier: Player,
+
+    /// The player-ID of this [`Demon`]'s publisher
+    pub publisher: Player,
+}
+
+impl Display for Demon {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.name, self.position)
+    }
+}
+
+/// Struct modelling a minimal representation of a [`Demon`] in the database
+///
+/// These representations are used whenever a different object references a demon, or when a list of
+/// demons is requested
+#[derive(Debug, Hash, Eq, PartialEq)]
+pub struct PartialDemon {
+    pub name: String,
+    pub position: i16,
+    // TODO: when implemented return host here instead of publisher
+    pub publisher: String,
+}
+
+impl Display for PartialDemon {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.name, self.position)
+    }
+}
+
+impl Queryable<(sql_types::Text, sql_types::SmallInt, sql_types::Text), Pg> for PartialDemon {
+    type Row = (String, i16, String);
+
+    fn build(row: Self::Row) -> Self {
+        PartialDemon {
+            name: row.0,
+            position: row.1,
+            publisher: row.2,
+        }
+    }
+}
+
+impl Serialize for PartialDemon {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(4))?;
+        map.serialize_entry("name", &self.name)?;
+        map.serialize_entry("position", &self.position)?;
+        map.serialize_entry("publisher", &self.publisher)?;
+        map.serialize_entry("state", &ListState::from(self.position).to_string())?;
+        map.end()
+    }
+}
+
+impl Model for PartialDemon {
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
+    >;
+    type Selection = (demons::name, demons::position, players::name);
+
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            demons::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(demons::publisher.eq(players::id))
     }
 
+    fn selection() -> Self::Selection {
+        (demons::name, demons::position, players::name)
+    }
+}
+
+impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Demon {
+    #[allow(clippy::type_complexity)]
+    type Row = (
+        String,
+        i16,
+        i16,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        String,
+        i32,
+        bool,
+        String,
+        i32,
+        bool,
+    );
+
+    fn build(row: Self::Row) -> Self {
+        Demon {
+            name: row.0,
+            position: row.1,
+            requirement: row.2,
+            video: row.3,
+            description: row.4,
+            notes: row.5,
+            verifier: Player {
+                name: row.6,
+                id: row.7,
+                banned: row.8,
+            },
+            publisher: Player {
+                name: row.9,
+                id: row.10,
+                banned: row.11,
+            },
+        }
+    }
+}
+
+impl Model for Demon {
+    #[allow(clippy::type_complexity)]
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            demons::table,
+            demon_publisher_verifier_join::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::dsl::And<
+            diesel::expression::operators::Eq<
+                demons::publisher,
+                demon_publisher_verifier_join::pid,
+            >,
+            diesel::expression::operators::Eq<demons::verifier, demon_publisher_verifier_join::vid>,
+        >,
+    >;
+    type Selection = (
+        demons::name,
+        demons::position,
+        demons::requirement,
+        demons::video,
+        demons::description,
+        demons::notes,
+        demon_publisher_verifier_join::pname,
+        demon_publisher_verifier_join::pid,
+        demon_publisher_verifier_join::pbanned,
+        demon_publisher_verifier_join::vname,
+        demon_publisher_verifier_join::vid,
+        demon_publisher_verifier_join::vbanned,
+    );
+
+    fn from() -> Self::From {
+        diesel::query_source::joins::Join::new(
+            demons::table,
+            demon_publisher_verifier_join::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(demons::publisher
+            .eq(demon_publisher_verifier_join::pid)
+            .and(demons::verifier.eq(demon_publisher_verifier_join::vid)))
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
+    }
+}
+
+type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
+type ByName<'a> = diesel::dsl::Filter<All<Demon>, WithName<'a>>;
+
+type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
+type ByPosition = diesel::dsl::Filter<All<Demon>, WithPosition>;
+
+impl Demon {
     /// Constructs a diesel query returning all columns of demons whose name matches the given
     /// string
     pub fn by_name(name: &str) -> ByName {
@@ -182,14 +292,38 @@ impl Demon {
             .map(|_| ())
     }
 
-    pub fn mv(&self, to: i16, connection: &PgConnection) -> QueryResult<()> {
+    pub fn mv(&mut self, to: i16, connection: &PgConnection) -> QueryResult<()> {
+        if to == self.position {
+            warn!("No-op move of demon {}", self.name);
+
+            return Ok(())
+        }
+
+        // FIXME: Temporarily move the demon somewhere else because otherwise the unique constraints
+        // complains. I actually dont know why, its DEFERRABLE INITIALLY IMMEDIATE (whatever the
+        // fuck that means, it made it work in the python version)
+        diesel::update(demons::table)
+            .filter(demons::name.eq(&self.name))
+            .set(demons::position.eq(-1))
+            .execute(connection)?;
+
         if to > self.position {
+            debug!(
+                "Target position {} is greater than current position {}, shifting demons towards lower position",
+                to, self.position
+            );
+
             diesel::update(demons::table)
                 .filter(demons::position.gt(self.position))
                 .filter(demons::position.le(to))
                 .set(demons::position.eq(demons::position - 1))
                 .execute(connection)?;
         } else if to < self.position {
+            debug!(
+                "Target position {} is lesser than current position {}, shifting demons towards higher position",
+                to, self.position
+            );
+
             diesel::update(demons::table)
                 .filter(demons::position.ge(to))
                 .filter(demons::position.gt(self.position))
@@ -197,13 +331,14 @@ impl Demon {
                 .execute(connection)?;
         }
 
-        if to != self.position {
-            // alright, diesel::update(self) errors out for some reason
-            diesel::update(demons::table)
-                .filter(demons::name.eq(&self.name))
-                .set(demons::position.eq(to))
-                .execute(connection)?;
-        }
+        debug!("Performing actual move to position {}", to);
+
+        diesel::update(demons::table)
+            .filter(demons::name.eq(&self.name))
+            .set(demons::position.eq(to))
+            .execute(connection)?;
+
+        self.position = to;
 
         Ok(())
     }
@@ -254,17 +389,12 @@ impl Demon {
     }
 }
 
-impl PartialDemon {
-    fn all() -> diesel::dsl::Select<demons::table, (demons::name, demons::position)> {
-        demons::table.select((demons::name, demons::position))
-    }
-}
-
 impl Into<PartialDemon> for Demon {
     fn into(self) -> PartialDemon {
         PartialDemon {
             name: self.name,
             position: self.position,
+            publisher: self.publisher.name,
         }
     }
 }

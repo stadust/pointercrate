@@ -1,5 +1,9 @@
-use super::User;
-use crate::{error::PointercrateError, operation::Get, Result};
+use super::{PermissionsSet, User};
+use crate::{
+    error::PointercrateError,
+    operation::{Get, GetPermissions},
+    Result,
+};
 use diesel::{result::Error, PgConnection, RunQueryDsl};
 
 impl Get<i32> for User {
@@ -27,5 +31,11 @@ impl Get<String> for User {
                 }),
             Err(err) => Err(PointercrateError::database(err)),
         }
+    }
+}
+
+impl GetPermissions for User {
+    fn permissions() -> PermissionsSet {
+        perms!(Moderator or Administrator)
     }
 }

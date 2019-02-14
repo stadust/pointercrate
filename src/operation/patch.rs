@@ -1,10 +1,17 @@
+// We're gonna allow unused_macros here because they unused onces are here for completeness sake and
+// not having them fucks with my OCD. And we might need them one day if we implement crazy weird
+// patch operations, who knows
+#![allow(unused_macros)]
+
 use crate::{
-    error::PointercrateError, middleware::cond::IfMatch, model::user::Permissions, Result,
+    error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
 };
 use diesel::pg::PgConnection;
+use log::info;
 use serde::{de::Error, Deserialize, Deserializer};
 use std::{
     collections::hash_map::DefaultHasher,
+    fmt::Display,
     hash::{Hash, Hasher},
 };
 
@@ -14,18 +21,18 @@ pub trait Hotfix {
     /// The level of authorization required to perform this [`HotFix`]
     ///
     /// The default implementation allows all patches without any authorization
-    fn required_permissions(&self) -> Permissions {
-        Permissions::empty()
-    }
+    fn required_permissions(&self) -> PermissionsSet;
 }
 
-pub trait Patch<P: Hotfix>: Sized {
+pub trait Patch<P: Hotfix>: Display + Sized {
     fn patch(self, patch: P, connection: &PgConnection) -> Result<Self>;
 
     fn patch_if_match(self, patch: P, condition: IfMatch, connection: &PgConnection) -> Result<Self>
     where
         Self: Hash,
     {
+        info!("Patching {} only if {} is met", self, condition);
+
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
 
@@ -96,6 +103,18 @@ macro_rules! make_patch {
                 #[serde(default, deserialize_with = $deserialize_with)]
                 pub $field: Option<$type>,
             )*
+        }
+
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(f, "[ ")?;
+                $(
+                    if let Some(ref value) = self.$field {
+                        write!(f, "{} -> {:?} ", stringify!($field), value)?;
+                    }
+                )*
+                write!(f, "]")
+            }
         }
     };
 }
@@ -212,4 +231,41 @@ macro_rules! validate_nullable {
             }
         )+
     }
+}
+
+macro_rules! patch_handler_with_authorization {
+    ($handler_name: ident, $endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
+        /// `PATCH` handler
+        pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
+            info!("PATCH {}", stringify!($endpoint));
+
+            let state = req.state().clone();
+            let if_match = req.extensions_mut().remove().unwrap();
+            let auth = req.extensions_mut().remove().unwrap();
+
+            let resource_id = Path::<$id_type>::extract(req).map_err(|_| {
+                PointercrateError::bad_request(&format!("{} must be integer", $localized_id))
+            });
+
+            req.json()
+                .from_err()
+                .and_then(move |patch: $patch_type| Ok((patch, resource_id?.into_inner())))
+                .and_then(move |(patch, resource_id)| {
+                    state.patch_authorized(auth, resource_id, patch, if_match)
+                })
+                .map(move |updated: $target_type| HttpResponse::Ok().json_with_etag(updated))
+                .responder()
+        }
+    };
+
+    ($endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
+        patch_handler_with_authorization!(
+            patch,
+            $endpoint,
+            $id_type,
+            $localized_id,
+            $patch_type,
+            $target_type
+        );
+    };
 }

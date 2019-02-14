@@ -7,12 +7,12 @@ use maud::{html, Markup, PreEscaped};
 pub struct Homepage;
 
 impl Page for Homepage {
-    fn title(&self) -> &str {
-        "Home"
+    fn title(&self) -> String {
+        "Home".to_owned()
     }
 
-    fn description(&self) -> &str {
-        "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players"
+    fn description(&self) -> String {
+        "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -25,6 +25,7 @@ impl Page for Homepage {
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html! {
+<<<<<<< HEAD
             div.tabbed style = "background-color: rgba(255,255,255, 0.3); display:flex; justify-content: center; height: 430px; font-size: 110%"{
                 div.tab-display style="padding-top:50px; padding-bottom: 50px; display: flex; flex-flow: row; margin-left: 20px; justify-content: space-between; max-width: 1024px; width: 70%; align-items: center" {
                     div style ="display: flex; justify-content: space-between; flex-direction: column; width: 70%; height: 100%; padding-left: 30px" {
@@ -79,6 +80,26 @@ impl Page for Homepage {
                         "Check it out"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
                         i.fa.fa-arrow-right aria-hidden="true" {}
                     }
+=======
+            div.panel.feature-panel.fade style="max-width:800px; margin-left:auto; margin-right: auto; font-size: 0.9em" {
+                h3 style="font-size: 1.5em; margin-bottom: 0px;" {
+                    "Home of the official Geometry Dash Demonlist!"
+                }
+                div.feature.js-scroll-anim.hover.scale data-anim="fade" {
+                    i class = "fa fa-list-ol fa-2x blue2" aria-hidden="true" {}
+                    h3.b2 {"Ranking"}
+                    "Accurate ranking of the game's hardest demons, determined by some of its best players!"
+                }
+                div.feature.js-scroll-anim.hover.scale data-anim="fade" {
+                    i class = "fa fa-trophy fa-2x blue2" aria-hidden="true" {}
+                    h3.b2 {"Records"}
+                    "Over 9000 records on currently 100 demons, with new ones getting submitted daily!"
+                }
+                div.feature.js-scroll-anim.hover.scale data-anim="fade" {
+                    i class = "fa fa-clock-o fa-2x blue2" aria-hidden="true" {}
+                    h3.b2 {"Up-to-date"}
+                    "Thanks to a team of moderators all around the world, the list is updated nearly 24/7!"
+>>>>>>> master
                 }
             }
             div.center style="background: #0881c6;text-align: center;color: white;font-weight: bold;" {
@@ -113,7 +134,7 @@ impl Page for Homepage {
         }
     }
 
-    fn head(&self, req: &HttpRequest<PointercrateState>) -> Vec<Markup> {
+    fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
         vec![html! {
             (PreEscaped(r#"
 <style>
