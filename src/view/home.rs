@@ -110,9 +110,8 @@ impl Page for Homepage {
                     span { "I don't know what to write anymore!" }
                 }
             }
-            div.tabbed.center.information-banner.left {
+            div.tabbed.center.information-banner.left#changelog {
                 div.tab-display {
-                    div.flex {
                         div style = "display: flex; flex-flow: column;"{
                             h1 style="text-align: left; margin-top: 0px" {
                                 "Changelog"
@@ -189,7 +188,7 @@ impl Page for Homepage {
                             h3.tab.tab-active data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
                             h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
                         }
-                    }
+
                 }
             }
         }

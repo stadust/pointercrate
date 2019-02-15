@@ -4,12 +4,14 @@ use crate::{
     state::PointercrateState,
 };
 use actix_web::HttpRequest;
+use gdcf::model::{Creator, PartialLevel};
 use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]
 pub struct Demonlist {
     current_demon: Demon,
     all_demons: Vec<PartialDemon>,
+    server_level: Option<PartialLevel<u64, Creator>>,
 }
 
 impl Demonlist {
@@ -17,6 +19,7 @@ impl Demonlist {
         Demonlist {
             current_demon: demon,
             all_demons: Vec::new(),
+            server_level: None,
         }
     }
 }

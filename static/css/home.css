@@ -57,6 +57,10 @@
   .information-banner .information * {
     text-align: center !important;
   }
+
+  #changelog h3 {
+    display: inline;
+  }
 }
 
 @media (min-width: 1044px) {
