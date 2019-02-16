@@ -45,6 +45,10 @@
 }
 
 @media (max-width: 1043px) {
+  .information-banner > * {
+    width: 100%;
+  }
+
   .information-banner.right > * {
     flex-flow: column-reverse;
   }
@@ -60,6 +64,10 @@
 
   #changelog h3 {
     display: inline;
+  }
+
+  #about-inner {
+    flex-direction: column;
   }
 }
 

@@ -119,6 +119,9 @@ type ByName<'a> = diesel::dsl::Filter<All<User>, WithName<'a>>;
 type WithId = diesel::dsl::Eq<members::member_id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All<User>, WithId>;
 
+type WithPermissions = diesel::expression::SqlLiteral<sql_types::Bool>;
+type ByPermissions = diesel::dsl::Filter<All<User>, WithPermissions>;
+
 impl User {
     pub fn by_name(name: &str) -> ByName {
         User::all().filter(members::name.eq(name))
@@ -126,6 +129,13 @@ impl User {
 
     pub fn by_id(id: i32) -> ById {
         User::all().filter(members::member_id.eq(id))
+    }
+
+    pub fn by_permissions(permissions: Permissions) -> ByPermissions {
+        User::all().filter(diesel::dsl::sql(&format!(
+            "permissions & {0}::Bit(16) = {0}::Bit(16)",
+            permissions.bits()
+        )))
     }
 
     pub fn permissions(&self) -> Permissions {

@@ -110,6 +110,21 @@ impl PointercrateState {
         self.database(GetMessage(key, None, PhantomData))
     }
 
+    pub fn get2<Key1, Key2, G1, G2>(
+        &self, key1: Key1, key2: Key2,
+    ) -> impl Future<Item = (G1, G2), Error = PointercrateError>
+    where
+        Key1: Send + 'static,
+        Key2: Send + 'static,
+        G1: Get<Key1> + Send + 'static,
+        G2: Get<Key2> + Send + 'static,
+    {
+        let future2 = self.get(key2);
+
+        self.get(key1)
+            .and_then(move |result1| future2.map(move |result2| (result1, result2)))
+    }
+
     pub fn post_authorized<T, P>(
         &self, t: T, authorization: Authorization,
     ) -> impl Future<Item = P, Error = PointercrateError>

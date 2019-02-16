@@ -30,7 +30,7 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve, mime::MimeProcess},
     state::{Http, PointercrateState},
-    view::{documentation::Documentation, home::Homepage, Page},
+    view::{documentation::Documentation, Page},
 };
 use actix::System;
 use actix_web::{
@@ -123,7 +123,8 @@ fn main() {
             )
             .resource("/", |r| {
                 r.name("home");
-                r.get().f(|req| Homepage.render(req))
+                r.get().f(view::home::handler)
+                //r.get().f(|req| Homepage.render(req))
             })
             .resource("/demonlist/{position}/", |r| r.name("demonlist"))
             .resource("/about/", |r| r.name("about"))  // TODO: this

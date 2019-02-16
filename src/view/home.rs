@@ -1,10 +1,29 @@
 use super::{url_helper, Page};
-use crate::state::PointercrateState;
-use actix_web::HttpRequest;
+use crate::{model::user::User, permissions::Permissions, state::PointercrateState};
+use actix_web::{AsyncResponder, HttpRequest, Responder};
 use maud::{html, Markup, PreEscaped};
+use tokio::prelude::Future;
 
 #[derive(Debug)]
-pub struct Homepage;
+struct Homepage {
+    demonlist_team: Vec<User>,
+    pointercrate_team: Vec<User>,
+}
+
+pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    let req_clone = req.clone();
+
+    req.state()
+        .get2(Permissions::ListAdministrator, Permissions::Administrator)
+        .map(move |(demonlist_team, pointercrate_team)| {
+            Homepage {
+                demonlist_team,
+                pointercrate_team,
+            }
+            .render(&req_clone)
+        })
+        .responder()
+}
 
 impl Page for Homepage {
     fn title(&self) -> String {
@@ -112,83 +131,126 @@ impl Page for Homepage {
             }
             div.tabbed.center.information-banner.left#changelog {
                 div.tab-display {
-                        div style = "display: flex; flex-flow: column;"{
-                            h1 style="text-align: left; margin-top: 0px" {
-                                "Changelog"
+                    div style = "display: flex; flex-flow: column;"{
+                        h2 style="text-align: left; margin-top: 0px" {
+                            "Changelog"
+                        }
+                        div.tab-content data-tab-id ="99" {
+                            h3 style="text-align: left; font-size: 110%" {
+                                "2019-??-??: Rustification!"
                             }
-                            div.tab-content data-tab-id ="99" {
-                                h2 style="text-align: left" {
-                                    "2019-??-??: Rustification!"
-                                }
-                                p {
-                                    "The entire website has been rewritten in Rust! Various minor bugs that were noticed while porting over from the old python backend were fixed and performance has greatly improved. Other than that, it's mostly an internal change."
-                                }
-                                p {
-                                    "Additionally, I have, yet again, redesigned the home page! Most notably, it has been merged it with the former about page, as both were very under-utilized."
-                                }
-                                p {
-                                    "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."
-                                }
+                            p {
+                                "The entire website has been rewritten in Rust! Various minor bugs that were noticed while porting over from the old python backend were fixed and performance has greatly improved. Other than that, it's mostly an internal change."
                             }
-                            div.tab-content.tab-content-active data-tab-id ="100" {
-                                h2 style="text-align: left" {
-                                    "2018-04-04: Anniversary Update!"
-                                }
-                                p {
-                                    "Its been one year since I rented the pointercrate domain and started hosting the demonlist! Today I'm happy to announce the official pointercrate API, which can be used to programmatically access the demonlist. The documentation can be found"
-                                    a href = "/documentation/" { " here. " }
-                                    "Further minor changes include:"
-                                }
-                                ul {
-                                    li {
-                                        "Internal rework of how list mods are authenticated. They now use the account system."
-                                    }
-                                    li {
-                                        "The website now embeds nicely into discord!"
-                                    }
-                                    li {
-                                        "We added a link to the official demonlist discord server, which is an awesome place where I get help with spellchecking"
-                                    }
-                                    li {
-                                        "There is now a public discord bot that integrates with the demonlist! Find it in the discord server!"
-                                    }
-                                    li {
-                                        "The API is actually just the first step in something way more awesome hopefully coming \"soon\"... :)"
-                                    }
-                                }
+                            p {
+                                "Additionally, I have, yet again, redesigned the home page! Most notably, it has been merged it with the former about page, as both were very under-utilized."
                             }
-                            div.tab-content data-tab-id ="101" {
-                                h2 style="text-align: left" {
-                                    "2017-10-29: New design!"
+                            p {
+                                "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."
+                            }
+                        }
+                        div.tab-content.tab-content-active data-tab-id ="100" {
+                            h3 style="text-align: left" {
+                                "2018-04-04: Anniversary Update!"
+                            }
+                            p {
+                                "Its been one year since I rented the pointercrate domain and started hosting the demonlist! Today I'm happy to announce the official pointercrate API, which can be used to programmatically access the demonlist. The documentation can be found"
+                                a href = "/documentation/" { " here. " }
+                                "Further minor changes include:"
+                            }
+                            ul {
+                                li {
+                                    "Internal rework of how list mods are authenticated. They now use the account system."
                                 }
-                                p {
-                                    "Pointercrate's design has been completely overhauled, to fix various issues we had with the old version:"
+                                li {
+                                    "The website now embeds nicely into discord!"
                                 }
-                                ul {
-                                    li {
-                                        "The old homepage was thrown together in 5 minutes and you all knew it"
-                                    }
-                                    li {
-                                        "Scrollbars were working weirdly or not at all"
-                                    }
-                                    li {
-                                        "On mobile you couldn't close the demonlist after clicking that weird button in the bottom left corner"
-                                    }
-                                    li {
-                                        "There was way too much blue"
-                                    }
+                                li {
+                                    "We added a link to the official demonlist discord server, which is an awesome place where I get help with spellchecking"
                                 }
-                                p {
-                                    "Most of these issues arose because the old version was not designed with mobile in mind, and mobile support was 'hacked in' later. The new design uses a mobile-first approach and should be a lot more responsive."
+                                li {
+                                    "There is now a public discord bot that integrates with the demonlist! Find it in the discord server!"
+                                }
+                                li {
+                                    "The API is actually just the first step in something way more awesome hopefully coming \"soon\"... :)"
                                 }
                             }
                         }
-                        div.tab-selection style="padding: 20px 0px; text-align: center"{
-                            h3.tab data-tab-id="99" style="padding: 10px; text-align:left" { "2019-??-??" }
-                            h3.tab.tab-active data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
-                            h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
+                        div.tab-content data-tab-id ="101" {
+                            h3 style="text-align: left" {
+                                "2017-10-29: New design!"
+                            }
+                            p {
+                                "Pointercrate's design has been completely overhauled, to fix various issues we had with the old version:"
+                            }
+                            ul {
+                                li {
+                                    "The old homepage was thrown together in 5 minutes and you all knew it"
+                                }
+                                li {
+                                    "Scrollbars were working weirdly or not at all"
+                                }
+                                li {
+                                    "On mobile you couldn't close the demonlist after clicking that weird button in the bottom left corner"
+                                }
+                                li {
+                                    "There was way too much blue"
+                                }
+                            }
+                            p {
+                                "Most of these issues arose because the old version was not designed with mobile in mind, and mobile support was 'hacked in' later. The new design uses a mobile-first approach and should be a lot more responsive."
+                            }
                         }
-
+                    }
+                    div.tab-selection style="padding: 20px 0px; text-align: center"{
+                        h3.tab data-tab-id="99" style="padding: 10px; text-align:left" { "2019-??-??" }
+                        h3.tab.tab-active data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
+                        h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
+                    }
+                }
+            }
+            div.center.information-stripe {
+                div.flex style="flex-wrap: wrap; align-items: center" {
+                    span { "On average updated once a year!" }
+                    span { "I redo the homepage every time!" }
+                    span { "No new features since 1975!" }
+                }
+            }
+            div.center.information-banner.right {
+                div style = "flex-flow: column" {
+                    h2 {
+                        "Contact"
+                    }
+                    div.flex#about-inner {
+                        div style = "flex-basis: 0; padding: 5px" {
+                            h3 { "Demonlist Team: "}
+                            p {
+                                "The demonlist is managed by a large team of players lead by:"
+                            }
+                            div.flex.wrap style = "padding: 20px" {
+                                @for member in &self.demonlist_team {
+                                    h4 style="display: inline; margin: 5px" { (member.name) }
+                                }
+                            }
+                            p {
+                                "Contant these people for any list related questions/issues"
+                            }
+                        }
+                        div style = "flex-basis: 0; padding: 5px" {
+                            h3 { "Pointercrate Team: "}
+                            p {
+                                "Pointercrate as an entity independent from the demonlist is administrated and moderated by the following people:"
+                            }
+                            div.flex.wrap style = "padding: 20px" {
+                                @for member in &self.pointercrate_team {
+                                    h4 style="display: inline; margin: 5px" { (member.name) }
+                                }
+                            }
+                            p {
+                                "Contact these people for suggestion for pointercrate itself, bug reports or programming related questions"
+                            }
+                        }
+                    }
                 }
             }
         }

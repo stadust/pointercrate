@@ -1,4 +1,4 @@
-use super::{PermissionsSet, User};
+use super::{Permissions, PermissionsSet, User};
 use crate::{
     error::PointercrateError,
     operation::{Get, GetPermissions},
@@ -31,6 +31,12 @@ impl Get<String> for User {
                 }),
             Err(err) => Err(PointercrateError::database(err)),
         }
+    }
+}
+
+impl Get<Permissions> for Vec<User> {
+    fn get(perms: Permissions, connection: &PgConnection) -> Result<Vec<User>> {
+        Ok(User::by_permissions(perms).load(connection)?)
     }
 }
 
