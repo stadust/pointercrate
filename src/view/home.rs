@@ -218,7 +218,7 @@ impl Page for Homepage {
             }
             div.center.information-banner.right {
                 div style = "flex-flow: column" {
-                    h2 {
+                    h2#contact {
                         "Contact"
                     }
                     div.flex#about-inner {

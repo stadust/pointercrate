@@ -137,8 +137,26 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
             }
             div.flex.no-stretch {
                 div {
+                    h2 { "pointercrate:" }
+                    a.link.js-scroll {
+                        "Back to top"
+                    }
+                    br ;
+                    a.link href = "/#contact" {
+                        "Contact"
+                    }
+                    br ;
+                    a.link href = "/documentation/" {
+                        "API Documentation"
+                    }
+                }
+                div {
+                    h2 { "Terms of Use:" }
+                    "All content on pointercrate.com is provided free of charge. However, you may not redistribute, in any way, any original content found here without the creator's explicit permission."
+                }
+                div {
                     h2 {
-                        "pointercrate"
+                        "Demonlist:"
                     }
                     a.link href={ (url_helper::demon(req, 1)) } title = "Hardest demon" {
                         "Current top demon"
