@@ -235,6 +235,25 @@ impl Page for Homepage {
                             p {
                                 "Contant these people for any list related questions/issues"
                             }
+                            i {
+                                "Twitter: "
+                                a href = "https://twitter.com/demonlistgd" {"demonlistgd"}
+                            }
+                            br ;
+                            i {
+                                "YouTube: "
+                                a href = "https://www.youtube.com/channel/UCqI5feGZEqJRp6VcrP5gVyw" {"Demon List GD"}
+                            }
+                            br ;
+                            i {
+                                "Twitch: "
+                                a href = "https://twitch.tv/demonlistgd/" {"DemonListGD"}
+                            }
+                            br ;
+                            i {
+                                "Discord: "
+                                a href = "https://discord.gg/cZcBxQT" {"Demon List Public Server"}
+                            }
                         }
                         div style = "flex-basis: 0; padding: 5px" {
                             h3 { "Pointercrate Team: "}
@@ -248,6 +267,15 @@ impl Page for Homepage {
                             }
                             p {
                                 "Contact these people for suggestion for pointercrate itself, bug reports or programming related questions"
+                            }
+                            i {
+                                "Twitter: "
+                                a href = "https://twitter.com/stadust1971" {"stadust - pointercrate"}
+                            }
+                            br ;
+                            i {
+                                "Discord: "
+                                a href = "https://discord.gg/sQewUEB" {"Pointercrate Central"}
                             }
                         }
                     }

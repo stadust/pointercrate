@@ -29,7 +29,7 @@ bitflags = "1.0.4"
 byteorder = "1.2.6"
 serde_urlencoded = "0.5.3"
 joinery = "1.2.2"
-maud = {version = "0.19.0", features = ["actix-web"]}
+maud = {version = "0.20.0", features = ["actix-web"]}
 mime = "0.3.12"
 
 [dependencies.diesel-derive-enum]
