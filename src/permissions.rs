@@ -167,6 +167,12 @@ impl PermissionsSet {
 
         PermissionsSet { perms: set }
     }
+
+    pub fn union(&self, other: &Self) -> Self {
+        PermissionsSet {
+            perms: (&self.perms | &other.perms),
+        }
+    }
 }
 
 impl Display for PermissionsSet {

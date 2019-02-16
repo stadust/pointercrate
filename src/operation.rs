@@ -20,9 +20,30 @@ mod get {
         fn get(id: Key, connection: &PgConnection) -> Result<Self>;
     }
 
+    // TODO: if the need arises, this can be generalized for 3-tuples, 4-tuples,...
+    impl<G1, G2, Key1, Key2> Get<(Key1, Key2)> for (G1, G2)
+    where
+        G1: Get<Key1>,
+        G2: Get<Key2>,
+    {
+        fn get((key1, key2): (Key1, Key2), connection: &PgConnection) -> Result<Self> {
+            Ok((G1::get(key1, connection)?, G2::get(key2, connection)?))
+        }
+    }
+
     pub trait GetPermissions {
         fn permissions() -> PermissionsSet {
             PermissionsSet::default()
+        }
+    }
+
+    impl<G1, G2> GetPermissions for (G1, G2)
+    where
+        G1: GetPermissions,
+        G2: GetPermissions,
+    {
+        fn permissions() -> PermissionsSet {
+            G1::permissions().union(&G2::permissions())
         }
     }
 
