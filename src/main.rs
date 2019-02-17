@@ -117,10 +117,7 @@ fn main() {
             .middleware(Authorizer)
             .middleware(Precondition)
             .middleware(MimeProcess)
-            .handler(
-                "/static",
-                fs::StaticFiles::new("static").unwrap(),
-            )
+            .handler("/static", fs::StaticFiles::new("static").unwrap())
             .resource("/", |r| {
                 r.name("home");
                 r.get().f(view::home::handler)
@@ -131,18 +128,19 @@ fn main() {
                 r.get().f(view::demonlist::handler)
             })
             .resource("/demonlist/{position}/", |r| r.name("demonlist"))
-            .resource("/about/", |r| r.name("about"))  // TODO: this
             .resource("/documentation/", |r| {
                 r.name("documentation");
-                r.get().f(|req| Documentation::new(req.state(), "index".into()).map(|d|d.render(req)));
+                r.get().f(|req| {
+                    Documentation::new(req.state(), "index".into()).map(|d| d.render(req))
+                });
                 r.route().f(allowed!(GET))
             })
             .resource("/documentation/{page}/", |r| {
-                r.get().f(|req|{
+                r.get().f(|req| {
                     Path::<String>::extract(req)
                         .map(|page| page.into_inner())
                         .and_then(|page| Documentation::new(req.state(), page).map_err(Into::into))
-                        .map(|d|d.render(req))
+                        .map(|d| d.render(req))
                 });
                 r.route().f(allowed!(GET))
             })
@@ -179,13 +177,13 @@ fn main() {
                                 r.route().f(allowed!(DELETE))
                             })
                     })
-                    .nested("/players", |player_scope|{
+                    .nested("/players", |player_scope| {
                         player_scope
                             .resource("/", |r| {
                                 r.get().f(wrap(api::player::paginate));
                                 r.route().f(allowed!(GET))
                             })
-                            .resource("/{player_id}/", |r|{
+                            .resource("/{player_id}/", |r| {
                                 r.get().f(wrap(api::player::get));
                                 r.method(Method::PATCH).f(wrap(api::player::patch));
                                 r.route().f(allowed!(GET, PATCH))
@@ -238,7 +236,8 @@ fn main() {
 
                     Ok(normalized)
                 });
-                r.route().f(|req| crate::api::error(req, PointercrateError::NotFound))
+                r.route()
+                    .f(|req| crate::api::error(req, PointercrateError::NotFound))
             })
     };
 

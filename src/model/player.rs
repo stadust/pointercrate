@@ -9,7 +9,7 @@ use diesel::{
     expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
     QueryResult, RunQueryDsl,
 };
-use log::info;
+use log::{info, trace};
 use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
 
@@ -91,7 +91,42 @@ impl Player {
     }
 
     pub fn merge(&self, with: Player, conn: &PgConnection) -> Result<()> {
-        // TODO: deal with the publisher, verifier, and creator references
+        // FIXME: I had a serious headache while writing this code and didn't really think much
+        // while doing so. Maybe look over it again at some point If both `self` and `with`
+        // are registered as the creator of a level, delete `with` as creator
+        trace!("Deleting duplicate creator entries");
+        diesel::sql_query(format!(
+            "DELETE FROM creators AS c1 WHERE c1.creator = {0} AND EXISTS (SELECT * FROM creators AS c2 WHERE c2.demon = c1.demon AND c2.creator = {1})",
+            with.id, self.id
+        ))
+        .execute(conn)?;
+
+        trace!("Transfering all creator entries from {} to {}", with, self);
+        // Transfer all other creator entries to `self`
+        diesel::sql_query(format!(
+            "UPDATE creators SET creator = {1} WHERE creator = {0}",
+            with.id, self.id
+        ))
+        .execute(conn)?;
+
+        trace!(
+            "Transfering all publisher/verifier entries from {} to {}",
+            with,
+            self
+        );
+        // Transfer all publisher/verifier entries to `self`
+        diesel::sql_query(format!(
+            "UPDATE demons SET publisher = {1} WHERE publisher = {0}",
+            with.id, self.id
+        ))
+        .execute(conn)?;
+
+        diesel::sql_query(format!(
+            "UPDATE demons SET verifier = {1} WHERE verifier = {0}",
+            with.id, self.id
+        ))
+        .execute(conn)?;
+
         diesel::sql_query(format!(
             include_str!("../../sql/prepare_player_merge.sql"),
             self.id, with.id

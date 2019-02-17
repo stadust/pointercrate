@@ -198,7 +198,12 @@ pub mod url_helper {
 
     pub fn url(req: &HttpRequest<PointercrateState>, name: &str) -> Url {
         req.url_for_static(name)
-            .map_err(|_| error!("Internal Error: Attempt to retrieve url for non-existing page"))
+            .map_err(|_| {
+                error!(
+                    "Internal Error: Attempt to retrieve url for non-existing page '{}'",
+                    name
+                )
+            })
             .unwrap()
     }
 
@@ -208,7 +213,12 @@ pub mod url_helper {
         I: ToString,
     {
         req.url_for(name, params.into_iter().map(|i| i.to_string()))
-            .map_err(|_| error!("Internal Error: Attempt to retrieve url for non-existing page"))
+            .map_err(|_| {
+                error!(
+                    "Internal Error: Attempt to retrieve url for non-existing page '{}'",
+                    name
+                )
+            })
             .unwrap()
     }
 }
