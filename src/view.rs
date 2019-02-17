@@ -34,17 +34,17 @@ pub trait Page {
                         (self.title())
                     }
 
-                    meta property="og:site_name" content="pointercrate" {}
-                    meta property="og:type" content="website" {}
-                    meta property="og:title" content = (self.title()) {}
-                    meta property="og:description" content = (self.description()) {}
+                    meta property="og:site_name" content="pointercrate";
+                    meta property="og:type" content="website";
+                    meta property="og:title" content = (self.title());
+                    meta property="og:description" content = (self.description());
 
-                    meta name ="viewport" content="initial-scale=1, maximum-scale=1" {}
-                    meta name="author" content = "stadust, GunnerBones" {}
-                    meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top" {}
-                    meta name="description" content = (self.description()) {}
-                    meta http-equiv="Content-Type" content = "text/html; charset=utf-8" {}
-                    meta http-equiv="Content-Style-Type" content="text/css" {}
+                    meta name ="viewport" content="initial-scale=1, maximum-scale=1";
+                    meta name="author" content = "stadust, GunnerBones";
+                    meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,official,game,top";
+                    meta name="description" content = (self.description());
+                    meta http-equiv="Content-Type" content = "text/html; charset=utf-8";
+                    meta http-equiv="Content-Style-Type" content="text/css";
 
                     @for markup in self.head(req) {
                         {(markup)}
@@ -62,19 +62,19 @@ pub trait Page {
                         script src = {(STATIC)(script)} {}
                     }
 
-                    link rel = "stylesheet" href = "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" {}
-                    link rel = "stylesheet" href = "https://fonts.googleapis.com/css?family=Montserrat|Montserrat:light,bold" {}
+                    link rel = "stylesheet" href = "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
+                    link rel = "stylesheet" href = "https://fonts.googleapis.com/css?family=Montserrat|Montserrat:light,bold";
 
-                    link rel = "stylesheet" href = {(STATIC) "css/core/layout.v2.css"} {}
-                    link rel = "stylesheet" href = {(STATIC) "css/core/icon.v2.css"} {}
-                    link rel = "stylesheet" href = {(STATIC) "css/core/nav.v2.css"} {}
-                    link rel = "stylesheet" href = {(STATIC) "css/core/ui.v2.1.css"} {}
-                    link rel = "stylesheet" href = {(STATIC) "css/core/core.v2.css"} {}
-                    link rel = "stylesheet" href = {(STATIC) "css/main.v2.1.css"} {}
-                    link rel = "stylesheet" href = {(STATIC) "css/core/tab.css"} {}
+                    link rel = "stylesheet" href = {(STATIC) "css/core/layout.v2.css"};
+                    link rel = "stylesheet" href = {(STATIC) "css/core/icon.v2.css"};
+                    link rel = "stylesheet" href = {(STATIC) "css/core/nav.v2.css"};
+                    link rel = "stylesheet" href = {(STATIC) "css/core/ui.v2.1.css"};
+                    link rel = "stylesheet" href = {(STATIC) "css/core/core.v2.css"};
+                    link rel = "stylesheet" href = {(STATIC) "css/main.v2.1.css"};
+                    link rel = "stylesheet" href = {(STATIC) "css/core/tab.css"};
 
                     @for sheet in self.stylesheets() {
-                        link rel = "stylesheet" href = {(STATIC) (sheet)} {}
+                        link rel = "stylesheet" href = {(STATIC) (sheet)};
                     }
                 }
                 body style={"background-image: url(" (STATIC) "images/squares3.png)"}{
@@ -103,7 +103,7 @@ pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
                         span {"Documentation"}
                     }
                 }
-                a.nav-item.hover.white href = {(url_helper::demon(req, 1))} title = "Geometry Dash Demonlist" {
+                a.nav-item.hover.white href = {(url_helper::url(req, "demonlist-overview"))} title = "Geometry Dash Demonlist" {
                     span style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"Geometry Dash"}
                         span {"DEMONLIST"}

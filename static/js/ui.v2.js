@@ -80,6 +80,7 @@ class Search {
   }
 
   updateResults(searchString) {
+    // TODO: wait a bit here
     var queries = searchString.split(";");
     this.container.find("ul").each((i, l) => $(l).hide());
 

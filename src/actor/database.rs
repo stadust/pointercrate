@@ -4,7 +4,7 @@ use crate::{
         auth::{Authorization, Claims},
         cond::IfMatch,
     },
-    model::{user::PatchMe, Model, User},
+    model::{demon::PartialDemon, user::PatchMe, Model, User},
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
     Result,
 };
@@ -94,6 +94,25 @@ impl Actor for DatabaseActor {
         info!(
             "Stopped pointercrate database actor! We can no longer interact with the database! :("
         )
+    }
+}
+
+#[derive(Debug)]
+pub struct AllDemons;
+
+impl Message for AllDemons {
+    type Result = Result<Vec<PartialDemon>>;
+}
+
+impl Handler<AllDemons> for DatabaseActor {
+    type Result = Result<Vec<PartialDemon>>;
+
+    fn handle(&mut self, _: AllDemons, _: &mut Self::Context) -> Self::Result {
+        use diesel::QueryDsl;
+
+        Ok(PartialDemon::all()
+            .order_by(crate::schema::demons::position)
+            .load(&*self.connection()?)?)
     }
 }
 

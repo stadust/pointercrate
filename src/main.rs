@@ -126,6 +126,10 @@ fn main() {
                 r.get().f(view::home::handler)
                 //r.get().f(|req| Homepage.render(req))
             })
+            .resource("/demonlist/", |r| {
+                r.name("demonlist-overview");
+                r.get().f(view::demonlist::handler)
+            })
             .resource("/demonlist/{position}/", |r| r.name("demonlist"))
             .resource("/about/", |r| r.name("about"))  // TODO: this
             .resource("/documentation/", |r| {
