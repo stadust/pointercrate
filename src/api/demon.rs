@@ -6,7 +6,7 @@ use crate::{
     middleware::cond::HttpResponseBuilderExt,
     model::{
         creator::{Creator, PostCreator},
-        demon::{Demon, DemonPagination, PartialDemon, PatchDemon, PostDemon},
+        demon::{Demon, DemonPagination, DemonWithCreators, PartialDemon, PatchDemon, PostDemon},
     },
     state::PointercrateState,
 };
@@ -32,7 +32,12 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
 }
 
 post_handler_with_authorization!("/api/v1/demons/", PostDemon, Demon);
-get_handler!("/api/v1/demons/[position]/", i16, "Demon position", Demon);
+get_handler!(
+    "/api/v1/demons/[position]/",
+    i16,
+    "Demon position",
+    DemonWithCreators
+);
 patch_handler_with_authorization!(
     "/api/v1/demons/[position]/",
     i16,

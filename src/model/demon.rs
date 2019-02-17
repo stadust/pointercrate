@@ -2,7 +2,7 @@ use super::{All, Model};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::player::Player,
+    model::{creator::Creators, player::Player},
     operation::Get,
     schema::{demon_publisher_verifier_join, demons, players},
     Result,
@@ -14,7 +14,10 @@ use diesel::{
 use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
-use std::fmt::{Display, Formatter};
+use std::{
+    fmt::{Display, Formatter},
+    hash::{Hash, Hasher},
+};
 
 mod get;
 mod paginate;
@@ -251,6 +254,23 @@ impl Model for Demon {
 
     fn selection() -> Self::Selection {
         Self::Selection::default()
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct DemonWithCreators {
+    #[serde(flatten)]
+    demon: Demon,
+
+    creators: Creators,
+}
+
+impl Hash for DemonWithCreators {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        // We only hash the demon here, because the creators don't matter for the ETag value - they
+        // are modified through a different endpoint than the demon objects themselves, and
+        // conflicting access to them is impossible anyway
+        self.demon.hash(state)
     }
 }
 

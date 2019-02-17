@@ -2,9 +2,9 @@
 
 # Player objects{id=player}
 
-Each player on the list is represented by a `Player` object. The following assumptions can be made about these:
+Each player on the list is represented by a `Player` object. The following invariant holds true for any player object:
 
-- If a player is banned, he does not have any approved or submitted records on the list
+- If the player is banned, they do not have any approved or submitted records on the list
 
 Note that it is not possible to retrieve a player's demonlist score via the API.
 

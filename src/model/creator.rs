@@ -3,6 +3,7 @@ use crate::{
     schema::{creators, demons, players},
 };
 use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl, Queryable};
+use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
 
 mod delete;
@@ -11,6 +12,7 @@ mod post;
 
 pub use self::post::PostCreator;
 
+#[derive(Debug, Serialize)]
 pub(crate) struct Creators(pub(crate) Vec<Player>);
 
 #[derive(Debug, Queryable, Hash)]
