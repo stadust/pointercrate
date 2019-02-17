@@ -113,6 +113,6 @@ impl HttpResponseBuilderExt for HttpResponseBuilder {
     }
 
     fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse {
-        self.etag(&obj).json(obj)
+        self.etag(&obj).json(serde_json::json!({ "data": obj }))
     }
 }
