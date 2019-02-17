@@ -58,6 +58,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map(|record: Option<Record>| {
             match record {
                 Some(record) => {
+                    // FIXME: this needs to happen inside an async actix actor
                     tokio::spawn(post_process_record(&record, state2));
 
                     HttpResponse::Created().json_with_etag(record)

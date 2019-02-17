@@ -4,7 +4,7 @@ use gdcf::{
     chrono::Duration,
     model::{
         level::{DemonRating, LevelRating},
-        PartialLevel,
+        Creator, PartialLevel,
     },
     Gdcf, GdcfFuture,
 };
@@ -48,14 +48,16 @@ impl Actor for GdcfActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Option<PartialLevel<u64, u64>>;
+    type Result = Option<PartialLevel<u64, Creator>>;
 }
 
 impl Handler<GetDemon> for GdcfActor {
-    type Result = Option<PartialLevel<u64, u64>>;
+    type Result = Option<PartialLevel<u64, Creator>>;
 
-    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Option<PartialLevel<u64, u64>> {
-        let GdcfFuture { cached, inner } = self.0.levels::<u64, u64>(
+    fn handle(
+        &mut self, msg: GetDemon, ctx: &mut Context<Self>,
+    ) -> Option<PartialLevel<u64, Creator>> {
+        let GdcfFuture { cached, inner } = self.0.levels::<u64, Creator>(
             LevelsRequest::default()
                 .search(msg.0)
                 .with_rating(LevelRating::Demon(DemonRating::Hard))

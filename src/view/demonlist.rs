@@ -1,14 +1,15 @@
 use super::{url_helper, Page};
 use crate::{
-    actor::database::AllDemons,
+    actor::{database::AllDemons, gdcf::GetDemon},
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    error::PointercrateError,
     model::demon::{Demon, PartialDemon},
     state::PointercrateState,
 };
-use actix_web::{AsyncResponder, HttpRequest, Responder};
+use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
 use gdcf::model::{Creator, PartialLevel};
 use maud::{html, Markup, PreEscaped};
-use tokio::prelude::Future;
+use tokio::prelude::{Future, IntoFuture};
 
 struct ListSection {
     name: &'static str,
@@ -43,7 +44,7 @@ pub struct DemonlistOverview {
     all_demons: Vec<PartialDemon>,
 }
 
-pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
     let req_clone = req.clone();
 
     req.state()
@@ -127,6 +128,36 @@ pub struct Demonlist {
     server_level: Option<PartialLevel<u64, Creator>>,
 }
 
+pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    let req_clone = req.clone();
+    let state = req.state().clone();
+
+    Path::<i16>::extract(req)
+        .map_err(|_| PointercrateError::bad_request("Demon position must be integer"))
+        .into_future()
+        .and_then(move |position| {
+            state
+                .get(position.into_inner())
+                .and_then(move |current_demon: Demon| {
+                    state.database(AllDemons).and_then(move |all_demons| {
+                        state
+                            .gdcf
+                            .send(GetDemon(current_demon.name.clone()))
+                            .map_err(PointercrateError::internal)
+                            .map(move |demon| {
+                                Demonlist {
+                                    current_demon,
+                                    all_demons,
+                                    server_level: demon,
+                                }
+                                .render(&req_clone)
+                            })
+                    })
+                })
+        })
+        .responder()
+}
+
 impl Demonlist {
     pub fn new(demon: Demon) -> Demonlist {
         Demonlist {
@@ -146,8 +177,12 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        String::new()
-        //self.current_demon.description.as_ref().unwrap_or("")
+        if let Some(ref level) = self.server_level {
+            if let Some(ref description) = level.description {
+                return format!("{}: {}", self.title(), description)
+            }
+        }
+        format!("{}: <No Description Provided>", self.title())
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -200,11 +235,11 @@ impl Page for Demonlist {
                         ]
                     }},
                     "name": "\#{0} - {1}",
-                    "description": "", // TODO: description
+                    "description": {2},
                     "url": "https://pointercrate.com/demonlist/{0}/"
                 }}
                 </script>
-            "#, self.current_demon.position, self.current_demon.name)))
+            "#, self.current_demon.position, self.current_demon.name, self.description())))
         }]
     }
 }

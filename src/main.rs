@@ -121,13 +121,15 @@ fn main() {
             .resource("/", |r| {
                 r.name("home");
                 r.get().f(view::home::handler)
-                //r.get().f(|req| Homepage.render(req))
             })
             .resource("/demonlist/", |r| {
                 r.name("demonlist-overview");
+                r.get().f(view::demonlist::overview_handler)
+            })
+            .resource("/demonlist/{position}/", |r| {
+                r.name("demonlist");
                 r.get().f(view::demonlist::handler)
             })
-            .resource("/demonlist/{position}/", |r| r.name("demonlist"))
             .resource("/documentation/", |r| {
                 r.name("documentation");
                 r.get().f(|req| {

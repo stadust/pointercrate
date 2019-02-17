@@ -224,6 +224,18 @@ impl PointercrateState {
     {
         self.database(PaginateMessage(data, PhantomData))
     }
+
+    pub fn gdcf<Msg, T>(&self, msg: Msg) -> impl Future<Item = T, Error = PointercrateError>
+    where
+        T: Send + 'static,
+        Msg: Message<Result = Result<T>> + Send + 'static,
+        GdcfActor: Handler<Msg>,
+    {
+        self.gdcf
+            .send(msg)
+            .map_err(PointercrateError::internal)
+            .flatten()
+    }
 }
 
 impl Http {
