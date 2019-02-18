@@ -186,6 +186,7 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
     }
 }
 
+// FIXME: this is just broken
 pub mod url_helper {
     use crate::state::PointercrateState;
     use actix_web::HttpRequest;

@@ -11,8 +11,6 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
-// TODO: figure out a way to omit some fields if the user requesting the data is missing some
-// permissions
 pub trait Paginator: Sized + Serialize
 where
     for<'de> Self: Deserialize<'de>,

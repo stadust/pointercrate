@@ -11,16 +11,26 @@ Each demon on the list is represented by a `Demon` object. The following assumpt
 Note that although on the website the record requirement for demons on the extended list is always displayed as `100%`,
 `Demon` objects still save their requirement from when they were on the main list.
 
+## Embedded Form
+
+When embedded into other objects (for example, as part of a [Record](/documentation/objects/#record)), only the following minimal representation of each demon is provided:
+
+| Field    | Type    | Description               |
+| -------- | ------- | ------------------------- |
+| name     | string  | The name of the demon     |
+| position | integer | The position of the demon |
+
 ## Short Form
 
-When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), or as the field of another object,
-only a shorter representation of each demon is provided.
+When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), oonly the following partial representation of each demon is provided:
 
-| Field    | Type                     | Description                             |
-| -------- | ------------------------ | --------------------------------------- |
-| name     | string                   | The name of the demon                   |
-| position | integer                  | The position of the demon               |
-| state    | [ListState](#list-state) | The section of the list the demon is in |
+| Field     | Type                     | Description                                      |
+| --------- | ------------------------ | ------------------------------------------------ |
+| name      | string                   | The name of the demon                            |
+| position  | integer                  | The position of the demon                        |
+| publisher | string                   | The name of the player that published this demon |
+| state     | [ListState](#list-state) | The section of the list the demon is in          |
+| video     | URL?                     | The verification video                           |
 
 ## Long Form
 

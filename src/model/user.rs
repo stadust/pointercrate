@@ -138,6 +138,13 @@ impl User {
         )))
     }
 
+    pub fn name(&self) -> &str {
+        match self.display_name {
+            Some(ref name) => name,
+            None => &self.name,
+        }
+    }
+
     pub fn permissions(&self) -> Permissions {
         Permissions::from_bitstring(&self.permissions)
     }

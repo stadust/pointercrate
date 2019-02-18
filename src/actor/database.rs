@@ -6,6 +6,8 @@ use crate::{
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
+    permissions::Permissions,
+    view::demonlist::DemonlistOverview,
     Result,
 };
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
@@ -15,7 +17,8 @@ use diesel::{
     query_builder::QueryFragment,
     r2d2::{ConnectionManager, Pool, PooledConnection},
     sql_types::{HasSqlType, NotNull, SqlOrd},
-    AppearsOnTable, Connection, Expression, QuerySource, RunQueryDsl, SelectableExpression,
+    AppearsOnTable, Connection, Expression, QueryDsl, QuerySource, RunQueryDsl,
+    SelectableExpression,
 };
 use joinery::Joinable;
 use log::{debug, info, trace};
@@ -98,21 +101,35 @@ impl Actor for DatabaseActor {
 }
 
 #[derive(Debug)]
-pub struct AllDemons;
+pub struct GetDemonlistOverview;
 
-impl Message for AllDemons {
-    type Result = Result<Vec<PartialDemon>>;
+impl Message for GetDemonlistOverview {
+    type Result = Result<DemonlistOverview>;
 }
 
-impl Handler<AllDemons> for DatabaseActor {
-    type Result = Result<Vec<PartialDemon>>;
+impl Handler<GetDemonlistOverview> for DatabaseActor {
+    type Result = Result<DemonlistOverview>;
 
-    fn handle(&mut self, _: AllDemons, _: &mut Self::Context) -> Self::Result {
-        use diesel::QueryDsl;
-
-        Ok(PartialDemon::all()
+    fn handle(&mut self, _: GetDemonlistOverview, _: &mut Self::Context) -> Self::Result {
+        let connection = &*self.connection()?;
+        let (admins, mods, helpers) = Get::get(
+            (
+                Permissions::ListAdministrator,
+                Permissions::ListModerator,
+                Permissions::ListHelper,
+            ),
+            connection,
+        )?;
+        let all_demons = PartialDemon::all()
             .order_by(crate::schema::demons::position)
-            .load(&*self.connection()?)?)
+            .load(connection)?;
+
+        Ok(DemonlistOverview {
+            demon_overview: all_demons,
+            admins,
+            mods,
+            helpers,
+        })
     }
 }
 

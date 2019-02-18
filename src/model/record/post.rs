@@ -2,7 +2,7 @@ use super::{Record, RecordStatus};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{Demon, Player, Submitter},
+    model::{record::RecordDemon, Demon, Player, Submitter},
     operation::{Delete, Get, Post, PostData},
     permissions::PermissionsSet,
     video, Result,
@@ -155,7 +155,10 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 status,
                 player,
                 submitter: submitter.id,
-                demon: demon.into(),
+                demon: RecordDemon {
+                    position: demon.position,
+                    name: demon.name
+                }
             }))
         })
     }

@@ -1,8 +1,5 @@
 use super::{All, Model, Player};
-use crate::{
-    model::demon::PartialDemon,
-    schema::{demons, players, records},
-};
+use crate::schema::{demons, players, records};
 use diesel::{
     deserialize::Queryable,
     expression::bound::Bound,
@@ -99,6 +96,19 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
+/// Absolutely minimal representation of a demon to be sent along with a record object
+#[derive(Debug, Hash, Serialize)]
+pub struct RecordDemon {
+    pub position: i16,
+    pub name: String,
+}
+
+impl Display for RecordDemon {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.name, self.position)
+    }
+}
+
 #[derive(Debug, Identifiable, Associations, Serialize, Hash)]
 #[table_name = "records"]
 pub struct Record {
@@ -108,7 +118,7 @@ pub struct Record {
     pub status: RecordStatus,
     pub player: Player,
     pub submitter: i32,
-    pub demon: PartialDemon,
+    pub demon: RecordDemon,
 }
 
 impl Display for Record {
@@ -232,10 +242,9 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
                 banned: row.6,
             },
             submitter: row.7,
-            demon: PartialDemon {
+            demon: RecordDemon {
                 name: row.8,
                 position: row.9,
-                publisher: String::new(), // TODO: either omit here or write another view
             },
         }
     }

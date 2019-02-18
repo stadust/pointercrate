@@ -112,6 +112,7 @@ pub struct PartialDemon {
     pub position: i16,
     // TODO: when implemented return host here instead of publisher
     pub publisher: String,
+    pub video: Option<String>,
 }
 
 impl Display for PartialDemon {
@@ -120,14 +121,15 @@ impl Display for PartialDemon {
     }
 }
 
-impl Queryable<(sql_types::Text, sql_types::SmallInt, sql_types::Text), Pg> for PartialDemon {
-    type Row = (String, i16, String);
+impl Queryable<<<PartialDemon as Model>::Selection as Expression>::SqlType, Pg> for PartialDemon {
+    type Row = (String, i16, String, Option<String>);
 
     fn build(row: Self::Row) -> Self {
         PartialDemon {
             name: row.0,
             position: row.1,
             publisher: row.2,
+            video: row.3,
         }
     }
 }
@@ -155,7 +157,7 @@ impl Model for PartialDemon {
         >,
         diesel::expression::operators::Eq<demons::columns::publisher, players::columns::id>,
     >;
-    type Selection = (demons::name, demons::position, players::name);
+    type Selection = (demons::name, demons::position, players::name, demons::video);
 
     fn from() -> Self::From {
         diesel::query_source::joins::Join::new(
@@ -167,7 +169,7 @@ impl Model for PartialDemon {
     }
 
     fn selection() -> Self::Selection {
-        (demons::name, demons::position, players::name)
+        Self::Selection::default()
     }
 }
 
@@ -415,6 +417,7 @@ impl Into<PartialDemon> for Demon {
             name: self.name,
             position: self.position,
             publisher: self.publisher.name,
+            video: self.video,
         }
     }
 }

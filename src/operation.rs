@@ -20,7 +20,6 @@ mod get {
         fn get(id: Key, connection: &PgConnection) -> Result<Self>;
     }
 
-    // TODO: if the need arises, this can be generalized for 3-tuples, 4-tuples,...
     impl<G1, G2, Key1, Key2> Get<(Key1, Key2)> for (G1, G2)
     where
         G1: Get<Key1>,
@@ -28,6 +27,21 @@ mod get {
     {
         fn get((key1, key2): (Key1, Key2), connection: &PgConnection) -> Result<Self> {
             Ok((G1::get(key1, connection)?, G2::get(key2, connection)?))
+        }
+    }
+
+    impl<G1, G2, G3, Key1, Key2, Key3> Get<(Key1, Key2, Key3)> for (G1, G2, G3)
+    where
+        G1: Get<Key1>,
+        G2: Get<Key2>,
+        G3: Get<Key3>,
+    {
+        fn get((key1, key2, key3): (Key1, Key2, Key3), connection: &PgConnection) -> Result<Self> {
+            Ok((
+                G1::get(key1, connection)?,
+                G2::get(key2, connection)?,
+                G3::get(key3, connection)?,
+            ))
         }
     }
 

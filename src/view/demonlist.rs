@@ -1,9 +1,12 @@
 use super::{url_helper, Page};
 use crate::{
-    actor::{database::AllDemons, gdcf::GetDemon},
+    actor::{database::GetDemonlistOverview, http::GetDemon},
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::demon::{Demon, PartialDemon},
+    model::{
+        demon::{Demon, PartialDemon},
+        user::User,
+    },
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
@@ -41,15 +44,18 @@ static LEGACY_SECTION: ListSection  = ListSection{
 
 #[derive(Debug)]
 pub struct DemonlistOverview {
-    all_demons: Vec<PartialDemon>,
+    pub demon_overview: Vec<PartialDemon>,
+    pub admins: Vec<User>,
+    pub mods: Vec<User>,
+    pub helpers: Vec<User>,
 }
 
 pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
     let req_clone = req.clone();
 
     req.state()
-        .database(AllDemons)
-        .map(move |all_demons| DemonlistOverview { all_demons }.render(&req_clone))
+        .database(GetDemonlistOverview)
+        .map(move |overview| overview.render(&req_clone))
         .responder()
 }
 
@@ -71,17 +77,23 @@ impl Page for DemonlistOverview {
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
-        let dropdowns = dropdowns(req, &self.all_demons, None);
+        let dropdowns = dropdowns(req, &self.demon_overview, None);
 
         html! {
             (dropdowns)
 
-            h1 {"Demonlist"}
-            @for demon in &self.all_demons {
-                h2 {
-                    "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+            div.flex.m-center#container {
+                div.left {
+                    h1 {"Demonlist"}
+                    @for demon in &self.demon_overview {
+                        h2 {
+                            "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                        }
+                    }
                 }
+                (sidebar(&self.admins, &self.mods, &self.helpers))
             }
+
         }
     }
 
@@ -123,8 +135,8 @@ impl Page for DemonlistOverview {
 
 #[derive(Debug)]
 pub struct Demonlist {
+    overview: DemonlistOverview,
     current_demon: Demon,
-    all_demons: Vec<PartialDemon>,
     server_level: Option<PartialLevel<u64, Creator>>,
 }
 
@@ -139,33 +151,25 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
             state
                 .get(position.into_inner())
                 .and_then(move |current_demon: Demon| {
-                    state.database(AllDemons).and_then(move |all_demons| {
-                        state
-                            .gdcf
-                            .send(GetDemon(current_demon.name.clone()))
-                            .map_err(PointercrateError::internal)
-                            .map(move |demon| {
-                                Demonlist {
-                                    current_demon,
-                                    all_demons,
-                                    server_level: demon,
-                                }
-                                .render(&req_clone)
-                            })
-                    })
+                    state
+                        .database(GetDemonlistOverview)
+                        .and_then(move |overview| {
+                            state
+                                .gdcf
+                                .send(GetDemon(current_demon.name.clone()))
+                                .map_err(PointercrateError::internal)
+                                .map(move |demon| {
+                                    Demonlist {
+                                        overview,
+                                        current_demon,
+                                        server_level: demon,
+                                    }
+                                    .render(&req_clone)
+                                })
+                        })
                 })
         })
         .responder()
-}
-
-impl Demonlist {
-    pub fn new(demon: Demon) -> Demonlist {
-        Demonlist {
-            current_demon: demon,
-            all_demons: Vec::new(),
-            server_level: None,
-        }
-    }
 }
 
 impl Page for Demonlist {
@@ -194,7 +198,11 @@ impl Page for Demonlist {
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
-        let dropdowns = dropdowns(req, &self.all_demons, Some(&self.current_demon));
+        let dropdowns = dropdowns(
+            req,
+            &self.overview.demon_overview,
+            Some(&self.current_demon),
+        );
 
         html! {
             (dropdowns)
@@ -329,6 +337,69 @@ fn dropdown(
     }
 }
 
+fn sidebar(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
+    html! {
+        div.right {
+            (team_panel(admins, mods, helpers))
+            (rules_panel())
+            (submit_panel())
+            (stats_viewer_panel())
+            (discord_panel())
+        }
+    }
+}
+
+fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
+    let maybe_link = |user: &User| -> Markup {
+        html! {
+            li {
+                @match user.youtube_channel {
+                    Some(ref channel) => a target = "_blank" href = (channel) {
+                        (user.name())
+                    },
+                    None => (user.name())
+                }
+            }
+        }
+    };
+
+    html! {
+        div.panel.fade.js-scroll-anim#editors data-anim = "fade" {
+            div.underlined {
+                h2 {
+                    "List Editors:"
+                }
+            }
+            p {
+                "Contact any of these people if you have problems with the list or want to see a specific thing changed."
+            }
+            ul style = "line-height: 30px" {
+                @for admin in admins {
+                    b {
+                        (maybe_link(admin))
+                    }
+                }
+                @for moderator in mods {
+                    (maybe_link(moderator))
+                }
+            }
+            div.underlined {
+                h2 {
+                    "List Helpers"
+                }
+                p {
+                    "Contact these people if you have any questions regarding why a specific record was rejected. Do not needlessly bug them about checking submissions though!"
+                }
+                ul style = "line-height: 30px" {
+                    @for helper in helpers {
+                        (maybe_link(helper))
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn rules_panel() -> Markup {
     html! {
         did#rules.panel.fade.js-scroll-anim data-anim = "fade" {
@@ -375,8 +446,8 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "Records made using the FPS bypass are "
-                        i { "not" }
+                        "Records made using the FPS bypass are"
+                        i { " not " }
                         "accepted"
                     }
                 }
