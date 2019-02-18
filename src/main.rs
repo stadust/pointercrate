@@ -25,11 +25,11 @@ extern crate diesel;
 type Result<T> = std::result::Result<T, PointercrateError>;
 
 use crate::{
-    actor::{database::DatabaseActor, gdcf::GdcfActor},
+    actor::{database::DatabaseActor, http::HttpActor},
     api::wrap,
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve, mime::MimeProcess},
-    state::{Http, PointercrateState},
+    state::PointercrateState,
     view::{documentation::Documentation, Page},
 };
 use actix::System;
@@ -76,9 +76,8 @@ fn main() {
 
     let _system = System::new("pointercrate");
 
-    let gdcf = GdcfActor::from_env();
     let database = DatabaseActor::from_env();
-    let http = Http::from_env();
+    let gdcf = HttpActor::from_env(database.clone().recipient());
 
     let app_factory = move || {
         let doc_files_location = env!("OUT_DIR");
@@ -106,7 +105,6 @@ fn main() {
         let state = PointercrateState {
             database: database.clone(),
             gdcf: gdcf.clone(),
-            http: http.clone(),
 
             documentation_toc: Arc::new(toc),
             documentation_topics: Arc::new(map),
@@ -158,6 +156,27 @@ fn main() {
                                 r.route().f(allowed!(GET, PATCH, DELETE))
                             })
                     })
+                    /*.resource("/gd/levels/{level_id}/", |r| { // FIXME: requires to fix the serde support in GDCF
+                        r.get().f(|req| {
+                            use crate::actor::gdcf::LevelById;
+                            use actix_web::{AsyncResponder, HttpResponse};
+                            use tokio::prelude::{Future, IntoFuture};
+
+                            let state = req.state().clone();
+
+                            Path::<u64>::extract(req)
+                                .into_future()
+                                .map_err(|_| PointercrateError::bad_request("very bad"))
+                                .and_then(move |position| {
+                                    state
+                                        .gdcf
+                                        .send(LevelById(position.into_inner()))
+                                        .map_err(PointercrateError::internal)
+                                })
+                                .map(|resource| HttpResponse::Ok().json(resource))
+                                .responder()
+                        })
+                    })*/
                     .nested("/demons", |demon_scope| {
                         demon_scope
                             .resource("/", |r| {
