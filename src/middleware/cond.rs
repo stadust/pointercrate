@@ -108,8 +108,7 @@ impl HttpResponseBuilderExt for HttpResponseBuilder {
     fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self {
         let mut hasher = DefaultHasher::new();
         obj.hash(&mut hasher);
-        self.header("ETag", hasher.finish().to_string());
-        self
+        self.header("ETag", hasher.finish().to_string())
     }
 
     fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse {

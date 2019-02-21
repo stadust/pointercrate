@@ -15,6 +15,10 @@ use crate::{
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
 use ipnetwork::IpNetwork;
 use log::info;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 use tokio::prelude::future::{Future, IntoFuture};
 
 /// `GET /api/v1/records/` handler
@@ -85,7 +89,45 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", Record);
+pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
+    info!("GET {}", "/api/v1/records/[record_id]/");
+
+    let state = req.state().clone();
+    let auth = state.authorize(
+        req.extensions_mut().remove().unwrap(),
+        perms!(ListHelper or ListModerator or ListAdministrator),
+    );
+
+    let resource_id = Path::<i32>::extract(req)
+        .map_err(|_| PointercrateError::bad_request("Record ID must be integer"));
+
+    resource_id
+        .into_future()
+        .and_then(move |resource_id| {
+            state
+                .get(resource_id.into_inner())
+                .and_then(|record: Record| {
+                    auth.then(move |result| {
+                        if result.is_ok() {
+                            Ok(HttpResponse::Ok().json_with_etag(record))
+                        } else {
+                            let mut hasher = DefaultHasher::new();
+                            record.hash(&mut hasher);
+
+                            let mut value = serde_json::value::to_value(record)
+                                .map_err(PointercrateError::internal)?;
+                            value["submitter"] = serde_json::json!(null);
+
+                            Ok(HttpResponse::Ok()
+                                .header("ETag", hasher.finish().to_string())
+                                .json(value))
+                        }
+                    })
+                })
+        })
+        .responder()
+}
+
 patch_handler_with_authorization!(
     "/api/v1/records/[record id]/",
     i32,
