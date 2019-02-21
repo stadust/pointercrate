@@ -6,7 +6,7 @@ use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
-        record::{PartialRecord, Record, RecordPagination, Submission},
+        record::{PartialRecord, PatchRecord, Record, RecordPagination, Submission},
         Submitter,
     },
     state::PointercrateState,
@@ -25,6 +25,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
+    let uri = req.uri().to_string();
 
     state
         .authorize(
@@ -35,7 +36,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .and_then(move |pagination: RecordPagination| {
             // TODO: we need to post-process the PartialRecords here. If no List* permission is
             // held, we remove the submitter field
-            state.paginate::<PartialRecord, _>(pagination)
+            state.paginate::<PartialRecord, _>(pagination, uri)
         })
         .map(|(records, links)| HttpResponse::Ok().header("Links", links).json(records))
         .responder()
@@ -71,6 +72,11 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
 }
 
 get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", Record);
-//patch_handler_with_authorization("/api/v1/records/[record id]/", i32, "Record ID", PatchRecord,
-// Record);
+patch_handler_with_authorization!(
+    "/api/v1/records/[record id]/",
+    i32,
+    "Record ID",
+    PatchRecord,
+    Record
+);
 delete_handler_with_authorization!("/api/v1/records/[record id]/", i32, "Record ID", Record);

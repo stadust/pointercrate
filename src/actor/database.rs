@@ -406,7 +406,7 @@ where
 }
 
 #[derive(Debug)]
-pub struct PaginateMessage<P, D>(pub D, pub PhantomData<P>)
+pub struct PaginateMessage<P, D>(pub D, pub String, pub PhantomData<P>)
 where
     D: Paginator<Model = P>,
     P: Paginate<D>,
@@ -472,29 +472,27 @@ where
         let connection = &*self.connection()?;
         let result = P::load(&msg.0, connection)?;
 
-        // FIXME: we literally don't generate links here, its only the query string. why are we stupid
-
         let first = msg.0.first(connection)?.map(|d| {
             format!(
-                "<{}>; rel=first",
+                "<{}?{}>; rel=first",msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
         let last = msg.0.last(connection)?.map(|d| {
             format!(
-                "<{}>; rel=last",
+                "<{}?{}>; rel=last",msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
         let next = msg.0.next(connection)?.map(|d| {
             format!(
-                "<{}>; rel=next",
+                "<{}?{}>; rel=next",msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
         let prev = msg.0.prev(connection)?.map(|d| {
             format!(
-                "<{}>; rel=prev",
+                "<{}?{}>; rel=prev", msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });

@@ -215,12 +215,13 @@ fn main() {
                             .resource("/", |r| {
                                 r.get().f(wrap(api::record::paginate));
                                 r.post().f(wrap(api::record::submit));
-                                r.route().f(allowed!(POST))
+                                r.route().f(allowed!(GET, POST))
                             })
                             .resource("/{record_id}/", |r| {
                                 r.get().f(wrap(api::record::get));
                                 r.delete().f(wrap(api::record::delete));
-                                r.route().f(allowed!(GET, DELETE))
+                                r.method(Method::PATCH).f(wrap(api::record::patch));
+                                r.route().f(allowed!(GET, DELETE, PATCH))
                             })
                     })
                     .nested("/auth", |auth_scope| {

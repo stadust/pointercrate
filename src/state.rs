@@ -199,7 +199,7 @@ impl PointercrateState {
     }
 
     pub fn paginate<P, D>(
-        &self, data: D,
+        &self, data: D, uri: String,
     ) -> impl Future<Item = (Vec<P>, String), Error = PointercrateError>
     where
         D: Paginator<Model = P> + Send + 'static,
@@ -218,6 +218,6 @@ impl PointercrateState {
             <D::PaginationColumn as Expression>::SqlType,
         >>::Expression: QueryFragment<Pg>,
     {
-        self.database(PaginateMessage(data, PhantomData))
+        self.database(PaginateMessage(data, uri, PhantomData))
     }
 }

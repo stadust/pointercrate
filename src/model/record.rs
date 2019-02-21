@@ -1,5 +1,8 @@
 use super::{All, Model, Player};
-use crate::schema::{demons, players, records};
+use crate::{
+    error::PointercrateError,
+    schema::{demons, players, records},
+};
 use diesel::{
     deserialize::Queryable,
     expression::bound::Bound,
@@ -17,9 +20,10 @@ use std::fmt::{Display, Formatter};
 mod delete;
 mod get;
 mod paginate;
+mod patch;
 mod post;
 
-pub use self::{paginate::RecordPagination, post::Submission};
+pub use self::{paginate::RecordPagination, patch::PatchRecord, post::Submission};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -213,6 +217,12 @@ impl Record {
 
     pub fn status(&self) -> RecordStatus {
         self.status
+    }
+
+    pub fn validate_video(video: &mut String) -> Result<(), PointercrateError> {
+        *video = crate::video::validate(video)?;
+
+        Ok(())
     }
 }
 

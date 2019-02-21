@@ -15,6 +15,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+// TODO: implement some sort of "batch patch" that allows multiple patch operations to occur, which
+// either all work out or all fail. This will be required once there is a web interface
+
 /// Trait marking its implementors as containing patch data which can be applied to a matching
 /// [`Patch`]
 pub trait Hotfix {

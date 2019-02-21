@@ -232,8 +232,6 @@ impl Handler<PostProcessRecord> for HttpActor {
                 };
             }
 
-            dbg!(&payload);
-
             let deletor = self.deletor.clone();
             let payload_future = self.execute_discord_webhook(payload);
 

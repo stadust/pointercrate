@@ -18,6 +18,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
+    let uri = req.uri().to_string();
 
     state
         .authorize(
@@ -25,7 +26,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
         )
         .and_then(move |_| pagination)
-        .and_then(move |pagination: PlayerPagination| state.paginate::<Player, _>(pagination))
+        .and_then(move |pagination: PlayerPagination| state.paginate::<Player, _>(pagination, uri))
         .map(|(players, links)| HttpResponse::Ok().header("Links", links).json(players))
         .responder()
 }
