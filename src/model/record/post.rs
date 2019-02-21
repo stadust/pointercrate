@@ -2,7 +2,7 @@ use super::{Record, RecordStatus};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{record::RecordDemon, Demon, Player, Submitter},
+    model::{record::EmbeddedDemon, Demon, Player, Submitter},
     operation::{Delete, Get, Post, PostData},
     permissions::PermissionsSet,
     video, Result,
@@ -70,13 +70,13 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 return Err(PointercrateError::PlayerBanned)
             }
 
-            // Cannot submit records for the legacy lsit
-            if demon.position > *EXTENDED_LIST_SIZE {
+            // Cannot submit records for the legacy list (it is possible to directly add them for list mods)
+            if demon.position > *EXTENDED_LIST_SIZE && status == RecordStatus::Submitted {
                 return Err(PointercrateError::SubmitLegacy)
             }
 
-            // Can only submit 100% records for the extended list
-            if demon.position > *LIST_SIZE && progress != 100 {
+            // Can only submit 100% records for the extended list (it is possible to directly add them for list mods)
+            if demon.position > *LIST_SIZE && progress != 100 && status == RecordStatus::Submitted {
                 return Err(PointercrateError::Non100Extended)
             }
 
@@ -155,7 +155,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 status,
                 player,
                 submitter: submitter.id,
-                demon: RecordDemon {
+                demon: EmbeddedDemon {
                     position: demon.position,
                     name: demon.name
                 }

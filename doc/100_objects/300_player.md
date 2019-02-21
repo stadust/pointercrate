@@ -8,7 +8,7 @@ Each player on the list is represented by a `Player` object. The following invar
 
 Note that it is not possible to retrieve a player's demonlist score via the API.
 
-## Short Form
+## Short/Embedded Form
 
 When retrieving players via [`GET /players/`](/documentation/players/#get-players), or as the field of another object,
 only a shorter representation of each player is provided.
@@ -21,27 +21,43 @@ only a shorter representation of each player is provided.
 
 ## Long Form
 
-| Field     | Type                  | Description                                   |
-| --------- | --------------------- | --------------------------------------------- |
-| id        | integer               | The player's id                               |
-| name      | string                | The player's name                             |
-| banned    | boolean               | Value indicating whether the player is banned |
-| created   | List[[Demon](#demon)] | A list of demons the player created           |
-| beaten    | List[[Demon](#demon)] | A list of demons the player has beaten        |
-| published | List[[Demon](#demon)] | A list of demons the player has published     |
-| verified  | List[[Demon](#demon)] | A list of demons the player has verified      |
+| Field     | Type                    | Description                                   |
+| --------- | ----------------------- | --------------------------------------------- |
+| id        | integer                 | The player's id                               |
+| name      | string                  | The player's name                             |
+| banned    | boolean                 | Value indicating whether the player is banned |
+| created   | List[[Demon](#demon)]   | A list of demons the player created           |
+| beaten    | _see below_             | A list of demons the player has beaten        |
+| records   | List[[Record](#record)] | A list of records the player has on the list  |
+| published | List[[Demon](#demon)]   | A list of demons the player has published     |
+| verified  | List[[Demon](#demon)]   | A list of demons the player has verified      |
 
-### Example object:
+**Note**: The `beaten` fields is provided temporarily for compatibility purposes with some discord bots built against the API. You should use `records` instead
+
+## Example objects
+
+### Short/Embedded form
+
+```json
+{
+  "id": 4,
+  "name": "Pennutoh",
+  "banned": false
+}
+```
+
+### Long form
 
 ```json
 {
   "banned": false,
   "beaten": [],
-  "created": [
+  "records": [
     {
+      "id": 12,
       "name": "Cadrega City",
-      "position": 34,
-      "state": "MAIN"
+      "progress": 100,
+      "status": "approved"
     }
   ],
   "id": 2,
@@ -49,8 +65,7 @@ only a shorter representation of each player is provided.
   "published": [
     {
       "name": "Cadrega City",
-      "position": 34,
-      "state": "MAIN"
+      "position": 34
     }
   ],
   "verified": []

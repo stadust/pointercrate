@@ -7,7 +7,8 @@
 Each pointercrate user is represented by a `User` object.
 
 If the display name is not `null`, it will replace a user's username wherever their name is displayed.
-Right now, that is only relevant to users with `LIST_HELPER` permissions or higher.
+
+There is only one form of user objects:
 
 | Field           | Type    | Description                                                  |
 | --------------- | ------- | ------------------------------------------------------------ |
@@ -17,7 +18,7 @@ Right now, that is only relevant to users with `LIST_HELPER` permissions or high
 | display_name    | string  | The user's display name. This can be `null`.                 |
 | youtube_channel | string  | The user's linked youtube channel. This can be `null`        |
 
-### Example object:
+## Example object
 
 ```json
 {

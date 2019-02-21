@@ -54,7 +54,30 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | `EXTENDED` | The demon is in the extended section of the list |
 | `LEGACY`   | The demon is in the legacy section of the list   |
 
-### Example object:
+## Example objects
+
+### Embedded form
+
+```json
+{
+  "name": "Cadrega City",
+  "position": 34
+}
+```
+
+### Short form
+
+```json
+{
+  "name": "Cadrega City",
+  "position": 34,
+  "publisher": "Pennutoh",
+  "state": "approved",
+  "video": "https://www.youtube.com/watch?v=cHEGAqOgddA"
+}
+```
+
+### Long form
 
 ```json
 {

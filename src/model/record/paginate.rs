@@ -1,4 +1,4 @@
-use super::{PartialRecord, RecordStatus};
+use super::{Record, RecordStatus};
 use crate::{
     error::PointercrateError,
     model::Model,
@@ -34,7 +34,7 @@ pub struct RecordPagination {
 }
 
 impl Paginator for RecordPagination {
-    type Model = PartialRecord;
+    type Model = Record;
     type PaginationColumn = records::id;
     type PaginationColumnType = i32;
 
@@ -73,9 +73,9 @@ impl Paginator for RecordPagination {
     }
 }
 
-impl Paginate<RecordPagination> for PartialRecord {
+impl Paginate<RecordPagination> for Record {
     fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(PartialRecord::boxed_all());
+        let mut query = pagination.filter(Record::boxed_all());
 
         filter!(query[
             records::id > pagination.after_id,

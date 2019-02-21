@@ -12,7 +12,7 @@ Although each HTTP response comes with a status code, you can still calculate th
 | code    | integer | The error code                                                  |
 | data    | object  | A JSON object containing additional data relevant to the error. |
 
-### Example object:
+## Example object
 
 ```json
 {

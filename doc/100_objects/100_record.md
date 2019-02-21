@@ -2,12 +2,29 @@
 
 # Record objects{id=record}
 
-Each record on the list is represented by a `Record` object. The following assumptions can be made about these:
+Each record on the list is represented by a `Record` object. The following invariants hold true for all player objects
 
 - The `progress` value lies within `demon.requirement` and `100`
 - Every `video` value is unique
 - Every combination of `demon`, `player` and `status` values is unique
 - Every `video` value is in one of the formats listed [here](/documentation/#video)
+
+The object only contains the submitter information if the object has been requested with sufficient permissions
+
+## Embedded Form
+
+The embedded form of record objects is returned if a record object is part of another object
+
+| Field    | Type                           | Description                                  |
+| -------- | ------------------------------ | -------------------------------------------- |
+| id       | integer                        | The record's id                              |
+| progress | integer                        | The progress achieved by the record's holder |
+| status   | [RecordStatus](#record-status) | The record's status.                         |
+| demon    | String                         | The name of the demon the record was made on |
+
+## Long Form
+
+The long form of record objects is returned by [`GET /records/`](/documentation/records/#get-records) and [`GET /records/{record_id}`](/documentation/records/#record-retrieval). There is no short form for the pagination endpoint
 
 | Field     | Type                           | Description                                             |
 | --------- | ------------------------------ | ------------------------------------------------------- |
@@ -17,24 +34,36 @@ Each record on the list is represented by a `Record` object. The following assum
 | status    | [RecordStatus](#record-status) | The record's status.                                    |
 | player    | [Player](#player)              | The record holder                                       |
 | demon     | [Demon](#demon)                | The demon the record was made on                        |
-| submitter | [Submitter](#submitter)        | The internal ID of the person that submitted the record |
+| submitter | integer?                       | The internal ID of the person that submitted the record |
 
 ## Enum RecordStatus{id=record-status}
 
 | Value       | Description                                               |
 | ----------- | --------------------------------------------------------- |
-| `APPROVED`  | The record has been approved and is displayed on the list |
-| `REJECTED`  | The record has been rejected                              |
-| `SUBMITTED` | The record has been submitted and is awaiting review      |
+| `approved`  | The record has been approved and is displayed on the list |
+| `rejected`  | The record has been rejected                              |
+| `submitted` | The record has been submitted and is awaiting review      |
 
-### Example object:
+## Example objects
+
+### Embedded form
+
+```json
+{
+  "id": 1,
+  "progress": 100,
+  "demon": "Cadrega City",
+  "status": "approved"
+}
+```
+
+### Long form
 
 ```json
 {
   "demon": {
     "name": "Cadrega City",
-    "position": 34,
-    "state": "MAIN"
+    "position": 34
   },
   "id": 2,
   "player": {
@@ -43,11 +72,8 @@ Each record on the list is represented by a `Record` object. The following assum
     "name": "AeonAir"
   },
   "progress": 100,
-  "status": "APPROVED",
-  "submitter": {
-    "banned": false,
-    "id": 2
-  },
+  "status": "approved",
+  "submitter": null,
   "video": null
 }
 ```

@@ -6,7 +6,7 @@ use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
-        record::{PartialRecord, PatchRecord, Record, RecordPagination, Submission},
+        record::{PatchRecord, Record, RecordPagination, Submission},
         user::User,
         Submitter,
     },
@@ -42,7 +42,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .and_then(move |user| Ok((user, pagination?)))
         .and_then(move |(user, pagination): (User, RecordPagination)| {
             state
-                .paginate::<PartialRecord, _>(pagination, uri)
+                .paginate::<Record, _>(pagination, uri)
                 .and_then(move |(records, links)| {
                     let mut value = serde_json::value::to_value(records)
                         .map_err(PointercrateError::internal)?;

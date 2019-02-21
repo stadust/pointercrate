@@ -1,7 +1,11 @@
-use super::{Record, RecordDemon, RecordStatus};
+use super::{Record, RecordStatus};
 use crate::{
     error::PointercrateError,
-    model::{demon::Demon, player::Player, Model},
+    model::{
+        demon::{Demon, EmbeddedDemon},
+        player::Player,
+        Model,
+    },
     operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
     permissions::PermissionsSet,
     schema::records,
@@ -46,7 +50,7 @@ impl Patch<PatchRecord> for Record {
         }
 
         let map = move |_| {
-            RecordDemon {
+            EmbeddedDemon {
                 name: demon.name,
                 position: demon.position,
             }

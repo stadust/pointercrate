@@ -9,7 +9,7 @@ Everyone who submits a record gets assigned an incremental submitter id, interna
 | id     | int     | The submitter's ID                               |
 | banned | boolean | Value indicating whether the submitter is banned |
 
-### Example object
+## Example object
 
 ```json
 {

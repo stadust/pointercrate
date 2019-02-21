@@ -1,6 +1,7 @@
 use super::{All, Model, Player};
 use crate::{
     error::PointercrateError,
+    model::demon::EmbeddedDemon,
     schema::{demons, players, records},
 };
 use diesel::{
@@ -100,20 +101,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-/// Absolutely minimal representation of a demon to be sent along with a record object
-#[derive(Debug, Hash, Serialize)]
-pub struct RecordDemon {
-    pub position: i16,
-    pub name: String,
-}
-
-impl Display for RecordDemon {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (at {})", self.name, self.position)
-    }
-}
-
-#[derive(Debug, Identifiable, Associations, Serialize, Hash)]
+#[derive(Debug, Identifiable, Serialize, Hash)]
 #[table_name = "records"]
 pub struct Record {
     pub id: i32,
@@ -122,7 +110,16 @@ pub struct Record {
     pub status: RecordStatus,
     pub player: Player,
     pub submitter: i32,
-    pub demon: RecordDemon,
+    pub demon: EmbeddedDemon,
+}
+
+#[derive(Debug)]
+pub struct EmbeddedRecord {
+    pub id: i32,
+    pub progress: i16,
+    pub status: RecordStatus,
+    pub player: String,
+    pub demon: String,
 }
 
 impl Display for Record {
@@ -133,18 +130,6 @@ impl Display for Record {
             self.player, self.progress, self.demon, self.id
         )
     }
-}
-
-#[derive(Debug, Identifiable, Serialize, Hash, Queryable)]
-#[table_name = "records"]
-pub struct PartialRecord {
-    pub id: i32,
-    pub progress: i16,
-    pub video: Option<String>,
-    pub status: RecordStatus,
-    pub player: i32,
-    pub submitter: i32,
-    pub demon: String,
 }
 
 #[derive(Insertable, Debug)]
@@ -252,32 +237,11 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
                 banned: row.6,
             },
             submitter: row.7,
-            demon: RecordDemon {
+            demon: EmbeddedDemon {
                 name: row.8,
                 position: row.9,
             },
         }
-    }
-}
-
-impl Model for PartialRecord {
-    type From = records::table;
-    type Selection = (
-        records::id,
-        records::progress,
-        records::video,
-        records::status_,
-        records::player,
-        records::submitter,
-        records::demon,
-    );
-
-    fn from() -> Self::From {
-        records::table
-    }
-
-    fn selection() -> Self::Selection {
-        Self::Selection::default()
     }
 }
 

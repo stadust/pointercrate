@@ -259,6 +259,19 @@ impl Model for Demon {
     }
 }
 
+/// Absolutely minimal representation of a demon to be sent when a demon is part of another object
+#[derive(Debug, Hash, Serialize)]
+pub struct EmbeddedDemon {
+    pub position: i16,
+    pub name: String,
+}
+
+impl Display for EmbeddedDemon {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.name, self.position)
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct DemonWithCreators {
     #[serde(flatten)]
