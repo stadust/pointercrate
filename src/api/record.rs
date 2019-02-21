@@ -7,6 +7,7 @@ use crate::{
     middleware::cond::HttpResponseBuilderExt,
     model::{
         record::{PartialRecord, PatchRecord, Record, RecordPagination, Submission},
+        user::User,
         Submitter,
     },
     state::PointercrateState,
@@ -32,13 +33,26 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
             req.extensions_mut().remove().unwrap(),
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
         )
-        .and_then(move |_| pagination)
-        .and_then(move |pagination: RecordPagination| {
-            // TODO: we need to post-process the PartialRecords here. If no List* permission is
-            // held, we remove the submitter field
-            state.paginate::<PartialRecord, _>(pagination, uri)
+        .and_then(move |user| Ok((user, pagination?)))
+        .and_then(move |(user, pagination): (User, RecordPagination)| {
+            state
+                .paginate::<PartialRecord, _>(pagination, uri)
+                .and_then(move |(records, links)| {
+                    let mut value = serde_json::value::to_value(records)
+                        .map_err(PointercrateError::internal)?;
+                    let records = value
+                        .as_array_mut()
+                        .ok_or(PointercrateError::InternalServerError)?;
+
+                    if !user.has_any(&perms!(ListHelper or ListModerator or ListAdministrator)) {
+                        for record in records.iter_mut() {
+                            record["submitter"] = serde_json::json!(null);
+                        }
+                    }
+
+                    Ok(HttpResponse::Ok().header("Links", links).json(records))
+                })
         })
-        .map(|(records, links)| HttpResponse::Ok().header("Links", links).json(records))
         .responder()
 }
 
