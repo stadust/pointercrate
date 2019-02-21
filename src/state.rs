@@ -25,7 +25,10 @@ use diesel::{
     AppearsOnTable, Expression, QuerySource, SelectableExpression,
 };
 use std::{collections::HashMap, hash::Hash, marker::PhantomData, sync::Arc};
-use tokio::prelude::Future;
+use tokio::prelude::{
+    future::{err, Either},
+    Future,
+};
 
 #[derive(Clone)]
 #[allow(missing_debug_implementations)]
@@ -94,8 +97,24 @@ impl PointercrateState {
     {
         let clone = self.clone();
 
+        // Why do it this way around instead of checking `G::permissions() ==
+        // PermissionsSet::default()` first and simply not doing the whole authorization thing when
+        // it's the case? Because this way allows us to pass the user object from a successful
+        // authentication to the `GetMessage` struct even if no permissions are required. This
+        // means that in those cases we still get audit-log entries
         self.authorize(authorization, G::permissions())
-            .and_then(move |user| clone.database(GetMessage(key, Some(user), PhantomData)))
+            .then(move |result| {
+                match result {
+                    Ok(user) => Either::A(clone.database(GetMessage(key, Some(user), PhantomData))),
+                    Err(PointercrateError::Unauthorized)
+                        if G::permissions() == PermissionsSet::default() =>
+                        Either::A(clone.database(GetMessage(key, None, PhantomData))),
+                    Err(e) => Either::B(err(e)),
+                }
+            })
+
+        //self.authorize(authorization, G::permissions())
+        //    .and_then(move |user| clone.database(GetMessage(key, Some(user), PhantomData)))
     }
 
     pub fn get<Key, G>(&self, key: Key) -> impl Future<Item = G, Error = PointercrateError>
@@ -115,8 +134,21 @@ impl PointercrateState {
     {
         let clone = self.clone();
 
+        // Why do it this way around instead of checking `t.required_permissions() ==
+        // PermissionsSet::default()` first and simply not doing the whole authorization thing when
+        // it's the case? Because this way allows us to pass the user object from a successful
+        // authentication to the `PostMessage` struct even if no permissions are required. This
+        // means that in those cases we still get audit-log entries
         self.authorize(authorization, t.required_permissions())
-            .and_then(move |user| clone.database(PostMessage(t, Some(user), PhantomData)))
+            .then(move |result| {
+                match result {
+                    Ok(user) => Either::A(clone.database(PostMessage(t, Some(user), PhantomData))),
+                    Err(PointercrateError::Unauthorized)
+                        if t.required_permissions() == PermissionsSet::default() =>
+                        Either::A(clone.database(PostMessage(t, None, PhantomData))),
+                    Err(e) => Either::B(err(e)),
+                }
+            })
     }
 
     pub fn post<T, P>(&self, t: T) -> impl Future<Item = P, Error = PointercrateError>

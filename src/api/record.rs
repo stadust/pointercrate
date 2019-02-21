@@ -21,6 +21,8 @@ use std::{
 };
 use tokio::prelude::future::{Future, IntoFuture};
 
+// FIXME: we need a prettier way to handle the removal of fields
+
 /// `GET /api/v1/records/` handler
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/records/");
@@ -66,6 +68,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     let state = req.state().clone();
     let remote_addr = req.extensions_mut().remove::<IpNetwork>().unwrap();
+    let auth = req.extensions_mut().remove().unwrap();
 
     req.json()
         .from_err()
@@ -74,7 +77,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
                 .get(remote_addr)
                 .and_then(move |submitter: Submitter| {
                     state
-                        .post((submission, submitter))
+                        .post_authorized((submission, submitter), auth)
                         .and_then(move |record: Option<Record>| {
                             state.http(PostProcessRecord(record))
                         })
