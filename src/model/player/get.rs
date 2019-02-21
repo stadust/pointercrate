@@ -1,6 +1,12 @@
-use super::Player;
-use crate::{error::PointercrateError, operation::Get, Result};
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use super::{Player, PlayerWithDemonsAndRecords};
+use crate::{
+    error::PointercrateError,
+    model::{creator::created_by, demon::EmbeddedDemon, Model},
+    operation::Get,
+    schema::demons,
+    Result,
+};
+use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a str> for Player {
     fn get(name: &'a str, connection: &PgConnection) -> Result<Self> {
@@ -24,5 +30,26 @@ impl Get<i32> for Player {
                 }),
             Err(err) => Err(PointercrateError::database(err)),
         }
+    }
+}
+
+impl<T> Get<T> for PlayerWithDemonsAndRecords
+where
+    Player: Get<T>,
+{
+    fn get(t: T, connection: &PgConnection) -> Result<Self> {
+        let player = Player::get(t, connection)?;
+
+        Ok(PlayerWithDemonsAndRecords {
+            records: Get::get(player.id, connection)?,
+            created: created_by(player.id).load(connection)?,
+            verified: EmbeddedDemon::all()
+                .filter(demons::verifier.eq(&player.id))
+                .load(connection)?,
+            published: EmbeddedDemon::all()
+                .filter(demons::publisher.eq(&player.id))
+                .load(connection)?,
+            player,
+        })
     }
 }

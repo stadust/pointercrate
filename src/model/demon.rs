@@ -260,7 +260,7 @@ impl Model for Demon {
 }
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
-#[derive(Debug, Hash, Serialize)]
+#[derive(Debug, Hash, Serialize, Queryable)]
 pub struct EmbeddedDemon {
     pub position: i16,
     pub name: String,
@@ -269,6 +269,19 @@ pub struct EmbeddedDemon {
 impl Display for EmbeddedDemon {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         write!(f, "{} (at {})", self.name, self.position)
+    }
+}
+
+impl Model for EmbeddedDemon {
+    type From = demons::table;
+    type Selection = (demons::position, demons::name);
+
+    fn from() -> Self::From {
+        demons::table
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
     }
 }
 
@@ -431,6 +444,24 @@ impl Into<PartialDemon> for Demon {
             position: self.position,
             publisher: self.publisher.name,
             video: self.video,
+        }
+    }
+}
+
+impl Into<EmbeddedDemon> for Demon {
+    fn into(self) -> EmbeddedDemon {
+        EmbeddedDemon {
+            position: self.position,
+            name: self.name,
+        }
+    }
+}
+
+impl Into<EmbeddedDemon> for PartialDemon {
+    fn into(self) -> EmbeddedDemon {
+        EmbeddedDemon {
+            position: self.position,
+            name: self.name,
         }
     }
 }

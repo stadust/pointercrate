@@ -113,12 +113,11 @@ pub struct Record {
     pub demon: EmbeddedDemon,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Queryable, Hash, Serialize)]
 pub struct EmbeddedRecord {
     pub id: i32,
     pub progress: i16,
     pub status: RecordStatus,
-    pub player: String,
     pub demon: String,
 }
 
@@ -287,6 +286,24 @@ impl Model for Record {
             diesel::query_source::joins::Inner,
         )
         .on(records::player.eq(players::id))
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
+    }
+}
+
+impl Model for EmbeddedRecord {
+    type From = records::table;
+    type Selection = (
+        records::id,
+        records::progress,
+        records::status_,
+        records::demon,
+    );
+
+    fn from() -> Self::From {
+        records::table
     }
 
     fn selection() -> Self::Selection {

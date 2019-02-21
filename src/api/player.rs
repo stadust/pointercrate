@@ -2,7 +2,7 @@ use super::PCResponder;
 use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::player::{PatchPlayer, Player, PlayerPagination},
+    model::player::{PatchPlayer, Player, PlayerPagination, PlayerWithDemonsAndRecords},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
@@ -31,7 +31,12 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-get_handler!("/api/v1/players/[id]/", i32, "Player ID", Player);
+get_handler!(
+    "/api/v1/players/[id]/",
+    i32,
+    "Player ID",
+    PlayerWithDemonsAndRecords
+);
 
 patch_handler_with_authorization!(
     "/api/v1/players/[id]/",

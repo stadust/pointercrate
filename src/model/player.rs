@@ -1,6 +1,9 @@
 use super::{All, Model};
 use crate::{
-    model::record::RecordStatus,
+    model::{
+        demon::EmbeddedDemon,
+        record::{EmbeddedRecord, RecordStatus},
+    },
     operation::Delete,
     schema::{players, records},
     Result,
@@ -26,6 +29,16 @@ pub struct Player {
     pub id: i32,
     pub name: String,
     pub banned: bool,
+}
+
+#[derive(Debug, Serialize, Hash)]
+pub struct PlayerWithDemonsAndRecords {
+    #[serde(flatten)]
+    pub player: Player,
+    pub records: Vec<EmbeddedRecord>,
+    pub created: Vec<EmbeddedDemon>,
+    pub verified: Vec<EmbeddedDemon>,
+    pub published: Vec<EmbeddedDemon>,
 }
 
 impl Display for Player {
