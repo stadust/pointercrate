@@ -38,7 +38,7 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | Header       | Value                                    |
 | ------------ | ---------------------------------------- |
 | Content-Type | `application/json`                       |
-| ETag         | base64 encoded hash of the updated demon |
+| ETag         | unsigned 64 bit  hash of the updated demon |
 
 | Field | Type                                   | Description              |
 | ----- | -------------------------------------- | ------------------------ |
@@ -50,7 +50,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 | Header | Value                            |
 | ------ | -------------------------------- |
-| ETag   | base64 encoded hash of the demon |
+| ETag   | unsigned 64 bit  hash of the demon |
 
 ### Errors:
 

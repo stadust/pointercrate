@@ -27,10 +27,10 @@ other people at least cannot change your password, allowing you to invalidate th
 
 ### Response: `200 OK`
 
-| Header       | Value                                   |
-| ------------ | --------------------------------------- |
-| Content-Type | `application/json`                      |
-| ETag         | base64 encoded hash of your user object |
+| Header       | Value                                    |
+| ------------ | ---------------------------------------- |
+| Content-Type | `application/json`                       |
+| ETag         | unsigned 64 bit hash of your user object |
 
 | Field | Type                                 | Description                                                 |
 | ----- | ------------------------------------ | ----------------------------------------------------------- |
@@ -41,9 +41,9 @@ other people at least cannot change your password, allowing you to invalidate th
 Returned when the `PATCH` operation did not make any changes. Note that this is also returned when you only change your password,
 as you hashed password is not part of your user object hash.
 
-| Header | Value                                   |
-| ------ | --------------------------------------- |
-| ETag   | base64 encoded hash of your user object |
+| Header | Value                                    |
+| ------ | ---------------------------------------- |
+| ETag   | unsigned 64 bit hash of your user object |
 
 ### Errors:
 

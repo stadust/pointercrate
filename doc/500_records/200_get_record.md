@@ -21,10 +21,10 @@ Retrieves detailed information about the record with id `record_id`
 
 ### Response: `200 OK`
 
-| Header       | Value                                    |
-| ------------ | ---------------------------------------- |
-| Content-Type | `application/json`                       |
-| ETag         | base64 encoded hash of the record object |
+| Header       | Value                                     |
+| ------------ | ----------------------------------------- |
+| Content-Type | `application/json`                        |
+| ETag         | unsigned 64 bit hash of the record object |
 
 | Field | Type                                     | Description                 |
 | ----- | ---------------------------------------- | --------------------------- |
@@ -34,9 +34,9 @@ Retrieves detailed information about the record with id `record_id`
 
 Returned if the `If-None-Match` header is set, and the etag for the record object matches one of the set values.
 
-| Header | Value                                    |
-| ------ | ---------------------------------------- |
-| ETag   | base64 encoded hash of the record object |
+| Header | Value                                     |
+| ------ | ----------------------------------------- |
+| ETag   | unsigned 64 bit hash of the record object |
 
 ### Errors:
 

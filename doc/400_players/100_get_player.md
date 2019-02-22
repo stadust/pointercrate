@@ -18,7 +18,7 @@ Retrieves detailed information about the player with id `player_id`
 | Header       | Value                                    |
 | ------------ | ---------------------------------------- |
 | Content-Type | `application/json`                       |
-| ETag         | base64 encoded hash of the player object |
+| ETag         | unsigned 64 bit  hash of the player object |
 
 | Field | Type                                     | Description                 |
 | ----- | ---------------------------------------- | --------------------------- |
@@ -30,7 +30,7 @@ Returned if the `If-None-Match` header is set, and the etag for the player objec
 
 | Header | Value                                    |
 | ------ | ---------------------------------------- |
-| ETag   | base64 encoded hash of the player object |
+| ETag   | unsigned 64 bit  hash of the player object |
 
 ### Errors:
 

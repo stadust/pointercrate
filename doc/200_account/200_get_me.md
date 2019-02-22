@@ -16,10 +16,10 @@ Gets information about the currently logged in account (that is, the account who
 
 ### Response: `200 OK`
 
-| Header       | Value                                   |
-| ------------ | --------------------------------------- |
-| Content-Type | `application/json`                      |
-| ETag         | base64 encoded hash of your user object |
+| Header       | Value                                    |
+| ------------ | ---------------------------------------- |
+| Content-Type | `application/json`                       |
+| ETag         | unsigned 64 bit hash of your user object |
 
 | Field | Type                                 | Description                                                 |
 | ----- | ------------------------------------ | ----------------------------------------------------------- |

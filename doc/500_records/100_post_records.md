@@ -35,11 +35,11 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 
 ### Response: `201 CREATED`
 
-| Header       | Value                                           |
-| ------------ | ----------------------------------------------- |
-| Content-Type | `application/json`                              |
-| Location     | The location of the newly created record        |
-| ETag         | base64 encoded hash of the newly created record |
+| Header       | Value                                            |
+| ------------ | ------------------------------------------------ |
+| Content-Type | `application/json`                               |
+| Location     | The location of the newly created record         |
+| ETag         | unsigned 64 bit hash of the newly created record |
 
 | Field | Type                                     | Description                     |
 | ----- | ---------------------------------------- | ------------------------------- |

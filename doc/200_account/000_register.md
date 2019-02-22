@@ -27,11 +27,11 @@ Registering for an account does not provide an access token, it needs to be aqui
 
 ### Response: `201 CREATED`
 
-| Header       | Value                                   |
-| ------------ | --------------------------------------- |
-| Content-Type | `application/json`                      |
-| Location     | `/auth/me/`                             |
-| ETag         | base64 encoded hash of your user object |
+| Header       | Value                                    |
+| ------------ | ---------------------------------------- |
+| Content-Type | `application/json`                       |
+| Location     | `/auth/me/`                              |
+| ETag         | unsigned 64 bit hash of your user object |
 
 | Field | Type                                 | Description                                              |
 | ----- | ------------------------------------ | -------------------------------------------------------- |

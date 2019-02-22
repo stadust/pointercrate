@@ -37,7 +37,7 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | ------------ | ---------------------------------------------- |
 | Content-Type | `application/json`                             |
 | Location     | The location of the newly created demon        |
-| ETag         | base64 encoded hash of the newly created demon |
+| ETag         | unsigned 64 bit  hash of the newly created demon |
 
 | Field | Type                                   | Description                    |
 | ----- | -------------------------------------- | ------------------------------ |

@@ -29,10 +29,10 @@ Modifies a given record.
 
 ### Response: `200 OK`
 
-| Header       | Value                                     |
-| ------------ | ----------------------------------------- |
-| Content-Type | `application/json`                        |
-| ETag         | base64 encoded hash of the updated record |
+| Header       | Value                                      |
+| ------------ | ------------------------------------------ |
+| Content-Type | `application/json`                         |
+| ETag         | unsigned 64 bit hash of the updated record |
 
 | Field | Type                                     | Description               |
 | ----- | ---------------------------------------- | ------------------------- |
@@ -42,9 +42,9 @@ Modifies a given record.
 
 Returned when the `PATCH` operation did not make any changes.
 
-| Header | Value                             |
-| ------ | --------------------------------- |
-| ETag   | base64 encoded hash of the record |
+| Header | Value                              |
+| ------ | ---------------------------------- |
+| ETag   | unsigned 64 bit hash of the record |
 
 ### Errors
 

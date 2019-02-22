@@ -33,7 +33,7 @@ Also note that you cannot grant (or revoke) other users `ADMINISTRATOR` permissi
 | Header       | Value                                   |
 | ------------ | --------------------------------------- |
 | Content-Type | `application/json`                      |
-| ETag         | base64 encoded hash of the updated user |
+| ETag         | unsigned 64 bit  hash of the updated user |
 
 | Field | Type                                 | Description             |
 | ----- | ------------------------------------ | ----------------------- |
@@ -45,7 +45,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 | Header | Value                           |
 | ------ | ------------------------------- |
-| ETag   | base64 encoded hash of the user |
+| ETag   | unsigned 64 bit  hash of the user |
 
 ### Errors:
 

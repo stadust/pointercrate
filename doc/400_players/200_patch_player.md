@@ -34,7 +34,7 @@ the record will the higher progress will take precedence.
 | Header       | Value                                     |
 | ------------ | ----------------------------------------- |
 | Content-Type | `application/json`                        |
-| ETag         | base64 encoded hash of the updated player |
+| ETag         | unsigned 64 bit  hash of the updated player |
 
 | Field | Type                                     | Description               |
 | ----- | ---------------------------------------- | ------------------------- |
@@ -46,7 +46,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 | Header | Value                             |
 | ------ | --------------------------------- |
-| ETag   | base64 encoded hash of the player |
+| ETag   | unsigned 64 bit  hash of the player |
 
 ### Errors:
 

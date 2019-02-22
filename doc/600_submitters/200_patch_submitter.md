@@ -26,7 +26,7 @@ Access to this endpoint requires at least `LIST_MODERATOR` permissions.
 | Header       | Value                                        |
 | ------------ | -------------------------------------------- |
 | Content-Type | `application/json`                           |
-| ETag         | base64 encoded hash of the updated submitter |
+| ETag         |unsigned 64 bit  hash of the updated submitter |
 
 | Field | Type                                           | Description                  |
 | ----- | ---------------------------------------------- | ---------------------------- |
@@ -38,7 +38,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 | Header | Value                                |
 | ------ | ------------------------------------ |
-| ETag   | base64 encoded hash of the submitter |
+| ETag   | unsigned 64 bit  hash of the submitter |
 
 ### Errors:
 

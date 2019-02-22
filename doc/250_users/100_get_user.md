@@ -24,7 +24,7 @@ Retrieves detailed information about the user with id `user_id`
 | Header       | Value                                  |
 | ------------ | -------------------------------------- |
 | Content-Type | `application/json`                     |
-| ETag         | base64 encoded hash of the user object |
+| ETag         | unsigned 64 bit  hash of the user object |
 
 | Field | Type                                 | Description               |
 | ----- | ------------------------------------ | ------------------------- |
@@ -36,7 +36,7 @@ Returned if the `If-None-Match` header is set, and the etag for the user object 
 
 | Header | Value                                  |
 | ------ | -------------------------------------- |
-| ETag   | base64 encoded hash of the user object |
+| ETag   | unsigned 64 bit  hash of the user object |
 
 ### Errors:
 

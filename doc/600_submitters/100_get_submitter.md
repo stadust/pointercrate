@@ -22,7 +22,7 @@ Access to this endpoint requires at least `LIST_ADMIN` permissions.
 | Header       | Value                                       |
 | ------------ | ------------------------------------------- |
 | Content-Type | `application/json`                          |
-| ETag         | base64 encoded hash of the submitter object |
+| ETag         | unsigned 64 bit  hash of the submitter object |
 
 | Field | Type                                           | Description                    |
 | ----- | ---------------------------------------------- | ------------------------------ |
@@ -34,7 +34,7 @@ Returned if the `If-None-Match` header is set, and the etag for the submitter ob
 
 | Header | Value                                       |
 | ------ | ------------------------------------------- |
-| ETag   | base64 encoded hash of the submitter object |
+| ETag   | unsigned 64 bit  hash of the submitter object |
 
 ### Errors:
 

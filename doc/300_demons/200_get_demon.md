@@ -18,7 +18,7 @@ Retrieves detailed information about the demon at `position`
 | Header       | Value                                   |
 | ------------ | --------------------------------------- |
 | Content-Type | `application/json`                      |
-| ETag         | base64 encoded hash of the demon object |
+| ETag         | unsigned 64 bit  hash of the demon object |
 
 | Field | Type                                   | Description                |
 | ----- | -------------------------------------- | -------------------------- |
@@ -30,7 +30,7 @@ Returned if the `If-None-Match` header is set, and the etag for the demon object
 
 | Header | Value                                   |
 | ------ | --------------------------------------- |
-| ETag   | base64 encoded hash of the demon object |
+| ETag   | unsigned 64 bit  hash of the demon object |
 
 ### Errors:
 
