@@ -98,7 +98,7 @@ pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
             }
             div.nav-group-right.nav-group {
                 a.nav-item.hover.white href = {(url_helper::url(req, "documentation"))} {
-                     pan style ="display:flex; flex-direction:column;" {
+                    span style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"REST API"}
                         span {"Documentation"}
                     }
@@ -123,8 +123,8 @@ pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
 }
 
 pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
-    let first_extended = &*LIST_SIZE + 1;
-    let first_legacy = &*EXTENDED_LIST_SIZE + 1;
+    let first_extended = *LIST_SIZE + 1;
+    let first_legacy = *EXTENDED_LIST_SIZE + 1;
 
     html! {
         div.footer.center.fade {
