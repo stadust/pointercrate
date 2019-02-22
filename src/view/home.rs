@@ -94,7 +94,7 @@ impl Page for Homepage {
                             }
                         }
                     }
-                    a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = {(url_helper::demon(req, 1))} {
+                    a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = "/demonlist/"{
                         "Check it out"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
                         i.fa.fa-arrow-right aria-hidden="true" {}
                     }

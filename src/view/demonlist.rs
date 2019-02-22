@@ -8,6 +8,7 @@ use crate::{
         user::User,
     },
     state::PointercrateState,
+    video,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
 use gdcf::model::{Creator, PartialLevel};
@@ -84,10 +85,27 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center#container {
                 div.left {
-                    h1 {"Demonlist"}
+                    div.panel.fade {
+                        div.underlined {
+                            h1 {"Demonlist"}
+                        }
+                        p {
+                            "This page provides an view of the entire demonlist. To get further information, like the list of records or the level password, click on a demons name to get to its page! Note that this page can be slow to load due to the abundance of videos"
+                        }
+                    }
+                    (rules_panel())
                     @for demon in &self.demon_overview {
-                        h2 {
-                            "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                        div.panel.fade.js-scroll-anim data-anim="fade" {
+                            div.underlined {
+                                h2 {
+                                    a href = {"/demonlist/" (demon.position)} {
+                                        "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                    }
+                                }
+                            }
+                            @if let Some(ref video) = demon.video {
+                                iframe."ratio-16-9" style="width: 90%; margin: 15px 5% 0px" src = (video::embed(video)) {}
+                            }
                         }
                     }
                 }
@@ -341,7 +359,6 @@ fn sidebar(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
     html! {
         div.right {
             (team_panel(admins, mods, helpers))
-            (rules_panel())
             (submit_panel())
             (stats_viewer_panel())
             (discord_panel())
@@ -402,7 +419,7 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
 
 fn rules_panel() -> Markup {
     html! {
-        did#rules.panel.fade.js-scroll-anim data-anim = "fade" {
+        did#rules.panel.fade.flex.js-scroll-anim data-anim = "fade" style = "flex-direction: column" {
             div.underlined {
                 h2 {
                     "Rules:"

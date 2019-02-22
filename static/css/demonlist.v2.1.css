@@ -41,7 +41,8 @@ tr:nth-child(even) {
 }
 
 .right p,
-.right span {
+.right span,
+#rules span {
   font-size: 0.8em;
   font-weight: normal;
 }
