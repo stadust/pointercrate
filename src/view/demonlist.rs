@@ -387,13 +387,13 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
                 h2 {
                     "List Helpers"
                 }
-                p {
-                    "Contact these people if you have any questions regarding why a specific record was rejected. Do not needlessly bug them about checking submissions though!"
-                }
-                ul style = "line-height: 30px" {
-                    @for helper in helpers {
-                        (maybe_link(helper))
-                    }
+            }
+            p {
+                "Contact these people if you have any questions regarding why a specific record was rejected. Do not needlessly bug them about checking submissions though!"
+            }
+            ul style = "line-height: 30px" {
+                @for helper in helpers {
+                    (maybe_link(helper))
                 }
             }
         }
