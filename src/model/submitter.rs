@@ -9,6 +9,7 @@ use diesel::{
     sql_types, ExpressionMethods,
 };
 use ipnetwork::IpNetwork;
+use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
 
 mod get;
@@ -17,7 +18,7 @@ mod patch;
 
 pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 
-#[derive(Queryable, Debug, Identifiable)]
+#[derive(Queryable, Debug, Identifiable, Serialize, Hash)]
 #[table_name = "submitters"]
 #[primary_key("submitter_id")]
 pub struct Submitter {
@@ -42,9 +43,16 @@ struct NewSubmitter<'a> {
 type WithIp<'a> = diesel::dsl::Eq<submitters::ip_address, Bound<sql_types::Inet, &'a IpNetwork>>;
 type ByIp<'a> = diesel::dsl::Filter<All<Submitter>, WithIp<'a>>;
 
+type WithId = diesel::dsl::Eq<submitters::submitter_id, Bound<sql_types::Integer, i32>>;
+type ById = diesel::dsl::Filter<All<Submitter>, WithId>;
+
 impl Submitter {
     pub fn by_ip(ip: &IpNetwork) -> ByIp {
         Submitter::all().filter(submitters::ip_address.eq(ip))
+    }
+
+    pub fn by_id(id: i32) -> ById {
+        Submitter::all().filter(submitters::submitter_id.eq(id))
     }
 
     pub fn insert(ip: &IpNetwork, conn: &PgConnection) -> QueryResult<Submitter> {

@@ -1,5 +1,10 @@
 use super::Submitter;
-use crate::{error::PointercrateError, operation::Get, Result};
+use crate::{
+    error::PointercrateError,
+    operation::{Get, GetPermissions},
+    permissions::PermissionsSet,
+    Result,
+};
 use diesel::{result::Error, PgConnection, RunQueryDsl};
 use ipnetwork::IpNetwork;
 
@@ -11,5 +16,25 @@ impl Get<IpNetwork> for Submitter {
                 Submitter::insert(&ip, connection).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
+    }
+}
+
+impl Get<i32> for Submitter {
+    fn get(id: i32, connection: &PgConnection) -> Result<Self> {
+        match Submitter::by_id(id).first(connection) {
+            Ok(submitter) => Ok(submitter),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Submitter",
+                    identified_by: id.to_string(),
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl GetPermissions for Submitter {
+    fn permissions() -> PermissionsSet {
+        perms!(ListAdministrator)
     }
 }
