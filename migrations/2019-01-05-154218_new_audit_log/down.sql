@@ -33,7 +33,14 @@ DROP FUNCTION audit_creator_deletion() CASCADE;
 DROP TABLE submitter_modifications;
 DROP FUNCTION audit_submitter_modification() CASCADE;
 
--- ...
+DROP TABLE user_additions;
+DROP FUNCTION audit_user_addition() CASCADE;
+
+DROP TABLE user_modifications;
+DROP FUNCTION audit_user_modification() CASCADE;
+
+DROP TABLE user_deletions;
+DROP FUNCTION audit_user_deletion() CASCADE;
 
 DROP TABLE audit_log2;
 

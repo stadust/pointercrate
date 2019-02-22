@@ -296,4 +296,74 @@ $submitter_modifications_trigger$ LANGUAGE plpgsql;
 
 CREATE TRIGGER submitter_modification_trigger AFTER UPDATE ON submitters FOR EACH ROW EXECUTE PROCEDURE audit_submitter_modification();
 
--- TODO: user account thing
+CREATE TABLE user_additions (
+    id INTEGER NOT NULL -- REFERENCES members(member_id)
+) INHERITS (audit_log2);
+
+CREATE FUNCTION audit_user_addition() RETURNS trigger AS $audit_user_addition$
+    BEGIN
+        -- cannot be logged in during registration
+        INSERT INTO user_additions (userid, id) VALUES (NULL, NEW.member_id);
+
+        RETURN NEW;
+    END;
+$audit_user_addition$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_addition_trigger AFTER INSERT ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_addition();
+
+CREATE TABLE user_modifications (
+    id INTEGER NOT NULL, -- REFERENCES members(member_id)
+
+    -- fields updatable by user themself
+    display_name CITEXT NULL,
+    youtube_channel CITEXT NULL,
+
+    -- fields updatable by staff
+    permissions BIT(16) NULL
+) INHERITS (audit_log2);
+
+CREATE FUNCTION audit_user_modification() RETURNS trigger as $user_modification_trigger$
+    DECLARE
+        display_name_change CITEXT;
+        youtube_channel_change BOOLEAN;
+        permissions_change BIT(16);
+    BEGIN
+        IF (OLD.display_name <> NEW.display_name) THEN
+            display_name_change = OLD.display_name;
+        END IF;
+
+        IF (OLD.youtube_channel <> NEW.youtube_channel) THEN
+            youtube_channel_change = OLD.youtube_channel;
+        END IF;
+
+        IF (OLD.permissions <> NEW.permissions) THEN
+            permissions_change = OLD.permissions;
+        END IF;
+
+        INSERT INTO user_modifications (userid, id, display_name, youtube_channel, permissions)
+        (SELECT id, NEW.member_id, display_name_change, youtube_channel_change, permissions_change FROM active_user LIMIT 1);
+
+        RETURN NEW;
+    END;
+$user_modification_trigger$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_modification_trigger AFTER INSERT ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_modification();
+
+CREATE TABLE user_deletions (
+    id INTEGER NOT NULL -- REFERENCES members(member_id)
+) INHERITS (audit_log2);
+
+CREATE FUNCTION audit_user_deletion() RETURNS trigger AS $user_deletion_trigger$
+    BEGIN
+        INSERT INTO user_modifications (userid, id, display_name, youtube_channel, permissions)
+            (SELECT id, OLD.member_id, OLD.display_name, OLD.youtube_channel, OLD.permissions
+            FROM active_user LIMIT 1);
+
+        INSERT INTO user_deletions (userid, id)
+            (SELECT id, OLD.member_id FROM active_user LIMIT 1);
+
+        RETURN NULL;
+    END;
+$user_deletion_trigger$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_deletion_trigger AFTER INSERT ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_deletion();
