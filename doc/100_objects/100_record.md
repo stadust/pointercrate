@@ -9,7 +9,8 @@ Each record on the list is represented by a `Record` object. The following invar
 - Every combination of `demon`, `player` and `status` values is unique
 - Every `video` value is in one of the formats listed [here](/documentation/#video)
 
-The object only contains the submitter information if the object has been requested with sufficient permissions
+The object only contains the submitter information if the object has been requested with sufficient permissions.
+Requests without `ExtendedAccess` permissions can only retrieve approved records
 
 ## Embedded Form
 

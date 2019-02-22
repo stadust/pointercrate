@@ -1,5 +1,5 @@
 use super::{All, Model};
-use crate::schema::submitters;
+use crate::{model::record::EmbeddedRecord, schema::submitters};
 use diesel::{
     expression::bound::Bound,
     insert_into,
@@ -25,6 +25,13 @@ pub struct Submitter {
     pub id: i32,
     pub ip: IpNetwork,
     pub banned: bool,
+}
+
+#[derive(Debug, Serialize, Hash)]
+pub struct SubmitterWithRecords {
+    #[serde(flatten)]
+    submitter: Submitter,
+    records: Vec<EmbeddedRecord>,
 }
 
 impl Display for Submitter {

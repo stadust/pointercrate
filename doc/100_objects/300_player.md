@@ -6,7 +6,7 @@ Each player on the list is represented by a `Player` object. The following invar
 
 - If the player is banned, they do not have any approved or submitted records on the list
 
-Note that it is not possible to retrieve a player's demonlist score via the API.
+Note that it is not possible to retrieve a player's demonlist score via the API. You can calculate it yourself based on the `records` list
 
 ## Short/Embedded Form
 
@@ -57,7 +57,8 @@ only a shorter representation of each player is provided.
       "id": 12,
       "name": "Cadrega City",
       "progress": 100,
-      "status": "approved"
+      "status": "approved",
+      "player": "Pennutoh"
     }
   ],
   "id": 2,

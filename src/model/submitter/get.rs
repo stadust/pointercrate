@@ -1,4 +1,4 @@
-use super::Submitter;
+use super::{Submitter, SubmitterWithRecords};
 use crate::{
     error::PointercrateError,
     operation::{Get, GetPermissions},
@@ -34,6 +34,26 @@ impl Get<i32> for Submitter {
 }
 
 impl GetPermissions for Submitter {
+    fn permissions() -> PermissionsSet {
+        perms!(ListAdministrator)
+    }
+}
+
+impl<T> Get<T> for SubmitterWithRecords
+where
+    Submitter: Get<T>,
+{
+    fn get(t: T, connection: &PgConnection) -> Result<Self> {
+        let submitter = Submitter::get(t, connection)?;
+
+        Ok(SubmitterWithRecords {
+            records: Get::get(&submitter, connection)?,
+            submitter,
+        })
+    }
+}
+
+impl GetPermissions for SubmitterWithRecords {
     fn permissions() -> PermissionsSet {
         perms!(ListAdministrator)
     }

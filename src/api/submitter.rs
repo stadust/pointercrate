@@ -4,7 +4,7 @@ use super::PCResponder;
 use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
-    model::submitter::{PatchSubmitter, Submitter, SubmitterPagination},
+    model::submitter::{PatchSubmitter, Submitter, SubmitterPagination, SubmitterWithRecords},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
@@ -35,7 +35,12 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-get_handler_with_authorization!("/api/v1/submitters/[id]", i32, "Submitter ID", Submitter);
+get_handler_with_authorization!(
+    "/api/v1/submitters/[id]",
+    i32,
+    "Submitter ID",
+    SubmitterWithRecords
+);
 patch_handler_with_authorization!(
     "/api/v1/submitters/[id]/",
     i32,

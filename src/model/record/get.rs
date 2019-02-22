@@ -1,7 +1,7 @@
 use super::{EmbeddedRecord, Record};
 use crate::{
     error::PointercrateError,
-    model::{demon::Demon, record::RecordStatus, Model},
+    model::{demon::Demon, record::RecordStatus, submitter::Submitter, Model},
     operation::Get,
     schema::records,
     Result,
@@ -36,6 +36,14 @@ impl<'a> Get<&'a Demon> for Vec<EmbeddedRecord> {
         Ok(EmbeddedRecord::all()
             .filter(records::demon.eq(&demon.name))
             .filter(records::status_.eq(&RecordStatus::Approved))
+            .load(connection)?)
+    }
+}
+
+impl<'a> Get<&'a Submitter> for Vec<EmbeddedRecord> {
+    fn get(submitter: &'a Submitter, connection: &PgConnection) -> Result<Self> {
+        Ok(EmbeddedRecord::all()
+            .filter(records::submitter.eq(&submitter.id))
             .load(connection)?)
     }
 }

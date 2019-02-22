@@ -73,7 +73,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
   "name": "Cadrega City",
   "position": 34,
   "publisher": "Pennutoh",
-  "state": "approved",
+  "state": "MAIN",
   "video": "https://www.youtube.com/watch?v=cHEGAqOgddA"
 }
 ```
