@@ -6,12 +6,12 @@
 
 <div class='info-yellow'>
 <b>Acces Restrictions:</b><br>
-Access to this endpoint requires at least `EXTENDED_ACCESS` permissions.
+If the requested record is not approved, access to this endpoint requires at least `ExtendedAccess` permissions.
 </div>
 
 Retrieves detailed information about the record with id `record_id`
 
-### Request:
+### Request
 
 | Header        | Expected Value                                                                                                                                                                                              | Optional |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
@@ -44,10 +44,10 @@ Returned if the `If-None-Match` header is set, and the etag for the record objec
 | ----------- | ---------- | --------------------------------------- |
 | 404         | 40401      | No record with id `record_id` was found |
 
-### Example request:
+### Example request
 
 ```json
-GET {{api_base}}/records/2/
+GET /api/v1/records/2/
 Accept: application/json
 Authorization: Bearer <omitted>
 ```

@@ -14,16 +14,15 @@ on the additional request and response fields headers.
 
 Allows to retrieve a list of records.
 
-If you do not have `LIST_HELPER` or higher permissions, or don't send an access token along, you will only receive `APPROVED` records,
-and have the `submitter` field always set to `null`.
+Only users with `ExtendedAccess` or higher permissions can see non-approved records. Only users with `ListHelper` or higher can see the anonymized submitter ID (for all other users, the `submitter` field of the record objects will be set to `null`).
 
-### Filtering:
+### Filtering
 
 The result can be filtered by any of the following fields: `id`, `progress`, `status`, `player`, `demon`.
 
 Pagination is done via the `id` field.
 
-### Request:
+### Request
 
 | Header        | Expected Value                                             | Optional |
 | ------------- | ---------------------------------------------------------- | -------- |
@@ -39,7 +38,7 @@ Pagination is done via the `id` field.
 | ----- | ---------------------------------------------- | ----------------- |
 | -     | List[[Record](/documentation/objects/#record)] | A list of records |
 
-### Example request:
+### Example request
 
 ```json
 GET /api/v1/records/

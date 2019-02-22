@@ -6,7 +6,7 @@ use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
-        record::{PatchRecord, Record, RecordPagination, Submission},
+        record::{PatchRecord, Record, RecordPagination, RecordStatus, Submission},
         user::User,
         Submitter,
     },
@@ -50,7 +50,9 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
                         .as_array_mut()
                         .ok_or(PointercrateError::InternalServerError)?;
 
-                    if !user.has_any(&perms!(ListHelper or ListModerator or ListAdministrator)) {
+                    if !user.list_team_member() {
+                        records.retain(|record| record["status"] == "approved");
+
                         for record in records.iter_mut() {
                             record["submitter"] = serde_json::json!(null);
                         }
@@ -98,7 +100,7 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let state = req.state().clone();
     let auth = state.authorize(
         req.extensions_mut().remove().unwrap(),
-        perms!(ListHelper or ListModerator or ListAdministrator),
+        perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
     );
 
     let resource_id = Path::<i32>::extract(req)
@@ -111,19 +113,28 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
                 .get(resource_id.into_inner())
                 .and_then(|record: Record| {
                     auth.then(move |result| {
-                        if result.is_ok() {
-                            Ok(HttpResponse::Ok().json_with_etag(record))
-                        } else {
-                            let mut hasher = DefaultHasher::new();
-                            record.hash(&mut hasher);
+                        match result {
+                            // List mods see all records with their submitter information
+                            Ok(ref user) if user.list_team_member() =>
+                                Ok(HttpResponse::Ok().json_with_etag(record)),
 
-                            let mut value = serde_json::value::to_value(record)
-                                .map_err(PointercrateError::internal)?;
-                            value["submitter"] = serde_json::json!(null);
+                            // Unauthorized people cannot see non-approved records
+                            Err(_) if record.status() != RecordStatus::Approved =>
+                                Err(PointercrateError::MissingPermissions {required: perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator)}),
 
-                            Ok(HttpResponse::Ok()
-                                .header("ETag", hasher.finish().to_string())
-                                .json(value))
+                            // People with only ExtendedAccess, or unauthorized people (in case of an approved record) will see the record without the submitter info
+                            _ => {
+                                let mut hasher = DefaultHasher::new();
+                                record.hash(&mut hasher);
+
+                                let mut value = serde_json::value::to_value(record)
+                                    .map_err(PointercrateError::internal)?;
+                                value["submitter"] = serde_json::json!(null);
+
+                                Ok(HttpResponse::Ok()
+                                    .header("ETag", hasher.finish().to_string())
+                                    .json(value))
+                            },
                         }
                     })
                 })

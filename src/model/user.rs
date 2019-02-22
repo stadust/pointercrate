@@ -159,6 +159,14 @@ impl User {
         perms.perms.iter().any(|perm| own_perms & *perm == *perm)
     }
 
+    pub fn list_team_member(&self) -> bool {
+        self.has_any(&perms!(ListHelper or ListModerator or ListAdministrator))
+    }
+
+    pub fn extended_list_access(&self) -> bool {
+        self.has_any(&perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator))
+    }
+
     pub fn validate_name(name: &mut String) -> Result<()> {
         if name.len() < 3 || name != name.trim() {
             return Err(PointercrateError::InvalidUsername)

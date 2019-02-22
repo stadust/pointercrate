@@ -11,7 +11,7 @@ Access to this endpoint requires at least `LIST_HELPER` permissions.
 
 Modifies a given record.
 
-### Request:
+### Request
 
 | Header        | Expected Value                                                                             | Optional |
 | ------------- | ------------------------------------------------------------------------------------------ | -------- |
@@ -46,7 +46,7 @@ Returned when the `PATCH` operation did not make any changes.
 | ------ | --------------------------------- |
 | ETag   | base64 encoded hash of the record |
 
-### Errors:
+### Errors
 
 | Status code | Error code | Description                                                                                                     |
 | ----------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +60,7 @@ Returned when the `PATCH` operation did not make any changes.
 | 422         | 42216      | The update status value is not a valid member of the [RecordStatus](/documentation/objects/#record-status) enum |
 | 422         | 42221      | The record holder is banned and you tried to set the record status to `APPROVED`                                |
 
-### Example request:
+### Example request
 
 ```json
 PATCH /api/v1/records/2/
