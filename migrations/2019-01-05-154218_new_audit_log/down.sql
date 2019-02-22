@@ -40,6 +40,10 @@ DROP TRIGGER creator_deletion_trigger ON creators;
 DROP FUNCTION audit_creator_deletion();
 DROP TABLE creator_deletions;
 
+DROP TRIGGER submitter_modification_trigger ON creators;
+DROP FUNCTION audit_submitter_modification();
+DROP TABLE submitter_modifications;
+
 -- ...
 
 DROP TABLE audit_log2;

@@ -27,7 +27,7 @@ only a shorter representation of each player is provided.
 | name      | string                  | The player's name                             |
 | banned    | boolean                 | Value indicating whether the player is banned |
 | created   | List[[Demon](#demon)]   | A list of demons the player created           |
-| beaten    | _see below_             | A list of demons the player has beaten        |
+| beaten    | _see below_             | _see below_                                   |
 | records   | List[[Record](#record)] | A list of records the player has on the list  |
 | published | List[[Demon](#demon)]   | A list of demons the player has published     |
 | verified  | List[[Demon](#demon)]   | A list of demons the player has verified      |

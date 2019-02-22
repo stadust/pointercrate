@@ -273,4 +273,27 @@ $creator_deletion_trigger$ LANGUAGE plpgsql;
 
 CREATE TRIGGER creator_deletion_trigger AFTER DELETE ON creators FOR EACH ROW EXECUTE PROCEDURE audit_creator_deletion();
 
--- TODO: user account things, submitter handling
+CREATE TABLE submitter_modifications (
+    submitter INTEGER NOT NULL,
+
+    banned BOOLEAN NULL
+) INHERITS (audit_log2);
+
+CREATE FUNCTION audit_submitter_modification() RETURNS trigger as $submitter_modifications_trigger$
+    DECLARE
+        banned_change BOOLEAN;
+    BEGIN
+        IF (OLD.banned <> NEW.banned) THEN
+            banned_change = OLD.banned;
+        END IF;
+
+        INSERT INTO submitter_modifications (userid, id, banned)
+        (SELECT id, NEW.id, banned_change FROM active_user LIMIT 1);
+
+        RETURN NEW;
+    END;
+$submitter_modifications_trigger$ LANGUAGE plpgsql;
+
+CREATE TRIGGER submitter_modification_trigger AFTER UPDATE ON submitters FOR EACH ROW EXECUTE PROCEDURE audit_submitter_modification();
+
+-- TODO: user account thing

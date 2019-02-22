@@ -89,7 +89,6 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
     }
   ],
   "name": "Cadrega City",
-  "notes": "Pennutoh is amazing",
   "position": 34,
   "publisher": {
     "banned": false,
