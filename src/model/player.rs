@@ -9,8 +9,10 @@ use crate::{
     Result,
 };
 use diesel::{
-    expression::bound::Bound, insert_into, sql_types, ExpressionMethods, PgConnection, QueryDsl,
-    QueryResult, RunQueryDsl,
+    expression::bound::Bound,
+    insert_into,
+    sql_types::{self, BigInt, Double, Integer, Text},
+    ExpressionMethods, PgConnection, QueryDsl, QueryResult, RunQueryDsl,
 };
 use log::{info, trace};
 use serde_derive::Serialize;
@@ -31,6 +33,12 @@ pub struct Player {
     pub banned: bool,
 }
 
+impl Display for Player {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (ID: {})", self.name, self.id)
+    }
+}
+
 #[derive(Debug, Serialize, Hash)]
 pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
@@ -41,10 +49,19 @@ pub struct PlayerWithDemonsAndRecords {
     pub published: Vec<EmbeddedDemon>,
 }
 
-impl Display for Player {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (ID: {})", self.name, self.id)
-    }
+#[derive(Debug, QueryableByName)]
+pub struct RankedPlayer {
+    #[sql_type = "Integer"]
+    id: i32,
+
+    #[sql_type = "Text"]
+    name: String,
+
+    #[sql_type = "BigInt"]
+    rank: i64,
+
+    #[sql_type = "Double"]
+    score: f64,
 }
 
 #[derive(Insertable, Debug)]

@@ -1,10 +1,14 @@
 use super::{url_helper, Page};
 use crate::{
-    actor::{database::GetDemonlistOverview, http::GetDemon},
+    actor::{
+        database::{GetDemonlistOverview, GetPlayerRanking},
+        http::GetDemon,
+    },
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{
         demon::{Demon, DemonWithCreatorsAndRecords, PartialDemon},
+        player::RankedPlayer,
         user::User,
     },
     state::PointercrateState,
@@ -156,6 +160,7 @@ pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
     server_level: Option<PartialLevel<u64, Creator>>,
+    ranking: Vec<RankedPlayer>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
@@ -172,18 +177,23 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
                     state
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
-                            state
-                                .gdcf
-                                .send(GetDemon(data.demon.name.clone()))
-                                .map_err(PointercrateError::internal)
-                                .map(move |demon| {
-                                    Demonlist {
-                                        overview,
-                                        data,
-                                        server_level: demon,
-                                    }
-                                    .render(&req_clone)
-                                })
+                            state.database(GetPlayerRanking).and_then(move |ranking| {
+                                dbg!(&ranking);
+
+                                state
+                                    .gdcf
+                                    .send(GetDemon(data.demon.name.clone()))
+                                    .map_err(PointercrateError::internal)
+                                    .map(move |demon| {
+                                        Demonlist {
+                                            overview,
+                                            data,
+                                            server_level: demon,
+                                            ranking,
+                                        }
+                                        .render(&req_clone)
+                                    })
+                            })
                         })
                 })
         })
