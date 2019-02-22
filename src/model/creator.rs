@@ -13,7 +13,7 @@ mod post;
 pub use self::post::PostCreator;
 
 #[derive(Debug, Serialize)]
-pub(crate) struct Creators(pub(crate) Vec<Player>);
+pub struct Creators(pub Vec<Player>);
 
 #[derive(Debug, Queryable, Hash)]
 pub struct Creator {

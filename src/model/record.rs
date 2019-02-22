@@ -119,6 +119,7 @@ pub struct EmbeddedRecord {
     pub progress: i16,
     pub status: RecordStatus,
     pub demon: String,
+    pub player: String,
 }
 
 impl Display for Record {
@@ -294,16 +295,30 @@ impl Model for Record {
 }
 
 impl Model for EmbeddedRecord {
-    type From = records::table;
+    #[allow(clippy::type_complexity)]
+    type From = diesel::query_source::joins::JoinOn<
+        diesel::query_source::joins::Join<
+            records::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        >,
+        diesel::expression::operators::Eq<records::player, players::id>,
+    >;
     type Selection = (
         records::id,
         records::progress,
         records::status_,
         records::demon,
+        players::name,
     );
 
     fn from() -> Self::From {
-        records::table
+        diesel::query_source::joins::Join::new(
+            records::table,
+            players::table,
+            diesel::query_source::joins::Inner,
+        )
+        .on(records::player.eq(players::id))
     }
 
     fn selection() -> Self::Selection {

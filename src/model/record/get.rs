@@ -1,5 +1,11 @@
 use super::{EmbeddedRecord, Record};
-use crate::{error::PointercrateError, model::Model, operation::Get, schema::records, Result};
+use crate::{
+    error::PointercrateError,
+    model::{demon::Demon, record::RecordStatus, Model},
+    operation::Get,
+    schema::records,
+    Result,
+};
 use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl Get<i32> for Record {
@@ -19,7 +25,17 @@ impl Get<i32> for Record {
 impl Get<i32> for Vec<EmbeddedRecord> {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
         Ok(EmbeddedRecord::all()
-            .filter(records::id.eq(&id))
+            .filter(records::player.eq(&id))
+            .filter(records::status_.eq(&RecordStatus::Approved))
+            .load(connection)?)
+    }
+}
+
+impl<'a> Get<&'a Demon> for Vec<EmbeddedRecord> {
+    fn get(demon: &'a Demon, connection: &PgConnection) -> Result<Self> {
+        Ok(EmbeddedRecord::all()
+            .filter(records::demon.eq(&demon.name))
+            .filter(records::status_.eq(&RecordStatus::Approved))
             .load(connection)?)
     }
 }

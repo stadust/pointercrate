@@ -6,7 +6,10 @@ use crate::{
     middleware::cond::HttpResponseBuilderExt,
     model::{
         creator::{Creator, PostCreator},
-        demon::{Demon, DemonPagination, DemonWithCreators, PartialDemon, PatchDemon, PostDemon},
+        demon::{
+            Demon, DemonPagination, DemonWithCreatorsAndRecords, PartialDemon, PatchDemon,
+            PostDemon,
+        },
     },
     state::PointercrateState,
 };
@@ -39,7 +42,7 @@ get_handler!(
     "/api/v1/demons/[position]/",
     i16,
     "Demon position",
-    DemonWithCreators
+    DemonWithCreatorsAndRecords
 );
 patch_handler_with_authorization!(
     "/api/v1/demons/[position]/",

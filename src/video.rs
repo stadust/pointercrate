@@ -136,3 +136,14 @@ pub fn embed(video: &str) -> String {
 
     format!("https://www.youtube.com/embed/{}", video_id)
 }
+
+pub fn host(video: &str) -> &str {
+    match Url::parse(video).unwrap().domain().unwrap() {
+        "www.youtube.com" => "YouTube",
+        "www.twitch.com" => "Twitch",
+        "everyplay.com" => "Everyplay",
+        "www.bilibili.com" => "Bilibili",
+        "vimeo.com" => "Vimeo",
+        _ => unreachable!(),
+    }
+}

@@ -4,7 +4,7 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{
-        demon::{Demon, PartialDemon},
+        demon::{Demon, DemonWithCreatorsAndRecords, PartialDemon},
         user::User,
     },
     state::PointercrateState,
@@ -12,6 +12,7 @@ use crate::{
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
 use gdcf::model::{Creator, PartialLevel};
+use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
 
@@ -70,11 +71,11 @@ impl Page for DemonlistOverview {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec![]
+        vec!["js/demonlist.v2.1.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
-        vec!["css/demonlist.v2.1.css"]
+        vec!["css/demonlist.v2.1.css", "css/sidebar.css"]
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
@@ -85,15 +86,7 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center#container {
                 div.left {
-                    div.panel.fade {
-                        div.underlined {
-                            h1 {"Demonlist"}
-                        }
-                        p {
-                            "This page provides an view of the entire demonlist. To get further information, like the list of records or the level password, click on a demons name to get to its page! Note that this page can be slow to load due to the abundance of videos"
-                        }
-                    }
-                    (rules_panel())
+                    (submission_panel())
                     @for demon in &self.demon_overview {
                         div.panel.fade.js-scroll-anim data-anim="fade" {
                             div.underlined {
@@ -104,12 +97,19 @@ impl Page for DemonlistOverview {
                                 }
                             }
                             @if let Some(ref video) = demon.video {
-                                iframe."ratio-16-9" style="width: 90%; margin: 15px 5% 0px" src = (video::embed(video)) {}
+                                iframe."ratio-16-9"."js-delay-attr" style="width: 90%; margin: 15px 5% 0px" data-attr = "src" data-attr-value = (video::embed(video)) {}
                             }
                         }
                     }
                 }
-                (sidebar(&self.admins, &self.mods, &self.helpers))
+
+                div.right {
+                    (team_panel(&self.admins, &self.mods, &self.helpers))
+                    (rules_panel())
+                    (submit_panel())
+                    (stats_viewer_panel())
+                    (discord_panel())
+                }
             }
 
         }
@@ -154,7 +154,7 @@ impl Page for DemonlistOverview {
 #[derive(Debug)]
 pub struct Demonlist {
     overview: DemonlistOverview,
-    current_demon: Demon,
+    data: DemonWithCreatorsAndRecords,
     server_level: Option<PartialLevel<u64, Creator>>,
 }
 
@@ -168,18 +168,18 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
         .and_then(move |position| {
             state
                 .get(position.into_inner())
-                .and_then(move |current_demon: Demon| {
+                .and_then(move |data: DemonWithCreatorsAndRecords| {
                     state
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
                             state
                                 .gdcf
-                                .send(GetDemon(current_demon.name.clone()))
+                                .send(GetDemon(data.demon.name.clone()))
                                 .map_err(PointercrateError::internal)
                                 .map(move |demon| {
                                     Demonlist {
                                         overview,
-                                        current_demon,
+                                        data,
                                         server_level: demon,
                                     }
                                     .render(&req_clone)
@@ -194,7 +194,7 @@ impl Page for Demonlist {
     fn title(&self) -> String {
         format!(
             "#{} - {} - Geometry Dash Demonlist",
-            self.current_demon.position, self.current_demon.name
+            self.data.demon.position, self.data.demon.name
         )
     }
 
@@ -208,22 +208,134 @@ impl Page for Demonlist {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec![]
+        vec!["js/demonlist.v2.1.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
-        vec!["css/demonlist.v2.1.css"]
+        vec!["css/demonlist.v2.1.css", "css/sidebar.css"]
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
-        let dropdowns = dropdowns(
-            req,
-            &self.overview.demon_overview,
-            Some(&self.current_demon),
-        );
+        let dropdowns = dropdowns(req, &self.overview.demon_overview, Some(&self.data.demon));
 
         html! {
             (dropdowns)
+
+            div.flex.m-center#container {
+                div.left {
+                    (submission_panel())
+                    div.panel.fade.js-scroll-anim data-anim = "fade" {
+                        div.underlined {
+                            h1 {
+                                (self.data.demon.name)
+                            }
+                            h3 {
+                                @if self.data.creators.0.len() > 3 {
+                                    "by " (self.data.creators.0[0].name) " and "
+                                    div.tooltip {
+                                        "more"
+                                        div.tooltiptext.fade {
+                                            (self.data.creators.0.iter().map(|player| &player.name).join_with(", ").to_string())
+                                        }
+                                    }
+                                    ", " (self.data.short_headline())
+                                }
+                                @else {
+                                    (self.data.headline())
+                                }
+                            }
+                        }
+                        @if let Some(ref level) = self.server_level {
+                            @if let Some(ref description) = level.description {
+                                div.underlined.pad {
+                                    q {
+                                        (description)
+                                    }
+                                }
+                            }
+                        }
+                        @if let Some(ref video) = self.data.demon.video {
+                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5% 0px" data-attr = "src" data-attr-value = (video::embed(video)) {"Verification Video"}
+                        }
+                    }
+                    (rules_panel())
+                    @if !self.data.records.is_empty() || self.data.demon.position <= *EXTENDED_LIST_SIZE {
+                        div.records.panel.fade.js-scroll-anim data-anim = "fade" {
+                            div.underlined.pad {
+                                h2 {
+                                    "Records"
+                                }
+                                @if self.data.demon.position <= *LIST_SIZE {
+                                    h3 {
+                                        (self.data.demon.requirement) "% or better required to qualify"
+                                    }
+                                }
+                                @else if self.data.demon.position <= *EXTENDED_LIST_SIZE {
+                                    h3 {
+                                        "100% required to qualify"
+                                    }
+                                }
+                                @if !self.data.records.is_empty() {
+                                    h4 {
+                                        (self.data.records.len())
+                                        " records registered, out of which "
+                                        (self.data.records.iter().filter(|record| record.progress == 100).count())
+                                        " are 100%"
+                                    }
+                                }
+                            }
+                            @if self.data.records.is_empty() {
+                                h3 {
+                                    @if self.data.demon.position > *EXTENDED_LIST_SIZE {
+                                        "No records!"
+                                    }
+                                    @else {
+                                        "No records yet! Be the first to achieve one!"
+                                    }
+                                }
+                            }
+                            @else {
+                                table {
+                                    tbody {
+                                        tr {
+                                            th {
+                                                "Record Holder"
+                                            }
+                                            th {
+                                                "Progress"
+                                            }
+                                            th.video-link {
+                                                "Video Proof"
+                                            }
+                                        }
+                                        @for record in &self.data.records {
+                                            tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
+                                                td {
+                                                    (record.player)
+                                                }
+                                                td {
+                                                    (record.progress)
+                                                }
+                                                td.video-link {
+                                                    @if let Some(ref video) = self.data.demon.video {
+                                                        (video::host(video))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                div.right {
+                    (team_panel(&self.overview.admins, &self.overview.mods, &self.overview.helpers))
+                    (submit_panel())
+                    (stats_viewer_panel())
+                    (discord_panel())
+                }
+            }
         }
     }
 
@@ -265,7 +377,7 @@ impl Page for Demonlist {
                     "url": "https://pointercrate.com/demonlist/{0}/"
                 }}
                 </script>
-            "#, self.current_demon.position, self.current_demon.name, self.description())))
+            "#, self.data.demon.position, self.data.demon.name, self.description())))
         }]
     }
 }
@@ -310,14 +422,18 @@ fn dropdown(
                 a href = (url_helper::demon(req, demon.position)) {
                     {"#" (demon.position) " - " (demon.name)}
                     br ;
-                    (demon.publisher)
+                    i {
+                        (demon.publisher)
+                    }
                 }
             }
             @else {
                 a href = (url_helper::demon(req, demon.position)) {
                     {(demon.name)}
                     br ;
-                    (demon.publisher)
+                    i {
+                        (demon.publisher)
+                    }
                 }
             }
         }
@@ -355,13 +471,57 @@ fn dropdown(
     }
 }
 
-fn sidebar(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
+fn submission_panel() -> Markup {
     html! {
-        div.right {
-            (team_panel(admins, mods, helpers))
-            (submit_panel())
-            (stats_viewer_panel())
-            (discord_panel())
+        div.panel.fade.closable#submitter style = "display: none" {
+            span.plus.cross.hover {}
+            div.underlined {
+                h2 {"Record Submission"}
+            }
+            i {
+                p#submission-output style = "margin: 5px auto; display: none" {}
+            }
+            div.flex {
+                form#submission-form onsubmit = "return submitter.submit();" {
+                    h3 {
+                        "Demon:"
+                    }
+                    p {
+                        "The demon the record was made on. Only demons in the top " (EXTENDED_LIST_SIZE) " are accepted. This excludes legacy demons!"
+                    }
+                    input#id_demon type = "text" name = "demon" required="" placeholder = "e. g. 'Bloodbath', 'Yatagarasu'" ;
+                    h3 {
+                        "Holder:"
+                    }
+                    p {
+                        "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs!"
+                    }
+                    input#id_player type = "text" name = "demon" required="" placeholder="e. g. 'Slypp, 'Krazyman50'" maxlength="50" ;
+                    h3 {
+                        "Progress:"
+                    }
+                    p {
+                        "The progress made as percentage. Only values greater than the demons record requirement and smaller than or equal to 100 are accepted!"
+                    }
+                    input#id_progress type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100" ;
+                    h3 {
+                        "Video: "
+                    }
+                    p {
+                        "A proof video of the legitimancy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream."
+                        br {}
+
+                        i { "Note: " }
+                        "Please pay attention to only submit well-formed URLs!"
+                    }
+                    input#id_video type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
+                    div style ="font-weight: bold;font-size: 90%;text-align: left;margin-top: 15px;" {
+                        input#id_check type = "checkbox" ;
+                        "Only check for potential errors, do not submit the record (Will not count towards the ratelimit)"
+                    }
+                    input.button.blue.hover.fade.slightly-round type = "submit" style = "margin: 15px auto 0px;";
+                }
+            }
         }
     }
 }
@@ -511,8 +671,8 @@ fn stats_viewer_panel() -> Markup {
 
 fn discord_panel() -> Markup {
     html! {
-        div.panel.fade.js-scroll-anim data-anim = "fade" {
-            iframe#discord style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" {}
+        div.panel.fade.js-scroll-anim#discord data-anim = "fade" {
+            iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
                 "Join the official demonlist discord server, where you can get in touch with the demonlist team!"
             }

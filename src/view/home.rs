@@ -1,4 +1,4 @@
-use super::{url_helper, Page};
+use super::Page;
 use crate::{model::user::User, permissions::Permissions, state::PointercrateState};
 use actix_web::{AsyncResponder, HttpRequest, Responder};
 use maud::{html, Markup, PreEscaped};

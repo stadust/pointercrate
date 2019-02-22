@@ -1,5 +1,10 @@
-use super::{Demon, DemonWithCreators};
-use crate::{error::PointercrateError, model::creator::Creators, operation::Get, Result};
+use super::{Demon, DemonWithCreatorsAndRecords};
+use crate::{
+    error::PointercrateError,
+    model::{creator::Creators, record::EmbeddedRecord},
+    operation::Get,
+    Result,
+};
 use diesel::{result::Error, PgConnection, RunQueryDsl};
 
 impl<'a> Get<&'a str> for Demon {
@@ -30,14 +35,19 @@ impl Get<i16> for Demon {
     }
 }
 
-impl<T> Get<T> for DemonWithCreators
+impl<T> Get<T> for DemonWithCreatorsAndRecords
 where
     Demon: Get<T>,
 {
     fn get(t: T, connection: &PgConnection) -> Result<Self> {
         let demon = Demon::get(t, connection)?;
         let creators = Creators::get(&demon.name, connection)?;
+        let records = Vec::<EmbeddedRecord>::get(&demon, connection)?;
 
-        Ok(DemonWithCreators { demon, creators })
+        Ok(DemonWithCreatorsAndRecords {
+            demon,
+            creators,
+            records,
+        })
     }
 }

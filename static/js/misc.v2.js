@@ -20,11 +20,11 @@ $(window).on("load resize", function() {
       var dest = src.data("destination");
       var destination = $("#" + dest);
 
+      if (src.data("reveal")) destination.fadeIn(1000);
+
       if (dest !== undefined)
         scrollTarget.animate({ scrollTop: destination.offset().top - 60 }, 400);
       else scrollTarget.animate({ scrollTop: 0 }, 400);
-
-      if (src.data("reveal")) destination.fadeIn(1000);
     });
   });
 
@@ -103,5 +103,13 @@ $(window).on("load resize", function() {
   });
   $(".ratio-4-3").each(function() {
     forceRatio(this, 4, 3);
+  });
+
+  $(".js-delay-attr").each((i, elem) => {
+    var elem = $(elem);
+    var attr = elem.data("attr");
+    var value = elem.data("attr-value");
+
+    elem.attr(attr, value);
   });
 });

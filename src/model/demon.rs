@@ -2,7 +2,7 @@ use super::{All, Model};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{creator::Creators, player::Player},
+    model::{creator::Creators, player::Player, record::EmbeddedRecord},
     operation::Get,
     schema::{demon_publisher_verifier_join, demons, players},
     Result,
@@ -11,6 +11,7 @@ use diesel::{
     dsl::max, expression::bound::Bound, pg::Pg, sql_types, BoolExpressionMethods, Expression,
     ExpressionMethods, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
 };
+use joinery::Joinable;
 use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
@@ -286,19 +287,74 @@ impl Model for EmbeddedDemon {
 }
 
 #[derive(Debug, Serialize)]
-pub struct DemonWithCreators {
+pub struct DemonWithCreatorsAndRecords {
     #[serde(flatten)]
-    demon: Demon,
-
-    creators: Creators,
+    pub demon: Demon,
+    pub creators: Creators,
+    pub records: Vec<EmbeddedRecord>,
 }
 
-impl Hash for DemonWithCreators {
+impl Hash for DemonWithCreatorsAndRecords {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // We only hash the demon here, because the creators don't matter for the ETag value - they
         // are modified through a different endpoint than the demon objects themselves, and
         // conflicting access to them is impossible anyway
         self.demon.hash(state)
+    }
+}
+
+impl DemonWithCreatorsAndRecords {
+    pub fn headline(&self) -> String {
+        let publisher = &self.demon.publisher.name;
+        let verifier = &self.demon.verifier.name;
+
+        let creator = match &self.creators.0[..] {
+            [] => "Unknown".to_string(),
+            [creator] => creator.name.to_string(),
+            many => {
+                let mut iter = many.iter();
+                let fst = iter.next().unwrap();
+
+                format!(
+                    "{} and {}",
+                    iter.map(|player| &player.name).join_with(", ").to_string(),
+                    fst.name
+                )
+            },
+        };
+
+        // no comparison between &String and String, so just make it a reference
+        let creator = &creator;
+
+        if creator == verifier && creator == publisher {
+            format!("by {}", creator)
+        } else if creator != verifier && verifier == publisher {
+            format!("by {}, verified and published by {}", creator, verifier)
+        } else if creator != verifier && creator != publisher && publisher != verifier {
+            format!(
+                "by {}, verifier by {}, published by {}",
+                creator, verifier, publisher
+            )
+        } else if creator == verifier && creator != publisher {
+            format!("by {}, published by {}", creator, publisher)
+        } else if creator == publisher && creator != verifier {
+            format!("by {}, verified by {}", creator, verifier)
+        } else {
+            "If you're seeing this, file a bug report".to_string()
+        }
+    }
+
+    pub fn short_headline(&self) -> String {
+        let demon = &self.demon;
+
+        if demon.publisher == demon.verifier {
+            format!("verified and published by {}", demon.verifier.name)
+        } else {
+            format!(
+                "published by {}, verified by {}",
+                demon.publisher.name, demon.verifier.name
+            )
+        }
     }
 }
 

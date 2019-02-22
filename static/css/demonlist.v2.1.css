@@ -58,8 +58,10 @@ tr:nth-child(even) {
 }
 
 @media (max-width: 1023px) {
-  #rules {
+  #rules,
+  #discord {
     order: -1;
+    width: 100%;
   }
 
   #editors,

@@ -45,6 +45,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | verifier    | [Player](#player)        | The demon's verifier                                                    |
 | publisher   | [Player](#player)        | The demon's publisher                                                   |
 | creators    | List[[Player](#player)]  | The demon's creators                                                    |
+| records     | List[[Record](#record)]  | All approved records for this demon                                     |
 
 ## Enum ListState{id=list-state}
 
@@ -95,6 +96,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
     "id": 2,
     "name": "Pennutoh"
   },
+  "records": [],
   "requirement": 54,
   "state": "MAIN",
   "verifier": {

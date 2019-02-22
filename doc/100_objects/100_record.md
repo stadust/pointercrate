@@ -21,6 +21,7 @@ The embedded form of record objects is returned if a record object is part of an
 | progress | integer                        | The progress achieved by the record's holder |
 | status   | [RecordStatus](#record-status) | The record's status.                         |
 | demon    | String                         | The name of the demon the record was made on |
+| player   | String                         | The name of the record holder                |
 
 ## Long Form
 
@@ -53,7 +54,8 @@ The long form of record objects is returned by [`GET /records/`](/documentation/
   "id": 1,
   "progress": 100,
   "demon": "Cadrega City",
-  "status": "approved"
+  "status": "approved",
+  "player": "Aquatias"
 }
 ```
 
