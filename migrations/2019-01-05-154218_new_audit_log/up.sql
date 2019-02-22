@@ -12,7 +12,7 @@
 -- python codebase, we can ofc modify the demons table)
 
 -- Global fallback table in case no temporary 'active_user' table was created in the current session
-CREATE TABLE active_user (id INTEGER);
+CREATE TABLE active_user (id INTEGER PRIMARY KEY); -- primary key required because diesel migrations break otherwise
 
 -- TODO: generate a dummy member with ID 0
 INSERT INTO active_user VALUES (0);

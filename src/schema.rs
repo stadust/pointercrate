@@ -1,22 +1,4 @@
 table! {
-    use diesel::sql_types::*;
-    use crate::model::audit::Audit_operation;
-
-    audit_log (id) {
-        id -> Int4,
-        operation -> Audit_operation,
-        target -> Nullable<Varchar>,
-        old_value -> Nullable<Varchar>,
-        new_value -> Nullable<Varchar>,
-        time_ -> Timestamp,
-        list_mod -> Nullable<Text>,
-        demon -> Nullable<Text>,
-        record -> Nullable<Int4>,
-        player -> Nullable<Int4>,
-    }
-}
-
-table! {
     creators (demon, creator) {
         demon -> Text,
         creator -> Int4,
@@ -93,9 +75,6 @@ table! {
     }
 }
 
-joinable!(audit_log -> demons (demon));
-joinable!(audit_log -> players (player));
-joinable!(audit_log -> records (record));
 joinable!(creators -> demons (demon));
 joinable!(creators -> players (creator));
 joinable!(records -> demons (demon));
@@ -103,7 +82,6 @@ joinable!(records -> players (player));
 joinable!(records -> submitters (submitter));
 
 allow_tables_to_appear_in_same_query!(
-    audit_log,
     creators,
     demons,
     members,
