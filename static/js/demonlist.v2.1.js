@@ -176,9 +176,9 @@ function formatDemon(demon) {
   if (demon.position < window.list_length) {
     return "<b>" + demon.name + "</b>";
   } else if (demon.position < window.extended_list_length) {
-    return "<i>" + demon.name + "</i>";
-  } else {
     return demon.name;
+  } else {
+    return "<i>" + demon.name + "</i>";
   }
 }
 

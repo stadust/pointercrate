@@ -335,7 +335,7 @@ impl Page for Demonlist {
                                                     (record.player.name)
                                                 }
                                                 td {
-                                                    (record.progress)
+                                                    (record.progress) "%"
                                                 }
                                                 td.video-link {
                                                     @if let Some(ref video) = self.data.demon.video {
