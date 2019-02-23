@@ -86,6 +86,7 @@ class StatsViewer {
     this._amountLegacy = this.domElement.find("#amount-legacy");
     this._current = this.domElement.find("#name");
     this._error = this.domElement.find("#error-output");
+    this._progress = this.domElement.find("#progress");
     this._content = this.domElement.find("#stats-data");
 
     $("#players li").click(e => this.updateView(e));
@@ -113,16 +114,12 @@ class StatsViewer {
         this._rank.text(selected.data("rank"));
         this._score.text(selected.find("i").text());
 
-        this.created = json.created;
-        this.published = json.published;
-        this.beaten = json.beaten;
-        this.verified = json.verified;
-
-        var hardest = json.verified
-          .concat(json.beaten)
-          .reduce((acc, next) => (acc.position > next.position ? next : acc));
-
-        this._hardest.text(hardest.name || "None");
+        this.setFields(
+          json.created,
+          json.published,
+          json.verified,
+          json.records
+        );
 
         this._error.hide(100);
         this._content.show(100);
@@ -130,42 +127,43 @@ class StatsViewer {
     });
   }
 
-  formatDemons(demons) {
-    let formatted = demons.map(function(demon) {
-      switch (demon.state) {
-        case "LEGACY":
-          return "<i>" + demon.name + "</i>";
-        case "MAIN":
-          return "<b>" + demon.name + "</b>";
-        default:
-          return demon.name;
-      }
-    });
+  setFields(created, published, verified, records) {
+    this._created.html(formatDemons(created) || "None");
+    this._published.html(formatDemons(published) || "None");
+    this._verified.html(formatDemons(verified) || "None");
 
-    return formatted.join(", ");
-  }
+    let beaten = records
+      .filter(record => record.progress == 100)
+      .map(record => record.demon);
 
-  set created(array) {
-    this._created.html(this.formatDemons(array) || "None");
-  }
+    let legacy = beaten.filter(
+      demon => demon.position > window.extended_list_length
+    ).length;
+    let extended = beaten.filter(
+      demon =>
+        demon.position > window.list_length &&
+        demon.position <= window.extended_list_length
+    ).length;
 
-  set published(array) {
-    this._published.html(this.formatDemons(array) || "None");
-  }
-
-  set beaten(array) {
-    let legacy = array.filter(demon => demon.state == "LEGACY").length;
-    let extended = array.filter(demon => demon.state == "EXTENDED").length;
-
-    this._beaten.html(this.formatDemons(array) || "None");
+    this._beaten.html(formatDemons(beaten) || "None");
     this._amountBeaten.text(
-      array.length - legacy - extended + " ( + " + extended + " )"
+      beaten.length - legacy - extended + " ( + " + extended + " )"
     );
     this._amountLegacy.text(legacy);
-  }
 
-  set verified(array) {
-    this._verified.html(this.formatDemons(array) || "None");
+    var hardest = verified
+      .concat(beaten)
+      .reduce((acc, next) => (acc.position > next.position ? next : acc));
+
+    this._hardest.text(hardest.name || "None");
+
+    var non100Records = records
+      .filter(record => record.progress != 100)
+      .sort((r1, r2) => r1.progress - r2.progress)
+      .map(record => formatDemon(record.demon) + " (" + record.progress + "%)")
+      .join(", ");
+
+    this._progress.html(non100Records || "None");
   }
 }
 
@@ -173,3 +171,17 @@ $(document).ready(function() {
   window.statsViewer = new StatsViewer();
   window.submitter = new Submitter();
 });
+
+function formatDemon(demon) {
+  if (demon.position < window.list_length) {
+    return "<b>" + demon.name + "</b>";
+  } else if (demon.position < window.extended_list_length) {
+    return "<i>" + demon.name + "</i>";
+  } else {
+    return demon.name;
+  }
+}
+
+function formatDemons(demons) {
+  return demons.map(formatDemon).join(", ");
+}

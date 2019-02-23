@@ -52,16 +52,16 @@ pub struct PlayerWithDemonsAndRecords {
 #[derive(Debug, QueryableByName)]
 pub struct RankedPlayer {
     #[sql_type = "Integer"]
-    id: i32,
+    pub id: i32,
 
     #[sql_type = "Text"]
-    name: String,
+    pub name: String,
 
     #[sql_type = "BigInt"]
-    rank: i64,
+    pub rank: i64,
 
     #[sql_type = "Double"]
-    score: f64,
+    pub score: f64,
 }
 
 #[derive(Insertable, Debug)]

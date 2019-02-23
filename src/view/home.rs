@@ -140,10 +140,20 @@ impl Page for Homepage {
                                 "2019-??-??: Rustification!"
                             }
                             p {
-                                "The entire website has been rewritten in Rust! Various minor bugs that were noticed while porting over from the old python backend were fixed and performance has greatly improved. Other than that, it's mostly an internal change."
+                                "The entire website has been rewritten in Rust! Various minor bugs that were noticed while porting over from the old python backend were fixed and performance has greatly improved. Other than that, it's mostly an internal change, so the list of (visible) changes is rather short:"
                             }
-                            p {
-                                "Additionally, I have, yet again, redesigned the home page! Most notably, it has been merged it with the former about page, as both were very under-utilized."
+                            ul {
+                                li {
+                                    "I have (yet again) redesigned the home page! Most notably, it has been merged it with the former about page, as both were very under-utilized."
+                                }
+                                li {
+                                    "The demonlist now has an overview page over"
+                                    a href = "/demonlist/" { " here. " }
+                                    "which shows an actual list (revolutionary, I know) of all demons"
+                                }
+                                li {
+                                    "The API has been majorly overhauled. " i{"Most"} " changes should be backward compatible, since I just added a ton of fields, but there are some other changes as well, so be sure to check the documentation again. Mainly, there is no `state` parameter for demons anymore and `player.beaten` has become the more general `player.records`"
+                                }
                             }
                             p {
                                 "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."

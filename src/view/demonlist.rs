@@ -120,7 +120,8 @@ impl Page for DemonlistOverview {
     }
 
     fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
-        vec![html! {
+        vec![
+            html! {
             (PreEscaped(r#"
                 <script type="application/ld+json">
                 {{
@@ -151,7 +152,16 @@ impl Page for DemonlistOverview {
                 }}
                 </script>
             "#))
-        }]
+            },
+            html! {
+                (PreEscaped(format!("
+                    <script>
+                        window.list_length = {0};
+                        window.extended_list_length = {1}
+                    </script>", *LIST_SIZE, *EXTENDED_LIST_SIZE)
+                ))
+            },
+        ]
     }
 }
 
@@ -234,6 +244,7 @@ impl Page for Demonlist {
             div.flex.m-center#container {
                 div.left {
                     (submission_panel())
+                    (stats_viewer(&self.ranking))
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 {
@@ -350,45 +361,55 @@ impl Page for Demonlist {
     }
 
     fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
-        vec![html! {
-            (PreEscaped(format!(r#"
-                <script type="application/ld+json">
-                {{
-                    "@context": "http://schema.org",
-                    "@type": "WebPage",
-                    "breadcrumb": {{
-                        "@type": "BreadcrumbList",
-                        "itemListElement": [{{
-                                "@type": "ListItem",
-                                "position": 1,
-                                "item": {{
-                                    "@id": "https://pointercrate.com/",
-                                    "name": "pointercrate"
+        vec![
+            html! {
+                (PreEscaped(format!(r#"
+                    <script type="application/ld+json">
+                    {{
+                        "@context": "http://schema.org",
+                        "@type": "WebPage",
+                        "breadcrumb": {{
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [{{
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "item": {{
+                                        "@id": "https://pointercrate.com/",
+                                        "name": "pointercrate"
+                                    }}
+                                }},{{
+                                    "@type": "ListItem",
+                                    "position": 2,
+                                    "item": {{
+                                        "@id": "https://pointercrate.com/demonlist/",
+                                        "name": "demonlist"
+                                    }}
+                                }},{{
+                                    "@type": "ListItem",
+                                    "position": 3,
+                                    "item": {{
+                                        "@id": "https://pointercrate.com/demonlist/{0}/",
+                                        "name": "{1}"
+                                    }}
                                 }}
-                            }},{{
-                                "@type": "ListItem",
-                                "position": 2,
-                                "item": {{
-                                    "@id": "https://pointercrate.com/demonlist/",
-                                    "name": "demonlist"
-                                }}
-                            }},{{
-                                "@type": "ListItem",
-                                "position": 3,
-                                "item": {{
-                                    "@id": "https://pointercrate.com/demonlist/{0}/",
-                                    "name": "{1}"
-                                }}
-                            }}
-                        ]
-                    }},
-                    "name": "\#{0} - {1}",
-                    "description": {2},
-                    "url": "https://pointercrate.com/demonlist/{0}/"
-                }}
-                </script>
-            "#, self.data.demon.position, self.data.demon.name, self.description())))
-        }]
+                            ]
+                        }},
+                        "name": "\#{0} - {1}",
+                        "description": {2},
+                        "url": "https://pointercrate.com/demonlist/{0}/"
+                    }}
+                    </script>
+                "#, self.data.demon.position, self.data.demon.name, self.description())))
+            },
+            html! {
+                (PreEscaped(format!("
+                    <script>
+                        window.list_length = {0};
+                        window.extended_list_length = {1}
+                    </script>", *LIST_SIZE, *EXTENDED_LIST_SIZE
+                )))
+            },
+        ]
     }
 }
 
@@ -530,6 +551,125 @@ fn submission_panel() -> Markup {
                         "Only check for potential errors, do not submit the record (Will not count towards the ratelimit)"
                     }
                     input.button.blue.hover.fade.slightly-round type = "submit" style = "margin: 15px auto 0px;";
+                }
+            }
+        }
+    }
+}
+
+fn stats_viewer(players: &[RankedPlayer]) -> Markup {
+    html! {
+        div.panel.fade.closable#statsviewer style = "display:none" {
+            span.plus.cross.hover {}
+            h2.underlined.pad {
+                "Stats Viewer"
+            }
+            div.flex#stats-viewer-cont {
+                div.flex#player-selection style="flex-direction: column"{
+                    div.search.small.seperated style="flex-grow:0" {
+                        input placeholder = "Filter..." ;
+                    }
+                    div style="position:relative; margin: 0px 10px 10px; min-height: 400px" {
+                        ul#players style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {
+                            @for player in players {
+                                li.white.hover data-id = (player.id) data-rank = (player.rank) {
+                                    (player.name)
+                                    i {
+                                        (format!("{:.2}", player.score))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                div {
+                    p#error-output style = "text-align: center" {
+                        "Click on a player's name on the left to get started!"
+                    }
+                    div#stats-data style = "display:none" {
+                        div.flex.col {
+                            div.container.flex.space {
+                                span {
+                                    b {
+                                        "List demons completed:"
+                                    }
+                                    br;
+                                    span#amount-beaten {}
+                                }
+                                span {
+                                    b {
+                                        "Legacy demons completed:"
+                                    }
+                                    br;
+                                    span#amount-legacy {}
+                                }
+                                span {
+                                    b {
+                                        "Demonlist score:"
+                                    }
+                                    br;
+                                    span#score {}
+                                }
+                            }
+                            div.container.flex.space {
+                                span {
+                                    b {
+                                        "Demonlist rank:"
+                                    }
+                                    br;
+                                    span#rank {}
+                                }
+                                span {
+                                    b {
+                                        "Hardest demon:"
+                                    }
+                                    br;
+                                    span#hardest {}
+                                }
+                            }
+                            div.container.flex.space {
+                                span {
+                                    b {
+                                        "Demons completed:"
+                                    }
+                                    br;
+                                    span#beaten {}
+                                }
+                            }
+                            div.container.flex.space {
+                                span {
+                                    b {
+                                        "List demons created:"
+                                    }
+                                    br;
+                                    span#created {}
+                                }
+                                span {
+                                    b {
+                                        "List demons published:"
+                                    }
+                                    br;
+                                    span#published {}
+                                }
+                                span {
+                                    b {
+                                        "List demons verified:"
+                                    }
+                                    br;
+                                    span#verified {}
+                                }
+                            }
+                            div.container.flex.space {
+                                span {
+                                    b {
+                                        "Progress on:"
+                                    }
+                                    br;
+                                    span#progress {}
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

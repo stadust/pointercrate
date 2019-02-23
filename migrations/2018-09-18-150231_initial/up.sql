@@ -1,26 +1,29 @@
 -- Your SQL goes here
 
-CREATE TYPE RECORD_STATUS AS ENUM ('APPROVED', 'REJECTED', 'SUBMITTED', 'DELETED');
-CREATE TYPE AUDIT_OPERATION AS ENUM (
-    'ADD_DEMON','PATCH_DEMON',
-    'ADD_RECORD', 'REMOVE_RECORD', 'PATCH_RECORD',
-    'ADD_PLAYER', 'REMOVE_PLAYER', 'PATCH_PLAYER',
-    'BAN_SUBMITTER'
-);
+-- This is a workaround
+-- To get the new backend to work, we need to run all migrations against the existing database
+-- all things from this migration already exist in that database, so theoretically, it should be a NOOP.
+-- However, there is no `CREATE ... IF NOT EXISTS` equavalent for types in postgres
+-- The following code tries to create the type and ignores the error by explicitly registering a handler for it
+DO $$ BEGIN
+    CREATE TYPE RECORD_STATUS AS ENUM ('APPROVED', 'REJECTED', 'SUBMITTED', 'DELETED');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TABLE players(
+CREATE TABLE IF NOT EXISTS  players(
     id SERIAL PRIMARY KEY,
     name CITEXT NOT NULL UNIQUE,
     banned BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE submitters (
+CREATE TABLE IF NOT EXISTS  submitters (
     submitter_id SERIAL PRIMARY KEY,
     ip_address INET NOT NULL,
     banned BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE TABLE members (
+CREATE TABLE IF NOT EXISTS  members (
     member_id SERIAL PRIMARY KEY,
     name CITEXT UNIQUE NOT NULL,
     display_name CITEXT NULL DEFAULT NULL,
@@ -30,7 +33,7 @@ CREATE TABLE members (
     permissions BIT(16) NOT NULL DEFAULT B'0000000000000000'::BIT(16)
 );
 
-CREATE TABLE demons (
+CREATE TABLE IF NOT EXISTS  demons (
     name CITEXT PRIMARY KEY,
     position SMALLINT NOT NULL,
     requirement SMALLINT NOT NULL,
@@ -44,7 +47,7 @@ CREATE TABLE demons (
     CONSTRAINT valid_record_req CHECK (requirement >= 0 AND requirement <= 100)
 );
 
-CREATE TABLE records (
+CREATE TABLE IF NOT EXISTS  records (
     id SERIAL PRIMARY KEY,
     progress SMALLINT CHECK (progress >= 0 AND progress <= 100) NOT NULL,
     video VARCHAR(200) UNIQUE,
@@ -55,21 +58,11 @@ CREATE TABLE records (
     UNIQUE (demon, player, status_)
 );
 
-CREATE TABLE creators (
+CREATE TABLE IF NOT EXISTS  creators (
     demon CITEXT NOT NULL REFERENCES demons(name) ON DELETE RESTRICT ON UPDATE CASCADE,
     creator INT NOT NULL REFERENCES players(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     PRIMARY KEY (demon, creator)
 );
 
-CREATE TABLE audit_log (
-    id SERIAL PRIMARY KEY,
-    operation AUDIT_OPERATION NOT NULL,
-    target VARCHAR(200),
-    old_value VARCHAR(200),
-    new_value VARCHAR(200),
-    time_ TIMESTAMP WITHOUT TIME ZONE DEFAULT (NOW() AT TIME ZONE 'utc') NOT NULL,
-    list_mod CITEXT NULL REFERENCES members(name) ON DELETE SET NULL ON UPDATE CASCADE,
-    demon CITEXT NULL REFERENCES demons(name) ON DELETE SET NULL ON UPDATE CASCADE,
-    record INT NULL REFERENCES records(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    player INT NULL REFERENCES players(id) ON DELETE SET NULL ON UPDATE CASCADE
-);
+GRANT TRIGGER, REFERENCES, SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO pointercrate;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO pointercrate;

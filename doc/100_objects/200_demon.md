@@ -22,7 +22,7 @@ When embedded into other objects (for example, as part of a [Record](/documentat
 
 ## Short Form
 
-When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), oonly the following partial representation of each demon is provided:
+When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), only the following partial representation of each demon is provided:
 
 | Field     | Type    | Description                                      |
 | --------- | ------- | ------------------------------------------------ |
@@ -38,7 +38,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | name        | string                  | The name of the demon                                                   |
 | position    | integer                 | The position of the demon                                               |
 | requirement | integer                 | The minimum percentage a record on this demon has to be, to be accepted |
-| video       | URL                     | The verification video. Can be `null`                                   |
+| video       | URL?                    | The verification video.                                                 |
 | notes       | string                  | Extra notes added to the demon by the list mods                         |
 | verifier    | [Player](#player)       | The demon's verifier                                                    |
 | publisher   | [Player](#player)       | The demon's publisher                                                   |
