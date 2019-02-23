@@ -354,7 +354,7 @@ impl Page for Demonlist {
                                                     (record.progress) "%"
                                                 }
                                                 td.video-link {
-                                                    @if let Some(ref video) = self.data.demon.video {
+                                                    @if let Some(ref video) = record.video {
                                                          a.link href = (video) {
                                                              (video::host(video))
                                                          }

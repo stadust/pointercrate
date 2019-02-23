@@ -151,10 +151,10 @@ pub fn thumbnail(video: &str) -> String {
 pub fn host(video: &str) -> &str {
     match Url::parse(video).unwrap().domain().unwrap() {
         "www.youtube.com" => "YouTube",
-        "www.twitch.com" => "Twitch",
+        "www.twitch.tv" => "Twitch",
         "everyplay.com" => "Everyplay",
         "www.bilibili.com" => "Bilibili",
         "vimeo.com" => "Vimeo",
-        _ => unreachable!(),
+        host => panic!("{}", host),
     }
 }

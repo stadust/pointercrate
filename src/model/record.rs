@@ -117,6 +117,7 @@ pub struct Record {
 pub struct EmbeddedRecordPD {
     pub id: i32,
     pub progress: i16,
+    pub video: Option<String>,
     pub status: RecordStatus,
     pub demon: EmbeddedDemon,
     pub player: Player,
@@ -126,6 +127,7 @@ pub struct EmbeddedRecordPD {
 pub struct EmbeddedRecordD {
     pub id: i32,
     pub progress: i16,
+    pub video: Option<String>,
     pub status: RecordStatus,
     pub demon: EmbeddedDemon,
 }
@@ -134,6 +136,7 @@ pub struct EmbeddedRecordD {
 pub struct EmbeddedRecordP {
     pub id: i32,
     pub progress: i16,
+    pub video: Option<String>,
     pub status: RecordStatus,
     pub player: Player,
 }
@@ -369,6 +372,7 @@ impl Model for EmbeddedRecordPD {
         records::id,
         records::progress,
         records::status_,
+        records::video,
         players::id,
         players::name,
         players::banned,
@@ -398,21 +402,32 @@ impl Model for EmbeddedRecordPD {
 impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, Pg>
     for EmbeddedRecordPD
 {
-    type Row = (i32, i16, RecordStatus, i32, String, bool, String, i16);
+    type Row = (
+        i32,
+        i16,
+        RecordStatus,
+        Option<String>,
+        i32,
+        String,
+        bool,
+        String,
+        i16,
+    );
 
     fn build(row: Self::Row) -> Self {
         EmbeddedRecordPD {
             id: row.0,
             progress: row.1,
             status: row.2,
+            video: row.3,
             player: Player {
-                id: row.3,
-                name: row.4,
-                banned: row.5,
+                id: row.4,
+                name: row.5,
+                banned: row.6,
             },
             demon: EmbeddedDemon {
-                name: row.6,
-                position: row.7,
+                name: row.7,
+                position: row.8,
             },
         }
     }
@@ -432,6 +447,7 @@ impl Model for EmbeddedRecordD {
         records::id,
         records::progress,
         records::status_,
+        records::video,
         demons::name,
         demons::position,
     );
@@ -453,16 +469,17 @@ impl Model for EmbeddedRecordD {
 impl Queryable<<<EmbeddedRecordD as Model>::Selection as Expression>::SqlType, Pg>
     for EmbeddedRecordD
 {
-    type Row = (i32, i16, RecordStatus, String, i16);
+    type Row = (i32, i16, RecordStatus, Option<String>, String, i16);
 
     fn build(row: Self::Row) -> Self {
         EmbeddedRecordD {
             id: row.0,
             progress: row.1,
             status: row.2,
+            video: row.3,
             demon: EmbeddedDemon {
-                name: row.3,
-                position: row.4,
+                name: row.4,
+                position: row.5,
             },
         }
     }
@@ -482,6 +499,7 @@ impl Model for EmbeddedRecordP {
         records::id,
         records::progress,
         records::status_,
+        records::video,
         players::id,
         players::name,
         players::banned,
@@ -504,17 +522,18 @@ impl Model for EmbeddedRecordP {
 impl Queryable<<<EmbeddedRecordP as Model>::Selection as Expression>::SqlType, Pg>
     for EmbeddedRecordP
 {
-    type Row = (i32, i16, RecordStatus, i32, String, bool);
+    type Row = (i32, i16, RecordStatus, Option<String>, i32, String, bool);
 
     fn build(row: Self::Row) -> Self {
         EmbeddedRecordP {
             id: row.0,
             progress: row.1,
             status: row.2,
+            video: row.3,
             player: Player {
-                id: row.3,
-                name: row.4,
-                banned: row.5,
+                id: row.4,
+                name: row.5,
+                banned: row.6,
             },
         }
     }

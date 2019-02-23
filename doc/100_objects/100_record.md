@@ -16,11 +16,12 @@ Requests without `ExtendedAccess` permissions can only retrieve approved records
 
 The embedded form of record objects is returned if a record object is part of another object
 
-| Field    | Type                           | Description                                  |
-| -------- | ------------------------------ | -------------------------------------------- |
-| id       | integer                        | The record's id                              |
-| progress | integer                        | The progress achieved by the record's holder |
-| status   | [RecordStatus](#record-status) | The record's status.                         |
+| Field    | Type                           | Description                                |
+| -------- | ------------------------------ | ------------------------------------------ |
+| id       | integer                        | The record's id                            |
+| progress | integer                        | The progress achieved by the record holder |
+| status   | [RecordStatus](#record-status) | The record's status.                       |
+| video    | URL?                           | The record's video.                        |
 
 Depending on the context the object is returned in, one (or both) of the following fields will be present:
 
@@ -37,7 +38,7 @@ The long form of record objects is returned by [`GET /records/`](/documentation/
 | --------- | ------------------------------ | ------------------------------------------------------- |
 | id        | integer                        | The record's id                                         |
 | progress  | integer                        | The progress achieved by the record's holder            |
-| video     | URL                            | The record's video. Can be `null`                       |
+| video     | URL?                           | The record's video.                                     |
 | status    | [RecordStatus](#record-status) | The record's status.                                    |
 | player    | [Player](#player)              | The record holder                                       |
 | demon     | [Demon](#demon)                | The demon the record was made on                        |
