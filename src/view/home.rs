@@ -239,7 +239,7 @@ impl Page for Homepage {
                             }
                             div.flex.wrap style = "padding: 20px" {
                                 @for member in &self.demonlist_team {
-                                    h4 style="display: inline; margin: 5px" { (member.name) }
+                                    h4 style="display: inline; margin: 5px" { (member.name()) }
                                 }
                             }
                             p {
@@ -272,7 +272,7 @@ impl Page for Homepage {
                             }
                             div.flex.wrap style = "padding: 20px" {
                                 @for member in &self.pointercrate_team {
-                                    h4 style="display: inline; margin: 5px" { (member.name) }
+                                    h4 style="display: inline; margin: 5px" { (member.name()) }
                                 }
                             }
                             p {
