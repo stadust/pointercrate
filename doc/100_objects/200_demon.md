@@ -24,36 +24,26 @@ When embedded into other objects (for example, as part of a [Record](/documentat
 
 When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), oonly the following partial representation of each demon is provided:
 
-| Field     | Type                     | Description                                      |
-| --------- | ------------------------ | ------------------------------------------------ |
-| name      | string                   | The name of the demon                            |
-| position  | integer                  | The position of the demon                        |
-| publisher | string                   | The name of the player that published this demon |
-| state     | [ListState](#list-state) | The section of the list the demon is in          |
-| video     | URL?                     | The verification video                           |
+| Field     | Type    | Description                                      |
+| --------- | ------- | ------------------------------------------------ |
+| name      | string  | The name of the demon                            |
+| position  | integer | The position of the demon                        |
+| publisher | string  | The name of the player that published this demon |
+| video     | URL?    | The verification video                           |
 
 ## Long Form
 
-| Field       | Type                     | Description                                                             |
-| ----------- | ------------------------ | ----------------------------------------------------------------------- |
-| name        | string                   | The name of the demon                                                   |
-| position    | integer                  | The position of the demon                                               |
-| state       | [ListState](#list-state) | The section of the list the demon is in                                 |
-| requirement | integer                  | The minimum percentage a record on this demon has to be, to be accepted |
-| video       | URL                      | The verification video. Can be `null`                                   |
-| notes       | string                   | Extra notes added to the demon by the list mods                         |
-| verifier    | [Player](#player)        | The demon's verifier                                                    |
-| publisher   | [Player](#player)        | The demon's publisher                                                   |
-| creators    | List[[Player](#player)]  | The demon's creators                                                    |
-| records     | List[[Record](#record)]  | All approved records for this demon                                     |
-
-## Enum ListState{id=list-state}
-
-| Value      | Description                                      |
-| ---------- | ------------------------------------------------ |
-| `MAIN`     | The demon is in the main section of the list     |
-| `EXTENDED` | The demon is in the extended section of the list |
-| `LEGACY`   | The demon is in the legacy section of the list   |
+| Field       | Type                    | Description                                                             |
+| ----------- | ----------------------- | ----------------------------------------------------------------------- |
+| name        | string                  | The name of the demon                                                   |
+| position    | integer                 | The position of the demon                                               |
+| requirement | integer                 | The minimum percentage a record on this demon has to be, to be accepted |
+| video       | URL                     | The verification video. Can be `null`                                   |
+| notes       | string                  | Extra notes added to the demon by the list mods                         |
+| verifier    | [Player](#player)       | The demon's verifier                                                    |
+| publisher   | [Player](#player)       | The demon's publisher                                                   |
+| creators    | List[[Player](#player)] | The demon's creators                                                    |
+| records     | List[[Record](#record)] | All approved records for this demon                                     |
 
 ## Example objects
 

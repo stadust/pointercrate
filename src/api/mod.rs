@@ -5,6 +5,7 @@ pub mod player;
 pub mod record;
 pub mod submitter;
 pub mod user;
+pub mod misc;
 
 use crate::{
     error::PointercrateError,

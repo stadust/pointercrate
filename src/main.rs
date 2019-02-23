@@ -146,9 +146,16 @@ fn main() {
             })
             .scope("/api/v1", |api_scope| {
                 api_scope
+                    .resource("/list_information", |r| {
+                        r.get().f(api::misc::list_information);
+                        r.route().f(allowed!(GET))
+                    })
                     .nested("/users", |user_scope| {
                         user_scope
-                            .resource("/", |r| r.get().f(wrap(api::user::paginate)))
+                            .resource("/", |r| {
+                                r.get().f(wrap(api::user::paginate));
+                                r.route().f(allowed!(GET))
+                            })
                             .resource("/{user_id}/", |r| {
                                 r.get().f(wrap(api::user::get));
                                 r.method(Method::PATCH).f(wrap(api::user::patch));

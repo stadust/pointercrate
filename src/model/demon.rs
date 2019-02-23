@@ -1,6 +1,5 @@
 use super::{All, Model};
 use crate::{
-    config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{creator::Creators, player::Player, record::EmbeddedRecordP},
     operation::Get,
@@ -26,45 +25,6 @@ mod patch;
 mod post;
 
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
-
-/// Enum encoding the 3 different parts of the demonlist
-#[derive(Debug)]
-pub enum ListState {
-    /// The main part of the demonlist, ranging from position 1 onwards to [`LIST_SIZE`]
-    /// (inclusive)
-    Main,
-
-    /// The extended part of the demonlist, ranging from [`LIST_SIZE`] (exclusive) onwards to
-    /// [`EXTENDED_LIST_SIZE`] (inclusive)
-    Extended,
-
-    /// The legacy part of the demonlist, starting at [`EXTENDED_LIST_SIZE`] (exclusive) and being
-    /// theoretically unbounded
-    Legacy,
-}
-
-impl From<i16> for ListState {
-    /// Calculates the [`ListState`] of [`Demon`] based on its [`Demon::position`]
-    fn from(position: i16) -> ListState {
-        if position <= *LIST_SIZE {
-            ListState::Main
-        } else if position <= *EXTENDED_LIST_SIZE {
-            ListState::Extended
-        } else {
-            ListState::Legacy
-        }
-    }
-}
-
-impl Display for ListState {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            ListState::Main => write!(f, "MAIN"),
-            ListState::Extended => write!(f, "EXTENDED"),
-            ListState::Legacy => write!(f, "LEGACY"),
-        }
-    }
-}
 
 /// Struct modelling a demon in the database
 #[derive(Debug, Identifiable, Serialize, Hash)]
@@ -144,7 +104,6 @@ impl Serialize for PartialDemon {
         map.serialize_entry("name", &self.name)?;
         map.serialize_entry("position", &self.position)?;
         map.serialize_entry("publisher", &self.publisher)?;
-        map.serialize_entry("state", &ListState::from(self.position).to_string())?;
         map.end()
     }
 }
