@@ -94,15 +94,31 @@ impl Page for DemonlistOverview {
                     @for demon in &self.demon_overview {
                         @if demon.position <= *EXTENDED_LIST_SIZE {
                             div.panel.fade {
-                                div.underlined {
-                                    h2 {
+                                div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
+                                    @if let Some(ref video) = demon.video {
+                                        div.thumb."ratio-16-9"."js-delay-css" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
+                                            a href = (video) {
+                                                div.play {}
+                                            }
+                                        }
+                                        div.leftlined.pad {
+                                            h2 style = "text-align: left; margin-bottom: 0px" {
+                                                a href = {"/demonlist/" (demon.position)} {
+                                                    "#" (demon.position) " - " (demon.name)
+                                                }
+                                            }
+                                            h3 style = "text-align: left" {
+                                                i {
+                                                    "by " (demon.publisher)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    @else {
                                         a href = {"/demonlist/" (demon.position)} {
                                             "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
                                         }
                                     }
-                                }
-                                @if let Some(ref video) = demon.video {
-                                    iframe."ratio-16-9"."js-delay-attr" style="width: 90%; margin: 15px 5% 0px" data-attr = "src" data-attr-value = (video::embed(video)) {}
                                 }
                             }
                         }

@@ -98,6 +98,14 @@ $(window).on("load resize", function() {
 
   // ratio things
 
+  $(".js-delay-css").each((i, elem) => {
+    var elem = $(elem);
+    var attr = elem.data("property");
+    var value = elem.data("property-value");
+
+    elem.css(attr, value);
+  });
+
   $(".ratio-16-9").each(function() {
     forceRatio(this, 16, 9);
   });

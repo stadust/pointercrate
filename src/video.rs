@@ -137,6 +137,17 @@ pub fn embed(video: &str) -> String {
     format!("https://www.youtube.com/embed/{}", video_id)
 }
 
+pub fn thumbnail(video: &str) -> String {
+    // Videos need to be welformed once we get here!
+    let url = Url::parse(video).unwrap();
+    let video_id = url
+        .query_pairs()
+        .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
+        .unwrap();
+
+    format!("https://i.ytimg.com/vi/{}/mqdefault.jpg", video_id)
+}
+
 pub fn host(video: &str) -> &str {
     match Url::parse(video).unwrap().domain().unwrap() {
         "www.youtube.com" => "YouTube",
