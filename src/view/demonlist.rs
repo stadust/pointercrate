@@ -4,6 +4,7 @@ use crate::{
         database::{GetDemonlistOverview, GetPlayerRanking},
         http::GetDemon,
     },
+    api::PCResponder,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{
@@ -56,12 +57,12 @@ pub struct DemonlistOverview {
     pub helpers: Vec<User>,
 }
 
-pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
 
     req.state()
         .database(GetDemonlistOverview)
-        .map(move |overview| overview.render(&req_clone))
+        .map(move |overview| overview.render(&req_clone).respond_to(&req_clone).unwrap())  // We can unwrap here since respond_to in the Responder implementation for PreEscaped<String> always returns an Ok value.
         .responder()
 }
 
@@ -173,7 +174,7 @@ pub struct Demonlist {
     ranking: Vec<RankedPlayer>,
 }
 
-pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
     let state = req.state().clone();
 
@@ -202,6 +203,8 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
                                             ranking,
                                         }
                                         .render(&req_clone)
+                                        .respond_to(&req_clone)
+                                        .unwrap()
                                     })
                             })
                         })

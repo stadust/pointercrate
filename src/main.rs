@@ -26,7 +26,7 @@ type Result<T> = std::result::Result<T, PointercrateError>;
 
 use crate::{
     actor::{database::DatabaseActor, http::HttpActor},
-    api::wrap,
+    api::{wrap, wrap_direct},
     error::PointercrateError,
     middleware::{auth::Authorizer, cond::Precondition, ip::IpResolve, mime::MimeProcess},
     state::PointercrateState,
@@ -37,7 +37,7 @@ use actix_web::{
     dev::Handler,
     fs,
     http::{Method, NormalizePath, StatusCode},
-    server, App, FromRequest, Path,
+    server, App, FromRequest, Path, Responder,
 };
 use std::sync::Arc;
 
@@ -122,26 +122,28 @@ fn main() {
             })
             .resource("/demonlist/", |r| {
                 r.name("demonlist-overview");
-                r.get().f(view::demonlist::overview_handler)
+                r.get().f(wrap(view::demonlist::overview_handler))
             })
             .resource("/demonlist/{position}/", |r| {
                 r.name("demonlist");
-                r.get().f(view::demonlist::handler)
+                r.get().f(wrap(view::demonlist::handler))
             })
             .resource("/documentation/", |r| {
                 r.name("documentation");
-                r.get().f(|req| {
-                    Documentation::new(req.state(), "index".into()).map(|d| d.render(req))
-                });
+                r.get().f(wrap_direct(|req| {
+                    Documentation::new(req.state(), "index".into())
+                        .map(|d| d.render(req).respond_to(req).unwrap())
+                }));
                 r.route().f(allowed!(GET))
             })
             .resource("/documentation/{page}/", |r| {
-                r.get().f(|req| {
+                r.get().f(wrap_direct(|req| {
                     Path::<String>::extract(req)
+                        .map_err(|_| PointercrateError::GenericBadRequest)  // no idea how this could happen
                         .map(|page| page.into_inner())
-                        .and_then(|page| Documentation::new(req.state(), page).map_err(Into::into))
-                        .map(|d| d.render(req))
-                });
+                        .and_then(|page| Documentation::new(req.state(), page))
+                        .map(|d| d.render(req).respond_to(req).unwrap())
+                }));
                 r.route().f(allowed!(GET))
             })
             .scope("/api/v1", |api_scope| {

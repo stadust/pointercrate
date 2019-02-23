@@ -1,11 +1,11 @@
 //! Module containg the actual actix request handlers
 pub mod auth;
 pub mod demon;
+pub mod misc;
 pub mod player;
 pub mod record;
 pub mod submitter;
 pub mod user;
-pub mod misc;
 
 use crate::{
     error::PointercrateError,
@@ -17,7 +17,7 @@ use crate::{
 use actix_web::{error::ResponseError, HttpRequest, HttpResponse};
 use log::warn;
 use mime;
-use tokio::prelude::future::{err, Either, Future};
+use tokio::prelude::future::Future;
 
 pub type PCResponder = Box<dyn Future<Item = HttpResponse, Error = PointercrateError>>;
 
@@ -26,33 +26,40 @@ where
     F: Fn(&HttpRequest<PointercrateState>) -> PCResponder + 'static,
 {
     move |req: &HttpRequest<PointercrateState>| -> Box<dyn Future<Item = HttpResponse, Error = PointercrateError>> {
-        let future = match preferred_mime_type(req) {
-            Err(error) => Either::A(err(error)),
-            Ok(mime_type) => {
-                let req_clone = req.clone();
-                let f = handler(req).or_else(move |error| {
-                    warn!("HTTP Error returned during request handling: {}", error);
+        let req_clone = req.clone();
 
-                    let response = match (mime_type.type_(), mime_type.subtype()) {
-                        (mime::TEXT, mime::HTML)  => {
-                            let html = ErrorPage::new(&error).render(&req_clone);
-
-                            HttpResponse::Ok()
-                                .content_type("text/html; charset=utf-8")
-                                .body(html.0)
-                        },
-                        (mime::APPLICATION, mime::JSON) => error.error_response(),
-                        _ => unreachable!()
-                    };
-
-                    Ok(response)
-                });
-                Either::B(f)
-            }
-        };
-
-        Box::new(future)
+        Box::new(handler(req).or_else(move |error| handle_error(&req_clone, error)))
     }
+}
+
+pub fn wrap_direct(
+    handler: impl Fn(&HttpRequest<PointercrateState>) -> Result<HttpResponse>,
+) -> impl Fn(&HttpRequest<PointercrateState>) -> Result<HttpResponse> {
+    move |req: &HttpRequest<PointercrateState>| -> Result<HttpResponse> {
+        handler(req).or_else(|error| handle_error(req, error))
+    }
+}
+
+fn handle_error(
+    req: &HttpRequest<PointercrateState>, error: PointercrateError,
+) -> Result<HttpResponse> {
+    warn!("HTTP Error returned during request handling: {}", error);
+
+    let mime_type = preferred_mime_type(req)?;
+
+    let response = match (mime_type.type_(), mime_type.subtype()) {
+        (mime::TEXT, mime::HTML) => {
+            let html = ErrorPage::new(&error).render(&req);
+
+            HttpResponse::Ok()
+                .content_type("text/html; charset=utf-8")
+                .body(html.0)
+        },
+        (mime::APPLICATION, mime::JSON) => error.error_response(),
+        _ => unreachable!(),
+    };
+
+    Ok(response)
 }
 
 fn preferred_mime_type(req: &HttpRequest<PointercrateState>) -> Result<mime::Mime> {
@@ -90,17 +97,5 @@ fn preferred_mime_type(req: &HttpRequest<PointercrateState>) -> Result<mime::Mim
 pub fn error(
     req: &HttpRequest<PointercrateState>, error: PointercrateError,
 ) -> Result<HttpResponse> {
-    preferred_mime_type(req).map(|mime_type| {
-        match (mime_type.type_(), mime_type.subtype()) {
-            (mime::TEXT, mime::HTML) => {
-                let html = ErrorPage::new(&error).render(req);
-
-                HttpResponse::Ok()
-                    .content_type("text/html; charset=utf-8")
-                    .body(html.0)
-            },
-            (mime::APPLICATION, mime::JSON) => error.error_response(),
-            _ => unreachable!(),
-        }
-    })
+    handle_error(req, error)
 }
