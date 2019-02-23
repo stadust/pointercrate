@@ -60,6 +60,10 @@ impl Paginator for UserPagination {
 
 impl Paginate<UserPagination> for User {
     fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+        if pagination.limit() > 100 || pagination.limit() < 1 {
+            return Err(PointercrateError::InvalidPaginationLimit)
+        }
+
         let mut query = pagination.filter(User::boxed_all());
 
         if let Some(permissions) = pagination.has_permissions {

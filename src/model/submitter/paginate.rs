@@ -56,6 +56,10 @@ impl Paginator for SubmitterPagination {
 
 impl Paginate<SubmitterPagination> for Submitter {
     fn load(pagination: &SubmitterPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+        if pagination.limit() > 100 || pagination.limit() < 1 {
+            return Err(PointercrateError::InvalidPaginationLimit)
+        }
+
         let mut query = pagination.filter(Submitter::boxed_all());
 
         filter!(query[

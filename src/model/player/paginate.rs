@@ -59,6 +59,10 @@ impl Paginator for PlayerPagination {
 
 impl Paginate<PlayerPagination> for Player {
     fn load(pagination: &PlayerPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+        if pagination.limit() > 100 || pagination.limit() < 1 {
+            return Err(PointercrateError::InvalidPaginationLimit)
+        }
+
         let mut query = pagination.filter(Player::boxed_all());
 
         filter!(query[

@@ -197,6 +197,13 @@ pub enum PointercrateError {
     #[fail(display = "Invalid password! The password must be at least 10 characters long")]
     InvalidPassword,
 
+    /// `422 UNPRECESSABLE ENTITY` variant returned if the `limit` parameter provided for
+    /// pagination is too large or too small
+    ///
+    /// Error Code `42207`
+    #[fail(display = "Invalid value for the 'limit' parameter. It must be between 1 and 100")]
+    InvalidPaginationLimit,
+
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42211`
@@ -391,6 +398,7 @@ impl PointercrateError {
             PointercrateError::UnprocessableEntity => 42200,
             PointercrateError::InvalidUsername => 42202,
             PointercrateError::InvalidPassword => 42204,
+            PointercrateError::InvalidPaginationLimit => 42207,
             PointercrateError::UnexpectedNull { .. } => 42211,
             PointercrateError::InvalidRequirement => 42212,
             PointercrateError::InvalidPosition { .. } => 42213,

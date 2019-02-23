@@ -75,6 +75,10 @@ impl Paginator for RecordPagination {
 
 impl Paginate<RecordPagination> for Record {
     fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+        if pagination.limit() > 100 || pagination.limit() < 1 {
+            return Err(PointercrateError::InvalidPaginationLimit)
+        }
+
         let mut query = pagination.filter(Record::boxed_all());
 
         filter!(query[

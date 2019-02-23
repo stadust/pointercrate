@@ -58,12 +58,8 @@ Multiple conditions can be combined, i.e. `/api/v1/records?status=APPROVED&id__g
 
 These error conditions can occur at any endpoint supporting pagination and are thus not listed specifically for each of them.
 
-// TODO: this error handling needs to be reimplemented
-
 | Status code | Error code | Description                                                     |
 | ----------- | ---------- | --------------------------------------------------------------- |
 | 422         | 42207      | The `limit` parameter is smaller than `1` or greater than `100` |
-| 422         | 42208      | The `after` parameter is greater than the `before` parameter    |
-| 422         | 42209      | The `after` parameter is smaller than `0`                       |
 
 </div>
