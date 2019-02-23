@@ -92,7 +92,7 @@ impl Page for DemonlistOverview {
                     (submission_panel())
                     (stats_viewer(&self.ranking))
                     @for demon in &self.demon_overview {
-                        @if demon.position < *EXTENDED_LIST_SIZE {
+                        @if demon.position <= *EXTENDED_LIST_SIZE {
                             div.panel.fade {
                                 div.underlined {
                                     h2 {
