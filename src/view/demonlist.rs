@@ -93,7 +93,7 @@ impl Page for DemonlistOverview {
                 div.left {
                     (submission_panel())
                     @for demon in &self.demon_overview {
-                        div.panel.fade.js-scroll-anim data-anim="fade" {
+                        div.panel.fade {
                             div.underlined {
                                 h2 {
                                     a href = {"/demonlist/" (demon.position)} {
@@ -340,7 +340,9 @@ impl Page for Demonlist {
                                                 }
                                                 td.video-link {
                                                     @if let Some(ref video) = self.data.demon.video {
-                                                        (video::host(video))
+                                                         a.link href = (video) {
+                                                             (video::host(video))
+                                                         }
                                                     }
                                                 }
                                             }
