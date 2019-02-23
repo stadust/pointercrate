@@ -224,6 +224,18 @@ fn main() {
                                 r.route().f(allowed!(GET, DELETE, PATCH))
                             })
                     })
+                    .nested("/submitters", |record_scope| {
+                        record_scope
+                            .resource("/", |r| {
+                                r.get().f(wrap(api::submitter::paginate));
+                                r.route().f(allowed!(GET))
+                            })
+                            .resource("/{submitter_id}/", |r| {
+                                r.get().f(wrap(api::submitter::get));
+                                r.method(Method::PATCH).f(wrap(api::submitter::patch));
+                                r.route().f(allowed!(GET, PATCH))
+                            })
+                    })
                     .nested("/auth", |auth_scope| {
                         auth_scope
                             .resource("/", |r| {
