@@ -1,4 +1,4 @@
-use super::{url_helper, Page};
+use super::Page;
 use crate::{error::PointercrateError, state::PointercrateState};
 use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped};
@@ -38,7 +38,6 @@ impl Page for ErrorPage<'_> {
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
-        // FIXME: the generated contact link is broken
         html! {
             div.m-center.flex.col.cen.no-stretch#error style = "height: calc(100% - 60px)"{
                 div.flex.cen style="width: 100%" {
@@ -65,7 +64,7 @@ impl Page for ErrorPage<'_> {
                 }
                 p style="text-align: center; font-size: .7em" {
                     "Believe we've made a mistake in showing you this error?"(PreEscaped("&nbsp;"))
-                    a.link href = {(url_helper::url(req, "home")) "#contact"} {
+                    a.link href = "/#contact" {
                         "Contact us!"
                     }
                 }

@@ -1,4 +1,4 @@
-use super::{url_helper, Page};
+use super::Page;
 use crate::{
     actor::{
         database::{GetDemonlistOverview, GetPlayerRanking},
@@ -189,8 +189,6 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
                             state.database(GetPlayerRanking).and_then(move |ranking| {
-                                dbg!(&ranking);
-
                                 state
                                     .gdcf
                                     .send(GetDemon(data.demon.name.clone()))
@@ -452,17 +450,15 @@ fn dropdown(
 ) -> Markup {
     let format = |demon: &PartialDemon| -> Markup {
         html! {
-            @if section.numbered {
-                a href = (url_helper::demon(req, demon.position)) {
+            a href = {"/demonlist/" (demon.position)} {
+                @if section.numbered {
                     {"#" (demon.position) " - " (demon.name)}
                     br ;
                     i {
                         (demon.publisher)
                     }
                 }
-            }
-            @else {
-                a href = (url_helper::demon(req, demon.position)) {
+                @else {
                     {(demon.name)}
                     br ;
                     i {

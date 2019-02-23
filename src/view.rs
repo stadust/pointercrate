@@ -10,8 +10,9 @@ pub mod documentation;
 pub mod error;
 pub mod home;
 
-// TODO: maybe do this with `url_for()`
-
+// FIXME: we need a better dynamic url generation solution. We cannot use url_for because it breaks
+// when running behind a reverse proxy (all URLs it generates are for 127.0.0.1 which is freaking
+// useless)
 pub const STATIC: &str = "/static/";
 
 pub trait Page {
@@ -92,18 +93,18 @@ pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
     html! {
         div.nav.center.collapse.underlined.see-through {
             div.nav-icon {
-                a href = (url_helper::url(req, "home")) {
+                a href = "/" {
                     img src = {(STATIC) "images/pointercrate2.png"} style="height:15px";
                 }
             }
             div.nav-group-right.nav-group {
-                a.nav-item.hover.white href = {(url_helper::url(req, "documentation"))} {
+                a.nav-item.hover.white href = "/documentation/" {
                     span style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"REST API"}
                         span {"Documentation"}
                     }
                 }
-                a.nav-item.hover.white href = {(url_helper::url(req, "demonlist-overview"))} title = "Geometry Dash Demonlist" {
+                a.nav-item.hover.white href = "/demonlist/" title = "Geometry Dash Demonlist" {
                     span style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"Geometry Dash"}
                         span {"DEMONLIST"}
@@ -158,15 +159,15 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
                     h2 {
                         "Demonlist:"
                     }
-                    a.link href={ (url_helper::demon(req, 1)) } title = "Hardest demon" {
+                    a.link href="/demonlist/1/" title = "Hardest demon" {
                         "Current top demon"
                     }
                     br;
-                    a.link href = {(url_helper::demon(req, first_extended))} title="Extended list" {
+                    a.link href = {"/demonlist/" (first_extended) "/"} title="Extended list" {
                         "Extended list"
                     }
                     br;
-                    a.link href = {(url_helper::demon(req, first_legacy))} title="Legacy list" {
+                    a.link href = {"/demonlist/" (first_legacy) "/"} title="Legacy list" {
                         "Legacy List"
                     }
                 }
@@ -183,43 +184,5 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
                 }
             }
         }
-    }
-}
-
-// FIXME: this is just broken
-pub mod url_helper {
-    use crate::state::PointercrateState;
-    use actix_web::HttpRequest;
-    use log::error;
-    use url::Url;
-
-    pub fn demon(req: &HttpRequest<PointercrateState>, position: i16) -> Url {
-        url_with(req, "demonlist", &[position])
-    }
-
-    pub fn url(req: &HttpRequest<PointercrateState>, name: &str) -> Url {
-        req.url_for_static(name)
-            .map_err(|_| {
-                error!(
-                    "Internal Error: Attempt to retrieve url for non-existing page '{}'",
-                    name
-                )
-            })
-            .unwrap()
-    }
-
-    pub fn url_with<U, I>(req: &HttpRequest<PointercrateState>, name: &str, params: U) -> Url
-    where
-        U: IntoIterator<Item = I>,
-        I: ToString,
-    {
-        req.url_for(name, params.into_iter().map(|i| i.to_string()))
-            .map_err(|_| {
-                error!(
-                    "Internal Error: Attempt to retrieve url for non-existing page '{}'",
-                    name
-                )
-            })
-            .unwrap()
     }
 }
