@@ -96,10 +96,8 @@ impl Page for DemonlistOverview {
                             div.panel.fade {
                                 div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
                                     @if let Some(ref video) = demon.video {
-                                        div.thumb."ratio-16-9"."js-delay-css" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
-                                            a href = (video) {
-                                                div.play {}
-                                            }
+                                        div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
+                                            a.play href = (video) {}
                                         }
                                         div.leftlined.pad {
                                             h2 style = "text-align: left; margin-bottom: 0px" {

@@ -193,16 +193,17 @@ tr:nth-child(even) {
   color: #ffffff;
   font-size: 0.5em; /* change this to change size */
   height: 3em;
-  margin: 0px auto;
+  /*margin: 0px auto;*/
   padding: 0;
-  position: relative;
+  position: absolute;
   text-align: center;
   text-indent: 0.1em;
   transition: all 150ms ease-out;
   width: 4em;
   opacity: 0.8;
   top: 50%;
-  transform: translate(0%, -50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .play:hover {
