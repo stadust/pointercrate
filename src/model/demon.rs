@@ -2,7 +2,7 @@ use super::{All, Model};
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{creator::Creators, player::Player, record::EmbeddedRecord},
+    model::{creator::Creators, player::Player, record::EmbeddedRecordP},
     operation::Get,
     schema::{demon_publisher_verifier_join, demons, players},
     Result,
@@ -291,7 +291,7 @@ pub struct DemonWithCreatorsAndRecords {
     #[serde(flatten)]
     pub demon: Demon,
     pub creators: Creators,
-    pub records: Vec<EmbeddedRecord>,
+    pub records: Vec<EmbeddedRecordP>,
 }
 
 impl Hash for DemonWithCreatorsAndRecords {

@@ -321,7 +321,7 @@ impl Page for Demonlist {
                                         @for record in &self.data.records {
                                             tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
                                                 td {
-                                                    (record.player)
+                                                    (record.player.name)
                                                 }
                                                 td {
                                                     (record.progress)

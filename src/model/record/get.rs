@@ -1,4 +1,4 @@
-use super::{EmbeddedRecord, Record};
+use super::{EmbeddedRecordD, EmbeddedRecordP, EmbeddedRecordPD, Record};
 use crate::{
     error::PointercrateError,
     model::{demon::Demon, record::RecordStatus, submitter::Submitter, Model},
@@ -22,27 +22,24 @@ impl Get<i32> for Record {
     }
 }
 
-impl Get<i32> for Vec<EmbeddedRecord> {
+impl Get<i32> for Vec<EmbeddedRecordD> {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        Ok(EmbeddedRecord::all()
-            .filter(records::player.eq(&id))
-            .filter(records::status_.eq(&RecordStatus::Approved))
-            .load(connection)?)
+        Ok(EmbeddedRecordD::by_player_and_status(id, RecordStatus::Approved).load(connection)?)
     }
 }
 
-impl<'a> Get<&'a Demon> for Vec<EmbeddedRecord> {
+impl<'a> Get<&'a Demon> for Vec<EmbeddedRecordP> {
     fn get(demon: &'a Demon, connection: &PgConnection) -> Result<Self> {
-        Ok(EmbeddedRecord::all()
-            .filter(records::demon.eq(&demon.name))
-            .filter(records::status_.eq(&RecordStatus::Approved))
-            .load(connection)?)
+        Ok(
+            EmbeddedRecordP::by_demon_and_status(&demon.name, RecordStatus::Approved)
+                .load(connection)?,
+        )
     }
 }
 
-impl<'a> Get<&'a Submitter> for Vec<EmbeddedRecord> {
+impl<'a> Get<&'a Submitter> for Vec<EmbeddedRecordPD> {
     fn get(submitter: &'a Submitter, connection: &PgConnection) -> Result<Self> {
-        Ok(EmbeddedRecord::all()
+        Ok(EmbeddedRecordPD::all()
             .filter(records::submitter.eq(&submitter.id))
             .load(connection)?)
     }

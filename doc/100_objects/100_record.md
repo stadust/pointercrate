@@ -21,8 +21,13 @@ The embedded form of record objects is returned if a record object is part of an
 | id       | integer                        | The record's id                              |
 | progress | integer                        | The progress achieved by the record's holder |
 | status   | [RecordStatus](#record-status) | The record's status.                         |
-| demon    | String                         | The name of the demon the record was made on |
-| player   | String                         | The name of the record holder                |
+
+Depending on the context the object is returned in, one (or both) of the following fields will be present:
+
+| Field  | Type              | Description                      |
+| ------ | ----------------- | -------------------------------- |
+| player | [Player](#player) | The record holder                |
+| demon  | [Demon](#demon)   | The demon the record was made on |
 
 ## Long Form
 

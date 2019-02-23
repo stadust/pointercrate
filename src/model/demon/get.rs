@@ -1,7 +1,7 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     error::PointercrateError,
-    model::{creator::Creators, record::EmbeddedRecord},
+    model::{creator::Creators, record::EmbeddedRecordP},
     operation::Get,
     Result,
 };
@@ -42,7 +42,7 @@ where
     fn get(t: T, connection: &PgConnection) -> Result<Self> {
         let demon = Demon::get(t, connection)?;
         let creators = Creators::get(&demon.name, connection)?;
-        let records = Vec::<EmbeddedRecord>::get(&demon, connection)?;
+        let records = Vec::<EmbeddedRecordP>::get(&demon, connection)?;
 
         Ok(DemonWithCreatorsAndRecords {
             demon,

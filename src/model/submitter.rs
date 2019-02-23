@@ -1,5 +1,5 @@
 use super::{All, Model};
-use crate::{model::record::EmbeddedRecord, schema::submitters};
+use crate::{model::record::EmbeddedRecordPD, schema::submitters};
 use diesel::{
     expression::bound::Bound,
     insert_into,
@@ -31,7 +31,7 @@ pub struct Submitter {
 pub struct SubmitterWithRecords {
     #[serde(flatten)]
     submitter: Submitter,
-    records: Vec<EmbeddedRecord>,
+    records: Vec<EmbeddedRecordPD>,
 }
 
 impl Display for Submitter {
