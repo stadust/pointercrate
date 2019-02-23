@@ -115,8 +115,10 @@ impl Page for DemonlistOverview {
                                         }
                                     }
                                     @else {
-                                        a href = {"/demonlist/" (demon.position)} {
-                                            "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                        h2 {
+                                            a href = {"/demonlist/" (demon.position)} {
+                                                "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                            }
                                         }
                                     }
                                 }

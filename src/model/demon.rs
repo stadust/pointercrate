@@ -291,7 +291,7 @@ impl DemonWithCreatorsAndRecords {
             format!("by {}, verified and published by {}", creator, verifier)
         } else if creator != verifier && creator != publisher && publisher != verifier {
             format!(
-                "by {}, verifier by {}, published by {}",
+                "by {}, verified by {}, published by {}",
                 creator, verifier, publisher
             )
         } else if creator == verifier && creator != publisher {
