@@ -1,9 +1,6 @@
 use super::Page;
 use crate::{
-    actor::{
-        database::{GetDemonlistOverview, GetPlayerRanking},
-        http::GetDemon,
-    },
+    actor::{database::GetDemonlistOverview, http::GetDemon},
     api::PCResponder,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
@@ -55,6 +52,7 @@ pub struct DemonlistOverview {
     pub admins: Vec<User>,
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
+    pub ranking: Vec<RankedPlayer>,
 }
 
 pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -92,17 +90,20 @@ impl Page for DemonlistOverview {
             div.flex.m-center#container {
                 div.left {
                     (submission_panel())
+                    (stats_viewer(&self.ranking))
                     @for demon in &self.demon_overview {
-                        div.panel.fade {
-                            div.underlined {
-                                h2 {
-                                    a href = {"/demonlist/" (demon.position)} {
-                                        "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                        @if demon.position < *EXTENDED_LIST_SIZE {
+                            div.panel.fade {
+                                div.underlined {
+                                    h2 {
+                                        a href = {"/demonlist/" (demon.position)} {
+                                            "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                        }
                                     }
                                 }
-                            }
-                            @if let Some(ref video) = demon.video {
-                                iframe."ratio-16-9"."js-delay-attr" style="width: 90%; margin: 15px 5% 0px" data-attr = "src" data-attr-value = (video::embed(video)) {}
+                                @if let Some(ref video) = demon.video {
+                                    iframe."ratio-16-9"."js-delay-attr" style="width: 90%; margin: 15px 5% 0px" data-attr = "src" data-attr-value = (video::embed(video)) {}
+                                }
                             }
                         }
                     }
@@ -171,7 +172,6 @@ pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
     server_level: Option<PartialLevel<u64, Creator>>,
-    ranking: Vec<RankedPlayer>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -188,23 +188,20 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                     state
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
-                            state.database(GetPlayerRanking).and_then(move |ranking| {
-                                state
-                                    .gdcf
-                                    .send(GetDemon(data.demon.name.clone()))
-                                    .map_err(PointercrateError::internal)
-                                    .map(move |demon| {
-                                        Demonlist {
-                                            overview,
-                                            data,
-                                            server_level: demon,
-                                            ranking,
-                                        }
-                                        .render(&req_clone)
-                                        .respond_to(&req_clone)
-                                        .unwrap()
-                                    })
-                            })
+                            state
+                                .gdcf
+                                .send(GetDemon(data.demon.name.clone()))
+                                .map_err(PointercrateError::internal)
+                                .map(move |demon| {
+                                    Demonlist {
+                                        overview,
+                                        data,
+                                        server_level: demon,
+                                    }
+                                    .render(&req_clone)
+                                    .respond_to(&req_clone)
+                                    .unwrap()
+                                })
                         })
                 })
         })
@@ -245,7 +242,7 @@ impl Page for Demonlist {
             div.flex.m-center#container {
                 div.left {
                     (submission_panel())
-                    (stats_viewer(&self.ranking))
+                    (stats_viewer(&self.overview.ranking))
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 {

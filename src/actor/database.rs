@@ -5,7 +5,7 @@ use crate::{
         auth::{Authorization, Claims},
         cond::IfMatch,
     },
-    model::{demon::PartialDemon, player::RankedPlayer, user::PatchMe, Model, User},
+    model::{demon::PartialDemon, user::PatchMe, Model, User},
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
     permissions::Permissions,
     view::demonlist::DemonlistOverview,
@@ -125,35 +125,19 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
             .order_by(crate::schema::demons::position)
             .load(connection)?;
 
-        Ok(DemonlistOverview {
-            demon_overview: all_demons,
-            admins,
-            mods,
-            helpers,
-        })
-    }
-}
-
-#[derive(Debug)]
-pub struct GetPlayerRanking;
-
-impl Message for GetPlayerRanking {
-    type Result = Result<Vec<RankedPlayer>>;
-}
-
-impl Handler<GetPlayerRanking> for DatabaseActor {
-    type Result = Result<Vec<RankedPlayer>>;
-
-    fn handle(&mut self, _: GetPlayerRanking, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.connection()?;
-
         let ranking = diesel::sql_query(format!(
             include_str!("../../sql/ranking.sql"),
             *EXTENDED_LIST_SIZE
         ))
         .load(connection)?;
 
-        Ok(ranking)
+        Ok(DemonlistOverview {
+            demon_overview: all_demons,
+            admins,
+            mods,
+            helpers,
+            ranking,
+        })
     }
 }
 
