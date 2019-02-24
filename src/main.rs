@@ -39,7 +39,7 @@ use actix_web::{
     http::{Method, NormalizePath, StatusCode},
     server, App, FromRequest, Path, Responder,
 };
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
 #[macro_use]
 pub mod operation;
@@ -80,7 +80,8 @@ fn main() {
     let gdcf = HttpActor::from_env(database.clone().recipient());
 
     let app_factory = move || {
-        let doc_files_location = env!("OUT_DIR");
+        let doc_files_location =
+            std::env::var("DOCUMENTATION").unwrap_or(env!("OUT_DIR").to_string());
         let doc_files_location = std::path::Path::new(&doc_files_location);
 
         let toc = std::fs::read_to_string(doc_files_location.join("../output")).unwrap();
@@ -284,8 +285,13 @@ fn main() {
             })
     };
 
+    let port = match std::env::var("PORT") {
+        Ok(port) => port.parse().unwrap_or(8088),
+        _ => 8088,
+    };
+
     server::new(app_factory)
-        .bind("127.0.0.1:8088")
+        .bind(SocketAddr::from(([127, 0, 0, 1], port)))
         .unwrap()
         .run();
 }
