@@ -45,6 +45,8 @@ impl HttpActor {
         let cache = DatabaseCache::new(config);
         let client = BoomlingsClient::new();
 
+        cache.initialize().unwrap();
+
         HttpActor {
             deletor,
             gdcf: Gdcf::new(client, cache),
