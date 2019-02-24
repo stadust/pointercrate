@@ -2,10 +2,11 @@ use crate::{actor::database::DeleteMessage, model::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
 use gdcf::{
     api::request::level::{LevelsRequest, SearchFilters},
+    cache::CachedObject,
     chrono::Duration,
     model::{
         level::{DemonRating, Level, LevelRating},
-        Creator, NewgroundsSong, PartialLevel,
+        Creator, NewgroundsSong,
     },
     Gdcf, GdcfFuture,
 };
@@ -140,26 +141,29 @@ impl Handler<LevelById> for HttpActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Option<PartialLevel<u64, Creator>>;
+    type Result = Option<Level<u64, Creator>>;
 }
 
 impl Handler<GetDemon> for HttpActor {
-    type Result = Option<PartialLevel<u64, Creator>>;
+    type Result = Option<Level<u64, Creator>>;
 
-    fn handle(
-        &mut self, msg: GetDemon, ctx: &mut Context<Self>,
-    ) -> Option<PartialLevel<u64, Creator>> {
+    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Option<Level<u64, Creator>> {
         let GdcfFuture { cached, inner } = self.gdcf.levels::<u64, Creator>(
             LevelsRequest::default()
-                .search(msg.0)
+                .search(msg.0.clone())
                 .with_rating(LevelRating::Demon(DemonRating::Hard))
                 .filter(SearchFilters::default().rated()),
         );
 
         if let Some(inner) = inner {
+            debug!(
+                "Spawning future to asynchronously perform LevelsRequest for {}",
+                msg.0
+            );
+
             ctx.spawn(
                 inner
-                    .map(|_| ())
+                    .map(|_| info!("LevelsRequest successful"))
                     .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
                     .into_actor(self),
             );
@@ -170,7 +174,25 @@ impl Handler<GetDemon> for HttpActor {
                 let mut inner = inner.extract();
 
                 if !inner.is_empty() {
-                    Some(inner.remove(0))
+                    let best_match = inner.remove(0);
+
+                    let GdcfFuture { cached, inner } = self.gdcf.level(best_match.level_id.into());
+
+                    if let Some(inner) = inner {
+                        debug!(
+                            "Spawning future to asynchronously perform LevelRequest for {}",
+                            msg.0
+                        );
+
+                        ctx.spawn(
+                            inner
+                                .map(|level| info!("Successfully retrieved level {}", level))
+                                .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
+                                .into_actor(self),
+                        );
+                    }
+
+                    cached.map(CachedObject::extract)
                 } else {
                     None
                 }

@@ -121,6 +121,10 @@ tr:nth-child(even) {
   }
 }
 
+#level-info span {
+  margin: 5px 10px;
+}
+
 #statsviewer ul {
   color: black;
 

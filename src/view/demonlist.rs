@@ -5,7 +5,7 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{
-        demon::{Demon, DemonWithCreatorsAndRecords, PartialDemon},
+        demon::{self, Demon, DemonWithCreatorsAndRecords, PartialDemon},
         player::RankedPlayer,
         user::User,
     },
@@ -13,7 +13,7 @@ use crate::{
     video,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
-use gdcf::model::{Creator, PartialLevel};
+use gdcf::model::{level::Password, Creator, Level};
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
@@ -187,7 +187,7 @@ impl Page for DemonlistOverview {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
-    server_level: Option<PartialLevel<u64, Creator>>,
+    server_level: Option<Level<u64, Creator>>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -234,7 +234,7 @@ impl Page for Demonlist {
 
     fn description(&self) -> String {
         if let Some(ref level) = self.server_level {
-            if let Some(ref description) = level.description {
+            if let Some(ref description) = level.base.description {
                 return format!("{}: {}", self.title(), description)
             }
         }
@@ -251,6 +251,16 @@ impl Page for Demonlist {
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         let dropdowns = dropdowns(req, &self.overview.demon_overview, Some(&self.data.demon));
+        let score100 = demon::score(
+            self.data.demon.position,
+            100,
+            self.overview.demon_overview.len(),
+        );
+        let score_requirement = demon::score(
+            self.data.demon.position,
+            self.data.demon.requirement,
+            self.overview.demon_overview.len(),
+        );
 
         html! {
             (dropdowns)
@@ -261,7 +271,7 @@ impl Page for Demonlist {
                     (stats_viewer(&self.overview.ranking))
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
-                            h1 {
+                            h1 style = "overflow: hidden"{
                                 (self.data.demon.name)
                             }
                             h3 {
@@ -281,7 +291,7 @@ impl Page for Demonlist {
                             }
                         }
                         @if let Some(ref level) = self.server_level {
-                            @if let Some(ref description) = level.description {
+                            @if let Some(ref description) = level.base.description {
                                 div.underlined.pad {
                                     q {
                                         (description)
@@ -290,7 +300,66 @@ impl Page for Demonlist {
                             }
                         }
                         @if let Some(ref video) = self.data.demon.video {
-                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5% 0px" data-attr = "src" data-attr-value = (video::embed(video)) {"Verification Video"}
+                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" data-attr = "src" data-attr-value = (video::embed(video)) {"Verification Video"}
+                        }
+                        div.underlined.pad.flex.wrap#level-info {
+                            @if let Some(ref level) = self.server_level {
+                                span {
+                                    b {
+                                        "Level Password: "
+                                    }
+                                    br;
+                                    @match level.password {
+                                        Password::NoCopy => "Not copyable",
+                                        Password::FreeCopy => "Free to copy",
+                                        Password::PasswordCopy(ref pw) => (pw)
+                                    }
+                                }
+                                span {
+                                    b {
+                                        "Level ID: "
+                                    }
+                                    br;
+                                    (level.base.level_id)
+                                }
+                                span {
+                                    b {
+                                        "Level length: "
+                                    }
+                                    br;
+                                    (level.base.length.to_string())
+                                }
+                                span {
+                                    b {
+                                        div.tooltip {
+                                        "Reported object count: "
+                                            div.tooltiptext.fade {
+                                                "The object count reported by the Geometry Dash servers is mostly wrong. It is provided by the game client and not validated by the servers. Additionally to the official client having a set of bugs that can cause the count to be wrong, the servers also store the object count in a 16 bit unsigned integer. This means that if a level has more than 65535 objects, it'll simply display 65535. Furthermore, since the count isn't validated, it is possible to manually send fake requests to the servers to set the object count to arbitrary values."
+                                            }
+                                        }
+                                    }
+                                    br;
+                                    (level.base.object_amount)
+                                }
+                            }
+                            @if self.data.demon.position <= *EXTENDED_LIST_SIZE {
+                                span {
+                                    b {
+                                        "Demonlist score (100%): "
+                                    }
+                                    br;
+                                        (format!("{:.2}", score100))
+                                }
+                            }
+                            @if self.data.demon.position <= *LIST_SIZE {
+                                span {
+                                    b {
+                                        "Demonlist score (" (self.data.demon.requirement) "%)"
+                                    }
+                                    br;
+                                    (format!("{:.2}", score_requirement))
+                                }
+                            }
                         }
                     }
                     (rules_panel())

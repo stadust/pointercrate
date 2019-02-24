@@ -480,3 +480,17 @@ impl Into<EmbeddedDemon> for PartialDemon {
         }
     }
 }
+
+pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
+    let position = f64::from(position);
+    let progress = f64::from(progress);
+    let list_length = list_length as f64;
+
+    f64::powf(progress / 100f64, position) * list_length
+        / (1f64
+            + (list_length - 1f64)
+                * f64::exp(
+                    (-4f64 * f64::ln(list_length - 1f64) * (list_length - position))
+                        / (3f64 * list_length),
+                ))
+}
