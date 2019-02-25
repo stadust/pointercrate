@@ -8,7 +8,6 @@ class Submitter {
     this._player = this.domElement.find("#id_player");
     this._video = this.domElement.find("#id_video");
     this._progress = this.domElement.find("#id_progress");
-    this._check = this.domElement.find("#id_check");
   }
 
   show() {
@@ -30,8 +29,7 @@ class Submitter {
         demon: this.demon,
         player: this.player,
         video: this.video,
-        progress: this.progress,
-        check: this.check
+        progress: this.progress
       }),
       statusCode: {
         204: () => (this.output = "This record can be submitted!"),
@@ -60,10 +58,6 @@ class Submitter {
 
   get progress() {
     return parseInt(this._progress.val());
-  }
-
-  get check() {
-    return this._check[0].checked;
   }
 
   set output(data) {
