@@ -610,7 +610,7 @@ fn submission_panel() -> Markup {
                     p {
                         "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs!"
                     }
-                    input#id_player type = "text" name = "demon" required="" placeholder="e. g. 'Slypp, 'Krazyman50'" maxlength="50" ;
+                    input#id_player type = "text" name = "demon" required="" placeholder="e. g. 'Slypp, 'KrmaL'" maxlength="50" ;
                     h3 {
                         "Progress:"
                     }

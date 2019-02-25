@@ -1,5 +1,6 @@
 use crate::{error::PointercrateError, state::PointercrateState};
 use actix_web::{
+    http::Method,
     middleware::{Middleware, Started},
     Error, HttpRequest,
 };
@@ -109,16 +110,30 @@ impl Middleware<PointercrateState> for Authorizer {
             if let Some(token_cookie) = req.cookie("access_token") {
                 let token = token_cookie.value();
 
-                // if we're doing cookie based authorization, there needs to be a X-CSRF-TOKEN
-                // header set
+                if *req.method() == Method::GET {
+                    Authorization::Token {
+                        access_token: token.to_string(),
+                        csrf_token: None,
+                    }
+                } else {
+                    // if we're doing cookie based authorization, there needs to be a X-CSRF-TOKEN
+                    // header set, unless we're in GET requests, in which case everything is fine
+                    // :tm:
 
-                match header!(req, "X-CSRF-TOKEN") {
-                    Some(csrf_token) =>
-                        Authorization::Token {
-                            access_token: token.to_string(),
-                            csrf_token: Some(csrf_token.to_string()),
-                        },
-                    None => return Err(PointercrateError::Unauthorized.into()),
+                    match header!(req, "X-CSRF-TOKEN") {
+                        Some(csrf_token) =>
+                            Authorization::Token {
+                                access_token: token.to_string(),
+                                csrf_token: Some(csrf_token.to_string()),
+                            },
+                        None =>
+                        // Here's the thing: We cannot simply abort the request here, as this could
+                        // be a POST request that doesn't require authentication. The browser would
+                        // send the cookie along anyway, but there'd be no csrf token (because why
+                        // would there be, the request doesn't request auth). We therefore act as if
+                        // not even the cookie was set
+                            Authorization::Unauthorized,
+                    }
                 }
             } else {
                 Authorization::Unauthorized

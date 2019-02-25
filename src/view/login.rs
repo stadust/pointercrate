@@ -62,7 +62,7 @@ impl Page for LoginPage {
                     "By using pointercrate accounts you agree to cookies. If you don't then I formally request you to stop using the internet as you obviously have no idea what you're talking about. "
                 }
                 div.flex#login {
-                    div.rightlined.flex.col style="margin: 0" {
+                    div.flex.col {
                         h2 {"Login"}
                         p {
                             "Log in to an existing pointercrate account. If you do not have an account yet, register on the right or below. If you aren't pointercrate staff, this isn't interesting to you (yet)"
