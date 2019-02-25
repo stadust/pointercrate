@@ -347,7 +347,7 @@ CREATE FUNCTION audit_user_modification() RETURNS trigger as $user_modification_
     END;
 $user_modification_trigger$ LANGUAGE plpgsql;
 
-CREATE TRIGGER user_modification_trigger AFTER INSERT ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_modification();
+CREATE TRIGGER user_modification_trigger AFTER UPDATE ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_modification();
 
 CREATE TABLE user_deletions (
     id INTEGER NOT NULL -- REFERENCES members(member_id)
@@ -366,4 +366,4 @@ CREATE FUNCTION audit_user_deletion() RETURNS trigger AS $user_deletion_trigger$
     END;
 $user_deletion_trigger$ LANGUAGE plpgsql;
 
-CREATE TRIGGER user_deletion_trigger AFTER INSERT ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_deletion();
+CREATE TRIGGER user_deletion_trigger AFTER DELETE ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_deletion();
