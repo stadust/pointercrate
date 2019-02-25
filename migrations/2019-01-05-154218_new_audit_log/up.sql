@@ -303,7 +303,7 @@ CREATE TABLE user_additions (
 CREATE FUNCTION audit_user_addition() RETURNS trigger AS $audit_user_addition$
     BEGIN
         -- cannot be logged in during registration
-        INSERT INTO user_additions (userid, id) VALUES (NULL, NEW.member_id);
+        INSERT INTO user_additions (userid, id) VALUES (0, NEW.member_id);
 
         RETURN NEW;
     END;
