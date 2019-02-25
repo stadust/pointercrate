@@ -53,6 +53,7 @@ fn handle_error(
 
             HttpResponse::Ok()
                 .content_type("text/html; charset=utf-8")
+                .status(error.status_code())
                 .body(html.0)
         },
         (mime::APPLICATION, mime::JSON) => error.error_response(),
