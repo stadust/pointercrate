@@ -121,6 +121,7 @@ fn main() {
                 r.name("home");
                 r.get().f(view::home::handler)
             })
+            .resource("/login", |r| r.get().f(view::login::handler))
             .resource("/demonlist/", |r| {
                 r.name("demonlist-overview");
                 r.get().f(wrap(view::demonlist::overview_handler))

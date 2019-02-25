@@ -122,10 +122,6 @@ a {
   cursor: pointer;
 }
 
-input {
-  border: 1px solid #ddd;
-}
-
 *:focus {
   outline: none;
 }
@@ -187,6 +183,38 @@ ul.roman li {
   margin: 8px 0px;
 }
 
+/* General Input Styles */
+
+input[type="text"],
+input[type="number"],
+input[type="url"],
+input[type="password"] {
+  border: 1px solid #ddd;
+  min-width: 0; /* Firefox and Egde need this */
+
+  min-height: 1em;
+  height: 2em;
+
+  padding: 0px 5px;
+  margin-left: 10px;
+  margin-right: 10px;
+
+  background: rgba(0, 0, 0, 0);
+}
+
+form input[type="text"]:valid,
+form input[type="number"]:valid,
+form input[type="url"]:valid,
+form input[type="password"]:valid {
+  border-bottom: 1px solid lime;
+}
+
+form input[type="text"]:invalid,
+form input[type="number"]:invalid,
+form input[type="url"]:invalid,
+form input[type="password"]:invalid {
+  border-bottom: 1px solid coral;
+}
 /* Search UI Element */
 
 .search {
@@ -198,15 +226,6 @@ ul.roman li {
 
   display: flex;
   justify-content: space-between;
-}
-
-.search.small {
-  padding: 0px 4px;
-}
-
-.search.small input {
-  height: 1em;
-  padding: 10 0;
 }
 
 .search:before,
@@ -231,29 +250,14 @@ ul.roman li {
 }
 
 .search input {
-  min-width: 0; /* Firefox and Egde need this */
-  min-height: 1em;
-
-  height: 2em;
-
   margin: 5px;
-
   border: 0;
-
-  background: rgba(0, 0, 0, 0);
-
   flex-grow: 2;
 }
 
 .search.seperated input {
   border-left: 1px solid #888;
   border-right: 1px solid #888;
-  padding-right: 3px;
-  padding-left: 3px;
-}
-
-.search input:focus {
-  outline: none;
 }
 
 /* DropDown styles */

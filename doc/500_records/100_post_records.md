@@ -24,14 +24,14 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | ------------ | ------------------------------------------- | -------- |
 | Content-Type | `application/json` or `multipart/form-data` | false    |
 
-| Field    | Type                                                  | Description                                                                                                                                                      | Optional |
-| -------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| progress | integer                                               | The records progress                                                                                                                                             | false    |
-| player   | string                                                | The name of the player holding the record                                                                                                                        | false    |
-| demon    | string                                                | The name of the demon the record is made on                                                                                                                      | false    |
-| video    | URL                                                   | The video of the record                                                                                                                                          | true     |
-| status   | [RecordStatus](/documentation/objects/#record-status) | The status the newly record should have, defaults to `SUBMITTED`                                                                                                 | true     |
-| check    | boolean                                               | Value indication whether the record to be submitted should only be validated, but not actually submitted. Checking records does not count towards the rate limit | true     |
+| Field    | Type                                                  | Description                                                      | Optional |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------------------- | -------- |
+| progress | integer                                               | The records progress                                             | false    |
+| player   | string                                                | The name of the player holding the record                        | false    |
+| demon    | string                                                | The name of the demon the record is made on                      | false    |
+| video    | URL                                                   | The video of the record                                          | true     |
+| status   | [RecordStatus](/documentation/objects/#record-status) | The status the newly record should have, defaults to `SUBMITTED` | true     |
+| check    | boolean                                               | _deprecated_                                                     | true     |
 
 ### Response: `201 CREATED`
 

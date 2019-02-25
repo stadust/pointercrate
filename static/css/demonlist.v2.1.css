@@ -113,7 +113,7 @@ tr:nth-child(even) {
   font-weight: 600;
 }
 
-/* Statsview Styles */
+/* Stats viewer styles */
 
 @media (min-width: 768px) {
   #player-selection {
@@ -166,12 +166,7 @@ tr:nth-child(even) {
 
 /* Submission form styles */
 
-#submitter input:not([type="submit"]) {
-  padding: 0px 5px;
-}
-
 #submitter input:not([type="submit"]):not([type="checkbox"]) {
-  height: 2em;
   width: 98%;
 }
 

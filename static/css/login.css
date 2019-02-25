@@ -1,0 +1,30 @@
+#login span {
+  display: flex;
+  flex-direction: column;
+
+  margin: 10px 0px;
+}
+
+#login span > * {
+  margin: 4px 10px;
+  text-align: left;
+  font-style: italic;
+}
+
+#login > * {
+  max-width: 50%;
+}
+
+*:not(.grow) {
+  flex-grow: 0 !important;
+}
+
+.grow {
+  flex-grow: 1;
+}
+
+#login .error {
+  font-size: 60%;
+  color: coral;
+  margin-top: 0px;
+}

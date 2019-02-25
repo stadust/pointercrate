@@ -561,7 +561,7 @@ fn dropdown(
 
             div.see-through.fade.dropdown#(section.id) {
                 div.search.seperated {
-                    input placeholder = "Filter..." {}
+                    input placeholder = "Filter..." type = "text" {}
                 }
                 p style = "margin: 10px" {
                     (section.description)
@@ -629,11 +629,9 @@ fn submission_panel() -> Markup {
                         "Please pay attention to only submit well-formed URLs!"
                     }
                     input#id_video type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
-                    div style ="font-weight: bold;font-size: 90%;text-align: left;margin-top: 15px;" {
-                        input#id_check type = "checkbox" ;
-                        "Only check for potential errors, do not submit the record (Will not count towards the ratelimit)"
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" {
+                        "Log in"
                     }
-                    input.button.blue.hover.fade.slightly-round type = "submit" style = "margin: 15px auto 0px;";
                 }
             }
         }
@@ -649,8 +647,8 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
             }
             div.flex#stats-viewer-cont {
                 div.flex#player-selection style="flex-direction: column"{
-                    div.search.small.seperated style="flex-grow:0" {
-                        input placeholder = "Filter..." ;
+                    div.search.seperated style="flex-grow:0" {
+                        input placeholder = "Filter..." type = "text" style = "height: 1em";
                     }
                     div style="position:relative; margin: 0px 10px 10px; min-height: 400px" {
                         ul#players style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {
