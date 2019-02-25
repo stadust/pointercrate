@@ -119,16 +119,23 @@ fn main() {
             .handler("/static", fs::StaticFiles::new("static").unwrap())
             .resource("/", |r| {
                 r.name("home");
-                r.get().f(view::home::handler)
+                r.get().f(wrap(view::home::handler));
+                r.route().f(allowed!(GET))
             })
-            .resource("/login", |r| r.get().f(view::login::handler))
+            .resource("/login/", |r| {
+                r.get().f(view::login::handler);
+                r.post().f(wrap(view::login::login));
+                r.route().f(allowed!(GET, POST))
+            })
             .resource("/demonlist/", |r| {
                 r.name("demonlist-overview");
-                r.get().f(wrap(view::demonlist::overview_handler))
+                r.get().f(wrap(view::demonlist::overview_handler));
+                r.route().f(allowed!(GET))
             })
             .resource("/demonlist/{position}/", |r| {
                 r.name("demonlist");
-                r.get().f(wrap(view::demonlist::handler))
+                r.get().f(wrap(view::demonlist::handler));
+                r.route().f(allowed!(GET))
             })
             .resource("/documentation/", |r| {
                 r.name("documentation");

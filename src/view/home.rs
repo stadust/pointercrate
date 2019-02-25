@@ -1,5 +1,7 @@
 use super::Page;
-use crate::{model::user::User, permissions::Permissions, state::PointercrateState};
+use crate::{
+    api::PCResponder, model::user::User, permissions::Permissions, state::PointercrateState,
+};
 use actix_web::{AsyncResponder, HttpRequest, Responder};
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::Future;
@@ -10,7 +12,7 @@ struct Homepage {
     pointercrate_team: Vec<User>,
 }
 
-pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
 
     req.state()
@@ -21,6 +23,8 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
                 pointercrate_team,
             }
             .render(&req_clone)
+            .respond_to(&req_clone)
+            .unwrap()
         })
         .responder()
 }

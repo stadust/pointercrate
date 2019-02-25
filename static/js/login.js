@@ -49,9 +49,13 @@ $(document).ready(function() {
 
       $.ajax({
         method: "POST",
-        url: "/api/v1/auth/",
-        username: loginUsernameInput.value,
-        password: loginPasswordInput.value,
+        url: "/login/",
+        dataType: "json",
+        headers: {
+          Authorization:
+            "Basic " +
+            btoa(loginUsernameInput.value + ":" + loginPasswordInput.value)
+        },
         error: function(data) {
           loginPasswordError.innerHTML = "Invalid credentials";
           loginPasswordInput.value = "";
@@ -108,9 +112,16 @@ $(document).ready(function() {
         success: function() {
           $.ajax({
             method: "POST",
-            url: "/api/v1/auth/",
-            username: registerUsernameInput.value,
-            password: registerPasswordInput.value,
+            url: "/login/",
+            headers: {
+              Authorization:
+                "Basic " +
+                btoa(
+                  registerUsernameInput.value +
+                    ":" +
+                    registerPasswordInput.value
+                )
+            },
             success: function() {
               window.location = "/account";
             }

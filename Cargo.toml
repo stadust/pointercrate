@@ -31,6 +31,7 @@ serde_urlencoded = "0.5.3"
 joinery = "1.2.2"
 maud = {version = "0.20.0", features = ["actix-web"]}
 mime = "0.3.12"
+cookie = "0.11.0"
 
 [dependencies.diesel-derive-enum]
 version = "0.4.4"
