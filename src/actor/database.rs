@@ -179,10 +179,14 @@ impl Handler<TokenAuth> for DatabaseActor {
     fn handle(&mut self, msg: TokenAuth, _: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
 
-        if let Authorization::Token(token) = msg.0 {
+        if let Authorization::Token {
+            access_token,
+            csrf_token,
+        } = msg.0
+        {
             // Well this is reassuring. Also we directly deconstruct it and only save the ID so we
             // don't accidentally use unsafe values later on
-            let Claims { id, .. } = jsonwebtoken::dangerous_unsafe_decode::<Claims>(&token)
+            let Claims { id, .. } = jsonwebtoken::dangerous_unsafe_decode::<Claims>(&access_token)
                 .map_err(|_| PointercrateError::Unauthorized)?
                 .claims;
 
@@ -194,7 +198,13 @@ impl Handler<TokenAuth> for DatabaseActor {
             let user =
                 User::get(id, &*self.connection()?).map_err(|_| PointercrateError::Unauthorized)?;
 
-            user.validate_token(&token)
+            let user = user.validate_token(&access_token)?;
+
+            if let Some(ref csrf_token) = csrf_token {
+                user.validate_csrf_token(csrf_token)?
+            }
+
+            Ok(user)
         } else {
             Err(PointercrateError::Unauthorized)
         }
@@ -209,7 +219,7 @@ impl Handler<Invalidate> for DatabaseActor {
     type Result = Result<()>;
 
     fn handle(&mut self, msg: Invalidate, ctx: &mut Self::Context) -> Self::Result {
-        if let Authorization::Basic(_, ref password) = msg.0 {
+        if let Authorization::Basic { ref password, .. } = msg.0 {
             let password = password.clone();
             let user = self.handle(BasicAuth(msg.0), ctx)?;
             let patch = PatchMe {
@@ -241,7 +251,7 @@ impl Handler<BasicAuth> for DatabaseActor {
     fn handle(&mut self, msg: BasicAuth, _: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
 
-        if let Authorization::Basic(username, password) = msg.0 {
+        if let Authorization::Basic { username, password } = msg.0 {
             debug!(
                 "Trying to authorize user {} (still not logging the password)",
                 username

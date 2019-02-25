@@ -3,10 +3,10 @@ use crate::{
     actor::database::BasicAuth, api::PCResponder, model::user::User, state::PointercrateState,
 };
 use actix_web::{http::Cookie, AsyncResponder, HttpRequest, HttpResponse, Responder};
+use cookie::SameSite;
 use log::info;
 use maud::{html, Markup};
 use tokio::prelude::Future;
-use cookie::SameSite;
 
 #[derive(Debug)]
 pub struct LoginPage;

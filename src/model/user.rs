@@ -3,7 +3,7 @@ use crate::{
     bitstring::Bits,
     config::SECRET,
     error::PointercrateError,
-    middleware::auth::Claims,
+    middleware::auth::{CSRFClaims, Claims},
     permissions::{Permissions, PermissionsSet},
     schema::members,
     Result,
@@ -219,6 +219,31 @@ impl User {
                 PointercrateError::Unauthorized
             })
             .map(move |_| self)
+    }
+
+    pub fn generate_csrf_token(&self) -> String {
+        use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+        let start = SystemTime::now();
+        let since_epoch = start.duration_since(UNIX_EPOCH).expect("time when backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
+
+        let claim = CSRFClaims {
+            id: self.id,
+            iat: since_epoch.as_secs(),
+            exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
+        };
+
+        jsonwebtoken::encode(&jsonwebtoken::Header::default(), &claim, &SECRET).unwrap()
+    }
+
+    pub fn validate_csrf_token(&self, token: &str) -> Result<()> {
+        jsonwebtoken::decode::<CSRFClaims>(token, &SECRET, &jsonwebtoken::Validation::default())
+            .map_err(|err| {
+                warn!("Token validation FAILED for account {}: {}", self.id, err);
+
+                PointercrateError::Unauthorized
+            })
+            .map(|_| ())
     }
 
     fn password_hash(&self) -> String {

@@ -13,15 +13,25 @@ pub enum Authorization {
     Unauthorized,
 
     /// The chosen authorization method was `Basic`
-    Basic(String, String),
+    Basic { username: String, password: String },
 
     /// The chosen authorization method was `Bearer`
-    Token(String),
+    Token {
+        access_token: String,
+        csrf_token: Option<String>,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub id: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CSRFClaims {
+    pub id: i32,
+    pub exp: u64,
+    pub iat: u64,
 }
 
 /// Actix-Web Middleware that deals with Authorization headers
@@ -66,7 +76,10 @@ impl Middleware<PointercrateState> for Authorizer {
                     if let [username, password] = &decoded.split(':').collect::<Vec<_>>()[..] {
                         debug!("Found basic authorization!");
 
-                        Authorization::Basic(username.to_string(), password.to_string())
+                        Authorization::Basic {
+                            username: username.to_string(),
+                            password: password.to_string(),
+                        }
                     } else {
                         warn!("Malformed 'Authorization' header");
 
@@ -78,7 +91,10 @@ impl Middleware<PointercrateState> for Authorizer {
                 ["Bearer", token] => {
                     debug!("Found token (Bearer) authorization");
 
-                    Authorization::Token(token.to_string())
+                    Authorization::Token {
+                        access_token: token.to_string(),
+                        csrf_token: None,
+                    }
                 },
                 _ => {
                     warn!("Malformed 'Authorization' header");
@@ -88,9 +104,25 @@ impl Middleware<PointercrateState> for Authorizer {
                 },
             }
         } else {
-            debug!("Found no authorization!");
+            debug!("Found no authorization header, testing for cookie based authorization!");
 
-            Authorization::Unauthorized
+            if let Some(token_cookie) = req.cookie("access_token") {
+                let token = token_cookie.value();
+
+                // if we're doing cookie based authorization, there needs to be a X-CSRF-TOKEN
+                // header set
+
+                match header!(req, "X-CSRF-TOKEN") {
+                    Some(csrf_token) =>
+                        Authorization::Token {
+                            access_token: token.to_string(),
+                            csrf_token: Some(csrf_token.to_string()),
+                        },
+                    None => return Err(PointercrateError::Unauthorized.into()),
+                }
+            } else {
+                Authorization::Unauthorized
+            }
         };
 
         req.extensions_mut().insert(authorization);
