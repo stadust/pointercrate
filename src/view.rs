@@ -5,6 +5,7 @@ use crate::{
 use actix_web::HttpRequest;
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
+pub mod account;
 pub mod demonlist;
 pub mod documentation;
 pub mod error;

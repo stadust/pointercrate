@@ -127,6 +127,10 @@ fn main() {
                 r.post().f(wrap(view::login::login));
                 r.route().f(allowed!(GET, POST))
             })
+            .resource("/account/", |r| {
+                r.get().f(wrap(view::account::handler));
+                r.route().f(allowed!(GET))
+            })
             .resource("/demonlist/", |r| {
                 r.name("demonlist-overview");
                 r.get().f(wrap(view::demonlist::overview_handler));

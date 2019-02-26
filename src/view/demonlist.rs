@@ -629,9 +629,7 @@ fn submission_panel() -> Markup {
                         "Please pay attention to only submit well-formed URLs!"
                     }
                     input#id_video type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" {
-                        "Log in"
-                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
             }
         }

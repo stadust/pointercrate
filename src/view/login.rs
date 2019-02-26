@@ -28,6 +28,7 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> PCResponder {
                     Cookie::build("access_token", user.generate_token())
                         .http_only(true) // TODO: secure cookies if and only if we have an https connection
                         .same_site(SameSite::Strict)
+                        .path("/")
                         .finish(),
                 )
                 .finish()
