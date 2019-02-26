@@ -215,6 +215,12 @@ form input[type="url"]:invalid,
 form input[type="password"]:invalid {
   border-bottom: 1px solid coral;
 }
+
+.form-input .error {
+  font-size: 60%;
+  color: coral;
+  margin-top: 0px;
+}
 /* Search UI Element */
 
 .search {

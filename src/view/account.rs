@@ -42,14 +42,84 @@ impl Page for AccountPage {
     }
 
     fn stylesheets(&self) -> Vec<&str> {
-        vec![]
+        vec!["css/account.css"]
     }
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html! {
             div.m-center.flex.panel.fade.col.wrap style = "margin: 100px 0px;"{
                 h1.underlined.pad {
-                    "Pointercrate Account"
+                    "Settings and Configuration"
+                }
+
+                div.tabbed.flex {
+                    div.tab-selection.flex.col.rightlined style="text-align: center;flex-grow:0"{
+                        div.tab.tab-active.hover.scale data-tab-id="1" style="padding: 10px" {
+                            h3 {
+                                "Profile"
+                            }
+                            i class = "fa fa-user fa-2x" aria-hidden="true" {}
+                        }
+                    }
+                    div.tab-display {
+                        div.tab-content.tab-content-active data-tab-id ="1" {
+                            h2 {
+                                "Profile - " (self.user.name())
+                            }
+                            div.flex.space.wrap#things {
+                                span {
+                                    b {
+                                        "Username: "
+                                    }
+                                    (self.user.name)
+                                    p {
+                                        "The name you registered under and which you use to log in to pointercrate. This name is unique to your account, and cannot be changed"
+                                    }
+                                }
+                                span {
+                                    b {
+                                        "Display name: "
+                                    }
+                                    @match self.user.display_name {
+                                        Some(ref dn) => (dn),
+                                        None => "-"
+                                    }
+                                    p {
+                                        "If set, this name will be displayed instead of your username. Display names aren't unique."
+                                    }
+                                }
+                                span {
+                                    b {
+                                        "Youtube channel: "
+                                    }
+                                    @match self.user.youtube_channel {
+                                        Some(ref yc) => (yc),
+                                        None => "-"
+                                    }
+                                    p {
+                                        "A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it."
+                                    }
+                                }
+                                span {
+                                    b {
+                                        "Permissions: "
+                                    }
+                                    (self.user.permissions())
+                                    p {
+                                        "The permissions you have on pointercrate. 'Extended Access' means you can retrieve more data from the API if you authorize yourself, 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
+                                    }
+                                }
+                            }
+                        }
+                        div.flex style = "justify-content: end" {
+                            a.blue.hover.button#token {
+                                "Get access token"
+                            }
+                            a.blue.hover.button#edit {
+                                "Edit"
+                            }
+                        }
+                    }
                 }
             }
         }

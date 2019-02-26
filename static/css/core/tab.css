@@ -5,3 +5,7 @@
 .tab {
   cursor: pointer;
 }
+
+.tab-active {
+  color: #0881c6;
+}

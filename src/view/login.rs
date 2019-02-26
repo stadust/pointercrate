@@ -12,6 +12,7 @@ use tokio::prelude::Future;
 pub struct LoginPage;
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+    // TODO: if already logged in, redirect to /account/
     LoginPage.render(req)
 }
 
@@ -46,7 +47,7 @@ impl Page for LoginPage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/login.js"]
+        vec!["js/login.js", "js/form.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -66,15 +67,15 @@ impl Page for LoginPage {
                     div.flex.col {
                         h2 {"Login"}
                         p {
-                            "Log in to an existing pointercrate account. If you do not have an account yet, register on the right or below. If you aren't pointercrate staff, this isn't interesting to you (yet)"
+                            "Log in to an existing pointercrate account. If you do not have an account yet, register on the right or below. "
                         }
                         form.flex.col.grow#login-form novalidate = "" {
-                            span#login-username {
+                            span.form-input#login-username {
                                 label for = "username" {"Username:"}
                                 input required = "" type = "text" name = "username" minlength = "3";
                                 p.error {}
                             }
-                            span#login-password {
+                            span.form-input#login-password {
                                 label for = "password" {"Password:"}
                                 input required = "" type = "password" name = "password" minlength = "10";
                                 p.error {}
@@ -87,19 +88,19 @@ impl Page for LoginPage {
                         h2 {"Register"}
                         form.flex.col.grow#register-form novalidate = "" {
                             p {
-                                "Create a new pointercrate account. The chosen username will " i{"not"} " be changable after (not even by asking an admin nicely). "
+                                "Not registered yet? Create a new pointercrate account below."
                             }
-                            span#register-username {
+                            span.form-input#register-username {
                                 label for = "username" {"Username:"}
                                 input required = "" type = "text" name = "username";
                                 p.error {}
                             }
-                            span#register-password {
+                            span.form-input#register-password {
                                 label for = "password" {"Password:"}
                                 input required = "" type = "password" name = "password" minlength = "10";
                                 p.error {}
                             }
-                            span#register-password-repeat {
+                            span.form-input#register-password-repeat {
                                 label for = "password2" {"Repeat Password:"}
                                 input required = "" type = "password" name = "password2" minlength = "10";
                                 p.error {}

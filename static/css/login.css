@@ -19,12 +19,6 @@
   flex-grow: 1;
 }
 
-#login .error {
-  font-size: 60%;
-  color: coral;
-  margin-top: 0px;
-}
-
 #login > * {
   margin: 5px;
   padding: 5px;

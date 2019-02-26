@@ -1,0 +1,17 @@
+.button {
+  max-width: 100px;
+  margin: 10px;
+}
+
+#things span {
+  margin: 5px;
+}
+
+#things {
+  text-align: left;
+}
+
+#things p {
+  font-size: 90%;
+  margin: 0px;
+}

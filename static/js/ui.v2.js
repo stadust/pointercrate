@@ -124,12 +124,6 @@ $(document).ready(function() {
     DropDown.allDropDowns[elem.id] = new DropDown($(elem));
   });
 
-  // register dialogs
-
-  $(".overlay").each((index, element) => {
-    Dialog.allDialogs[element.id] = new Dialog(element);
-  });
-
   // register search elements
 
   $(".search").each((index, element) => {

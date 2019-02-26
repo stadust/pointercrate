@@ -1,5 +1,6 @@
 use crate::bitstring::Bits;
 use bitflags::bitflags;
+use joinery::Joinable;
 use serde::{ser::SerializeSeq, Serialize, Serializer};
 use serde_derive::Deserialize;
 use std::{
@@ -42,6 +43,42 @@ bitflags! {
 
         #[allow(non_upper_case_globals)]
         const ItIsImpossibleToGainThisPermission = 0b1000_0000_0000_0000;
+    }
+}
+
+impl Display for Permissions {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        let mut perms = Vec::new();
+
+        if *self & Permissions::ExtendedAccess == Permissions::ExtendedAccess {
+            perms.push("Extended Access")
+        }
+
+        if *self & Permissions::ListHelper == Permissions::ListHelper {
+            perms.push("List Helper")
+        }
+
+        if *self & Permissions::ListModerator == Permissions::ListModerator {
+            perms.push("List Moderator")
+        }
+
+        if *self & Permissions::ListAdministrator == Permissions::ListAdministrator {
+            perms.push("List Administrator")
+        }
+
+        if *self & Permissions::Moderator == Permissions::Moderator {
+            perms.push("Moderator")
+        }
+
+        if *self & Permissions::Administrator == Permissions::Administrator {
+            perms.push("Administrator")
+        }
+
+        if perms.is_empty() {
+            write!(f, "None")
+        } else {
+            write!(f, "{}", perms.join_with(", "))
+        }
     }
 }
 
