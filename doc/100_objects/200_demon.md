@@ -39,7 +39,6 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | position    | integer                 | The position of the demon                                               |
 | requirement | integer                 | The minimum percentage a record on this demon has to be, to be accepted |
 | video       | URL?                    | The verification video.                                                 |
-| notes       | string                  | Extra notes added to the demon by the list mods                         |
 | verifier    | [Player](#player)       | The demon's verifier                                                    |
 | publisher   | [Player](#player)       | The demon's publisher                                                   |
 | creators    | List[[Player](#player)] | The demon's creators                                                    |

@@ -31,14 +31,13 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | requirement | integer | Set to update the record requirement                            | true     |
 | verifier    | string  | Set to update the verifier. Needs to be the name of the player  | true     |
 | publisher   | string  | Set to update the publisher. Needs to be the name of the player | true     |
-| notes       | string  | Set to update the notes                                         | true     |
 
 ### Response: `200 OK`
 
-| Header       | Value                                    |
-| ------------ | ---------------------------------------- |
-| Content-Type | `application/json`                       |
-| ETag         | unsigned 64 bit  hash of the updated demon |
+| Header       | Value                                     |
+| ------------ | ----------------------------------------- |
+| Content-Type | `application/json`                        |
+| ETag         | unsigned 64 bit hash of the updated demon |
 
 | Field | Type                                   | Description              |
 | ----- | -------------------------------------- | ------------------------ |
@@ -48,9 +47,9 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 
 Returned when the `PATCH` operation did not make any changes.
 
-| Header | Value                            |
-| ------ | -------------------------------- |
-| ETag   | unsigned 64 bit  hash of the demon |
+| Header | Value                             |
+| ------ | --------------------------------- |
+| ETag   | unsigned 64 bit hash of the demon |
 
 ### Errors:
 
@@ -71,7 +70,6 @@ Content-Type: application/merge-patch+json
 If-Match: cPOrB3TM19Ffsm8PAkD2jNqB61A=
 
 {
-    "notes": "This demon was hack-verified",
     "position": 17,
     "requirement": 45
 }

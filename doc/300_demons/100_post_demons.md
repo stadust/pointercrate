@@ -28,16 +28,15 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | verifier    | string       | The name of the verifier of the demon  | false    |
 | publisher   | string       | The name of the publisher of the demon | false    |
 | creators    | List[string] | The names of the creatorsof the demon  | false    |
-| notes       | string       | Additional notes for the demon         | true     |
 | video       | string       | A link to the verification video       | true     |
 
 ### Response: `201 CREATED`
 
-| Header       | Value                                          |
-| ------------ | ---------------------------------------------- |
-| Content-Type | `application/json`                             |
-| Location     | The location of the newly created demon        |
-| ETag         | unsigned 64 bit  hash of the newly created demon |
+| Header       | Value                                           |
+| ------------ | ----------------------------------------------- |
+| Content-Type | `application/json`                              |
+| Location     | The location of the newly created demon         |
+| ETag         | unsigned 64 bit hash of the newly created demon |
 
 | Field | Type                                   | Description                    |
 | ----- | -------------------------------------- | ------------------------------ |
