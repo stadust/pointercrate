@@ -16,9 +16,9 @@ Registering for an account does not provide an access token, it needs to be aqui
 
 ### Request
 
-| Header       | Expected Value                              | Optional |
-| ------------ | ------------------------------------------- | -------- |
-| Content-Type | `application/json` or `multipart/form-data` | false    |
+| Header       | Expected Value     | Optional |
+| ------------ | ------------------ | -------- |
+| Content-Type | `application/json` | false    |
 
 | Field    | Type   | Description   | Optional |
 | -------- | ------ | ------------- | -------- |

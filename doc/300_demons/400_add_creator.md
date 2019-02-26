@@ -16,7 +16,7 @@ Adds a creator the creator list of the demon at the specified position.
 | Header        | Expected Value                                             | Optional |
 | ------------- | ---------------------------------------------------------- | -------- |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens) | false    |
-| Content-Type  | `application/json` or `multipart/form-data`                | false    |
+| Content-Type  | `application/json`                                         | false    |
 
 | Field   | Type   | Description                                       | Optional |
 | ------- | ------ | ------------------------------------------------- | -------- |

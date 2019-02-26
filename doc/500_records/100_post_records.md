@@ -20,9 +20,9 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 
 ### Request:
 
-| Header       | Expected Value                              | Optional |
-| ------------ | ------------------------------------------- | -------- |
-| Content-Type | `application/json` or `multipart/form-data` | false    |
+| Header       | Expected Value     | Optional |
+| ------------ | ------------------ | -------- |
+| Content-Type | `application/json` | false    |
 
 | Field    | Type                                                  | Description                                                      | Optional |
 | -------- | ----------------------------------------------------- | ---------------------------------------------------------------- | -------- |
