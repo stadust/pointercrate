@@ -174,7 +174,7 @@ tr:nth-child(even) {
   margin: 20px 0px 10px 0px;
 }
 
-#submission-form p {
+#submission-form > p {
   margin: 5px 0;
 
   font-size: 90%;

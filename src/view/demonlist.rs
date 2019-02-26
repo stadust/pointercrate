@@ -74,7 +74,7 @@ impl Page for DemonlistOverview {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/demonlist.v2.1.js"]
+        vec!["js/demonlist.v2.1.js", "js/form.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -242,7 +242,7 @@ impl Page for Demonlist {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/demonlist.v2.1.js"]
+        vec!["js/demonlist.v2.1.js", "js/form.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -596,28 +596,37 @@ fn submission_panel() -> Markup {
                 p#submission-output style = "margin: 5px auto; display: none" {}
             }
             div.flex {
-                form#submission-form onsubmit = "return submitter.submit();" {
+                form#submission-form novalidate = "" {
                     h3 {
                         "Demon:"
                     }
                     p {
                         "The demon the record was made on. Only demons in the top " (EXTENDED_LIST_SIZE) " are accepted. This excludes legacy demons!"
                     }
-                    input#id_demon type = "text" name = "demon" required="" placeholder = "e. g. 'Bloodbath', 'Yatagarasu'" ;
+                    span.form-input.flex.col#id_demon {
+                        input type = "text" name = "demon" required="" placeholder = "e. g. 'Bloodbath', 'Yatagarasu'" ;
+                        p.error {}
+                    }
                     h3 {
                         "Holder:"
                     }
                     p {
                         "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs!"
                     }
-                    input#id_player type = "text" name = "demon" required="" placeholder="e. g. 'Slypp, 'KrmaL'" maxlength="50" ;
+                    span.form-input.flex.col#id_player {
+                        input type = "text" name = "demon" required="" placeholder="e. g. 'Slypp, 'KrmaL'" maxlength="50" ;
+                        p.error {}
+                    }
                     h3 {
                         "Progress:"
                     }
                     p {
                         "The progress made as percentage. Only values greater than the demons record requirement and smaller than or equal to 100 are accepted!"
                     }
-                    input#id_progress type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100" ;
+                    span.form-input.flex.col#id_progress {
+                        input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100" ;
+                        p.error {}
+                    }
                     h3 {
                         "Video: "
                     }
@@ -628,7 +637,10 @@ fn submission_panel() -> Markup {
                         i { "Note: " }
                         "Please pay attention to only submit well-formed URLs!"
                     }
-                    input#id_video type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
+                    span.form-input.flex.col#id_video {
+                        input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
+                        p.error {}
+                    }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
             }

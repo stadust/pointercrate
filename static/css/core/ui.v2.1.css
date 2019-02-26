@@ -219,7 +219,10 @@ form input[type="password"]:invalid {
 .form-input .error {
   font-size: 60%;
   color: coral;
-  margin-top: 0px;
+  text-align: left;
+  font-style: italic;
+
+  margin: 4px 10px;
 }
 /* Search UI Element */
 

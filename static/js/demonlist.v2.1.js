@@ -163,7 +163,70 @@ class StatsViewer {
 
 $(document).ready(function() {
   window.statsViewer = new StatsViewer();
-  window.submitter = new Submitter();
+  //window.submitter = new Submitter();
+
+  var submissionForm = new Form(document.getElementById("submission-form"));
+
+  var demon = submissionForm.input("id_demon");
+  var player = submissionForm.input("id_player");
+  var progress = submissionForm.input("id_progress");
+  var video = submissionForm.input("id_video");
+
+  demon.addValidator(valueMissing, "Please specify a demon");
+
+  player.addValidator(valueMissing, "Please specify a record holder");
+  player.addValidator(
+    tooLong,
+    "Due to Geometry Dash's limitations I know that no player has such a long name"
+  );
+
+  progress.addValidator(
+    valueMissing,
+    "Please specify the records's progress progress"
+  );
+  progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
+  progress.addValidator(
+    rangeOverflow,
+    "Record progress cannot be larger than 100%"
+  );
+  progress.addValidator(badInput, "Record progress must be a valid integer");
+  progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+
+  video.addValidator(
+    valueMissing,
+    "Please specify a video so we can check the records validity"
+  );
+  video.addValidator(typeMismatch, "Please enter a valid URL");
+
+  output = $("#submission-output");
+
+  submissionForm.onSubmit(function(event) {
+    $.ajax({
+      method: "POST",
+      url: "/api/v1/records/",
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify({
+        demon: demon.value,
+        player: player.value,
+        video: video.value,
+        progress: parseInt(progress.value)
+      }),
+      error: data => {
+        output.text(data.responseJSON.message);
+        output.slideDown(100);
+      },
+      success: () => {
+        output.text("Record successfully submitted");
+        output.slideDown(100);
+
+        player.value = "";
+        progress.value = "";
+        video.value = "";
+        demon.value = "";
+      }
+    });
+  });
 });
 
 function formatDemon(demon) {

@@ -38,7 +38,7 @@ impl Page for AccountPage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec![]
+        vec!["js/account.js", "js/form.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -49,12 +49,12 @@ impl Page for AccountPage {
         html! {
             div.m-center.flex.panel.fade.col.wrap style = "margin: 100px 0px;"{
                 h1.underlined.pad {
-                    "Settings and Configuration"
+                    "Under Construction"
                 }
 
                 div.tabbed.flex {
                     div.tab-selection.flex.col.rightlined style="text-align: center;flex-grow:0"{
-                        div.tab.tab-active.hover.scale data-tab-id="1" style="padding: 10px" {
+                        div.tab.tab-active.hover.scale data-tab-id="1" style="padding: 10px; flex-grow: 0" {
                             h3 {
                                 "Profile"
                             }
@@ -110,6 +110,26 @@ impl Page for AccountPage {
                                     }
                                 }
                             }
+                        }
+                        p {
+                            "To get a copy of your access token, please reenter your account credentials:"
+                        }
+                        p#access-token {
+
+                        }
+                        form.flex.col.grow#login-form novalidate = "" {
+                            span.form-input#login-username {
+                                label for = "username" {"Username:"}
+                                input required = "" type = "text" name = "username" minlength = "3";
+                                p.error {}
+                            }
+                            span.form-input#login-password {
+                                label for = "password" {"Password:"}
+                                input required = "" type = "password" name = "password" minlength = "10";
+                                p.error {}
+                            }
+                            div.grow {}
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Get access token";
                         }
                         div.flex style = "justify-content: end" {
                             a.blue.hover.button#token {
