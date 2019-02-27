@@ -1,4 +1,4 @@
-use super::Demon;
+use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     model::player::Player,
     operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
@@ -61,6 +61,24 @@ impl Patch<PatchDemon> for Demon {
                 .execute(connection)?;
 
             Ok(self)
+        })
+    }
+}
+
+impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
+    fn patch(self, patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+        let DemonWithCreatorsAndRecords {
+            demon,
+            creators,
+            records,
+        } = self;
+
+        let demon = demon.patch(patch, connection)?;
+
+        Ok(DemonWithCreatorsAndRecords {
+            demon,
+            creators,
+            records,
         })
     }
 }

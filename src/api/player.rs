@@ -43,5 +43,5 @@ patch_handler_with_authorization!(
     i32,
     "Player ID",
     PatchPlayer,
-    Player
+    PlayerWithDemonsAndRecords
 );

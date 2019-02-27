@@ -239,6 +239,12 @@ pub struct DemonWithCreatorsAndRecords {
     pub records: Vec<EmbeddedRecordP>,
 }
 
+impl Display for DemonWithCreatorsAndRecords {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{} (at {})", self.demon.name, self.demon.position)
+    }
+}
+
 impl Hash for DemonWithCreatorsAndRecords {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // We only hash the demon here, because the creators don't matter for the ETag value - they

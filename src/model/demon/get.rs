@@ -35,12 +35,8 @@ impl Get<i16> for Demon {
     }
 }
 
-impl<T> Get<T> for DemonWithCreatorsAndRecords
-where
-    Demon: Get<T>,
-{
-    fn get(t: T, connection: &PgConnection) -> Result<Self> {
-        let demon = Demon::get(t, connection)?;
+impl Get<Demon> for DemonWithCreatorsAndRecords {
+    fn get(demon: Demon, connection: &PgConnection) -> Result<Self> {
         let creators = Creators::get(&demon.name, connection)?;
         let records = Vec::<EmbeddedRecordP>::get(&demon, connection)?;
 
@@ -49,5 +45,14 @@ where
             creators,
             records,
         })
+    }
+}
+
+impl<T> Get<T> for DemonWithCreatorsAndRecords
+where
+    Demon: Get<T>,
+{
+    fn get(t: T, connection: &PgConnection) -> Result<Self> {
+        DemonWithCreatorsAndRecords::get(Demon::get(t, connection)?, connection)
     }
 }

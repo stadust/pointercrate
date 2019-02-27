@@ -49,6 +49,12 @@ pub struct PlayerWithDemonsAndRecords {
     pub published: Vec<EmbeddedDemon>,
 }
 
+impl Display for PlayerWithDemonsAndRecords {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.player)
+    }
+}
+
 #[derive(Debug, QueryableByName)]
 pub struct RankedPlayer {
     #[sql_type = "Integer"]

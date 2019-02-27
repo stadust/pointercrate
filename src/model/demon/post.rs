@@ -32,8 +32,8 @@ pub struct NewDemon<'a> {
     video: Option<&'a String>,
 }
 
-impl Post<PostDemon> for DemonWithCreatorsAndRecords {
-    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Self> {
+impl Post<PostDemon> for Demon {
+    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Demon> {
         info!("Creating new demon from {:?}", data);
 
         Demon::validate_requirement(&mut data.requirement)?;
@@ -69,8 +69,23 @@ impl Post<PostDemon> for DemonWithCreatorsAndRecords {
                 Creator::create_from((data.name.as_ref(), creator.as_ref()), connection)?;
             }
 
-            Ok(DemonWithCreatorsAndRecords::get(data.position, connection)?)
+            Ok(Demon {
+                name: data.name,
+                position: data.position,
+                requirement: data.requirement,
+                video: data.video,
+                notes: None,
+                description: None,
+                publisher,
+                verifier,
+            })
         })
+    }
+}
+
+impl Post<PostDemon> for DemonWithCreatorsAndRecords {
+    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Self> {
+        DemonWithCreatorsAndRecords::get(Demon::create_from(data, connection)?, connection)
     }
 }
 

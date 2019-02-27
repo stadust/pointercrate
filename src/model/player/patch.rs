@@ -1,4 +1,4 @@
-use super::Player;
+use super::{Player, PlayerWithDemonsAndRecords};
 use crate::{
     error::PointercrateError,
     operation::{deserialize_non_optional, Hotfix, Patch},
@@ -55,6 +55,28 @@ impl Patch<PatchPlayer> for Player {
                 .execute(connection)?;
 
             Ok(self)
+        })
+    }
+}
+
+impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
+    fn patch(self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
+        let PlayerWithDemonsAndRecords {
+            player,
+            records,
+            created,
+            verified,
+            published,
+        } = self;
+
+        let player = player.patch(patch, connection)?;
+
+        Ok(PlayerWithDemonsAndRecords {
+            player,
+            records,
+            created,
+            verified,
+            published,
         })
     }
 }

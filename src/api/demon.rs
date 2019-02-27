@@ -7,8 +7,7 @@ use crate::{
     model::{
         creator::{Creator, PostCreator},
         demon::{
-            Demon, DemonPagination, DemonWithCreatorsAndRecords, PartialDemon, PatchDemon,
-            PostDemon,
+            DemonPagination, DemonWithCreatorsAndRecords, PartialDemon, PatchDemon, PostDemon,
         },
     },
     state::PointercrateState,
@@ -49,7 +48,7 @@ patch_handler_with_authorization!(
     i16,
     "Demon position",
     PatchDemon,
-    Demon
+    DemonWithCreatorsAndRecords
 );
 
 pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
