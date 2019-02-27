@@ -67,7 +67,7 @@ impl Display for Demon {
 ///
 /// These representations are used whenever a different object references a demon, or when a list of
 /// demons is requested
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Serialize)]
 pub struct PartialDemon {
     pub name: String,
     pub position: i16,
@@ -92,19 +92,6 @@ impl Queryable<<<PartialDemon as Model>::Selection as Expression>::SqlType, Pg> 
             publisher: row.2,
             video: row.3,
         }
-    }
-}
-
-impl Serialize for PartialDemon {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut map = serializer.serialize_map(Some(4))?;
-        map.serialize_entry("name", &self.name)?;
-        map.serialize_entry("position", &self.position)?;
-        map.serialize_entry("publisher", &self.publisher)?;
-        map.end()
     }
 }
 
