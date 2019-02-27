@@ -12,7 +12,6 @@ use diesel::{
 };
 use joinery::Joinable;
 use log::{debug, warn};
-use serde::{ser::SerializeMap, Serialize, Serializer};
 use serde_derive::Serialize;
 use std::{
     fmt::{Display, Formatter},
