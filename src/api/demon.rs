@@ -37,7 +37,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-post_handler_with_authorization!("/api/v1/demons/", PostDemon, Demon);
+post_handler_with_authorization!("/api/v1/demons/", PostDemon, DemonWithCreatorsAndRecords);
 get_handler!(
     "/api/v1/demons/[position]/",
     i16,

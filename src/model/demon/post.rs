@@ -1,4 +1,4 @@
-use super::Demon;
+use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     model::{creator::Creator, Player},
     operation::{Get, Post, PostData},
@@ -32,8 +32,8 @@ pub struct NewDemon<'a> {
     video: Option<&'a String>,
 }
 
-impl Post<PostDemon> for Demon {
-    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Demon> {
+impl Post<PostDemon> for DemonWithCreatorsAndRecords {
+    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Self> {
         info!("Creating new demon from {:?}", data);
 
         Demon::validate_requirement(&mut data.requirement)?;
@@ -69,16 +69,7 @@ impl Post<PostDemon> for Demon {
                 Creator::create_from((data.name.as_ref(), creator.as_ref()), connection)?;
             }
 
-            Ok(Demon {
-                name: data.name,
-                position: data.position,
-                requirement: data.requirement,
-                video: data.video,
-                notes: None,
-                description: None,
-                publisher,
-                verifier,
-            })
+            Ok(DemonWithCreatorsAndRecords::get(data.position, connection)?)
         })
     }
 }
