@@ -198,7 +198,8 @@ $(document).ready(function() {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
-  output = $("#submission-output");
+  errorOutput = $("#submission-error");
+  successOutput = $("#submission-success");
 
   submissionForm.onSubmit(function(event) {
     $.ajax({
@@ -213,12 +214,12 @@ $(document).ready(function() {
         progress: parseInt(progress.value)
       }),
       error: data => {
-        output.text(data.responseJSON.message);
-        output.slideDown(100);
+        errorOutput.text(data.responseJSON.message);
+        errorOutput.slideDown(100);
       },
       success: () => {
-        output.text("Record successfully submitted");
-        output.slideDown(100);
+        successOutput.text("Record successfully submitted");
+        successOutput.slideDown(100);
 
         player.value = "";
         progress.value = "";

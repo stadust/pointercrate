@@ -4,6 +4,8 @@ $(document).ready(function() {
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
+  var loginError = loginForm.getElementsByClassName("output")[0];
+
   loginUsername.addValidator(valueMissing, "Username required");
   loginUsername.addValidator(
     tooShort,
@@ -18,6 +20,8 @@ $(document).ready(function() {
   );
 
   loginForm.onSubmit(function(event) {
+    loginError.style.display = "";
+
     $.ajax({
       method: "POST",
       url: "/login/",
@@ -27,7 +31,12 @@ $(document).ready(function() {
           "Basic " + btoa(loginUsername.value + ":" + loginPassword.value)
       },
       error: function(data) {
-        loginPassword.setError("Invalid credentials");
+        if (data.status == 401) {
+          loginPassword.setError("Invalid credentials");
+        } else {
+          loginError.innerHTML = data.responseJSON.message;
+          loginError.style.display = "initial";
+        }
       },
       success: function() {
         window.location = "/account";
@@ -40,6 +49,8 @@ $(document).ready(function() {
   var registerUsername = registerForm.input("register-username");
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
+
+  var registerError = registerForm.getElementsByClassName("output")[0];
 
   registerUsername.addValidator(valueMissing, "Username required");
   registerUsername.addValidator(
@@ -64,6 +75,8 @@ $(document).ready(function() {
   );
 
   registerForm.onSubmit(function(event) {
+    registerError.style.display = "";
+
     $.ajax({
       method: "POST",
       url: "/api/v1/auth/register/",
@@ -88,6 +101,10 @@ $(document).ready(function() {
             Authorization:
               "Basic " +
               btoa(registerUsername.value + ":" + registerPassword.value)
+          },
+          error: function(data) {
+            registerError.innerHTML = data.responseJSON.message;
+            registerError.style.display = "initial";
           },
           success: function() {
             window.location = "/account/";

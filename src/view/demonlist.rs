@@ -592,9 +592,8 @@ fn submission_panel() -> Markup {
             div.underlined {
                 h2 {"Record Submission"}
             }
-            i {
-                p#submission-output style = "margin: 5px auto; display: none" {}
-            }
+            p.info-red.output#submission-error {}
+            p.info-green.output#submission-success {}
             div.flex {
                 form#submission-form novalidate = "" {
                     h3 {

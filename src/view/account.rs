@@ -111,32 +111,32 @@ impl Page for AccountPage {
                                 }
                             }
                         }
-                        p {
-                            "To get a copy of your access token, please reenter your account credentials:"
-                        }
-                        p#access-token {
-
-                        }
-                        form.flex.col.grow#login-form novalidate = "" {
-                            span.form-input#login-username {
-                                label for = "username" {"Username:"}
-                                input required = "" type = "text" name = "username" minlength = "3";
-                                p.error {}
+                        div#get-token {
+                            p {
+                                "To get a copy of your access token, please reenter your account credentials:"
                             }
-                            span.form-input#login-password {
-                                label for = "password" {"Password:"}
-                                input required = "" type = "password" name = "password" minlength = "10";
-                                p.error {}
+                            p#access-token {}
+                            form.flex.col.grow#login-form novalidate = "" {
+                                span.form-input#login-username {
+                                    label for = "username" {"Username:"}
+                                    input required = "" type = "text" name = "username" minlength = "3";
+                                    p.error {}
+                                }
+                                span.form-input#login-password {
+                                    label for = "password" {"Password:"}
+                                    input required = "" type = "password" name = "password" minlength = "10";
+                                    p.error {}
+                                }
+                                div.grow {}
+                                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Get access token";
                             }
-                            div.grow {}
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Get access token";
-                        }
-                        div.flex style = "justify-content: end" {
-                            a.blue.hover.button#token {
-                                "Get access token"
-                            }
-                            a.blue.hover.button#edit {
-                                "Edit"
+                            div.flex style = "justify-content: end" {
+                                a.blue.hover.button#token {
+                                    "Get access token"
+                                }
+                                a.blue.hover.button#edit {
+                                    "Edit"
+                                }
                             }
                         }
                     }

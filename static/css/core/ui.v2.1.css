@@ -387,3 +387,41 @@ form input[type="password"]:invalid {
 .overlined.pad {
   padding-top: 10px;
 }
+
+.info-green {
+  background: #ddffdd;
+  border: 1px solid #a8ff93;
+  border-radius: 10px;
+  padding: 5px 15px;
+  color: #074d07;
+  margin: 25px 0px;
+}
+
+.info-green a {
+  color: #68bf0b !important;
+}
+
+.info-yellow {
+  background: #fffadd;
+  border: 1px solid #e0e37b;
+  border-radius: 10px;
+  padding: 5px 15px;
+  color: #4d4707;
+  margin: 25px 0px;
+}
+
+.info-red {
+  background: #fdd;
+  border: 1px solid #ff9393;
+  border-radius: 10px;
+  padding: 5px 15px;
+  color: #4d0707;
+  margin: 25px 0px;
+}
+
+.output {
+  display: none;
+  font-style: italic;
+  font-size: 80%;
+  margin: 0px 10px;
+}
