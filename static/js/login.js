@@ -1,10 +1,11 @@
 $(document).ready(function() {
-  var loginForm = new Form(document.getElementById("login-form"));
+  var htmlLoginForm = document.getElementById("login-form");
+  var loginForm = new Form(htmlLoginForm);
 
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
-  var loginError = loginForm.getElementsByClassName("output")[0];
+  var loginError = htmlLoginForm.getElementsByClassName("output")[0];
 
   loginUsername.addValidator(valueMissing, "Username required");
   loginUsername.addValidator(
@@ -44,13 +45,14 @@ $(document).ready(function() {
     });
   });
 
-  var registerForm = new Form(document.getElementById("register-form"));
+  var htmlRegisterForm = document.getElementById("register-form");
+  var registerForm = new Form(htmlRegisterForm);
 
   var registerUsername = registerForm.input("register-username");
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
 
-  var registerError = registerForm.getElementsByClassName("output")[0];
+  var registerError = htmlRegisterForm.getElementsByClassName("output")[0];
 
   registerUsername.addValidator(valueMissing, "Username required");
   registerUsername.addValidator(

@@ -47,16 +47,6 @@ tr:nth-child(even) {
   font-weight: normal;
 }
 
-.left {
-  max-width: 70%;
-}
-
-.right {
-  align-items: flex-start;
-  max-width: 30%;
-  margin-bottom: 50px;
-}
-
 @media (max-width: 1023px) {
   #rules,
   #discord {

@@ -70,6 +70,9 @@ impl Page for LoginPage {
                             "Log in to an existing pointercrate account. You have 3 login attempts by 30 minutes. If you do not have an account yet, register on the right or below. "
                         }
                         form.flex.col.grow#login-form novalidate = "" {
+                            p {
+                                "For security reasons, retrieving your access tokens requires you to log in again"
+                            }
                             p.info-red.output {}
                             span.form-input#login-username {
                                 label for = "username" {"Username:"}

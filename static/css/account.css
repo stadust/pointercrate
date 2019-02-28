@@ -1,6 +1,9 @@
 .button {
   max-width: 100px;
-  margin: 10px;
+}
+
+.right .button {
+  margin: 0px auto;
 }
 
 #things span {
@@ -12,7 +15,7 @@
 }
 
 #things p {
-  font-size: 90%;
+  font-size: 80%;
   margin: 0px;
 }
 

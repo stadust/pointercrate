@@ -185,6 +185,13 @@ ul.roman li {
 
 /* General Input Styles */
 
+textarea {
+  background: rgba(0, 0, 0, 0);
+  border: 1px solid #ddd;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
 input[type="text"],
 input[type="number"],
 input[type="url"],
@@ -200,6 +207,7 @@ input[type="password"] {
   margin-right: 10px;
 
   background: rgba(0, 0, 0, 0);
+  box-sizing: border-box;
 }
 
 form input[type="text"]:valid,
@@ -216,14 +224,25 @@ form input[type="password"]:invalid {
   border-bottom: 1px solid coral;
 }
 
-.form-input .error {
-  font-size: 60%;
-  color: coral;
+.form-input > * {
   text-align: left;
   font-style: italic;
 
-  margin: 4px 10px;
+  margin: 2px 10px;
 }
+
+.form-input .error {
+  font-size: 60%;
+  color: coral;
+}
+
+.form-input {
+  display: flex;
+  flex-direction: column;
+
+  margin: 10px 0px;
+}
+
 /* Search UI Element */
 
 .search {
