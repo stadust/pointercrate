@@ -120,6 +120,9 @@ impl Page for AccountPage {
                                     "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
                                 }
                                 form.flex.col.grow.underlined.overlined.pad#login-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
+                                    p {
+                                        "For security reasons, retrieving your access tokens requires you to log in again"
+                                    }
                                     p.info-red.output {}
                                     span.form-input#login-username {
                                         label for = "username" {"Username:"}
@@ -155,58 +158,6 @@ impl Page for AccountPage {
                         }
                     }
                 }
-
-                /*div.m-center.flex.panel.fade.col.wrap style = "margin: 100px 0px;"{
-                    h1.underlined.pad {
-                        "Under Construction"
-                    }
-
-                    div.tabbed.flex {
-                        div.tab-selection.flex.col.rightlined style="text-align: center;flex-grow:0"{
-                            div.tab.tab-active.hover.scale data-tab-id="1" style="padding: 10px; flex-grow: 0" {
-                                h3 {
-                                    "Profile"
-                                }
-                                i class = "fa fa-user fa-2x" aria-hidden="true" {}
-                            }
-                        }
-                        div.tab-display {
-                            div.tab-content.tab-content-active data-tab-id ="1" {
-                                h2 {
-                                    "Profile - " (self.user.name())
-                                }
-
-                            div#get-token {
-                                p {
-                                    "To get a copy of your access token, please reenter your account credentials:"
-                                }
-                                p#access-token {}
-                                form.flex.col.grow#login-form novalidate = "" {
-                                    span.form-input#login-username {
-                                        label for = "username" {"Username:"}
-                                        input required = "" type = "text" name = "username" minlength = "3";
-                                        p.error {}
-                                    }
-                                    span.form-input#login-password {
-                                        label for = "password" {"Password:"}
-                                        input required = "" type = "password" name = "password" minlength = "10";
-                                        p.error {}
-                                    }
-                                    div.grow {}
-                                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Get access token";
-                                }
-                                div.flex style = "justify-content: end" {
-                                    a.blue.hover.button#token {
-                                        "Get access token"
-                                    }
-                                    a.blue.hover.button#edit {
-                                        "Edit"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }*/
             }
         }
     }
