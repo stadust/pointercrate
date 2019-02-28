@@ -44,10 +44,6 @@ It is then possible to specify conditions in the query string, which the returne
 
 There are two ways of filtering the result set:
 
-// TODO: reimplement comma list of values for equality
-
-// TODO: maybe implement sorting?
-
 - **Filtering by equality**: The objects returned can be filtered by a specific field's value by specifying the field and a value in the query string, i.e. `/api/v1/records?id=54`
 - **Filtering by inequality**: The objects returned can be filtered by whether a field is smaller/greater than a specific value by specifying the field,
   suffixed with either `__lt` or `__gt`, and the value to check for inequality against in the query string, i.e. `/api/v1/records?id__gt=20`. Note that this doesn't work for all fields (since a lexicographical filtering on the record status hardly seems useful)

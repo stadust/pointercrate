@@ -4,6 +4,11 @@
 
 ## `POST`{.verb} `/auth/`
 
+<div class='info-yellow'>
+<b>Rate Limits:</b><br>
+This endpoint is ratelimited at 3 requests per 30 minutes
+</div>
+
 Logs into an existing pointercrate user account, providing an acccess token upon success.
 
 ### Request:

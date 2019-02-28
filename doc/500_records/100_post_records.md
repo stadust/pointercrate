@@ -6,7 +6,7 @@
 
 <div class='info-yellow'>
 <b>Rate Limits:</b><br>
-This endpoint is ratelimited at 5 requests per 10 minutes, unless you have at least `LIST_HELPER` permissions, or set the `check` field to `true`.
+This endpoint is ratelimited at 5 requests per 10 minutes
 </div>
 
 <div class='info-yellow'>

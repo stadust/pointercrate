@@ -6,6 +6,11 @@
 
 ## `POST`{.verb} `/auth/register/`
 
+<div class='info-yellow'>
+<b>Rate Limits:</b><br>
+This endpoint is ratelimited at 1 requests per hour
+</div>
+
 Registers a new pointercrate account.
 
 When registering, you only choose your username and your password. Your chosen username must be at least `3` spaces long and may not contain leading or trailing spaces. Your chosen password must be at least `10` characters long and has no further restrictions imposed.

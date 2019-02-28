@@ -68,6 +68,7 @@ impl Paginate<SubmitterPagination> for Submitter {
         ]);
 
         query
+            .order_by(submitters::submitter_id)
             .limit(pagination.limit.unwrap_or(50))
             .load(connection)
             .map_err(PointercrateError::database)

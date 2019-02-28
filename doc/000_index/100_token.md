@@ -18,6 +18,10 @@ Each access token is valid until you change your password, or is invalidated via
 When an endpoint requires authentication via an access token, the `Authorization` header has to be set to the word `Bearer` followed by a space,
 followed by your access token.
 
+## Cookies
+
+Theoretically, it is possible to authenticate using cookies. Any requests made from your browser through the web interface are authenticated this way. Practically, you cannot use this authentication method (attempting to do so will simply result in a `401 UNAUTHORIZED` response)
+
 ## Errors
 
 These error conditions apply to any endpoint that require authentication and are thus not repeated for every one of them.

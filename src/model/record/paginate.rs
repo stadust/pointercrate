@@ -87,6 +87,7 @@ impl Paginate<RecordPagination> for Record {
         ]);
 
         query
+            .order_by(records::id)
             .limit(pagination.limit.unwrap_or(50))
             .load(connection)
             .map_err(PointercrateError::database)

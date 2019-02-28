@@ -70,14 +70,21 @@ where
             .map(|id| self.page(Some(id), None)))
     }
 
+    /// Returns the first id that could theoretically be on the next page, if the associated object exists
     fn next(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        // If the current request had a 'before' value set, we check if object with ids greater than or equal to that value exist.
+        // If they, do, the first id that could be on the next page is simply our 'before' value
+
         let after = if let Some(id) = self.before() {
             if select(exists(self.filter(Self::Model::boxed_all().filter(Self::PaginationColumn::default().ge(id.clone()))))).get_result(connection)? {
-                id
+                Some(id)
             } else {
-                return Ok(None)
+                None
             }
-        }else {
+        } else {
+            // Otherwise, we simply apply the query that returns the current page, offset by limit and then get the next element.
+            // If it exists, its the first element on the next page. If it doesn't, there is no next page
+
             let limit = self.limit();
 
             let mut base = self.filter(Self::Model::boxed_all().select(Self::PaginationColumn::default()));
@@ -86,33 +93,34 @@ where
                 base = base.filter(Self::PaginationColumn::default().gt(after));
             }
 
-            let after = base
+            base
+                .order_by(Self::PaginationColumn::default())
                 .offset(limit)
-                .limit(limit + 1)
+                .limit(1)
                 .get_result(connection)
-                .optional()?;
-
-            match after {
-                Some(id) => id,
-                None => return Ok(None)
-            }
+                .optional()?
         };
 
-        Ok(Some(self.page(None, Some(after))))
+        Ok(after.map(|value| self.page(None, Some(value))))
     }
 
+    /// Returns the last id that could theoretically be on the previous page, if the associated object exists
     fn prev(&self, connection: &PgConnection) -> Result<Option<Self>> {
+        // If the current request had an 'after' value set, we check if object with ids lesser than or equal to that value exist.
+        // If they, do, the last id that could be on the previous page is simply our 'after' value
         let before = if let Some(id) = self.after() {
             if select(exists(self.filter(
                 Self::Model::boxed_all().filter(Self::PaginationColumn::default().le(id.clone())),
             )))
             .get_result(connection)?
             {
-                id
+                Some(id)
             } else {
-                return Ok(None)
+                None
             }
-        } else {
+        } else if self.before().is_some() {
+            // Otherwise, we simply apply the query that returns the current page, reverse the order, offset by limit and then get the next element.
+            // If it exists, its the last element on the previous page. If it doesn't, there is no previous page
             let limit = self.limit();
 
             let mut base =
@@ -122,20 +130,18 @@ where
                 base = base.filter(Self::PaginationColumn::default().lt(before));
             }
 
-            let before = base
+            base
                 .order_by(Self::PaginationColumn::default().desc())
                 .offset(limit)
-                .limit(limit + 1)
+                .limit(1)
                 .get_result(connection)
-                .optional()?;
-
-            match before {
-                Some(id) => id,
-                None => return Ok(None),
-            }
+                .optional()?
+        } else {
+            // If there are no 'after' and 'before' values set, we know we are on the first page. There is no previous page to the first page
+            None
         };
 
-        Ok(Some(self.page(Some(before), None)))
+        Ok(before.map(|value| self.page(Some(value), None)))
     }
 }
 
