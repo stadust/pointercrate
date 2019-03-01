@@ -42,6 +42,6 @@ impl Get<Permissions> for Vec<User> {
 
 impl GetPermissions for User {
     fn permissions() -> PermissionsSet {
-        perms!(Moderator or Administrator)
+        perms!(Administrator)
     }
 }

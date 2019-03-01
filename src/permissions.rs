@@ -93,7 +93,6 @@ impl Permissions {
         }
 
         if (Permissions::Moderator
-            | Permissions::ListModerator
             | Permissions::LeaderboardAdministrator
             | Permissions::ExtendedAccess)
             & self

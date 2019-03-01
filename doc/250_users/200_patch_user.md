@@ -6,10 +6,12 @@
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `MODERATOR` permissions.
+Access to this endpoint requires are explained below!
 </div>
 
 Modifies a given user.
+
+To modify the `display_name`, you need to be at least `Moderator`. To modify the `permissions`, you must have a strictly higher permission that those you want to assign
 
 Note that if you only have `MODERATOR` but not `ADMINISTRATOR` permissions, you can only modify a users `display_name`, not their permissions.
 
@@ -30,10 +32,10 @@ Also note that you cannot grant (or revoke) other users `ADMINISTRATOR` permissi
 
 ### Response: `200 OK`
 
-| Header       | Value                                   |
-| ------------ | --------------------------------------- |
-| Content-Type | `application/json`                      |
-| ETag         | unsigned 64 bit  hash of the updated user |
+| Header       | Value                                    |
+| ------------ | ---------------------------------------- |
+| Content-Type | `application/json`                       |
+| ETag         | unsigned 64 bit hash of the updated user |
 
 | Field | Type                                 | Description             |
 | ----- | ------------------------------------ | ----------------------- |
@@ -43,9 +45,9 @@ Also note that you cannot grant (or revoke) other users `ADMINISTRATOR` permissi
 
 Returned when the `PATCH` operation did not make any changes.
 
-| Header | Value                           |
-| ------ | ------------------------------- |
-| ETag   | unsigned 64 bit  hash of the user |
+| Header | Value                            |
+| ------ | -------------------------------- |
+| ETag   | unsigned 64 bit hash of the user |
 
 ### Errors:
 

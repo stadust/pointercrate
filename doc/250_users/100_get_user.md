@@ -6,7 +6,7 @@
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `MODERATOR` permissions.
+Access to this endpoint requires at least `Moderator` or `ListAdministrator` permissions.
 </div>
 
 Retrieves detailed information about the user with id `user_id`
@@ -21,10 +21,10 @@ Retrieves detailed information about the user with id `user_id`
 
 ### Response: `200 OK`
 
-| Header       | Value                                  |
-| ------------ | -------------------------------------- |
-| Content-Type | `application/json`                     |
-| ETag         | unsigned 64 bit  hash of the user object |
+| Header       | Value                                   |
+| ------------ | --------------------------------------- |
+| Content-Type | `application/json`                      |
+| ETag         | unsigned 64 bit hash of the user object |
 
 | Field | Type                                 | Description               |
 | ----- | ------------------------------------ | ------------------------- |
@@ -34,9 +34,9 @@ Retrieves detailed information about the user with id `user_id`
 
 Returned if the `If-None-Match` header is set, and the etag for the user object matches one of the set values.
 
-| Header | Value                                  |
-| ------ | -------------------------------------- |
-| ETag   | unsigned 64 bit  hash of the user object |
+| Header | Value                                   |
+| ------ | --------------------------------------- |
+| ETag   | unsigned 64 bit hash of the user object |
 
 ### Errors:
 

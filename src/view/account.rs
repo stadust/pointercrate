@@ -193,7 +193,7 @@ impl Page for AccountPage {
                                     "Edit profile"
                                 }
                                 p {
-                                    "Edit some of the stuff displayed on your profile! You can change your display name and youtube channel link!"
+                                    "Edit some of the stuff displayed on your profile! You can change your display name and youtube channel link! You can also change your password here"
                                 }
                                 a.blue.hover.button.slightly-round.js-scroll data-destination = "edit" data-reveal = "true" {
                                     "Edit"

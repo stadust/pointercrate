@@ -1,5 +1,3 @@
-% users
-
 <div class='panel fade js-scroll-anim' data-anim='fade'>
 
 # User listing
@@ -14,14 +12,14 @@ on the additional request and response fields headers.
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `MODERATOR` permissions.
+Access to this endpoint requires at least `Moderator` or 'ListAdministrator' permissions.
 </div>
 
 Allows to retrieve a potentially filtered list of all pointercrate users.
 
-### Filtering:
+### Filtering
 
-The result can be filtered by any of the following fields: `id`, `name`, `permissions`, `display_name`.
+The result can be filtered by any of the following fields: `id`, `name`, `has_permissions`, `display_name`.
 
 Pagination is done via the `id` field.
 

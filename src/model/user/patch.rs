@@ -53,11 +53,22 @@ impl Patch<PatchMe> for User {
 
 impl Hotfix for PatchUser {
     fn required_permissions(&self) -> PermissionsSet {
-        if let Some(perms) = self.permissions {
-            PermissionsSet::one(perms.assignable_from() | Permissions::Moderator)
+        // FIXME: Ideally, here we return permissions based on what is supposed to be patched and
+        // which of the user's permissions are affected by the patch. For this we need to calculate
+        // the difference between the targets current permissions and the applied patch (XOR of the
+        // bit strings). This is not possible with our current implementation. The commented out
+        // implementation has the severe flaw that every can revoke arbitrary permissions from
+        // anyone else.
+        perms!(Administrator)
+        /*if let Some(perms) = self.permissions {
+            if self.display_name.is_none() {
+                PermissionsSet::one(perms.assignable_from())
+            } else {
+                PermissionsSet::one(perms.assignable_from() | Permissions::Moderator)
+            }
         } else {
             perms!(Moderator)
-        }
+        }*/
     }
 }
 

@@ -25,7 +25,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     state
         .authorize(
             req.extensions_mut().remove().unwrap(),
-            perms!(Moderator or Administrator),
+            perms!(Administrator),
         )
         .and_then(move |_| pagination)
         .and_then(move |pagination: UserPagination| state.paginate::<User, _>(pagination, uri))
