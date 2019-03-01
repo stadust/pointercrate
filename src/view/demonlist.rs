@@ -845,7 +845,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "Records must be legitimate and either uploaded on YouTube (or that chinese website I forgot the name of if China) or streamed to be added to the list."
+                        "Records must be legitimate and either uploaded on YouTube, Vimeo, Bilibili or streamed to be added to the list."
                     }
                 }
                 li {
