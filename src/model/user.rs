@@ -184,6 +184,15 @@ impl User {
         Ok(())
     }
 
+    pub fn validate_channel(channel: &mut Option<String>) -> Result<()> {
+        *channel = match channel {
+            Some(channel) => Some(crate::video::validate_channel(channel)?),
+            None => None,
+        };
+
+        Ok(())
+    }
+
     // ALRIGHT. the following code is really fucking weird. Here's why:
     // - I need to keep backwards-compatibility with the python code I wrote 2 years ago
     // - Said python code was based on some misunderstanding about bcrypt

@@ -17,6 +17,45 @@ const VIMEO_FORMAT: &str = "https://vimeo.com/{video_id}' or\
 const BILIBILI_FORMAT: &str = "'https://www.bilibili.com/video/{video_id}' or\
                                'https://bilibili.com/video/{video_id}";
 
+const YOUTUBE_CHANNEL_FORMAT: &str = "'youtube.com/channel/{channel_id}' or\
+                                      'youtube.com/c/{custom_channel_id}/' or\
+                                      'youtube.com/user/{username}/";
+
+pub fn validate_channel(url: &str) -> Result<String> {
+    let url =
+        Url::parse(url).map_err(|_| PointercrateError::bad_request("Malformed channel URL"))?;
+
+    if !SCHEMES.contains(&url.scheme()) {
+        return Err(PointercrateError::InvalidUrlScheme)
+    }
+
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err(PointercrateError::UrlAuthenticated)
+    }
+
+    if let Some(host) = url.domain() {
+        match host {
+            "www.youtube.com" | "youtube.com" =>
+                if let Some(path_segments) = url.path_segments() {
+                    match &path_segments.collect::<Vec<_>>()[..] {
+                        ["channel", _] | ["user", _] | ["c", _] => Ok(url.to_string()),
+                        _ =>
+                            Err(PointercrateError::InvalidUrlFormat {
+                                expected: YOUTUBE_CHANNEL_FORMAT,
+                            }),
+                    }
+                } else {
+                    Err(PointercrateError::InvalidUrlFormat {
+                        expected: YOUTUBE_CHANNEL_FORMAT,
+                    })
+                },
+            _ => Err(PointercrateError::NotYouTube),
+        }
+    } else {
+        Err(PointercrateError::UnprocessableEntity)
+    }
+}
+
 pub fn validate(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| PointercrateError::bad_request("Malformed video URL"))?;
 

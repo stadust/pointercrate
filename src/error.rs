@@ -303,6 +303,12 @@ pub enum PointercrateError {
         expected: &'static str,
     },
 
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42226`
+    #[fail(display = "The given URL is no YouTube URL")]
+    NotYouTube,
+
     /// `428 PRECONDITION REQUIRED`
     ///
     /// Error Code `42800`
@@ -411,6 +417,7 @@ impl PointercrateError {
             PointercrateError::UrlAuthenticated => 42223,
             PointercrateError::UnsupportedVideoHost => 42224,
             PointercrateError::InvalidUrlFormat { .. } => 42225,
+            PointercrateError::NotYouTube => 42226,
 
             PointercrateError::PreconditionRequired => 42800,
 

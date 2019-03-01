@@ -34,8 +34,7 @@ impl Patch<PatchMe> for User {
     fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
         info!("Patching user {} with {}", self, patch);
 
-        validate!(patch: User::validate_password[password]);
-        //TODO: youtube channel url validation
+        validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
 
         patch!(self, patch: display_name, youtube_channel);
         patch_with!(self, patch: set_password(&password));
