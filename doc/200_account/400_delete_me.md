@@ -9,7 +9,7 @@ Deletes your pointercrate account. Note that this action is irreversible!
 Deleting your account requires you to provide your password instead of just an access token, to ensure that if you for some reason leak your access token,
 other people at least cannot delete your account.
 
-### Request:
+### Request
 
 | Header        | Expected Value                                                                           | Optional |
 | ------------- | ---------------------------------------------------------------------------------------- | -------- |
@@ -20,19 +20,13 @@ other people at least cannot delete your account.
 
 _Nothing_
 
-### Errors:
-
-| Status code | Error code | Description                                                                               |
-| ----------- | ---------- | ----------------------------------------------------------------------------------------- |
-| 412         | 41200      | The value provided in the `If-Match` header doesn't match the current state of the object |
-| 418         | 41800      | No `If-Match` header was provided                                                         |
-
-### Example request:
+### Example request
 
 ```json
 DELETE /appi/v1/auth/me/
 Accept: application/json
 Authorization: Basic <omitted>
+If-Match: 10434480491831244259
 ```
 
 </div>

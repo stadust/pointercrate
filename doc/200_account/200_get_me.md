@@ -12,7 +12,7 @@ Gets information about the currently logged in account (that is, the account who
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens)                                                                                                                                                  | false    |
 | If-Match      | Conditional request header. If the etag value of the requested data matches any of the here provided values, the data is returned as requested. Otherwise a `412 PRECONDITION FAILED` response is generated | true     |
-| If-None-Match | Conditional request header. If the etag value of the requested data does not match any of the here provided values, if it returned as requested. Otherwise, a `304 NOT MODIFED` response is generated       | true     |  |
+| If-None-Match | Conditional request header. If the etag value of the requested data does not match any of the here provided values, if it returned as requested. Otherwise, a `304 NOT MODIFED` response is generated       | true     |
 
 ### Response: `200 OK`
 
@@ -29,9 +29,9 @@ Gets information about the currently logged in account (that is, the account who
 
 Returned if the `If-None-Match` header is set, and the etag for the user object matches one of the set values.
 
-| Header | Value                                   |
-| ------ | --------------------------------------- |
-| ETag   | base64 encoded hash of your user object |
+| Header | Value                                    |
+| ------ | ---------------------------------------- |
+| ETag   | unsigned 64 bit hash of your user object |
 
 ### Example request:
 

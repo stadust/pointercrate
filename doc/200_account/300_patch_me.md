@@ -47,16 +47,12 @@ as you hashed password is not part of your user object hash.
 
 ### Errors:
 
-| Status code | Error code | Description                                                                               |
-| ----------- | ---------- | ----------------------------------------------------------------------------------------- |
-| 400         | 40003      | Invalid data type for requested field                                                     |
-| 403         | 40302      | The requested field cannot be updated via this endpoint                                   |
-| 412         | 41200      | The value provided in the `If-Match` header doesn't match the current state of the object |
-| 418         | 41800      | No `If-Match` header was provided                                                         |
-| 422         | 42202      | The choosen name does not meet the criteria described [here](#registering-for-an-account) |
-| 422         | 42204      | The choosen password is too short                                                         |
-| 422         | 42205      | The requested field does not exist                                                        |
-| 422         | 42211      | `null` is not allowed for the requested field                                             |
+| Status code | Error code | Description                                                                               | Data                                |
+| ----------- | ---------- | ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| 422         | 42202      | The choosen name does not meet the criteria described [here](#registering-for-an-account) | -                                   |
+| 422         | 42204      | The choosen password is too short                                                         | -                                   |
+| 422         | 42225      | The channel URL does not match the expected format                                        | `expected`: The expected URL format |
+| 422         | 42226      | The provided channel URL isn't a YouTube URL                                              | -                                   |
 
 ### Example request:
 
@@ -65,7 +61,7 @@ PATCH /api/v1/auth/me/
 Accept: application/json
 Authorization: Basic <omitted>
 Content-Type: application/merge-patch+json
-If-Match: ugiyhd6DWxIBtdbUlB3UhPbJppU=
+If-Match: 10434480491831244259
 
 {
     "display_name": "stardust1971",

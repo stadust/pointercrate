@@ -16,7 +16,7 @@ Invalidates all access tokens to your account.
 
 _Nothing_
 
-### Example request:
+### Example request
 
 ```json
 POST /api/v1/auth/invalidate/
