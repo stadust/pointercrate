@@ -3,7 +3,7 @@
 use super::PCResponder;
 use crate::{
     actor::database::{BasicAuth, Invalidate, PatchMessage, TokenAuth},
-    middleware::cond::HttpResponseBuilderExt,
+    middleware::cond::{HttpResponseBuilderExt, IfMatch},
     model::user::{PatchMe, Registration, User},
     operation::Hotfix,
     state::PointercrateState,
@@ -71,7 +71,7 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     let state = req.state().clone();
     let auth = req.extensions_mut().remove().unwrap();
-    let if_match = req.extensions_mut().remove().unwrap();
+    let if_match: IfMatch = req.extensions_mut().remove().unwrap();
 
     req.json()
         .from_err()
@@ -79,7 +79,7 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
             state
                 .authorize_basic(auth, patch.required_permissions())
                 .and_then(move |user: User| {
-                    state.database(PatchMessage::new(user.id, patch, user, if_match))
+                    state.database(PatchMessage::new(user.id, patch, user, Some(if_match)))
                 })
         })
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
@@ -91,7 +91,7 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/auth/me/");
 
     let state = req.state().clone();
-    let if_match = req.extensions_mut().remove().unwrap();
+    let if_match: IfMatch = req.extensions_mut().remove().unwrap();
 
     state
         .database(BasicAuth(req.extensions_mut().remove().unwrap()))

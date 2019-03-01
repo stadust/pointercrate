@@ -7,7 +7,7 @@ use actix_web::{
     middleware::{Middleware, Response, Started},
     Error, HttpRequest, HttpResponse,
 };
-use log::warn;
+use log::{debug, warn};
 use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -60,6 +60,8 @@ impl<S> Middleware<S> for Precondition {
                             Ok(hash) => hashes.push(hash),
                         }
                     }
+
+                    debug!("IfMatch values are {:?}", hashes);
 
                     req.extensions_mut().insert(IfMatch(hashes));
                 },

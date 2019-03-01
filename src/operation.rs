@@ -200,10 +200,12 @@ mod delete {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
             /// `DELETE` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
+                use crate::middleware::cond::IfMatch;
+
                 info!("DELETE {}", $endpoint);
 
                 let state = req.state().clone();
-                let if_match = req.extensions_mut().remove().unwrap();
+                let if_match: IfMatch = req.extensions_mut().remove().unwrap();
                 let auth = req.extensions_mut().remove().unwrap();
 
                 Path::<$id_type>::extract(req)
