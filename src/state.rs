@@ -67,7 +67,7 @@ impl PointercrateState {
     ) -> impl Future<Item = User, Error = PointercrateError> {
         self.database(TokenAuth(authorization))
             .and_then(move |user| {
-                if !user.has_any(&perms) {
+                if !perms.perms.is_empty() && !user.has_any(&perms) {
                     Err(PointercrateError::MissingPermissions { required: perms })
                 } else {
                     Ok(user)
@@ -80,7 +80,7 @@ impl PointercrateState {
     ) -> impl Future<Item = User, Error = PointercrateError> {
         self.database(BasicAuth(authorization))
             .and_then(move |user| {
-                if !user.has_any(&perms) {
+                if !perms.perms.is_empty() && !user.has_any(&perms) {
                     Err(PointercrateError::MissingPermissions { required: perms })
                 } else {
                     Ok(user)
@@ -224,7 +224,7 @@ impl PointercrateState {
     {
         let clone = self.clone();
 
-        self.authorize_basic(authorization, fix.required_permissions().into())
+        self.authorize_basic(authorization, fix.required_permissions())
             .and_then(move |user| {
                 clone.database(PatchMessage::new(key, fix, user, Some(condition)))
             })

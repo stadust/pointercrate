@@ -1,11 +1,3 @@
-.button {
-  max-width: 100px;
-}
-
-.right .button {
-  margin: 0px auto;
-}
-
 #things span {
   margin: 5px;
 }
@@ -16,9 +8,12 @@
 
 #things p {
   font-size: 80%;
-  margin: 0px;
 }
 
 #access-token {
   font-size: 80%;
+}
+
+#login-form > p {
+  text-align: center;
 }

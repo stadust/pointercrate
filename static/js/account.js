@@ -15,15 +15,9 @@ $(document).ready(function() {
   var htmlLoginForm = document.getElementById("login-form");
   var loginForm = new Form(htmlLoginForm);
 
-  var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
   var loginError = htmlLoginForm.getElementsByClassName("output")[0];
-  loginUsername.addValidator(valueMissing, "Username required");
-  loginUsername.addValidator(
-    tooShort,
-    "Username too short. It needs to be at least 3 characters long."
-  );
 
   loginPassword.setClearOnInvalid(true);
   loginPassword.addValidator(valueMissing, "Password required");
@@ -40,7 +34,7 @@ $(document).ready(function() {
       dataType: "json",
       headers: {
         Authorization:
-          "Basic " + btoa(loginUsername.value + ":" + loginPassword.value)
+          "Basic " + btoa(window.username + ":" + loginPassword.value)
       },
       error: function(data) {
         if (data.status == 401) {
@@ -55,6 +49,82 @@ $(document).ready(function() {
         accessToken.innerHTML = data.responseJSON.token;
         htmlLoginForm.style.display = "none";
         accessTokenArea.style.display = "block";
+      }
+    });
+  });
+
+  var htmlEditForm = document.getElementById("edit-form");
+  var editForm = new Form(htmlEditForm);
+
+  var editDisplayName = editForm.input("edit-display-name");
+  var editYtChannel = editForm.input("edit-yt-channel");
+  var editPassword = editForm.input("edit-password");
+  var editPasswordRepeat = editForm.input("edit-password-repeat");
+  var authPassword = editForm.input("auth-password");
+
+  var editError = htmlEditForm.getElementsByClassName("output")[0];
+
+  editYtChannel.addValidator(typeMismatch, "Please enter a valid URL");
+
+  editPassword.addValidator(
+    tooShort,
+    "Password too short. It needs to be at least 10 characters long."
+  );
+
+  editPasswordRepeat.addValidator(
+    tooShort,
+    "Password too short. It needs to be at least 10 characters long."
+  );
+  editPasswordRepeat.addValidator(
+    rpp => rpp.value == editPassword.value,
+    "Passwords don't match"
+  );
+
+  authPassword.addValidator(valueMissing, "Password required");
+  authPassword.addValidator(
+    tooShort,
+    "Password too short. It needs to be at least 10 characters long."
+  );
+
+  editForm.onSubmit(function(event) {
+    editError.style.display = "none";
+
+    data = {};
+
+    if (editDisplayName.value) data["display_name"] = editDisplayName.value;
+    if (editYtChannel.value) data["youtube_channel"] = editYtChannel.value;
+    if (editPassword.value) data["password"] = editPassword.value;
+
+    $.ajax({
+      method: "PATCH",
+      url: "/api/v1/auth/me/",
+      dataType: "json",
+      contentType: "application/json",
+      headers: {
+        "If-Match": window.etag,
+        Authorization:
+          "Basic " + btoa(window.username + ":" + authPassword.value)
+      },
+      data: JSON.stringify(data),
+      error: function(data) {
+        switch (data.status) {
+          case 401:
+            authPassword.setError("Invalid credentials");
+            break;
+          case 412:
+          case 418:
+            editError.innerHTML =
+              "Concurrent account access was made. Please reload the page";
+            editError.innerHTML = "initial";
+            break;
+          default:
+            editError.innerHTML = data.responseJSON.message;
+            editError.style.display = "initial";
+            break;
+        }
+      },
+      success: function() {
+        window.location.reload();
       }
     });
   });

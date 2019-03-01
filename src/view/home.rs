@@ -158,6 +158,9 @@ impl Page for Homepage {
                                 li {
                                     "The API has been majorly overhauled. " i{"Most"} " changes should be backward compatible, since I just added a ton of fields, but there are some other changes as well, so be sure to check the documentation again. Mainly, there is no `state` parameter for demons anymore and `player.beaten` has become the more general `player.records`"
                                 }
+                                li {
+                                    "There is now deeper integration with the GD servers, allowing me to display additions stats for each demon. The code to calculate level length and accurately count objects was contributed by cos8o, so big thanks to him!"
+                                }
                             }
                             p {
                                 "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."

@@ -5,6 +5,10 @@ use crate::{
 use actix_web::{AsyncResponder, HttpRequest, Responder};
 use log::info;
 use maud::{html, Markup, PreEscaped};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 use tokio::prelude::Future;
 
 #[derive(Debug)]
@@ -92,7 +96,7 @@ impl Page for AccountPage {
                                             "Youtube channel: "
                                         }
                                         @match self.user.youtube_channel {
-                                            Some(ref yc) => (yc),
+                                            Some(ref yc) => a.link href = (yc) {},
                                             None => "-"
                                         }
                                         p {
@@ -110,6 +114,43 @@ impl Page for AccountPage {
                                     }
                                 }
                             }
+                            div.panel.fade.closable#edit style = "display: none" {
+                                h2.underlined.pad {
+                                    "Edit profile"
+                                }
+                                p {
+                                    "Modifying your account requires you to re-authenticate using your password. " i{"Changing"} " your password will log you out and redirect to the login page. It will further invalidate all access tokens to your account"
+                                }
+                                form.flex.col#edit-form novalidate = "" {
+                                    p.info-red.output {}
+                                    span.form-input#edit-display-name {
+                                        label for = "display_name" {"New display name:"}
+                                        input type = "text" name = "username" value = (self.user.display_name.as_ref().map(AsRef::as_ref).unwrap_or(""));
+                                        p.error {}
+                                    }
+                                    span.form-input#edit-yt-channel {
+                                        label for = "yt_channel" {"New YouTube channel:"}
+                                        input type = "url" name = "yt_channel" value = (self.user.youtube_channel.as_ref().map(AsRef::as_ref).unwrap_or(""));
+                                        p.error {}
+                                    }
+                                    span.form-input#edit-password {
+                                        label for = "password" {"New password:"}
+                                        input type = "password" name = "password" minlength = "10";
+                                        p.error {}
+                                    }
+                                    span.form-input#edit-password-repeat {
+                                        label for = "password2" {"Repeat new password:"}
+                                        input type = "password" name = "password2" minlength = "10";
+                                        p.error {}
+                                    }
+                                    span.overlined.underlined.pad.form-input#auth-password {
+                                        label for = "auth-password" {"Authenticate:"}
+                                        input type = "password" name ="auth-password" minlength = "10" required = "";
+                                        p.error {}
+                                    }
+                                    input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Submit edit";
+                                }
+                            }
                         }
                         div.right {
                             div.panel.fade {
@@ -119,28 +160,23 @@ impl Page for AccountPage {
                                 p {
                                     "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
                                 }
-                                form.flex.col.grow.underlined.overlined.pad#login-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
-                                    p {
-                                        "For security reasons, retrieving your access tokens requires you to log in again"
+                                form.flex.col.underlined.overlined.pad#login-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
+                                    p style = "text-align: center" {
+                                        "For security reasons, retrieving your access tokens requires you to reenter your password"
                                     }
                                     p.info-red.output {}
-                                    span.form-input#login-username {
-                                        label for = "username" {"Username:"}
-                                        input required = "" type = "text" name = "username" minlength = "3";
-                                        p.error {}
-                                    }
                                     span.form-input#login-password {
                                         label for = "password" {"Password:"}
                                         input required = "" type = "password" name = "password" minlength = "10";
                                         p.error {}
                                     }
-                                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
+                                    input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                                 }
                                 div.overlined.underlined.pad#token-area style = "display: none" {
                                     b {"You access token is:"}
                                     textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px" {}
                                 }
-                                a.blue.hover.button#get-token {
+                                a.blue.hover.button.slightly-round#get-token {
                                     "Get access token"
                                 }
                             }
@@ -151,7 +187,7 @@ impl Page for AccountPage {
                                 p {
                                     "Edit some of the stuff displayed on your profile! You can change your display name and youtube channel link!"
                                 }
-                                a.blue.hover.button {
+                                a.blue.hover.button.slightly-round.js-scroll data-destination = "edit" data-reveal = "true" {
                                     "Edit"
                                 }
                             }
@@ -163,6 +199,13 @@ impl Page for AccountPage {
     }
 
     fn head(&self, _: &HttpRequest<PointercrateState>) -> Vec<Markup> {
-        vec![]
+        let mut hasher = DefaultHasher::new();
+        self.user.hash(&mut hasher);
+
+        vec![html! {
+            (PreEscaped(
+                format!("<script>window.username='{}'; window.etag='{}';</script>", self.user.name, hasher.finish().to_string())
+            ))
+        }]
     }
 }

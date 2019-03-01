@@ -82,7 +82,7 @@ impl Page for LoginPage {
                                 p.error {}
                             }
                             div.grow {}
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                         }
                     }
                     div.flex.col {
@@ -108,7 +108,7 @@ impl Page for LoginPage {
                                 p.error {}
                             }
                             div.grow {}
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Register";
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value = "Register";
                         }
                     }
                 }
