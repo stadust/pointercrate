@@ -129,4 +129,52 @@ $(document).ready(function() {
       }
     });
   });
+
+  var invalidateButton = document.getElementById("invalidate-token");
+
+  invalidateButton.addEventListener(
+    "click",
+    function(event) {
+      invalidateButton.style.display = "none";
+      htmlInvalidateForm.style.display = "block";
+    },
+    false
+  );
+
+  var htmlInvalidateForm = document.getElementById("invalidate-form");
+  var invalidateForm = new Form(htmlInvalidateForm);
+
+  var invalidatePassword = invalidateForm.input("invalidate-auth-password");
+  var invalidateError = htmlInvalidateForm.getElementsByClassName("output")[0];
+
+  invalidatePassword.setClearOnInvalid(true);
+  invalidatePassword.addValidator(valueMissing, "Password required");
+  invalidatePassword.addValidator(
+    tooShort,
+    "Password too short. It needs to be at least 10 characters long."
+  );
+  invalidateForm.onSubmit(function(event) {
+    invalidateError.style.display = "";
+
+    $.ajax({
+      method: "POST",
+      url: "/api/v1/auth/invalidate/",
+      dataType: "json",
+      headers: {
+        Authorization:
+          "Basic " + btoa(window.username + ":" + invalidatePassword.value)
+      },
+      error: function(data) {
+        if (data.status == 401) {
+          invalidatePassword.setError("Invalid credentials");
+        } else {
+          invalidateError.innerHTML = data.responseJSON.message;
+          invalidateError.style.display = "initial";
+        }
+      },
+      success: function(crap, more_crap, data) {
+        window.location.reload();
+      }
+    });
+  });
 });

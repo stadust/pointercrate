@@ -199,6 +199,29 @@ impl Page for AccountPage {
                                     "Edit"
                                 }
                             }
+                            div.panel.fade {
+                                h2.underlined.pad {
+                                    "Invalidate tokens"
+                                }
+                                p {
+                                    "If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action"
+                                }
+                                form.flex.col.overlined.pad#invalidate-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
+                                    p style = "text-align: center" {
+                                        "For security reasons, invalidating your access tokens requires you to reenter your password"
+                                    }
+                                    p.info-red.output {}
+                                    span.form-input#invalidate-auth-password {
+                                        label for = "password" {"Password:"}
+                                        input required = "" type = "password" name = "password" minlength = "10";
+                                        p.error {}
+                                    }
+                                    input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Invalidate";
+                                }
+                                a.blue.hover.button.slightly-round#invalidate-token {
+                                    "Invalidate all access tokens"
+                                }
+                            }
                         }
                     }
                 }
