@@ -181,7 +181,7 @@ impl Page for AccountPage {
                                 }
                                 div.overlined.underlined.pad#token-area style = "display: none" {
                                     b {"You access token is:"}
-                                    textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px" {}
+                                    textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px: min-height:75px" {}
                                 }
                                 a.blue.hover.button.slightly-round#get-token {
                                     "Get access token"
