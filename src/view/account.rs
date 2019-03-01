@@ -29,6 +29,11 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                 .respond_to(&req_clone)
                 .unwrap()
         })
+        .or_else(|_| {
+            Ok(actix_web::HttpResponse::Found()
+                .header(actix_web::http::header::LOCATION, "/login/")
+                .finish())
+        })
         .responder()
 }
 
