@@ -6,6 +6,7 @@ $(document).ready(function() {
   getTokenButton.addEventListener(
     "click",
     function(event) {
+      getTokenButton.style.display = "none";
       accessTokenArea.style.display = "none";
       htmlLoginForm.style.display = "block";
     },

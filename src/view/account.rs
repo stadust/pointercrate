@@ -167,7 +167,7 @@ impl Page for AccountPage {
                                 p {
                                     "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
                                 }
-                                form.flex.col.underlined.overlined.pad#login-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
+                                form.flex.col.overlined.pad#login-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
                                     p style = "text-align: center" {
                                         "For security reasons, retrieving your access tokens requires you to reenter your password"
                                     }
@@ -179,9 +179,9 @@ impl Page for AccountPage {
                                     }
                                     input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                                 }
-                                div.overlined.underlined.pad#token-area style = "display: none" {
-                                    b {"You access token is:"}
-                                    textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px: min-height:75px" {}
+                                div.overlined.pad#token-area style = "display: none" {
+                                    b {"Your access token is:"}
+                                    textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                                 }
                                 a.blue.hover.button.slightly-round#get-token {
                                     "Get access token"
