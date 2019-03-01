@@ -122,6 +122,7 @@ impl Page for AccountPage {
                                 }
                             }
                             div.panel.fade.closable#edit style = "display: none" {
+                                span.plus.cross.hover {}
                                 h2.underlined.pad {
                                     "Edit profile"
                                 }
