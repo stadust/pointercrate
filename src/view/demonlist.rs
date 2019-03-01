@@ -817,6 +817,7 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
     }
 }
 
+// TODO: make panels retractable. this is freaking huge.
 fn rules_panel() -> Markup {
     html! {
         did#rules.panel.fade.flex.js-scroll-anim data-anim = "fade" style = "flex-direction: column" {
@@ -826,10 +827,8 @@ fn rules_panel() -> Markup {
                 }
             }
             ul.roman {
-                li {
-                    span {
-                        "Anyone posting illegitimate recordings (hacked, cut, stolen, automated gameplay, no-clip, etc.) and passing them of as legit will have all their records removed from this list"
-                    }
+                h3 {
+                    "Demon rules:"
                 }
                 li {
                     span {
@@ -838,34 +837,61 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "If you verified a level on this list, your record for it won't be included - You get points for your verification though"
+                        "List demons that recieve a hacked update changing difficulty will be move the the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
+                    }
+                }
+                h3 {
+                    "Submission rules:"
+                }
+                li {
+                    span {
+                        "Records must be legitimate and either uploaded on YouTube (or that chinese website I forgot the name of if China) or streamed to be added to the list."
                     }
                 }
                 li {
                     span {
-                        "If a record has been added, it is legit and was either streamed or has a full video uploaded"
+                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include but aren't limited to: speedhacks, noclip, auto, nerfs, macros, fps bypass, etc."
                     }
                 }
                 li {
                     span {
-                        "The record holder must meet the percentage requirement in order to be added to the list for that level"
+                        "Records on a level must be in normal mode and on the live version of the level or on an appropriate bug fixed/low detail copy of said level. Please refer to the bugfix and LDM guidelines."
                     }
                 }
                 li {
                     span {
-                        "Be polite about suggesting changes. We probably won't listed to you if you're rude or forceful about it"
+                        "The record holder must meet the percentage requirement of a level in order to be added to the list for said level."
+                    }
+                }
+                h3 {
+                    "General guidelines:"
+                }
+                li {
+                    span {
+                        "Verifications are not counted as records on the list, but still award points."
                     }
                 }
                 li {
                     span {
-                        "Being in a group in which people beat levels for the same channel, yet passing that channel of as being a single person's, can cause your records to be temporarily removed from this list"
+                        "Being in a group in which people beat levels for th same channel will cause your records to be temporarily removed from the list."
+                    }
+                }
+                h3 {
+                    "Bugfix and LDM guidelines:"
+                }
+                li {
+                    span {
+                        "Records using a level's built-in LDM are always eligible. "
                     }
                 }
                 li {
                     span {
-                        "Records made using the FPS bypass are"
-                        i { " not " }
-                        "accepted"
+                        "Records on appropriate LDM copies of levels are eligible. Please take contact with a List Moderator if you are unsure of which decorations can or cannot be removed. Generally speaking, a LDM copy should not remove decorations that obstruct the player's vision, blind transitions, flashes or boss fights, for example. Referring to the first guideline, if the previously stated decorations are removed in a level's built-in LDM though, it is perfectly fine to use it."
+                    }
+                }
+                li {
+                    span {
+                        "Records on appropriate bugfix copies of levels for different refresh rates are eligible. Please take contact with a List Moderator if you are unsure of what is or isn't a bug."
                     }
                 }
             }
