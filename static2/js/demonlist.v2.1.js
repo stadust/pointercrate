@@ -104,6 +104,8 @@ class StatsViewer {
       success: data => {
         let json = data.data;
 
+        console.log(json);
+
         this._current.text(selected.find(".player-name").text());
         this._rank.text(selected.data("rank"));
         this._score.text(selected.find("i").text());
@@ -198,8 +200,8 @@ $(document).ready(function() {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
-  errorOutput = $("#submission-error");
-  successOutput = $("#submission-success");
+  var errorOutput = $("#submission-error");
+  var successOutput = $("#submission-success");
 
   submissionForm.onSubmit(function(event) {
     $.ajax({
