@@ -40,7 +40,8 @@ impl HttpActor {
 
         let gdcf_url = std::env::var("GDCF_DATABASE_URL").expect("GDCF_DATABASE_URL is not set");
 
-        let mut config = DatabaseCacheConfig::postgres_config(&gdcf_url);
+        let mut config = DatabaseCacheConfig::postgres_config(&gdcf_url)
+            .expect("Failed to connect to GDCF database");
         config.invalidate_after(Duration::minutes(30));
 
         let cache = DatabaseCache::new(config);
