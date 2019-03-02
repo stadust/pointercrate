@@ -138,19 +138,19 @@ tr:nth-child(even) {
   font-variant: small-caps;
 }
 
-.container {
+.stats-container {
   margin: 5px 0%;
 }
 
-.container > * {
+.stats-container > * {
   margin: 5px 1%;
 }
 
-.container b {
+.stats-container b {
   font-size: 110%;
 }
 
-.container :not(b) {
+.stats-container :not(b) {
   font-size: 90%;
 }
 

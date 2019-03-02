@@ -678,7 +678,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                     }
                     div#stats-data style = "display:none" {
                         div.flex.col {
-                            div.container.flex.space {
+                            div.stats-container.flex.space {
                                 span {
                                     b {
                                         "List demons completed:"
@@ -701,7 +701,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                                     span#score {}
                                 }
                             }
-                            div.container.flex.space {
+                            div.stats-container.flex.space {
                                 span {
                                     b {
                                         "Demonlist rank:"
@@ -717,7 +717,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                                     span#hardest {}
                                 }
                             }
-                            div.container.flex.space {
+                            div.stats-container.flex.space {
                                 span {
                                     b {
                                         "Demons completed:"
@@ -726,7 +726,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                                     span#beaten {}
                                 }
                             }
-                            div.container.flex.space {
+                            div.stats-container.flex.space {
                                 span {
                                     b {
                                         "List demons created:"
@@ -749,7 +749,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                                     span#verified {}
                                 }
                             }
-                            div.container.flex.space {
+                            div.stats-container.flex.space {
                                 span {
                                     b {
                                         "Progress on:"
