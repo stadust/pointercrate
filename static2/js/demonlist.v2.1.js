@@ -132,6 +132,9 @@ class StatsViewer {
       .filter(record => record.progress == 100)
       .map(record => record.demon);
 
+    console.log(beaten);
+    console.log(records);
+
     let legacy = beaten.filter(
       demon => demon.position > window.extended_list_length
     ).length;
