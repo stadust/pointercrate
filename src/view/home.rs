@@ -220,7 +220,7 @@ impl Page for Homepage {
                         }
                     }
                     div.tab-selection style="padding: 20px 0px; text-align: center"{
-                        h3.tab data-tab-id="99" style="padding: 10px; text-align:left" { "2019-??-??" }
+                        h3.tab data-tab-id="99" style="padding: 10px; text-align:left" { "2019-03-02" }
                         h3.tab.tab-active data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
                         h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
                     }
@@ -250,7 +250,7 @@ impl Page for Homepage {
                                 }
                             }
                             p {
-                                "Contant these people for any list related questions/issues"
+                                "Contact these people for any list related questions/issues"
                             }
                             i {
                                 "Twitter: "
