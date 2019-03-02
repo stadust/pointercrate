@@ -87,7 +87,7 @@ impl Page for DemonlistOverview {
         html! {
             (dropdowns)
 
-            div.flex.m-center#container {
+            div.flex.m-center.container {
                 div.left {
                     (submission_panel())
                     (stats_viewer(&self.ranking))
