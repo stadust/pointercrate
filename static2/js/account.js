@@ -197,6 +197,33 @@ $(document).ready(function() {
   setupEditAccount();
   setupInvalidateToken();
 
+  var deleteUserButton = document.getElementById("delete-user");
+
+  deleteUserButton.addEventListener(
+    "click",
+    function(event) {
+      $.ajax({
+        method: "DELETE",
+        url: "/api/v1/users/" + window.currentUser.id + "/",
+        headers: {
+          "X-CSRF-TOKEN": csrfToken,
+          "If-Match": window.currentUser.etag
+        },
+        error: function(data) {
+          edit2Success.style.display = "";
+          edit2Error.innerHTML = data.responseJSON.message;
+          edit2Error.style.display = "block";
+        },
+        success: function(data) {
+          edit2Error.style.display = "";
+          edit2Success.style.display = "block";
+          edit2Success.innerHTML = "Successfully deleted user!";
+        }
+      });
+    },
+    false
+  );
+
   var htmlEditForm = document.getElementById("patch-permissions");
   var editForm2 = new Form(htmlEditForm);
   var edit2Error = htmlEditForm.getElementsByClassName("output")[0];

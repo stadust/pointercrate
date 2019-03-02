@@ -147,7 +147,10 @@ impl AccountPage {
                                 input type = "checkbox" name = "admin2";
                                 span.checkmark {}
                             }
-                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
+                            div.flex.no-stretch {
+                                input.button.blue.hover.slightly-round#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                                input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
+                            }
                         }
                     }
                 }
