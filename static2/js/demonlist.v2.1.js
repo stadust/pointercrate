@@ -152,7 +152,10 @@ class StatsViewer {
 
     var hardest = verified
       .concat(beaten)
-      .reduce((acc, next) => (acc.position > next.position ? next : acc));
+      .reduce((acc, next) => (acc.position > next.position ? next : acc), {
+        position: 34832834,
+        name: "None"
+      });
 
     this._hardest.text(hardest.name || "None");
 
