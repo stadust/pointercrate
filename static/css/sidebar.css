@@ -7,7 +7,7 @@
 }
 
 @media (max-width: 1023px) {
-  #container {
+  .container {
     flex-wrap: wrap;
   }
 

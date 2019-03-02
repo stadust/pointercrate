@@ -1,8 +1,7 @@
 use crate::bitstring::Bits;
 use bitflags::bitflags;
 use joinery::Joinable;
-use serde::{ser::SerializeSeq, Serialize, Serializer};
-use serde_derive::Deserialize;
+use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     collections::HashSet,
     fmt::{Display, Formatter},
@@ -15,7 +14,6 @@ bitflags! {
     /// and only if, **all** bits that are set in the [`Permissions`] object are also set in the input.
     ///
     /// Consult the [pointercrate API documentation](https://pointercrate.com/documentation#permissions) for more details
-    #[derive(Deserialize)]
     pub struct Permissions: u16 {
         #[allow(non_upper_case_globals)]
         const ExtendedAccess = 0b0000_0000_0000_0001;
@@ -168,6 +166,43 @@ impl Serialize for Permissions {
         S: Serializer,
     {
         serializer.serialize_u16(self.bits)
+    }
+}
+
+impl<'de> Deserialize<'de> for Permissions {
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct _Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for _Visitor {
+            type Value = u16;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                write!(formatter, "an integer value")
+            }
+
+            fn visit_i64<E>(self, v: i64) -> std::result::Result<u16, E>
+            where
+                E: std::error::Error,
+            {
+                Ok(v as u16)
+            }
+
+            fn visit_u64<E>(self, v: u64) -> std::result::Result<u16, E>
+            where
+                E: std::error::Error,
+            {
+                Ok(v as u16)
+            }
+        }
+
+        let mut perms = Permissions::empty();
+
+        perms.bits = deserializer.deserialize_u16(_Visitor)?;
+
+        Ok(perms)
     }
 }
 

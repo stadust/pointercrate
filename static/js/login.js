@@ -36,7 +36,7 @@ $(document).ready(function() {
           loginPassword.setError("Invalid credentials");
         } else {
           loginError.innerHTML = data.responseJSON.message;
-          loginError.style.display = "initial";
+          loginError.style.display = "block";
         }
       },
       success: function() {
@@ -106,7 +106,7 @@ $(document).ready(function() {
           },
           error: function(data) {
             registerError.innerHTML = data.responseJSON.message;
-            registerError.style.display = "initial";
+            registerError.style.display = "block";
           },
           success: function() {
             window.location = "/account/";

@@ -265,7 +265,7 @@ impl Page for Demonlist {
         html! {
             (dropdowns)
 
-            div.flex.m-center#container {
+            div.flex.m-center.container {
                 div.left {
                     (submission_panel())
                     (stats_viewer(&self.overview.ranking))
@@ -623,7 +623,7 @@ fn submission_panel() -> Markup {
                         "The progress made as percentage. Only values greater than the demons record requirement and smaller than or equal to 100 are accepted!"
                     }
                     span.form-input.flex.col#id_progress {
-                        input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100" ;
+                        input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100";
                         p.error {}
                     }
                     h3 {

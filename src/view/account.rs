@@ -58,19 +58,30 @@ impl Page for AccountPage {
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html! {
+            span#chicken-salad-red-fish style = "display:none" {(self.user.generate_csrf_token())}
             div.tabbed {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
-                    div.tab.tab-active.button.white.hover.no-shadow.active data-tab-id="1" {
+                    div.tab.tab-active.button.white.hover.no-shadow data-tab-id="1" {
                         b {
                             "Profile"
                         }
                         (PreEscaped("&nbsp;"))
                         i class = "fa fa-user fa-2x" aria-hidden="true" {}
                     }
+                    @if self.user.has_any(&perms!(Administrator)) {
+                        div.tab.button.white.hover.no-shadow data-tab-id="2" {
+                            b {
+                                "Users"
+                            }
+                            (PreEscaped("&nbsp;"))
+                            i class = "fa fa-users fa-2x" aria-hidden="true" {}
+                        }
+                    }
                 }
 
                 div.tab-display {
                     (self.profile_page())
+                    (self.user_page())
                 }
             }
         }
@@ -89,9 +100,103 @@ impl Page for AccountPage {
 }
 
 impl AccountPage {
+    fn user_page(&self) -> Markup {
+        html! {
+            div.m-center.flex.tab-content.container data-tab-id = "2" {
+                div.left {
+                    div.panel.fade {
+                        h1.underlined.pad {
+                            "User"
+                        }
+                        p#text {
+                            "Use the panels on the right to select users to modify"
+                        }
+                        form.flex.col.pad#patch-permissions novalidate = "" style="display:none" {
+                            h3 {
+                                "Permissions:"
+                            }
+                            p.info-red.output {}
+                            p.info-green.output {}
+                            label.cb-container.form-input#perm-extended for = "extended" {
+                                i{"Extended access"}
+                                input type = "checkbox" name = "extended";
+                                span.checkmark {}
+                            }
+                            label.form-input.cb-container#perm-list-helper for = "helper" {
+                                i {"List Helper"}
+                                input type = "checkbox" name = "helper";
+                                span.checkmark {}
+                            }
+                            label.form-input.cb-container#perm-list-mod for = "mod" {
+                                i {"List Moderator"}
+                                input type = "checkbox" name = "mod";
+                                span.checkmark {}
+                            }
+                            label.form-input.cb-container#perm-list-admin for = "admin" {
+                                i {"List Administrator"}
+                                input type = "checkbox" name = "admin";
+                                span.checkmark {}
+                            }
+                            label.form-input.cb-container#perm-mod for = "mod2" {
+                                i {"Pointercrate Moderator"}
+                                input type = "checkbox" name = "mod2";
+                                span.checkmark {}
+                            }
+                            label.form-input.cb-container#perm-admin for = "admin2" {
+                                i {"Pointercrate Administrator"}
+                                input type = "checkbox" name = "admin2";
+                                span.checkmark {}
+                            }
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
+                        }
+                    }
+                }
+                div.right {
+                    div.panel.fade {
+                        h2.underlined.pad {
+                            "Find users"
+                        }
+                        p {
+                            "Users can be uniquely identified by name and ID. To modify a user's account, you need their ID. If you know neither, try looking in the list below"
+                        }
+                        form.flex.col.underlined.pad#find-id-form novalidate = "" {
+                            p.info-red.output {}
+                            span.form-input#find-id {
+                                label for = "id" {"User ID:"}
+                                input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
+                                p.error {}
+                            }
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+                        }
+                        form.flex.col#find-name-form novalidate = "" {
+                            p.info-red.output {}
+                            span.form-input#find-id {
+                                label for = "name" {"Username:"}
+                                input required = "" type = "text" name = "name" minlength = "3";
+                                p.error {}
+                            }
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by name";
+                        }
+                    }
+                    div.panel.fade {
+                        h2.underlined.pad {
+                            "User list"
+                        }
+                        p {
+                            "A list of all user accounts on pointercrate"
+                        }
+                        a.blue.hover.button.slightly-round#find-name {
+                            "Load"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fn profile_page(&self) -> Markup {
         html! {
-            div.m-center.flex.tab-content-active#container data-tab-id = "1"{
+            div.m-center.flex.tab-content.tab-content-active.container data-tab-id = "1"{
                 div.left {
                     div.panel.fade {
                         h1.underlined.pad {
@@ -189,7 +294,7 @@ impl AccountPage {
                         p {
                             "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
                         }
-                        form.flex.col.overlined.pad#login-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
+                        form.flex.col.overlined.pad#login-form novalidate = "" style="display: none" {
                             p style = "text-align: center" {
                                 "For security reasons, retrieving your access tokens requires you to reenter your password"
                             }
@@ -227,7 +332,7 @@ impl AccountPage {
                         p {
                             "If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action"
                         }
-                        form.flex.col.overlined.pad#invalidate-form novalidate = "" style = "text-align: left; margin: 10px 0px;display: none" {
+                        form.flex.col.overlined.pad#invalidate-form novalidate = "" style="display: none" {
                             p style = "text-align: center" {
                                 "For security reasons, invalidating your access tokens requires you to reenter your password"
                             }

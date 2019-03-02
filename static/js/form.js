@@ -18,7 +18,7 @@ class Input {
   }
 
   resetError() {
-    this.error.innerHTML = "";
+    if (this.error) this.error.innerHTML = "";
     this.input.setCustomValidity("");
   }
 
@@ -28,11 +28,13 @@ class Input {
   }
 
   appendError(errorString) {
-    if (this.error.innerHTML != "") {
-      this.error.innerHTML += "<br>";
-    }
+    if (this.error) {
+      if (this.error.innerHTML != "") {
+        this.error.innerHTML += "<br>";
+      }
 
-    this.error.innerHTML += errorString;
+      this.error.innerHTML += errorString;
+    }
     this.input.setCustomValidity(this.error.innerHTML);
 
     if (this.clearOnInvalid) {
@@ -84,11 +86,18 @@ class Input {
   }
 
   get value() {
+    if (this.input.type == "checkbox") {
+      return this.input.checked;
+    }
     return this.input.value;
   }
 
   set value(value) {
-    this.input.value = value;
+    if (this.input.type == "checkbox") {
+      this.input.checked = value;
+    } else {
+      this.input.value = value;
+    }
   }
 }
 

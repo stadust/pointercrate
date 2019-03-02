@@ -17,3 +17,13 @@
 #login-form > p {
   text-align: center;
 }
+
+.tab-active {
+  background-color: #ddd;
+  color: #222224;
+}
+
+form {
+  text-align: left;
+  margin: 10px 0px;
+}

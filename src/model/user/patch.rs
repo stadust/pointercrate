@@ -59,7 +59,11 @@ impl Hotfix for PatchUser {
         // bit strings). This is not possible with our current implementation. The commented out
         // implementation has the severe flaw that every can revoke arbitrary permissions from
         // anyone else.
-        perms!(Administrator)
+        match self.permissions {
+            Some(perms) if perms & Permissions::Administrator != Permissions::empty() =>
+                perms!(ItIsImpossibleToGainThisPermission),
+            _ => perms!(Administrator),
+        }
         /*if let Some(perms) = self.permissions {
             if self.display_name.is_none() {
                 PermissionsSet::one(perms.assignable_from())
