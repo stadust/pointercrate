@@ -1,7 +1,7 @@
 use crate::{actor::database::DeleteMessage, model::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
 use gdcf::{
-    api::request::level::{LevelsRequest, SearchFilters},
+    api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
     cache::CachedObject,
     chrono::Duration,
     model::{
@@ -134,7 +134,7 @@ impl Handler<LevelById> for HttpActor {
             ctx.spawn(inner.map(|_| ()).map_err(|_| ()).into_actor(self));
         }
 
-        cached.map(|level| level.extract())
+        cached.map(CachedObject::extract)
     }
 }
 
@@ -151,6 +151,7 @@ impl Handler<GetDemon> for HttpActor {
     fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Option<Level<u64, Creator>> {
         let GdcfFuture { cached, inner } = self.gdcf.levels::<u64, Creator>(
             LevelsRequest::default()
+                .request_type(LevelRequestType::MostLiked)
                 .search(msg.0.clone())
                 .with_rating(LevelRating::Demon(DemonRating::Hard))
                 .filter(SearchFilters::default().rated()),
