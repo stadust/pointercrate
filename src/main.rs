@@ -116,7 +116,7 @@ fn main() {
             .middleware(Authorizer)
             .middleware(Precondition)
             .middleware(MimeProcess)
-            .handler("/static", fs::StaticFiles::new("static").unwrap())
+            .handler("/static2", fs::StaticFiles::new("static2").unwrap())
             .resource("/", |r| {
                 r.name("home");
                 r.get().f(wrap(view::home::handler));

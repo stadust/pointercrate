@@ -15,7 +15,7 @@ pub mod login;
 // FIXME: we need a better dynamic url generation solution. We cannot use url_for because it breaks
 // when running behind a reverse proxy (all URLs it generates are for 127.0.0.1 which is freaking
 // useless)
-pub const STATIC: &str = "/static/";
+pub const STATIC: &str = "/static2/";
 
 pub trait Page {
     fn title(&self) -> String;

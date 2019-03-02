@@ -316,7 +316,7 @@ impl Page for Homepage {
     "name": "pointercrate",
     "description": "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players",
     "url": "https://pointercrate.com/",
-    "logo": "https://pointercrate.com/static/images/pointercrate2.png",
+    "logo": "https://pointercrate.com/static2/images/pointercrate2.png",
     "sameAs": [
       "https://twitter.com/demonlistgd",
       "https://www.youtube.com/channel/UCqI5feGZEqJRp6VcrP5gVyw"
