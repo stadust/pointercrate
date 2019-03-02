@@ -132,7 +132,7 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
                                 Ok(HttpResponse::Ok()
                                     .header("ETag", hasher.finish().to_string())
-                                    .json(value))
+                                    .json(serde_json::json!({"data": value})))
                             },
                         }
                     })
