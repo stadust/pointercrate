@@ -170,7 +170,7 @@ impl AccountPage {
                         }
                         form.flex.col#find-name-form novalidate = "" {
                             p.info-red.output {}
-                            span.form-input#find-id {
+                            span.form-input#find-name {
                                 label for = "name" {"Username:"}
                                 input required = "" type = "text" name = "name" minlength = "3";
                                 p.error {}

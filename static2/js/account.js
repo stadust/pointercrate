@@ -1,11 +1,6 @@
 "use strict";
 
-$(document).ready(function() {
-  var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
-  var csrfToken = csrfTokenSpan.innerHTML;
-
-  csrfTokenSpan.remove();
-
+function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");
   var accessToken = document.getElementById("access-token");
   var getTokenButton = document.getElementById("get-token");
@@ -60,7 +55,9 @@ $(document).ready(function() {
       }
     });
   });
+}
 
+function setupEditAccount() {
   var htmlEditForm = document.getElementById("edit-form");
   var editForm = new Form(htmlEditForm);
 
@@ -136,7 +133,9 @@ $(document).ready(function() {
       }
     });
   });
+}
 
+function setupInvalidateToken() {
   var invalidateButton = document.getElementById("invalidate-token");
 
   invalidateButton.addEventListener(
@@ -184,11 +183,24 @@ $(document).ready(function() {
       }
     });
   });
+}
 
-  var htmlEditForm2 = document.getElementById("patch-permissions");
-  var editForm2 = new Form(htmlEditForm2);
-  var edit2Error = htmlEditForm2.getElementsByClassName("output")[0];
-  var edit2Success = htmlEditForm2.getElementsByClassName("output")[1];
+function setupEditUser() {}
+
+$(document).ready(function() {
+  var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
+  var csrfToken = csrfTokenSpan.innerHTML;
+
+  csrfTokenSpan.remove();
+
+  setupGetAccessToken();
+  setupEditAccount();
+  setupInvalidateToken();
+
+  var htmlEditForm = document.getElementById("patch-permissions");
+  var editForm2 = new Form(htmlEditForm);
+  var edit2Error = htmlEditForm.getElementsByClassName("output")[0];
+  var edit2Success = htmlEditForm.getElementsByClassName("output")[1];
 
   var extended = editForm2.input("perm-extended");
   var list_helper = editForm2.input("perm-list-helper");
@@ -200,31 +212,24 @@ $(document).ready(function() {
   var text = document.getElementById("text");
 
   var htmlUserByIdForm = document.getElementById("find-id-form");
+  var htmlUserByNameForm = document.getElementById("find-name-form");
   var userByIdForm = new Form(htmlUserByIdForm);
+  var userByNameForm = new Form(htmlUserByNameForm);
   var userByIdError = htmlUserByIdForm.getElementsByClassName("output")[0];
+  var userByNameError = htmlUserByNameForm.getElementsByClassName("output")[0];
 
   var userId = userByIdForm.input("find-id");
+  var userName = userByNameForm.input("find-name");
 
   userId.addValidator(valueMissing, "User ID required");
+  userName.addValidator(valueMissing, "Username required");
 
-  userByIdForm.onSubmit(function(event) {
-    userByIdError.style.display = "";
-
+  function requestUserForEdit(userId, onError) {
     $.ajax({
       method: "GET",
-      url: "/api/v1/users/" + userId.value + "/",
+      url: "/api/v1/users/" + userId + "/",
       dataType: "json",
-      error: function(data) {
-        switch (data.responseJSON.code) {
-          case 40401:
-            userId.setError(data.responseJSON.message);
-            break;
-          default:
-            userByIdError.innerHTML = data.responseJSON.message;
-            userByIdError.style.display = "block";
-            break;
-        }
-      },
+      error: onError,
       success: function(crap, mor_crap, data) {
         window.currentUser = data.responseJSON.data;
         window.currentUser.etag = data.getResponseHeader("ETag");
@@ -255,7 +260,51 @@ $(document).ready(function() {
         mod.value = (bitmask & 0x2000) == 0x2000;
         admin.value = (bitmask & 0x4000) == 0x4000;
 
-        htmlEditForm2.style.display = "block";
+        htmlEditForm.style.display = "block";
+      }
+    });
+  }
+
+  userByIdForm.onSubmit(function(event) {
+    userByIdError.style.display = "";
+
+    requestUserForEdit(userId.value, function(data) {
+      switch (data.responseJSON.code) {
+        case 40401:
+          userId.setError(data.responseJSON.message);
+          break;
+        default:
+          userByIdError.innerHTML = data.responseJSON.message;
+          userByIdError.style.display = "block";
+          break;
+      }
+    });
+  });
+
+  userByNameForm.onSubmit(function(event) {
+    userByNameError.style.display = "";
+
+    $.ajax({
+      method: "GET",
+      url: "/api/v1/users/?name=" + userName.value,
+      dataType: "json",
+      error: function(data) {
+        userByNameError.innerHTML = data.responseJSON.message;
+        userByNameError.style.display = "block";
+      },
+      success: function(crap, mor_crap, data) {
+        var json = data.responseJSON;
+
+        console.log(json);
+
+        if (!json || json.length == 0) {
+          userName.setError("No user with that name found!");
+        } else {
+          requestUserForEdit(json[0].id, function(data) {
+            userByNameError.innerHTML = data.responseJSON.message;
+            userByNameError.style.display = "block";
+          });
+        }
       }
     });
   });
