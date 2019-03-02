@@ -20,7 +20,6 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
-    let uri = req.uri().to_string();
 
     state
         .authorize(
@@ -28,7 +27,9 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
             perms!(Administrator),
         )
         .and_then(move |_| pagination)
-        .and_then(move |pagination: UserPagination| state.paginate::<User, _>(pagination, uri))
+        .and_then(move |pagination: UserPagination| {
+            state.paginate::<User, _>(pagination, "/api/v1/users/".to_string())
+        })
         .map(|(users, links)| HttpResponse::Ok().header("Links", links).json(users))
         .responder()
 }

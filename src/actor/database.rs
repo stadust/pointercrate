@@ -521,6 +521,8 @@ where
             .join_with(",")
             .to_string();
 
+        debug!("Pagination header is: {}", header);
+
         Ok((result, header))
     }
 }

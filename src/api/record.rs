@@ -32,7 +32,6 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
-    let uri = req.uri().to_string();
 
     state
         .authorize(
@@ -42,7 +41,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .and_then(move |user| Ok((user, pagination?)))
         .and_then(move |(user, pagination): (User, RecordPagination)| {
             state
-                .paginate::<Record, _>(pagination, uri)
+                .paginate::<Record, _>(pagination, "/api/v1/records/".to_string())
                 .and_then(move |(records, links)| {
                     let mut value = serde_json::value::to_value(records)
                         .map_err(PointercrateError::internal)?;
