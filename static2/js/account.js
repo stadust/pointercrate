@@ -1,3 +1,5 @@
+"use strict";
+
 $(document).ready(function() {
   var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
   var csrfToken = csrfTokenSpan.innerHTML;
@@ -95,7 +97,7 @@ $(document).ready(function() {
   editForm.onSubmit(function(event) {
     editError.style.display = "none";
 
-    data = {};
+    var data = {};
 
     if (editDisplayName.value) data["display_name"] = editDisplayName.value;
     if (editYtChannel.value) data["youtube_channel"] = editYtChannel.value;
