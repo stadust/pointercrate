@@ -205,6 +205,7 @@ $(document).ready(function() {
       $.ajax({
         method: "DELETE",
         url: "/api/v1/users/" + window.currentUser.id + "/",
+        dataType: "json",
         headers: {
           "X-CSRF-TOKEN": csrfToken,
           "If-Match": window.currentUser.etag
