@@ -1,8 +1,5 @@
 use super::Creator;
-use crate::{
-    error::PointercrateError, operation::Delete, permissions::PermissionsSet, schema::creators,
-    Result,
-};
+use crate::{error::PointercrateError, operation::Delete, schema::creators, Result};
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 

@@ -1,8 +1,5 @@
 use super::Record;
-use crate::{
-    error::PointercrateError, operation::Delete, permissions::PermissionsSet, schema::records,
-    Result,
-};
+use crate::{error::PointercrateError, operation::Delete, schema::records, Result};
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 

@@ -1,7 +1,6 @@
 use super::User;
 use crate::{
-    error::PointercrateError, middleware::auth::Me, operation::Delete, permissions::PermissionsSet,
-    schema::members, Result,
+    error::PointercrateError, middleware::auth::Me, operation::Delete, schema::members, Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;

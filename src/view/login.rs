@@ -1,7 +1,5 @@
 use super::Page;
-use crate::{
-    api::PCResponder, middleware::auth::Basic, model::user::User, state::PointercrateState,
-};
+use crate::{api::PCResponder, middleware::auth::Basic, state::PointercrateState};
 use actix_web::{http::Cookie, AsyncResponder, HttpRequest, HttpResponse, Responder};
 use cookie::SameSite;
 use log::info;

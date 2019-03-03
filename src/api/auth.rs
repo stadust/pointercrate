@@ -8,7 +8,6 @@ use crate::{
         cond::{HttpResponseBuilderExt, IfMatch},
     },
     model::user::{PatchMe, Registration, User},
-    operation::Hotfix,
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, HttpMessage, HttpRequest, HttpResponse};

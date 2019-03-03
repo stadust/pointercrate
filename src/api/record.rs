@@ -7,7 +7,6 @@ use crate::{
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::{
         record::{PatchRecord, Record, RecordPagination, Submission},
-        user::User,
         Submitter,
     },
     state::PointercrateState,

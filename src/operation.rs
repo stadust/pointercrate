@@ -118,9 +118,7 @@ mod post {
 
 #[macro_use]
 mod delete {
-    use crate::{
-        error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
-    };
+    use crate::{error::PointercrateError, middleware::cond::IfMatch, Result};
     use diesel::pg::PgConnection;
     use log::info;
     use std::{
