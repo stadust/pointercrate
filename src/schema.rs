@@ -19,13 +19,13 @@ table! {
 }
 
 table! {
-    demon_publisher_verifier_join (pid, vid) {
-        pname -> Text,
-        pid -> Int4,
-        pbanned -> Bool,
+    demon_publisher_verifier_join (vid, pid) {
         vname -> Text,
         vid -> Int4,
         vbanned -> Bool,
+        pname -> Text,
+        pid -> Int4,
+        pbanned -> Bool,
     }
 }
 

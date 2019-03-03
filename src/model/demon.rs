@@ -181,12 +181,12 @@ impl Model for Demon {
         demons::video,
         demons::description,
         demons::notes,
-        demon_publisher_verifier_join::pname,
-        demon_publisher_verifier_join::pid,
-        demon_publisher_verifier_join::pbanned,
         demon_publisher_verifier_join::vname,
         demon_publisher_verifier_join::vid,
         demon_publisher_verifier_join::vbanned,
+        demon_publisher_verifier_join::pname,
+        demon_publisher_verifier_join::pid,
+        demon_publisher_verifier_join::pbanned,
     );
 
     fn from() -> Self::From {
