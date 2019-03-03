@@ -815,13 +815,12 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
 // TODO: make panels retractable. this is freaking huge.
 fn rules_panel() -> Markup {
     html! {
-        did#rules.panel.fade.flex.js-scroll-anim data-anim = "fade" style = "flex-direction: column" {
-            div.underlined {
-                h2 {
-                    "Rules:"
-                }
+        did#rules.panel.fade.flex.js-scroll-anim.js-collapse data-anim = "fade" style = "flex-direction: column" {
+            h2.underlined.pad {
+                "Rules:"
+                span.arrow.hover {}
             }
-            ul.roman {
+            ul.roman.js-collapse-content style="display:none" {
                 h3 {
                     "Demon rules:"
                 }

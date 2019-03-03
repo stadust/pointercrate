@@ -96,7 +96,30 @@ $(window).on("load resize", function() {
     });
   }
 
+  $(".js-collapse").each(function(i, elem) {
+    var collapse = $(elem);
+    var content = collapse.find(".js-collapse-content");
+    var arrow = collapse.find(".arrow");
+
+    arrow.parent().click(function() {
+      if (collapse.hasClass("active")) {
+        content.slideUp(250);
+        collapse.removeClass("active");
+      } else {
+        content.slideDown(250);
+        collapse.addClass("active");
+      }
+    });
+  });
+
   // ratio things
+
+  $(".ratio-16-9").each(function() {
+    forceRatio(this, 16, 9);
+  });
+  $(".ratio-4-3").each(function() {
+    forceRatio(this, 4, 3);
+  });
 
   $(".js-delay-css").each((i, elem) => {
     var elem = $(elem);
@@ -104,13 +127,6 @@ $(window).on("load resize", function() {
     var value = elem.data("property-value");
 
     elem.css(attr, value);
-  });
-
-  $(".ratio-16-9").each(function() {
-    forceRatio(this, 16, 9);
-  });
-  $(".ratio-4-3").each(function() {
-    forceRatio(this, 4, 3);
   });
 
   $(".js-delay-attr").each((i, elem) => {

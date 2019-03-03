@@ -120,7 +120,7 @@ function setupEditAccount() {
           case 418:
             editError.innerHTML =
               "Concurrent account access was made. Please reload the page";
-            editError.innerHTML = "block";
+            editError.style.display = "block";
             break;
           default:
             editError.innerHTML = data.responseJSON.message;
