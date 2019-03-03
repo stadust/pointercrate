@@ -2,7 +2,7 @@ use crate::{
     config::EXTENDED_LIST_SIZE,
     error::PointercrateError,
     middleware::{
-        auth::{AuthType, Authorization, Claims, Me, TAuthType},
+        auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
         cond::IfMatch,
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
@@ -144,6 +144,12 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
 #[derive(Debug)]
 pub struct Auth<T: TAuthType>(pub Authorization, pub PhantomData<T>);
 
+impl<T: TAuthType> Auth<T> {
+    pub fn new(auth: Authorization) -> Self {
+        Self(auth, PhantomData)
+    }
+}
+
 impl<T: TAuthType> Message for Auth<T> {
     type Result = Result<Me>;
 }
@@ -211,20 +217,6 @@ impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
     }
 }
 
-/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] by access token
-///
-/// ## Errors
-/// + [`PointercrateError::Unauthorized`]: Authorization failed
-#[derive(Debug)]
-pub struct TokenAuth(pub Authorization);
-
-/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] using basic auth
-///
-/// ## Errors
-/// + [`PointercrateError::Unauthorized`]: Authorization failed
-#[derive(Debug)]
-pub struct BasicAuth(pub Authorization);
-
 /// Message that indicates the [`DatabaseActor`] to invalidate all access tokens to the account
 /// authorized by the given [`Authorization`] object. The [`Authorization`] object must be of type
 /// [`Authorization::Basic] for this.
@@ -237,16 +229,61 @@ pub struct BasicAuth(pub Authorization);
 #[derive(Debug)]
 pub struct Invalidate(pub Authorization);
 
-impl Message for TokenAuth {
+impl Message for Invalidate {
+    type Result = Result<()>;
+}
+
+impl Handler<Invalidate> for DatabaseActor {
+    type Result = Result<()>;
+
+    fn handle(&mut self, msg: Invalidate, ctx: &mut Self::Context) -> Self::Result {
+        if let Authorization::Basic { ref password, .. } = msg.0 {
+            let password = password.clone();
+            let user = self.handle(Auth::<Basic>(msg.0, PhantomData), ctx)?;
+            let patch = PatchMe {
+                password: Some(password),
+                display_name: None,
+                youtube_channel: None,
+            };
+
+            info!("Invalidating all access tokens for user {}", user.0.id);
+
+            self.handle(
+                PatchMessage::<_, User, _>::unconditional(user.0.id, patch, user.0),
+                ctx,
+            )
+            .map(|_| ())
+        } else {
+            Err(PointercrateError::Unauthorized)
+        }
+    }
+}
+
+/*
+/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] by access token
+///
+/// ## Errors
+/// + [`PointercrateError::Unauthorized`]: Authorization failed
+#[derive(Debug)]
+pub struct Token(pub Authorization);
+
+/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] using basic auth
+///
+/// ## Errors
+/// + [`PointercrateError::Unauthorized`]: Authorization failed
+#[derive(Debug)]
+pub struct Basic(pub Authorization);
+
+impl Message for Token {
     type Result = Result<User>;
 }
 
 // During authorization, all and every error that might come up will be converted into
 // `PointercrateError::Unauthorized`
-impl Handler<TokenAuth> for DatabaseActor {
+impl Handler<Token> for DatabaseActor {
     type Result = Result<User>;
 
-    fn handle(&mut self, msg: TokenAuth, _: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: Token, _: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
 
         if let Authorization::Token {
@@ -281,44 +318,14 @@ impl Handler<TokenAuth> for DatabaseActor {
     }
 }
 
-impl Message for Invalidate {
-    type Result = Result<()>;
-}
-
-impl Handler<Invalidate> for DatabaseActor {
-    type Result = Result<()>;
-
-    fn handle(&mut self, msg: Invalidate, ctx: &mut Self::Context) -> Self::Result {
-        if let Authorization::Basic { ref password, .. } = msg.0 {
-            let password = password.clone();
-            let user = self.handle(BasicAuth(msg.0), ctx)?;
-            let patch = PatchMe {
-                password: Some(password),
-                display_name: None,
-                youtube_channel: None,
-            };
-
-            info!("Invalidating all access tokens for user {}", user.id);
-
-            self.handle(
-                PatchMessage::<_, User, _>::unconditional(user.id, patch, user),
-                ctx,
-            )
-            .map(|_| ())
-        } else {
-            Err(PointercrateError::Unauthorized)
-        }
-    }
-}
-
-impl Message for BasicAuth {
+impl Message for Basic {
     type Result = Result<User>;
 }
 
-impl Handler<BasicAuth> for DatabaseActor {
+impl Handler<Basic> for DatabaseActor {
     type Result = Result<User>;
 
-    fn handle(&mut self, msg: BasicAuth, _: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: Basic, _: &mut Self::Context) -> Self::Result {
         debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
 
         if let Authorization::Basic { username, password } = msg.0 {
@@ -335,7 +342,7 @@ impl Handler<BasicAuth> for DatabaseActor {
             Err(PointercrateError::Unauthorized)
         }
     }
-}
+}*/
 
 /// Message that requests the retrieval of an object of type `G` from the database using the
 /// provided key. The user object (if provided) will be the user any generated audit log entries

@@ -49,7 +49,7 @@ mod get {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
             /// `GET` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                use crate::middleware::auth::Authorization;
+                use crate::middleware::auth::{Authorization, Token};
 
                 info!("GET {}", $endpoint);
 
@@ -62,7 +62,9 @@ mod get {
 
                 resource_id
                     .into_future()
-                    .and_then(move |resource_id| state.get(resource_id.into_inner(), auth))
+                    .and_then(move |resource_id| {
+                        state.get::<Token, _, _>(resource_id.into_inner(), auth)
+                    })
                     .map(|resource: $resource_type| HttpResponse::Ok().json_with_etag(resource))
                     .responder()
             }
@@ -91,6 +93,8 @@ mod post {
         ($handler_name: ident, $endpoint: expr, $post_type: ty, $target_type: ty) => {
             /// `POST` handler
             pub fn post(req: &HttpRequest<PointercrateState>) -> PCResponder {
+                use crate::middleware::auth::Token;
+
                 info!("POST {}", $endpoint);
 
                 let auth = req.extensions_mut().remove().unwrap();
@@ -98,7 +102,9 @@ mod post {
 
                 req.json()
                     .from_err()
-                    .and_then(move |post: $post_type| state.post_authorized(post, auth))
+                    .and_then(move |post: $post_type| {
+                        state.post_authorized::<Token, _, _>(post, auth)
+                    })
                     .map(|created: $target_type| HttpResponse::Created().json_with_etag(created))
                     .responder()
             }
@@ -153,7 +159,7 @@ mod delete {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
             /// `DELETE` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                use crate::middleware::cond::IfMatch;
+                use crate::middleware::{auth::Token, cond::IfMatch};
 
                 info!("DELETE {}", $endpoint);
 
@@ -167,7 +173,7 @@ mod delete {
                     })
                     .into_future()
                     .and_then(move |resource_id| {
-                        state.delete_authorized::<$id_type, $resource_type>(
+                        state.delete_authorized::<Token, $id_type, $resource_type>(
                             resource_id.into_inner(),
                             Some(if_match),
                             auth,

@@ -3,7 +3,7 @@
 use super::PCResponder;
 use crate::{
     error::PointercrateError,
-    middleware::cond::HttpResponseBuilderExt,
+    middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::submitter::{PatchSubmitter, Submitter, SubmitterPagination, SubmitterWithRecords},
     state::PointercrateState,
 };
@@ -22,10 +22,11 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let state = req.state().clone();
 
     state
-        .authorize(
+        /*.authorize(
             req.extensions_mut().remove().unwrap(),
             perms!(ListAdministrator),
-        )
+        )*/
+        .auth::<Token>(req.extensions_mut().remove().unwrap()) // TODO: pagination permissions thingy
         .and_then(move |_| pagination)
         .and_then(move |pagination: SubmitterPagination| {
             state.paginate::<Submitter, _>(pagination, "/api/v1/submitters/".to_string())

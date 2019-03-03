@@ -1,6 +1,6 @@
 use super::Page;
 use crate::{
-    actor::database::BasicAuth, api::PCResponder, model::user::User, state::PointercrateState,
+    api::PCResponder, middleware::auth::Basic, model::user::User, state::PointercrateState,
 };
 use actix_web::{http::Cookie, AsyncResponder, HttpRequest, HttpResponse, Responder};
 use cookie::SameSite;
@@ -22,11 +22,11 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /login/");
 
     req.state()
-        .database(BasicAuth(req.extensions_mut().remove().unwrap()))
-        .map(|user: User| {
+        .auth::<Basic>(req.extensions_mut().remove().unwrap())
+        .map(|user| {
             HttpResponse::NoContent()
                 .cookie(
-                    Cookie::build("access_token", user.generate_token())
+                    Cookie::build("access_token", user.0.generate_token())
                         .http_only(true) // TODO: secure cookies if and only if we have an https connection
                         .same_site(SameSite::Strict)
                         .path("/")

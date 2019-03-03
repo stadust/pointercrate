@@ -1,14 +1,17 @@
 use crate::{
     actor::{
         database::{
-            BasicAuth, DatabaseActor, DeleteMessage, GetInternal, GetMessage, PaginateMessage,
-            PatchMessage, PostMessage, TokenAuth,
+            Auth, DatabaseActor, DeleteMessage, GetInternal, GetMessage, PaginateMessage,
+            PatchMessage, PostMessage,
         },
         http::HttpActor,
     },
     error::PointercrateError,
-    middleware::{auth::Authorization, cond::IfMatch},
-    model::{user::User, Model},
+    middleware::{
+        auth::{Authorization, Me, TAuthType, Token},
+        cond::IfMatch,
+    },
+    model::Model,
     operation::{
         Delete, DeletePermissions, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData,
     },
@@ -61,30 +64,10 @@ impl PointercrateState {
         self.gdcf.send(msg).map_err(PointercrateError::internal)
     }
 
-    pub fn authorize(
-        &self, authorization: Authorization, perms: PermissionsSet,
-    ) -> impl Future<Item = User, Error = PointercrateError> {
-        self.database(TokenAuth(authorization))
-            .and_then(move |user| {
-                if !perms.perms.is_empty() && !user.has_any(&perms) {
-                    Err(PointercrateError::MissingPermissions { required: perms })
-                } else {
-                    Ok(user)
-                }
-            })
-    }
-
-    pub fn authorize_basic(
-        &self, authorization: Authorization, perms: PermissionsSet,
-    ) -> impl Future<Item = User, Error = PointercrateError> {
-        self.database(BasicAuth(authorization))
-            .and_then(move |user| {
-                if !perms.perms.is_empty() && !user.has_any(&perms) {
-                    Err(PointercrateError::MissingPermissions { required: perms })
-                } else {
-                    Ok(user)
-                }
-            })
+    pub fn auth<T: TAuthType>(
+        &self, auth: Authorization,
+    ) -> impl Future<Item = Me, Error = PointercrateError> {
+        self.database(Auth::<T>(auth, PhantomData))
     }
 
     pub fn get_unauthorized<Key, G>(
@@ -94,13 +77,15 @@ impl PointercrateState {
         G: Get<Key> + AccessRestrictions + Send + 'static,
         Key: Send + 'static,
     {
-        self.get(key, Authorization::Unauthorized)
+        // Auth type doesnt matter, as we don't do auth
+        self.get::<Token, _, _>(key, Authorization::Unauthorized)
     }
 
-    pub fn get<Key, G>(
+    pub fn get<T, Key, G>(
         &self, key: Key, auth: Authorization,
     ) -> impl Future<Item = G, Error = PointercrateError>
     where
+        T: TAuthType,
         G: Get<Key> + AccessRestrictions + Send + 'static,
         Key: Send + 'static,
     {
@@ -110,11 +95,9 @@ impl PointercrateState {
             Authorization::Unauthorized =>
                 Either::A(self.database(GetMessage(key, None, PhantomData))),
             auth =>
-                Either::B(
-                    self.database(TokenAuth(auth)).and_then(move |user| {
-                        clone.database(GetMessage(key, Some(user), PhantomData))
-                    }),
-                ),
+                Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
+                    clone.database(GetMessage(key, Some(user.0), PhantomData))
+                })),
         }
     }
 
@@ -126,10 +109,11 @@ impl PointercrateState {
         self.database(GetInternal(key, PhantomData))
     }
 
-    pub fn post_authorized<T, P>(
-        &self, t: T, authorization: Authorization,
+    pub fn post_authorized<A, T, P>(
+        &self, t: T, auth: Authorization,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
+        A: TAuthType,
         T: PostData + Send + 'static,
         P: Post<T> + Send + 'static,
     {
@@ -140,10 +124,10 @@ impl PointercrateState {
         // it's the case? Because this way allows us to pass the user object from a successful
         // authentication to the `PostMessage` struct even if no permissions are required. This
         // means that in those cases we still get audit-log entries
-        self.authorize(authorization, t.required_permissions())
+        self.database(Auth::<A>::new(auth)) // TODO: reintroduce permission checking
             .then(move |result| {
                 match result {
-                    Ok(user) => Either::A(clone.database(PostMessage(t, Some(user), PhantomData))),
+                    Ok(user) => Either::A(clone.database(PostMessage(t, Some(user.0), PhantomData))),
                     Err(PointercrateError::Unauthorized)
                         if t.required_permissions() == PermissionsSet::default() =>
                         Either::A(clone.database(PostMessage(t, None, PhantomData))),
@@ -164,21 +148,22 @@ impl PointercrateState {
         self.database(PostMessage(t, None, PhantomData))
     }
 
-    pub fn delete_authorized<Key, D>(
-        &self, key: Key, condition: Option<IfMatch>, authorization: Authorization,
+    pub fn delete_authorized<T, Key, D>(
+        &self, key: Key, condition: Option<IfMatch>, auth: Authorization,
     ) -> impl Future<Item = (), Error = PointercrateError>
     where
+        T: TAuthType,
         Key: Send + 'static,
         D: Get<Key> + Delete + DeletePermissions + Hash + Send + 'static,
     {
         let clone = self.clone();
 
-        self.authorize(authorization, D::permissions())
+        self.database(Auth::<T>::new(auth))// TODO: reintroduce permission checking
             .and_then(move |user| {
                 clone.database(DeleteMessage::<Key, D>(
                     key,
                     condition,
-                    Some(user),
+                    Some(user.0),
                     PhantomData,
                 ))
             })
@@ -199,35 +184,20 @@ impl PointercrateState {
         ))
     }
 
-    pub fn patch_authorized<Key, P, H>(
-        &self, authorization: Authorization, key: Key, fix: H, condition: IfMatch,
+    pub fn patch_authorized<T, Key, P, H>(
+        &self, auth: Authorization, key: Key, fix: H, condition: IfMatch,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
+        T: TAuthType,
         Key: Send + 'static,
         H: Hotfix + Send + 'static,
         P: Get<Key> + Patch<H> + Send + Hash + 'static,
     {
         let clone = self.clone();
 
-        self.authorize(authorization, fix.required_permissions())
+        self.database(Auth::<T>::new(auth)) // TODO: reintroduce permission checking
             .and_then(move |user| {
-                clone.database(PatchMessage::new(key, fix, user, Some(condition)))
-            })
-    }
-
-    pub fn patch_authorized_basic<Key, P, H>(
-        &self, authorization: Authorization, key: Key, fix: H, condition: IfMatch,
-    ) -> impl Future<Item = P, Error = PointercrateError>
-    where
-        Key: Send + 'static,
-        H: Hotfix + Send + 'static,
-        P: Get<Key> + Patch<H> + Send + Hash + 'static,
-    {
-        let clone = self.clone();
-
-        self.authorize_basic(authorization, fix.required_permissions())
-            .and_then(move |user| {
-                clone.database(PatchMessage::new(key, fix, user, Some(condition)))
+                clone.database(PatchMessage::new(key, fix, user.0, Some(condition)))
             })
     }
 

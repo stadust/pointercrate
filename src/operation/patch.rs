@@ -241,7 +241,7 @@ macro_rules! patch_handler_with_authorization {
     ($handler_name: ident, $endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
         /// `PATCH` handler
         pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-            use crate::middleware::cond::IfMatch;
+            use crate::middleware::{auth::Token, cond::IfMatch};
 
             info!("PATCH {}", stringify!($endpoint));
 
@@ -257,7 +257,7 @@ macro_rules! patch_handler_with_authorization {
                 .from_err()
                 .and_then(move |patch: $patch_type| Ok((patch, resource_id?.into_inner())))
                 .and_then(move |(patch, resource_id)| {
-                    state.patch_authorized(auth, resource_id, patch, if_match)
+                    state.patch_authorized::<Token, _, _, _>(auth, resource_id, patch, if_match)
                 })
                 .map(move |updated: $target_type| HttpResponse::Ok().json_with_etag(updated))
                 .responder()

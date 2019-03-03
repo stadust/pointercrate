@@ -4,7 +4,7 @@ use super::PCResponder;
 use crate::{
     actor::http::PostProcessRecord,
     error::PointercrateError,
-    middleware::cond::HttpResponseBuilderExt,
+    middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::{
         record::{PatchRecord, Record, RecordPagination, Submission},
         user::User,
@@ -30,11 +30,12 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let state = req.state().clone();
 
     state
-        .authorize(
+        /*.authorize(
             req.extensions_mut().remove().unwrap(),
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
-        )
-        .and_then(move |user| Ok((user, pagination?)))
+        )*/
+        .auth::<Token>(req.extensions_mut().remove().unwrap()) // TODO: pagination permissions thingy
+        .and_then(move |user| Ok((user.0, pagination?)))
         .and_then(move |(user, pagination): (User, RecordPagination)| {
             state
                 .paginate::<Record, _>(pagination, "/api/v1/records/".to_string())
@@ -74,7 +75,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
                 .get_internal(remote_addr)
                 .and_then(move |submitter: Submitter| {
                     state
-                        .post_authorized((submission, submitter), auth)
+                        .post_authorized::<Token, _, _>((submission, submitter), auth)
                         .and_then(move |record: Option<Record>| {
                             state.http(PostProcessRecord(record))
                         })

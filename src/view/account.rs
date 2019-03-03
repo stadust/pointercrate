@@ -1,6 +1,6 @@
 use super::Page;
 use crate::{
-    actor::database::TokenAuth, api::PCResponder, model::user::User, state::PointercrateState,
+    api::PCResponder, middleware::auth::Token, model::user::User, state::PointercrateState,
 };
 use actix_web::{AsyncResponder, HttpRequest, Responder};
 use log::info;
@@ -22,9 +22,9 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
 
     req.state()
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .map(move |user: User| {
-            AccountPage { user }
+        .auth::<Token>(req.extensions_mut().remove().unwrap())
+        .map(move |user| {
+            AccountPage { user: user.0 }
                 .render(&req_clone)
                 .respond_to(&req_clone)
                 .unwrap()

@@ -1,7 +1,7 @@
 use super::PCResponder;
 use crate::{
     error::PointercrateError,
-    middleware::cond::HttpResponseBuilderExt,
+    middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::player::{PatchPlayer, Player, PlayerPagination, PlayerWithDemonsAndRecords},
     state::PointercrateState,
 };
@@ -20,10 +20,11 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let state = req.state().clone();
 
     state
-        .authorize(
+        /*.authorize(
             req.extensions_mut().remove().unwrap(),
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
-        )
+        )*/
+        .auth::<Token>(req.extensions_mut().remove().unwrap()) // TODO: pagination permissions thingy
         .and_then(move |_| pagination)
         .and_then(move |pagination: PlayerPagination| {
             state.paginate::<Player, _>(pagination, "/api/v1/players/".to_string())

@@ -2,8 +2,11 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::{BasicAuth, Invalidate, PatchMessage, TokenAuth},
-    middleware::cond::{HttpResponseBuilderExt, IfMatch},
+    actor::database::{Invalidate, PatchMessage},
+    middleware::{
+        auth::{Basic, Token},
+        cond::{HttpResponseBuilderExt, IfMatch},
+    },
     model::user::{PatchMe, Registration, User},
     operation::Hotfix,
     state::PointercrateState,
@@ -35,11 +38,11 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/auth/");
 
     req.state()
-        .database(BasicAuth(req.extensions_mut().remove().unwrap()))
-        .map(|user: User| {
+        .auth::<Basic>(req.extensions_mut().remove().unwrap())
+        .map(|user| {
             HttpResponse::Ok().etag(&user).json(json!({
                 "data": user,
-                "token": user.generate_token()
+                "token": user.0.generate_token()
             }))
         })
         .responder()
@@ -60,8 +63,8 @@ pub fn me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/auth/me/");
 
     req.state()
-        .database(TokenAuth(req.extensions_mut().remove().unwrap()))
-        .map(|user: User| HttpResponse::Ok().json_with_etag(user))
+        .auth::<Token>(req.extensions_mut().remove().unwrap())
+        .map(|user| HttpResponse::Ok().json_with_etag(user))
         .responder()
 }
 
@@ -76,11 +79,9 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     req.json()
         .from_err()
         .and_then(move |patch: PatchMe| {
-            state
-                .authorize_basic(auth, patch.required_permissions())
-                .and_then(move |user: User| {
-                    state.database(PatchMessage::new(user.id, patch, user, Some(if_match)))
-                })
+            state.auth::<Basic>(auth).and_then(move |user| {
+                state.database(PatchMessage::new(user.0.id, patch, user.0, Some(if_match)))
+            })
         })
         .map(|user: User| HttpResponse::Ok().json_with_etag(user))
         .responder()
@@ -94,8 +95,8 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let if_match: IfMatch = req.extensions_mut().remove().unwrap();
 
     state
-        .database(BasicAuth(req.extensions_mut().remove().unwrap()))
-        .and_then(move |user: User| state.delete::<i32, User>(user.id, if_match))
+        .auth::<Basic>(req.extensions_mut().remove().unwrap())
+        .and_then(move |user| state.delete::<i32, User>(user.0.id, if_match))
         .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

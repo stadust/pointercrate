@@ -29,30 +29,31 @@ pub enum AuthType {
     Token,
 }
 
-pub trait TAuthType {
+pub trait TAuthType: Send + Sync + 'static {
     fn auth_type() -> AuthType;
 }
 
 #[derive(Debug)]
-pub struct BasicAuth;
+pub struct Basic;
 
 #[derive(Debug)]
-pub struct TokenAuth;
+pub struct Token;
 
-impl TAuthType for BasicAuth {
+impl TAuthType for Basic {
     fn auth_type() -> AuthType {
         AuthType::Basic
     }
 }
 
-impl TAuthType for TokenAuth {
+impl TAuthType for Token {
     fn auth_type() -> AuthType {
         AuthType::Token
     }
 }
 
 /// The user that made an authorized request
-#[derive(Debug)]
+#[derive(Debug, Serialize, Hash)]
+#[serde(transparent)]
 pub struct Me(pub User);
 
 #[derive(Debug, Deserialize, Serialize)]

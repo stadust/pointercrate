@@ -3,7 +3,7 @@
 use super::PCResponder;
 use crate::{
     error::PointercrateError,
-    middleware::cond::HttpResponseBuilderExt,
+    middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::{
         creator::{Creator, PostCreator},
         demon::{
@@ -61,7 +61,7 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     req.json()
         .from_err()
         .and_then(move |post: PostCreator| Ok((position?.into_inner(), post.creator)))
-        .and_then(move |data| state.post_authorized(data, auth))
+        .and_then(move |data| state.post_authorized::<Token, _, _>(data, auth))
         .map(|_: Creator| HttpResponse::Created().finish())
         .responder()
 }
