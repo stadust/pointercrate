@@ -108,6 +108,8 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 // approved record has higher progress than the submission. If its submitted, we do the
                 // same, but at the same time, we mark the existing submission with lower progress for
                 // deleting.
+
+                // First we reject all records where the video is already in the database
                 if record.video == video {
                     return Err(PointercrateError::SubmissionExists {
                         existing: record.id,
@@ -115,6 +117,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                     })
                 }
 
+                // Then we reject all records, where the same player/demon combo has already been rejected
                 if record.status() == RecordStatus::Rejected {
                     return Err(PointercrateError::SubmissionExists {
                         status: record.status(),
@@ -122,15 +125,26 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                     })
                 }
 
-                if record.status() == status && record.progress() < progress {
-                    if record.status() == RecordStatus::Submitted {
-                        to_delete.push(record)
-                    }
-                } else {
+                // Then we reject all submissions, where any other record with higher progress with the same player/demon exists (approved or submited)
+                if status == RecordStatus::Submitted && record.progress() >= progress {
                     return Err(PointercrateError::SubmissionExists {
                         status: record.status(),
                         existing: record.id,
                     })
+                }
+
+                // Lastly, we handle the case where existing and new have the same status. This should be pretty self explaining
+                if record.status() == status {
+                    if record.progress() < progress {
+                        if record.status() == RecordStatus::Submitted {
+                            to_delete.push(record)
+                        }
+                    } else {
+                        return Err(PointercrateError::SubmissionExists {
+                            status: record.status(),
+                            existing: record.id,
+                        })
+                    }
                 }
 
             }
