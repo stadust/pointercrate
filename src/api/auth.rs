@@ -2,9 +2,9 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::{Invalidate, PatchMessage},
+    actor::database::{DeleteMessage, Invalidate, PatchMessage},
     middleware::{
-        auth::{Basic, Token},
+        auth::{Basic, Me, Token},
         cond::{HttpResponseBuilderExt, IfMatch},
     },
     model::user::{PatchMe, Registration, User},
@@ -96,7 +96,7 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     state
         .auth::<Basic>(req.extensions_mut().remove().unwrap())
-        .and_then(move |user| state.delete::<i32, User>(user.0.id, if_match))
+        .and_then(move |me| state.database(DeleteMessage::<Me, Me>::new(me, if_match, None)))
         .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

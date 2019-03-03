@@ -1,10 +1,7 @@
 use super::User;
 use crate::{
-    error::PointercrateError,
-    operation::{Delete, DeletePermissions},
-    permissions::PermissionsSet,
-    schema::members,
-    Result,
+    error::PointercrateError, middleware::auth::Me, operation::Delete, permissions::PermissionsSet,
+    schema::members, Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
@@ -21,8 +18,14 @@ impl Delete for User {
     }
 }
 
-impl DeletePermissions for User {
-    fn permissions() -> PermissionsSet {
-        perms!(Administrator)
+impl Delete for Me {
+    fn delete(self, connection: &PgConnection) -> Result<()> {
+        info!("Self-deleting user {}", self.0);
+
+        delete(members::table)
+            .filter(members::member_id.eq(self.0.id))
+            .execute(connection)
+            .map(|_| ())
+            .map_err(PointercrateError::database)
     }
 }

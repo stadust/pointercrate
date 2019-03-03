@@ -56,6 +56,12 @@ impl TAuthType for Token {
 #[serde(transparent)]
 pub struct Me(pub User);
 
+impl std::fmt::Display for Me {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub id: i32,

@@ -1,9 +1,6 @@
 use super::Creator;
 use crate::{
-    error::PointercrateError,
-    operation::{Delete, DeletePermissions},
-    permissions::PermissionsSet,
-    schema::creators,
+    error::PointercrateError, operation::Delete, permissions::PermissionsSet, schema::creators,
     Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
@@ -22,11 +19,5 @@ impl Delete for Creator {
             .execute(connection)
             .map(|_| ())
             .map_err(PointercrateError::database)
-    }
-}
-
-impl DeletePermissions for Creator {
-    fn permissions() -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }

@@ -434,18 +434,22 @@ where
     pub fn unconditional(key: Key) -> Self {
         DeleteMessage(key, None, None, PhantomData)
     }
+
+    pub fn new(key: Key, if_match: IfMatch, user: Option<User>) -> Self {
+        DeleteMessage(key, Some(if_match), user, PhantomData)
+    }
 }
 
 impl<Key, D> Message for DeleteMessage<Key, D>
 where
-    D: Get<Key> + Delete + Hash,
+    D: Get<Key> + Delete + AccessRestrictions + Hash,
 {
     type Result = Result<()>;
 }
 
 impl<Key, D> Handler<DeleteMessage<Key, D>> for DatabaseActor
 where
-    D: Get<Key> + Delete + Hash,
+    D: Get<Key> + Delete + AccessRestrictions + Hash,
 {
     type Result = Result<()>;
 
@@ -453,11 +457,14 @@ where
         let connection = &*self.maybe_audited_connection(&msg.2)?;
 
         connection.transaction(|| {
-            let target = D::get(msg.0, connection)?;
+            D::pre_access(msg.2.as_ref())?;
+
+            let object = D::get(msg.0, connection)?.access(msg.2.as_ref())?;
+            object.pre_delete(msg.2.as_ref())?;
 
             match msg.1 {
-                Some(condition) => target.delete_if_match(condition, connection),
-                None => target.delete(connection),
+                Some(condition) => object.delete_if_match(condition, connection),
+                None => object.delete(connection),
             }
         })
     }

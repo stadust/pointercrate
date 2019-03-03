@@ -1,5 +1,12 @@
 use super::{Creator, Creators};
-use crate::{error::PointercrateError, model::Demon, operation::Get, schema::creators, Result};
+use crate::{
+    error::PointercrateError,
+    model::{user::User, Demon},
+    operation::Get,
+    permissions::{self, AccessRestrictions},
+    schema::creators,
+    Result,
+};
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a str> for Creators {
@@ -21,5 +28,11 @@ impl Get<(i16, i32)> for Creator {
             .filter(creators::creator.eq(&player_id))
             .get_result(connection)
             .map_err(PointercrateError::database)
+    }
+}
+
+impl AccessRestrictions for Creator {
+    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(ListModerator or ListAdministrator), user)
     }
 }

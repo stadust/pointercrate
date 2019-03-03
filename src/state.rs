@@ -12,9 +12,7 @@ use crate::{
         cond::IfMatch,
     },
     model::Model,
-    operation::{
-        Delete, DeletePermissions, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData,
-    },
+    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
     permissions::{AccessRestrictions, PermissionsSet},
     Result,
 };
@@ -148,40 +146,29 @@ impl PointercrateState {
         self.database(PostMessage(t, None, PhantomData))
     }
 
-    pub fn delete_authorized<T, Key, D>(
+    pub fn delete<T, Key, D>(
         &self, key: Key, condition: Option<IfMatch>, auth: Authorization,
     ) -> impl Future<Item = (), Error = PointercrateError>
     where
         T: TAuthType,
         Key: Send + 'static,
-        D: Get<Key> + Delete + DeletePermissions + Hash + Send + 'static,
+        D: Get<Key> + AccessRestrictions + Delete + Hash + Send + 'static,
     {
         let clone = self.clone();
 
-        self.database(Auth::<T>::new(auth))// TODO: reintroduce permission checking
-            .and_then(move |user| {
-                clone.database(DeleteMessage::<Key, D>(
-                    key,
-                    condition,
-                    Some(user.0),
-                    PhantomData,
-                ))
-            })
-    }
-
-    pub fn delete<Key, D>(
-        &self, key: Key, condition: IfMatch,
-    ) -> impl Future<Item = (), Error = PointercrateError>
-    where
-        Key: Send + 'static,
-        D: Get<Key> + Delete + Hash + Send + 'static,
-    {
-        self.database(DeleteMessage::<Key, D>(
-            key,
-            Some(condition),
-            None,
-            PhantomData,
-        ))
+        match auth {
+            Authorization::Unauthorized =>
+                Either::A(self.database(DeleteMessage::<Key, D>(key, condition, None, PhantomData))),
+            auth =>
+                Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
+                    clone.database(DeleteMessage::<Key, D>(
+                        key,
+                        condition,
+                        Some(user.0),
+                        PhantomData,
+                    ))
+                })),
+        }
     }
 
     pub fn patch_authorized<T, Key, P, H>(

@@ -84,4 +84,8 @@ impl AccessRestrictions for Record {
 
         Ok(page)
     }
+
+    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(ListModerator or ListAdministrator), user)
+    }
 }

@@ -1,6 +1,7 @@
 use super::User;
 use crate::{
     error::PointercrateError,
+    middleware::auth::Me,
     operation::Get,
     permissions::{self, AccessRestrictions, Permissions},
     Result,
@@ -50,4 +51,17 @@ impl AccessRestrictions for User {
     fn pre_page_access(user: Option<&User>) -> Result<()> {
         permissions::demand(perms!(Administrator), user)
     }
+
+    // TODO: reject delete if self is user
+    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(Administrator), user)
+    }
 }
+
+impl Get<Me> for Me {
+    fn get(me: Me, _: &PgConnection) -> Result<Me> {
+        Ok(me)
+    }
+}
+
+impl AccessRestrictions for Me {}

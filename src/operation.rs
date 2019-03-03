@@ -4,7 +4,7 @@ mod paginate;
 mod patch;
 
 pub use self::{
-    delete::{Delete, DeletePermissions},
+    delete::Delete,
     get::Get,
     paginate::{Paginate, Paginator},
     patch::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
@@ -149,12 +149,6 @@ mod delete {
         }
     }
 
-    pub trait DeletePermissions {
-        fn permissions() -> PermissionsSet {
-            PermissionsSet::default()
-        }
-    }
-
     macro_rules! delete_handler_with_authorization {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
             /// `DELETE` handler
@@ -173,7 +167,7 @@ mod delete {
                     })
                     .into_future()
                     .and_then(move |resource_id| {
-                        state.delete_authorized::<Token, $id_type, $resource_type>(
+                        state.delete::<Token, $id_type, $resource_type>(
                             resource_id.into_inner(),
                             Some(if_match),
                             auth,

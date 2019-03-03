@@ -292,6 +292,10 @@ pub trait AccessRestrictions {
     {
         Ok(page)
     }
+
+    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
+        Ok(())
+    }
 }
 /*
 impl<A, B> AccessRestrictions for (A, B)

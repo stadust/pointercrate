@@ -1,9 +1,6 @@
 use super::Record;
 use crate::{
-    error::PointercrateError,
-    operation::{Delete, DeletePermissions},
-    permissions::PermissionsSet,
-    schema::records,
+    error::PointercrateError, operation::Delete, permissions::PermissionsSet, schema::records,
     Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
@@ -18,11 +15,5 @@ impl Delete for Record {
             .execute(connection)
             .map(|_| ())
             .map_err(PointercrateError::database)
-    }
-}
-
-impl DeletePermissions for Record {
-    fn permissions() -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }
