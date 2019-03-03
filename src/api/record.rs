@@ -16,8 +16,6 @@ use ipnetwork::IpNetwork;
 use log::info;
 use tokio::prelude::future::{Future, IntoFuture};
 
-// FIXME: we need a prettier way to handle the removal of fields
-
 /// `GET /api/v1/records/` handler
 pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET /api/v1/records/");
@@ -68,60 +66,12 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-/*pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
-    info!("GET {}", "/api/v1/records/[record_id]/");
-
-    let state = req.state().clone();
-    let auth = state.authorize(
-        req.extensions_mut().remove().unwrap(),
-        perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
-    );
-
-    let resource_id = Path::<i32>::extract(req)
-        .map_err(|_| PointercrateError::bad_request("Record ID must be integer"));
-
-    resource_id
-        .into_future()
-        .and_then(move |resource_id| {
-            state
-                .get(resource_id.into_inner())
-                .and_then(|record: Record| {
-                    auth.then(move |result| {
-                        match result {
-                            // List mods see all records with their submitter information
-                            Ok(ref user) if user.list_team_member() =>
-                                Ok(HttpResponse::Ok().json_with_etag(record)),
-
-                            // Unauthorized people cannot see non-approved records
-                            Err(_) if record.status() != RecordStatus::Approved =>
-                                Err(PointercrateError::MissingPermissions {required: perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator)}),
-
-                            // People with only ExtendedAccess, or unauthorized people (in case of an approved record) will see the record without the submitter info
-                            _ => {
-                                let mut hasher = DefaultHasher::new();
-                                record.hash(&mut hasher);
-
-                                let mut value = serde_json::value::to_value(record)
-                                    .map_err(PointercrateError::internal)?;
-                                value["submitter"] = serde_json::json!(null);
-
-                                Ok(HttpResponse::Ok()
-                                    .header("ETag", hasher.finish().to_string())
-                                    .json(serde_json::json!({"data": value})))
-                            },
-                        }
-                    })
-                })
-        })
-        .responder()
-}*/
-
 get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", Record);
-patch_handler_with_authorization!(
+patch_handler!(
     "/api/v1/records/[record id]/",
     i32,
     "Record ID",
     PatchRecord,
     Record
 );
-delete_handler_with_authorization!("/api/v1/records/[record id]/", i32, "Record ID", Record);
+delete_handler!("/api/v1/records/[record id]/", i32, "Record ID", Record);

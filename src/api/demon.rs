@@ -40,14 +40,14 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-post_handler_with_authorization!("/api/v1/demons/", PostDemon, DemonWithCreatorsAndRecords);
+post_handler!("/api/v1/demons/", PostDemon, DemonWithCreatorsAndRecords);
 get_handler!(
     "/api/v1/demons/[position]/",
     i16,
     "Demon position",
     DemonWithCreatorsAndRecords
 );
-patch_handler_with_authorization!(
+patch_handler!(
     "/api/v1/demons/[position]/",
     i16,
     "Demon position",
@@ -71,7 +71,7 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-delete_handler_with_authorization!(
+delete_handler!(
     delete_creator,
     "/api/v1/demons/[position]/creators/[player id]/",
     (i16, i32),

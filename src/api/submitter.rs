@@ -41,7 +41,7 @@ get_handler!(
     "Submitter ID",
     SubmitterWithRecords
 );
-patch_handler_with_authorization!(
+patch_handler!(
     "/api/v1/submitters/[id]/",
     i32,
     "Submitter ID",

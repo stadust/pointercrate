@@ -36,7 +36,7 @@ get_handler!(
     PlayerWithDemonsAndRecords
 );
 
-patch_handler_with_authorization!(
+patch_handler!(
     "/api/v1/players/[id]/",
     i32,
     "Player ID",

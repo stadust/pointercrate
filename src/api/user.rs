@@ -32,5 +32,5 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
 }
 
 get_handler!("/api/v1/users/[id]", i32, "User ID", User);
-patch_handler_with_authorization!("/api/v1/users/[id]/", i32, "User ID", PatchUser, User);
-delete_handler_with_authorization!("/api/v1/users/[user id]/", i32, "User ID", User);
+patch_handler!("/api/v1/users/[id]/", i32, "User ID", PatchUser, User);
+delete_handler!("/api/v1/users/[user id]/", i32, "User ID", User);

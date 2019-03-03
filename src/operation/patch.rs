@@ -225,7 +225,7 @@ macro_rules! validate_nullable {
     }
 }
 
-macro_rules! patch_handler_with_authorization {
+macro_rules! patch_handler {
     ($handler_name: ident, $endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
         /// `PATCH` handler
         pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -253,7 +253,7 @@ macro_rules! patch_handler_with_authorization {
     };
 
     ($endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
-        patch_handler_with_authorization!(
+        patch_handler!(
             patch,
             $endpoint,
             $id_type,

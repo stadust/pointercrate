@@ -89,7 +89,7 @@ mod post {
         fn required_permissions(&self) -> PermissionsSet;
     }
 
-    macro_rules! post_handler_with_authorization {
+    macro_rules! post_handler {
         ($handler_name: ident, $endpoint: expr, $post_type: ty, $target_type: ty) => {
             /// `POST` handler
             pub fn post(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -109,7 +109,7 @@ mod post {
         };
 
         ($endpoint: expr, $post_type: ty, $target_type: ty) => {
-            post_handler_with_authorization!(post, $endpoint, $post_type, $target_type);
+            post_handler!(post, $endpoint, $post_type, $target_type);
         };
     }
 }
@@ -145,7 +145,7 @@ mod delete {
         }
     }
 
-    macro_rules! delete_handler_with_authorization {
+    macro_rules! delete_handler {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
             /// `DELETE` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -175,13 +175,7 @@ mod delete {
         };
 
         ($endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
-            delete_handler_with_authorization!(
-                delete,
-                $endpoint,
-                $id_type,
-                $id_name,
-                $resource_type
-            );
+            delete_handler!(delete, $endpoint, $id_type, $id_name, $resource_type);
         };
     }
 }
