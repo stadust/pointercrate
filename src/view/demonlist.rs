@@ -331,12 +331,7 @@ impl Page for Demonlist {
                                 }
                                 span {
                                     b {
-                                        div.tooltip {
-                                        "Reported object count: "
-                                            div.tooltiptext.fade {
-                                                "The object count reported by the Geometry Dash servers is mostly wrong. It is provided by the game client and not validated by the servers. Additionally to the official client having a set of bugs that can cause the count to be wrong, the servers also store the object count in a 16 bit unsigned integer. This means that if a level has more than 65535 objects, it'll simply display 65535. Furthermore, since the count isn't validated, it is possible to manually send fake requests to the servers to set the object count to arbitrary values."
-                                            }
-                                        }
+                                        "Object count: "
                                     }
                                     br;
                                     (level.decompress_data().map(|data| data.object_count()).unwrap_or(level.base.object_amount as usize))
