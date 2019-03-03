@@ -66,7 +66,7 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     req.json()
         .from_err()
         .and_then(move |post: PostCreator| Ok((position?.into_inner(), post.creator)))
-        .and_then(move |data| state.post_authorized::<Token, _, _>(data, auth))
+        .and_then(move |data| state.post::<Token, _, _>(data, auth))
         .map(|_: Creator| HttpResponse::Created().finish())
         .responder()
 }

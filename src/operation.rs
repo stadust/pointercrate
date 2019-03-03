@@ -102,9 +102,7 @@ mod post {
 
                 req.json()
                     .from_err()
-                    .and_then(move |post: $post_type| {
-                        state.post_authorized::<Token, _, _>(post, auth)
-                    })
+                    .and_then(move |post: $post_type| state.post::<Token, _, _>(post, auth))
                     .map(|created: $target_type| HttpResponse::Created().json_with_etag(created))
                     .responder()
             }

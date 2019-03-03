@@ -13,7 +13,7 @@ use crate::{
     },
     model::Model,
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
-    permissions::{AccessRestrictions, PermissionsSet},
+    permissions::AccessRestrictions,
     Result,
 };
 use actix::{Addr, Handler, Message};
@@ -25,10 +25,7 @@ use diesel::{
     AppearsOnTable, Expression, QuerySource, SelectableExpression,
 };
 use std::{collections::HashMap, hash::Hash, marker::PhantomData, sync::Arc};
-use tokio::prelude::{
-    future::{err, Either},
-    Future,
-};
+use tokio::prelude::{future::Either, Future};
 
 #[derive(Clone)]
 #[allow(missing_debug_implementations)]
@@ -107,7 +104,15 @@ impl PointercrateState {
         self.database(GetInternal(key, PhantomData))
     }
 
-    pub fn post_authorized<A, T, P>(
+    pub fn post_unauthorized<T, P>(&self, t: T) -> impl Future<Item = P, Error = PointercrateError>
+    where
+        T: PostData + Send + 'static,
+        P: Post<T> + Send + 'static,
+    {
+        self.post::<Token, _, _>(t, Authorization::Unauthorized)
+    }
+
+    pub fn post<A, T, P>(
         &self, t: T, auth: Authorization,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
@@ -117,33 +122,14 @@ impl PointercrateState {
     {
         let clone = self.clone();
 
-        // Why do it this way around instead of checking `t.required_permissions() ==
-        // PermissionsSet::default()` first and simply not doing the whole authorization thing when
-        // it's the case? Because this way allows us to pass the user object from a successful
-        // authentication to the `PostMessage` struct even if no permissions are required. This
-        // means that in those cases we still get audit-log entries
-        self.database(Auth::<A>::new(auth)) // TODO: reintroduce permission checking
-            .then(move |result| {
-                match result {
-                    Ok(user) => Either::A(clone.database(PostMessage(t, Some(user.0), PhantomData))),
-                    Err(PointercrateError::Unauthorized)
-                        if t.required_permissions() == PermissionsSet::default() =>
-                        Either::A(clone.database(PostMessage(t, None, PhantomData))),
-                    Err(e) => Either::B(err(e)),
-                }
-            })
-    }
-
-    pub fn post<T, P>(&self, t: T) -> impl Future<Item = P, Error = PointercrateError>
-    where
-        T: PostData + Send + 'static,
-        P: Post<T> + Send + 'static,
-    {
-        // If this ever happens, its a programming error (should have called `post_authorized`
-        // instead) and since its security related, we simply crash the whole server
-        assert_eq!(t.required_permissions(), PermissionsSet::default());
-
-        self.database(PostMessage(t, None, PhantomData))
+        match auth {
+            Authorization::Unauthorized =>
+                Either::A(self.database(PostMessage(t, None, PhantomData))),
+            auth =>
+                Either::B(self.database(Auth::<A>::new(auth)).and_then(move |user| {
+                    clone.database(PostMessage(t, Some(user.0), PhantomData))
+                })),
+        }
     }
 
     pub fn delete<T, Key, D>(

@@ -7,7 +7,7 @@ use crate::{
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
-    permissions::{AccessRestrictions, Permissions},
+    permissions::{self, AccessRestrictions, Permissions},
     view::demonlist::DemonlistOverview,
     Result,
 };
@@ -410,6 +410,8 @@ impl<T: PostData, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseA
     type Result = Result<P>;
 
     fn handle(&mut self, msg: PostMessage<T, P>, _: &mut Self::Context) -> Self::Result {
+        permissions::demand(msg.0.required_permissions(), msg.1.as_ref())?;
+
         P::create_from(msg.0, &*self.maybe_audited_connection(&msg.1)?)
     }
 }

@@ -23,7 +23,7 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     req.json()
         .from_err()
-        .and_then(move |registration: Registration| state.post(registration))
+        .and_then(move |registration: Registration| state.post_unauthorized(registration))
         .map(|user: User| {
             HttpResponse::Created()
                 .header("Location", "/api/v1/auth/me/")

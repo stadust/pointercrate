@@ -53,7 +53,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
                 .get_internal(remote_addr)
                 .and_then(move |submitter: Submitter| {
                     state
-                        .post_authorized::<Token, _, _>((submission, submitter), auth)
+                        .post::<Token, _, _>((submission, submitter), auth)
                         .and_then(move |record: Option<Record>| {
                             state.http(PostProcessRecord(record))
                         })
