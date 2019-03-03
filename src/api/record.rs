@@ -28,35 +28,14 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
+    let auth = req.extensions_mut().remove().unwrap();
 
-    state
-        /*.authorize(
-            req.extensions_mut().remove().unwrap(),
-            perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
-        )*/
-        .auth::<Token>(req.extensions_mut().remove().unwrap()) // TODO: pagination permissions thingy
-        .and_then(move |user| Ok((user.0, pagination?)))
-        .and_then(move |(user, pagination): (User, RecordPagination)| {
-            state
-                .paginate::<Record, _>(pagination, "/api/v1/records/".to_string())
-                .and_then(move |(records, links)| {
-                    let mut value = serde_json::value::to_value(records)
-                        .map_err(PointercrateError::internal)?;
-                    let records = value
-                        .as_array_mut()
-                        .ok_or(PointercrateError::InternalServerError)?;
-
-                    if !user.list_team_member() {
-                        records.retain(|record| record["status"] == "approved");
-
-                        for record in records.iter_mut() {
-                            record["submitter"] = serde_json::json!(null);
-                        }
-                    }
-
-                    Ok(HttpResponse::Ok().header("Links", links).json(records))
-                })
+    pagination
+        .into_future()
+        .and_then(move |pagination: RecordPagination| {
+            state.paginate::<Token, Record, _>(pagination, "/api/v1/records/".to_string(), auth)
         })
+        .map(|(players, links)| HttpResponse::Ok().header("Links", links).json(players))
         .responder()
 }
 

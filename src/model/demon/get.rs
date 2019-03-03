@@ -1,7 +1,7 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     error::PointercrateError,
-    model::{creator::Creators, record::EmbeddedRecordP},
+    model::{creator::Creators, demon::PartialDemon, record::EmbeddedRecordP},
     operation::Get,
     permissions::AccessRestrictions,
     Result,
@@ -59,4 +59,5 @@ where
 }
 
 impl AccessRestrictions for Demon {}
+impl AccessRestrictions for PartialDemon {}
 impl AccessRestrictions for DemonWithCreatorsAndRecords {}

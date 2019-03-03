@@ -25,11 +25,16 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
     let state = req.state().clone();
+    let auth = req.extensions_mut().remove().unwrap();
 
     pagination
         .into_future()
         .and_then(move |pagination: DemonPagination| {
-            state.paginate::<PartialDemon, _>(pagination, "/api/v1/demons/".to_string())
+            state.paginate::<Token, PartialDemon, _>(
+                pagination,
+                "/api/v1/demons/".to_string(),
+                auth,
+            )
         })
         .map(|(demons, links)| HttpResponse::Ok().header("Links", links).json(demons))
         .responder()

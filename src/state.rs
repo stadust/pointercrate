@@ -201,12 +201,13 @@ impl PointercrateState {
             })
     }
 
-    pub fn paginate<P, D>(
-        &self, data: D, uri: String,
+    pub fn paginate<T, P, D>(
+        &self, data: D, uri: String, auth: Authorization
     ) -> impl Future<Item = (Vec<P>, String), Error = PointercrateError>
     where
+        T: TAuthType,
         D: Paginator<Model = P> + Send + 'static,
-        P: Paginate<D> + Send + 'static,
+        P: Paginate<D> + AccessRestrictions + Send + 'static,
         <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
         <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
         Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -221,6 +222,15 @@ impl PointercrateState {
             <D::PaginationColumn as Expression>::SqlType,
         >>::Expression: QueryFragment<Pg>,
     {
-        self.database(PaginateMessage(data, uri, PhantomData))
+        let clone = self.clone();
+
+        match auth {
+            Authorization::Unauthorized =>
+                Either::A(self.database(PaginateMessage(data, uri, None, PhantomData))),
+            auth =>
+                Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
+                    clone.database(PaginateMessage(data, uri, Some(user.0), PhantomData))
+                })),
+        }
     }
 }

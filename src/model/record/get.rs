@@ -65,4 +65,23 @@ impl AccessRestrictions for Record {
 
         Ok(self)
     }
+
+    fn pre_page_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(
+            perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
+            user,
+        )
+    }
+
+    fn page_access(mut page: Vec<Self>, user: Option<&User>) -> Result<Vec<Self>> {
+        if user.is_none() || !user.unwrap().list_team_member() {
+            page.retain(|record| record.status() == RecordStatus::Approved);
+
+            for record in page.iter_mut() {
+                record.submitter = None
+            }
+        }
+
+        Ok(page)
+    }
 }

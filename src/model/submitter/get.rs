@@ -38,6 +38,10 @@ impl AccessRestrictions for Submitter {
     fn pre_access(user: Option<&User>) -> Result<()> {
         permissions::demand(perms!(ListModerator or ListAdministrator), user)
     }
+
+    fn pre_page_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(ListAdministrator), user)
+    }
 }
 
 impl<T> Get<T> for SubmitterWithRecords

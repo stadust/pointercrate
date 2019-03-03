@@ -1,9 +1,9 @@
 use super::{Player, PlayerWithDemonsAndRecords};
 use crate::{
     error::PointercrateError,
-    model::{creator::created_by, demon::EmbeddedDemon, Model},
+    model::{creator::created_by, demon::EmbeddedDemon, user::User, Model},
     operation::Get,
-    permissions::AccessRestrictions,
+    permissions::{self, AccessRestrictions},
     schema::demons,
     Result,
 };
@@ -56,5 +56,12 @@ where
 }
 
 // Everyone can access player objects (through the stats viewer)
-impl AccessRestrictions for Player {}
+impl AccessRestrictions for Player {
+    fn pre_page_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(
+            perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
+            user,
+        )
+    }
+}
 impl AccessRestrictions for PlayerWithDemonsAndRecords {}

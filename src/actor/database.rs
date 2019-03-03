@@ -526,10 +526,10 @@ where
 }
 
 #[derive(Debug)]
-pub struct PaginateMessage<P, D>(pub D, pub String, pub PhantomData<P>)
+pub struct PaginateMessage<P, D>(pub D, pub String, pub Option<User>, pub PhantomData<P>)
 where
     D: Paginator<Model = P>,
-    P: Paginate<D>,
+    P: Paginate<D> + AccessRestrictions,
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -548,7 +548,7 @@ where
 impl<P, D> Message for PaginateMessage<P, D>
 where
     D: Paginator<Model = P>,
-    P: Paginate<D> + 'static,
+    P: Paginate<D> + AccessRestrictions+ 'static,
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -570,7 +570,7 @@ where
 impl<P, D> Handler<PaginateMessage<P, D>> for DatabaseActor
 where
     D: Paginator<Model = P>,
-    P: Paginate<D> + 'static,
+    P: Paginate<D> + AccessRestrictions +'static,
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -589,8 +589,11 @@ where
     type Result = Result<(Vec<P>, String)>;
 
     fn handle(&mut self, msg: PaginateMessage<P, D>, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.connection()?;
-        let result = P::load(&msg.0, connection)?;
+        let connection = &*self.maybe_audited_connection(&msg.2)?;
+
+        P::pre_page_access(msg.2.as_ref())?;
+
+        let result = P::page_access(P::load(&msg.0, connection)?, msg.2.as_ref())?;
 
         let first = msg.0.first(connection)?.map(|d| {
             format!(

@@ -281,8 +281,19 @@ pub trait AccessRestrictions {
     {
         Ok(self)
     }
-}
 
+    fn pre_page_access(user: Option<&User>) -> Result<()> {
+        Ok(())
+    }
+
+    fn page_access(page: Vec<Self>, user: Option<&User>) -> Result<Vec<Self>>
+    where
+        Self: Sized,
+    {
+        Ok(page)
+    }
+}
+/*
 impl<A, B> AccessRestrictions for (A, B)
 where
     A: AccessRestrictions,
@@ -318,7 +329,7 @@ where
         Ok((a.access(user)?, b.access(user)?, c.access(user)?))
     }
 }
-
+*/
 pub fn demand(permissions: PermissionsSet, user: Option<&User>) -> Result<()> {
     if permissions.is_empty() {
         return Ok(())

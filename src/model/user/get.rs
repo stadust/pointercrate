@@ -41,9 +41,13 @@ impl Get<Permissions> for Vec<User> {
     }
 }
 
-// TODO: check jurisdiction in `access()`
+// TODO: check jurisdiction in `access()` and `page_access()`
 impl AccessRestrictions for User {
     fn pre_access(user: Option<&User>) -> Result<()> {
         permissions::demand(perms!(Moderator or Administrator), user)
+    }
+
+    fn pre_page_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(Administrator), user)
     }
 }
