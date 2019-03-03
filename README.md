@@ -1,5 +1,12 @@
 # Pointercrate
 
-A work-in-progress rewrite-from-scratch of the [pointercrate](https://pointercrate.com/) codebase in Rust. This is in a pretty early stage and is nearly completely untested. Development is going very, very, slow as I have a pretty demanding university schedule.
+As of march 2nd 2019 this is the official repository for pointercrate. It contains all the backend (Rust) and frontend (JavaScript/CSS and html templating in form of rust macros) code that runs pointercrate.
 
-Anyway though, this has the intention to be more maintainable than the current python code base which I refuse to touch again in fear of everything breaking (even more, that is).
+## Special thanks
+
+The following people have helped with development of pointercrate, either through code contributions or other things:
+
+- cos8o: Reverse engineered parts of the Geometry Dash source that allows pointercrate to display accurate object counts and level lengths
+- GunnerBones and PoisoN: Development of various discord bots integrating with the pointercrate API
+- Aquatias and Deltablu: My trusty admins that click checkboxes for me (love you guys)
+- and of course the developers of all the dependencies pointercrate uses

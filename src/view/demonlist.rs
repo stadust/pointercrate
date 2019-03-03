@@ -339,7 +339,7 @@ impl Page for Demonlist {
                                         }
                                     }
                                     br;
-                                    (level.base.object_amount)
+                                    (level.decompress_data().map(|data| data.object_count()).unwrap_or(level.base.object_amount as usize))
                                 }
                             }
                             @if self.data.demon.position <= *EXTENDED_LIST_SIZE {
