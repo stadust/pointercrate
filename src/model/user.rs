@@ -29,7 +29,7 @@ pub use self::{
 };
 
 /// Model representing a user in the database
-#[derive(Queryable, Debug, Identifiable, Clone)] // FIXME: remove the Clone derive again
+#[derive(Queryable, Debug, Identifiable)]
 #[table_name = "members"]
 pub struct User {
     /// The [`User`]'s unique ID. This is used to identify users and cannot be changed.

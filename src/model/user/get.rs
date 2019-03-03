@@ -52,9 +52,24 @@ impl AccessRestrictions for User {
         permissions::demand(perms!(Administrator), user)
     }
 
-    // TODO: reject delete if self is user
     fn pre_delete(&self, user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(Administrator), user)
+        permissions::demand(perms!(Administrator), user)?;
+
+        if self.id == user.unwrap().id {
+            return Err(PointercrateError::DeleteSelf)
+        }
+
+        Ok(())
+    }
+
+    fn pre_patch(&self, user: Option<&User>) -> Result<()> {
+        if let Some(user) = user {
+            if self.id == user.id {
+                return Err(PointercrateError::PatchSelf)
+            }
+        }
+
+        Ok(())
     }
 }
 

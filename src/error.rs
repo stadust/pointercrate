@@ -72,6 +72,24 @@ pub enum PointercrateError {
         required: PermissionsSet,
     },
 
+    /// `403 FORBIDDEN` error returned when a user attempts to delete his own account via the admin
+    /// panel
+    ///
+    /// Error Code `40302`
+    #[fail(
+        display = "You cannot delete your own account via this endpoint. Use DELETE /api/v1/auth/me/"
+    )]
+    DeleteSelf,
+
+    /// `403 FORBIDDEN` error returned when a user attempts to patch his own account via the admin
+    /// panel
+    ///
+    /// Error Code `40303`
+    #[fail(
+        display = "You cannot modify your own account via this endpoint. Use PATCH /api/v1/auth/me/"
+    )]
+    PatchSelf,
+
     /// `403 FORBIDDEN` error returned if someone with an IP-adress that's banned from submitting
     /// records tries to submit a record
     ///
@@ -382,6 +400,8 @@ impl PointercrateError {
 
             PointercrateError::Forbidden => 40300,
             PointercrateError::MissingPermissions { .. } => 40301,
+            PointercrateError::DeleteSelf => 40302,
+            PointercrateError::PatchSelf => 40303,
             PointercrateError::BannedFromSubmissions => 40304,
 
             PointercrateError::NotFound => 40400,
