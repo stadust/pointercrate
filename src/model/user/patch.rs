@@ -32,7 +32,7 @@ impl Hotfix for PatchMe {
 
 impl Patch<PatchMe> for User {
     fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
-        info!("Patching user {} with {}", self, patch);
+        //info!("Patching user {} with {}", self, patch);
 
         validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
 

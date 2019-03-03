@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS  records (
     player INT NOT NULL REFERENCES players(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     submitter INT NOT NULL REFERENCES submitters(submitter_id) ON DELETE RESTRICT,
     demon CITEXT NOT NULL REFERENCES demons(name) ON DELETE CASCADE ON UPDATE CASCADE,
-    UNIQUE (demon, player, status_)
+    UNIQUE (demon, player, status_) DEFFERABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE IF NOT EXISTS  creators (

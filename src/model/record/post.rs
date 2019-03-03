@@ -49,6 +49,11 @@ impl Post<(Submission, Submitter)> for Option<Record> {
         ): (Submission, Submitter),
         connection: &PgConnection,
     ) -> Result<Self> {
+        info!(
+            "Processing record addition '{}% on {} by {} ({})'",
+            progress, demon, player, status
+        );
+
         // Banned submitters cannot submit records
         if submitter.banned {
             return Err(PointercrateError::BannedFromSubmissions)?
@@ -110,6 +115,8 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 // deleting.
 
                 // First we reject all records where the video is already in the database
+                debug!("Existing record is {} with status {}", record, record.status());
+
                 if record.video == video {
                     return Err(PointercrateError::SubmissionExists {
                         existing: record.id,
@@ -136,9 +143,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 // Lastly, we handle the case where existing and new have the same status. This should be pretty self explaining
                 if record.status() == status {
                     if record.progress() < progress {
-                        if record.status() == RecordStatus::Submitted {
-                            to_delete.push(record)
-                        }
+                        to_delete.push(record)
                     } else {
                         return Err(PointercrateError::SubmissionExists {
                             status: record.status(),
