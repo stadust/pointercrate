@@ -6,7 +6,7 @@ use crate::{
     error::PointercrateError,
     middleware::cond::HttpResponseBuilderExt,
     model::{
-        record::{PatchRecord, Record, RecordPagination, RecordStatus, Submission},
+        record::{PatchRecord, Record, RecordPagination, Submission},
         user::User,
         Submitter,
     },
@@ -15,10 +15,6 @@ use crate::{
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
 use ipnetwork::IpNetwork;
 use log::info;
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-};
 use tokio::prelude::future::{Future, IntoFuture};
 
 // FIXME: we need a prettier way to handle the removal of fields
@@ -75,7 +71,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .from_err()
         .and_then(move |submission: Submission| {
             state
-                .get(remote_addr)
+                .get_internal(remote_addr)
                 .and_then(move |submitter: Submitter| {
                     state
                         .post_authorized((submission, submitter), auth)
@@ -93,7 +89,7 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
+/*pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("GET {}", "/api/v1/records/[record_id]/");
 
     let state = req.state().clone();
@@ -139,8 +135,9 @@ pub fn get(req: &HttpRequest<PointercrateState>) -> PCResponder {
                 })
         })
         .responder()
-}
+}*/
 
+get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", Record);
 patch_handler_with_authorization!(
     "/api/v1/records/[record id]/",
     i32,

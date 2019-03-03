@@ -1,8 +1,9 @@
 use super::{Submitter, SubmitterWithRecords};
 use crate::{
     error::PointercrateError,
-    operation::{Get, GetPermissions},
-    permissions::PermissionsSet,
+    model::user::User,
+    operation::Get,
+    permissions::{self, AccessRestrictions},
     Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
@@ -33,9 +34,9 @@ impl Get<i32> for Submitter {
     }
 }
 
-impl GetPermissions for Submitter {
-    fn permissions() -> PermissionsSet {
-        perms!(ListAdministrator)
+impl AccessRestrictions for Submitter {
+    fn pre_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(ListModerator or ListAdministrator), user)
     }
 }
 
@@ -53,8 +54,8 @@ where
     }
 }
 
-impl GetPermissions for SubmitterWithRecords {
-    fn permissions() -> PermissionsSet {
-        perms!(ListAdministrator)
+impl AccessRestrictions for SubmitterWithRecords {
+    fn pre_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(ListModerator or ListAdministrator), user)
     }
 }

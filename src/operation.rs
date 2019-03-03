@@ -5,7 +5,7 @@ mod patch;
 
 pub use self::{
     delete::{Delete, DeletePermissions},
-    get::{Get, GetPermissions},
+    get::Get,
     paginate::{Paginate, Paginator},
     patch::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
     post::{Post, PostData},
@@ -13,7 +13,7 @@ pub use self::{
 
 #[macro_use]
 mod get {
-    use crate::{permissions::PermissionsSet, Result};
+    use crate::Result;
     use diesel::pg::PgConnection;
 
     pub trait Get<Key>: Sized {
@@ -45,29 +45,16 @@ mod get {
         }
     }
 
-    pub trait GetPermissions {
-        fn permissions() -> PermissionsSet {
-            PermissionsSet::default()
-        }
-    }
-
-    impl<G1, G2> GetPermissions for (G1, G2)
-    where
-        G1: GetPermissions,
-        G2: GetPermissions,
-    {
-        fn permissions() -> PermissionsSet {
-            G1::permissions().union(&G2::permissions())
-        }
-    }
-
     macro_rules! get_handler {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
             /// `GET` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
+                use crate::middleware::auth::Authorization;
+
                 info!("GET {}", $endpoint);
 
                 let state = req.state().clone();
+                let auth: Authorization = req.extensions_mut().remove().unwrap();
 
                 let resource_id = Path::<$id_type>::extract(req).map_err(|_| {
                     PointercrateError::bad_request(&format!("{} must be integer", $id_localization))
@@ -75,7 +62,7 @@ mod get {
 
                 resource_id
                     .into_future()
-                    .and_then(move |resource_id| state.get(resource_id.into_inner()))
+                    .and_then(move |resource_id| state.get(resource_id.into_inner(), auth))
                     .map(|resource: $resource_type| HttpResponse::Ok().json_with_etag(resource))
                     .responder()
             }
@@ -83,40 +70,6 @@ mod get {
 
         ($endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
             get_handler!(get, $endpoint, $id_type, $id_localization, $resource_type);
-        };
-    }
-
-    macro_rules! get_handler_with_authorization {
-        ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
-            /// `GET` handler
-            pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                info!("GET {}", $endpoint);
-
-                let state = req.state().clone();
-                let auth = req.extensions_mut().remove().unwrap();
-
-                let resource_id = Path::<$id_type>::extract(req).map_err(|_| {
-                    PointercrateError::bad_request(&format!("{} must be integer", $id_localization))
-                });
-
-                resource_id
-                    .into_future()
-                    .and_then(move |resource_id| {
-                        state.get_authorized(resource_id.into_inner(), auth)
-                    })
-                    .map(|resource: $resource_type| HttpResponse::Ok().json_with_etag(resource))
-                    .responder()
-            }
-        };
-
-        ($endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
-            get_handler_with_authorization!(
-                get,
-                $endpoint,
-                $id_type,
-                $id_localization,
-                $resource_type
-            );
         };
     }
 }

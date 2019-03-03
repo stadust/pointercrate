@@ -1,8 +1,8 @@
 use crate::{
     actor::{
         database::{
-            BasicAuth, DatabaseActor, DeleteMessage, GetMessage, PaginateMessage, PatchMessage,
-            PostMessage, TokenAuth,
+            BasicAuth, DatabaseActor, DeleteMessage, GetInternal, GetMessage, PaginateMessage,
+            PatchMessage, PostMessage, TokenAuth,
         },
         http::HttpActor,
     },
@@ -10,10 +10,9 @@ use crate::{
     middleware::{auth::Authorization, cond::IfMatch},
     model::{user::User, Model},
     operation::{
-        Delete, DeletePermissions, Get, GetPermissions, Hotfix, Paginate, Paginator, Patch, Post,
-        PostData,
+        Delete, DeletePermissions, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData,
     },
-    permissions::PermissionsSet,
+    permissions::{AccessRestrictions, PermissionsSet},
     Result,
 };
 use actix::{Addr, Handler, Message};
@@ -88,41 +87,43 @@ impl PointercrateState {
             })
     }
 
-    pub fn get_authorized<Key, G>(
-        &self, key: Key, authorization: Authorization,
+    pub fn get_unauthorized<Key, G>(
+        &self, key: Key,
     ) -> impl Future<Item = G, Error = PointercrateError>
     where
+        G: Get<Key> + AccessRestrictions + Send + 'static,
         Key: Send + 'static,
-        G: Get<Key> + GetPermissions + Send + 'static,
+    {
+        self.get(key, Authorization::Unauthorized)
+    }
+
+    pub fn get<Key, G>(
+        &self, key: Key, auth: Authorization,
+    ) -> impl Future<Item = G, Error = PointercrateError>
+    where
+        G: Get<Key> + AccessRestrictions + Send + 'static,
+        Key: Send + 'static,
     {
         let clone = self.clone();
 
-        // Why do it this way around instead of checking `G::permissions() ==
-        // PermissionsSet::default()` first and simply not doing the whole authorization thing when
-        // it's the case? Because this way allows us to pass the user object from a successful
-        // authentication to the `GetMessage` struct even if no permissions are required. This
-        // means that in those cases we still get audit-log entries
-        self.authorize(authorization, G::permissions())
-            .then(move |result| {
-                match result {
-                    Ok(user) => Either::A(clone.database(GetMessage(key, Some(user), PhantomData))),
-                    Err(PointercrateError::Unauthorized)
-                        if G::permissions() == PermissionsSet::default() =>
-                        Either::A(clone.database(GetMessage(key, None, PhantomData))),
-                    Err(e) => Either::B(err(e)),
-                }
-            })
-
-        //self.authorize(authorization, G::permissions())
-        //    .and_then(move |user| clone.database(GetMessage(key, Some(user), PhantomData)))
+        match auth {
+            Authorization::Unauthorized =>
+                Either::A(self.database(GetMessage(key, None, PhantomData))),
+            auth =>
+                Either::B(
+                    self.database(TokenAuth(auth)).and_then(move |user| {
+                        clone.database(GetMessage(key, Some(user), PhantomData))
+                    }),
+                ),
+        }
     }
 
-    pub fn get<Key, G>(&self, key: Key) -> impl Future<Item = G, Error = PointercrateError>
+    pub fn get_internal<Key, G>(&self, key: Key) -> impl Future<Item = G, Error = PointercrateError>
     where
-        Key: Send + 'static,
         G: Get<Key> + Send + 'static,
+        Key: Send + 'static,
     {
-        self.database(GetMessage(key, None, PhantomData))
+        self.database(GetInternal(key, PhantomData))
     }
 
     pub fn post_authorized<T, P>(

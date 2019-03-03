@@ -109,7 +109,7 @@ pub struct Record {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub player: Player,
-    pub submitter: i32,
+    pub submitter: Option<i32>,
     pub demon: EmbeddedDemon,
 }
 
@@ -342,7 +342,7 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
                 name: row.5,
                 banned: row.6,
             },
-            submitter: row.7,
+            submitter: Some(row.7),
             demon: EmbeddedDemon {
                 name: row.8,
                 position: row.9,

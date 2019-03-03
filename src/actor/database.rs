@@ -7,7 +7,7 @@ use crate::{
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
     operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
-    permissions::Permissions,
+    permissions::{AccessRestrictions, Permissions},
     view::demonlist::DemonlistOverview,
     Result,
 };
@@ -274,17 +274,42 @@ impl Handler<BasicAuth> for DatabaseActor {
 /// Calls [`Get::get`] with the provided key and a database connection from the internal connection
 /// pool when handled
 #[derive(Debug)]
-pub struct GetMessage<Key, G: Get<Key>>(pub Key, pub Option<User>, pub PhantomData<G>);
+pub struct GetMessage<Key, G: Get<Key> + AccessRestrictions>(
+    pub Key,
+    pub Option<User>,
+    pub PhantomData<G>,
+);
 
-impl<Key, G: Get<Key> + 'static> Message for GetMessage<Key, G> {
+impl<Key, G: Get<Key> + AccessRestrictions + 'static> Message for GetMessage<Key, G> {
     type Result = Result<G>;
 }
 
-impl<Key, G: Get<Key> + 'static> Handler<GetMessage<Key, G>> for DatabaseActor {
+impl<Key, G: Get<Key> + AccessRestrictions + 'static> Handler<GetMessage<Key, G>>
+    for DatabaseActor
+{
     type Result = Result<G>;
 
     fn handle(&mut self, msg: GetMessage<Key, G>, _: &mut Self::Context) -> Self::Result {
-        G::get(msg.0, &*self.maybe_audited_connection(&msg.1)?)
+        G::pre_access(msg.1.as_ref())?;
+
+        let object = G::get(msg.0, &*self.maybe_audited_connection(&msg.1)?)?;
+
+        object.access(msg.1.as_ref())
+    }
+}
+
+#[derive(Debug)]
+pub struct GetInternal<Key, G: Get<Key>>(pub Key, pub PhantomData<G>);
+
+impl<Key, G: Get<Key> + 'static> Message for GetInternal<Key, G> {
+    type Result = Result<G>;
+}
+
+impl<Key, G: Get<Key> + 'static> Handler<GetInternal<Key, G>> for DatabaseActor {
+    type Result = Result<G>;
+
+    fn handle(&mut self, msg: GetInternal<Key, G>, _: &mut Self::Context) -> Self::Result {
+        G::get(msg.0, &*self.connection()?)
     }
 }
 

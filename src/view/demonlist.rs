@@ -198,9 +198,8 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"))
         .into_future()
         .and_then(move |position| {
-            state
-                .get(position.into_inner())
-                .and_then(move |data: DemonWithCreatorsAndRecords| {
+            state.get_unauthorized(position.into_inner()).and_then(
+                move |data: DemonWithCreatorsAndRecords| {
                     state
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
@@ -219,7 +218,8 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                                     .unwrap()
                                 })
                         })
-                })
+                },
+            )
         })
         .responder()
 }

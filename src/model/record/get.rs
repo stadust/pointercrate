@@ -1,8 +1,9 @@
 use super::{EmbeddedRecordD, EmbeddedRecordP, EmbeddedRecordPD, Record};
 use crate::{
     error::PointercrateError,
-    model::{demon::Demon, record::RecordStatus, submitter::Submitter, Model},
+    model::{demon::Demon, record::RecordStatus, submitter::Submitter, user::User, Model},
     operation::Get,
+    permissions::{self, AccessRestrictions},
     schema::records,
     Result,
 };
@@ -43,5 +44,25 @@ impl<'a> Get<&'a Submitter> for Vec<EmbeddedRecordPD> {
         Ok(EmbeddedRecordPD::all()
             .filter(records::submitter.eq(&submitter.id))
             .load(connection)?)
+    }
+}
+
+impl AccessRestrictions for Record {
+    fn access(mut self, user: Option<&User>) -> Result<Self> {
+        // Theoretically we disclose information here, as a non-authorized user can figure out which
+        // records dont exist and which ones are simply non-approved. Practically, we dont give a
+        // shit
+        if self.status() != RecordStatus::Approved {
+            permissions::demand(
+                perms!(ListHelper or ListModerator or ListAdministrator),
+                user,
+            )?;
+        }
+
+        if user.is_none() || !user.unwrap().list_team_member() {
+            self.submitter = None;
+        }
+
+        Ok(self)
     }
 }

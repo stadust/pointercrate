@@ -188,7 +188,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 video,
                 status,
                 player,
-                submitter: submitter.id,
+                submitter: Some(submitter.id),
                 demon: EmbeddedDemon {
                     position: demon.position,
                     name: demon.name

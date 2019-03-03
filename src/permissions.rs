@@ -1,4 +1,4 @@
-use crate::bitstring::Bits;
+use crate::{bitstring::Bits, error::PointercrateError, model::user::User, Result};
 use bitflags::bitflags;
 use joinery::Joinable;
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
@@ -210,7 +210,7 @@ impl<'de> Deserialize<'de> for Permissions {
 ///
 /// A [`PermissionsSet`] object can be seen as a boolean function that evaluates to true if, and
 /// only if, any of the contained [`Permissions`] objects evaluate to true for the given input.
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct PermissionsSet {
     /// The contained permissions
     pub perms: HashSet<Permissions>,
@@ -230,7 +230,7 @@ impl Serialize for PermissionsSet {
 }
 
 impl PermissionsSet {
-    /// Construts a singleton [`PermissionsSet`] containing only the given [`Permissions`] object
+    /// Constructs a singleton [`PermissionsSet`] containing only the given [`Permissions`] object
     pub fn one(perm: Permissions) -> Self {
         let mut set = HashSet::new();
 
@@ -243,6 +243,94 @@ impl PermissionsSet {
         PermissionsSet {
             perms: (&self.perms | &other.perms),
         }
+    }
+
+    pub fn cross(&self, other: &Self) -> Self {
+        if self.perms.is_empty() {
+            return other.clone()
+        }
+
+        if other.perms.is_empty() {
+            return self.clone()
+        }
+
+        let mut set = HashSet::new();
+
+        for perm1 in &self.perms {
+            for perm2 in &other.perms {
+                set.insert(*perm1 | *perm2);
+            }
+        }
+
+        PermissionsSet { perms: set }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.perms.is_empty()
+    }
+}
+
+pub trait AccessRestrictions {
+    fn pre_access(user: Option<&User>) -> Result<()> {
+        Ok(())
+    }
+
+    fn access(self, user: Option<&User>) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(self)
+    }
+}
+
+impl<A, B> AccessRestrictions for (A, B)
+where
+    A: AccessRestrictions,
+    B: AccessRestrictions,
+{
+    fn pre_access(user: Option<&User>) -> Result<()> {
+        A::pre_access(user)?;
+        B::pre_access(user)
+    }
+
+    fn access(self, user: Option<&User>) -> Result<Self> {
+        let (a, b) = self;
+
+        Ok((a.access(user)?, b.access(user)?))
+    }
+}
+
+impl<A, B, C> AccessRestrictions for (A, B, C)
+where
+    A: AccessRestrictions,
+    B: AccessRestrictions,
+    C: AccessRestrictions,
+{
+    fn pre_access(user: Option<&User>) -> Result<()> {
+        A::pre_access(user)?;
+        B::pre_access(user)?;
+        C::pre_access(user)
+    }
+
+    fn access(self, user: Option<&User>) -> Result<Self> {
+        let (a, b, c) = self;
+
+        Ok((a.access(user)?, b.access(user)?, c.access(user)?))
+    }
+}
+
+pub fn demand(permissions: PermissionsSet, user: Option<&User>) -> Result<()> {
+    if permissions.is_empty() {
+        return Ok(())
+    }
+
+    match user {
+        None => Err(PointercrateError::Unauthorized),
+        Some(user) if !user.has_any(&permissions) =>
+            Err(PointercrateError::MissingPermissions {
+                required: permissions,
+            }),
+        _ => Ok(()),
     }
 }
 

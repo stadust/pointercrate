@@ -34,7 +34,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-get_handler_with_authorization!(
+get_handler!(
     "/api/v1/submitters/[id]",
     i32,
     "Submitter ID",

@@ -16,7 +16,7 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
 
     req.state()
-        .get((Permissions::ListAdministrator, Permissions::Administrator))
+        .get_internal((Permissions::ListAdministrator, Permissions::Administrator))
         .map(move |(demonlist_team, pointercrate_team)| {
             Homepage {
                 demonlist_team,

@@ -3,6 +3,7 @@ use crate::{
     error::PointercrateError,
     model::{creator::created_by, demon::EmbeddedDemon, Model},
     operation::Get,
+    permissions::AccessRestrictions,
     schema::demons,
     Result,
 };
@@ -53,3 +54,7 @@ where
         })
     }
 }
+
+// Everyone can access player objects (through the stats viewer)
+impl AccessRestrictions for Player {}
+impl AccessRestrictions for PlayerWithDemonsAndRecords {}

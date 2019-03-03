@@ -1,7 +1,8 @@
-use super::{Permissions, PermissionsSet, User};
+use super::User;
 use crate::{
     error::PointercrateError,
-    operation::{Get, GetPermissions},
+    operation::Get,
+    permissions::{self, AccessRestrictions, Permissions},
     Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
@@ -40,8 +41,9 @@ impl Get<Permissions> for Vec<User> {
     }
 }
 
-impl GetPermissions for User {
-    fn permissions() -> PermissionsSet {
-        perms!(Administrator)
+// TODO: check jurisdiction in `access()`
+impl AccessRestrictions for User {
+    fn pre_access(user: Option<&User>) -> Result<()> {
+        permissions::demand(perms!(Moderator or Administrator), user)
     }
 }

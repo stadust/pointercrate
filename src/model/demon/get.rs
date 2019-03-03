@@ -3,6 +3,7 @@ use crate::{
     error::PointercrateError,
     model::{creator::Creators, record::EmbeddedRecordP},
     operation::Get,
+    permissions::AccessRestrictions,
     Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
@@ -56,3 +57,6 @@ where
         DemonWithCreatorsAndRecords::get(Demon::get(t, connection)?, connection)
     }
 }
+
+impl AccessRestrictions for Demon {}
+impl AccessRestrictions for DemonWithCreatorsAndRecords {}
