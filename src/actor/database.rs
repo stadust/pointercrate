@@ -2,7 +2,7 @@ use crate::{
     config::EXTENDED_LIST_SIZE,
     error::PointercrateError,
     middleware::{
-        auth::{Authorization, Claims},
+        auth::{AuthType, Authorization, Claims, Me, TAuthType},
         cond::IfMatch,
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
@@ -22,7 +22,7 @@ use diesel::{
     SelectableExpression,
 };
 use joinery::Joinable;
-use log::{debug, info, trace};
+use log::{debug, info, trace, warn};
 use std::{hash::Hash, marker::PhantomData};
 
 /// Actor that executes database related actions on a thread pool
@@ -138,6 +138,76 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
             helpers,
             ranking,
         })
+    }
+}
+
+#[derive(Debug)]
+pub struct Auth<T: TAuthType>(pub Authorization, pub PhantomData<T>);
+
+impl<T: TAuthType> Message for Auth<T> {
+    type Result = Result<Me>;
+}
+
+impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
+    type Result = Result<Me>;
+
+    fn handle(&mut self, msg: Auth<T>, _: &mut Self::Context) -> Self::Result {
+        info!("Received authorization request!");
+
+        match T::auth_type() {
+            AuthType::Basic => {
+                info!("We are expected to perform basic authentication");
+
+                if let Authorization::Basic { username, password } = msg.0 {
+                    debug!("Trying to authorize user {}", username);
+
+                    let user = User::get(username, &*self.connection()?)
+                        .map_err(|_| PointercrateError::Unauthorized)?;
+
+                    user.verify_password(&password).map(Me)
+                } else {
+                    warn!("No basic authentication found");
+
+                    Err(PointercrateError::Unauthorized)
+                }
+            },
+            AuthType::Token => {
+                info!("We are expected to perform token authentication");
+
+                if let Authorization::Token {
+                    access_token,
+                    csrf_token,
+                } = msg.0
+                {
+                    // Well this is reassuring. Also we directly deconstruct it and only save the ID
+                    // so we don't accidentally use unsafe values later on
+                    let Claims { id, .. } =
+                        jsonwebtoken::dangerous_unsafe_decode::<Claims>(&access_token)
+                            .map_err(|_| PointercrateError::Unauthorized)?
+                            .claims;
+
+                    debug!(
+                        "The token identified the user with id {}, validating...",
+                        id
+                    );
+
+                    let user = User::get(id, &*self.connection()?)
+                        .map_err(|_| PointercrateError::Unauthorized)?;
+
+                    let user = user.validate_token(&access_token)?;
+
+                    if let Some(ref csrf_token) = csrf_token {
+                        user.validate_csrf_token(csrf_token)?
+                    }
+
+                    Ok(Me(user))
+                } else {
+                    warn!("No token authentication found");
+
+                    Err(PointercrateError::Unauthorized)
+                }
+            },
+        }
     }
 }
 

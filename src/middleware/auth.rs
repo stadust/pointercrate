@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, state::PointercrateState};
+use crate::{error::PointercrateError, model::user::User, state::PointercrateState};
 use actix_web::{
     http::Method,
     middleware::{Middleware, Started},
@@ -22,6 +22,38 @@ pub enum Authorization {
         csrf_token: Option<String>,
     },
 }
+
+#[derive(Debug)]
+pub enum AuthType {
+    Basic,
+    Token,
+}
+
+pub trait TAuthType {
+    fn auth_type() -> AuthType;
+}
+
+#[derive(Debug)]
+pub struct BasicAuth;
+
+#[derive(Debug)]
+pub struct TokenAuth;
+
+impl TAuthType for BasicAuth {
+    fn auth_type() -> AuthType {
+        AuthType::Basic
+    }
+}
+
+impl TAuthType for TokenAuth {
+    fn auth_type() -> AuthType {
+        AuthType::Token
+    }
+}
+
+/// The user that made an authorized request
+#[derive(Debug)]
+pub struct Me(pub User);
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
