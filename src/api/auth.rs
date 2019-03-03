@@ -79,10 +79,15 @@ pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .from_err()
         .and_then(move |patch: PatchMe| {
             state.auth::<Basic>(auth).and_then(move |user| {
-                state.database(PatchMessage::new(user.0.id, patch, user.0, Some(if_match)))
+                state.database(PatchMessage::<Me, Me, _>::new(
+                    user,
+                    patch,
+                    None,
+                    Some(if_match),
+                ))
             })
         })
-        .map(|user: User| HttpResponse::Ok().json_with_etag(user))
+        .map(|user| HttpResponse::Ok().json_with_etag(user))
         .responder()
 }
 

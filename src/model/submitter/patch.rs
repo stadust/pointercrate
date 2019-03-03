@@ -1,6 +1,6 @@
 use super::Submitter;
 use crate::{
-    operation::{deserialize_non_optional, Hotfix, Patch},
+    operation::{deserialize_non_optional, Patch},
     permissions::PermissionsSet,
     schema::submitters,
     Result,
@@ -12,12 +12,6 @@ use serde_derive::Deserialize;
 make_patch! {
     struct PatchSubmitter {
         banned: bool
-    }
-}
-
-impl Hotfix for PatchSubmitter {
-    fn required_permissions(&self) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }
 

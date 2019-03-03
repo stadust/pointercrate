@@ -1,7 +1,7 @@
 use super::{Player, PlayerWithDemonsAndRecords};
 use crate::{
     error::PointercrateError,
-    operation::{deserialize_non_optional, Hotfix, Patch},
+    operation::{deserialize_non_optional, Patch},
     permissions::PermissionsSet,
     schema::players,
     Result,
@@ -14,12 +14,6 @@ make_patch! {
     struct PatchPlayer {
         name: String,
         banned: bool
-    }
-}
-
-impl Hotfix for PatchPlayer {
-    fn required_permissions(&self) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }
 

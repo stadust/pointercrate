@@ -1,6 +1,7 @@
 use super::{Permissions, PermissionsSet, User};
 use crate::{
-    operation::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
+    middleware::auth::Me,
+    operation::{deserialize_non_optional, deserialize_optional, Patch},
     schema::members,
     Result,
 };
@@ -23,27 +24,20 @@ make_patch! {
     }
 }
 
-impl Hotfix for PatchMe {
-    fn required_permissions(&self) -> PermissionsSet {
-        // We can always modify our own account
-        PermissionsSet::default()
-    }
-}
-
-impl Patch<PatchMe> for User {
+impl Patch<PatchMe> for Me {
     fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
         //info!("Patching user {} with {}", self, patch);
 
         validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
 
-        patch!(self, patch: display_name, youtube_channel);
-        patch_with!(self, patch: set_password(&password));
+        patch!(self.0, patch: display_name, youtube_channel);
+        patch_with!(self.0, patch: set_password(&password));
 
-        diesel::update(&self)
+        diesel::update(&self.0)
             .set((
-                members::password_hash.eq(&self.password_hash),
-                members::display_name.eq(&self.display_name),
-                members::youtube_channel.eq(&self.youtube_channel),
+                members::password_hash.eq(&self.0.password_hash),
+                members::display_name.eq(&self.0.display_name),
+                members::youtube_channel.eq(&self.0.youtube_channel),
             ))
             .execute(connection)?;
 
@@ -53,31 +47,6 @@ impl Patch<PatchMe> for User {
     fn permissions_for(&self, _: &PatchMe) -> PermissionsSet {
         // We can always modify our own account
         PermissionsSet::default()
-    }
-}
-
-impl Hotfix for PatchUser {
-    fn required_permissions(&self) -> PermissionsSet {
-        // FIXME: Ideally, here we return permissions based on what is supposed to be patched and
-        // which of the user's permissions are affected by the patch. For this we need to calculate
-        // the difference between the targets current permissions and the applied patch (XOR of the
-        // bit strings). This is not possible with our current implementation. The commented out
-        // implementation has the severe flaw that every can revoke arbitrary permissions from
-        // anyone else.
-        match self.permissions {
-            Some(perms) if perms & Permissions::Administrator != Permissions::empty() =>
-                perms!(ItIsImpossibleToGainThisPermission),
-            _ => perms!(Administrator),
-        }
-        /*if let Some(perms) = self.permissions {
-            if self.display_name.is_none() {
-                PermissionsSet::one(perms.assignable_from())
-            } else {
-                PermissionsSet::one(perms.assignable_from() | Permissions::Moderator)
-            }
-        } else {
-            perms!(Moderator)
-        }*/
     }
 }
 

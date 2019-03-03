@@ -15,19 +15,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-// TODO: implement some sort of "batch patch" that allows multiple patch operations to occur, which
-// either all work out or all fail. This will be required once there is a web interface
-
-/// Trait marking its implementors as containing patch data which can be applied to a matching
-/// [`Patch`]
-pub trait Hotfix {
-    /// The level of authorization required to perform this [`HotFix`]
-    ///
-    /// The default implementation allows all patches without any authorization
-    fn required_permissions(&self) -> PermissionsSet;
-}
-
-pub trait Patch<P: Hotfix>: Display + Sized {
+pub trait Patch<P>: Display + Sized {
     fn patch(self, patch: P, connection: &PgConnection) -> Result<Self>;
     fn permissions_for(&self, patch: &P) -> PermissionsSet;
 
@@ -257,7 +245,7 @@ macro_rules! patch_handler_with_authorization {
                 .from_err()
                 .and_then(move |patch: $patch_type| Ok((patch, resource_id?.into_inner())))
                 .and_then(move |(patch, resource_id)| {
-                    state.patch_authorized::<Token, _, _, _>(auth, resource_id, patch, if_match)
+                    state.patch::<Token, _, _, _>(auth, resource_id, patch, if_match)
                 })
                 .map(move |updated: $target_type| HttpResponse::Ok().json_with_etag(updated))
                 .responder()

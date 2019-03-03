@@ -1,7 +1,7 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     model::player::Player,
-    operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
+    operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     permissions::PermissionsSet,
     schema::demons,
     Result,
@@ -18,12 +18,6 @@ make_patch! {
         requirement: i16,
         verifier: String,
         publisher: String
-    }
-}
-
-impl Hotfix for PatchDemon {
-    fn required_permissions(&self) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }
 

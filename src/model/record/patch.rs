@@ -6,7 +6,7 @@ use crate::{
         player::Player,
         Model,
     },
-    operation::{deserialize_non_optional, deserialize_optional, Get, Hotfix, Patch},
+    operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     permissions::PermissionsSet,
     schema::records,
     Result,
@@ -22,12 +22,6 @@ make_patch! {
         status: RecordStatus,
         player: String,
         demon: String,
-    }
-}
-
-impl Hotfix for PatchRecord {
-    fn required_permissions(&self) -> PermissionsSet {
-        perms!(ListHelper or ListModerator or ListAdministrator)
     }
 }
 

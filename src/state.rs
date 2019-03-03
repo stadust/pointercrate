@@ -12,7 +12,7 @@ use crate::{
         cond::IfMatch,
     },
     model::Model,
-    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
+    operation::{Delete, Get, Paginate, Paginator, Patch, Post, PostData},
     permissions::AccessRestrictions,
     Result,
 };
@@ -157,21 +157,25 @@ impl PointercrateState {
         }
     }
 
-    pub fn patch_authorized<T, Key, P, H>(
+    pub fn patch<T, Key, P, H>(
         &self, auth: Authorization, key: Key, fix: H, condition: IfMatch,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
         T: TAuthType,
         Key: Send + 'static,
-        H: Hotfix + Send + 'static,
-        P: Get<Key> + Patch<H> + Send + Hash + 'static,
+        H: Send + 'static,
+        P: Get<Key> + AccessRestrictions + Patch<H> + Send + Hash + 'static,
     {
         let clone = self.clone();
 
-        self.database(Auth::<T>::new(auth)) // TODO: reintroduce permission checking
-            .and_then(move |user| {
-                clone.database(PatchMessage::new(key, fix, user.0, Some(condition)))
-            })
+        match auth {
+            Authorization::Unauthorized =>
+                Either::A(self.database(PatchMessage::new(key, fix, None, Some(condition)))),
+            auth =>
+                Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
+                    clone.database(PatchMessage::new(key, fix, Some(user.0), Some(condition)))
+                })),
+        }
     }
 
     pub fn paginate<T, P, D>(

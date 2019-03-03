@@ -7,7 +7,7 @@ pub use self::{
     delete::Delete,
     get::Get,
     paginate::{Paginate, Paginator},
-    patch::{deserialize_non_optional, deserialize_optional, Hotfix, Patch},
+    patch::{deserialize_non_optional, deserialize_optional, Patch},
     post::{Post, PostData},
 };
 

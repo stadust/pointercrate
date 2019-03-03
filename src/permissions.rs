@@ -296,44 +296,12 @@ pub trait AccessRestrictions {
     fn pre_delete(&self, user: Option<&User>) -> Result<()> {
         Ok(())
     }
-}
-/*
-impl<A, B> AccessRestrictions for (A, B)
-where
-    A: AccessRestrictions,
-    B: AccessRestrictions,
-{
-    fn pre_access(user: Option<&User>) -> Result<()> {
-        A::pre_access(user)?;
-        B::pre_access(user)
-    }
 
-    fn access(self, user: Option<&User>) -> Result<Self> {
-        let (a, b) = self;
-
-        Ok((a.access(user)?, b.access(user)?))
+    fn pre_patch(&self, user: Option<&User>) -> Result<()> {
+        Ok(())
     }
 }
 
-impl<A, B, C> AccessRestrictions for (A, B, C)
-where
-    A: AccessRestrictions,
-    B: AccessRestrictions,
-    C: AccessRestrictions,
-{
-    fn pre_access(user: Option<&User>) -> Result<()> {
-        A::pre_access(user)?;
-        B::pre_access(user)?;
-        C::pre_access(user)
-    }
-
-    fn access(self, user: Option<&User>) -> Result<Self> {
-        let (a, b, c) = self;
-
-        Ok((a.access(user)?, b.access(user)?, c.access(user)?))
-    }
-}
-*/
 pub fn demand(permissions: PermissionsSet, user: Option<&User>) -> Result<()> {
     if permissions.is_empty() {
         return Ok(())

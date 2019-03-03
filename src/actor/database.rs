@@ -6,7 +6,7 @@ use crate::{
         cond::IfMatch,
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
-    operation::{Delete, Get, Hotfix, Paginate, Paginator, Patch, Post, PostData},
+    operation::{Delete, Get, Paginate, Paginator, Patch, Post, PostData},
     permissions::{self, AccessRestrictions, Permissions},
     view::demonlist::DemonlistOverview,
     Result,
@@ -249,7 +249,7 @@ impl Handler<Invalidate> for DatabaseActor {
             info!("Invalidating all access tokens for user {}", user.0.id);
 
             self.handle(
-                PatchMessage::<_, User, _>::unconditional(user.0.id, patch, user.0),
+                PatchMessage::<Me, Me, _>::unconditional(user, patch, None),
                 ctx,
             )
             .map(|_| ())
@@ -475,26 +475,24 @@ where
 #[derive(Debug)]
 pub struct PatchMessage<Key, P, H>
 where
-    H: Hotfix,
-    P: Get<Key> + Patch<H> + Hash,
+    P: Get<Key> + AccessRestrictions + Patch<H> + Hash,
 {
     key: Key,
     patch_data: H,
     condition: Option<IfMatch>,
-    patcher: User,
+    patcher: Option<User>,
     phantom: PhantomData<P>,
 }
 
 impl<Key, P, H> PatchMessage<Key, P, H>
 where
-    H: Hotfix,
-    P: Get<Key> + Patch<H> + Hash,
+    P: Get<Key> + AccessRestrictions + Patch<H> + Hash,
 {
-    pub fn unconditional(key: Key, fix: H, patcher: User) -> Self {
+    pub fn unconditional(key: Key, fix: H, patcher: Option<User>) -> Self {
         PatchMessage::new(key, fix, patcher, None)
     }
 
-    pub fn new(key: Key, fix: H, patcher: User, if_match: Option<IfMatch>) -> Self {
+    pub fn new(key: Key, fix: H, patcher: Option<User>, if_match: Option<IfMatch>) -> Self {
         PatchMessage {
             key,
             patch_data: fix,
@@ -507,28 +505,34 @@ where
 
 impl<Key, P, H> Message for PatchMessage<Key, P, H>
 where
-    H: Hotfix,
-    P: Get<Key> + Patch<H> + Hash + 'static,
+    P: Get<Key> + AccessRestrictions + Patch<H> + Hash + 'static,
 {
     type Result = Result<P>;
 }
 
 impl<Key, P, H> Handler<PatchMessage<Key, P, H>> for DatabaseActor
 where
-    H: Hotfix,
-    P: Get<Key> + Patch<H> + Hash + 'static,
+    P: Get<Key> + AccessRestrictions + Patch<H> + Hash + 'static,
 {
     type Result = Result<P>;
 
     fn handle(&mut self, msg: PatchMessage<Key, P, H>, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.audited_connection(&msg.patcher)?;
+        let connection = &*self.maybe_audited_connection(&msg.patcher)?;
 
         connection.transaction(|| {
-            let target = P::get(msg.key, connection)?;
+            P::pre_access(msg.patcher.as_ref())?;
+
+            let object = P::get(msg.key, connection)?.access(msg.patcher.as_ref())?;
+            object.pre_patch(msg.patcher.as_ref())?;
+
+            permissions::demand(
+                object.permissions_for(&msg.patch_data),
+                msg.patcher.as_ref(),
+            )?;
 
             match msg.condition {
-                Some(condition) => target.patch_if_match(msg.patch_data, condition, connection),
-                None => target.patch(msg.patch_data, connection),
+                Some(condition) => object.patch_if_match(msg.patch_data, condition, connection),
+                None => object.patch(msg.patch_data, connection),
             }
         })
     }
