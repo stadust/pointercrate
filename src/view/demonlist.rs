@@ -417,7 +417,7 @@ impl Page for Demonlist {
                                                 }
                                                 td.video-link {
                                                     @if let Some(ref video) = record.video {
-                                                         a.link href = (video) {
+                                                         a.link href = (video) target = "_blank"{
                                                              (video::host(video))
                                                          }
                                                     }
