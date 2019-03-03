@@ -108,7 +108,21 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 // approved record has higher progress than the submission. If its submitted, we do the
                 // same, but at the same time, we mark the existing submission with lower progress for
                 // deleting.
-                if record.status() != RecordStatus::Rejected && record.progress() < progress {
+                if record.video == video {
+                    return Err(PointercrateError::SubmissionExists {
+                        existing: record.id,
+                        status: record.status()
+                    })
+                }
+
+                if record.status() == RecordStatus::Rejected {
+                    return Err(PointercrateError::SubmissionExists {
+                        status: record.status(),
+                        existing: record.id,
+                    })
+                }
+
+                if record.status() == status && record.progress() < progress {
                     if record.status() == RecordStatus::Submitted {
                         to_delete.push(record)
                     }
@@ -118,6 +132,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                         existing: record.id,
                     })
                 }
+
             }
 
             if verify_only {
