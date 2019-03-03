@@ -141,7 +141,7 @@ impl Page for Homepage {
                         }
                         div.tab-content data-tab-id ="99" {
                             h3 style="text-align: left; font-size: 110%" {
-                                "2019-??-??: Rustification!"
+                                "2019-03-02: Rustification!"
                             }
                             p {
                                 "The entire website has been rewritten in Rust! Various minor bugs that were noticed while porting over from the old python backend were fixed and performance has greatly improved. Other than that, it's mostly an internal change, so the list of (visible) changes is rather short:"
