@@ -57,6 +57,10 @@ impl Patch<PatchPlayer> for Player {
             Ok(self)
         })
     }
+
+    fn permissions_for(&self, _: &PatchPlayer) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
+    }
 }
 
 impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
@@ -78,5 +82,9 @@ impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
             verified,
             published,
         })
+    }
+
+    fn permissions_for(&self, _: &PatchPlayer) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }

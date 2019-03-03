@@ -63,6 +63,10 @@ impl Patch<PatchDemon> for Demon {
             Ok(self)
         })
     }
+
+    fn permissions_for(&self, _: &PatchDemon) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
+    }
 }
 
 impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
@@ -80,5 +84,9 @@ impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
             creators,
             records,
         })
+    }
+
+    fn permissions_for(&self, _: &PatchDemon) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
     }
 }

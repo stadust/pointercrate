@@ -107,4 +107,8 @@ impl Patch<PatchRecord> for Record {
                 Ok(self)
         })
     }
+
+    fn permissions_for(&self, _: &PatchRecord) -> PermissionsSet {
+        perms!(ListHelper or ListModerator or ListAdministrator)
+    }
 }

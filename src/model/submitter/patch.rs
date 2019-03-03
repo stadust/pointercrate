@@ -34,4 +34,8 @@ impl Patch<PatchSubmitter> for Submitter {
 
         Ok(self)
     }
+
+    fn permissions_for(&self, _: &PatchSubmitter) -> PermissionsSet {
+        perms!(ListModerator or ListAdministrator)
+    }
 }

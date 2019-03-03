@@ -29,6 +29,7 @@ pub trait Hotfix {
 
 pub trait Patch<P: Hotfix>: Display + Sized {
     fn patch(self, patch: P, connection: &PgConnection) -> Result<Self>;
+    fn permissions_for(&self, patch: &P) -> PermissionsSet;
 
     fn patch_if_match(self, patch: P, condition: IfMatch, connection: &PgConnection) -> Result<Self>
     where

@@ -49,6 +49,11 @@ impl Patch<PatchMe> for User {
 
         Ok(self)
     }
+
+    fn permissions_for(&self, _: &PatchMe) -> PermissionsSet {
+        // We can always modify our own account
+        PermissionsSet::default()
+    }
 }
 
 impl Hotfix for PatchUser {
@@ -93,5 +98,32 @@ impl Patch<PatchUser> for User {
             .execute(connection)?;
 
         Ok(self)
+    }
+
+    fn permissions_for(&self, patch: &PatchUser) -> PermissionsSet {
+        match patch {
+            PatchUser {
+                display_name: None,
+                permissions: None,
+            } => perms!(Administrator),
+
+            PatchUser {
+                display_name: Some(_),
+                permissions: None,
+            } => perms!(Moderator),
+
+            PatchUser {
+                display_name: None,
+                permissions: Some(perms),
+            } => PermissionsSet::one((*perms ^ self.permissions()).assignable_from()),
+
+            PatchUser {
+                display_name: Some(_),
+                permissions: Some(perms),
+            } =>
+                PermissionsSet::one(
+                    (*perms ^ self.permissions()).assignable_from() | Permissions::Moderator,
+                ),
+        }
     }
 }
