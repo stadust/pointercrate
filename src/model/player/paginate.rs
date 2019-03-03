@@ -70,10 +70,6 @@ impl Paginate<PlayerPagination> for Player {
             players::id < pagination.before_id
         ]);
 
-        query
-            .order_by(players::id)
-            .limit(pagination.limit.unwrap_or(50))
-            .load(connection)
-            .map_err(PointercrateError::database)
+        pagination_result!(query, pagination, players::id, connection)
     }
 }

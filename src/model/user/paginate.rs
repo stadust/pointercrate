@@ -78,13 +78,6 @@ impl Paginate<UserPagination> for User {
             members::member_id < pagination.before_id
         ]);
 
-        pagination_result!(
-            query,
-            pagination,
-            before_id,
-            after_id,
-            members::member_id,
-            connection
-        )
+        pagination_result!(query, pagination, members::member_id, connection)
     }
 }

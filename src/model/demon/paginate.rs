@@ -79,10 +79,13 @@ impl Paginate<DemonPagination> for PartialDemon {
             demons::position < pagination.before_position
         ]);
 
-        query
-            .order_by(demons::position)
-            .limit(pagination.limit.unwrap_or(50))
-            .load(connection)
-            .map_err(PointercrateError::database)
+        pagination_result!(
+            query,
+            pagination,
+            before_position,
+            after_position,
+            demons::position,
+            connection
+        )
     }
 }

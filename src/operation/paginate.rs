@@ -230,4 +230,14 @@ macro_rules! pagination_result {
                 .map_err(PointercrateError::database)
         }
     };
+    ($query: expr, $pagination_data: expr, $db_column: path, $connection: expr) => {
+        pagination_result!(
+            $query,
+            $pagination_data,
+            before_id,
+            after_id,
+            $db_column,
+            $connection
+        )
+    };
 }
