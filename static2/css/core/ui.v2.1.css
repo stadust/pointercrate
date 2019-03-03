@@ -507,5 +507,21 @@ form input[type="password"]:invalid {
   display: none;
   font-style: italic;
   font-size: 80%;
+  margin: 0px;
+}
+
+form .output {
   margin: 0px 10px;
+}
+
+ul.selection-list {
+  border: 1px solid #999;
+  font-size: 80%;
+  margin: 10px 0px;
+}
+
+ul.selection-list li {
+  padding: 5px;
+  text-align: left;
+  cursor: pointer;
 }

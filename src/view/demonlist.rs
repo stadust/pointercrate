@@ -655,7 +655,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                         input placeholder = "Filter..." type = "text" style = "height: 1em";
                     }
                     div style="position:relative; margin: 0px 10px 10px; min-height: 400px" {
-                        ul#players style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {
+                        ul.selection-list#players style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {
                             @for player in players {
                                 li.white.hover data-id = (player.id) data-rank = (player.rank) {
                                     (player.name)

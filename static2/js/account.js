@@ -252,6 +252,9 @@ $(document).ready(function() {
   userName.addValidator(valueMissing, "Username required");
 
   function requestUserForEdit(userId, onError) {
+    edit2Error.style.display = "";
+    edit2Success.style.display = "";
+
     $.ajax({
       method: "GET",
       url: "/api/v1/users/" + userId + "/",
@@ -260,6 +263,12 @@ $(document).ready(function() {
       success: function(crap, mor_crap, data) {
         window.currentUser = data.responseJSON.data;
         window.currentUser.etag = data.getResponseHeader("ETag");
+
+        if (window.currentUser.name == window.username) {
+          edit2Error.style.display = "block";
+          edit2Error.innerHTML =
+            "This is your own account. You cannot modify your own account using this interface!";
+        }
 
         if (window.currentUser.display_name) {
           text.innerHTML =
@@ -377,4 +386,127 @@ $(document).ready(function() {
       }
     });
   });
+
+  var loadUsersButton = document.getElementById("load-users");
+  var loadUsersError = document.getElementById("load-users-error");
+  var userList = document.getElementById("user-list");
+  var nextUserButton = document.getElementById("next-user");
+  var prevUserButton = document.getElementById("prev-user");
+
+  function populateUserlist(data) {
+    loadUsersButton.style.display = "none";
+
+    window.userPagination = parsePagination(data.getResponseHeader("Links"));
+    var userString = "";
+
+    for (var user of data.responseJSON) {
+      userString +=
+        "<li data-uid=" +
+        user.id +
+        "><b>" +
+        user.name +
+        "</b> (ID: " +
+        user.id +
+        ")<br><i>Display name: " +
+        (user.display_name || "None") +
+        "</i>";
+    }
+
+    userList.innerHTML = userString;
+
+    for (var li of userList.getElementsByTagName("li")) {
+      // javascript is really fucking stupid
+      function set(li) {
+        li.addEventListener(
+          "click",
+          () => requestUserForEdit(li.dataset.uid),
+          false
+        );
+      }
+      set(li);
+    }
+
+    document.getElementById("hidden-user-list").style.display = "block";
+  }
+
+  loadUsersButton.addEventListener("click", () =>
+    makeRequest("GET", "/users/?limit=5", loadUsersError, populateUserlist)
+  );
+
+  nextUserButton.addEventListener("click", () => {
+    if (window.userPagination.next) {
+      makeRequest(
+        "GET",
+        window.userPagination.next,
+        loadUsersError,
+        populateUserlist
+      );
+    }
+  });
+
+  prevUserButton.addEventListener("click", () => {
+    if (window.userPagination.prev) {
+      makeRequest(
+        "GET",
+        window.userPagination.prev,
+        loadUsersError,
+        populateUserlist
+      );
+    }
+  });
 });
+
+function parsePagination(linkHeader) {
+  var links = {};
+  if (linkHeader) {
+    for (var link of linkHeader.split(",")) {
+      var s = link.split(";");
+
+      links[s[1].substring(5)] = s[0].substring(8, s[0].length - 1);
+    }
+  }
+  return links;
+}
+
+function makeRequest(
+  method,
+  endpoint,
+  errorOutput,
+  onSuccess,
+  errorCodes = {},
+  headers = {},
+  data = {}
+) {
+  errorOutput.style.display = "";
+
+  headers["Accept"] = "application/json";
+
+  $.ajax({
+    method: method,
+    url: "/api/v1" + endpoint,
+    contentType: "application/json",
+    data: JSON.stringify(data),
+    headers: headers,
+    error: function(data, code, errorThrown) {
+      if (!data.responseJSON) {
+        errorOutput.innerHTML =
+          "Server unexpectedly returned " + code + " (" + errorThrown + ")";
+        errorOutput.style.display = "block";
+      } else {
+        var error = data.responseJSON;
+
+        if (error.code in errorCodes) {
+          errorCodes[error.code](error.message, error.data);
+        } else {
+          errorOutput.innerHTML = error.message;
+          errorOutput.style.display = "block";
+        }
+      }
+    },
+    success: function(crap, crap2, data) {
+      errorOutput.style.display = "";
+
+      onSuccess(data);
+    }
+  });
+}

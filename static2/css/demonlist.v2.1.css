@@ -116,17 +116,7 @@ tr:nth-child(even) {
 }
 
 #statsviewer ul {
-  color: black;
-
-  border: 1px solid #999;
-
   overflow: auto;
-}
-
-#statsviewer li {
-  cursor: pointer;
-  text-align: left;
-  padding: 5px;
 }
 
 #statsviewer li i {

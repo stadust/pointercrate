@@ -1,7 +1,7 @@
 use crate::error::PointercrateError;
 use actix_web::{
-    middleware::{Middleware, Started},
-    HttpRequest, Result,
+    middleware::{Middleware, Response, Started},
+    HttpRequest, HttpResponse, Result,
 };
 use log::{trace, warn};
 use mime::Mime;
@@ -47,5 +47,11 @@ impl<S> Middleware<S> for MimeProcess {
         req.extensions_mut().insert(ContentType(content_type));
 
         Ok(Started::Done)
+    }
+
+    fn response(&self, req: &HttpRequest<S>, resp: HttpResponse) -> Result<Response> {
+        trace!("Response is {:?}", resp);
+
+        Ok(Response::Done(resp))
     }
 }

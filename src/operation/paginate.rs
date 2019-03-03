@@ -210,3 +210,24 @@ macro_rules! filter_method {
         }
     };
 }
+
+macro_rules! pagination_result {
+    ($query: expr, $pagination_data: expr, $before_column: ident, $after_column: ident, $db_column: path, $connection: expr) => {
+        if $pagination_data.$after_column.is_none() && $pagination_data.$before_column.is_some() {
+            let mut members = $query
+                .order_by($db_column.desc())
+                .limit($pagination_data.limit.unwrap_or(50))
+                .load($connection)?;
+
+            members.reverse();
+
+            Ok(members)
+        } else {
+            $query
+                .order_by($db_column)
+                .limit($pagination_data.limit.unwrap_or(50))
+                .load($connection)
+                .map_err(PointercrateError::database)
+        }
+    };
+}

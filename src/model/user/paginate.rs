@@ -67,7 +67,6 @@ impl Paginate<UserPagination> for User {
         let mut query = pagination.filter(User::boxed_all());
 
         if let Some(permissions) = pagination.has_permissions {
-            // FIXME: raw inline SQL is a bad idea
             query = query.filter(diesel::dsl::sql(&format!(
                 "permissions & {0}::Bit(16) = {0}::Bit(16)",
                 permissions.bits()
@@ -79,9 +78,13 @@ impl Paginate<UserPagination> for User {
             members::member_id < pagination.before_id
         ]);
 
-        query
-            .limit(pagination.limit.unwrap_or(50))
-            .load(connection)
-            .map_err(PointercrateError::database)
+        pagination_result!(
+            query,
+            pagination,
+            before_id,
+            after_id,
+            members::member_id,
+            connection
+        )
     }
 }

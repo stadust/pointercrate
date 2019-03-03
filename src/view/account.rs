@@ -112,11 +112,11 @@ impl AccountPage {
                             "Use the panels on the right to select users to modify"
                         }
                         form.flex.col.pad#patch-permissions novalidate = "" style="display:none" {
+                            p.info-red.output {}
+                            p.info-green.output {}
                             h3 {
                                 "Permissions:"
                             }
-                            p.info-red.output {}
-                            p.info-green.output {}
                             label.cb-container.form-input#perm-extended for = "extended" {
                                 i{"Extended access"}
                                 input type = "checkbox" name = "extended";
@@ -188,7 +188,15 @@ impl AccountPage {
                         p {
                             "A list of all user accounts on pointercrate"
                         }
-                        a.blue.hover.button.slightly-round#find-name {
+                        p.info-red.output#load-users-error {}
+                        div#hidden-user-list  style="display:none"{
+                            ul.selection-list#user-list {}
+                            div.flex {
+                                div.button.blue.hover.slightly-round#prev-user style="margin-right: 20px" { "Previous"}
+                                div.button.blue.hover.slightly-round#next-user {"Next"} // clap clap
+                            }
+                        }
+                        a.blue.hover.button.slightly-round#load-users {
                             "Load"
                         }
                     }
