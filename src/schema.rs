@@ -19,7 +19,7 @@ table! {
 }
 
 table! {
-    demon_publisher_verifier_join (vid, pid) {
+    demon_verifier_publisher_join (vid, pid) {
         vname -> Text,
         vid -> Int4,
         vbanned -> Bool,
@@ -88,5 +88,5 @@ allow_tables_to_appear_in_same_query!(
     players,
     records,
     submitters,
-    demon_publisher_verifier_join
+    demon_verifier_publisher_join
 );

@@ -3,7 +3,7 @@ use crate::{
     error::PointercrateError,
     model::{creator::Creators, player::Player, record::EmbeddedRecordP},
     operation::Get,
-    schema::{demon_publisher_verifier_join, demons, players},
+    schema::{demon_verifier_publisher_join, demons, players},
     Result,
 };
 use diesel::{
@@ -163,15 +163,15 @@ impl Model for Demon {
     type From = diesel::query_source::joins::JoinOn<
         diesel::query_source::joins::Join<
             demons::table,
-            demon_publisher_verifier_join::table,
+            demon_verifier_publisher_join::table,
             diesel::query_source::joins::Inner,
         >,
         diesel::dsl::And<
             diesel::expression::operators::Eq<
                 demons::publisher,
-                demon_publisher_verifier_join::pid,
+                demon_verifier_publisher_join::pid,
             >,
-            diesel::expression::operators::Eq<demons::verifier, demon_publisher_verifier_join::vid>,
+            diesel::expression::operators::Eq<demons::verifier, demon_verifier_publisher_join::vid>,
         >,
     >;
     type Selection = (
@@ -181,23 +181,23 @@ impl Model for Demon {
         demons::video,
         demons::description,
         demons::notes,
-        demon_publisher_verifier_join::vname,
-        demon_publisher_verifier_join::vid,
-        demon_publisher_verifier_join::vbanned,
-        demon_publisher_verifier_join::pname,
-        demon_publisher_verifier_join::pid,
-        demon_publisher_verifier_join::pbanned,
+        demon_verifier_publisher_join::vname,
+        demon_verifier_publisher_join::vid,
+        demon_verifier_publisher_join::vbanned,
+        demon_verifier_publisher_join::pname,
+        demon_verifier_publisher_join::pid,
+        demon_verifier_publisher_join::pbanned,
     );
 
     fn from() -> Self::From {
         diesel::query_source::joins::Join::new(
             demons::table,
-            demon_publisher_verifier_join::table,
+            demon_verifier_publisher_join::table,
             diesel::query_source::joins::Inner,
         )
         .on(demons::publisher
-            .eq(demon_publisher_verifier_join::pid)
-            .and(demons::verifier.eq(demon_publisher_verifier_join::vid)))
+            .eq(demon_verifier_publisher_join::pid)
+            .and(demons::verifier.eq(demon_verifier_publisher_join::vid)))
     }
 
     fn selection() -> Self::Selection {
@@ -472,7 +472,7 @@ impl Into<EmbeddedDemon> for PartialDemon {
         }
     }
 }
-
+/*
 pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
     let position = f64::from(position);
     let progress = f64::from(progress);
@@ -485,4 +485,13 @@ pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
                     (-4f64 * f64::ln(list_length - 1f64) * (list_length - position))
                         / (3f64 * list_length),
                 ))
+}
+*/
+
+pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
+    let position = f64::from(position);
+    let progress = f64::from(progress);
+    let list_length = list_length as f64;
+
+    f64::powf(progress / 100.0, 5.0) * 100.0 * f64::exp(-0.03 * (position - 1.0))
 }
