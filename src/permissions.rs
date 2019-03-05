@@ -80,34 +80,56 @@ impl Display for Permissions {
     }
 }
 
+macro_rules! perms {
+    ($($($perm: ident),+)or*) => {
+        {
+            use crate::permissions::{PermissionsSet, Permissions};
+            use std::collections::HashSet;
+
+            let mut perm_set = HashSet::new();
+
+            $(
+                perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
+            )*
+
+            PermissionsSet {
+                perms: perm_set
+            }
+        }
+    };
+}
+
+
 impl Permissions {
     /// Gets a [`Permissions`] object that has all permissions set that would be required to assign
     /// all the permissions stored in this object
-    pub fn assignable_from(self) -> Permissions {
-        let mut from = Permissions::empty();
+    pub fn assignable_from(self) -> PermissionsSet {
+        //let mut from = Permissions::empty();
+        let mut set = PermissionsSet::default();
 
         if (Permissions::ListHelper | Permissions::ListModerator) & self != Permissions::empty() {
-            from.insert(Permissions::ListAdministrator)
+            set = set.cross(&perms!(ListAdministrator or Administrator))
         }
 
         if (Permissions::Moderator
             | Permissions::LeaderboardAdministrator
+            | Permissions::ListAdministrator
             | Permissions::ExtendedAccess)
             & self
             != Permissions::empty()
         {
-            from.insert(Permissions::Administrator)
+            set = set.cross(&PermissionsSet::one(Permissions::Administrator))
         }
 
         if Permissions::LeaderboardModerator & self != Permissions::empty() {
-            from.insert(Permissions::LeaderboardAdministrator)
+            set = set.cross(&perms!(LeaderboardAdministrator, Administrator))
         }
 
         if Permissions::Administrator & self != Permissions::empty() {
-            from.insert(Permissions::ItIsImpossibleToGainThisPermission)
+            set = set.cross(&PermissionsSet::one(Permissions::ItIsImpossibleToGainThisPermission))
         }
 
-        from
+        set
     }
 
     /// Gets a [`Permissions`] object containing all the permissions you can assign if you have the
@@ -336,23 +358,4 @@ impl Into<PermissionsSet> for Permissions {
     fn into(self) -> PermissionsSet {
         PermissionsSet::one(self)
     }
-}
-
-macro_rules! perms {
-    ($($($perm: ident),+)or*) => {
-        {
-            use crate::permissions::{PermissionsSet, Permissions};
-            use std::collections::HashSet;
-
-            let mut perm_set = HashSet::new();
-
-            $(
-                perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
-            )*
-
-            PermissionsSet {
-                perms: perm_set
-            }
-        }
-    };
 }

@@ -331,7 +331,7 @@ impl Page for Demonlist {
                                     }
                                     br;
                                     @match level_data.as_ref().map(|ref data| data.level_length()) {
-                                        Ok(Ok(duration)) => (format!("{}m:{:2}s", duration.as_secs() / 60, duration.as_secs() % 60)),
+                                        Ok(Ok(duration)) => (format!("{}m:{:02}s", duration.as_secs() / 60, duration.as_secs() % 60)),
                                         _ => (level.base.length.to_string())
                                     }
                                 }

@@ -84,15 +84,15 @@ impl Patch<PatchUser> for User {
             PatchUser {
                 display_name: None,
                 permissions: Some(perms),
-            } => PermissionsSet::one((*perms ^ self.permissions()).assignable_from()),
+            } => (*perms ^ self.permissions()).assignable_from(),
 
             PatchUser {
                 display_name: Some(_),
                 permissions: Some(perms),
             } =>
-                PermissionsSet::one(
-                    (*perms ^ self.permissions()).assignable_from() | Permissions::Moderator,
-                ),
+
+                    (*perms ^ self.permissions()).assignable_from().cross(&PermissionsSet::one(Permissions::Moderator)),
+
         }
     }
 }
