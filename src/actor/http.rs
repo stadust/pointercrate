@@ -176,7 +176,7 @@ impl Handler<GetDemon> for HttpActor {
                 let mut inner = inner.extract();
 
                 if !inner.is_empty() {
-                    let best_match = inner.remove(0);
+                    let best_match = inner.iter().max_by(|x, y| x.difficulty.cmp(&y.difficulty)).unwrap();
 
                     let GdcfFuture { cached, inner } = self.gdcf.level(best_match.level_id.into());
 
