@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene)]
-#![allow(proc_macro_derive_resolution_fallback)]
 #![deny(
     bare_trait_objects,
     missing_debug_implementations,
@@ -11,6 +9,8 @@
     unused_imports,
     unused_parens
 )]
+#![feature(proc_macro_hygiene)]
+#![allow(proc_macro_derive_resolution_fallback)]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy::all))]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 #![recursion_limit = "512"]
@@ -178,9 +178,9 @@ fn main() {
                                 r.route().f(allowed!(GET, PATCH, DELETE))
                             })
                     })
-                    /*.resource("/gd/levels/{level_id}/", |r| { // FIXME: requires to fix the serde support in GDCF
+                    .resource("/gd/levels/{level_id}/", |r| {
                         r.get().f(|req| {
-                            use crate::actor::gdcf::LevelById;
+                            use crate::actor::http::LevelById;
                             use actix_web::{AsyncResponder, HttpResponse};
                             use tokio::prelude::{Future, IntoFuture};
 
@@ -198,7 +198,7 @@ fn main() {
                                 .map(|resource| HttpResponse::Ok().json(resource))
                                 .responder()
                         })
-                    })*/
+                    })
                     .nested("/demons", |demon_scope| {
                         demon_scope
                             .resource("/", |r| {

@@ -40,6 +40,10 @@ features = ["postgres"]
 [dependencies.gdcf]
 git = "https://github.com/stadust/gdcf"
 #path = "../gdcf/gdcf"
+features = ["serde_support"]
+
+[dependencies.gdcf_parse]
+git = "https://github.com/stadust/gdcf"
 
 [dependencies.gdcf_dbcache]
 git = "https://github.com/stadust/gdcf"

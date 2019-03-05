@@ -14,6 +14,7 @@ use crate::{
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
 use gdcf::model::{level::Password, Creator, Level};
+use gdcf_parse::level_data::{LevelExt};
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
@@ -304,6 +305,8 @@ impl Page for Demonlist {
                         }
                         div.underlined.pad.flex.wrap#level-info {
                             @if let Some(ref level) = self.server_level {
+                                @let level_data = level.decompress_data();
+
                                 span {
                                     b {
                                         "Level Password: "
@@ -327,14 +330,17 @@ impl Page for Demonlist {
                                         "Level length: "
                                     }
                                     br;
-                                    (level.base.length.to_string())
+                                    @match level_data.as_ref().map(|ref data| data.level_length()) {
+                                        Ok(Ok(duration)) => (format!("{}m:{:2}s", duration.as_secs() / 60, duration.as_secs() % 60)),
+                                        _ => (level.base.length.to_string())
+                                    }
                                 }
                                 span {
                                     b {
                                         "Object count: "
                                     }
                                     br;
-                                    (level.decompress_data().map(|data| data.object_count()).unwrap_or(level.base.object_amount as usize))
+                                    (level_data.as_ref().map(|ref data| data.object_count()).unwrap_or(level.base.object_amount as usize))
                                 }
                             }
                             @if self.data.demon.position <= *EXTENDED_LIST_SIZE {
