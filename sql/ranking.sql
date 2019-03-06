@@ -1,7 +1,7 @@
 SELECT RANK() OVER(ORDER BY t.total_score DESC) as rank, t.total_score as score, players.name as name, t.player as id
 FROM
 (
-    SELECT a.player, SUM(record_score(a.progress::FLOAT, a.position::FLOAT, (SELECT 100 FROM aux))) as total_score
+    SELECT a.player, SUM(record_score(a.progress::FLOAT, a.position::FLOAT, (SELECT {0} FROM aux))) as total_score
     FROM (
         SELECT player as player, progress as progress, demons.position as position
         FROM records
@@ -19,4 +19,4 @@ FROM
 ) t
 INNER JOIN players
 ON t.player = players.id
-WHERE t.total_score >= record_score(100.0::FLOAT, {0}::FLOAT, (SELECT 100 FROM aux));
+WHERE t.total_score >= record_score(100.0::FLOAT, {0}::FLOAT, (SELECT {0} FROM aux));
