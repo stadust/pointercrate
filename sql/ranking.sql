@@ -19,4 +19,4 @@ FROM
 ) t
 INNER JOIN players
 ON t.player = players.id
-WHERE t.total_score >= record_score(100.0::FLOAT, {0}::FLOAT);
+WHERE t.total_score >= record_score(100.0::FLOAT, {0}::FLOAT, {0}::FLOAT);
