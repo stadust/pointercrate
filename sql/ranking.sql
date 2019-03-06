@@ -1,7 +1,7 @@
 SELECT RANK() OVER(ORDER BY t.total_score DESC) as rank, t.total_score as score, players.name as name, t.player as id
 FROM
 (
-    SELECT a.player, SUM(record_score(a.progress::FLOAT, a.position::FLOAT, (SELECT {0} FROM aux))) as total_score
+    SELECT a.player, SUM(record_score(a.progress::FLOAT, a.position::FLOAT, {0}::FLOAT as total_score
     FROM (
         SELECT player as player, progress as progress, demons.position as position
         FROM records
