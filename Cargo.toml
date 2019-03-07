@@ -39,20 +39,21 @@ features = ["postgres"]
 
 [dependencies.gdcf]
 git = "https://github.com/stadust/gdcf"
-#path = "../gdcf/gdcf"
+
+[dependencies.gdcf_model]
+git = "https://github.com/stadust/gdcf"
 features = ["serde_support"]
 
 [dependencies.gdcf_parse]
 git = "https://github.com/stadust/gdcf"
+features = ["parallel"]
 
 [dependencies.gdcf_dbcache]
 git = "https://github.com/stadust/gdcf"
-#path = "../gdcf/gdcf_dbcache"
 features = ["pg"]
 
 [dependencies.gdrs]
 git = "https://github.com/stadust/gdcf"
-#path = "../gdcf/gdrs"
 
 [dependencies.diesel]
 version = "1.3.3"

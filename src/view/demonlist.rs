@@ -13,8 +13,10 @@ use crate::{
     video,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
-use gdcf::model::{level::Password, Creator, Level};
-use gdcf_parse::level_data::{LevelExt};
+use gdcf_model::{
+    level::{data::LevelInformationSource, Level, Password},
+    user::Creator,
+};
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
@@ -305,7 +307,9 @@ impl Page for Demonlist {
                         }
                         div.underlined.pad.flex.wrap#level-info {
                             @if let Some(ref level) = self.server_level {
-                                @let level_data = level.decompress_data();
+                                @let level_data = level.decompress_data().ok();
+                                @let level_data = level_data.as_ref().and_then(|data| gdcf_parse::level::data::parse_lazy_parallel(data).ok());
+                                @let stats = level_data.map(LevelInformationSource::stats);
 
                                 span {
                                     b {
@@ -330,8 +334,8 @@ impl Page for Demonlist {
                                         "Level length: "
                                     }
                                     br;
-                                    @match level_data.as_ref().map(|ref data| data.level_length()) {
-                                        Ok(Ok(duration)) => (format!("{}m:{:02}s", duration.as_secs() / 60, duration.as_secs() % 60)),
+                                    @match stats {
+                                        Some(ref stats) => (format!("{}m:{:02}s", stats.duration.as_secs() / 60, stats.duration.as_secs() % 60)),
                                         _ => (level.base.length.to_string())
                                     }
                                 }
@@ -340,7 +344,10 @@ impl Page for Demonlist {
                                         "Object count: "
                                     }
                                     br;
-                                    (level_data.as_ref().map(|ref data| data.object_count()).unwrap_or(level.base.object_amount as usize))
+                                    @match stats {
+                                        Some(ref stats) => (stats.object_count),
+                                        _ => (level.base.object_amount)
+                                    }
                                 }
                             }
                             @if self.data.demon.position <= *EXTENDED_LIST_SIZE {

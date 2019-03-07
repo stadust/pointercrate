@@ -4,13 +4,14 @@ use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
     cache::CachedObject,
     chrono::Duration,
-    model::{
-        level::{DemonRating, Level, LevelRating},
-        Creator, NewgroundsSong,
-    },
     Gdcf, GdcfFuture,
 };
 use gdcf_dbcache::cache::{DatabaseCache, DatabaseCacheConfig, Pg};
+use gdcf_model::{
+    level::{DemonRating, Level, LevelRating},
+    song::NewgroundsSong,
+    user::Creator,
+};
 use gdrs::BoomlingsClient;
 use hyper::{
     client::{Client, HttpConnector},
@@ -173,10 +174,13 @@ impl Handler<GetDemon> for HttpActor {
 
         match cached {
             Some(inner) => {
-                let mut inner = inner.extract();
+                let inner = inner.extract();
 
                 if !inner.is_empty() {
-                    let best_match = inner.iter().max_by(|x, y| x.difficulty.cmp(&y.difficulty)).unwrap();
+                    let best_match = inner
+                        .iter()
+                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
+                        .unwrap();
 
                     let GdcfFuture { cached, inner } = self.gdcf.level(best_match.level_id.into());
 
