@@ -37,8 +37,6 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-// TODO: support to invalidate access tokens
-
 impl Page for AccountPage {
     fn title(&self) -> String {
         format!("Account - {}", self.user.name)

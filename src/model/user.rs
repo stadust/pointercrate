@@ -27,7 +27,6 @@ pub use self::{
     patch::{PatchMe, PatchUser},
     post::Registration,
 };
-//FIXME: in the schema, the fields need to be Text, not Citext
 
 /// Model representing a user in the database
 #[derive(Queryable, Debug, Identifiable)]
