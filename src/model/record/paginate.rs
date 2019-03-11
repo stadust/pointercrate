@@ -4,11 +4,17 @@ use crate::{
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
-    schema::records,
+    schema::{records, demons},
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    pg::Pg, query_builder::BoxedSelectStatement, JoinOnDsl, PgConnection, QueryDsl, RunQueryDsl,
+};
 use serde_derive::{Deserialize, Serialize};
+use diesel::{
+    query_builder::SelectStatement,
+    query_source::joins::{Inner, Join},
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecordPagination {
@@ -25,6 +31,12 @@ pub struct RecordPagination {
     progress_lt: Option<i16>,
     #[serde(rename = "progress__gt")]
     progress_gt: Option<i16>,
+
+    demon_position: Option<i16>,
+    #[serde(rename = "demon_position__lt")]
+    demon_position_lt: Option<i16>,
+    #[serde(rename = "demon_position__gt")]
+    demon_position_gt: Option<i16>,
 
     status: Option<RecordStatus>,
 
@@ -84,7 +96,10 @@ impl Paginate<RecordPagination> for Record {
 
         filter!(query[
             records::id > pagination.after_id,
-            records::id < pagination.before_id
+            records::id < pagination.before_id,
+            demons::position = pagination.demon_position,
+            demons::position < pagination.demon_position_lt,
+            demons::position > pagination.demon_position_gt
         ]);
 
         pagination_result!(query, pagination, records::id, connection)

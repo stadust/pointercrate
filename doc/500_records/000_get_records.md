@@ -18,7 +18,7 @@ Only users with `ExtendedAccess` or higher permissions can see non-approved reco
 
 ### Filtering
 
-The result can be filtered by any of the following fields: `id`, `progress`, `status`, `player`, `demon`.
+The result can be filtered by any of the following fields: `id`, `progress`, `status`, `player`, `demon` (for filtering demons by name) and `demon_position` (for filtering demons by position). The fields `progress` and `demon_position` support inequality based filtering.
 
 Pagination is done via the `id` field.
 
