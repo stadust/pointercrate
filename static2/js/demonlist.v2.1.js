@@ -239,9 +239,9 @@ $(document).ready(function() {
 });
 
 function formatDemon(demon) {
-  if (demon.position < window.list_length) {
+  if (demon.position <= window.list_length) {
     return "<b>" + demon.name + "</b>";
-  } else if (demon.position < window.extended_list_length) {
+  } else if (demon.position <= window.extended_list_length) {
     return demon.name;
   } else {
     return "<i>" + demon.name + "</i>";
