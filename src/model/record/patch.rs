@@ -1,5 +1,6 @@
 use super::{Record, RecordStatus};
 use crate::{
+    citext::{CiStr, CiString},
     error::PointercrateError,
     model::{
         demon::{Demon, EmbeddedDemon},
@@ -20,8 +21,8 @@ make_patch! {
         progress: i16,
         video: Option<String>,
         status: RecordStatus,
-        player: String,
-        demon: String,
+        player: CiString,
+        demon: CiString,
     }
 }
 
@@ -32,7 +33,10 @@ impl Patch<PatchRecord> for Record {
         validate_nullable!(patch: Record::validate_video[video]);
 
         let demon = Demon::get(
-            &patch.demon.as_ref().unwrap_or(&self.demon.name)[..],
+            match patch.demon {
+                None => self.demon.name.as_ref(),
+                Some(ref demon) => demon.as_ref(),
+            },
             connection,
         )?;
         let progress = patch.progress.unwrap_or(self.progress);
@@ -49,7 +53,7 @@ impl Patch<PatchRecord> for Record {
                 position: demon.position,
             }
         };
-        let map2 = |name: &str| Player::get(name, connection);
+        let map2 = |name: &CiStr| Player::get(name, connection);
 
         map_patch!(self, patch: map => demon);
         try_map_patch!(self, patch: map2 => player);

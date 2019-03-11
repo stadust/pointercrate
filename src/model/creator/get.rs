@@ -1,5 +1,6 @@
 use super::{Creator, Creators};
 use crate::{
+    citext::CiStr,
     error::PointercrateError,
     model::{user::User, Demon},
     operation::Get,
@@ -9,8 +10,8 @@ use crate::{
 };
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
-impl<'a> Get<&'a str> for Creators {
-    fn get(name: &'a str, connection: &PgConnection) -> Result<Self> {
+impl<'a> Get<&'a CiStr> for Creators {
+    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
         super::creators_of(name)
             .load(connection)
             .map(Creators)

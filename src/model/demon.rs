@@ -24,6 +24,7 @@ mod patch;
 mod post;
 
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
+use crate::citext::{CiStr, CiString, CiText};
 
 /// Struct modelling a demon in the database
 #[derive(Debug, Identifiable, Serialize, Hash)]
@@ -31,7 +32,7 @@ pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 #[primary_key("name")]
 pub struct Demon {
     /// The [`Demon`]'s Geometry Dash level name
-    pub name: String,
+    pub name: CiString,
 
     /// The [`Demon`]'s position on the demonlist
     ///
@@ -68,10 +69,10 @@ impl Display for Demon {
 /// demons is requested
 #[derive(Debug, Hash, Eq, PartialEq, Serialize)]
 pub struct PartialDemon {
-    pub name: String,
+    pub name: CiString,
     pub position: i16,
     // TODO: when implemented return host here instead of publisher
-    pub publisher: String,
+    pub publisher: CiString,
     pub video: Option<String>,
 }
 
@@ -82,7 +83,7 @@ impl Display for PartialDemon {
 }
 
 impl Queryable<<<PartialDemon as Model>::Selection as Expression>::SqlType, Pg> for PartialDemon {
-    type Row = (String, i16, String, Option<String>);
+    type Row = (CiString, i16, CiString, Option<String>);
 
     fn build(row: Self::Row) -> Self {
         PartialDemon {
@@ -122,16 +123,16 @@ impl Model for PartialDemon {
 impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Demon {
     #[allow(clippy::type_complexity)]
     type Row = (
-        String,
+        CiString,
         i16,
         i16,
         Option<String>,
         Option<String>,
         Option<String>,
-        String,
+        CiString,
         i32,
         bool,
-        String,
+        CiString,
         i32,
         bool,
     );
@@ -209,7 +210,7 @@ impl Model for Demon {
 #[derive(Debug, Hash, Serialize, Queryable)]
 pub struct EmbeddedDemon {
     pub position: i16,
-    pub name: String,
+    pub name: CiString,
 }
 
 impl Display for EmbeddedDemon {
@@ -275,7 +276,7 @@ impl DemonWithCreatorsAndRecords {
         };
 
         // no comparison between &String and String, so just make it a reference
-        let creator = &creator;
+        let creator = &CiString(creator);
 
         if creator == verifier && creator == publisher {
             format!("by {}", creator)
@@ -309,7 +310,7 @@ impl DemonWithCreatorsAndRecords {
     }
 }
 
-type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<sql_types::Text, &'a str>>;
+type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<CiText, &'a CiStr>>;
 type ByName<'a> = diesel::dsl::Filter<All<Demon>, WithName<'a>>;
 
 type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
@@ -318,7 +319,7 @@ type ByPosition = diesel::dsl::Filter<All<Demon>, WithPosition>;
 impl Demon {
     /// Constructs a diesel query returning all columns of demons whose name matches the given
     /// string
-    pub fn by_name(name: &str) -> ByName {
+    pub fn by_name(name: &CiStr) -> ByName {
         Demon::all().filter(demons::name.eq(name))
     }
 
@@ -414,8 +415,8 @@ impl Demon {
         Ok(())
     }
 
-    pub fn validate_name(name: &mut String, connection: &PgConnection) -> Result<()> {
-        *name = name.trim().to_string();
+    pub fn validate_name(name: &mut CiString, connection: &PgConnection) -> Result<()> {
+        *name = CiString(name.trim().to_string());
 
         match Demon::get(name.as_ref(), connection) {
             Ok(demon) =>

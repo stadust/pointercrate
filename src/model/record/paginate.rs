@@ -1,5 +1,6 @@
 use super::{Record, RecordStatus};
 use crate::{
+    citext::CiString,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
@@ -29,7 +30,7 @@ pub struct RecordPagination {
 
     player: Option<i32>,
     submitter: Option<i32>,
-    demon: Option<String>,
+    demon: Option<CiString>,
     video: Option<String>,
 }
 

@@ -1,5 +1,6 @@
 use super::{Record, RecordStatus};
 use crate::{
+    citext::CiString,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
     model::{record::EmbeddedDemon, Demon, Player, Submitter},
@@ -14,8 +15,8 @@ use serde_derive::Deserialize;
 #[derive(Deserialize, Debug)]
 pub struct Submission {
     pub progress: i16,
-    pub player: String,
-    pub demon: String,
+    pub player: CiString,
+    pub demon: CiString,
     #[serde(default)]
     pub video: Option<String>,
     #[serde(default)]
@@ -100,8 +101,8 @@ impl Post<(Submission, Submitter)> for Option<Record> {
             // which is why we need the loop here
             let records: Vec<Record> = match video {
                 Some(ref video) =>
-                    Record::get_existing(player.id, &demon.name, video).get_results(connection)?,
-                None => Record::by_player_and_demon(player.id, &demon.name).get_results(connection)?,
+                    Record::get_existing(player.id, demon.name.as_ref(), video).get_results(connection)?,
+                None => Record::by_player_and_demon(player.id, demon.name.as_ref()).get_results(connection)?,
             };
 
             let video_ref = video.as_ref().map(AsRef::as_ref);
@@ -176,7 +177,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 status,
                 player.id,
                 submitter.id,
-                &demon.name,
+                demon.name.as_ref(),
                 connection
             )?;
 

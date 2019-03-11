@@ -208,7 +208,7 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                         .and_then(move |overview| {
                             state
                                 .gdcf
-                                .send(GetDemon(data.demon.name.clone()))
+                                .send(GetDemon(data.demon.name.to_string()))
                                 .map_err(PointercrateError::internal)
                                 .map(move |demon| {
                                     Demonlist {

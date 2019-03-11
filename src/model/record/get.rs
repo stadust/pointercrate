@@ -32,7 +32,7 @@ impl Get<i32> for Vec<EmbeddedRecordD> {
 impl<'a> Get<&'a Demon> for Vec<EmbeddedRecordP> {
     fn get(demon: &'a Demon, connection: &PgConnection) -> Result<Self> {
         Ok(
-            EmbeddedRecordP::by_demon_and_status(&demon.name, RecordStatus::Approved)
+            EmbeddedRecordP::by_demon_and_status(demon.name.as_ref(), RecordStatus::Approved)
                 .order_by(records::progress.desc())
                 .load(connection)?,
         )

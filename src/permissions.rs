@@ -99,7 +99,6 @@ macro_rules! perms {
     };
 }
 
-
 impl Permissions {
     /// Gets a [`Permissions`] object that has all permissions set that would be required to assign
     /// all the permissions stored in this object
@@ -126,7 +125,9 @@ impl Permissions {
         }
 
         if Permissions::Administrator & self != Permissions::empty() {
-            set = set.cross(&PermissionsSet::one(Permissions::ItIsImpossibleToGainThisPermission))
+            set = set.cross(&PermissionsSet::one(
+                Permissions::ItIsImpossibleToGainThisPermission,
+            ))
         }
 
         set

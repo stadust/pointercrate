@@ -1,5 +1,6 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
+    citext::{CiStr, CiString},
     model::player::Player,
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     permissions::PermissionsSet,
@@ -12,12 +13,12 @@ use serde_derive::Deserialize;
 
 make_patch! {
     struct PatchDemon {
-        name: String,
+        name: CiString,
         position: i16,
         video: Option<String>,
         requirement: i16,
-        verifier: String,
-        publisher: String
+        verifier: CiString,
+        publisher: CiString
     }
 }
 
@@ -28,7 +29,7 @@ impl Patch<PatchDemon> for Demon {
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name: &str| Player::get(name, connection);
+        let map = |name: &CiStr| Player::get(name, connection);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);

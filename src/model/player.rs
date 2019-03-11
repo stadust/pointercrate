@@ -1,5 +1,6 @@
 use super::{All, Model};
 use crate::{
+    citext::CiString,
     model::{
         demon::EmbeddedDemon,
         record::{EmbeddedRecordD, RecordStatus},
@@ -24,12 +25,13 @@ mod paginate;
 mod patch;
 
 pub use self::{paginate::PlayerPagination, patch::PatchPlayer};
+use crate::citext::{CiStr, CiText};
 
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
 pub struct Player {
     pub id: i32,
-    pub name: String,
+    pub name: CiString,
     pub banned: bool,
 }
 
@@ -60,8 +62,8 @@ pub struct RankedPlayer {
     #[sql_type = "Integer"]
     pub id: i32,
 
-    #[sql_type = "Text"]
-    pub name: String,
+    #[sql_type = "CiText"]
+    pub name: CiString,
 
     #[sql_type = "BigInt"]
     pub rank: i64,
@@ -73,17 +75,17 @@ pub struct RankedPlayer {
 #[derive(Insertable, Debug)]
 #[table_name = "players"]
 struct NewPlayer<'a> {
-    name: &'a str,
+    name: &'a CiStr,
 }
 
-type WithName<'a> = diesel::dsl::Eq<players::name, Bound<sql_types::Text, &'a str>>;
+type WithName<'a> = diesel::dsl::Eq<players::name, Bound<CiText, &'a CiStr>>;
 type ByName<'a> = diesel::dsl::Filter<All<Player>, WithName<'a>>;
 
 type WithId = diesel::dsl::Eq<players::id, Bound<sql_types::Int4, i32>>;
 type ById = diesel::dsl::Filter<All<Player>, WithId>;
 
 impl Player {
-    pub fn by_name(name: &str) -> ByName {
+    pub fn by_name(name: &CiStr) -> ByName {
         Player::all().filter(players::name.eq(name))
     }
 
@@ -91,7 +93,7 @@ impl Player {
         Player::all().filter(players::id.eq(id))
     }
 
-    pub fn insert(name: &str, conn: &PgConnection) -> QueryResult<Player> {
+    pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<Player> {
         info!("Creating new player with name {}", name);
 
         insert_into(players::table)

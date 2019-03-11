@@ -7,15 +7,16 @@ use crate::{
     Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
+use crate::citext::CiStr;
 
-impl<'a> Get<&'a str> for Demon {
-    fn get(name: &'a str, connection: &PgConnection) -> Result<Self> {
+impl<'a> Get<&'a CiStr> for Demon {
+    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
         match Demon::by_name(name).first(connection) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Demon",
-                    identified_by: name.to_owned(),
+                    identified_by: name.to_string(),
                 }),
             Err(err) => Err(PointercrateError::database(err)),
         }
@@ -38,7 +39,7 @@ impl Get<i16> for Demon {
 
 impl Get<Demon> for DemonWithCreatorsAndRecords {
     fn get(demon: Demon, connection: &PgConnection) -> Result<Self> {
-        let creators = Creators::get(&demon.name, connection)?;
+        let creators = Creators::get(demon.name.as_ref(), connection)?;
         let records = Vec::<EmbeddedRecordP>::get(&demon, connection)?;
 
         Ok(DemonWithCreatorsAndRecords {

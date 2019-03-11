@@ -90,9 +90,9 @@ impl Patch<PatchUser> for User {
                 display_name: Some(_),
                 permissions: Some(perms),
             } =>
-
-                    (*perms ^ self.permissions()).assignable_from().cross(&PermissionsSet::one(Permissions::Moderator)),
-
+                (*perms ^ self.permissions())
+                    .assignable_from()
+                    .cross(&PermissionsSet::one(Permissions::Moderator)),
         }
     }
 }

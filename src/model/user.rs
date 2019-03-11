@@ -27,6 +27,7 @@ pub use self::{
     patch::{PatchMe, PatchUser},
     post::Registration,
 };
+//FIXME: in the schema, the fields need to be Text, not Citext
 
 /// Model representing a user in the database
 #[derive(Queryable, Debug, Identifiable)]
@@ -141,7 +142,7 @@ impl User {
     pub fn name(&self) -> &str {
         match self.display_name {
             Some(ref name) => name,
-            None => &self.name,
+            None => self.name.as_ref(),
         }
     }
 

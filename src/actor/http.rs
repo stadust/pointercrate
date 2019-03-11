@@ -1,9 +1,9 @@
 use crate::{actor::database::DeleteMessage, model::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
+use chrono::Duration;
 use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
     cache::CachedObject,
-    chrono::Duration,
     Gdcf, GdcfFuture,
 };
 use gdcf_dbcache::cache::{DatabaseCache, DatabaseCacheConfig, Pg};

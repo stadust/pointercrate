@@ -8,9 +8,10 @@ use crate::{
     Result,
 };
 use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use crate::citext::CiStr;
 
-impl<'a> Get<&'a str> for Player {
-    fn get(name: &'a str, connection: &PgConnection) -> Result<Self> {
+impl<'a> Get<&'a CiStr> for Player {
+    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
         match Player::by_name(name).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>

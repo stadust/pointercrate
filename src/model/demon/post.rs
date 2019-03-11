@@ -1,5 +1,6 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
+    citext::{CiStr, CiString},
     model::{creator::Creator, Player},
     operation::{Get, Post, PostData},
     permissions::PermissionsSet,
@@ -12,19 +13,19 @@ use serde_derive::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct PostDemon {
-    name: String,
+    name: CiString,
     position: i16,
     requirement: i16,
-    verifier: String,
-    publisher: String,
-    creators: Vec<String>,
+    verifier: CiString,
+    publisher: CiString,
+    creators: Vec<CiString>,
     video: Option<String>,
 }
 
 #[derive(Insertable, Debug)]
 #[table_name = "demons"]
 pub struct NewDemon<'a> {
-    name: &'a str,
+    name: &'a CiStr,
     position: i16,
     requirement: i16,
     verifier: i32,
@@ -51,7 +52,7 @@ impl Post<PostDemon> for Demon {
             let verifier = Player::get(data.verifier.as_ref(), connection)?;
 
             let new = NewDemon {
-                name: &data.name,
+                name: data.name.as_ref(),
                 position: data.position,
                 requirement: data.requirement,
                 verifier: verifier.id,
@@ -84,7 +85,7 @@ impl Post<PostDemon> for Demon {
 }
 
 impl Post<PostDemon> for DemonWithCreatorsAndRecords {
-    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Self> {
+    fn create_from(data: PostDemon, connection: &PgConnection) -> Result<Self> {
         DemonWithCreatorsAndRecords::get(Demon::create_from(data, connection)?, connection)
     }
 }

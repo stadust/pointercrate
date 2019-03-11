@@ -1,5 +1,6 @@
 use super::{Player, PlayerWithDemonsAndRecords};
 use crate::{
+    citext::CiString,
     error::PointercrateError,
     operation::{deserialize_non_optional, Patch},
     permissions::PermissionsSet,
@@ -12,7 +13,7 @@ use serde_derive::Deserialize;
 
 make_patch! {
     struct PatchPlayer {
-        name: String,
+        name: CiString,
         banned: bool
     }
 }
@@ -30,7 +31,7 @@ impl Patch<PatchPlayer> for Player {
 
             if let Some(ref name) = patch.name {
                 if *name != self.name {
-                    match Player::by_name(&name).first(connection) {
+                    match Player::by_name(name.as_ref()).first(connection) {
                         Ok(player) => self.merge(player, connection)?,
                         Err(Error::NotFound) => (),
                         Err(err) => return Err(PointercrateError::database(err)),

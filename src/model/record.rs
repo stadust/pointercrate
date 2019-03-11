@@ -25,6 +25,7 @@ mod patch;
 mod post;
 
 pub use self::{paginate::RecordPagination, patch::PatchRecord, post::Submission};
+use crate::citext::{CiStr, CiString, CiText};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -160,7 +161,7 @@ struct NewRecord<'a> {
     status: RecordStatus,
     player: i32,
     submitter: i32,
-    demon: &'a str,
+    demon: &'a CiStr,
 }
 
 type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
@@ -171,7 +172,7 @@ type WithVideo<'a> =
 
 type WithPlayerAndDemon<'a> = diesel::dsl::And<
     diesel::dsl::Eq<records::player, Bound<sql_types::Int4, i32>>,
-    diesel::dsl::Eq<records::demon, Bound<sql_types::Text, &'a str>>,
+    diesel::dsl::Eq<records::demon, Bound<CiText, &'a CiStr>>,
 >;
 type ByPlayerAndDemon<'a> = diesel::dsl::Filter<All<Record>, WithPlayerAndDemon<'a>>;
 
@@ -185,15 +186,15 @@ impl Record {
         Record::all().filter(records::id.eq(id))
     }
 
-    pub fn with_player_and_demon(player: i32, demon: &str) -> WithPlayerAndDemon {
+    pub fn with_player_and_demon(player: i32, demon: &CiStr) -> WithPlayerAndDemon {
         records::player.eq(player).and(records::demon.eq(demon))
     }
 
-    pub fn by_player_and_demon(player: i32, demon: &str) -> ByPlayerAndDemon {
+    pub fn by_player_and_demon(player: i32, demon: &CiStr) -> ByPlayerAndDemon {
         Record::all().filter(Record::with_player_and_demon(player, demon))
     }
 
-    pub fn get_existing<'a>(player: i32, demon: &'a str, video: &'a str) -> ByExisting<'a> {
+    pub fn get_existing<'a>(player: i32, demon: &'a CiStr, video: &'a str) -> ByExisting<'a> {
         Record::all()
             .filter(Record::with_player_and_demon(player, demon).or(records::video.eq(Some(video))))
     }
@@ -204,7 +205,7 @@ impl Record {
 
     pub fn insert(
         progress: i16, video: Option<&str>, status: RecordStatus, player: i32, submitter: i32,
-        demon: &str, conn: &PgConnection,
+        demon: &CiStr, conn: &PgConnection,
     ) -> QueryResult<i32> {
         let new = NewRecord {
             progress,
@@ -252,18 +253,18 @@ impl EmbeddedRecordD {
     }
 }
 
-type WithDemon<'a> = diesel::dsl::Eq<records::demon, Bound<sql_types::Text, &'a str>>;
+type WithDemon<'a> = diesel::dsl::Eq<records::demon, Bound<CiText, &'a CiStr>>;
 type ByDemon<'a> = diesel::dsl::Filter<All<EmbeddedRecordP>, WithDemon<'a>>;
 
 type ByDemonAndStatus<'a> =
     diesel::dsl::Filter<All<EmbeddedRecordP>, diesel::dsl::And<WithDemon<'a>, WithStatus>>;
 
 impl EmbeddedRecordP {
-    fn by_demon(demon: &str) -> ByDemon {
+    fn by_demon(demon: &CiStr) -> ByDemon {
         EmbeddedRecordP::all().filter(records::demon.eq(demon))
     }
 
-    fn by_demon_and_status(demon: &str, status: RecordStatus) -> ByDemonAndStatus {
+    fn by_demon_and_status(demon: &CiStr, status: RecordStatus) -> ByDemonAndStatus {
         Self::by_demon(demon).filter(Record::with_status(status))
     }
 }
@@ -324,10 +325,10 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
         Option<String>,
         RecordStatus,
         i32,
-        String,
+        CiString,
         bool,
         i32,
-        String,
+        CiString,
         i16,
     );
 
@@ -408,9 +409,9 @@ impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, 
         RecordStatus,
         Option<String>,
         i32,
-        String,
+        CiString,
         bool,
-        String,
+        CiString,
         i16,
     );
 
@@ -469,7 +470,7 @@ impl Model for EmbeddedRecordD {
 impl Queryable<<<EmbeddedRecordD as Model>::Selection as Expression>::SqlType, Pg>
     for EmbeddedRecordD
 {
-    type Row = (i32, i16, RecordStatus, Option<String>, String, i16);
+    type Row = (i32, i16, RecordStatus, Option<String>, CiString, i16);
 
     fn build(row: Self::Row) -> Self {
         EmbeddedRecordD {
@@ -522,7 +523,7 @@ impl Model for EmbeddedRecordP {
 impl Queryable<<<EmbeddedRecordP as Model>::Selection as Expression>::SqlType, Pg>
     for EmbeddedRecordP
 {
-    type Row = (i32, i16, RecordStatus, Option<String>, i32, String, bool);
+    type Row = (i32, i16, RecordStatus, Option<String>, i32, CiString, bool);
 
     fn build(row: Self::Row) -> Self {
         EmbeddedRecordP {

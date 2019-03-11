@@ -1,13 +1,19 @@
 table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+
     creators (demon, creator) {
-        demon -> Text,
+        demon -> CiText,
         creator -> Int4,
     }
 }
 
 table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+
     demons (name) {
-        name -> Text,
+        name -> CiText,
         position -> Int2,
         requirement -> Int2,
         video -> Nullable<Varchar>,
@@ -19,11 +25,14 @@ table! {
 }
 
 table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+
     demon_verifier_publisher_join (vid, pid) {
-        vname -> Text,
+        vname -> CiText,
         vid -> Int4,
         vbanned -> Bool,
-        pname -> Text,
+        pname -> CiText,
         pid -> Int4,
         pbanned -> Bool,
     }
@@ -32,6 +41,7 @@ table! {
 table! {
     use diesel::sql_types::*;
     use crate::bitstring::BitString;
+    use crate::citext::CiText;
 
     members (member_id) {
         member_id -> Int4,
@@ -45,9 +55,12 @@ table! {
 }
 
 table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+
     players (id) {
         id -> Int4,
-        name -> Text,
+        name -> CiText,
         banned -> Bool,
     }
 }
@@ -55,6 +68,7 @@ table! {
 table! {
     use diesel::sql_types::*;
     use crate::model::record::Record_status;
+    use crate::citext::CiText;
 
     records (id) {
         id -> Int4,
@@ -63,7 +77,7 @@ table! {
         status_ -> Record_status,
         player -> Int4,
         submitter -> Int4,
-        demon -> Text,
+        demon -> CiText,
     }
 }
 

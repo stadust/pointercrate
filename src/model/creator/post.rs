@@ -1,5 +1,6 @@
 use super::Creator;
 use crate::{
+    citext::{CiStr, CiString},
     error::PointercrateError,
     model::{Demon, Player},
     operation::{Get, Post, PostData},
@@ -13,19 +14,19 @@ use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct PostCreator {
-    pub creator: String,
+    pub creator: CiString,
 }
 
 #[derive(Debug, Insertable)]
 #[table_name = "creators"]
 struct NewCreator<'a> {
-    demon: &'a str,
+    demon: &'a CiStr,
     creator: i32,
 }
 
-impl<'a> Post<(&'a str, &'a str)> for Creator {
+impl<'a> Post<(&'a CiStr, &'a CiStr)> for Creator {
     fn create_from(
-        (demon, player): (&'a str, &'a str), connection: &PgConnection,
+        (demon, player): (&'a CiStr, &'a CiStr), connection: &PgConnection,
     ) -> Result<Creator> {
         info!("Adding '{}' as creator of demon '{}'", player, demon);
 
@@ -35,7 +36,7 @@ impl<'a> Post<(&'a str, &'a str)> for Creator {
 
             insert_into(creators::table)
                 .values(&NewCreator {
-                    demon: &demon.name,
+                    demon: demon.name.as_ref(),
                     creator: player.id,
                 })
                 .get_result(connection)
@@ -44,47 +45,49 @@ impl<'a> Post<(&'a str, &'a str)> for Creator {
     }
 }
 
-impl Post<(String, String)> for Creator {
+impl Post<(CiString, CiString)> for Creator {
     fn create_from(
-        (demon, player): (String, String), connection: &PgConnection,
+        (demon, player): (CiString, CiString), connection: &PgConnection,
     ) -> Result<Creator> {
         Creator::create_from((demon.as_ref(), player.as_ref()), connection)
     }
 }
 
-impl<'a> Post<(i16, &'a str)> for Creator {
-    fn create_from((position, player): (i16, &'a str), connection: &PgConnection) -> Result<Self> {
+impl<'a> Post<(i16, &'a CiStr)> for Creator {
+    fn create_from(
+        (position, player): (i16, &'a CiStr), connection: &PgConnection,
+    ) -> Result<Self> {
         let demon = Demon::get(position, connection)?;
 
         Creator::create_from((demon.name.as_ref(), player), connection)
     }
 }
 
-impl Post<(i16, String)> for Creator {
-    fn create_from((position, player): (i16, String), connection: &PgConnection) -> Result<Self> {
+impl Post<(i16, CiString)> for Creator {
+    fn create_from((position, player): (i16, CiString), connection: &PgConnection) -> Result<Self> {
         Creator::create_from((position, player.as_ref()), connection)
     }
 }
 
-impl PostData for (i16, String) {
+impl PostData for (i16, CiString) {
     fn required_permissions(&self) -> PermissionsSet {
         perms!(ListModerator or ListAdministrator)
     }
 }
 
-impl<'a> PostData for (i16, &'a str) {
+impl<'a> PostData for (i16, &'a CiStr) {
     fn required_permissions(&self) -> PermissionsSet {
         perms!(ListModerator or ListAdministrator)
     }
 }
 
-impl<'a> PostData for (&'a str, &'a str) {
+impl<'a> PostData for (&'a CiStr, &'a CiStr) {
     fn required_permissions(&self) -> PermissionsSet {
         perms!(ListModerator or ListAdministrator)
     }
 }
 
-impl<'a> PostData for (String, String) {
+impl<'a> PostData for (CiString, CiString) {
     fn required_permissions(&self) -> PermissionsSet {
         perms!(ListModerator or ListAdministrator)
     }

@@ -1,5 +1,6 @@
 use super::PartialDemon;
 use crate::{
+    citext::CiString,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
@@ -19,7 +20,7 @@ pub struct DemonPagination {
 
     limit: Option<i64>,
 
-    name: Option<String>,
+    name: Option<CiString>,
 
     requirement: Option<i16>,
 

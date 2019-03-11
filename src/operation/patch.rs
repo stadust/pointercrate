@@ -171,7 +171,7 @@ macro_rules! try_map_patch {
     ($target: expr, $patch: ident: $($map: expr => $field: ident),+) => {
         $(
             if let Some(ref value) = $patch.$field {
-                $target.$field = $map(value)?;
+                $target.$field = $map(value.as_ref())?;
             }
         )+
     };

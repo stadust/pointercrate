@@ -1,23 +1,24 @@
+pub use self::post::PostCreator;
 use crate::{
+    citext::CiString,
     model::player::Player,
     schema::{creators, demons, players},
 };
 use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl, Queryable};
 use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
+use crate::citext::{CiText, CiStr};
 
 mod delete;
 mod get;
 mod post;
-
-pub use self::post::PostCreator;
 
 #[derive(Debug, Serialize)]
 pub struct Creators(pub Vec<Player>);
 
 #[derive(Debug, Queryable, Hash)]
 pub struct Creator {
-    demon: String,
+    demon: CiString,
     creator: i32,
 }
 
@@ -31,7 +32,7 @@ impl Display for Creator {
     }
 }
 
-type ByDemon<'a> = diesel::dsl::Eq<creators::demon, Bound<sql_types::Text, &'a str>>;
+type ByDemon<'a> = diesel::dsl::Eq<creators::demon, Bound<CiText, &'a CiStr>>;
 type WithDemon<'a> = diesel::dsl::Filter<
     diesel::dsl::Select<
         diesel::dsl::InnerJoin<creators::table, players::table>,
@@ -56,7 +57,7 @@ pub fn created_by(player: i32) -> WithPlayer {
         .filter(creators::creator.eq(player))
 }
 
-pub fn creators_of(demon: &str) -> WithDemon {
+pub fn creators_of(demon: &CiStr) -> WithDemon {
     creators::table
         .inner_join(players::table)
         .select((players::id, players::name, players::banned))

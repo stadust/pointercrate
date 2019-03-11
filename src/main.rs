@@ -6,7 +6,7 @@
     stable_features,
     unknown_lints,
     unused_features,
-    unused_imports,
+    //unused_imports,
     unused_parens
 )]
 #![feature(proc_macro_hygiene)]
@@ -50,6 +50,7 @@ pub mod model;
 pub mod actor;
 pub mod api;
 pub mod bitstring;
+pub mod citext;
 pub mod config;
 pub mod error;
 pub mod middleware;
