@@ -1,3 +1,3 @@
 -- This file should undo anything in `up.sql`
 
-ALTER TABLE members ALTER COLUMN password_hash TYPE BYTEA;
+alter table members alter column password_hash type bytea using decode(password_hash, 'escape');
