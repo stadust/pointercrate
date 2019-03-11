@@ -49,8 +49,7 @@ pub struct User {
     /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
 
-    // TODO: change this to a string PLEASE
-    password_hash: Vec<u8>,
+    password_hash: String,
 
     permissions: Bits,
 }
@@ -251,13 +250,8 @@ impl User {
             .map(|_| ())
     }
 
-    fn password_hash(&self) -> String {
-        String::from_utf8(self.password_hash.clone()).unwrap()
-    }
-
     pub fn password_salt(&self) -> Vec<u8> {
-        let hash = self.password_hash();
-        let raw_parts: Vec<_> = hash.split('$').filter(|s| !s.is_empty()).collect();
+        let raw_parts: Vec<_> = self.password_hash.split('$').filter(|s| !s.is_empty()).collect();
 
         match &raw_parts[..] {
             [_, _, hash] => b64::decode(&hash[..22]),
@@ -272,14 +266,13 @@ impl User {
         // generated. Obviously, an error there is a bug in the library, so we might as
         // well panic
         self.password_hash = bcrypt::hash(password, bcrypt::DEFAULT_COST)
-            .unwrap()
-            .into_bytes();
+            .unwrap();
     }
 
     pub fn verify_password(self, password: &str) -> Result<Self> {
         debug!("Verifying a password!");
 
-        let valid = bcrypt::verify(&password, &self.password_hash()).map_err(|err| {
+        let valid = bcrypt::verify(&password, &self.password_hash).map_err(|err| {
             warn!(
                 "Password verification FAILED for account {}: {}",
                 self.id, err

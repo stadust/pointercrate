@@ -20,7 +20,7 @@ pub struct Registration {
 #[table_name = "members"]
 struct NewUser<'a> {
     name: &'a str,
-    password_hash: &'a [u8],
+    password_hash: &'a str,
 }
 
 impl Post<Registration> for User {
@@ -40,7 +40,7 @@ impl Post<Registration> for User {
 
                     let new = NewUser {
                         name: &registration.name,
-                        password_hash: hash.as_bytes(),
+                        password_hash: &hash,
                     };
 
                     insert_into(members::table)

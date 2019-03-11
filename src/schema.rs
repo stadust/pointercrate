@@ -46,7 +46,7 @@ table! {
         name -> Text,
         display_name -> Nullable<Text>,
         youtube_channel -> Nullable<Varchar>,
-        password_hash -> Bytea,
+        password_hash -> Text,
         permissions -> BitString,
     }
 }
