@@ -110,12 +110,17 @@ impl Deref for CiString {
     }
 }
 
+impl AsRef<CiStr> for CiStr {
+    fn as_ref(&self) -> &CiStr {
+        self
+    }
+}
+
 impl AsRef<CiStr> for CiString {
     fn as_ref(&self) -> &CiStr {
-        // This _should_ be fine, as both &CiStr and &str are fat pointers to a `str`, since CiStr
-        // is repr(transparent). We aren't relying on the specific representation of the fat
-        // pointer
-        unsafe { std::mem::transmute(self.0.as_ref() as &str) }
+        unsafe {
+            &*(self.0.as_ref() as *const str as *const CiStr)
+        }
     }
 }
 

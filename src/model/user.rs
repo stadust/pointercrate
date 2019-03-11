@@ -52,10 +52,6 @@ pub struct User {
     // TODO: change this to a string PLEASE
     password_hash: Vec<u8>,
 
-    // TODO: remove this
-    #[deprecated(note = "I was really fucking stupid when I wrote the database")]
-    password_salt: Vec<u8>,
-
     permissions: Bits,
 }
 
@@ -101,7 +97,6 @@ impl Model for User {
         members::display_name,
         members::youtube_channel,
         members::password_hash,
-        members::password_salt,
         members::permissions,
     );
 

@@ -45,11 +45,6 @@ pub struct Demon {
 
     pub video: Option<String>,
 
-    // TODO: remove this field
-    description: Option<String>,
-    // TODO: remove this field
-    notes: Option<String>,
-
     /// The player-ID of this [`Demon`]'s verifer
     pub verifier: Player,
 
@@ -127,8 +122,6 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
         i16,
         i16,
         Option<String>,
-        Option<String>,
-        Option<String>,
         CiString,
         i32,
         bool,
@@ -143,17 +136,15 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
             position: row.1,
             requirement: row.2,
             video: row.3,
-            description: row.4,
-            notes: row.5,
             verifier: Player {
-                name: row.6,
-                id: row.7,
-                banned: row.8,
+                name: row.4,
+                id: row.5,
+                banned: row.6,
             },
             publisher: Player {
-                name: row.9,
-                id: row.10,
-                banned: row.11,
+                name: row.7,
+                id: row.8,
+                banned: row.9,
             },
         }
     }
@@ -180,8 +171,6 @@ impl Model for Demon {
         demons::position,
         demons::requirement,
         demons::video,
-        demons::description,
-        demons::notes,
         demon_verifier_publisher_join::vname,
         demon_verifier_publisher_join::vid,
         demon_verifier_publisher_join::vbanned,

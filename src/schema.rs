@@ -17,8 +17,6 @@ table! {
         position -> Int2,
         requirement -> Int2,
         video -> Nullable<Varchar>,
-        description -> Nullable<Text>,
-        notes -> Nullable<Text>,
         verifier -> Int4,
         publisher -> Int4,
     }
@@ -49,7 +47,6 @@ table! {
         display_name -> Nullable<Text>,
         youtube_channel -> Nullable<Varchar>,
         password_hash -> Bytea,
-        password_salt -> Bytea,
         permissions -> BitString,
     }
 }

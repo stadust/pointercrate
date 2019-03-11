@@ -75,8 +75,6 @@ impl Post<PostDemon> for Demon {
                 position: data.position,
                 requirement: data.requirement,
                 video: data.video,
-                notes: None,
-                description: None,
                 publisher,
                 verifier,
             })

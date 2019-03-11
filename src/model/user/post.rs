@@ -21,7 +21,6 @@ pub struct Registration {
 struct NewUser<'a> {
     name: &'a str,
     password_hash: &'a [u8],
-    password_salt: Vec<u8>,
 }
 
 impl Post<Registration> for User {
@@ -42,7 +41,6 @@ impl Post<Registration> for User {
                     let new = NewUser {
                         name: &registration.name,
                         password_hash: hash.as_bytes(),
-                        password_salt: Vec::new(),
                     };
 
                     insert_into(members::table)
