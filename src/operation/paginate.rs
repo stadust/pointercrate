@@ -216,7 +216,7 @@ macro_rules! pagination_result {
         if $pagination_data.$after_column.is_none() && $pagination_data.$before_column.is_some() {
             let mut members = $query
                 .order_by($db_column.desc())
-                .limit($pagination_data.limit.unwrap_or(50))
+                .limit($pagination_data.limit())
                 .load($connection)?;
 
             members.reverse();
@@ -225,7 +225,7 @@ macro_rules! pagination_result {
         } else {
             $query
                 .order_by($db_column)
-                .limit($pagination_data.limit.unwrap_or(50))
+                .limit($pagination_data.limit())
                 .load($connection)
                 .map_err(PointercrateError::database)
         }

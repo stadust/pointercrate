@@ -22,7 +22,7 @@ use std::{
 };
 
 #[derive(SqlType, Debug)]
-#[postgres(oid = "63440", array_oid = "63445")]
+#[postgres(type_name = "CITEXT")]
 pub struct CiText;
 
 #[derive(Clone, Debug, Hash, AsExpression, FromSqlRow, Serialize, Deserialize)]
