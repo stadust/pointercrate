@@ -98,7 +98,7 @@ impl Model for User {
         members::permissions,
         members::display_name,
         members::youtube_channel,
-        members::nationality
+        members::nationality,
     );
 
     fn from() -> Self::From {

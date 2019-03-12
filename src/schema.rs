@@ -93,11 +93,4 @@ joinable!(records -> demons (demon));
 joinable!(records -> players (player));
 joinable!(records -> submitters (submitter));
 
-allow_tables_to_appear_in_same_query!(
-    creators,
-    demons,
-    members,
-    players,
-    records,
-    submitters,
-);
+allow_tables_to_appear_in_same_query!(creators, demons, members, players, records, submitters,);

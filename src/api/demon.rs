@@ -71,10 +71,29 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-delete_handler!(
-    delete_creator,
-    "/api/v1/demons/[position]/creators/[player id]/",
-    (i16, i32),
-    "Demon position and player ID",
-    Creator
-);
+pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
+    use crate::middleware::{auth::Token, cond::IfMatch};
+
+    info!(
+        "DELETE {}",
+        "/api/v1/demons/[position]/creators/[player id]/"
+    );
+
+    let state = req.state().clone();
+    let auth = req.extensions_mut().remove().unwrap();
+
+    Path::<(i16, i32)>::extract(req)
+        .map_err(|_| {
+            PointercrateError::bad_request("Demon position and player ID must be interger")
+        })
+        .into_future()
+        .and_then(move |resource_id| {
+            state.delete::<Token, (i16, i32), Creator>(
+                resource_id.into_inner(),
+                None,
+                auth,
+            )
+        })
+        .map(|_| HttpResponse::NoContent().finish())
+        .responder()
+}
