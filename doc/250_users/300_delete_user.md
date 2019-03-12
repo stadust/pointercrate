@@ -6,7 +6,7 @@
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `ADMINISTRATOR` permissions.
+Access to this endpoint requires at least `Administrator` permissions.
 </div>
 
 Deletes a user account. This action is irreversible!
@@ -22,15 +22,11 @@ Deletes a user account. This action is irreversible!
 
 _Nothing_
 
-### Errors:
+### Errors:    
 
-| Status code | Error code | Description                                                                                     |
-| ----------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| 403         | 40300      | Attempt to delete your own account. Use [`DELETE /auth/me/`](/documentation/account/#delete-me) |
-| 404         | 40401      | No user with id `user_id` was found                                                             |
-| 412         | 41200      | The value provided in the `If-Match` header doesn't match the current state of the object       |
-| 418         | 41800      | No `If-Match` header was provided                                                               |
-
+| Status code | Error code | Description                                                                              |
+| ----------- | ---------- | ----------------------------------------------------------------------------------------|
+|403|40302| Attempt to delete your own account through this endpoint|
 ### Example request:
 
 ```json

@@ -19,7 +19,7 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 
 | Header        | Expected Value                                                                            | Optional |
 | ------------- | ----------------------------------------------------------------------------------------- | -------- |
-| Content-Type  | `application/merge-patch+json`                                                            | false    |
+| Content-Type  | `application/json`                                                            | false    |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens)                                | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the demon object | false    |
 
@@ -66,7 +66,7 @@ Returned when the `PATCH` operation did not make any changes.
 PATCH /api/v1/demons/1/
 Accept: application/json
 Authorization: Bearer <omitted>
-Content-Type: application/merge-patch+json
+Content-Type: application/json
 If-Match: cPOrB3TM19Ffsm8PAkD2jNqB61A=
 
 {

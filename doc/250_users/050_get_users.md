@@ -12,10 +12,10 @@ on the additional request and response fields headers.
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `Moderator` or 'ListAdministrator' permissions.
+Access to this endpoint requires at least `Moderator` or be the leader of a team.
 </div>
 
-Allows to retrieve a potentially filtered list of all pointercrate users.
+Allows the retrieval of a list of all pointercrate users (if you are pointercrate staff), or a list of all users that fall under your juristiction as a team leader.
 
 ### Filtering
 

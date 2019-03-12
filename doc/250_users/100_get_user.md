@@ -6,7 +6,7 @@
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `Moderator` or `ListAdministrator` permissions.
+Access to this endpoint requires at least `Moderator` or have the requested user fall inside your jurisdiction
 </div>
 
 Retrieves detailed information about the user with id `user_id`

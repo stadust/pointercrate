@@ -15,7 +15,7 @@ other people at least cannot change your password, allowing you to invalidate th
 
 | Header        | Expected Value                                                                           | Optional |
 | ------------- | ---------------------------------------------------------------------------------------- | -------- |
-| Content-Type  | `application/merge-patch+json`                                                           | false    |
+| Content-Type  | `application/json`                                                           | false    |
 | Authorization | Basic access authentication header                                                       | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the user object | false    |
 
@@ -60,7 +60,7 @@ as you hashed password is not part of your user object hash.
 PATCH /api/v1/auth/me/
 Accept: application/json
 Authorization: Basic <omitted>
-Content-Type: application/merge-patch+json
+Content-Type: application/json
 If-Match: 10434480491831244259
 
 {

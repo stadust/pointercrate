@@ -20,7 +20,7 @@ the record will the higher progress will take precedence.
 
 | Header        | Expected Value                                                                             | Optional |
 | ------------- | ------------------------------------------------------------------------------------------ | -------- |
-| Content-Type  | `application/merge-patch+json`                                                             | false    |
+| Content-Type  | `application/json`                                                             | false    |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens)                                 | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the player object | false    |
 
@@ -62,7 +62,7 @@ Returned when the `PATCH` operation did not make any changes.
 PATCH /api/v1/players/1/
 Accept: application/json
 Authorization: Bearer <omitted>
-Content-Type: application/merge-patch+json
+Content-Type: application/json
 If-Match: FfbtbML27VL1ciOI1Ar0mX20Yhc=
 
 {

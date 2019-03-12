@@ -6,7 +6,7 @@
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `LIST_MODERATOR` permissions.
+Access to this endpoint requires at least `ListModerator` permissions.
 </div>
 
 Removes the specified player from the creator list of the demon at the specified position.

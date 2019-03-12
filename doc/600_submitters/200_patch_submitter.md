@@ -13,7 +13,7 @@ Access to this endpoint requires at least `LIST_MODERATOR` permissions.
 
 | Header        | Expected Value                                                                                | Optional |
 | ------------- | --------------------------------------------------------------------------------------------- | -------- |
-| Content-Type  | `application/merge-patch+json`                                                                | false    |
+| Content-Type  | `application/json`                                                                | false    |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens)                                    | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the submitter object | false    |
 
@@ -54,7 +54,7 @@ Returned when the `PATCH` operation did not make any changes.
 PATCH /api/v1/submitters/2/
 Accept: application/json
 Authorization: Bearer <omitted>
-Content-Type: application/merge-patch+json
+Content-Type: application/json
 If-Match: Pi0YjDmf-_EGc9fDY7xZJHQCC20=
 
 {

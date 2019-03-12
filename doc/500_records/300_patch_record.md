@@ -15,7 +15,7 @@ Modifies a given record.
 
 | Header        | Expected Value                                                                             | Optional |
 | ------------- | ------------------------------------------------------------------------------------------ | -------- |
-| Content-Type  | `application/merge-patch+json`                                                             | false    |
+| Content-Type  | `application/json`                                                             | false    |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens)                                 | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the record object | false    |
 
@@ -66,7 +66,7 @@ Returned when the `PATCH` operation did not make any changes.
 PATCH /api/v1/records/2/
 Accept: application/json
 Authorization: Bearer <omitted>
-Content-Type: application/merge-patch+json
+Content-Type: application/json
 If-Match: VV4v4HlCVToXCSqxdpaV3IQGRLw=
 
 {
