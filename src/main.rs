@@ -124,7 +124,7 @@ fn main() {
                 r.route().f(allowed!(GET))
             })
             .resource("/login/", |r| {
-                r.get().f(view::login::handler);
+                r.get().f(wrap(view::login::handler));
                 r.post().f(wrap(view::login::login));
                 r.route().f(allowed!(GET, POST))
             })

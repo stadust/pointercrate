@@ -1,5 +1,10 @@
 use super::Page;
-use crate::{api::PCResponder, middleware::auth::Basic, state::PointercrateState};
+use crate::{
+    api::PCResponder,
+    error::PointercrateError,
+    middleware::auth::{Basic, Token},
+    state::PointercrateState,
+};
 use actix_web::{http::Cookie, AsyncResponder, HttpRequest, HttpResponse, Responder};
 use cookie::SameSite;
 use log::info;
@@ -9,9 +14,23 @@ use tokio::prelude::Future;
 #[derive(Debug)]
 pub struct LoginPage;
 
-pub fn handler(req: &HttpRequest<PointercrateState>) -> impl Responder {
+pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     // TODO: if already logged in, redirect to /account/
-    LoginPage.render(req)
+    //LoginPage.render(req)
+
+    info!("GET /login/");
+
+    let req_clone = req.clone();
+
+    req.state()
+        .auth::<Token>(req.extensions_mut().remove().unwrap())
+        .map(move |user| {
+            actix_web::HttpResponse::Found()
+                .header(actix_web::http::header::LOCATION, "/account/")
+                .finish()
+        })
+        .or_else(move |_| Ok(LoginPage.render(&req_clone).respond_to(&req_clone).unwrap()))
+        .responder()
 }
 
 /// Alternate login handler for the web interface. Unlike the one in the api, it doesn't return your
@@ -22,16 +41,18 @@ pub fn login(req: &HttpRequest<PointercrateState>) -> PCResponder {
     req.state()
         .auth::<Basic>(req.extensions_mut().remove().unwrap())
         .map(|user| {
-            HttpResponse::NoContent()
-                .cookie(
-                    Cookie::build("access_token", user.0.generate_token())
-                        .http_only(true)
-                        .same_site(SameSite::Strict)
-                        .secure(true)
-                        .path("/")
-                        .finish(),
-                )
-                .finish()
+            let mut cookie = Cookie::build("access_token", user.0.generate_token())
+                .http_only(true)
+                .same_site(SameSite::Strict)
+                .path("/");
+
+            // allow cookies of HTTP if we're in a debug build, because I dont have a ssl cert for
+            // 127.0.0.1 on my laptop smh
+            if !cfg!(debug_assertions) {
+                cookie = cookie.secure(true)
+            }
+
+            HttpResponse::NoContent().cookie(cookie.finish()).finish()
         })
         .responder()
 }
