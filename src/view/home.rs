@@ -139,7 +139,7 @@ impl Page for Homepage {
                         h2 style="text-align: left; margin-top: 0px" {
                             "Changelog"
                         }
-                        div.tab-content data-tab-id ="99" {
+                        div.tab-content.tab-content-active data-tab-id ="99" {
                             h3 style="text-align: left; font-size: 110%" {
                                 "2019-03-02: Rustification!"
                             }
@@ -166,7 +166,7 @@ impl Page for Homepage {
                                 "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."
                             }
                         }
-                        div.tab-content.tab-content-active data-tab-id ="100" {
+                        div.tab-content data-tab-id ="100" {
                             h3 style="text-align: left" {
                                 "2018-04-04: Anniversary Update!"
                             }
@@ -220,8 +220,8 @@ impl Page for Homepage {
                         }
                     }
                     div.tab-selection style="padding: 20px 0px; text-align: center"{
-                        h3.tab data-tab-id="99" style="padding: 10px; text-align:left" { "2019-03-02" }
-                        h3.tab.tab-active data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
+                        h3.tab.tab-active data-tab-id="99" style="padding: 10px; text-align:left" { "2019-03-02" }
+                        h3.tab data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
                         h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
                     }
                 }
