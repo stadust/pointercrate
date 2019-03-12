@@ -49,6 +49,12 @@ class Input {
     });
   }
 
+  addValidators(validators) {
+    Object.keys(validators).forEach(message =>
+      this.addValidator(validators[message], message)
+    );
+  }
+
   setClearOnInvalid(clear) {
     this.clearOnInvalid = clear;
   }
@@ -106,6 +112,8 @@ class Form {
     this.inputs = [];
     this.submitHandler = undefined;
     this.invalidHandler = undefined;
+    this.errorOutput = form.getElementsByClassName("output")[0];
+    this.successOutput = form.getElementsByClassName("output")[1];
 
     for (var input of form.getElementsByClassName("form-input")) {
       this.inputs.push(new Input(input));
@@ -115,6 +123,9 @@ class Form {
       "submit",
       event => {
         event.preventDefault();
+
+        if (this.errorOutput) this.errorOutput.style.display = "none";
+        if (this.successOutput) this.successOutput.style.display = "none";
 
         var isValid = true;
 
@@ -134,6 +145,20 @@ class Form {
     );
   }
 
+  setError(message) {
+    if (this.successOutput) this.successOutput.style.display = "none";
+
+    this.errorOutput.innerHTML = message;
+    this.errorOutput.style.display = "block";
+  }
+
+  setSuccess(message) {
+    if (this.errorOutput) this.errorOutput.style.display = "none";
+
+    this.successOutput.innerHTML = message;
+    this.successOutput.style.display = "block";
+  }
+
   onSubmit(handler) {
     this.submitHandler = handler;
   }
@@ -149,6 +174,16 @@ class Form {
       }
     }
     return null;
+  }
+
+  value(id) {
+    this.input(id).value();
+  }
+
+  addValidators(validators) {
+    Object.keys(validators).forEach(input_id =>
+      this.input(input_id).addValidators(validators[input_id])
+    );
   }
 }
 

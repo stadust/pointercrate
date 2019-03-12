@@ -5,6 +5,9 @@ function setupGetAccessToken() {
   var accessToken = document.getElementById("access-token");
   var getTokenButton = document.getElementById("get-token");
 
+  var htmlLoginForm = document.getElementById("login-form");
+  var loginForm = new Form(htmlLoginForm);
+
   getTokenButton.addEventListener(
     "click",
     function(event) {
@@ -15,128 +18,97 @@ function setupGetAccessToken() {
     false
   );
 
-  var htmlLoginForm = document.getElementById("login-form");
-  var loginForm = new Form(htmlLoginForm);
-
   var loginPassword = loginForm.input("login-password");
 
-  var loginError = htmlLoginForm.getElementsByClassName("output")[0];
-
   loginPassword.setClearOnInvalid(true);
-  loginPassword.addValidator(valueMissing, "Password required");
-  loginPassword.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-  loginForm.onSubmit(function(event) {
-    loginError.style.display = "";
+  loginPassword.addValidators({
+    "Password required": valueMissing,
+    "Password too short. It needs to be at least 10 characters long.": tooShort
+  });
 
-    $.ajax({
-      method: "POST",
-      url: "/api/v1/auth/",
-      dataType: "json",
-      headers: {
-        Authorization:
-          "Basic " + btoa(window.username + ":" + loginPassword.value)
-      },
-      error: function(data) {
-        if (data.status == 401) {
-          loginPassword.setError("Invalid credentials");
-        } else {
-          loginError.innerHTML = data.responseJSON.message;
-          loginError.style.display = "block";
-        }
-      },
-      success: function(crap, more_crap, data) {
+  loginForm.onSubmit(function(event) {
+    makeRequest(
+      "POST",
+      "/auth/",
+      htmlLoginForm.getElementsByClassName("output")[0],
+      function(data) {
         loginPassword.value = "";
         accessToken.innerHTML = data.responseJSON.token;
         htmlLoginForm.style.display = "none";
         accessTokenArea.style.display = "block";
+      },
+      { 40100: () => loginPassword.setError("Invalid credentials") },
+      {
+        Authorization:
+          "Basic " + btoa(window.username + ":" + loginPassword.value)
       }
-    });
+    );
   });
 }
 
 function setupEditAccount() {
-  var htmlEditForm = document.getElementById("edit-form");
-  var editForm = new Form(htmlEditForm);
+  var editForm = new Form(document.getElementById("edit-form"));
 
   var editDisplayName = editForm.input("edit-display-name");
   var editYtChannel = editForm.input("edit-yt-channel");
   var editPassword = editForm.input("edit-password");
-  var editPasswordRepeat = editForm.input("edit-password-repeat");
   var authPassword = editForm.input("auth-password");
 
-  var editError = htmlEditForm.getElementsByClassName("output")[0];
-
-  editYtChannel.addValidator(typeMismatch, "Please enter a valid URL");
-
-  editPassword.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-
-  editPasswordRepeat.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-  editPasswordRepeat.addValidator(
-    rpp => rpp.value == editPassword.value,
-    "Passwords don't match"
-  );
-
-  authPassword.addValidator(valueMissing, "Password required");
-  authPassword.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
+  editForm.addValidators({
+    "edit-yt-channel": {
+      "Please enter a valid URL": typeMismatch
+    },
+    "edit-password": {
+      "Password too short. It needs to be at least 10 characters long.": tooShort
+    },
+    "edit-password-repeat": {
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+      "Passwords don't match": rpp => rpp.value == editPassword.value
+    },
+    "auth-password": {
+      "Password required": valueMissing,
+      "Password too short. It needs to be at least 10 characters long.": tooShort
+    }
+  });
 
   editForm.onSubmit(function(event) {
-    editError.style.display = "none";
-
     var data = {};
 
     if (editDisplayName.value) data["display_name"] = editDisplayName.value;
     if (editYtChannel.value) data["youtube_channel"] = editYtChannel.value;
     if (editPassword.value) data["password"] = editPassword.value;
 
-    $.ajax({
-      method: "PATCH",
-      url: "/api/v1/auth/me/",
-      dataType: "json",
-      contentType: "application/json",
-      headers: {
+    makeRequest(
+      "PATCH",
+      "/auth/me/",
+      editForm.errorOutput,
+      () => window.location.reload(),
+      {
+        40100: () => authPassword.setError("Invalid credentials"),
+        41200: () =>
+          editForm.setError(
+            "Concurrent account access was made. Please reload the page"
+          ),
+        41800: () =>
+          editForm.setError(
+            "Concurrent account access was made. Please reload the page"
+          ),
+        42225: message => editYtChannel.setError(message)
+      },
+      {
         "If-Match": window.etag,
         Authorization:
           "Basic " + btoa(window.username + ":" + authPassword.value)
       },
-      data: JSON.stringify(data),
-      error: function(data) {
-        switch (data.status) {
-          case 401:
-            authPassword.setError("Invalid credentials");
-            break;
-          case 412:
-          case 418:
-            editError.innerHTML =
-              "Concurrent account access was made. Please reload the page";
-            editError.style.display = "block";
-            break;
-          default:
-            editError.innerHTML = data.responseJSON.message;
-            editError.style.display = "block";
-            break;
-        }
-      },
-      success: function() {
-        window.location.reload();
-      }
-    });
+      data
+    );
   });
 }
 
 function setupInvalidateToken() {
   var invalidateButton = document.getElementById("invalidate-token");
+  var htmlInvalidateForm = document.getElementById("invalidate-form");
+  var invalidateForm = new Form(htmlInvalidateForm);
 
   invalidateButton.addEventListener(
     "click",
@@ -147,41 +119,28 @@ function setupInvalidateToken() {
     false
   );
 
-  var htmlInvalidateForm = document.getElementById("invalidate-form");
-  var invalidateForm = new Form(htmlInvalidateForm);
-
   var invalidatePassword = invalidateForm.input("invalidate-auth-password");
-  var invalidateError = htmlInvalidateForm.getElementsByClassName("output")[0];
 
   invalidatePassword.setClearOnInvalid(true);
-  invalidatePassword.addValidator(valueMissing, "Password required");
-  invalidatePassword.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-  invalidateForm.onSubmit(function(event) {
-    invalidateError.style.display = "";
+  invalidateForm.addValidators({
+    "invalidate-auth-password": {
+      "Password required": valueMissing,
+      "Password too short. It needs to be at least 10 characters long.": tooShort
+    }
+  });
 
-    $.ajax({
-      method: "POST",
-      url: "/api/v1/auth/invalidate/",
-      dataType: "json",
-      headers: {
+  invalidateForm.onSubmit(function(event) {
+    makeRequest(
+      "POST",
+      "/auth/invalidate/",
+      invalidateForm.errorOutput,
+      () => window.location.reload(),
+      { 40100: () => loginPassword.setError("Invalid credentials") },
+      {
         Authorization:
           "Basic " + btoa(window.username + ":" + invalidatePassword.value)
-      },
-      error: function(data) {
-        if (data.status == 401) {
-          invalidatePassword.setError("Invalid credentials");
-        } else {
-          invalidateError.innerHTML = data.responseJSON.message;
-          invalidateError.style.display = "block";
-        }
-      },
-      success: function(crap, more_crap, data) {
-        window.location.reload();
       }
-    });
+    );
   });
 }
 
@@ -202,73 +161,58 @@ $(document).ready(function() {
   deleteUserButton.addEventListener(
     "click",
     function(event) {
-      $.ajax({
-        method: "DELETE",
-        url: "/api/v1/users/" + window.currentUser.id + "/",
-        dataType: "json",
-        headers: {
+      makeRequest(
+        "DELETE",
+        "/users/" + window.currentUser.id + "/",
+        editForm.errorOutput,
+        () => editForm.setSuccess("Successfully deleted user!"),
+        {},
+        {
           "X-CSRF-TOKEN": csrfToken,
           "If-Match": window.currentUser.etag
-        },
-        error: function(data) {
-          edit2Success.style.display = "";
-          edit2Error.innerHTML = data.responseJSON.message;
-          edit2Error.style.display = "block";
-        },
-        success: function(data) {
-          edit2Error.style.display = "";
-          edit2Success.style.display = "block";
-          edit2Success.innerHTML = "Successfully deleted user!";
         }
-      });
+      );
     },
     false
   );
 
   var htmlEditForm = document.getElementById("patch-permissions");
-  var editForm2 = new Form(htmlEditForm);
-  var edit2Error = htmlEditForm.getElementsByClassName("output")[0];
-  var edit2Success = htmlEditForm.getElementsByClassName("output")[1];
+  var editForm = new Form(htmlEditForm);
 
-  var extended = editForm2.input("perm-extended");
-  var list_helper = editForm2.input("perm-list-helper");
-  var list_mod = editForm2.input("perm-list-mod");
-  var list_admin = editForm2.input("perm-list-admin");
-  var mod = editForm2.input("perm-mod");
-  var admin = editForm2.input("perm-admin");
+  var extended = editForm.input("perm-extended");
+  var list_helper = editForm.input("perm-list-helper");
+  var list_mod = editForm.input("perm-list-mod");
+  var list_admin = editForm.input("perm-list-admin");
+  var mod = editForm.input("perm-mod");
+  var admin = editForm.input("perm-admin");
 
   var text = document.getElementById("text");
 
-  var htmlUserByIdForm = document.getElementById("find-id-form");
-  var htmlUserByNameForm = document.getElementById("find-name-form");
-  var userByIdForm = new Form(htmlUserByIdForm);
-  var userByNameForm = new Form(htmlUserByNameForm);
-  var userByIdError = htmlUserByIdForm.getElementsByClassName("output")[0];
-  var userByNameError = htmlUserByNameForm.getElementsByClassName("output")[0];
+  var userByIdForm = new Form(document.getElementById("find-id-form"));
+  var userByNameForm = new Form(document.getElementById("find-name-form"));
 
   var userId = userByIdForm.input("find-id");
   var userName = userByNameForm.input("find-name");
 
   userId.addValidator(valueMissing, "User ID required");
-  userName.addValidator(valueMissing, "Username required");
+  userName.addValidators({
+    "Username required": valueMissing,
+    "Username is at least 3 characters long": tooShort
+  });
 
-  function requestUserForEdit(userId, onError) {
-    edit2Error.style.display = "";
-    edit2Success.style.display = "";
-
-    $.ajax({
-      method: "GET",
-      url: "/api/v1/users/" + userId + "/",
-      dataType: "json",
-      error: onError,
-      success: function(crap, mor_crap, data) {
+  function requestUserForEdit(userId, errorCodes) {
+    makeRequest(
+      "GET",
+      "/users/" + userId + "/",
+      editForm.errorOutput,
+      data => {
         window.currentUser = data.responseJSON.data;
         window.currentUser.etag = data.getResponseHeader("ETag");
 
         if (window.currentUser.name == window.username) {
-          edit2Error.style.display = "block";
-          edit2Error.innerHTML =
-            "This is your own account. You cannot modify your own account using this interface!";
+          editForm.setError(
+            "This is your own account. You cannot modify your own account using this interface!"
+          );
         }
 
         if (window.currentUser.display_name) {
@@ -288,7 +232,7 @@ $(document).ready(function() {
             window.currentUser.id;
         }
 
-        var bitmask = window.currentUser.permissions;
+        let bitmask = window.currentUser.permissions;
 
         extended.value = (bitmask & 0x1) == 0x1;
         list_helper.value = (bitmask & 0x2) == 0x2;
@@ -298,65 +242,57 @@ $(document).ready(function() {
         admin.value = (bitmask & 0x4000) == 0x4000;
 
         htmlEditForm.style.display = "block";
-      }
-    });
+      },
+      errorCodes
+    );
   }
 
   userByIdForm.onSubmit(function(event) {
-    userByIdError.style.display = "";
-
-    requestUserForEdit(userId.value, function(data) {
-      switch (data.responseJSON.code) {
-        case 40401:
-          userId.setError(data.responseJSON.message);
-          break;
-        default:
-          userByIdError.innerHTML = data.responseJSON.message;
-          userByIdError.style.display = "block";
-          break;
-      }
+    requestUserForEdit(userId.value, {
+      40401: message => userId.setError(message)
     });
   });
 
   userByNameForm.onSubmit(function(event) {
-    userByNameError.style.display = "";
-
-    $.ajax({
-      method: "GET",
-      url: "/api/v1/users/?name=" + userName.value,
-      dataType: "json",
-      error: function(data) {
-        userByNameError.innerHTML = data.responseJSON.message;
-        userByNameError.style.display = "block";
-      },
-      success: function(crap, mor_crap, data) {
-        var json = data.responseJSON;
-
-        console.log(json);
+    makeRequest(
+      "GET",
+      "/users/?name=" + userName.value,
+      userByNameForm.errorOutput,
+      data => {
+        let json = data.responseJSON;
 
         if (!json || json.length == 0) {
           userName.setError("No user with that name found!");
         } else {
-          requestUserForEdit(json[0].id, function(data) {
-            userByNameError.innerHTML = data.responseJSON.message;
-            userByNameError.style.display = "block";
-          });
+          requestUserForEdit(json[0].id, data =>
+            userByNameForm.setError(data.responseJSON.message)
+          );
         }
       }
-    });
+    );
   });
 
-  editForm2.onSubmit(function(event) {
-    $.ajax({
-      method: "PATCH",
-      url: "/api/v1/users/" + window.currentUser.id + "/",
-      dataType: "json",
-      contentType: "application/json",
-      headers: {
+  editForm.onSubmit(function(event) {
+    makeRequest(
+      "PATCH",
+      "/users/" + window.currentUser.id + "/",
+      editForm.errorOutput,
+      data => {
+        if (data.status == 200) {
+          window.currentUser = data.responseJSON.data;
+          window.currentUser.etag = data.getResponseHeader("ETag");
+
+          editForm.setSuccess("Successfully modified user!");
+        } else {
+          editForm.setSuccess("No changes made!");
+        }
+      },
+      {},
+      {
         "X-CSRF-TOKEN": csrfToken,
         "If-Match": window.currentUser.etag
       },
-      data: JSON.stringify({
+      {
         permissions:
           extended.value * 0x1 +
           list_helper.value * 0x2 +
@@ -364,28 +300,8 @@ $(document).ready(function() {
           list_admin.value * 0x8 +
           mod.value * 0x2000 +
           admin.value * 0x4000
-      }),
-      error: function(data) {
-        edit2Success.style.display = "";
-        edit2Error.innerHTML = data.responseJSON.message;
-        edit2Error.style.display = "block";
-      },
-      success: function(crap, crap2, data) {
-        edit2Error.style.display = "";
-        if (data.status == 200) {
-          window.currentUser = data.responseJSON.data;
-          window.currentUser.etag = data.getResponseHeader("ETag");
-
-          edit2Error.style.display = "";
-          edit2Success.style.display = "block";
-          edit2Success.innerHTML = "Successfully modified user!";
-        } else {
-          edit2Error.style.display = "";
-          edit2Success.style.display = "block";
-          edit2Success.innerHTML = "No changes made!";
-        }
       }
-    });
+    );
   });
 
   var loadUsersButton = document.getElementById("load-users");
@@ -400,7 +316,7 @@ $(document).ready(function() {
     window.userPagination = parsePagination(data.getResponseHeader("Links"));
     var userString = "";
 
-    for (var user of data.responseJSON) {
+    for (let user of data.responseJSON) {
       userString +=
         "<li data-uid=" +
         user.id +
@@ -415,16 +331,12 @@ $(document).ready(function() {
 
     userList.innerHTML = userString;
 
-    for (var li of userList.getElementsByTagName("li")) {
-      // javascript is really fucking stupid
-      function set(li) {
-        li.addEventListener(
-          "click",
-          () => requestUserForEdit(li.dataset.uid),
-          false
-        );
-      }
-      set(li);
+    for (let li of userList.getElementsByTagName("li")) {
+      li.addEventListener(
+        "click",
+        () => requestUserForEdit(li.dataset.uid),
+        false
+      );
     }
 
     document.getElementById("hidden-user-list").style.display = "block";
@@ -499,14 +411,17 @@ function makeRequest(
         if (error.code in errorCodes) {
           errorCodes[error.code](error.message, error.data);
         } else {
+          console.warn(
+            "The server returned an error of code " +
+              error.code +
+              ", which this form is not setup to handle correctly. Handling as generic error"
+          );
           errorOutput.innerHTML = error.message;
           errorOutput.style.display = "block";
         }
       }
     },
     success: function(crap, crap2, data) {
-      errorOutput.style.display = "";
-
       onSuccess(data);
     }
   });
