@@ -15,9 +15,6 @@ use tokio::prelude::Future;
 pub struct LoginPage;
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
-    // TODO: if already logged in, redirect to /account/
-    //LoginPage.render(req)
-
     info!("GET /login/");
 
     let req_clone = req.clone();
