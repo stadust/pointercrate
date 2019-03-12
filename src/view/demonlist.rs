@@ -410,13 +410,13 @@ impl Page for Demonlist {
                                 table {
                                     tbody {
                                         tr {
-                                            th {
+                                            th.blue {
                                                 "Record Holder"
                                             }
-                                            th {
+                                            th.blue {
                                                 "Progress"
                                             }
-                                            th.video-link {
+                                            th.video-link.blue {
                                                 "Video Proof"
                                             }
                                         }
