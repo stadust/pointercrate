@@ -843,7 +843,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "List demons that recieve a hacked update changing difficulty will be move the the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
+                        "List demons that receive a hacked update changing difficulty will be moved the the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
                     }
                 }
                 h3 {
