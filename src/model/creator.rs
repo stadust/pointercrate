@@ -1,13 +1,12 @@
 pub use self::post::PostCreator;
 use crate::{
-    citext::CiString,
+    citext::{CiStr, CiString, CiText},
     model::player::Player,
     schema::{creators, demons, players},
 };
 use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl, Queryable};
 use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
-use crate::citext::{CiText, CiStr};
 
 mod delete;
 mod get;

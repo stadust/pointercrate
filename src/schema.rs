@@ -1,19 +1,23 @@
 table! {
-    use crate::citext::CiText;
     use diesel::sql_types::*;
+    use crate::model::record::Record_status;
+    use crate::citext::Citext;
+    use crate::bitstring::BitString;
 
     creators (demon, creator) {
-        demon -> CiText,
+        demon -> Citext,
         creator -> Int4,
     }
 }
 
 table! {
-    use crate::citext::CiText;
     use diesel::sql_types::*;
+    use crate::model::record::Record_status;
+    use crate::citext::Citext;
+    use crate::bitstring::BitString;
 
     demons (name) {
-        name -> CiText,
+        name -> Citext,
         position -> Int2,
         requirement -> Int2,
         video -> Nullable<Varchar>,
@@ -23,49 +27,41 @@ table! {
 }
 
 table! {
-    use crate::citext::CiText;
     use diesel::sql_types::*;
-
-    demon_verifier_publisher_join (vid, pid) {
-        vname -> CiText,
-        vid -> Int4,
-        vbanned -> Bool,
-        pname -> CiText,
-        pid -> Int4,
-        pbanned -> Bool,
-    }
-}
-
-table! {
-    use diesel::sql_types::*;
+    use crate::model::record::Record_status;
+    use crate::citext::Citext;
     use crate::bitstring::BitString;
-    use crate::citext::CiText;
 
     members (member_id) {
         member_id -> Int4,
         name -> Text,
-        display_name -> Nullable<Text>,
-        youtube_channel -> Nullable<Varchar>,
         password_hash -> Text,
         permissions -> BitString,
-    }
-}
-
-table! {
-    use crate::citext::CiText;
-    use diesel::sql_types::*;
-
-    players (id) {
-        id -> Int4,
-        name -> CiText,
-        banned -> Bool,
+        display_name -> Nullable<Text>,
+        youtube_channel -> Nullable<Varchar>,
+        nationality -> Nullable<Varchar>,
     }
 }
 
 table! {
     use diesel::sql_types::*;
     use crate::model::record::Record_status;
-    use crate::citext::CiText;
+    use crate::citext::Citext;
+    use crate::bitstring::BitString;
+
+    players (id) {
+        id -> Int4,
+        name -> Citext,
+        banned -> Bool,
+        nationality -> Nullable<Varchar>,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::model::record::Record_status;
+    use crate::citext::Citext;
+    use crate::bitstring::BitString;
 
     records (id) {
         id -> Int4,
@@ -74,11 +70,16 @@ table! {
         status_ -> Record_status,
         player -> Int4,
         submitter -> Int4,
-        demon -> CiText,
+        demon -> Citext,
     }
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::model::record::Record_status;
+    use crate::citext::Citext;
+    use crate::bitstring::BitString;
+
     submitters (submitter_id) {
         submitter_id -> Int4,
         ip_address -> Inet,
@@ -99,5 +100,4 @@ allow_tables_to_appear_in_same_query!(
     players,
     records,
     submitters,
-    demon_verifier_publisher_join
 );

@@ -1,5 +1,6 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
+    citext::CiStr,
     error::PointercrateError,
     model::{creator::Creators, demon::PartialDemon, record::EmbeddedRecordP},
     operation::Get,
@@ -7,7 +8,6 @@ use crate::{
     Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
-use crate::citext::CiStr;
 
 impl<'a> Get<&'a CiStr> for Demon {
     fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {

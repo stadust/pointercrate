@@ -38,6 +38,10 @@ pub struct User {
     /// The [`User`]'s unique username. This is used to log-in and cannot be changed.
     pub name: String,
 
+    password_hash: String,
+
+    permissions: Bits,
+
     /// A user-customizable name for each [`User`].
     ///
     /// If set to anything other than [`None`], the value set here will be displayed everywhere the
@@ -48,9 +52,7 @@ pub struct User {
     /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
 
-    password_hash: String,
-
-    permissions: Bits,
+    pub nationality: Option<String>,
 }
 
 impl Display for User {
@@ -92,10 +94,11 @@ impl Model for User {
     type Selection = (
         members::member_id,
         members::name,
-        members::display_name,
-        members::youtube_channel,
         members::password_hash,
         members::permissions,
+        members::display_name,
+        members::youtube_channel,
+        members::nationality
     );
 
     fn from() -> Self::From {
@@ -250,7 +253,11 @@ impl User {
     }
 
     pub fn password_salt(&self) -> Vec<u8> {
-        let raw_parts: Vec<_> = self.password_hash.split('$').filter(|s| !s.is_empty()).collect();
+        let raw_parts: Vec<_> = self
+            .password_hash
+            .split('$')
+            .filter(|s| !s.is_empty())
+            .collect();
 
         match &raw_parts[..] {
             [_, _, hash] => b64::decode(&hash[..22]),
@@ -264,8 +271,7 @@ impl User {
         // or errors that happen during internally parsing the hash the library itself just
         // generated. Obviously, an error there is a bug in the library, so we might as
         // well panic
-        self.password_hash = bcrypt::hash(password, bcrypt::DEFAULT_COST)
-            .unwrap();
+        self.password_hash = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
     }
 
     pub fn verify_password(self, password: &str) -> Result<Self> {

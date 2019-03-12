@@ -4,17 +4,16 @@ use crate::{
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
-    schema::{records, demons},
+    schema::{demons, records},
     Result,
 };
 use diesel::{
-    pg::Pg, query_builder::BoxedSelectStatement, JoinOnDsl, PgConnection, QueryDsl, RunQueryDsl,
+    pg::Pg,
+    query_builder::{BoxedSelectStatement, SelectStatement},
+    query_source::joins::{Inner, Join},
+    JoinOnDsl, PgConnection, QueryDsl, RunQueryDsl,
 };
 use serde_derive::{Deserialize, Serialize};
-use diesel::{
-    query_builder::SelectStatement,
-    query_source::joins::{Inner, Join},
-};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecordPagination {

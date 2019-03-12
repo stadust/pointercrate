@@ -2,6 +2,7 @@
 !/src
 !/Cargo.toml
 !/rustfmt.toml
+!/diesel.toml
 !/migrations
 !/build_documentation.rs
 !/README.md

@@ -25,6 +25,8 @@ use std::{
 #[postgres(type_name = "CITEXT")]
 pub struct CiText;
 
+pub type Citext = CiText;
+
 #[derive(Clone, Debug, Hash, AsExpression, FromSqlRow, Serialize, Deserialize)]
 #[sql_type = "CiText"]
 #[serde(transparent)]
@@ -118,9 +120,7 @@ impl AsRef<CiStr> for CiStr {
 
 impl AsRef<CiStr> for CiString {
     fn as_ref(&self) -> &CiStr {
-        unsafe {
-            &*(self.0.as_ref() as *const str as *const CiStr)
-        }
+        unsafe { &*(self.0.as_ref() as *const str as *const CiStr) }
     }
 }
 

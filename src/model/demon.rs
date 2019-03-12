@@ -3,7 +3,7 @@ use crate::{
     error::PointercrateError,
     model::{creator::Creators, player::Player, record::EmbeddedRecordP},
     operation::Get,
-    schema::{demon_verifier_publisher_join, demons, players},
+    schema::{demons, players},
     Result,
 };
 use diesel::{
@@ -149,6 +149,22 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
         }
     }
 }
+
+table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+
+    demon_verifier_publisher_join (vid, pid) {
+        vname -> CiText,
+        vid -> Int4,
+        vbanned -> Bool,
+        pname -> CiText,
+        pid -> Int4,
+        pbanned -> Bool,
+    }
+}
+
+allow_tables_to_appear_in_same_query!(demons, demon_verifier_publisher_join);
 
 impl Model for Demon {
     #[allow(clippy::type_complexity)]

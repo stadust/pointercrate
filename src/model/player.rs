@@ -33,6 +33,7 @@ pub struct Player {
     pub id: i32,
     pub name: CiString,
     pub banned: bool,
+    //pub nationality: String,
 }
 
 impl Display for Player {
@@ -98,6 +99,7 @@ impl Player {
 
         insert_into(players::table)
             .values(&NewPlayer { name })
+            .returning(Player::selection())
             .get_result(conn)
     }
 
