@@ -165,7 +165,6 @@ a {
   margin-left: 10px;
   margin-right: 10px;
 
-  background: white;
   text-align: center;
 
   position: relative;
@@ -312,7 +311,6 @@ form input[type="password"]:invalid {
 
 .search {
   margin: 10px;
-  background: #fff;
   padding: 0px 4px;
 
   border: 1px solid #999;
