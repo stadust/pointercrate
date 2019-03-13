@@ -1,7 +1,7 @@
 use super::{EmbeddedRecordD, EmbeddedRecordP, EmbeddedRecordPD, Record};
 use crate::{
     error::PointercrateError,
-    model::{demon::Demon, record::RecordStatus, submitter::Submitter, user::User, Model},
+    model::{demon::Demon, record::RecordStatus, submitter::Submitter, user::User, By, Model},
     operation::Get,
     permissions::{self, AccessRestrictions},
     schema::records,
@@ -11,7 +11,7 @@ use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryD
 
 impl Get<i32> for Record {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        match Record::by_id(id).first(connection) {
+        match Record::by(id).first(connection) {
             Ok(record) => Ok(record),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {

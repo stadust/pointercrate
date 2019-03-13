@@ -25,7 +25,10 @@ mod patch;
 mod post;
 
 pub use self::{paginate::RecordPagination, patch::PatchRecord, post::Submission};
-use crate::citext::{CiStr, CiString, CiText};
+use crate::{
+    citext::{CiStr, CiString, CiText},
+    model::By,
+};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -164,9 +167,6 @@ struct NewRecord<'a> {
     demon: &'a CiStr,
 }
 
-type WithId = diesel::dsl::Eq<records::id, Bound<sql_types::Int4, i32>>;
-type ById = diesel::dsl::Filter<All<Record>, WithId>;
-
 type WithVideo<'a> =
     diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
 
@@ -181,11 +181,9 @@ type ByExisting<'a> = diesel::dsl::Filter<All<Record>, WithExisting<'a>>;
 
 type WithStatus = diesel::dsl::Eq<records::status_, Bound<Record_status, RecordStatus>>;
 
-impl Record {
-    pub fn by_id(id: i32) -> ById {
-        Record::all().filter(records::id.eq(id))
-    }
+impl By<records::id, i32> for Record {}
 
+impl Record {
     pub fn with_player_and_demon(player: i32, demon: &CiStr) -> WithPlayerAndDemon {
         records::player.eq(player).and(records::demon.eq(demon))
     }

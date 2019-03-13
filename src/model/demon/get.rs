@@ -2,7 +2,7 @@ use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::CiStr,
     error::PointercrateError,
-    model::{creator::Creators, demon::PartialDemon, record::EmbeddedRecordP},
+    model::{creator::Creators, demon::PartialDemon, record::EmbeddedRecordP, By},
     operation::Get,
     permissions::AccessRestrictions,
     Result,
@@ -11,7 +11,7 @@ use diesel::{result::Error, PgConnection, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Demon {
     fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
-        match Demon::by_name(name).first(connection) {
+        match Demon::by(name).first(connection) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -25,7 +25,7 @@ impl<'a> Get<&'a CiStr> for Demon {
 
 impl Get<i16> for Demon {
     fn get(position: i16, connection: &PgConnection) -> Result<Self> {
-        match Demon::by_position(position).first(connection) {
+        match Demon::by(position).first(connection) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {

@@ -1,7 +1,7 @@
 use super::{Submitter, SubmitterWithRecords};
 use crate::{
     error::PointercrateError,
-    model::user::User,
+    model::{user::User, By},
     operation::Get,
     permissions::{self, AccessRestrictions},
     Result,
@@ -11,7 +11,7 @@ use ipnetwork::IpNetwork;
 
 impl Get<IpNetwork> for Submitter {
     fn get(ip: IpNetwork, connection: &PgConnection) -> Result<Self> {
-        match Submitter::by_ip(&ip).first(connection) {
+        match Submitter::by(&ip).first(connection) {
             Ok(submitter) => Ok(submitter),
             Err(Error::NotFound) =>
                 Submitter::insert(&ip, connection).map_err(PointercrateError::database),
@@ -22,7 +22,7 @@ impl Get<IpNetwork> for Submitter {
 
 impl Get<i32> for Submitter {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        match Submitter::by_id(id).first(connection) {
+        match Submitter::by(id).first(connection) {
             Ok(submitter) => Ok(submitter),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {

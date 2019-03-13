@@ -24,7 +24,10 @@ mod patch;
 mod post;
 
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
-use crate::citext::{CiStr, CiString, CiText};
+use crate::{
+    citext::{CiStr, CiString, CiText},
+    model::By,
+};
 
 /// Struct modelling a demon in the database
 #[derive(Debug, Identifiable, Serialize, Hash)]
@@ -314,25 +317,10 @@ impl DemonWithCreatorsAndRecords {
         }
     }
 }
-
-type WithName<'a> = diesel::dsl::Eq<demons::name, Bound<CiText, &'a CiStr>>;
-type ByName<'a> = diesel::dsl::Filter<All<Demon>, WithName<'a>>;
-
-type WithPosition = diesel::dsl::Eq<demons::position, Bound<sql_types::Int2, i16>>;
-type ByPosition = diesel::dsl::Filter<All<Demon>, WithPosition>;
+impl By<demons::position, i16> for Demon {}
+impl By<demons::name, &CiStr> for Demon {}
 
 impl Demon {
-    /// Constructs a diesel query returning all columns of demons whose name matches the given
-    /// string
-    pub fn by_name(name: &CiStr) -> ByName {
-        Demon::all().filter(demons::name.eq(name))
-    }
-
-    /// Constructs a diesel query returning all columns of position whose name matches the given i16
-    pub fn by_position(position: i16) -> ByPosition {
-        Demon::all().filter(demons::position.eq(position))
-    }
-
     /// Increments the position of all demons with positions equal to or greater than the given one,
     /// by one.
     pub fn shift_down(starting_at: i16, connection: &PgConnection) -> QueryResult<()> {
