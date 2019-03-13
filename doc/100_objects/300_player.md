@@ -8,10 +8,18 @@ Each player on the list is represented by a `Player` object. The following invar
 
 Note that it is not possible to retrieve a player's demonlist score via the API. You can calculate it yourself based on the `records` list
 
-## Short/Embedded Form
+## Embedded Form 
+When part of the representation of another object, a player has the following fields:
 
-When retrieving players via [`GET /players/`](/documentation/players/#get-players), or as the field of another object,
-only a shorter representation of each player is provided.
+| Field  | Type    | Description                                   |
+| ------ | ------- | --------------------------------------------- |
+| id     | integer | The player's id                               |
+| name   | string  | The player's name                             |
+| banned | boolean | Value indicating whether the player is banned |
+
+## Short Form
+
+When retrieving players via [`GET /players/`](/documentation/players/#get-players) 
 
 | Field  | Type    | Description                                   |
 | ------ | ------- | --------------------------------------------- |
@@ -36,7 +44,17 @@ only a shorter representation of each player is provided.
 
 ## Example objects
 
-### Short/Embedded form
+### Embedded form
+
+```json
+{
+  "id": 4,
+  "name": "Pennutoh",
+  "banned": false
+}
+```
+
+### Short
 
 ```json
 {
