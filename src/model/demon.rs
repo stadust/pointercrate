@@ -494,10 +494,9 @@ pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
 }
 */
 
-pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
+pub fn score(position: i16, progress: i16) -> f64 {
     let position = f64::from(position);
     let progress = f64::from(progress);
-    let list_length = list_length as f64;
 
     f64::powf(progress / 100.0, 5.0) * 100.0 * f64::exp(-0.03 * (position - 1.0))
 }

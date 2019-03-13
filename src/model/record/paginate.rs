@@ -7,12 +7,7 @@ use crate::{
     schema::{demons, records},
     Result,
 };
-use diesel::{
-    pg::Pg,
-    query_builder::{BoxedSelectStatement, SelectStatement},
-    query_source::joins::{Inner, Join},
-    JoinOnDsl, PgConnection, QueryDsl, RunQueryDsl,
-};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

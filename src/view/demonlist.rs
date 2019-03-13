@@ -254,16 +254,8 @@ impl Page for Demonlist {
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         let dropdowns = dropdowns(req, &self.overview.demon_overview, Some(&self.data.demon));
-        let score100 = demon::score(
-            self.data.demon.position,
-            100,
-            self.overview.demon_overview.len(),
-        );
-        let score_requirement = demon::score(
-            self.data.demon.position,
-            self.data.demon.requirement,
-            self.overview.demon_overview.len(),
-        );
+        let score100 = demon::score(self.data.demon.position, 100);
+        let score_requirement = demon::score(self.data.demon.position, self.data.demon.requirement);
 
         html! {
             (dropdowns)

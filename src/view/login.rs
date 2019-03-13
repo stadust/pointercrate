@@ -1,7 +1,6 @@
 use super::Page;
 use crate::{
     api::PCResponder,
-    error::PointercrateError,
     middleware::auth::{Basic, Token},
     state::PointercrateState,
 };
@@ -21,7 +20,7 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
     req.state()
         .auth::<Token>(req.extensions_mut().remove().unwrap())
-        .map(move |user| {
+        .map(move |_| {
             actix_web::HttpResponse::Found()
                 .header(actix_web::http::header::LOCATION, "/account/")
                 .finish()

@@ -294,33 +294,33 @@ impl PermissionsSet {
 }
 
 pub trait AccessRestrictions {
-    fn pre_access(user: Option<&User>) -> Result<()> {
+    fn pre_access(_: Option<&User>) -> Result<()> {
         Ok(())
     }
 
-    fn access(self, user: Option<&User>) -> Result<Self>
+    fn access(self, _: Option<&User>) -> Result<Self>
     where
         Self: Sized,
     {
         Ok(self)
     }
 
-    fn pre_page_access(user: Option<&User>) -> Result<()> {
+    fn pre_page_access(_: Option<&User>) -> Result<()> {
         Ok(())
     }
 
-    fn page_access(page: Vec<Self>, user: Option<&User>) -> Result<Vec<Self>>
+    fn page_access(page: Vec<Self>, _: Option<&User>) -> Result<Vec<Self>>
     where
         Self: Sized,
     {
         Ok(page)
     }
 
-    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
+    fn pre_delete(&self, _: Option<&User>) -> Result<()> {
         Ok(())
     }
 
-    fn pre_patch(&self, user: Option<&User>) -> Result<()> {
+    fn pre_patch(&self, _: Option<&User>) -> Result<()> {
         Ok(())
     }
 }

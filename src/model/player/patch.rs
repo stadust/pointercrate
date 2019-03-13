@@ -2,7 +2,8 @@ use super::{Player, PlayerWithDemonsAndRecords};
 use crate::{
     citext::CiString,
     error::PointercrateError,
-    operation::{deserialize_non_optional, Patch},
+    model::{nationality::Nationality, player::PlayerWithNationality, By},
+    operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     permissions::PermissionsSet,
     schema::players,
     Result,
@@ -14,38 +15,46 @@ use serde_derive::Deserialize;
 make_patch! {
     struct PatchPlayer {
         name: CiString,
-        banned: bool
+        banned: bool,
+        nationality: Option<String>,
     }
 }
 
-impl Patch<PatchPlayer> for Player {
+impl Patch<PatchPlayer> for PlayerWithNationality {
     fn patch(mut self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
         info!("Patching player {} with {}", self, patch);
 
         connection.transaction(|| {
             if let Some(true) = patch.banned {
-                if !self.banned {
-                    self.ban(connection)?;
+                if !self.inner.banned {
+                    self.inner.ban(connection)?;
                 }
             }
 
             if let Some(ref name) = patch.name {
-                if *name != self.name {
-                    match Player::by_name(name.as_ref()).first(connection) {
-                        Ok(player) => self.merge(player, connection)?,
+                if *name != self.inner.name {
+                    match Player::by(name.as_ref()).first(connection) {
+                        Ok(player) => self.inner.merge(player, connection)?,
                         Err(Error::NotFound) => (),
                         Err(err) => return Err(PointercrateError::database(err)),
                     }
                 }
             }
 
-            patch!(self, patch: name, banned);
+            if let Some(nationality) = patch.nationality {
+                self.nationality = nationality
+                    .map(|nation| Nationality::get(nation.as_ref(), connection))
+                    .transpose()?;
+            }
+
+            patch!(self.inner, patch: name, banned);
 
             diesel::update(players::table)
-                .filter(players::id.eq(&self.id))
+                .filter(players::id.eq(&self.inner.id))
                 .set((
-                    players::banned.eq(&self.banned),
-                    players::name.eq(&self.name),
+                    players::banned.eq(&self.inner.banned),
+                    players::name.eq(&self.inner.name),
+                    players::nationality.eq(&self.nationality.as_ref().map(|n| &n.country_code)),
                 ))
                 .execute(connection)?;
 

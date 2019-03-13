@@ -1,3 +1,6 @@
+#![allow(unused_variables)]
+// currently, all the request parameters are unused, but they will be required in the future
+
 use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     state::PointercrateState,

@@ -1,24 +1,25 @@
 pub use self::{paginate::PlayerPagination, patch::PatchPlayer};
-use super::{All, Model};
+use super::Model;
 use crate::{
     citext::{CiStr, CiString, CiText},
     model::{
         demon::EmbeddedDemon,
         nationality::Nationality,
         record::{EmbeddedRecordD, RecordStatus},
+        By,
     },
     operation::Delete,
     schema::{nationality, players, records},
     Result,
 };
 use diesel::{
-    expression::{bound::Bound, Expression},
+    expression::Expression,
     insert_into,
     pg::Pg,
-    query_source::joins::{Inner, Join, JoinOn, LeftOuter},
-    sql_types::{self, BigInt, Bool, Double, Integer, Nullable, Text},
-    ExpressionMethods, JoinOnDsl, NullableExpressionMethods, PgConnection, QueryDsl, QueryResult,
-    Queryable, RunQueryDsl,
+    query_source::joins::{Join, JoinOn, LeftOuter},
+    sql_types::{BigInt, Double, Integer},
+    ExpressionMethods, NullableExpressionMethods, PgConnection, QueryResult, Queryable,
+    RunQueryDsl,
 };
 use log::{info, trace};
 use serde_derive::Serialize;
@@ -28,6 +29,8 @@ mod delete;
 mod get;
 mod paginate;
 mod patch;
+
+// TODO: use that crate to derive Display lul
 
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
@@ -43,19 +46,24 @@ impl Display for Player {
     }
 }
 
-#[derive(Debug, Identifiable, Eq, Hash, PartialEq, Serialize)]
-#[table_name = "players"]
+#[derive(Debug, Eq, Hash, PartialEq, Serialize)]
 pub struct PlayerWithNationality {
-    pub id: i32,
-    pub name: CiString,
-    pub banned: bool,
+    #[serde(flatten)]
+    pub inner: Player,
+
     pub nationality: Option<Nationality>,
+}
+
+impl Display for PlayerWithNationality {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.inner)
+    }
 }
 
 #[derive(Debug, Serialize, Hash)]
 pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
-    pub player: Player,
+    pub player: PlayerWithNationality,
     pub records: Vec<EmbeddedRecordD>,
     pub created: Vec<EmbeddedDemon>,
     pub verified: Vec<EmbeddedDemon>,
@@ -89,21 +97,13 @@ struct NewPlayer<'a> {
     name: &'a CiStr,
 }
 
-type WithName<'a> = diesel::dsl::Eq<players::name, Bound<CiText, &'a CiStr>>;
-type ByName<'a> = diesel::dsl::Filter<All<Player>, WithName<'a>>;
+impl By<players::id, i32> for Player {}
+impl By<players::name, &CiStr> for Player {}
 
-type WithId = diesel::dsl::Eq<players::id, Bound<sql_types::Int4, i32>>;
-type ById = diesel::dsl::Filter<All<Player>, WithId>;
+impl By<players::id, i32> for PlayerWithNationality {}
+impl By<players::name, &CiStr> for PlayerWithNationality {}
 
 impl Player {
-    pub fn by_name(name: &CiStr) -> ByName {
-        Player::all().filter(players::name.eq(name))
-    }
-
-    pub fn by_id(id: i32) -> ById {
-        Player::all().filter(players::id.eq(id))
-    }
-
     pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<Player> {
         info!("Creating new player with name {}", name);
 
@@ -251,9 +251,11 @@ impl Queryable<<<PlayerWithNationality as Model>::Selection as Expression>::SqlT
         };
 
         PlayerWithNationality {
-            id: row.0,
-            name: row.1,
-            banned: row.2,
+            inner: Player {
+                id: row.0,
+                name: row.1,
+                banned: row.2,
+            },
             nationality,
         }
     }

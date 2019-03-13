@@ -2,7 +2,7 @@ use super::Player;
 use crate::{
     citext::CiString,
     error::PointercrateError,
-    model::Model,
+    model::{player::PlayerWithNationality, Model},
     operation::{Paginate, Paginator},
     schema::players,
     Result,
@@ -22,16 +22,19 @@ pub struct PlayerPagination {
 
     name: Option<CiString>,
     banned: Option<bool>,
+
+    nation: Option<String>,
 }
 
 impl Paginator for PlayerPagination {
-    type Model = Player;
+    type Model = PlayerWithNationality;
     type PaginationColumn = players::id;
     type PaginationColumnType = i32;
 
     filter_method!(players[
         name = name,
-        banned = banned
+        banned = banned,
+        nationality = nation
     ]);
 
     fn page(
@@ -58,13 +61,13 @@ impl Paginator for PlayerPagination {
     }
 }
 
-impl Paginate<PlayerPagination> for Player {
+impl Paginate<PlayerPagination> for PlayerWithNationality {
     fn load(pagination: &PlayerPagination, connection: &PgConnection) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
 
-        let mut query = pagination.filter(Player::boxed_all());
+        let mut query = pagination.filter(PlayerWithNationality::boxed_all());
 
         filter!(query[
             players::id > pagination.after_id,

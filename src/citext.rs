@@ -4,11 +4,9 @@
 //! causes problems if you have UNIQUE constraints on CITEXT columns
 
 use diesel::{
-    deserialize::{self, FromSql, FromSqlRow, Queryable},
-    expression::{bound::Bound, AsExpression, Expression},
+    deserialize::{self, FromSql},
     pg::Pg,
     query_builder::QueryId,
-    row::Row,
     serialize::{self, IsNull, Output, ToSql},
 };
 use serde::{Serialize, Serializer};

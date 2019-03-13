@@ -49,7 +49,7 @@ impl<S> Middleware<S> for MimeProcess {
         Ok(Started::Done)
     }
 
-    fn response(&self, req: &HttpRequest<S>, resp: HttpResponse) -> Result<Response> {
+    fn response(&self, _: &HttpRequest<S>, resp: HttpResponse) -> Result<Response> {
         trace!("Response is {:?}", resp);
 
         Ok(Response::Done(resp))

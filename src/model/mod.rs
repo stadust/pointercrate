@@ -10,12 +10,13 @@ pub mod submitter;
 pub use self::{demon::Demon, player::Player, record::Record, submitter::Submitter, user::User};
 
 use diesel::{
-    dsl::Select,
-    expression::{Expression, SelectableExpression},
+    dsl::{Eq, Filter, Select},
+    expression::{AsExpression, Expression, SelectableExpression},
     pg::Pg,
     query_builder::{BoxedSelectStatement, QueryFragment, SelectStatement},
-    query_dsl::{boxed_dsl::BoxedDsl, select_dsl::SelectDsl},
-    QuerySource,
+    query_dsl::{boxed_dsl::BoxedDsl, filter_dsl::FilterDsl, select_dsl::SelectDsl},
+    query_source::Column,
+    ExpressionMethods, QuerySource,
 };
 
 pub type All<M> = Select<SelectStatement<<M as Model>::From>, <M as Model>::Selection>;
@@ -37,5 +38,18 @@ pub trait Model {
         BoxedDsl::internal_into_boxed(
             SelectStatement::simple(Self::from()).select(Self::selection()),
         )
+    }
+}
+
+trait By<T: Column + Default + ExpressionMethods, U: AsExpression<T::SqlType>/*U: Expression<SqlType = T::SqlType>*/>: Model {
+    fn with(u: U) -> diesel::dsl::Eq<T, U> {
+        T::default().eq(u)
+    }
+
+    fn by(u: U) -> Filter<All<Self>, Eq<T, U>>
+    where
+        All<Self>: FilterDsl<Eq<T, U>>,
+    {
+        Self::all().filter(Self::with(u))
     }
 }
