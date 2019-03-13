@@ -21,7 +21,7 @@ Allows to retrieve a potentially filtered list of all players having records on 
 
 ### Filtering:
 
-The result can be filtered by any of the following fields: `id`, `name`, `banned`.
+The result can be filtered by any of the following fields: `id`, `name`, `banned` and `nationality` (though only be country code).
 
 Pagination is done via the `id` field.
 
