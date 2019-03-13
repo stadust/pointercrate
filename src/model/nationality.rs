@@ -2,7 +2,7 @@ use crate::{
     error::PointercrateError,
     model::{By, Model},
     operation::Get,
-    schema::nationality,
+    schema::nationalities,
     Result,
 };
 use diesel::{pg::PgConnection, result::Error, RunQueryDsl};
@@ -26,15 +26,15 @@ impl Nationality {
     }
 }
 
-impl By<nationality::nation, &str> for Nationality {}
-impl By<nationality::iso_country_code, &str> for Nationality {}
+impl By<nationalities::nation, &str> for Nationality {}
+impl By<nationalities::iso_country_code, &str> for Nationality {}
 
 impl Model for Nationality {
-    type From = nationality::table;
-    type Selection = (nationality::nation, nationality::iso_country_code);
+    type From = nationalities::table;
+    type Selection = (nationalities::nation, nationalities::iso_country_code);
 
     fn from() -> Self::From {
-        nationality::table
+        nationalities::table
     }
 
     fn selection() -> Self::Selection {
@@ -44,9 +44,9 @@ impl Model for Nationality {
 
 impl Get<&str> for Nationality {
     fn get(id: &str, connection: &PgConnection) -> Result<Self> {
-        match <Nationality as By<nationality::iso_country_code, _>>::by(&id.to_uppercase())
+        match <Nationality as By<nationalities::iso_country_code, _>>::by(&id.to_uppercase())
             .first(connection)
-            .or_else(|_| <Nationality as By<nationality::nation, _>>::by(id).first(connection))
+            .or_else(|_| <Nationality as By<nationalities::nation, _>>::by(id).first(connection))
         {
             Ok(nationality) => Ok(nationality),
             Err(Error::NotFound) =>

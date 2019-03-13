@@ -9,7 +9,7 @@ use crate::{
         By,
     },
     operation::Delete,
-    schema::{nationality, players, records},
+    schema::{nationalities, players, records},
     Result,
 };
 use diesel::{
@@ -209,23 +209,23 @@ impl Model for Player {
 
 impl Model for PlayerWithNationality {
     type From = JoinOn<
-        Join<players::table, nationality::table, LeftOuter>,
+        Join<players::table, nationalities::table, LeftOuter>,
         diesel::dsl::Eq<
             players::nationality,
-            diesel::expression::nullable::Nullable<nationality::nation>,
+            diesel::expression::nullable::Nullable<nationalities::nation>,
         >,
     >;
     type Selection = (
         players::id,
         players::name,
         players::banned,
-        diesel::expression::nullable::Nullable<nationality::nation>,
-        diesel::expression::nullable::Nullable<nationality::iso_country_code>,
+        diesel::expression::nullable::Nullable<nationalities::nation>,
+        diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
     );
 
     fn from() -> Self::From {
-        Join::new(players::table, nationality::table, LeftOuter)
-            .on(players::nationality.eq(nationality::nation.nullable()))
+        Join::new(players::table, nationalities::table, LeftOuter)
+            .on(players::nationality.eq(nationalities::nation.nullable()))
     }
 
     fn selection() -> Self::Selection {
@@ -233,8 +233,8 @@ impl Model for PlayerWithNationality {
             players::id,
             players::name,
             players::banned,
-            nationality::nation.nullable(),
-            nationality::iso_country_code.nullable(),
+            nationalities::nation.nullable(),
+            nationalities::iso_country_code.nullable(),
         )
     }
 }

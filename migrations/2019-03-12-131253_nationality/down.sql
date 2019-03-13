@@ -3,4 +3,4 @@
 ALTER TABLE players DROP COLUMN nationality;
 ALTER TABLE members DROP COLUMN nationality;
 
-DROP TABLE nationality;
+DROP TABLE nationalities;

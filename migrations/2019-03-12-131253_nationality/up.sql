@@ -1,12 +1,12 @@
 -- Your SQL goes here
 
-CREATE TABLE nationality (
+CREATE TABLE nationalities (
     nation TEXT PRIMARY KEY,
     iso_country_code VARCHAR(2) UNIQUE NOT NULL,
     CHECK (LENGTH(iso_country_code) = 2)
 );
 
-INSERT INTO nationality (nation, iso_country_code)
+INSERT INTO nationalities (nation, iso_country_code)
 VALUES ('Afghanistan','AF'),
        ('Åland Islands','AX'),
        ('Albania','AL'),
@@ -257,5 +257,5 @@ VALUES ('Afghanistan','AF'),
        ('Zambia','ZM'),
        ('Zimbabwe','ZW');
 
-ALTER TABLE players ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationality(iso_country_code);
-ALTER TABLE members ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationality(iso_country_code);
+ALTER TABLE players ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationalities(iso_country_code);
+ALTER TABLE members ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationalities(iso_country_code);

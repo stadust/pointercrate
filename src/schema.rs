@@ -49,7 +49,7 @@ table! {
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
-    nationality (nation) {
+    nationalities (nation) {
         nation -> Text,
         iso_country_code -> Varchar,
     }
@@ -104,13 +104,12 @@ joinable!(creators -> players (creator));
 joinable!(records -> demons (demon));
 joinable!(records -> players (player));
 joinable!(records -> submitters (submitter));
-joinable!(players -> nationality (nationality));
 
 allow_tables_to_appear_in_same_query!(
     creators,
     demons,
     members,
-    nationality,
+    nationalities,
     players,
     records,
     submitters,
