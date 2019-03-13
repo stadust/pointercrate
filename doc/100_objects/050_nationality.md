@@ -6,8 +6,8 @@ Object representing some nation
 
 | Field  | Type    | Description                                      |
 | ------ | ------- | ------------------------------------------------ |
-| id     | int     | The submitter's ID                               |
-| banned | boolean | Value indicating whether the submitter is banned |
+|nation|string| The nation's name|
+| country_code|string| The nation's ISO country code. Always exactly 2 characters long
 
 ## Example objects
 
