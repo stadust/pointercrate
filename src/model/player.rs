@@ -12,6 +12,7 @@ use crate::{
     schema::{nationalities, players, records},
     Result,
 };
+use derive_more::Display;
 use diesel::{
     expression::Expression,
     insert_into,
@@ -23,7 +24,6 @@ use diesel::{
 };
 use log::{info, trace};
 use serde_derive::Serialize;
-use std::fmt::{Display, Formatter};
 
 mod delete;
 mod get;
@@ -32,21 +32,17 @@ mod patch;
 
 // TODO: use that crate to derive Display lul
 
-#[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
+#[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize, Display)]
 #[table_name = "players"]
+#[display(fmt = "{} (ID: {})", name, id)]
 pub struct Player {
     pub id: i32,
     pub name: CiString,
     pub banned: bool,
 }
 
-impl Display for Player {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (ID: {})", self.name, self.id)
-    }
-}
-
-#[derive(Debug, Eq, Hash, PartialEq, Serialize)]
+#[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
+#[display(fmt = "{}", inner)]
 pub struct PlayerWithNationality {
     #[serde(flatten)]
     pub inner: Player,
@@ -54,13 +50,8 @@ pub struct PlayerWithNationality {
     pub nationality: Option<Nationality>,
 }
 
-impl Display for PlayerWithNationality {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.inner)
-    }
-}
-
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Display)]
+#[display(fmt = "{}", player)]
 pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
     pub player: PlayerWithNationality,
@@ -68,12 +59,6 @@ pub struct PlayerWithDemonsAndRecords {
     pub created: Vec<EmbeddedDemon>,
     pub verified: Vec<EmbeddedDemon>,
     pub published: Vec<EmbeddedDemon>,
-}
-
-impl Display for PlayerWithDemonsAndRecords {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.player)
-    }
 }
 
 #[derive(Debug, QueryableByName)]

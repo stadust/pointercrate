@@ -4,6 +4,7 @@ use actix_web::{
     middleware::{Middleware, Started},
     Error, HttpRequest,
 };
+use derive_more::Display;
 use log::{debug, warn};
 use serde_derive::{Deserialize, Serialize};
 
@@ -52,15 +53,9 @@ impl TAuthType for Token {
 }
 
 /// The user that made an authorized request
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Display)]
 #[serde(transparent)]
 pub struct Me(pub User);
-
-impl std::fmt::Display for Me {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {

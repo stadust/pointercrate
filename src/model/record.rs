@@ -4,6 +4,7 @@ use crate::{
     model::demon::EmbeddedDemon,
     schema::{demons, players, records},
 };
+use derive_more::Display;
 use diesel::{
     deserialize::Queryable,
     expression::bound::Bound,
@@ -105,7 +106,8 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-#[derive(Debug, Identifiable, Serialize, Hash)]
+#[derive(Debug, Identifiable, Serialize, Hash, Display)]
+#[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
 #[table_name = "records"]
 pub struct Record {
     pub id: i32,
@@ -117,7 +119,8 @@ pub struct Record {
     pub demon: EmbeddedDemon,
 }
 
-#[derive(Debug, Hash, Serialize)]
+#[derive(Debug, Hash, Serialize, Display)]
+#[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct EmbeddedRecordPD {
     pub id: i32,
     pub progress: i16,
@@ -127,7 +130,8 @@ pub struct EmbeddedRecordPD {
     pub player: Player,
 }
 
-#[derive(Debug, Hash, Serialize)]
+#[derive(Debug, Hash, Serialize, Display)]
+#[display(fmt = "{}% on {} (ID: {})", progress, demon, id)]
 pub struct EmbeddedRecordD {
     pub id: i32,
     pub progress: i16,
@@ -136,23 +140,14 @@ pub struct EmbeddedRecordD {
     pub demon: EmbeddedDemon,
 }
 
-#[derive(Debug, Hash, Serialize)]
+#[derive(Debug, Hash, Serialize, Display)]
+#[display(fmt = "{} - {}% (ID: {})", player, progress, id)]
 pub struct EmbeddedRecordP {
     pub id: i32,
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
     pub player: Player,
-}
-
-impl Display for Record {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "{} {}% on {} (ID: {})",
-            self.player, self.progress, self.demon, self.id
-        )
-    }
 }
 
 #[derive(Insertable, Debug)]

@@ -1,4 +1,4 @@
-use super::{All, Model};
+use super::Model;
 use crate::{
     error::PointercrateError,
     model::{creator::Creators, player::Player, record::EmbeddedRecordP},
@@ -6,17 +6,15 @@ use crate::{
     schema::{demons, players},
     Result,
 };
+use derive_more::Display;
 use diesel::{
-    dsl::max, expression::bound::Bound, pg::Pg, sql_types, BoolExpressionMethods, Expression,
-    ExpressionMethods, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
+    dsl::max, pg::Pg, BoolExpressionMethods, Expression, ExpressionMethods, PgConnection, QueryDsl,
+    QueryResult, Queryable, RunQueryDsl,
 };
 use joinery::Joinable;
 use log::{debug, warn};
 use serde_derive::Serialize;
-use std::{
-    fmt::{Display, Formatter},
-    hash::{Hash, Hasher},
-};
+use std::hash::{Hash, Hasher};
 
 mod get;
 mod paginate;
@@ -25,14 +23,15 @@ mod post;
 
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 use crate::{
-    citext::{CiStr, CiString, CiText},
+    citext::{CiStr, CiString},
     model::By,
 };
 
 /// Struct modelling a demon in the database
-#[derive(Debug, Identifiable, Serialize, Hash)]
+#[derive(Debug, Identifiable, Serialize, Hash, Display)]
 #[table_name = "demons"]
 #[primary_key("name")]
+#[display(fmt = "{} (at {})", name, position)]
 pub struct Demon {
     /// The [`Demon`]'s Geometry Dash level name
     pub name: CiString,
@@ -55,29 +54,18 @@ pub struct Demon {
     pub publisher: Player,
 }
 
-impl Display for Demon {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (at {})", self.name, self.position)
-    }
-}
-
 /// Struct modelling a minimal representation of a [`Demon`] in the database
 ///
 /// These representations are used whenever a different object references a demon, or when a list of
 /// demons is requested
-#[derive(Debug, Hash, Eq, PartialEq, Serialize)]
+#[derive(Debug, Hash, Eq, PartialEq, Serialize, Display)]
+#[display(fmt = "{} (at {})", name, position)]
 pub struct PartialDemon {
     pub name: CiString,
     pub position: i16,
     // TODO: when implemented return host here instead of publisher
     pub publisher: CiString,
     pub video: Option<String>,
-}
-
-impl Display for PartialDemon {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (at {})", self.name, self.position)
-    }
 }
 
 impl Queryable<<<PartialDemon as Model>::Selection as Expression>::SqlType, Pg> for PartialDemon {
@@ -215,16 +203,11 @@ impl Model for Demon {
 }
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
-#[derive(Debug, Hash, Serialize, Queryable)]
+#[derive(Debug, Hash, Serialize, Queryable, Display)]
+#[display(fmt = "{} (at {})", name, position)]
 pub struct EmbeddedDemon {
     pub position: i16,
     pub name: CiString,
-}
-
-impl Display for EmbeddedDemon {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (at {})", self.name, self.position)
-    }
 }
 
 impl Model for EmbeddedDemon {
@@ -240,18 +223,13 @@ impl Model for EmbeddedDemon {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Display)]
+#[display(fmt = "{}", demon)]
 pub struct DemonWithCreatorsAndRecords {
     #[serde(flatten)]
     pub demon: Demon,
     pub creators: Creators,
     pub records: Vec<EmbeddedRecordP>,
-}
-
-impl Display for DemonWithCreatorsAndRecords {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{} (at {})", self.demon.name, self.demon.position)
-    }
 }
 
 impl Hash for DemonWithCreatorsAndRecords {

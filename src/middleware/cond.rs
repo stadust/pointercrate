@@ -7,24 +7,20 @@ use actix_web::{
     middleware::{Middleware, Response, Started},
     Error, HttpRequest, HttpResponse,
 };
+use derive_more::Display;
 use log::{debug, warn};
 use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,
-    fmt::{Display, Formatter},
     hash::{Hash, Hasher},
 };
 
 #[derive(Debug)]
 pub struct Precondition;
-#[derive(Debug)]
-pub struct IfMatch(Vec<u64>);
 
-impl Display for IfMatch {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "'object hash equal to any of {:?}'", self.0)
-    }
-}
+#[derive(Debug, Display)]
+#[display(fmt = "'object hash equal to any of {:?}'", _0)]
+pub struct IfMatch(Vec<u64>);
 
 impl<S> Middleware<S> for Precondition {
     fn start(&self, req: &HttpRequest<S>) -> Result<Started, Error> {

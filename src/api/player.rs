@@ -3,7 +3,7 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::player::{
-        PatchPlayer, Player, PlayerPagination, PlayerWithDemonsAndRecords, PlayerWithNationality,
+        PatchPlayer, PlayerPagination, PlayerWithDemonsAndRecords, PlayerWithNationality,
     },
     state::PointercrateState,
 };

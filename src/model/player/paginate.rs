@@ -1,4 +1,3 @@
-use super::Player;
 use crate::{
     citext::CiString,
     error::PointercrateError,

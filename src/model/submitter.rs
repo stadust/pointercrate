@@ -1,16 +1,9 @@
-use super::{All, Model};
+use super::Model;
 use crate::{model::record::EmbeddedRecordPD, schema::submitters};
-use diesel::{
-    expression::bound::Bound,
-    insert_into,
-    pg::PgConnection,
-    query_dsl::{QueryDsl, RunQueryDsl},
-    result::QueryResult,
-    sql_types, ExpressionMethods,
-};
+use derive_more::Display;
+use diesel::{insert_into, pg::PgConnection, query_dsl::RunQueryDsl, result::QueryResult};
 use ipnetwork::IpNetwork;
 use serde_derive::Serialize;
-use std::fmt::{Display, Formatter};
 
 mod get;
 mod paginate;
@@ -19,26 +12,22 @@ mod patch;
 pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 use crate::model::By;
 
-#[derive(Queryable, Debug, Identifiable, Serialize, Hash)]
+#[derive(Queryable, Debug, Identifiable, Serialize, Hash, Display)]
 #[table_name = "submitters"]
 #[primary_key("submitter_id")]
+#[display(fmt = "{} (Banned: {})", id, banned)]
 pub struct Submitter {
     pub id: i32,
     pub ip: IpNetwork,
     pub banned: bool,
 }
 
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Display)]
+#[display(fmt = "{}", submitter)]
 pub struct SubmitterWithRecords {
     #[serde(flatten)]
     submitter: Submitter,
     records: Vec<EmbeddedRecordPD>,
-}
-
-impl Display for Submitter {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.id)
-    }
 }
 
 #[derive(Insertable, Debug)]

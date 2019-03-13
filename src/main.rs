@@ -54,6 +54,7 @@ pub mod citext;
 pub mod config;
 pub mod error;
 pub mod middleware;
+#[allow(unused_imports)]
 pub mod schema;
 pub mod state;
 pub mod video;

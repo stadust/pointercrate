@@ -3,6 +3,7 @@
 //! Diesel currently does not support CITEXT columns at all, and interpreting them as TEXT columns
 //! causes problems if you have UNIQUE constraints on CITEXT columns
 
+use derive_more::Display;
 use diesel::{
     deserialize::{self, FromSql},
     pg::Pg,
@@ -11,13 +12,7 @@ use diesel::{
 };
 use serde::{Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
-use std::{
-    borrow::Borrow,
-    cmp::Ordering,
-    fmt::{Display, Formatter},
-    io::Write,
-    ops::Deref,
-};
+use std::{borrow::Borrow, cmp::Ordering, io::Write, ops::Deref};
 
 #[derive(SqlType, Debug)]
 #[postgres(type_name = "CITEXT")]
@@ -25,12 +20,12 @@ pub struct CiText;
 
 pub type Citext = CiText;
 
-#[derive(Clone, Debug, Hash, AsExpression, FromSqlRow, Serialize, Deserialize)]
+#[derive(Clone, Debug, Hash, AsExpression, FromSqlRow, Serialize, Deserialize, Display)]
 #[sql_type = "CiText"]
 #[serde(transparent)]
 pub struct CiString(pub String);
 
-#[derive(Debug, Hash, AsExpression)]
+#[derive(Debug, Hash, AsExpression, Display)]
 #[diesel(not_sized)]
 #[sql_type = "CiText"]
 #[repr(transparent)]
@@ -159,17 +154,5 @@ impl Into<String> for CiString {
 impl From<String> for CiString {
     fn from(value: String) -> Self {
         CiString(value)
-    }
-}
-
-impl Display for CiString {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl<'a> Display for &'a CiStr {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        self.0.fmt(f)
     }
 }

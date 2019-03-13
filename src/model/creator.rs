@@ -4,9 +4,9 @@ use crate::{
     model::player::Player,
     schema::{creators, demons, players},
 };
+use derive_more::Display;
 use diesel::{expression::bound::Bound, sql_types, ExpressionMethods, QueryDsl, Queryable};
 use serde_derive::Serialize;
-use std::fmt::{Display, Formatter};
 
 mod delete;
 mod get;
@@ -15,20 +15,11 @@ mod post;
 #[derive(Debug, Serialize)]
 pub struct Creators(pub Vec<Player>);
 
-#[derive(Debug, Queryable, Hash)]
+#[derive(Debug, Queryable, Hash, Display)]
+#[display(fmt = "creator with id {} on demon {}", creator, demon)]
 pub struct Creator {
     demon: CiString,
     creator: i32,
-}
-
-impl Display for Creator {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "creator with id {} on demon {}",
-            self.creator, self.demon
-        )
-    }
 }
 
 type ByDemon<'a> = diesel::dsl::Eq<creators::demon, Bound<CiText, &'a CiStr>>;
