@@ -257,9 +257,5 @@ VALUES ('Afghanistan','AF'),
        ('Zambia','ZM'),
        ('Zimbabwe','ZW');
 
-CREATE VIEW nationality_with_emoji AS
-    SELECT nation, iso_country_code, TRANSLATE(iso_country_code, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿') as flag
-    FROM nationality;
-
 ALTER TABLE players ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationality(iso_country_code);
 ALTER TABLE members ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationality(iso_country_code);

@@ -88,11 +88,7 @@ pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
         })
         .into_future()
         .and_then(move |resource_id| {
-            state.delete::<Token, (i16, i32), Creator>(
-                resource_id.into_inner(),
-                None,
-                auth,
-            )
+            state.delete::<Token, (i16, i32), Creator>(resource_id.into_inner(), None, auth)
         })
         .map(|_| HttpResponse::NoContent().finish())
         .responder()

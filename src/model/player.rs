@@ -1,19 +1,24 @@
+pub use self::{paginate::PlayerPagination, patch::PatchPlayer};
 use super::{All, Model};
 use crate::{
-    citext::CiString,
+    citext::{CiStr, CiString, CiText},
     model::{
         demon::EmbeddedDemon,
+        nationality::Nationality,
         record::{EmbeddedRecordD, RecordStatus},
     },
     operation::Delete,
-    schema::{players, records},
+    schema::{nationality, players, records},
     Result,
 };
 use diesel::{
-    expression::bound::Bound,
+    expression::{bound::Bound, Expression},
     insert_into,
-    sql_types::{self, BigInt, Double, Integer, Text},
-    ExpressionMethods, PgConnection, QueryDsl, QueryResult, RunQueryDsl,
+    pg::Pg,
+    query_source::joins::{Inner, Join, JoinOn, LeftOuter},
+    sql_types::{self, BigInt, Bool, Double, Integer, Nullable, Text},
+    ExpressionMethods, JoinOnDsl, NullableExpressionMethods, PgConnection, QueryDsl, QueryResult,
+    Queryable, RunQueryDsl,
 };
 use log::{info, trace};
 use serde_derive::Serialize;
@@ -24,22 +29,27 @@ mod get;
 mod paginate;
 mod patch;
 
-pub use self::{paginate::PlayerPagination, patch::PatchPlayer};
-use crate::citext::{CiStr, CiText};
-
 #[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize)]
 #[table_name = "players"]
 pub struct Player {
     pub id: i32,
     pub name: CiString,
     pub banned: bool,
-    //pub nationality: String,
 }
 
 impl Display for Player {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         write!(f, "{} (ID: {})", self.name, self.id)
     }
+}
+
+#[derive(Debug, Identifiable, Eq, Hash, PartialEq, Serialize)]
+#[table_name = "players"]
+pub struct PlayerWithNationality {
+    pub id: i32,
+    pub name: CiString,
+    pub banned: bool,
+    pub nationality: Option<Nationality>,
 }
 
 #[derive(Debug, Serialize, Hash)]
@@ -194,5 +204,57 @@ impl Model for Player {
 
     fn selection() -> Self::Selection {
         Self::Selection::default()
+    }
+}
+
+impl Model for PlayerWithNationality {
+    type From = JoinOn<
+        Join<players::table, nationality::table, LeftOuter>,
+        diesel::dsl::Eq<
+            players::nationality,
+            diesel::expression::nullable::Nullable<nationality::nation>,
+        >,
+    >;
+    type Selection = (
+        players::id,
+        players::name,
+        players::banned,
+        diesel::expression::nullable::Nullable<nationality::nation>,
+        diesel::expression::nullable::Nullable<nationality::iso_country_code>,
+    );
+
+    fn from() -> Self::From {
+        Join::new(players::table, nationality::table, LeftOuter)
+            .on(players::nationality.eq(nationality::nation.nullable()))
+    }
+
+    fn selection() -> Self::Selection {
+        (
+            players::id,
+            players::name,
+            players::banned,
+            nationality::nation.nullable(),
+            nationality::iso_country_code.nullable(),
+        )
+    }
+}
+
+impl Queryable<<<PlayerWithNationality as Model>::Selection as Expression>::SqlType, Pg>
+    for PlayerWithNationality
+{
+    type Row = (i32, CiString, bool, Option<String>, Option<String>);
+
+    fn build(row: Self::Row) -> Self {
+        let nationality = match (row.3, row.4) {
+            (Some(name), Some(country_code)) => Some(Nationality { name, country_code }),
+            _ => None,
+        };
+
+        PlayerWithNationality {
+            id: row.0,
+            name: row.1,
+            banned: row.2,
+            nationality,
+        }
     }
 }

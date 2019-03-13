@@ -1,6 +1,7 @@
 use super::User;
 use crate::{
     error::PointercrateError,
+    model::Model,
     operation::{Post, PostData},
     permissions::PermissionsSet,
     schema::members,
@@ -45,6 +46,7 @@ impl Post<Registration> for User {
 
                     insert_into(members::table)
                         .values(&new)
+                        .returning(User::selection())
                         .get_result(connection)
                         .map_err(PointercrateError::database)
                 },

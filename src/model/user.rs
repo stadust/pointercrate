@@ -51,8 +51,6 @@ pub struct User {
 
     /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
-
-    pub nationality: Option<String>,
 }
 
 impl Display for User {
@@ -98,7 +96,6 @@ impl Model for User {
         members::permissions,
         members::display_name,
         members::youtube_channel,
-        members::nationality,
     );
 
     fn from() -> Self::From {
@@ -231,7 +228,7 @@ impl User {
         use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
         let start = SystemTime::now();
-        let since_epoch = start.duration_since(UNIX_EPOCH).expect("time when backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
+        let since_epoch = start.duration_since(UNIX_EPOCH).expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
 
         let claim = CSRFClaims {
             id: self.id,

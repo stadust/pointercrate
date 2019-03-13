@@ -49,6 +49,18 @@ table! {
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
+    nationality (nation) {
+        nation -> Text,
+        iso_country_code -> Varchar,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::model::record::Record_status;
+    use crate::citext::Citext;
+    use crate::bitstring::BitString;
+
     players (id) {
         id -> Int4,
         name -> Citext,
@@ -92,5 +104,14 @@ joinable!(creators -> players (creator));
 joinable!(records -> demons (demon));
 joinable!(records -> players (player));
 joinable!(records -> submitters (submitter));
+joinable!(players -> nationality (nationality));
 
-allow_tables_to_appear_in_same_query!(creators, demons, members, players, records, submitters,);
+allow_tables_to_appear_in_same_query!(
+    creators,
+    demons,
+    members,
+    nationality,
+    players,
+    records,
+    submitters,
+);

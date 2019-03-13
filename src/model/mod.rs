@@ -2,6 +2,7 @@
 pub mod user;
 pub mod creator;
 pub mod demon;
+pub mod nationality;
 pub mod player;
 pub mod record;
 pub mod submitter;
