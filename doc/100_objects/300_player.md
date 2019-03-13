@@ -18,6 +18,7 @@ only a shorter representation of each player is provided.
 | id     | integer | The player's id                               |
 | name   | string  | The player's name                             |
 | banned | boolean | Value indicating whether the player is banned |
+| nationality| [Nationality](#nationality) | The player's nationality, if set|
 
 ## Long Form
 
@@ -26,13 +27,12 @@ only a shorter representation of each player is provided.
 | id        | integer                 | The player's id                               |
 | name      | string                  | The player's name                             |
 | banned    | boolean                 | Value indicating whether the player is banned |
+| nationality| [Nationality](#nationality) | The player's nationality, if set|
 | created   | List[[Demon](#demon)]   | A list of demons the player created           |
-| beaten    | _see below_             | _see below_                                   |
 | records   | List[[Record](#record)] | A list of records the player has on the list  |
 | published | List[[Demon](#demon)]   | A list of demons the player has published     |
 | verified  | List[[Demon](#demon)]   | A list of demons the player has verified      |
 
-**Note**: The `beaten` fields is provided temporarily for compatibility purposes with some discord bots built against the API. You should use `records` instead
 
 ## Example objects
 
@@ -42,7 +42,11 @@ only a shorter representation of each player is provided.
 {
   "id": 4,
   "name": "Pennutoh",
-  "banned": false
+  "banned": false,
+  "nationality": {
+    "nation": "Andorra",
+    "country_code": "AD"
+  }
 }
 ```
 
@@ -63,6 +67,10 @@ only a shorter representation of each player is provided.
   ],
   "id": 2,
   "name": "Pennutoh",
+  "nationality": {
+    "nation": "Andorra",
+    "country_code": "AD"
+  },
   "published": [
     {
       "name": "Cadrega City",
