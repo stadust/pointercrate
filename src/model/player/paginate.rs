@@ -1,9 +1,11 @@
 use crate::{
     citext::CiString,
     error::PointercrateError,
-    model::{player::PlayerWithNationality, Model},
+    model::{
+        player::{players_with_score, PlayerWithNationality},
+        Model,
+    },
     operation::{Paginate, Paginator},
-    schema::players,
     Result,
 };
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
@@ -27,10 +29,10 @@ pub struct PlayerPagination {
 
 impl Paginator for PlayerPagination {
     type Model = PlayerWithNationality;
-    type PaginationColumn = players::id;
+    type PaginationColumn = players_with_score::id;
     type PaginationColumnType = i32;
 
-    filter_method!(players[
+    filter_method!(players_with_score[
         name = name,
         banned = banned,
         nationality = nation
@@ -69,10 +71,10 @@ impl Paginate<PlayerPagination> for PlayerWithNationality {
         let mut query = pagination.filter(PlayerWithNationality::boxed_all());
 
         filter!(query[
-            players::id > pagination.after_id,
-            players::id < pagination.before_id
+            players_with_score::id > pagination.after_id,
+            players_with_score::id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, players::id, connection)
+        pagination_result!(query, pagination, players_with_score::id, connection)
     }
 }

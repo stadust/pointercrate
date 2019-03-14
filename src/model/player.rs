@@ -30,10 +30,23 @@ mod get;
 mod paginate;
 mod patch;
 
-// TODO: use that crate to derive Display lul
+table! {
+    use diesel::sql_types::*;
+    use crate::citext::Citext;
 
-#[derive(Queryable, Debug, Identifiable, Hash, Eq, PartialEq, Serialize, Display)]
-#[table_name = "players"]
+    players_with_score (id) {
+        id -> Int4,
+        name -> Citext,
+        banned -> Bool,
+        score -> Float,
+        nationality -> Nullable<Varchar>,
+    }
+}
+
+joinable!(players_with_score -> nationalities (nationality));
+allow_tables_to_appear_in_same_query!(players_with_score, nationalities);
+
+#[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display)]
 #[display(fmt = "{} (ID: {})", name, id)]
 pub struct Player {
     pub id: i32,
@@ -41,11 +54,20 @@ pub struct Player {
     pub banned: bool,
 }
 
+#[derive(Queryable, Debug, Hash, PartialEq, Serialize, Display)]
+#[display(fmt = "{} (ID: {})", name, id)]
+pub struct PlayerWithScore {
+    pub id: i32,
+    pub name: CiString,
+    pub banned: bool,
+    pub score: f32,
+}
+
 #[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
 #[display(fmt = "{}", inner)]
 pub struct PlayerWithNationality {
     #[serde(flatten)]
-    pub inner: Player,
+    pub inner: PlayerWithScore,
 
     pub nationality: Option<Nationality>,
 }
@@ -82,11 +104,11 @@ struct NewPlayer<'a> {
     name: &'a CiStr,
 }
 
-impl By<players::id, i32> for Player {}
-impl By<players::name, &CiStr> for Player {}
+impl By<players_with_score::id, i32> for Player {}
+impl By<players_with_score::name, &CiStr> for Player {}
 
-impl By<players::id, i32> for PlayerWithNationality {}
-impl By<players::name, &CiStr> for PlayerWithNationality {}
+impl By<players_with_score::id, i32> for PlayerWithNationality {}
+impl By<players_with_score::name, &CiStr> for PlayerWithNationality {}
 
 impl Player {
     pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<Player> {
@@ -192,32 +214,52 @@ impl Model for Player {
     }
 }
 
+impl Model for PlayerWithScore {
+    type From = players_with_score::table;
+    type Selection = (
+        players_with_score::id,
+        players_with_score::name,
+        players_with_score::banned,
+        players_with_score::score,
+    );
+
+    fn from() -> Self::From {
+        players_with_score::table
+    }
+
+    fn selection() -> Self::Selection {
+        Self::Selection::default()
+    }
+}
+
 impl Model for PlayerWithNationality {
     type From = JoinOn<
-        Join<players::table, nationalities::table, LeftOuter>,
+        Join<players_with_score::table, nationalities::table, LeftOuter>,
         diesel::dsl::Eq<
-            players::nationality,
+            players_with_score::nationality,
             diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
         >,
     >;
     type Selection = (
-        players::id,
-        players::name,
-        players::banned,
+        players_with_score::id,
+        players_with_score::name,
+        players_with_score::banned,
+        players_with_score::score,
         diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
         diesel::expression::nullable::Nullable<nationalities::nation>,
     );
 
     fn from() -> Self::From {
-        Join::new(players::table, nationalities::table, LeftOuter)
-            .on(players::nationality.eq(nationalities::iso_country_code.nullable()))
+        Join::new(players_with_score::table, nationalities::table, LeftOuter)
+            .on(players_with_score::nationality.eq(nationalities::iso_country_code.nullable()))
     }
 
     fn selection() -> Self::Selection {
         (
-            players::id,
-            players::name,
-            players::banned,
+            players_with_score::id,
+            players_with_score::name,
+            players_with_score::banned,
+            players_with_score::score,
             nationalities::iso_country_code.nullable(),
             nationalities::nation.nullable(),
         )
@@ -227,19 +269,20 @@ impl Model for PlayerWithNationality {
 impl Queryable<<<PlayerWithNationality as Model>::Selection as Expression>::SqlType, Pg>
     for PlayerWithNationality
 {
-    type Row = (i32, CiString, bool, Option<String>, Option<CiString>);
+    type Row = (i32, CiString, bool, f32, Option<String>, Option<CiString>);
 
     fn build(row: Self::Row) -> Self {
-        let nationality = match (row.3, row.4) {
+        let nationality = match (row.4, row.5) {
             (Some(country_code), Some(name)) => Some(Nationality::new(country_code, name)),
             _ => None,
         };
 
         PlayerWithNationality {
-            inner: Player {
+            inner: PlayerWithScore {
                 id: row.0,
                 name: row.1,
                 banned: row.2,
+                score: row.3,
             },
             nationality,
         }

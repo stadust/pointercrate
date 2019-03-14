@@ -6,9 +6,9 @@ use crate::{
     schema::nationalities,
     Result,
 };
+use derive_more::Constructor;
 use diesel::{pg::PgConnection, result::Error, RunQueryDsl};
 use serde_derive::Serialize;
-use derive_more::Constructor;
 
 #[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
 pub struct Nationality {
