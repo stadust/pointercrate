@@ -137,29 +137,26 @@ class StatsViewer {
     this._verified.html(formatDemons(verified) || "None");
 
     let beaten = records
-      .filter(record => record.progress == 100)
-      .map(record => record.demon);
-
-    console.log(beaten);
-    console.log(records);
+      .filter(record => record.progress == 100);
+      //.map(record => record.demon);
 
     let legacy = beaten.filter(
-      demon => demon.position > window.extended_list_length
+      record => record.demon.position > window.extended_list_length
     ).length;
     let extended = beaten.filter(
-      demon =>
-        demon.position > window.list_length &&
-        demon.position <= window.extended_list_length
+      record =>
+        record.demon.position > window.list_length &&
+        record.demon.position <= window.extended_list_length
     ).length;
 
-    this._beaten.html(formatDemons(beaten) || "None");
+    this._beaten.html(formatRecords(beaten) || "None");
     this._amountBeaten.text(
       beaten.length - legacy - extended + " ( + " + extended + " )"
     );
     this._amountLegacy.text(legacy);
 
     var hardest = verified
-      .concat(beaten)
+      .concat(beaten.map(record => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
         position: 34832834,
         name: "None"
@@ -245,6 +242,23 @@ $(document).ready(function() {
     });
   });
 });
+
+function formatRecords(records) {
+  return records.map(formatRecord).join(", ");
+}
+
+function formatRecord(record) {
+  let link = '<a target=blank href = "' + record.video + '">'+record.demon.name + '</a>'
+  let demon = record.demon
+
+  if (demon.position <= window.list_length) {
+    return "<b>" + link + "</b>";
+  } else if (demon.position <= window.extended_list_length) {
+    return link;
+  } else {
+    return "<i>" + link + "</i>";
+  }
+}
 
 function formatDemon(demon) {
   if (demon.position <= window.list_length) {
