@@ -156,7 +156,7 @@ impl Paginate<RankingPagination> for RankedPlayer2 {
         ]);
 
         if pagination.after_id.is_none() && pagination.before_id.is_some() {
-            query = query.filter(players_with_score::rank.ge(pagination.before_id.unwrap() - 50))
+            query = query.filter(players_with_score::index.ge(pagination.before_id.unwrap() - 50))
         }
 
         query
