@@ -74,24 +74,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
     where
         D: Deserializer<'de>,
     {
-        struct _Visitor;
-
-        impl<'de> serde::de::Visitor<'de> for _Visitor {
-            type Value = String;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(formatter, "a string")
-            }
-
-            fn visit_str<E>(self, v: &str) -> std::result::Result<String, E>
-            where
-                E: std::error::Error,
-            {
-                Ok(v.into())
-            }
-        }
-
-        let string = deserializer.deserialize_str(_Visitor)?.to_lowercase();
+        let string = String::deserialize(deserializer)?.to_lowercase();
 
         match &string[..] {
             "approved" => Ok(RecordStatus::Approved),

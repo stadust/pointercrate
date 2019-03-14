@@ -197,33 +197,9 @@ impl<'de> Deserialize<'de> for Permissions {
     where
         D: Deserializer<'de>,
     {
-        struct _Visitor;
-
-        impl<'de> serde::de::Visitor<'de> for _Visitor {
-            type Value = u16;
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(formatter, "an integer value")
-            }
-
-            fn visit_i64<E>(self, v: i64) -> std::result::Result<u16, E>
-            where
-                E: std::error::Error,
-            {
-                Ok(v as u16)
-            }
-
-            fn visit_u64<E>(self, v: u64) -> std::result::Result<u16, E>
-            where
-                E: std::error::Error,
-            {
-                Ok(v as u16)
-            }
-        }
-
         let mut perms = Permissions::empty();
 
-        perms.bits = deserializer.deserialize_u16(_Visitor)?;
+        perms.bits = u16::deserialize(deserializer)?;
 
         Ok(perms)
     }
