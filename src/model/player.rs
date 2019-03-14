@@ -197,20 +197,20 @@ impl Model for PlayerWithNationality {
         Join<players::table, nationalities::table, LeftOuter>,
         diesel::dsl::Eq<
             players::nationality,
-            diesel::expression::nullable::Nullable<nationalities::nation>,
+            diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
         >,
     >;
     type Selection = (
         players::id,
         players::name,
         players::banned,
-        diesel::expression::nullable::Nullable<nationalities::nation>,
         diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
+        diesel::expression::nullable::Nullable<nationalities::nation>,
     );
 
     fn from() -> Self::From {
         Join::new(players::table, nationalities::table, LeftOuter)
-            .on(players::nationality.eq(nationalities::nation.nullable()))
+            .on(players::nationality.eq(nationalities::iso_country_code.nullable()))
     }
 
     fn selection() -> Self::Selection {
@@ -218,8 +218,8 @@ impl Model for PlayerWithNationality {
             players::id,
             players::name,
             players::banned,
-            nationalities::nation.nullable(),
             nationalities::iso_country_code.nullable(),
+            nationalities::nation.nullable(),
         )
     }
 }
@@ -227,11 +227,11 @@ impl Model for PlayerWithNationality {
 impl Queryable<<<PlayerWithNationality as Model>::Selection as Expression>::SqlType, Pg>
     for PlayerWithNationality
 {
-    type Row = (i32, CiString, bool, Option<String>, Option<String>);
+    type Row = (i32, CiString, bool, Option<String>, Option<CiString>);
 
     fn build(row: Self::Row) -> Self {
         let nationality = match (row.3, row.4) {
-            (Some(name), Some(country_code)) => Some(Nationality { name, country_code }),
+            (Some(country_code), Some(name)) => Some(Nationality::new(country_code, name)),
             _ => None,
         };
 

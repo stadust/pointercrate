@@ -1,4 +1,5 @@
 use crate::{
+    citext::{CiStr, CiString},
     error::PointercrateError,
     model::{By, Model},
     operation::Get,
@@ -7,11 +8,12 @@ use crate::{
 };
 use diesel::{pg::PgConnection, result::Error, RunQueryDsl};
 use serde_derive::Serialize;
+use derive_more::Constructor;
 
-#[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash)]
+#[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
 pub struct Nationality {
-    pub name: String,
     pub country_code: String,
+    pub name: CiString,
 }
 
 /// The difference between 'A', as unicode codepoint (65), and '🇦', as unicode codepoint (127462)
@@ -26,12 +28,12 @@ impl Nationality {
     }
 }
 
-impl By<nationalities::nation, &str> for Nationality {}
-impl By<nationalities::iso_country_code, &str> for Nationality {}
+impl By<nationalities::nation, &CiStr> for Nationality {}
+impl By<nationalities::iso_country_code, &String> for Nationality {}
 
 impl Model for Nationality {
     type From = nationalities::table;
-    type Selection = (nationalities::nation, nationalities::iso_country_code);
+    type Selection = (nationalities::iso_country_code, nationalities::nation);
 
     fn from() -> Self::From {
         nationalities::table
@@ -44,9 +46,9 @@ impl Model for Nationality {
 
 impl Get<&str> for Nationality {
     fn get(id: &str, connection: &PgConnection) -> Result<Self> {
-        match <Nationality as By<nationalities::iso_country_code, _>>::by(&id.to_uppercase())
+        match Nationality::by(&id.to_uppercase())
             .first(connection)
-            .or_else(|_| <Nationality as By<nationalities::nation, _>>::by(id).first(connection))
+            .or_else(|_| Nationality::by(CiStr::from_str(id)).first(connection))
         {
             Ok(nationality) => Ok(nationality),
             Err(Error::NotFound) =>

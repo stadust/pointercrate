@@ -111,9 +111,15 @@ impl AsRef<CiStr> for CiStr {
     }
 }
 
+impl CiStr {
+    pub fn from_str(s: &str) -> &CiStr {
+        unsafe { &*(s as *const str as *const CiStr) }
+    }
+}
+
 impl AsRef<CiStr> for CiString {
     fn as_ref(&self) -> &CiStr {
-        unsafe { &*(self.0.as_ref() as *const str as *const CiStr) }
+        CiStr::from_str(self.0.as_ref())
     }
 }
 

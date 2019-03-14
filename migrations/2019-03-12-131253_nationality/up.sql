@@ -1,8 +1,8 @@
 -- Your SQL goes here
 
 CREATE TABLE nationalities (
-    nation TEXT PRIMARY KEY,
-    iso_country_code VARCHAR(2) UNIQUE NOT NULL,
+    iso_country_code VARCHAR(2) PRIMARY KEY,
+    nation CITEXT UNIQUE NOT NULL,
     CHECK (LENGTH(iso_country_code) = 2)
 );
 
