@@ -13,7 +13,7 @@ use derive_more::Constructor;
 #[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
 pub struct Nationality {
     pub country_code: String,
-    pub name: CiString,
+    pub nation: CiString,
 }
 
 /// The difference between 'A', as unicode codepoint (65), and '🇦', as unicode codepoint (127462)
