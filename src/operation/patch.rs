@@ -36,6 +36,7 @@ pub trait Patch<P>: Display + Sized {
     }
 }
 
+#[allow(clippy::option_option)]
 pub fn deserialize_optional<'de, T, D>(
     deserializer: D,
 ) -> std::result::Result<Option<Option<T>>, D::Error>
@@ -90,6 +91,7 @@ macro_rules! make_patch {
 
     (@$name: ident, [$(($deserialize_with: expr, $field: ident, $type: ty)),*]) => {
         #[derive(Deserialize, Debug)]
+        #[allow(clippy::option_option)]
         pub struct $name {
             $(
                 #[serde(default, deserialize_with = $deserialize_with)]

@@ -6,7 +6,7 @@
     stable_features,
     unknown_lints,
     unused_features,
-    //unused_imports,
+    unused_imports,
     unused_parens
 )]
 #![feature(proc_macro_hygiene)]
@@ -155,7 +155,7 @@ fn main() {
                 r.get().f(wrap_direct(|req| {
                     Path::<String>::extract(req)
                         .map_err(|_| PointercrateError::GenericBadRequest)  // no idea how this could happen
-                        .map(|page| page.into_inner())
+                        .map(Path::into_inner)
                         .and_then(|page| Documentation::new(req.state(), page))
                         .map(|d| d.render(req).respond_to(req).unwrap())
                 }));
