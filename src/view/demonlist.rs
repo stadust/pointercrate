@@ -678,6 +678,7 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                     }
                     div#stats-data style = "display:none" {
                         div.flex.col {
+                            h3#player-name style = "font-size:1.4em" {}
                             div.stats-container.flex.space {
                                 span {
                                     b {

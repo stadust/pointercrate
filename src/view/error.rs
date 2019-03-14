@@ -78,7 +78,7 @@ impl Page for ErrorPage<'_> {
 <style>
     @font-face {
         font-family: 'norwester';
-        src: url(/2/norwester.otf);
+        src: url(/static2/norwester.otf);
     }
 
     *:not(svg){

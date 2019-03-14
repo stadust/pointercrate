@@ -69,6 +69,7 @@ class Submitter {
 class StatsViewer {
   constructor() {
     this.domElement = $("#statsviewer");
+    this._name = this.domElement.find("#player-name");
     this._created = this.domElement.find("#created");
     this._beaten = this.domElement.find("#beaten");
     this._verified = this.domElement.find("#verified");
@@ -105,6 +106,17 @@ class StatsViewer {
         let json = data.data;
 
         console.log(json);
+
+        if (json.nationality == null) {
+            console.log("no nation :(");
+            this._name.text(json.name);
+        } else {
+            console.log("from " + json.nationality.nation);
+            let c1 = json.nationality.country_code.codePointAt(0),
+                c2 = json.nationality.country_code.codePointAt(1);
+
+            this._name.html(json.name + "&nbsp;<span title = '" + json.nationality.nation + "'>&#x" + (c1 + 127397).toString(16) + "&#x" + (c2 + 127397).toString(16) + "</span>");
+        }
 
         this._current.text(selected.find(".player-name").text());
         this._rank.text(selected.data("rank"));
