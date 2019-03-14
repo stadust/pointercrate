@@ -2,7 +2,7 @@ use super::Creator;
 use crate::{
     citext::{CiStr, CiString},
     error::PointercrateError,
-    model::{Demon, Player},
+    model::{Demon, EmbeddedPlayer},
     operation::{Get, Post, PostData},
     permissions::PermissionsSet,
     schema::creators,
@@ -32,7 +32,7 @@ impl<'a> Post<(&'a CiStr, &'a CiStr)> for Creator {
 
         connection.transaction(|| {
             let demon = Demon::get(demon, connection)?;
-            let player = Player::get(player, connection)?;
+            let player = EmbeddedPlayer::get(player, connection)?;
 
             insert_into(creators::table)
                 .values(&NewCreator {

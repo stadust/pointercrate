@@ -1,4 +1,4 @@
-use super::{All, Model, Player};
+use super::{All, EmbeddedPlayer, Model};
 use crate::{
     error::PointercrateError,
     model::demon::EmbeddedDemon,
@@ -97,7 +97,7 @@ pub struct Record {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub player: Player,
+    pub player: EmbeddedPlayer,
     pub submitter: Option<i32>,
     pub demon: EmbeddedDemon,
 }
@@ -110,7 +110,7 @@ pub struct EmbeddedRecordPD {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub demon: EmbeddedDemon,
-    pub player: Player,
+    pub player: EmbeddedPlayer,
 }
 
 #[derive(Debug, Hash, Serialize, Display)]
@@ -130,7 +130,7 @@ pub struct EmbeddedRecordP {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub player: Player,
+    pub player: EmbeddedPlayer,
 }
 
 #[derive(Insertable, Debug)]
@@ -314,7 +314,7 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
             progress: row.1,
             video: row.2,
             status: row.3,
-            player: Player {
+            player: EmbeddedPlayer {
                 id: row.4,
                 name: row.5,
                 banned: row.6,
@@ -397,7 +397,7 @@ impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, 
             progress: row.1,
             status: row.2,
             video: row.3,
-            player: Player {
+            player: EmbeddedPlayer {
                 id: row.4,
                 name: row.5,
                 banned: row.6,
@@ -507,7 +507,7 @@ impl Queryable<<<EmbeddedRecordP as Model>::Selection as Expression>::SqlType, P
             progress: row.1,
             status: row.2,
             video: row.3,
-            player: Player {
+            player: EmbeddedPlayer {
                 id: row.4,
                 name: row.5,
                 banned: row.6,

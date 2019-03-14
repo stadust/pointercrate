@@ -228,6 +228,10 @@ fn main() {
                                 r.get().f(wrap(api::player::paginate));
                                 r.route().f(allowed!(GET))
                             })
+                            .resource("/ranking/", |r| {
+                                r.get().f(wrap(api::player::ranking));
+                                r.route().f(allowed!(GET))
+                            })
                             .resource("/{player_id}/", |r| {
                                 r.get().f(wrap(api::player::get));
                                 r.method(Method::PATCH).f(wrap(api::player::patch));

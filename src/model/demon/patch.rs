@@ -1,7 +1,7 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
-    model::player::Player,
+    model::player::EmbeddedPlayer,
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     permissions::PermissionsSet,
     schema::demons,
@@ -29,7 +29,7 @@ impl Patch<PatchDemon> for Demon {
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name: &CiStr| Player::get(name, connection);
+        let map = |name: &CiStr| EmbeddedPlayer::get(name, connection);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);

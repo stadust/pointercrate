@@ -1,10 +1,9 @@
-use super::{Player, PlayerWithDemonsAndRecords};
+use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
 use crate::{
     citext::CiStr,
     error::PointercrateError,
     model::{
-        creator::created_by, demon::EmbeddedDemon, player::PlayerWithNationality, user::User, By,
-        Model,
+        creator::created_by, demon::EmbeddedDemon, player::ShortPlayer, user::User, By, Model,
     },
     operation::Get,
     permissions::{self, AccessRestrictions},
@@ -12,21 +11,22 @@ use crate::{
     Result,
 };
 use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use crate::model::player::RankedPlayer2;
 
-impl<'a> Get<&'a CiStr> for Player {
+impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
     fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
-        match Player::by(name).first(connection) {
+        match EmbeddedPlayer::by(name).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
-                Player::insert(&name, connection).map_err(PointercrateError::database),
+                EmbeddedPlayer::insert(&name, connection).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }
 
-impl Get<i32> for Player {
+impl Get<i32> for EmbeddedPlayer {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        match Player::by(id).first(connection) {
+        match EmbeddedPlayer::by(id).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -38,9 +38,9 @@ impl Get<i32> for Player {
     }
 }
 
-impl Get<i32> for PlayerWithNationality {
+impl Get<i32> for ShortPlayer {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        match PlayerWithNationality::by(id).first(connection) {
+        match ShortPlayer::by(id).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -54,10 +54,10 @@ impl Get<i32> for PlayerWithNationality {
 
 impl<T> Get<T> for PlayerWithDemonsAndRecords
 where
-    PlayerWithNationality: Get<T>,
+    ShortPlayer: Get<T>,
 {
     fn get(t: T, connection: &PgConnection) -> Result<Self> {
-        let player = PlayerWithNationality::get(t, connection)?;
+        let player = ShortPlayer::get(t, connection)?;
         let pid = player.inner.id;
 
         Ok(PlayerWithDemonsAndRecords {
@@ -75,7 +75,7 @@ where
 }
 
 // Everyone can access player objects (through the stats viewer)
-impl AccessRestrictions for PlayerWithNationality {
+impl AccessRestrictions for ShortPlayer {
     fn pre_page_access(user: Option<&User>) -> Result<()> {
         permissions::demand(
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
@@ -84,4 +84,5 @@ impl AccessRestrictions for PlayerWithNationality {
     }
 }
 impl AccessRestrictions for PlayerWithDemonsAndRecords {}
-impl AccessRestrictions for Player {}
+impl AccessRestrictions for EmbeddedPlayer {}
+impl AccessRestrictions for RankedPlayer2 {}

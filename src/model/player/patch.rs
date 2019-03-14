@@ -1,8 +1,8 @@
-use super::{Player, PlayerWithDemonsAndRecords};
+use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
 use crate::{
     citext::CiString,
     error::PointercrateError,
-    model::{nationality::Nationality, player::PlayerWithNationality, By},
+    model::{nationality::Nationality, player::ShortPlayer, By},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     permissions::PermissionsSet,
     schema::players,
@@ -20,7 +20,7 @@ make_patch! {
     }
 }
 
-impl Patch<PatchPlayer> for PlayerWithNationality {
+impl Patch<PatchPlayer> for ShortPlayer {
     fn patch(mut self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
         info!("Patching player {} with {}", self, patch);
 
@@ -33,7 +33,7 @@ impl Patch<PatchPlayer> for PlayerWithNationality {
 
             if let Some(ref name) = patch.name {
                 if *name != self.inner.name {
-                    match Player::by(name.as_ref()).first(connection) {
+                    match EmbeddedPlayer::by(name.as_ref()).first(connection) {
                         Ok(player) => self.inner.merge(player, connection)?,
                         Err(Error::NotFound) => (),
                         Err(err) => return Err(PointercrateError::database(err)),

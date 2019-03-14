@@ -3,7 +3,8 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::player::{
-        PatchPlayer, PlayerPagination, PlayerWithDemonsAndRecords, PlayerWithNationality,
+        PatchPlayer, PlayerPagination, PlayerWithDemonsAndRecords, RankedPlayer2,
+        RankingPagination, ShortPlayer,
     },
     state::PointercrateState,
 };
@@ -25,9 +26,33 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     pagination
         .into_future()
         .and_then(move |pagination: PlayerPagination| {
-            state.paginate::<Token, PlayerWithNationality, _>(
+            state.paginate::<Token, ShortPlayer, _>(
                 pagination,
                 "/api/v1/players/".to_string(),
+                auth,
+            )
+        })
+        .map(|(players, links)| HttpResponse::Ok().header("Links", links).json(players))
+        .responder()
+}
+
+/// `GET /api/v1/players/ranking` handler
+pub fn ranking(req: &HttpRequest<PointercrateState>) -> PCResponder {
+    info!("GET /api/v1/players/ranking/");
+
+    let query_string = req.query_string();
+    let pagination = serde_urlencoded::from_str(query_string)
+        .map_err(|err| PointercrateError::bad_request(&err.to_string()));
+
+    let state = req.state().clone();
+    let auth = req.extensions_mut().remove().unwrap();
+
+    pagination
+        .into_future()
+        .and_then(move |pagination: RankingPagination| {
+            state.paginate::<Token, RankedPlayer2, _>(
+                pagination,
+                "/api/v1/players/ranking/".to_string(),
                 auth,
             )
         })

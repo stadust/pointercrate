@@ -1,7 +1,7 @@
 pub use self::post::PostCreator;
 use crate::{
     citext::{CiStr, CiString, CiText},
-    model::player::Player,
+    model::player::EmbeddedPlayer,
     schema::{creators, demons, players},
 };
 use derive_more::Display;
@@ -13,7 +13,7 @@ mod get;
 mod post;
 
 #[derive(Debug, Serialize)]
-pub struct Creators(pub Vec<Player>);
+pub struct Creators(pub Vec<EmbeddedPlayer>);
 
 #[derive(Debug, Queryable, Hash, Display)]
 #[display(fmt = "creator with id {} on demon {}", creator, demon)]

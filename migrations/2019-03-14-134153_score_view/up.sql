@@ -1,28 +1,53 @@
 -- Your SQL goes here
 
+
+-- I call this query Frank
 CREATE VIEW players_with_score AS
-    SELECT players.id as id,
-           players.name as name,
-           players.banned as banned,
-           CASE WHEN t.total_score IS NULL THEN 0.0::FLOAT ELSE t.total_score END AS score,
-           players.nationality as nationality
+    SELECT players.id,
+           players.name,
+           RANK() OVER(ORDER BY scores.total_score DESC) AS rank,
+           CASE WHEN scores.total_score IS NULL THEN 0.0::FLOAT ELSE scores.total_score END AS score,
+           ROW_NUMBER() OVER(ORDER BY scores.total_score DESC) AS index,
+           nationalities.iso_country_code,
+           nationalities.nation
     FROM
     (
-        SELECT a.player, SUM(record_score(a.progress::FLOAT, a.position::FLOAT, 100::FLOAT)) as total_score
+        SELECT pseudo_records.player,
+               SUM(record_score(pseudo_records.progress::FLOAT, pseudo_records.position::FLOAT, 100::FLOAT)) as total_score
         FROM (
-            SELECT player as player, progress as progress, demons.position as position
+            SELECT player,
+                   progress,
+                   demons.position
             FROM records
             INNER JOIN demons
             ON demons.name = demon
             WHERE demons.position <= 100 AND status_ = 'APPROVED'
+
             UNION
-            SELECT verifier as player, 100 as progress, position as position
+
+            SELECT verifier as player,
+                   CASE WHEN demons.position > 100 THEN 0.0::FLOAT ELSE 100.0::FLOAT END as progress,
+                   position as position
             FROM demons
-            INNER JOIN players
-            ON players.id = verifier
-            WHERE demons.position <= 100 AND NOT players.banned
-        ) a
+
+            UNION
+
+            SELECT publisher as player,
+                   0.0::FLOAT as progress,
+                   position as position
+            FROM demons
+
+            UNION
+
+            SELECT creator as player,
+                   0.0::FLOAT as progress,
+                   1.0::FLOAT as position -- doesn't matter
+            FROM creators
+        ) AS pseudo_records
         GROUP BY player
-    ) t
-    RIGHT OUTER JOIN players
-    ON t.player = players.id;
+    ) scores
+    INNER JOIN players
+    ON scores.player = players.id
+    LEFT OUTER JOIN nationalities
+    ON players.nationality = nationalities.iso_country_code
+    WHERE NOT players.banned;

@@ -1,4 +1,7 @@
-pub use self::{paginate::PlayerPagination, patch::PatchPlayer};
+pub use self::{
+    paginate::{PlayerPagination, RankingPagination},
+    patch::PatchPlayer,
+};
 use super::Model;
 use crate::{
     citext::{CiStr, CiString, CiText},
@@ -32,42 +35,50 @@ mod patch;
 
 table! {
     use diesel::sql_types::*;
-    use crate::citext::Citext;
+    use crate::citext::CiText;
 
     players_with_score (id) {
         id -> Int4,
-        name -> Citext,
-        banned -> Bool,
-        score -> Float,
-        nationality -> Nullable<Varchar>,
+        name -> CiText,
+        rank -> Int8,
+        score -> Double,
+        index -> Int8,
+        iso_country_code -> Nullable<Varchar>,
+        nation -> Nullable<CiText>,
     }
 }
 
-joinable!(players_with_score -> nationalities (nationality));
-allow_tables_to_appear_in_same_query!(players_with_score, nationalities);
-
 #[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display)]
 #[display(fmt = "{} (ID: {})", name, id)]
-pub struct Player {
+pub struct EmbeddedPlayer {
     pub id: i32,
     pub name: CiString,
     pub banned: bool,
 }
 
-#[derive(Queryable, Debug, Hash, PartialEq, Serialize, Display)]
-#[display(fmt = "{} (ID: {})", name, id)]
-pub struct PlayerWithScore {
+#[derive(Debug, PartialEq, Serialize, Display)]
+#[display(fmt = "{} (ID: {}) at rank {} with score {}", name, id, rank, score)]
+pub struct RankedPlayer2 {
     pub id: i32,
     pub name: CiString,
-    pub banned: bool,
-    pub score: f32,
+    pub rank: i64,
+    pub score: f64,
+
+    /// This field exists solely for pagination purposes, code should never interact with it.
+    /// It is not possible to paginate reliable over the `rank` value, since it can contain
+    /// duplicates. All our other values aren't ordered. This field is simply something that
+    /// counts the rows returned from the database deterministically
+    #[serde(skip)]
+    pub index: i64,
+
+    pub nationality: Option<Nationality>,
 }
 
 #[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
 #[display(fmt = "{}", inner)]
-pub struct PlayerWithNationality {
+pub struct ShortPlayer {
     #[serde(flatten)]
-    pub inner: PlayerWithScore,
+    pub inner: EmbeddedPlayer,
 
     pub nationality: Option<Nationality>,
 }
@@ -76,7 +87,7 @@ pub struct PlayerWithNationality {
 #[display(fmt = "{}", player)]
 pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
-    pub player: PlayerWithNationality,
+    pub player: ShortPlayer,
     pub records: Vec<EmbeddedRecordD>,
     pub created: Vec<EmbeddedDemon>,
     pub verified: Vec<EmbeddedDemon>,
@@ -104,19 +115,19 @@ struct NewPlayer<'a> {
     name: &'a CiStr,
 }
 
-impl By<players_with_score::id, i32> for Player {}
-impl By<players_with_score::name, &CiStr> for Player {}
+impl By<players::id, i32> for EmbeddedPlayer {}
+impl By<players::name, &CiStr> for EmbeddedPlayer {}
 
-impl By<players_with_score::id, i32> for PlayerWithNationality {}
-impl By<players_with_score::name, &CiStr> for PlayerWithNationality {}
+impl By<players::id, i32> for ShortPlayer {}
+impl By<players::name, &CiStr> for ShortPlayer {}
 
-impl Player {
-    pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<Player> {
+impl EmbeddedPlayer {
+    pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<EmbeddedPlayer> {
         info!("Creating new player with name {}", name);
 
         insert_into(players::table)
             .values(&NewPlayer { name })
-            .returning(Player::selection())
+            .returning(EmbeddedPlayer::selection())
             .get_result(conn)
     }
 
@@ -147,7 +158,7 @@ impl Player {
         Ok(())
     }
 
-    pub fn merge(&self, with: Player, conn: &PgConnection) -> Result<()> {
+    pub fn merge(&self, with: EmbeddedPlayer, conn: &PgConnection) -> Result<()> {
         // FIXME: I had a serious headache while writing this code and didn't really think much
         // while doing so. Maybe look over it again at some point If both `self` and `with`
         // are registered as the creator of a level, delete `with` as creator
@@ -201,7 +212,7 @@ impl Player {
     }
 }
 
-impl Model for Player {
+impl Model for EmbeddedPlayer {
     type From = players::table;
     type Selection = (players::id, players::name, players::banned);
 
@@ -214,13 +225,48 @@ impl Model for Player {
     }
 }
 
-impl Model for PlayerWithScore {
+impl Model for ShortPlayer {
+    type From = JoinOn<
+        Join<players::table, nationalities::table, LeftOuter>,
+        diesel::dsl::Eq<
+            players::nationality,
+            diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
+        >,
+    >;
+    type Selection = (
+        players::id,
+        players::name,
+        players::banned,
+        diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
+        diesel::expression::nullable::Nullable<nationalities::nation>,
+    );
+
+    fn from() -> Self::From {
+        Join::new(players::table, nationalities::table, LeftOuter)
+            .on(players::nationality.eq(nationalities::iso_country_code.nullable()))
+    }
+
+    fn selection() -> Self::Selection {
+        (
+            players::id,
+            players::name,
+            players::banned,
+            nationalities::iso_country_code.nullable(),
+            nationalities::nation.nullable(),
+        )
+    }
+}
+
+impl Model for RankedPlayer2 {
     type From = players_with_score::table;
     type Selection = (
         players_with_score::id,
         players_with_score::name,
-        players_with_score::banned,
+        players_with_score::rank,
         players_with_score::score,
+        players_with_score::index,
+        players_with_score::iso_country_code,
+        players_with_score::nation,
     );
 
     fn from() -> Self::From {
@@ -232,58 +278,48 @@ impl Model for PlayerWithScore {
     }
 }
 
-impl Model for PlayerWithNationality {
-    type From = JoinOn<
-        Join<players_with_score::table, nationalities::table, LeftOuter>,
-        diesel::dsl::Eq<
-            players_with_score::nationality,
-            diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
-        >,
-    >;
-    type Selection = (
-        players_with_score::id,
-        players_with_score::name,
-        players_with_score::banned,
-        players_with_score::score,
-        diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
-        diesel::expression::nullable::Nullable<nationalities::nation>,
-    );
-
-    fn from() -> Self::From {
-        Join::new(players_with_score::table, nationalities::table, LeftOuter)
-            .on(players_with_score::nationality.eq(nationalities::iso_country_code.nullable()))
-    }
-
-    fn selection() -> Self::Selection {
-        (
-            players_with_score::id,
-            players_with_score::name,
-            players_with_score::banned,
-            players_with_score::score,
-            nationalities::iso_country_code.nullable(),
-            nationalities::nation.nullable(),
-        )
-    }
-}
-
-impl Queryable<<<PlayerWithNationality as Model>::Selection as Expression>::SqlType, Pg>
-    for PlayerWithNationality
-{
-    type Row = (i32, CiString, bool, f32, Option<String>, Option<CiString>);
+impl Queryable<<<ShortPlayer as Model>::Selection as Expression>::SqlType, Pg> for ShortPlayer {
+    type Row = (i32, CiString, bool, Option<String>, Option<CiString>);
 
     fn build(row: Self::Row) -> Self {
-        let nationality = match (row.4, row.5) {
+        let nationality = match (row.3, row.4) {
             (Some(country_code), Some(name)) => Some(Nationality::new(country_code, name)),
             _ => None,
         };
 
-        PlayerWithNationality {
-            inner: PlayerWithScore {
+        ShortPlayer {
+            inner: EmbeddedPlayer {
                 id: row.0,
                 name: row.1,
                 banned: row.2,
-                score: row.3,
             },
+            nationality,
+        }
+    }
+}
+
+impl Queryable<<<RankedPlayer2 as Model>::Selection as Expression>::SqlType, Pg> for RankedPlayer2 {
+    type Row = (
+        i32,
+        CiString,
+        i64,
+        f64,
+        i64,
+        Option<String>,
+        Option<CiString>,
+    );
+
+    fn build(row: Self::Row) -> Self {
+        let nationality = match (row.5, row.6) {
+            (Some(country_code), Some(name)) => Some(Nationality::new(country_code, name)),
+            _ => None,
+        };
+        RankedPlayer2 {
+            id: row.0,
+            name: row.1,
+            rank: row.2,
+            score: row.3,
+            index: row.4,
             nationality,
         }
     }

@@ -1,7 +1,7 @@
 use super::Model;
 use crate::{
     error::PointercrateError,
-    model::{creator::Creators, player::Player, record::EmbeddedRecordP},
+    model::{creator::Creators, player::EmbeddedPlayer, record::EmbeddedRecordP},
     operation::Get,
     schema::{demons, players},
     Result,
@@ -48,10 +48,10 @@ pub struct Demon {
     pub video: Option<String>,
 
     /// The player-ID of this [`Demon`]'s verifer
-    pub verifier: Player,
+    pub verifier: EmbeddedPlayer,
 
     /// The player-ID of this [`Demon`]'s publisher
-    pub publisher: Player,
+    pub publisher: EmbeddedPlayer,
 }
 
 /// Struct modelling a minimal representation of a [`Demon`] in the database
@@ -127,12 +127,12 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
             position: row.1,
             requirement: row.2,
             video: row.3,
-            verifier: Player {
+            verifier: EmbeddedPlayer {
                 name: row.4,
                 id: row.5,
                 banned: row.6,
             },
-            publisher: Player {
+            publisher: EmbeddedPlayer {
                 name: row.7,
                 id: row.8,
                 banned: row.9,

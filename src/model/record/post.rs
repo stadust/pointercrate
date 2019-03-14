@@ -3,7 +3,7 @@ use crate::{
     citext::CiString,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
-    model::{record::EmbeddedDemon, Demon, Player, Submitter},
+    model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
     operation::{Delete, Get, Post, PostData},
     permissions::PermissionsSet,
     video, Result,
@@ -68,7 +68,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
 
         connection.transaction(||{
             // Resolve player and demon name against the database
-            let player = Player::get(player.as_ref(), connection)?;
+            let player = EmbeddedPlayer::get(player.as_ref(), connection)?;
             let demon = Demon::get(demon.as_ref(), connection)?;
 
             // Banned player can't have records on the list

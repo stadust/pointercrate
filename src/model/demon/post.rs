@@ -1,7 +1,7 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
-    model::{creator::Creator, Player},
+    model::{creator::Creator, EmbeddedPlayer},
     operation::{Get, Post, PostData},
     permissions::PermissionsSet,
     schema::demons,
@@ -48,8 +48,8 @@ impl Post<PostDemon> for Demon {
             Demon::validate_name(&mut data.name, connection)?;
             Demon::validate_position(&mut data.position, connection)?;
 
-            let publisher = Player::get(data.publisher.as_ref(), connection)?;
-            let verifier = Player::get(data.verifier.as_ref(), connection)?;
+            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), connection)?;
+            let verifier = EmbeddedPlayer::get(data.verifier.as_ref(), connection)?;
 
             let new = NewDemon {
                 name: data.name.as_ref(),

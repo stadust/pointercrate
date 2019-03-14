@@ -4,7 +4,7 @@ use crate::{
     error::PointercrateError,
     model::{
         demon::{Demon, EmbeddedDemon},
-        player::Player,
+        player::EmbeddedPlayer,
         Model,
     },
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
@@ -53,7 +53,7 @@ impl Patch<PatchRecord> for Record {
                 position: demon.position,
             }
         };
-        let map2 = |name: &CiStr| Player::get(name, connection);
+        let map2 = |name: &CiStr| EmbeddedPlayer::get(name, connection);
 
         map_patch!(self, patch: map => demon);
         try_map_patch!(self, patch: map2 => player);
