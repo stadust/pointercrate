@@ -115,7 +115,12 @@ class StatsViewer {
             let c1 = json.nationality.country_code.codePointAt(0),
                 c2 = json.nationality.country_code.codePointAt(1);
 
-            this._name.html(json.name + "&nbsp;<span title = '" + json.nationality.nation + "'>&#x" + (c1 + 127397).toString(16) + "&#x" + (c2 + 127397).toString(16) + "</span>");
+            let flagEmoji = "&#" + (c1 + 127397).toString(10) + ";&#" + (c2 + 127397).toString(10) + ";";
+
+            this._name.html(json.name + "&nbsp;<span class = 'em em-flag-" +json.nationality.country_code.toLowerCase() + "' title = '" + json.nationality.nation + "'></span>");
+            //this._name.find("span").html(flagEmoji);
+            //this._name.find("span").html("&#x" + (c1 + 127397).toString(16) + ";&#x" + (c2 + 127397).toString(16) + ";");
+            //this._name.html(json.name + "&nbsp;<span title = '" + json.nationality.nation + "'>&#x" + (c1 + 127397).toString(16) + ";&#x" + (c2 + 127397).toString(16) + ";</span>");
         }
 
         this._current.text(selected.find(".player-name").text());

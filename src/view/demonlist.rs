@@ -144,6 +144,7 @@ impl Page for DemonlistOverview {
         vec![
             html! {
             (PreEscaped(r#"
+                <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
                 <script type="application/ld+json">
                 {{
                     "@context": "http://schema.org",
@@ -449,6 +450,7 @@ impl Page for Demonlist {
         vec![
             html! {
                 (PreEscaped(format!(r#"
+                    <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
                     <script type="application/ld+json">
                     {{
                         "@context": "http://schema.org",
