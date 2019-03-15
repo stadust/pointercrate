@@ -1,5 +1,5 @@
 use crate::{
-    citext::CiString,
+    citext::{CiString, CiText},
     error::PointercrateError,
     model::{
         player::{players_with_score, RankedPlayer2, ShortPlayer},
@@ -9,10 +9,10 @@ use crate::{
     schema::players,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    dsl::sql, pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl,
+};
 use serde_derive::{Deserialize, Serialize};
-use diesel::dsl::sql;
-use crate::citext::CiText;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PlayerPagination {
@@ -99,7 +99,23 @@ impl Paginator for RankingPagination {
     type PaginationColumn = players_with_score::index;
     type PaginationColumnType = i64;
 
-    filter_method!(players_with_score[iso_country_code = nation]);
+    fn filter<'a, ST>(
+        &'a self,
+        mut query: BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg>,
+    ) -> BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg>
+    {
+        filter!(query[players_with_score::iso_country_code = self.nation]);
+
+        if let Some(ref like_name) = self.name_contains {
+            query = query.filter(
+                sql("STRPOS(name, ")
+                    .bind::<CiText, _>(like_name)
+                    .sql(") > 0"),
+            );
+        }
+
+        query
+    }
 
     fn page(
         &self, last_on_page: Option<Self::PaginationColumnType>,
@@ -123,32 +139,6 @@ impl Paginator for RankingPagination {
     fn after(&self) -> Option<i64> {
         self.after_id
     }
-
-    fn first(&self, _: &PgConnection) -> Result<Option<Self>> {
-        Ok(Some(self.page(None, Some(1))))
-    }
-
-    fn next(&self, _: &PgConnection) -> Result<Option<Self>> {
-        if self.before_id.is_some() {
-            Ok(Some(self.page(None, self.before_id)))
-        } else if let Some(after) = self.after_id {
-            Ok(Some(self.page(None, Some(after + 51))))
-        } else {
-            Ok(Some(self.page(None, Some(51))))
-        }
-    }
-
-    fn prev(&self, _: &PgConnection) -> Result<Option<Self>> {
-        if self.after_id.is_some() {
-            Ok(Some(self.page(self.after_id, None)))
-        } else if let Some(before) = self.before_id {
-            Ok(Some(self.page(Some(before - 51), None)))
-        } else {
-            Ok(None)
-        }
-    }
-
-    // We can probably also do a more efficient implementation of .last() by doing some sort of weird COUNT , but ehhh, not needed yet
 }
 
 impl Paginate<RankingPagination> for RankedPlayer2 {
@@ -160,17 +150,6 @@ impl Paginate<RankingPagination> for RankedPlayer2 {
             players_with_score::index < pagination.before_id
         ]);
 
-        if let Some(ref like_name) = pagination.name_contains {
-            query = query.filter(sql("STRPOS(name, ").bind::<CiText,_>(like_name).sql(") > 0"));
-        }
-
-        if pagination.after_id.is_none() && pagination.before_id.is_some() {
-            query = query.filter(players_with_score::index.ge(pagination.before_id.unwrap() - 50))
-        }
-
-        query
-            .limit(50)
-            .load(connection)
-            .map_err(PointercrateError::database)
+        pagination_result!(query, pagination, players_with_score::index, connection)
     }
 }

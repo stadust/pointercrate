@@ -66,6 +66,7 @@ impl Paginate<UserPagination> for User {
 
         let mut query = pagination.filter(User::boxed_all());
 
+        // FIXME: this needs to happen in the filter method!
         if let Some(permissions) = pagination.has_permissions {
             query = query.filter(diesel::dsl::sql(&format!(
                 "permissions & {0}::Bit(16) = {0}::Bit(16)",
