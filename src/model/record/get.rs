@@ -4,7 +4,7 @@ use crate::{
     model::{demon::Demon, record::RecordStatus, submitter::Submitter, user::User, By, Model},
     operation::Get,
     permissions::{self, AccessRestrictions},
-    schema::{records, demons},
+    schema::{demons, records},
     Result,
 };
 use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
@@ -25,7 +25,11 @@ impl Get<i32> for Record {
 
 impl Get<i32> for Vec<EmbeddedRecordD> {
     fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        Ok(EmbeddedRecordD::by_player_and_status(id, RecordStatus::Approved).order_by(demons::position).load(connection)?)
+        Ok(
+            EmbeddedRecordD::by_player_and_status(id, RecordStatus::Approved)
+                .order_by(demons::name)
+                .load(connection)?,
+        )
     }
 }
 
