@@ -11,6 +11,8 @@ use crate::{
 };
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
+use diesel::dsl::sql;
+use crate::citext::CiText;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PlayerPagination {
@@ -89,6 +91,7 @@ pub struct RankingPagination {
     after_id: Option<i64>,
 
     nation: Option<String>,
+    name_contains: Option<CiString>,
 }
 
 impl Paginator for RankingPagination {
@@ -156,6 +159,10 @@ impl Paginate<RankingPagination> for RankedPlayer2 {
             players_with_score::index > pagination.after_id,
             players_with_score::index < pagination.before_id
         ]);
+
+        if let Some(ref like_name) = pagination.name_contains {
+            query = query.filter(sql("STRPOS(name, ").bind::<CiText,_>(like_name).sql(") > 0"));
+        }
 
         if pagination.after_id.is_none() && pagination.before_id.is_some() {
             query = query.filter(players_with_score::index.ge(pagination.before_id.unwrap() - 50))
