@@ -15,6 +15,8 @@ use crate::model::player::RankedPlayer2;
 
 impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
     fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
+        let name = CiStr::from_str(name.trim());
+
         match EmbeddedPlayer::by(name).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
