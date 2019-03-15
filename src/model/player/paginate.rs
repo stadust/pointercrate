@@ -144,6 +144,8 @@ impl Paginator for RankingPagination {
             Ok(None)
         }
     }
+
+    // We can probably also do a more efficient implementation of .last() by doing some sort of weird COUNT , but ehhh, not needed yet
 }
 
 impl Paginate<RankingPagination> for RankedPlayer2 {

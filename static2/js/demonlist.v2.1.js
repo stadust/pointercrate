@@ -167,7 +167,7 @@ class StatsViewer {
     var non100Records = records
       .filter(record => record.progress != 100)
       .sort((r1, r2) => r1.progress - r2.progress)
-      .map(record => formatDemon(record.demon) + " (" + record.progress + "%)")
+      .map(record => formatRecord(record) + " (" + record.progress + "%)")
       .join(", ");
 
     this._progress.html(non100Records || "None");
