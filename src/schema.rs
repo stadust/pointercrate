@@ -36,7 +36,7 @@ table! {
         member_id -> Int4,
         name -> Text,
         password_hash -> Text,
-        permissions -> Bit,
+        permissions -> BitString,
         display_name -> Nullable<Text>,
         youtube_channel -> Nullable<Varchar>,
         nationality -> Nullable<Varchar>,
