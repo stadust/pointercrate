@@ -6,7 +6,6 @@ use crate::{
     error::PointercrateError,
     model::{
         demon::{self, Demon, DemonWithCreatorsAndRecords, PartialDemon},
-        player::RankedPlayer,
         user::User,
     },
     state::PointercrateState,
@@ -55,7 +54,6 @@ pub struct DemonlistOverview {
     pub admins: Vec<User>,
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
-    pub ranking: Vec<RankedPlayer>,
 }
 
 pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -93,7 +91,7 @@ impl Page for DemonlistOverview {
             div.flex.m-center.container {
                 div.left {
                     (submission_panel())
-                    (stats_viewer(&self.ranking))
+                    (stats_viewer())
                     @for demon in &self.demon_overview {
                         @if demon.position <= *EXTENDED_LIST_SIZE {
                             div.panel.fade {
@@ -264,7 +262,7 @@ impl Page for Demonlist {
             div.flex.m-center.container {
                 div.left {
                     (submission_panel())
-                    (stats_viewer(&self.overview.ranking))
+                    (stats_viewer())
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 style = "overflow: hidden"{
@@ -649,7 +647,7 @@ fn submission_panel() -> Markup {
     }
 }
 
-fn stats_viewer(players: &[RankedPlayer]) -> Markup {
+fn stats_viewer() -> Markup {
     html! {
         div.panel.fade.closable#statsviewer style = "display:none" {
             span.plus.cross.hover {}

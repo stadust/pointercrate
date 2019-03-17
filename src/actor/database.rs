@@ -1,5 +1,4 @@
 use crate::{
-    config::EXTENDED_LIST_SIZE,
     error::PointercrateError,
     middleware::{
         auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
@@ -125,18 +124,11 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
             .order_by(crate::schema::demons::position)
             .load(connection)?;
 
-        let ranking = diesel::sql_query(format!(
-            include_str!("../../sql/ranking.sql"),
-            *EXTENDED_LIST_SIZE
-        ))
-        .load(connection)?;
-
         Ok(DemonlistOverview {
             demon_overview: all_demons,
             admins,
             mods,
             helpers,
-            ranking,
         })
     }
 }

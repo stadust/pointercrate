@@ -4,7 +4,7 @@ pub use self::{
 };
 use super::Model;
 use crate::{
-    citext::{CiStr, CiString, CiText},
+    citext::{CiStr, CiString},
     model::{
         demon::EmbeddedDemon,
         nationality::Nationality,
@@ -21,7 +21,6 @@ use diesel::{
     insert_into,
     pg::Pg,
     query_source::joins::{Join, JoinOn, LeftOuter},
-    sql_types::{BigInt, Double, Integer},
     ExpressionMethods, NullableExpressionMethods, PgConnection, QueryResult, Queryable,
     RunQueryDsl,
 };
@@ -92,21 +91,6 @@ pub struct PlayerWithDemonsAndRecords {
     pub created: Vec<EmbeddedDemon>,
     pub verified: Vec<EmbeddedDemon>,
     pub published: Vec<EmbeddedDemon>,
-}
-
-#[derive(Debug, QueryableByName)]
-pub struct RankedPlayer {
-    #[sql_type = "Integer"]
-    pub id: i32,
-
-    #[sql_type = "CiText"]
-    pub name: CiString,
-
-    #[sql_type = "BigInt"]
-    pub rank: i64,
-
-    #[sql_type = "Double"]
-    pub score: f64,
 }
 
 #[derive(Insertable, Debug)]
