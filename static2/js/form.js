@@ -218,6 +218,7 @@ class Paginator {
 
   handleResponse(data) {
     this.links = parsePagination(data.getResponseHeader("Links"));
+    this.list.scrollTop = 0;
 
     // Clear the current list.
     // list.innerHtml = '' is horrible and should never be used. It causes memory leaks and is terribly slow
