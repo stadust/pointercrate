@@ -84,7 +84,85 @@ class StatsViewer {
     this._progress = this.domElement.find("#progress");
     this._content = this.domElement.find("#stats-data");
 
-    $("#players li").click(e => this.updateView(e));
+    this.paginator = undefined;
+
+    var generatePlayer = player => {
+      var li = document.createElement("li");
+      var b = document.createElement("b");
+      var i = document.createElement("i");
+
+      li.className = "white hover";
+      li.dataset.id = player.id;
+      li.dataset.rank = player.rank;
+
+      b.appendChild(document.createTextNode("#" + player.rank + " "));
+      i.appendChild(document.createTextNode(player.score.toFixed(2)));
+
+      if (player.nationality) {
+        var span = document.createElement("span");
+
+        span.className =
+          "em em-flag-" + player.nationality.country_code.toLowerCase();
+
+        li.appendChild(span);
+        li.appendChild(document.createTextNode(" "));
+      }
+
+      li.appendChild(b);
+      li.appendChild(document.createTextNode(player.name));
+      li.appendChild(i);
+
+      li.addEventListener("click", e => this.updateView(e));
+
+      return li;
+    };
+
+    var filterInput = document.getElementById("pagination-filter");
+    var pagination = document.getElementById("stats-viewer-pagination");
+
+    var setPaginator = () => {
+      if (this.paginator) {
+        this.paginator.stop();
+      }
+
+      if (filterInput.value) {
+        this.paginator = new Paginator(
+          pagination,
+          "/players/ranking/",
+          { name_contains: filterInput.value },
+          generatePlayer
+        );
+      } else {
+        this.paginator = new Paginator(
+          pagination,
+          "/players/ranking/",
+          {},
+          generatePlayer
+        );
+      }
+    };
+
+    document
+      .getElementById("show-stats-viewer")
+      .addEventListener("click", () => setPaginator());
+
+    filterInput.addEventListener("keypress", event => {
+      if (event.keyCode == 13) {
+        setPaginator();
+      }
+    });
+
+    filterInput.addEventListener("change", () => setPaginator());
+
+    var timeout = undefined;
+
+    filterInput.addEventListener("input", () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
+      timeout = setTimeout(() => setPaginator(), 1000);
+    });
   }
 
   updateView(event) {
@@ -108,10 +186,17 @@ class StatsViewer {
         console.log(json);
 
         if (json.nationality == null) {
-            console.log("no nation :(");
-            this._name.text(json.name);
+          console.log("no nation :(");
+          this._name.text(json.name);
         } else {
-            this._name.html(json.name + "&nbsp;<span class = 'em em-flag-" +json.nationality.country_code.toLowerCase() + "' title = '" + json.nationality.nation + "'></span>");
+          this._name.html(
+            json.name +
+              "&nbsp;<span class = 'em em-flag-" +
+              json.nationality.country_code.toLowerCase() +
+              "' title = '" +
+              json.nationality.nation +
+              "'></span>"
+          );
         }
 
         this._current.text(selected.find(".player-name").text());
@@ -136,9 +221,8 @@ class StatsViewer {
     this._published.html(formatDemons(published) || "None");
     this._verified.html(formatDemons(verified) || "None");
 
-    let beaten = records
-      .filter(record => record.progress == 100);
-      //.map(record => record.demon);
+    let beaten = records.filter(record => record.progress == 100);
+    //.map(record => record.demon);
 
     let legacy = beaten.filter(
       record => record.demon.position > window.extended_list_length
@@ -248,8 +332,13 @@ function formatRecords(records) {
 }
 
 function formatRecord(record) {
-  let link = '<a target=blank href = "' + record.video + '">'+record.demon.name + '</a>'
-  let demon = record.demon
+  let link =
+    '<a target=blank href = "' +
+    record.video +
+    '">' +
+    record.demon.name +
+    "</a>";
+  let demon = record.demon;
 
   if (demon.position <= window.list_length) {
     return "<b>" + link + "</b>";

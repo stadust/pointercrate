@@ -198,7 +198,12 @@ class Paginator {
     this.list = htmlContainer.getElementsByClassName("selection-list")[0];
     this.errorOutput = htmlContainer.getElementsByClassName("output")[0];
 
-    htmlContainer.style.display = "block";
+    this.nextHandler = this.onNextClick.bind(this);
+    this.prevHandler = this.onPreviousClick.bind(this);
+
+    if (htmlContainer.style.display === "none") {
+      htmlContainer.style.display = "block";
+    }
 
     makeRequest(
       "GET",
@@ -207,8 +212,8 @@ class Paginator {
       this.handleResponse.bind(this)
     );
 
-    this.next.addEventListener("click", this.onNextClick.bind(this), false);
-    this.prev.addEventListener("click", this.onPreviousClick.bind(this), false);
+    this.next.addEventListener("click", this.nextHandler, false);
+    this.prev.addEventListener("click", this.prevHandler, false);
   }
 
   handleResponse(data) {
@@ -248,12 +253,8 @@ class Paginator {
   }
 
   stop() {
-    this.next.removeEventListener("click", this.onNextClick.bind(this), false);
-    this.prev.removeEventListener(
-      "click",
-      this.onPreviousClick.bind(this),
-      false
-    );
+    this.next.removeEventListener("click", this.nextHandler, false);
+    this.prev.removeEventListener("click", this.prevHandler, false);
   }
 }
 

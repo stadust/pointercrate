@@ -105,7 +105,7 @@ tr:nth-child(even) {
 /* Stats viewer styles */
 
 @media (min-width: 768px) {
-  #player-selection {
+  #stats-viewer-pagination {
     max-width: 40%;
   }
 }

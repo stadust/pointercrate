@@ -657,21 +657,17 @@ fn stats_viewer(players: &[RankedPlayer]) -> Markup {
                 "Stats Viewer"
             }
             div.flex#stats-viewer-cont {
-                div.flex#player-selection style="flex-direction: column"{
-                    div.search.seperated style="flex-grow:0" {
-                        input placeholder = "Filter..." type = "text" style = "height: 1em";
+                div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column"{
+                    div.search.seperated style = "margin-bottom: 0px"{
+                        input#pagination-filter placeholder = "Enter to search..." type = "text" style = "height: 1em";
                     }
-                    div style="position:relative; margin: 0px 10px 10px; min-height: 400px" {
-                        ul.selection-list#players style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {
-                            @for player in players {
-                                li.white.hover data-id = (player.id) data-rank = (player.rank) {
-                                    (player.name)
-                                    i {
-                                        (format!("{:.2}", player.score))
-                                    }
-                                }
-                            }
-                        }
+                    p.info-red.output style = "margin: 0px 10px"{}
+                    div style="position:relative; margin: 0px 10px; min-height: 400px; flex-grow:1" {
+                        ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
+                    }
+                    div.flex style = "font-variant: small-caps; font-weight: bolder"{
+                        div.button.small.prev { "Previous" }
+                        div.button.small.next {"Next"}
                     }
                 }
                 div {
@@ -929,7 +925,7 @@ fn stats_viewer_panel() -> Markup {
             p {
                 "Get a detailed overview of who completed the most, created the most demons or beat the hardest demons! There is even a leaderboard to compare yourself to the very best!"
             }
-            a.blue.hover.button.slightly-rounded.js-scroll data-destination = "statsviewer" data-reveal = "true" {
+            a.blue.hover.button.slightly-rounded.js-scroll#show-stats-viewer data-destination = "statsviewer" data-reveal = "true" {
                 "Open the stats viewer!"
             }
         }

@@ -80,7 +80,6 @@ class Search {
   }
 
   updateResults(searchString) {
-    // TODO: wait a bit here
     var queries = searchString.split(";");
     this.container.find("ul").each((i, l) => $(l).hide());
 
@@ -108,7 +107,7 @@ class Search {
 
         if (xOff > this.input.width()) {
           this.input.val("");
-          this.input.change();
+          this.input[0].dispatchEvent(new Event("change"));
         }
       }
     });
