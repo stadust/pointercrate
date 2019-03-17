@@ -187,6 +187,76 @@ class Form {
   }
 }
 
+class Paginator {
+  constructor(htmlContainer, endpoint, queryData, itemConstructor) {
+    this.next = htmlContainer.getElementsByClassName("next")[0];
+    this.prev = htmlContainer.getElementsByClassName("prev")[0];
+
+    this.links = undefined;
+    this.itemConstructor = itemConstructor;
+
+    this.list = htmlContainer.getElementsByClassName("selection-list")[0];
+    this.errorOutput = htmlContainer.getElementsByClassName("output")[0];
+
+    htmlContainer.style.display = "block";
+
+    makeRequest(
+      "GET",
+      endpoint + "?" + $.param(queryData),
+      this.errorOutput,
+      this.handleResponse.bind(this)
+    );
+
+    this.next.addEventListener("click", this.onNextClick.bind(this), false);
+    this.prev.addEventListener("click", this.onPreviousClick.bind(this), false);
+  }
+
+  handleResponse(data) {
+    this.links = parsePagination(data.getResponseHeader("Links"));
+
+    // Clear the current list.
+    // list.innerHtml = '' is horrible and should never be used. It causes memory leaks and is terribly slow
+    while (this.list.lastChild) {
+      this.list.removeChild(this.list.lastChild);
+    }
+
+    for (var user of data.responseJSON) {
+      this.list.appendChild(this.itemConstructor(user));
+    }
+  }
+
+  onPreviousClick() {
+    if (this.links.prev) {
+      makeRequest(
+        "GET",
+        this.links.prev,
+        this.errorOutput,
+        this.handleResponse.bind(this)
+      );
+    }
+  }
+
+  onNextClick() {
+    if (this.links.next) {
+      makeRequest(
+        "GET",
+        this.links.next,
+        this.errorOutput,
+        this.handleResponse.bind(this)
+      );
+    }
+  }
+
+  stop() {
+    this.next.removeEventListener("click", this.onNextClick.bind(this), false);
+    this.prev.removeEventListener(
+      "click",
+      this.onPreviousClick.bind(this),
+      false
+    );
+  }
+}
+
 function badInput(input) {
   return !input.validity.badInput;
 }
@@ -221,4 +291,62 @@ function typeMismatch(input) {
 
 function valueMissing(input) {
   return !input.validity.valueMissing;
+}
+
+function parsePagination(linkHeader) {
+  var links = {};
+  if (linkHeader) {
+    for (var link of linkHeader.split(",")) {
+      var s = link.split(";");
+
+      links[s[1].substring(5)] = s[0].substring(8, s[0].length - 1);
+    }
+  }
+  return links;
+}
+
+function makeRequest(
+  method,
+  endpoint,
+  errorOutput,
+  onSuccess,
+  errorCodes = {},
+  headers = {},
+  data = {}
+) {
+  errorOutput.style.display = "";
+
+  headers["Accept"] = "application/json";
+
+  $.ajax({
+    method: method,
+    url: "/api/v1" + endpoint,
+    contentType: "application/json",
+    data: JSON.stringify(data),
+    headers: headers,
+    error: function(data, code, errorThrown) {
+      if (!data.responseJSON) {
+        errorOutput.innerHTML =
+          "Server unexpectedly returned " + code + " (" + errorThrown + ")";
+        errorOutput.style.display = "block";
+      } else {
+        var error = data.responseJSON;
+
+        if (error.code in errorCodes) {
+          errorCodes[error.code](error.message, error.data);
+        } else {
+          console.warn(
+            "The server returned an error of code " +
+              error.code +
+              ", which this form is not setup to handle correctly. Handling as generic error"
+          );
+          errorOutput.innerHTML = error.message;
+          errorOutput.style.display = "block";
+        }
+      }
+    },
+    success: function(crap, crap2, data) {
+      onSuccess(data);
+    }
+  });
 }

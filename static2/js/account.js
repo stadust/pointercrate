@@ -144,8 +144,6 @@ function setupInvalidateToken() {
   });
 }
 
-function setupEditUser() {}
-
 $(document).ready(function() {
   var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
   var csrfToken = csrfTokenSpan.innerHTML;
@@ -305,124 +303,35 @@ $(document).ready(function() {
   });
 
   var loadUsersButton = document.getElementById("load-users");
-  var loadUsersError = document.getElementById("load-users-error");
-  var userList = document.getElementById("user-list");
-  var nextUserButton = document.getElementById("next-user");
-  var prevUserButton = document.getElementById("prev-user");
 
-  function populateUserlist(data) {
+  loadUsersButton.addEventListener("click", () => {
     loadUsersButton.style.display = "none";
 
-    window.userPagination = parsePagination(data.getResponseHeader("Links"));
-    var userString = "";
+    new Paginator(
+      document.getElementById("user-pagination"),
+      "/users/",
+      { limit: 5 },
+      user => {
+        var li = document.createElement("li");
+        var b = document.createElement("b");
+        var i = document.createElement("i");
 
-    for (let user of data.responseJSON) {
-      userString +=
-        "<li data-uid=" +
-        user.id +
-        "><b>" +
-        user.name +
-        "</b> (ID: " +
-        user.id +
-        ")<br><i>Display name: " +
-        (user.display_name || "None") +
-        "</i>";
-    }
+        b.appendChild(document.createTextNode(user.name));
+        i.appendChild(
+          document.createTextNode(
+            "Display name: " + (user.display_name || "None")
+          )
+        );
 
-    userList.innerHTML = userString;
+        li.appendChild(b);
+        li.appendChild(document.createTextNode(" (ID: " + user.id + ")"));
+        li.appendChild(document.createElement("br"));
+        li.appendChild(i);
 
-    for (let li of userList.getElementsByTagName("li")) {
-      li.addEventListener(
-        "click",
-        () => requestUserForEdit(li.dataset.uid),
-        false
-      );
-    }
+        li.addEventListener("click", () => requestUserForEdit(user.id), false);
 
-    document.getElementById("hidden-user-list").style.display = "block";
-  }
-
-  loadUsersButton.addEventListener("click", () =>
-    makeRequest("GET", "/users/?limit=5", loadUsersError, populateUserlist)
-  );
-
-  nextUserButton.addEventListener("click", () => {
-    if (window.userPagination.next) {
-      makeRequest(
-        "GET",
-        window.userPagination.next,
-        loadUsersError,
-        populateUserlist
-      );
-    }
-  });
-
-  prevUserButton.addEventListener("click", () => {
-    if (window.userPagination.prev) {
-      makeRequest(
-        "GET",
-        window.userPagination.prev,
-        loadUsersError,
-        populateUserlist
-      );
-    }
+        return li;
+      }
+    );
   });
 });
-
-function parsePagination(linkHeader) {
-  var links = {};
-  if (linkHeader) {
-    for (var link of linkHeader.split(",")) {
-      var s = link.split(";");
-
-      links[s[1].substring(5)] = s[0].substring(8, s[0].length - 1);
-    }
-  }
-  return links;
-}
-
-function makeRequest(
-  method,
-  endpoint,
-  errorOutput,
-  onSuccess,
-  errorCodes = {},
-  headers = {},
-  data = {}
-) {
-  errorOutput.style.display = "";
-
-  headers["Accept"] = "application/json";
-
-  $.ajax({
-    method: method,
-    url: "/api/v1" + endpoint,
-    contentType: "application/json",
-    data: JSON.stringify(data),
-    headers: headers,
-    error: function(data, code, errorThrown) {
-      if (!data.responseJSON) {
-        errorOutput.innerHTML =
-          "Server unexpectedly returned " + code + " (" + errorThrown + ")";
-        errorOutput.style.display = "block";
-      } else {
-        var error = data.responseJSON;
-
-        if (error.code in errorCodes) {
-          errorCodes[error.code](error.message, error.data);
-        } else {
-          console.warn(
-            "The server returned an error of code " +
-              error.code +
-              ", which this form is not setup to handle correctly. Handling as generic error"
-          );
-          errorOutput.innerHTML = error.message;
-          errorOutput.style.display = "block";
-        }
-      }
-    },
-    success: function(crap, crap2, data) {
-      onSuccess(data);
-    }
-  });
-}

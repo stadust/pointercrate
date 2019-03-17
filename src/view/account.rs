@@ -186,12 +186,12 @@ impl AccountPage {
                         p {
                             "A list of all user accounts on pointercrate"
                         }
-                        p.info-red.output#load-users-error {}
-                        div#hidden-user-list  style="display:none"{
+                        div#user-pagination style="display:none"{
+                            p.info-red.output#load-users-error {}
                             ul.selection-list#user-list {}
                             div.flex {
-                                div.button.blue.hover.slightly-round#prev-user style="margin-right: 20px" { "Previous"}
-                                div.button.blue.hover.slightly-round#next-user {"Next"} // clap clap
+                                div.button.blue.hover.slightly-round.prev style="margin-right: 20px" { "Previous"}
+                                div.button.blue.hover.slightly-round.next {"Next"} // *clap* next *clap* user
                             }
                         }
                         a.blue.hover.button.slightly-round#load-users {
