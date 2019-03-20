@@ -287,7 +287,7 @@ CREATE FUNCTION audit_submitter_modification() RETURNS trigger as $submitter_mod
             banned_change = OLD.banned;
         END IF;
 
-        INSERT INTO submitter_modifications (userid, id, banned)
+        INSERT INTO submitter_modifications (userid, submitter, banned)
         (SELECT id, NEW.id, banned_change FROM active_user LIMIT 1);
 
         RETURN NEW;
