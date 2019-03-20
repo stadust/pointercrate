@@ -67,6 +67,37 @@ class Submitter {
 }
 
 class StatsViewer {
+  generatePlayer(player) {
+    var li = document.createElement("li");
+    var b = document.createElement("b");
+    var i = document.createElement("i");
+
+    li.className = "white hover";
+    li.dataset.id = player.id;
+    li.dataset.rank = player.rank;
+
+    b.appendChild(document.createTextNode("#" + player.rank + " "));
+    i.appendChild(document.createTextNode(player.score.toFixed(2)));
+
+    if (player.nationality) {
+      var span = document.createElement("span");
+
+      span.className =
+        "em em-flag-" + player.nationality.country_code.toLowerCase();
+
+      li.appendChild(span);
+      li.appendChild(document.createTextNode(" "));
+    }
+
+    li.appendChild(b);
+    li.appendChild(document.createTextNode(player.name));
+    li.appendChild(i);
+
+    li.addEventListener("click", e => this.updateView(e));
+
+    return li;
+  }
+
   constructor() {
     this.domElement = $("#statsviewer");
     this._name = this.domElement.find("#player-name");
@@ -86,37 +117,6 @@ class StatsViewer {
 
     this.paginator = undefined;
 
-    var generatePlayer = player => {
-      var li = document.createElement("li");
-      var b = document.createElement("b");
-      var i = document.createElement("i");
-
-      li.className = "white hover";
-      li.dataset.id = player.id;
-      li.dataset.rank = player.rank;
-
-      b.appendChild(document.createTextNode("#" + player.rank + " "));
-      i.appendChild(document.createTextNode(player.score.toFixed(2)));
-
-      if (player.nationality) {
-        var span = document.createElement("span");
-
-        span.className =
-          "em em-flag-" + player.nationality.country_code.toLowerCase();
-
-        li.appendChild(span);
-        li.appendChild(document.createTextNode(" "));
-      }
-
-      li.appendChild(b);
-      li.appendChild(document.createTextNode(player.name));
-      li.appendChild(i);
-
-      li.addEventListener("click", e => this.updateView(e));
-
-      return li;
-    };
-
     var filterInput = document.getElementById("pagination-filter");
     var pagination = document.getElementById("stats-viewer-pagination");
 
@@ -130,14 +130,14 @@ class StatsViewer {
           pagination,
           "/players/ranking/",
           { name_contains: filterInput.value },
-          generatePlayer
+          this.generatePlayer.bind(this)
         );
       } else {
         this.paginator = new Paginator(
           pagination,
           "/players/ranking/",
           {},
-          generatePlayer
+          this.generatePlayer.bind(this)
         );
       }
     };
