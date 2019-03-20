@@ -353,7 +353,7 @@ impl Demon {
 
             diesel::update(demons::table)
                 .filter(demons::position.ge(to))
-                .filter(demons::position.gt(self.position))
+                .filter(demons::position.lt(self.position))
                 .set(demons::position.eq(demons::position + 1))
                 .execute(connection)?;
         }
