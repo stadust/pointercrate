@@ -154,7 +154,6 @@ class StatsViewer {
     this._verified.html(formatDemons(verified) || "None");
 
     let beaten = records.filter(record => record.progress == 100);
-    //.map(record => record.demon);
 
     let legacy = beaten.filter(
       record => record.demon.position > window.extended_list_length
@@ -242,14 +241,12 @@ $(document).ready(function() {
         progress: parseInt(progress.value)
       }),
       error: data => {
-        errorOutput.text(data.responseJSON.message);
-        errorOutput.slideDown(100);
-      },
-      statusCode: {
-        204: () => (this.output = "This record can be submitted!"),
-        429: () =>
-          (this.output =
-            "You are submitting too many records too fast! Try again later")
+        if (data.status == 429) {
+            this.output = "You are submitting too many records too fast! Try again later"
+        } else {
+            errorOutput.text(data.responseJSON.message);
+            errorOutput.slideDown(100);
+        }
       },
       success: () => {
         successOutput.text("Record successfully submitted");
