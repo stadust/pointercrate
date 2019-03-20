@@ -1,71 +1,3 @@
-class Submitter {
-  constructor() {
-    this.domElement = $("#submitter");
-    this.form = this.domElement.find("#submission-form");
-    this._output = this.domElement.find("#submission-output");
-
-    this._demon = this.domElement.find("#id_demon");
-    this._player = this.domElement.find("#id_player");
-    this._video = this.domElement.find("#id_video");
-    this._progress = this.domElement.find("#id_progress");
-  }
-
-  show() {
-    this.form[0].reset();
-    this._output.hide();
-
-    Dialog.showById("submission-dialog");
-  }
-
-  submit() {
-    this._output.slideUp(100);
-
-    $.ajax({
-      method: "POST",
-      url: "/api/v1/records/",
-      contentType: "application/json",
-      dataType: "json",
-      data: JSON.stringify({
-        demon: this.demon,
-        player: this.player,
-        video: this.video,
-        progress: this.progress
-      }),
-      statusCode: {
-        204: () => (this.output = "This record can be submitted!"),
-        429: () =>
-          (this.output =
-            "You are submitting too many records too fast! Try again later")
-      },
-      error: data => (this.output = data.responseJSON.message),
-      success: () => (this.output = "Record successfully submitted")
-    });
-
-    return false;
-  }
-
-  get demon() {
-    return this._demon.val();
-  }
-
-  get player() {
-    return this._player.val();
-  }
-
-  get video() {
-    return this._video.val();
-  }
-
-  get progress() {
-    return parseInt(this._progress.val());
-  }
-
-  set output(data) {
-    this._output.text(data);
-    this._output.slideDown(100);
-  }
-}
-
 class StatsViewer {
   generatePlayer(player) {
     var li = document.createElement("li");
@@ -260,7 +192,6 @@ class StatsViewer {
 
 $(document).ready(function() {
   window.statsViewer = new StatsViewer();
-  //window.submitter = new Submitter();
 
   var submissionForm = new Form(document.getElementById("submission-form"));
 
@@ -313,6 +244,12 @@ $(document).ready(function() {
       error: data => {
         errorOutput.text(data.responseJSON.message);
         errorOutput.slideDown(100);
+      },
+      statusCode: {
+        204: () => (this.output = "This record can be submitted!"),
+        429: () =>
+          (this.output =
+            "You are submitting too many records too fast! Try again later")
       },
       success: () => {
         successOutput.text("Record successfully submitted");
