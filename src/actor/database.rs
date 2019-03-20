@@ -4,7 +4,7 @@ use crate::{
         auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
         cond::IfMatch,
     },
-    model::{demon::PartialDemon, user::PatchMe, Model, User},
+    model::{demon::PartialDemon, nationality::Nationality, user::PatchMe, Model, User},
     operation::{Delete, Get, Paginate, Paginator, Patch, Post, PostData},
     permissions::{self, AccessRestrictions, Permissions},
     view::demonlist::DemonlistOverview,
@@ -123,12 +123,16 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
         let all_demons = PartialDemon::all()
             .order_by(crate::schema::demons::position)
             .load(connection)?;
+        let nations = Nationality::all()
+            .order_by(crate::schema::nationalities::iso_country_code)
+            .load(connection)?;
 
         Ok(DemonlistOverview {
             demon_overview: all_demons,
             admins,
             mods,
             helpers,
+            nations,
         })
     }
 }

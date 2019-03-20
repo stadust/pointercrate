@@ -351,6 +351,59 @@ form input[type="password"]:invalid {
   border-right: 1px solid #888;
 }
 
+/* Dropdown selection menu thingy styles */
+
+.dropdown-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu .menu {
+  position: absolute;
+
+  opacity: 0;
+  transition: all 0.3s;
+
+  width: calc(100% - 22px);
+  max-height: 400px;
+  overflow-y: scroll;
+
+  background:white;
+
+  border: 1px solid #Bbb;
+
+  margin-left: 10px;
+  margin-right: 10px;
+
+  z-index: 10000;
+
+  box-shadow: 0px 8px 10px #ccc, -10px 8px 15px #ccc, 10px 8px 15px #ccc;
+}
+
+.dropdown-menu > input[type="text"] {
+  border: none;
+  border-bottom: 1px dotted #555;
+  max-width: 250px;
+  font-size: 1.0em;
+}
+
+.dropdown-menu > input:focus {
+  border: 1px solid #Bbb;
+  border-bottom: none;
+  box-shadow: 0px 0px 10px 5px #ccc;
+}
+
+.dropdown-menu input:focus + .menu {
+  opacity: 0.95;
+  border-top: none;
+}
+
+.dropdown-menu .menu ul li {
+  padding: 3px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
 /* DropDown styles */
 .dropdown {
   z-index: 10;

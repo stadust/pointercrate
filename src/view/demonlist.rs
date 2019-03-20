@@ -19,6 +19,7 @@ use gdcf_model::{
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
+use crate::model::nationality::Nationality;
 
 struct ListSection {
     name: &'static str,
@@ -54,6 +55,7 @@ pub struct DemonlistOverview {
     pub admins: Vec<User>,
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
+    pub nations: Vec<Nationality>
 }
 
 pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -91,7 +93,7 @@ impl Page for DemonlistOverview {
             div.flex.m-center.container {
                 div.left {
                     (submission_panel())
-                    (stats_viewer())
+                    (stats_viewer(&self.nations))
                     @for demon in &self.demon_overview {
                         @if demon.position <= *EXTENDED_LIST_SIZE {
                             div.panel.fade {
@@ -262,7 +264,7 @@ impl Page for Demonlist {
             div.flex.m-center.container {
                 div.left {
                     (submission_panel())
-                    (stats_viewer())
+                    (stats_viewer(&self.overview.nations))
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 style = "overflow: hidden"{
@@ -647,12 +649,28 @@ fn submission_panel() -> Markup {
     }
 }
 
-fn stats_viewer() -> Markup {
+fn stats_viewer(nations: &[Nationality]) -> Markup {
     html! {
         div.panel.fade.closable#statsviewer style = "display:none" {
             span.plus.cross.hover {}
             h2.underlined.pad {
                 "Stats Viewer"
+                div.dropdown-menu {
+                    input#nation-filter type="text" value = "International" style = "color: #444446; font-weight: bold;";
+                    div.menu style = "font-size: 0.55em; font-weight: normal"{
+                        ul#nation-list {
+                            @for nation in nations {
+                                li.white.hover {
+                                    span class = {"em em-flag-" (nation.country_code.to_lowercase())} {}
+                                    (PreEscaped("&nbsp;"))
+                                    b {(nation.country_code)}
+                                    br;
+                                    span style = "font-size: 90%; font-style: italic" {(nation.nation)}
+                                }
+                            }
+                        }
+                    }
+                }
             }
             div.flex#stats-viewer-cont {
                 div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column"{
