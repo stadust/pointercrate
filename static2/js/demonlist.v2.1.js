@@ -242,11 +242,11 @@ $(document).ready(function() {
       }),
       error: data => {
         if (data.status == 429) {
-            this.output = "You are submitting too many records too fast! Try again later"
+            errorOutput.text("You are submitting too many records too fast! Try again later");
         } else {
             errorOutput.text(data.responseJSON.message);
-            errorOutput.slideDown(100);
         }
+        errorOutput.slideDown(100);
       },
       success: () => {
         successOutput.text("Record successfully submitted");
