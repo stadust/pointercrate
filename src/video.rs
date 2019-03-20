@@ -75,7 +75,10 @@ pub fn validate(url: &str) -> Result<String> {
                         url.query_pairs()
                             .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
                     {
-                        return Ok(format!("https://www.youtube.com/watch?v={}", video_id))
+                        return Ok(format!(
+                            "https://www.youtube.com/watch?v={}",
+                            video_id.chars().take(11).collect::<String>()
+                        ))
                     }
                 }
 
@@ -86,7 +89,11 @@ pub fn validate(url: &str) -> Result<String> {
             "youtu.be" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
-                        [video_id] => Ok(format!("https://www.youtube.com/watch?v={}", video_id)),
+                        [video_id] =>
+                            Ok(format!(
+                                "https://www.youtube.com/watch?v={}",
+                                video_id.chars().take(11).collect::<String>()
+                            )),
                         _ =>
                             Err(PointercrateError::InvalidUrlFormat {
                                 expected: YOUTUBE_FORMAT,
