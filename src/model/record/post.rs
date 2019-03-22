@@ -57,7 +57,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
 
         // Banned submitters cannot submit records
         if submitter.banned {
-            return Err(PointercrateError::BannedFromSubmissions)?
+            return Err(PointercrateError::BannedFromSubmissions(submitter.id))?
         }
 
         // Check if a video exists and validate it

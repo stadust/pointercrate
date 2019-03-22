@@ -94,8 +94,9 @@ pub enum PointercrateError {
     /// records tries to submit a record
     ///
     /// Error Code `40304`
-    #[fail(display = "You are banned from submitting records to the demonlist!")]
-    BannedFromSubmissions,
+    //#[fail(display = "You are banned from submitting records to the demonlist!")]
+    #[fail(display = "Submitters are currently only allowed on a case-by-case basis. Please ask a list mod to approve the following ID: {}", _0)]
+    BannedFromSubmissions(i32),
 
     /// `404 NOT FOUND`
     ///
@@ -402,7 +403,7 @@ impl PointercrateError {
             PointercrateError::MissingPermissions { .. } => 40301,
             PointercrateError::DeleteSelf => 40302,
             PointercrateError::PatchSelf => 40303,
-            PointercrateError::BannedFromSubmissions => 40304,
+            PointercrateError::BannedFromSubmissions(_) => 40304,
 
             PointercrateError::NotFound => 40400,
             PointercrateError::ModelNotFound { .. } => 40401,
