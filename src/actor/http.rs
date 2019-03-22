@@ -13,11 +13,6 @@ use gdcf_model::{
     user::Creator,
 };
 use gdrs::BoomlingsClient;
-use hyper::{
-    client::{Client, HttpConnector},
-    Body, Request,
-};
-use hyper_tls::HttpsConnector;
 use log::{debug, error, info, warn};
 use serde_json::json;
 use std::sync::Arc;
@@ -25,12 +20,13 @@ use tokio::{
     self,
     prelude::future::{result, Either, Future},
 };
+use reqwest::r#async::Client;
 
 /// Actor for whatever the fuck just happens to need to be done and isn't database access
 #[allow(missing_debug_implementations)]
 pub struct HttpActor {
     gdcf: Gdcf<BoomlingsClient, DatabaseCache<Pg>>,
-    http_client: Client<HttpsConnector<HttpConnector>>,
+    http_client: Client,
     discord_webhook_url: Arc<Option<String>>,
     deletor: Recipient<DeleteMessage<i32, Record>>,
 }
@@ -53,7 +49,7 @@ impl HttpActor {
         HttpActor {
             deletor,
             gdcf: Gdcf::new(client, cache),
-            http_client: Client::builder().build(HttpsConnector::new(4).unwrap()),
+            http_client: Client::builder().build().expect("Failed to create reqwest client"),
             discord_webhook_url: Arc::new(std::env::var("DISCORD_WEBHOOK").ok()),
         }
         .start()
@@ -65,14 +61,12 @@ impl HttpActor {
         if let Some(ref uri) = *self.discord_webhook_url {
             info!("Executing discord webhook!");
 
-            let request = Request::post(uri)
-                .header("Content-Type", "application/json")
-                .body(Body::from(data.to_string()))
-                .unwrap();
-
             let future = self
                 .http_client
-                .request(request)
+                .post(uri)
+                .header("Content-Type", "application/json")
+                .body(data.to_string())
+                .send()
                 .map_err(move |error| {
                     error!(
                         "INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}",
@@ -97,10 +91,9 @@ impl HttpActor {
             url
         );
 
-        let request = Request::head(url).body(Body::empty()).unwrap();
-
         self.http_client
-            .request(request)
+            .head(url)
+            .send()
             .map_err(|error| error!("INTERNAL SERVER ERROR: HEAD request failed: {:?}", error))
             .and_then(|response| {
                 let status = response.status().as_u16();

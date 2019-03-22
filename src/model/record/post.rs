@@ -27,7 +27,7 @@ pub struct Submission {
 
 impl PostData for (Submission, Submitter) {
     fn required_permissions(&self) -> PermissionsSet {
-        if self.0.status != RecordStatus::Submitted {
+        if self.0.status != RecordStatus::Submitted || self.0.video.is_none() {
             perms!(ListHelper or ListModerator or ListAdministrator)
         } else {
             PermissionsSet::default()
