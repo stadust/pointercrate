@@ -15,7 +15,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Precondition;
 
 #[derive(Debug, Display)]

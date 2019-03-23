@@ -113,7 +113,7 @@ impl Actor for HttpActor {
     type Context = Context<Self>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct LevelById(pub u64);
 
 impl Message for LevelById {

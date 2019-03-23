@@ -7,7 +7,7 @@ use ipnetwork::IpNetwork;
 use log::{error, warn};
 use std::net::{IpAddr, Ipv4Addr};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct IpResolve;
 
 impl<S> Middleware<S> for IpResolve {

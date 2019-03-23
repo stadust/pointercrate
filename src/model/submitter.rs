@@ -13,7 +13,7 @@ pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 use crate::model::By;
 use std::hash::{Hash, Hasher};
 
-#[derive(Queryable, Debug, Identifiable, Serialize, Hash, Display)]
+#[derive(Queryable, Debug, Identifiable, Serialize, Hash, Display, Copy, Clone)]
 #[table_name = "submitters"]
 #[primary_key("submitter_id")]
 #[display(fmt = "{} (Banned: {})", id, banned)]

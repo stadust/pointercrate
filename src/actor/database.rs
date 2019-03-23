@@ -102,7 +102,7 @@ impl Actor for DatabaseActor {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct GetDemonlistOverview;
 
 impl Message for GetDemonlistOverview {

@@ -89,6 +89,7 @@ macro_rules! perms {
             let mut perm_set = HashSet::new();
 
             $(
+                #[allow(unused_results)]
                 perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
             )*
 

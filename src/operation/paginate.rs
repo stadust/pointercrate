@@ -2,7 +2,7 @@ use crate::{context::RequestContext, model::Model, Result};
 use diesel::{
     dsl::{exists, max, min},
     expression::{AsExpression, NonAggregate},
-    pg::{Pg},
+    pg::Pg,
     query_builder::{BoxedSelectStatement, QueryFragment},
     select,
     sql_types::{HasSqlType, NotNull, SqlOrd},

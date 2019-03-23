@@ -10,7 +10,7 @@ use log::info;
 use maud::{html, Markup};
 use tokio::prelude::Future;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct LoginPage;
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {

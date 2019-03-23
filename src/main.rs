@@ -6,8 +6,7 @@
     stable_features,
     unknown_lints,
     unused_features,
-    //unused_imports,
-    //unused_results,
+    unused_imports,
     unused_parens
 )]
 #![feature(proc_macro_hygiene)]

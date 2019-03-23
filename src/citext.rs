@@ -14,7 +14,7 @@ use serde::{Serialize, Serializer};
 use serde_derive::{Deserialize, Serialize};
 use std::{borrow::Borrow, cmp::Ordering, io::Write, ops::Deref};
 
-#[derive(SqlType, Debug)]
+#[derive(SqlType, Debug, Copy, Clone)]
 #[postgres(type_name = "CITEXT")]
 pub struct CiText;
 

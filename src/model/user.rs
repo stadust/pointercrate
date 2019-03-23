@@ -317,6 +317,7 @@ mod b64 {
     // Bcrypt has its own base64 alphabet
     // ./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
     lazy_static! {
+        #[allow(unused_results)]
         static ref BCRYPT_TO_STANDARD: HashMap<char, &'static str> = {
             let mut m = HashMap::new();
             m.insert('/', "B");
