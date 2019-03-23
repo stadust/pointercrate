@@ -5,7 +5,7 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
-    operation::{Get, Post},
+    operation::{Delete, Get, Post},
     video, Result,
 };
 use diesel::{Connection, RunQueryDsl};
@@ -153,8 +153,7 @@ impl Post<Submission> for Option<Record> {
                     record.id
                 );
 
-                //FIXME: reimpl
-                //record.delete(connection)?;
+                record.delete(ctx)?;
             }
 
             debug!("All duplicates either already accepted, or has lower progress, accepting!");
