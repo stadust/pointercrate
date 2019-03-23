@@ -73,7 +73,7 @@ impl Post<PostDemon> for Demon {
             for creator in &data.creators {
                 Creator::create_from(
                     (data.name.as_ref(), creator.as_ref()),
-                    RequestContext::Internal,
+                    RequestContext::Internal(connection),
                     connection,
                 )?;
             }

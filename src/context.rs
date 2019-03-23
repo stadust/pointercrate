@@ -5,6 +5,7 @@ use crate::{
     Result,
 };
 use actix_web::HttpRequest;
+use diesel::PgConnection;
 use ipnetwork::IpNetwork;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -21,13 +22,15 @@ pub enum RequestData {
     },
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
+#[allow(missing_debug_implementations)]
 pub enum RequestContext<'a> {
-    Internal,
+    Internal(&'a PgConnection),
     External {
         ip: IpNetwork,
         user: Option<&'a Me>,
         if_match: Option<&'a IfMatch>,
+        connection: &'a PgConnection,
     },
 }
 
@@ -57,14 +60,15 @@ impl RequestData {
         self
     }
 
-    pub fn ctx(&self) -> RequestContext {
+    pub fn ctx<'a>(&'a self, connection: &'a PgConnection) -> RequestContext<'a> {
         match self {
-            RequestData::Internal => RequestContext::Internal,
+            RequestData::Internal => RequestContext::Internal(connection),
             RequestData::External { ip, user, if_match } =>
                 RequestContext::External {
                     ip: *ip,
                     user: user.as_ref(),
                     if_match: if_match.as_ref(),
+                    connection,
                 },
         }
     }
@@ -98,7 +102,7 @@ impl<'a> RequestContext<'a> {
 
     pub fn is_list_mod(&self) -> bool {
         match self {
-            RequestContext::Internal => true,
+            RequestContext::Internal(_) => true,
             RequestContext::External {
                 user: Some(Me(ref user)),
                 ..
@@ -124,6 +128,13 @@ impl<'a> RequestContext<'a> {
             RequestContext::External { if_match: None, .. } =>
                 Err(PointercrateError::invalid_state("Checked precondition on request that doesn't check precondition (this doesn't make sense!)")),
             _ => Ok(()),
+        }
+    }
+
+    pub fn connection(&self) -> &PgConnection {
+        match self {
+            RequestContext::Internal(connection) => connection,
+            RequestContext::External { connection, .. } => connection,
         }
     }
 }
