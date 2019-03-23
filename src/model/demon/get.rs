@@ -3,14 +3,14 @@ use crate::{
     citext::CiStr,
     context::RequestContext,
     error::PointercrateError,
-    model::{creator::Creators, demon::PartialDemon, record::EmbeddedRecordP, By},
+    model::{creator::Creators, record::EmbeddedRecordP, By},
     operation::Get,
     Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Demon {
-    fn get(name: &'a CiStr, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(name: &'a CiStr, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match Demon::by(name).first(connection) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
@@ -24,7 +24,7 @@ impl<'a> Get<&'a CiStr> for Demon {
 }
 
 impl Get<i16> for Demon {
-    fn get(position: i16, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(position: i16, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match Demon::by(position).first(connection) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>

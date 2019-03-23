@@ -1,18 +1,12 @@
 use super::{Creator, Creators};
 use crate::{
-    citext::CiStr,
-    context::RequestContext,
-    error::PointercrateError,
-    model::{user::User, Demon},
-    operation::Get,
-    permissions::{self},
-    schema::creators,
-    Result,
+    citext::CiStr, context::RequestContext, error::PointercrateError, model::Demon, operation::Get,
+    schema::creators, Result,
 };
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Creators {
-    fn get(name: &'a CiStr, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(name: &'a CiStr, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         super::creators_of(name)
             .load(connection)
             .map(Creators)
@@ -34,4 +28,3 @@ impl Get<(i16, i32)> for Creator {
             .map_err(PointercrateError::database)
     }
 }
-

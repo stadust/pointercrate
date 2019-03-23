@@ -12,7 +12,6 @@ use crate::{
         record::{EmbeddedRecordD, RecordStatus},
         By,
     },
-    operation::Delete,
     schema::{nationalities, players, records},
     Result,
 };

@@ -1,12 +1,11 @@
 use crate::{
     error::PointercrateError,
     middleware::{auth::Me, cond::IfMatch},
-    model::User,
     permissions::PermissionsSet,
     Result,
 };
 use actix_web::HttpRequest;
-use ipnetwork::{IpNetwork, Ipv4Network};
+use ipnetwork::IpNetwork;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},

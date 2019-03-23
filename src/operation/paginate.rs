@@ -1,4 +1,4 @@
-use crate::{model::Model, Result};
+use crate::{context::RequestContext, model::Model, Result};
 use diesel::{
     dsl::{exists, max, min},
     expression::{AsExpression, NonAggregate},
@@ -10,7 +10,6 @@ use diesel::{
     Queryable, RunQueryDsl, SelectableExpression,
 };
 use serde::{Deserialize, Serialize};
-use crate::context::RequestContext;
 
 pub trait Paginator: Sized + Serialize
 where

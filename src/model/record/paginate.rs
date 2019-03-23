@@ -103,7 +103,8 @@ impl Paginate<RecordPagination> for Record {
             query = query.filter(records::status_.eq(RecordStatus::Approved));
         }
 
-        let mut records: Vec<Record> = pagination_result!(query, pagination, records::id, connection)?;
+        let mut records: Vec<Record> =
+            pagination_result!(query, pagination, records::id, connection)?;
 
         if !ctx.is_list_mod() {
             for record in &mut records {

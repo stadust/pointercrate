@@ -5,7 +5,6 @@ use crate::{
     error::PointercrateError,
     model::{Demon, EmbeddedPlayer},
     operation::{Get, Post},
-    permissions::PermissionsSet,
     schema::creators,
     Result,
 };

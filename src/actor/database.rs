@@ -1,13 +1,10 @@
 use crate::{
     context::{RequestContext, RequestData},
     error::PointercrateError,
-    middleware::{
-        auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
-        cond::IfMatch,
-    },
+    middleware::auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
     model::{demon::PartialDemon, user::PatchMe, Model, User},
     operation::{Delete, Get, Paginate, Paginator, Patch, Post},
-    permissions::{self, Permissions},
+    permissions::Permissions,
     view::demonlist::DemonlistOverview,
     Result,
 };
@@ -21,7 +18,7 @@ use diesel::{
     AppearsOnTable, Connection, Expression, QueryDsl, QuerySource, RunQueryDsl,
     SelectableExpression,
 };
-use ipnetwork::IpNetwork;
+
 use joinery::Joinable;
 use log::{debug, info, trace, warn};
 use std::{hash::Hash, marker::PhantomData};
@@ -78,15 +75,6 @@ impl DatabaseActor {
         Ok(connection)
     }
 
-    fn maybe_audited_connection(
-        &self, maybe_user: &Option<User>,
-    ) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
-        match maybe_user {
-            Some(ref user) => self.audited_connection(user),
-            None => self.connection(),
-        }
-    }
-
     fn connection_for(
         &self, data: &RequestData,
     ) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
@@ -96,15 +84,6 @@ impl DatabaseActor {
                 ..
             } => self.audited_connection(user),
             _ => self.connection(),
-        }
-    }
-
-    fn maybe_audited_connection2(
-        &self, maybe_user: Option<&User>,
-    ) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
-        match maybe_user {
-            Some(user) => self.audited_connection(user),
-            None => self.connection(),
         }
     }
 }
@@ -457,7 +436,7 @@ impl Message for DeleteRecordDirectly {
 impl Handler<DeleteRecordDirectly> for DatabaseActor {
     type Result = Result<()>;
 
-    fn handle(&mut self, msg: DeleteRecordDirectly, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: DeleteRecordDirectly, _ctx: &mut Self::Context) -> Self::Result {
         use diesel::ExpressionMethods;
 
         let connection = &*self.connection()?;

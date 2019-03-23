@@ -1,14 +1,7 @@
 use super::{Submitter, SubmitterWithRecords};
-use crate::{
-    context::RequestContext,
-    error::PointercrateError,
-    model::{user::User, By},
-    operation::Get,
-    permissions::{self},
-    Result,
-};
+use crate::{context::RequestContext, error::PointercrateError, model::By, operation::Get, Result};
 use diesel::{result::Error, PgConnection, RunQueryDsl};
-use ipnetwork::{IpNetwork, Ipv4Network};
+use ipnetwork::IpNetwork;
 use std::net::Ipv4Addr;
 
 impl Get<()> for Submitter {

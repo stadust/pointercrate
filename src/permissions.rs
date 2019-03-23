@@ -1,4 +1,4 @@
-use crate::{bitstring::Bits, error::PointercrateError, model::user::User, Result};
+use crate::bitstring::Bits;
 use bitflags::bitflags;
 use joinery::Joinable;
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};

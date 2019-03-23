@@ -150,7 +150,7 @@ impl Paginator for RankingPagination {
 
 impl Paginate<RankingPagination> for RankedPlayer2 {
     fn load(
-        pagination: &RankingPagination, ctx: RequestContext, connection: &PgConnection,
+        pagination: &RankingPagination, _ctx: RequestContext, connection: &PgConnection,
     ) -> Result<Vec<Self>> {
         let mut query = pagination.filter(RankedPlayer2::boxed_all());
 

@@ -56,7 +56,7 @@ mod get {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
             /// `GET` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                use crate::middleware::auth::{Authorization, Token};
+                use crate::middleware::auth::Token;
 
                 info!("GET {}", $endpoint);
 
@@ -69,7 +69,8 @@ mod get {
                 resource_id
                     .into_future()
                     .and_then(move |resource_id| {
-                        req.state().get::<Token, _, _>(&req, resource_id.into_inner())
+                        req.state()
+                            .get::<Token, _, _>(&req, resource_id.into_inner())
                     })
                     .map(|resource: $resource_type| HttpResponse::Ok().json_with_etag(resource))
                     .responder()
@@ -84,7 +85,7 @@ mod get {
 
 #[macro_use]
 mod post {
-    use crate::{context::RequestContext, permissions::PermissionsSet, Result};
+    use crate::{context::RequestContext, Result};
     use diesel::pg::PgConnection;
 
     pub trait Post<T/*: PostData*/>: Sized {
@@ -116,16 +117,10 @@ mod post {
 
 #[macro_use]
 mod delete {
-    use crate::{
-        context::RequestContext, error::PointercrateError, middleware::cond::IfMatch, Result,
-    };
+    use crate::{context::RequestContext, Result};
     use diesel::pg::PgConnection;
-    use log::info;
-    use std::{
-        collections::hash_map::DefaultHasher,
-        fmt::Display,
-        hash::{Hash, Hasher},
-    };
+
+    use std::fmt::Display;
 
     pub trait Delete: Display {
         fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()>;
@@ -135,7 +130,7 @@ mod delete {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
             /// `DELETE` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                use crate::middleware::{auth::Token, cond::IfMatch};
+                use crate::middleware::auth::Token;
 
                 info!("DELETE {}", $endpoint);
 

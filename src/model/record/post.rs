@@ -5,8 +5,7 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
-    operation::{Delete, Get, Post},
-    permissions::PermissionsSet,
+    operation::{Get, Post},
     video, Result,
 };
 use diesel::{Connection, PgConnection, RunQueryDsl};

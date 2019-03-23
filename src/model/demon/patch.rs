@@ -1,16 +1,15 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     model::player::EmbeddedPlayer,
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
-    permissions::PermissionsSet,
     schema::demons,
     Result,
 };
 use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
-use crate::context::RequestContext;
 
 make_patch! {
     struct PatchDemon {
@@ -24,7 +23,9 @@ make_patch! {
 }
 
 impl Patch<PatchDemon> for Demon {
-    fn patch(mut self, mut patch: PatchDemon, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        mut self, mut patch: PatchDemon, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 
         info!("Patching demon {} with {}", self.name, patch);
@@ -64,7 +65,9 @@ impl Patch<PatchDemon> for Demon {
 }
 
 impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
-    fn patch(self, patch: PatchDemon, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        self, patch: PatchDemon, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
         let DemonWithCreatorsAndRecords {
             demon,
             creators,

@@ -1,11 +1,7 @@
 use super::User;
 use crate::{
-    context::RequestContext,
-    error::PointercrateError,
-    middleware::auth::Me,
-    operation::Get,
-    permissions::{self, Permissions},
-    Result,
+    context::RequestContext, error::PointercrateError, middleware::auth::Me, operation::Get,
+    permissions::Permissions, Result,
 };
 use diesel::{result::Error, PgConnection, RunQueryDsl};
 
@@ -42,7 +38,9 @@ impl Get<String> for User {
 }
 
 impl Get<Permissions> for Vec<User> {
-    fn get(perms: Permissions, ctx: RequestContext, connection: &PgConnection) -> Result<Vec<User>> {
+    fn get(
+        perms: Permissions, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Vec<User>> {
         ctx.check_permissions(perms!(Administrator))?;
 
         Ok(User::by_permissions(perms).load(connection)?)
@@ -50,7 +48,7 @@ impl Get<Permissions> for Vec<User> {
 }
 
 impl Get<Me> for Me {
-    fn get(me: Me, ctx: RequestContext, _: &PgConnection) -> Result<Me> {
+    fn get(me: Me, _ctx: RequestContext, _: &PgConnection) -> Result<Me> {
         Ok(me)
     }
 }

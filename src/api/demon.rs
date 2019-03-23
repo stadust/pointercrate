@@ -2,7 +2,6 @@
 
 use super::PCResponder;
 use crate::{
-    context::RequestData,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::{

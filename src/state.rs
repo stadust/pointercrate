@@ -8,10 +8,7 @@ use crate::{
     },
     context::RequestData,
     error::PointercrateError,
-    middleware::{
-        auth::{Authorization, Me, TAuthType, Token},
-        cond::IfMatch,
-    },
+    middleware::auth::{Authorization, Me, TAuthType},
     model::Model,
     operation::{Delete, Get, Paginate, Paginator, Patch, Post},
     Result,
@@ -25,7 +22,7 @@ use diesel::{
     sql_types::{HasSqlType, NotNull, SqlOrd},
     AppearsOnTable, Expression, QuerySource, SelectableExpression,
 };
-use ipnetwork::IpNetwork;
+
 use std::{collections::HashMap, hash::Hash, marker::PhantomData, sync::Arc};
 use tokio::prelude::{future::Either, Future};
 

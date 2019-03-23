@@ -5,14 +5,11 @@ use crate::{
     actor::http::PostProcessRecord,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::{
-        record::{PatchRecord, Record, RecordPagination, Submission},
-        Submitter,
-    },
+    model::record::{PatchRecord, Record, RecordPagination, Submission},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
-use ipnetwork::IpNetwork;
+
 use log::info;
 use tokio::prelude::future::{Future, IntoFuture};
 

@@ -1,14 +1,13 @@
 use super::Submitter;
 use crate::{
+    context::RequestContext,
     operation::{deserialize_non_optional, Patch},
-    permissions::PermissionsSet,
     schema::submitters,
     Result,
 };
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
-use crate::context::RequestContext;
 
 make_patch! {
     struct PatchSubmitter {
@@ -17,7 +16,9 @@ make_patch! {
 }
 
 impl Patch<PatchSubmitter> for Submitter {
-    fn patch(mut self, patch: PatchSubmitter, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        mut self, patch: PatchSubmitter, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 
         info!("Patching player {} with {}", self.id, patch);

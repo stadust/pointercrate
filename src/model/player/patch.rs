@@ -5,7 +5,6 @@ use crate::{
     error::PointercrateError,
     model::{nationality::Nationality, player::ShortPlayer, By},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
-    permissions::PermissionsSet,
     schema::players,
     Result,
 };

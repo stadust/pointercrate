@@ -3,18 +3,10 @@
 // patch operations, who knows
 #![allow(unused_macros)]
 
-use crate::{
-    context::RequestContext, error::PointercrateError, middleware::cond::IfMatch,
-    permissions::PermissionsSet, Result,
-};
+use crate::{context::RequestContext, Result};
 use diesel::pg::PgConnection;
-use log::info;
 use serde::{de::Error, Deserialize, Deserializer};
-use std::{
-    collections::hash_map::DefaultHasher,
-    fmt::Display,
-    hash::{Hash, Hasher},
-};
+use std::fmt::Display;
 
 pub trait Patch<P>: Display + Sized {
     fn patch(self, patch: P, ctx: RequestContext, connection: &PgConnection) -> Result<Self>;
@@ -215,7 +207,7 @@ macro_rules! patch_handler {
     ($handler_name: ident, $endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
         /// `PATCH` handler
         pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-            use crate::middleware::{auth::Token, cond::IfMatch};
+            use crate::middleware::auth::Token;
 
             info!("PATCH {}", stringify!($endpoint));
 

@@ -28,7 +28,7 @@ impl Delete for User {
 }
 
 impl Delete for Me {
-    fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()> {
+    fn delete(self, _ctx: RequestContext, connection: &PgConnection) -> Result<()> {
         info!("Self-deleting user {}", self.0);
 
         delete(members::table)

@@ -1,5 +1,6 @@
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     error::PointercrateError,
     model::{By, Model},
     operation::Get,
@@ -9,7 +10,6 @@ use crate::{
 use derive_more::Constructor;
 use diesel::{pg::PgConnection, result::Error, RunQueryDsl};
 use serde_derive::Serialize;
-use crate::context::RequestContext;
 
 #[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
 pub struct Nationality {
@@ -46,7 +46,7 @@ impl Model for Nationality {
 }
 
 impl Get<&str> for Nationality {
-    fn get(id: &str, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(id: &str, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match Nationality::by(&id.to_uppercase())
             .first(connection)
             .or_else(|_| Nationality::by(CiStr::from_str(id)).first(connection))

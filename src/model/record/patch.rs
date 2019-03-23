@@ -9,7 +9,6 @@ use crate::{
         Model,
     },
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
-    permissions::PermissionsSet,
     schema::records,
     Result,
 };

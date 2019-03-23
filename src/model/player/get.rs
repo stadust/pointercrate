@@ -3,22 +3,15 @@ use crate::{
     citext::CiStr,
     context::RequestContext,
     error::PointercrateError,
-    model::{
-        creator::created_by,
-        demon::EmbeddedDemon,
-        player::{RankedPlayer2, ShortPlayer},
-        user::User,
-        By, Model,
-    },
+    model::{creator::created_by, demon::EmbeddedDemon, player::ShortPlayer, By, Model},
     operation::Get,
-    permissions,
     schema::demons,
     Result,
 };
 use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
-    fn get(name: &'a CiStr, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(name: &'a CiStr, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         let name = CiStr::from_str(name.trim());
 
         match EmbeddedPlayer::by(name).first(connection) {
@@ -31,7 +24,7 @@ impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
 }
 
 impl Get<i32> for EmbeddedPlayer {
-    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(id: i32, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match EmbeddedPlayer::by(id).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
@@ -45,7 +38,7 @@ impl Get<i32> for EmbeddedPlayer {
 }
 
 impl Get<i32> for ShortPlayer {
-    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(id: i32, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match ShortPlayer::by(id).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>

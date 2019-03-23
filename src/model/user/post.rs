@@ -1,7 +1,7 @@
 use super::User;
 use crate::{
     context::RequestContext, error::PointercrateError, model::Model, operation::Post,
-    permissions::PermissionsSet, schema::members, Result,
+    schema::members, Result,
 };
 use diesel::{insert_into, result::Error, Connection, PgConnection, RunQueryDsl};
 use log::info;
@@ -22,7 +22,7 @@ struct NewUser<'a> {
 
 impl Post<Registration> for User {
     fn create_from(
-        mut registration: Registration, ctx: RequestContext, connection: &PgConnection,
+        mut registration: Registration, _ctx: RequestContext, connection: &PgConnection,
     ) -> Result<User> {
         info!("Creating new user from {:?}", registration);
 

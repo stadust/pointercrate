@@ -1,6 +1,7 @@
 use super::{Permissions, PermissionsSet, User};
 use crate::{
     context::RequestContext,
+    error::PointercrateError,
     middleware::auth::Me,
     operation::{deserialize_non_optional, deserialize_optional, Patch},
     schema::members,
@@ -9,7 +10,6 @@ use crate::{
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
-use crate::error::PointercrateError;
 
 make_patch! {
     struct PatchMe {
@@ -28,7 +28,7 @@ make_patch! {
 
 impl Patch<PatchMe> for Me {
     fn patch(
-        mut self, mut patch: PatchMe, ctx: RequestContext, connection: &PgConnection,
+        mut self, mut patch: PatchMe, _ctx: RequestContext, connection: &PgConnection,
     ) -> Result<Self> {
         //info!("Patching user {} with {}", self, patch);
 

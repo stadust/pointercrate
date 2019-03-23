@@ -24,9 +24,9 @@ mod post;
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     model::By,
 };
-use crate::context::RequestContext;
 
 /// Struct modelling a demon in the database
 #[derive(Debug, Identifiable, Serialize, Hash, Display)]

@@ -2,9 +2,8 @@ use super::{EmbeddedRecordD, EmbeddedRecordP, EmbeddedRecordPD, Record};
 use crate::{
     context::RequestContext,
     error::PointercrateError,
-    model::{demon::Demon, record::RecordStatus, submitter::Submitter, user::User, By, Model},
+    model::{demon::Demon, record::RecordStatus, submitter::Submitter, By, Model},
     operation::Get,
-    permissions,
     schema::{demons, records},
     Result,
 };
@@ -35,7 +34,7 @@ impl Get<i32> for Record {
 }
 
 impl Get<i32> for Vec<EmbeddedRecordD> {
-    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(id: i32, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         Ok(
             EmbeddedRecordD::by_player_and_status(id, RecordStatus::Approved)
                 .order_by(demons::name)
@@ -45,7 +44,7 @@ impl Get<i32> for Vec<EmbeddedRecordD> {
 }
 
 impl<'a> Get<&'a Demon> for Vec<EmbeddedRecordP> {
-    fn get(demon: &'a Demon, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(demon: &'a Demon, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         Ok(
             EmbeddedRecordP::by_demon_and_status(demon.name.as_ref(), RecordStatus::Approved)
                 .order_by((records::progress.desc(), records::id))

@@ -4,6 +4,7 @@ use crate::{
     api::PCResponder,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     error::PointercrateError,
+    middleware::auth::Token,
     model::{
         demon::{self, Demon, DemonWithCreatorsAndRecords, PartialDemon},
         user::User,
@@ -19,7 +20,6 @@ use gdcf_model::{
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
-use crate::middleware::auth::Token;
 
 struct ListSection {
     name: &'static str,

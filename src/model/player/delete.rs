@@ -1,7 +1,3 @@
-use super::EmbeddedPlayer;
-use crate::{error::PointercrateError, operation::Delete, schema::players, Result};
-use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
-use log::info;
 /*
 impl Delete for EmbeddedPlayer {
     fn delete(self, connection: &PgConnection) -> Result<()> {

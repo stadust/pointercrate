@@ -4,7 +4,6 @@ use crate::{
     context::RequestContext,
     model::{creator::Creator, EmbeddedPlayer},
     operation::{Get, Post},
-    permissions::PermissionsSet,
     schema::demons,
     video, Result,
 };
@@ -53,7 +52,7 @@ impl Post<PostDemon> for Demon {
             Demon::validate_name(&mut data.name, connection)?;
             Demon::validate_position(&mut data.position, connection)?;
 
-            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), ctx,  connection)?;
+            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), ctx, connection)?;
             let verifier = EmbeddedPlayer::get(data.verifier.as_ref(), ctx, connection)?;
 
             let new = NewDemon {
@@ -95,6 +94,10 @@ impl Post<PostDemon> for DemonWithCreatorsAndRecords {
     fn create_from(
         data: PostDemon, ctx: RequestContext, connection: &PgConnection,
     ) -> Result<Self> {
-        DemonWithCreatorsAndRecords::get(Demon::create_from(data, ctx, connection)?, ctx, connection)
+        DemonWithCreatorsAndRecords::get(
+            Demon::create_from(data, ctx, connection)?,
+            ctx,
+            connection,
+        )
     }
 }

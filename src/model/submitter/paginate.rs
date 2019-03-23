@@ -1,5 +1,6 @@
 use super::Submitter;
 use crate::{
+    context::RequestContext,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
@@ -8,7 +9,6 @@ use crate::{
 };
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
-use crate::context::RequestContext;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct SubmitterPagination {
@@ -56,7 +56,9 @@ impl Paginator for SubmitterPagination {
 }
 
 impl Paginate<SubmitterPagination> for Submitter {
-    fn load(pagination: &SubmitterPagination, ctx: RequestContext, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(
+        pagination: &SubmitterPagination, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }

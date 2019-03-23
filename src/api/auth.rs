@@ -73,18 +73,17 @@ pub fn me(req: &HttpRequest<PointercrateState>) -> PCResponder {
 pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("PATCH /api/v1/auth/me/");
 
-    let state = req.state().clone();
+    let req = req.clone();
     let auth = req.extensions_mut().remove().unwrap();
-    let if_match: IfMatch = req.extensions_mut().remove().unwrap();
 
     req.json()
         .from_err()
         .and_then(move |patch: PatchMe| {
-            state.auth::<Basic>(auth).and_then(move |user| {
-                state.database(PatchMessage::<Me, Me, _>::new(
+            req.state().auth::<Basic>(auth).and_then(move |user| {
+                req.state().database(PatchMessage::<Me, Me, _>::new(
                     user,
                     patch,
-                    RequestData::Internal,
+                    RequestData::from_request(&req),
                 ))
             })
         })
