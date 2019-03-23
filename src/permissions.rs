@@ -268,39 +268,7 @@ impl PermissionsSet {
         self.perms.is_empty()
     }
 }
-/*
-pub trait AccessRestrictions {
-    fn pre_page_access(_: Option<&User>) -> Result<()> {
-        Ok(())
-    }
 
-    fn page_access(page: Vec<Self>, _: Option<&User>) -> Result<Vec<Self>>
-    where
-        Self: Sized,
-    {
-        Ok(page)
-    }
-
-    fn pre_patch(&self, _: Option<&User>) -> Result<()> {
-        Ok(())
-    }
-}
-
-pub fn demand(permissions: PermissionsSet, user: Option<&User>) -> Result<()> {
-    if permissions.is_empty() {
-        return Ok(())
-    }
-
-    match user {
-        None => Err(PointercrateError::Unauthorized),
-        Some(user) if !user.has_any(&permissions) =>
-            Err(PointercrateError::MissingPermissions {
-                required: permissions,
-            }),
-        _ => Ok(()),
-    }
-}
-*/
 impl Display for PermissionsSet {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         let mut sep = "";

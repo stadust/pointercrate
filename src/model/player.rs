@@ -27,7 +27,6 @@ use diesel::{
 use log::{info, trace};
 use serde_derive::Serialize;
 
-mod delete;
 mod get;
 mod paginate;
 mod patch;
