@@ -9,7 +9,7 @@ use serde::{de::Error, Deserialize, Deserializer};
 use std::fmt::Display;
 
 pub trait Patch<P>: Display + Sized {
-    fn patch(self, patch: P, ctx: RequestContext, connection: &PgConnection) -> Result<Self>;
+    fn patch(self, patch: P, ctx: RequestContext) -> Result<Self>;
 }
 
 #[allow(clippy::option_option)]

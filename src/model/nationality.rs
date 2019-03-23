@@ -46,7 +46,9 @@ impl Model for Nationality {
 }
 
 impl Get<&str> for Nationality {
-    fn get(id: &str, _ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(id: &str, ctx: RequestContext) -> Result<Self> {
+        let connection = ctx.connection();
+
         match Nationality::by(&id.to_uppercase())
             .first(connection)
             .or_else(|_| Nationality::by(CiStr::from_str(id)).first(connection))

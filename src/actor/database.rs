@@ -121,7 +121,6 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
                 Permissions::ListHelper,
             ),
             RequestContext::Internal(connection),
-            connection,
         )?;
         let all_demons = PartialDemon::all()
             .order_by(crate::schema::demons::position)
@@ -163,9 +162,8 @@ impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
                     debug!("Trying to authorize user {}", username);
                     let connection = &*self.connection()?;
 
-                    let user =
-                        User::get(username, RequestContext::Internal(connection), connection)
-                            .map_err(|_| PointercrateError::Unauthorized)?;
+                    let user = User::get(username, RequestContext::Internal(connection))
+                        .map_err(|_| PointercrateError::Unauthorized)?;
 
                     user.verify_password(&password).map(Me)
                 } else {
@@ -196,7 +194,7 @@ impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
 
                     let connection = &*self.connection()?;
 
-                    let user = User::get(id, RequestContext::Internal(connection), connection)
+                    let user = User::get(id, RequestContext::Internal(connection))
                         .map_err(|_| PointercrateError::Unauthorized)?;
 
                     let user = user.validate_token(&access_token)?;
@@ -367,7 +365,7 @@ impl<Key, G: Get<Key> + 'static> Handler<GetMessage<Key, G>> for DatabaseActor {
 
     fn handle(&mut self, msg: GetMessage<Key, G>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self.connection_for(&msg.1)?;
-        G::get(msg.0, msg.1.ctx(connection), connection)
+        G::get(msg.0, msg.1.ctx(connection))
     }
 }
 
@@ -388,7 +386,7 @@ impl<T, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseActor {
 
     fn handle(&mut self, msg: PostMessage<T, P>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self.connection_for(&msg.1)?;
-        P::create_from(msg.0, msg.1.ctx(connection), connection)
+        P::create_from(msg.0, msg.1.ctx(connection))
     }
 }
 
@@ -428,7 +426,7 @@ where
         let connection = &*self.connection_for(&data)?;
         let ctx = data.ctx(connection);
 
-        connection.transaction(|| D::get(key, ctx, connection)?.delete(ctx, connection))
+        connection.transaction(|| D::get(key, ctx)?.delete(ctx))
     }
 }
 
@@ -490,11 +488,11 @@ where
         let ctx = request_data.ctx(connection);
 
         connection.transaction(|| {
-            let object = P::get(key, ctx, connection)?;
+            let object = P::get(key, ctx)?;
 
             ctx.check_if_match(&object)?;
 
-            object.patch(patch_data, ctx, connection)
+            object.patch(patch_data, ctx)
         })
     }
 }
@@ -566,7 +564,7 @@ where
         let connection = &*self.connection_for(&msg.2)?;
         let ctx = msg.2.ctx(connection);
 
-        let result = P::load(&msg.0, ctx, connection)?;
+        let result = P::load(&msg.0, ctx)?;
 
         let first = msg.0.first(connection)?.map(|d| {
             format!(

@@ -17,7 +17,7 @@ mod get {
     use diesel::pg::PgConnection;
 
     pub trait Get<Key>: Sized {
-        fn get(id: Key, ctx: RequestContext, connection: &PgConnection) -> Result<Self>;
+        fn get(id: Key, ctx: RequestContext) -> Result<Self>;
     }
 
     impl<G1, G2, Key1, Key2> Get<(Key1, Key2)> for (G1, G2)
@@ -26,11 +26,11 @@ mod get {
         G2: Get<Key2>,
     {
         fn get(
-            (key1, key2): (Key1, Key2), ctx: RequestContext, connection: &PgConnection,
+            (key1, key2): (Key1, Key2), ctx: RequestContext
         ) -> Result<Self> {
             Ok((
-                G1::get(key1, ctx, connection)?,
-                G2::get(key2, ctx, connection)?,
+                G1::get(key1, ctx)?,
+                G2::get(key2, ctx)?,
             ))
         }
     }
@@ -42,12 +42,12 @@ mod get {
         G3: Get<Key3>,
     {
         fn get(
-            (key1, key2, key3): (Key1, Key2, Key3), ctx: RequestContext, connection: &PgConnection,
+            (key1, key2, key3): (Key1, Key2, Key3), ctx: RequestContext
         ) -> Result<Self> {
             Ok((
-                G1::get(key1, ctx, connection)?,
-                G2::get(key2, ctx, connection)?,
-                G3::get(key3, ctx, connection)?,
+                G1::get(key1, ctx)?,
+                G2::get(key2, ctx)?,
+                G3::get(key3, ctx)?,
             ))
         }
     }
@@ -88,8 +88,8 @@ mod post {
     use crate::{context::RequestContext, Result};
     use diesel::pg::PgConnection;
 
-    pub trait Post<T/*: PostData*/>: Sized {
-        fn create_from(from: T, ctx: RequestContext, connection: &PgConnection) -> Result<Self>;
+    pub trait Post<T>: Sized {
+        fn create_from(from: T, ctx: RequestContext) -> Result<Self>;
     }
     macro_rules! post_handler {
         ($handler_name: ident, $endpoint: expr, $post_type: ty, $target_type: ty) => {
@@ -123,7 +123,7 @@ mod delete {
     use std::fmt::Display;
 
     pub trait Delete: Display {
-        fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()>;
+        fn delete(self, ctx: RequestContext) -> Result<()>;
     }
 
     macro_rules! delete_handler {

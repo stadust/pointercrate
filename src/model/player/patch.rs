@@ -21,10 +21,10 @@ make_patch! {
 }
 
 impl Patch<PatchPlayer> for ShortPlayer {
-    fn patch(
-        mut self, patch: PatchPlayer, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Self> {
+    fn patch(mut self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
+        let connection = ctx.connection();
 
         info!("Patching player {} with {}", self, patch);
 
@@ -47,7 +47,7 @@ impl Patch<PatchPlayer> for ShortPlayer {
 
             if let Some(nationality) = patch.nationality {
                 self.nationality = nationality
-                    .map(|nation| Nationality::get(nation.as_ref(), ctx, connection))
+                    .map(|nation| Nationality::get(nation.as_ref(), ctx))
                     .transpose()?;
             }
 
@@ -68,9 +68,7 @@ impl Patch<PatchPlayer> for ShortPlayer {
 }
 
 impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
-    fn patch(
-        self, patch: PatchPlayer, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Self> {
+    fn patch(self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
         let PlayerWithDemonsAndRecords {
             player,
             records,
@@ -79,7 +77,7 @@ impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
             published,
         } = self;
 
-        let player = player.patch(patch, ctx, connection)?;
+        let player = player.patch(patch, ctx)?;
 
         Ok(PlayerWithDemonsAndRecords {
             player,

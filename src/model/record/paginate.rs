@@ -82,9 +82,7 @@ impl Paginator for RecordPagination {
 }
 
 impl Paginate<RecordPagination> for Record {
-    fn load(
-        pagination: &RecordPagination, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Vec<Self>> {
+    fn load(pagination: &RecordPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
@@ -104,7 +102,7 @@ impl Paginate<RecordPagination> for Record {
         }
 
         let mut records: Vec<Record> =
-            pagination_result!(query, pagination, records::id, connection)?;
+            pagination_result!(query, pagination, records::id, ctx.connection())?;
 
         if !ctx.is_list_mod() {
             for record in &mut records {

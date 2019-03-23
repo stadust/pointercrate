@@ -23,17 +23,17 @@ make_patch! {
 }
 
 impl Patch<PatchDemon> for Demon {
-    fn patch(
-        mut self, mut patch: PatchDemon, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 
         info!("Patching demon {} with {}", self.name, patch);
 
+        let connection = ctx.connection();
+
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name: &CiStr| EmbeddedPlayer::get(name, ctx, connection);
+        let map = |name: &CiStr| EmbeddedPlayer::get(name, ctx);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);
@@ -65,16 +65,14 @@ impl Patch<PatchDemon> for Demon {
 }
 
 impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
-    fn patch(
-        self, patch: PatchDemon, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Self> {
+    fn patch(self, patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
         let DemonWithCreatorsAndRecords {
             demon,
             creators,
             records,
         } = self;
 
-        let demon = demon.patch(patch, ctx, connection)?;
+        let demon = demon.patch(patch, ctx)?;
 
         Ok(DemonWithCreatorsAndRecords {
             demon,

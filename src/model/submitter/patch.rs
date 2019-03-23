@@ -16,9 +16,7 @@ make_patch! {
 }
 
 impl Patch<PatchSubmitter> for Submitter {
-    fn patch(
-        mut self, patch: PatchSubmitter, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Self> {
+    fn patch(mut self, patch: PatchSubmitter, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 
         info!("Patching player {} with {}", self.id, patch);
@@ -28,7 +26,7 @@ impl Patch<PatchSubmitter> for Submitter {
         diesel::update(submitters::table)
             .filter(submitters::submitter_id.eq(&self.id))
             .set(submitters::banned.eq(&self.banned))
-            .execute(connection)?;
+            .execute(ctx.connection())?;
 
         Ok(self)
     }

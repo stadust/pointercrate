@@ -67,9 +67,7 @@ impl Paginator for PlayerPagination {
 }
 
 impl Paginate<PlayerPagination> for ShortPlayer {
-    fn load(
-        pagination: &PlayerPagination, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Vec<Self>> {
+    fn load(pagination: &PlayerPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         // FIXME: we can move this check to the database actor
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
@@ -86,7 +84,7 @@ impl Paginate<PlayerPagination> for ShortPlayer {
             players::id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, players::id, connection)
+        pagination_result!(query, pagination, players::id, ctx.connection())
     }
 }
 
@@ -149,9 +147,7 @@ impl Paginator for RankingPagination {
 }
 
 impl Paginate<RankingPagination> for RankedPlayer2 {
-    fn load(
-        pagination: &RankingPagination, _ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Vec<Self>> {
+    fn load(pagination: &RankingPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         let mut query = pagination.filter(RankedPlayer2::boxed_all());
 
         filter!(query[
@@ -159,6 +155,11 @@ impl Paginate<RankingPagination> for RankedPlayer2 {
             players_with_score::index < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, players_with_score::index, connection)
+        pagination_result!(
+            query,
+            pagination,
+            players_with_score::index,
+            ctx.connection()
+        )
     }
 }

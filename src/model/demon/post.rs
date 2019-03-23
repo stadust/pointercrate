@@ -34,10 +34,10 @@ pub struct NewDemon<'a> {
 }
 
 impl Post<PostDemon> for Demon {
-    fn create_from(
-        mut data: PostDemon, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Demon> {
+    fn create_from(mut data: PostDemon, ctx: RequestContext) -> Result<Demon> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
+        let connection = ctx.connection();
 
         info!("Creating new demon from {:?}", data);
 
@@ -52,8 +52,8 @@ impl Post<PostDemon> for Demon {
             Demon::validate_name(&mut data.name, connection)?;
             Demon::validate_position(&mut data.position, connection)?;
 
-            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), ctx, connection)?;
-            let verifier = EmbeddedPlayer::get(data.verifier.as_ref(), ctx, connection)?;
+            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), ctx)?;
+            let verifier = EmbeddedPlayer::get(data.verifier.as_ref(), ctx)?;
 
             let new = NewDemon {
                 name: data.name.as_ref(),
@@ -74,7 +74,6 @@ impl Post<PostDemon> for Demon {
                 Creator::create_from(
                     (data.name.as_ref(), creator.as_ref()),
                     RequestContext::Internal(connection),
-                    connection,
                 )?;
             }
 
@@ -91,13 +90,7 @@ impl Post<PostDemon> for Demon {
 }
 
 impl Post<PostDemon> for DemonWithCreatorsAndRecords {
-    fn create_from(
-        data: PostDemon, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Self> {
-        DemonWithCreatorsAndRecords::get(
-            Demon::create_from(data, ctx, connection)?,
-            ctx,
-            connection,
-        )
+    fn create_from(data: PostDemon, ctx: RequestContext) -> Result<Self> {
+        DemonWithCreatorsAndRecords::get(Demon::create_from(data, ctx)?, ctx)
     }
 }

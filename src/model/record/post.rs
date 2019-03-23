@@ -32,13 +32,13 @@ impl Post<Submission> for Option<Record> {
             video,
             status,
         }: Submission,
-        ctx: RequestContext, connection: &PgConnection,
+        ctx: RequestContext,
     ) -> Result<Self> {
         if status != RecordStatus::Submitted || video.is_none() {
             ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
         }
 
-        let submitter = Submitter::get((), ctx, connection)?;
+        let submitter = Submitter::get((), ctx)?;
 
         info!(
             "Processing record addition '{}% on {} by {} ({})'",
@@ -56,10 +56,12 @@ impl Post<Submission> for Option<Record> {
             None => None,
         };
 
+        let connection = ctx.connection();
+
         connection.transaction(||{
             // Resolve player and demon name against the database
-            let player = EmbeddedPlayer::get(player.as_ref(),ctx, connection)?;
-            let demon = Demon::get(demon.as_ref(), ctx, connection)?;
+            let player = EmbeddedPlayer::get(player.as_ref(),ctx)?;
+            let demon = Demon::get(demon.as_ref(), ctx)?;
 
             // Banned player can't have records on the list
             if player.banned {

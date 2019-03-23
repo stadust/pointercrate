@@ -56,9 +56,7 @@ impl Paginator for SubmitterPagination {
 }
 
 impl Paginate<SubmitterPagination> for Submitter {
-    fn load(
-        pagination: &SubmitterPagination, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Vec<Self>> {
+    fn load(pagination: &SubmitterPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
@@ -72,6 +70,11 @@ impl Paginate<SubmitterPagination> for Submitter {
             submitters::submitter_id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, submitters::submitter_id, connection)
+        pagination_result!(
+            query,
+            pagination,
+            submitters::submitter_id,
+            ctx.connection()
+        )
     }
 }

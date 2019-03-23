@@ -5,7 +5,7 @@ use ipnetwork::IpNetwork;
 use std::net::Ipv4Addr;
 
 impl Get<()> for Submitter {
-    fn get(_: (), ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(_: (), ctx: RequestContext) -> Result<Self> {
         match ctx {
             RequestContext::Internal(_) =>
                 Ok(Submitter {
@@ -13,7 +13,7 @@ impl Get<()> for Submitter {
                     ip: IpNetwork::V4(Ipv4Addr::new(127, 0, 0, 1).into()),
                     banned: false,
                 }),
-            RequestContext::External { ip, .. } =>
+            RequestContext::External { ip, connection, .. } =>
                 match Submitter::by(&ip).first(connection) {
                     Ok(submitter) => Ok(submitter),
                     Err(Error::NotFound) =>
@@ -25,10 +25,10 @@ impl Get<()> for Submitter {
 }
 
 impl Get<i32> for Submitter {
-    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+    fn get(id: i32, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 
-        match Submitter::by(id).first(connection) {
+        match Submitter::by(id).first(ctx.connection()) {
             Ok(submitter) => Ok(submitter),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -44,11 +44,11 @@ impl<T> Get<T> for SubmitterWithRecords
 where
     Submitter: Get<T>,
 {
-    fn get(t: T, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
-        let submitter = Submitter::get(t, ctx, connection)?;
+    fn get(t: T, ctx: RequestContext) -> Result<Self> {
+        let submitter = Submitter::get(t, ctx)?;
 
         Ok(SubmitterWithRecords {
-            records: Get::get(&submitter, ctx, connection)?,
+            records: Get::get(&submitter, ctx)?,
             submitter,
         })
     }

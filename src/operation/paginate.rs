@@ -11,6 +11,7 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
+// FIXME: these methods need to take RequestData as well
 pub trait Paginator: Sized + Serialize
 where
     for<'de> Self: Deserialize<'de>,
@@ -163,7 +164,7 @@ where
         <P::PaginationColumn as Expression>::SqlType,
     >>::Expression: QueryFragment<Pg>,
 {
-    fn load(paginator: &P, ctx: RequestContext, connection: &PgConnection) -> Result<Vec<Self>>;
+    fn load(paginator: &P, ctx: RequestContext) -> Result<Vec<Self>>;
 }
 
 macro_rules! __op {

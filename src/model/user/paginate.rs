@@ -61,7 +61,7 @@ impl Paginator for UserPagination {
 
 impl Paginate<UserPagination> for User {
     fn load(
-        pagination: &UserPagination, ctx: RequestContext, connection: &PgConnection,
+        pagination: &UserPagination, ctx: RequestContext
     ) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
@@ -84,6 +84,6 @@ impl Paginate<UserPagination> for User {
             members::member_id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, members::member_id, connection)
+        pagination_result!(query, pagination, members::member_id, ctx.connection())
     }
 }

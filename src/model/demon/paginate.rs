@@ -69,9 +69,7 @@ impl Paginator for DemonPagination {
 }
 
 impl Paginate<DemonPagination> for PartialDemon {
-    fn load(
-        pagination: &DemonPagination, _ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Vec<Self>> {
+    fn load(pagination: &DemonPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
@@ -89,7 +87,7 @@ impl Paginate<DemonPagination> for PartialDemon {
             before_position,
             after_position,
             demons::position,
-            connection
+            ctx.connection()
         )
     }
 }

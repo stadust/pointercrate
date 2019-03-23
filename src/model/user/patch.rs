@@ -28,10 +28,8 @@ make_patch! {
 
 impl Patch<PatchMe> for Me {
     fn patch(
-        mut self, mut patch: PatchMe, _ctx: RequestContext, connection: &PgConnection,
+        mut self, mut patch: PatchMe, ctx: RequestContext
     ) -> Result<Self> {
-        //info!("Patching user {} with {}", self, patch);
-
         validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
 
         patch!(self.0, patch: display_name, youtube_channel);
@@ -43,7 +41,7 @@ impl Patch<PatchMe> for Me {
                 members::display_name.eq(&self.0.display_name),
                 members::youtube_channel.eq(&self.0.youtube_channel),
             ))
-            .execute(connection)?;
+            .execute(ctx.connection())?;
 
         Ok(self)
     }
@@ -51,7 +49,7 @@ impl Patch<PatchMe> for Me {
 
 impl Patch<PatchUser> for User {
     fn patch(
-        mut self, mut patch: PatchUser, ctx: RequestContext, connection: &PgConnection,
+        mut self, mut patch: PatchUser, ctx: RequestContext
     ) -> Result<Self> {
         match patch {
             PatchUser {
@@ -98,7 +96,7 @@ impl Patch<PatchUser> for User {
                 members::display_name.eq(&self.display_name),
                 members::permissions.eq(&self.permissions),
             ))
-            .execute(connection)?;
+            .execute(ctx.connection())?;
 
         Ok(self)
     }

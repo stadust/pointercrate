@@ -28,9 +28,11 @@ make_patch! {
 
 impl Patch<PatchRecord> for Record {
     fn patch(
-        mut self, mut patch: PatchRecord, ctx: RequestContext, connection: &PgConnection,
+        mut self, mut patch: PatchRecord, ctx: RequestContext
     ) -> Result<Self> {
         ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
+
+        let connection = ctx.connection();
 
         info!("Patching record {} with {}", self, patch);
 
@@ -42,7 +44,6 @@ impl Patch<PatchRecord> for Record {
                 Some(ref demon) => demon.as_ref(),
             },
             ctx,
-            connection,
         )?;
         let progress = patch.progress.unwrap_or(self.progress);
 
@@ -58,7 +59,7 @@ impl Patch<PatchRecord> for Record {
                 position: demon.position,
             }
         };
-        let map2 = |name: &CiStr| EmbeddedPlayer::get(name, ctx, connection);
+        let map2 = |name: &CiStr| EmbeddedPlayer::get(name, ctx);
 
         map_patch!(self, patch: map => demon);
         try_map_patch!(self, patch: map2 => player);

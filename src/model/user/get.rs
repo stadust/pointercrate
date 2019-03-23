@@ -6,10 +6,10 @@ use crate::{
 use diesel::{result::Error, PgConnection, RunQueryDsl};
 
 impl Get<i32> for User {
-    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<User> {
+    fn get(id: i32, ctx: RequestContext) -> Result<User> {
         ctx.check_permissions(perms!(Moderator or Administrator))?;
 
-        match User::by_id(id).first(connection) {
+        match User::by_id(id).first(ctx.connection()) {
             Ok(user) => Ok(user),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -22,10 +22,10 @@ impl Get<i32> for User {
 }
 
 impl Get<String> for User {
-    fn get(name: String, ctx: RequestContext, connection: &PgConnection) -> Result<User> {
+    fn get(name: String, ctx: RequestContext) -> Result<User> {
         ctx.check_permissions(perms!(Moderator or Administrator))?;
 
-        match User::by_name(&name).first(connection) {
+        match User::by_name(&name).first(ctx.connection()) {
             Ok(user) => Ok(user),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -38,17 +38,15 @@ impl Get<String> for User {
 }
 
 impl Get<Permissions> for Vec<User> {
-    fn get(
-        perms: Permissions, ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<Vec<User>> {
+    fn get(perms: Permissions, ctx: RequestContext) -> Result<Vec<User>> {
         ctx.check_permissions(perms!(Administrator))?;
 
-        Ok(User::by_permissions(perms).load(connection)?)
+        Ok(User::by_permissions(perms).load(ctx.connection())?)
     }
 }
 
 impl Get<Me> for Me {
-    fn get(me: Me, _ctx: RequestContext, _: &PgConnection) -> Result<Me> {
+    fn get(me: Me, _ctx: RequestContext) -> Result<Me> {
         Ok(me)
     }
 }

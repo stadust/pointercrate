@@ -390,7 +390,7 @@ impl Demon {
     pub fn validate_name(name: &mut CiString, connection: &PgConnection) -> Result<()> {
         *name = CiString(name.trim().to_string());
 
-        match Demon::get(name.as_ref(), RequestContext::Internal(connection), connection) {
+        match Demon::get(name.as_ref(), RequestContext::Internal(connection)) {
             Ok(demon) =>
                 Err(PointercrateError::DemonExists {
                     position: demon.position,

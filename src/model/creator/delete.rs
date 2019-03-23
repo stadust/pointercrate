@@ -6,7 +6,7 @@ use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 
 impl Delete for Creator {
-    fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()> {
+    fn delete(self, ctx: RequestContext) -> Result<()> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 
         info!(
@@ -17,7 +17,7 @@ impl Delete for Creator {
         delete(creators::table)
             .filter(creators::demon.eq(self.demon))
             .filter(creators::creator.eq(self.creator))
-            .execute(connection)
+            .execute(ctx.connection())
             .map(|_| ())
             .map_err(PointercrateError::database)
     }

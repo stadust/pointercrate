@@ -21,13 +21,13 @@ struct NewUser<'a> {
 }
 
 impl Post<Registration> for User {
-    fn create_from(
-        mut registration: Registration, _ctx: RequestContext, connection: &PgConnection,
-    ) -> Result<User> {
+    fn create_from(mut registration: Registration, ctx: RequestContext) -> Result<User> {
         info!("Creating new user from {:?}", registration);
 
         User::validate_name(&mut registration.name)?;
         User::validate_password(&mut registration.password)?;
+
+        let connection = ctx.connection();
 
         connection.transaction(|| {
             match User::by_name(&registration.name).first::<User>(connection) {
