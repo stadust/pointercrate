@@ -7,7 +7,7 @@ use crate::{
     schema::{demons, records},
     Result,
 };
-use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
 
 impl Get<i32> for Record {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {

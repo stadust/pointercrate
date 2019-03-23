@@ -2,7 +2,7 @@ use super::Creator;
 use crate::{
     context::RequestContext, error::PointercrateError, operation::Delete, schema::creators, Result,
 };
-use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{delete, ExpressionMethods, RunQueryDsl};
 use log::info;
 
 impl Delete for Creator {

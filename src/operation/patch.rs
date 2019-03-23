@@ -4,7 +4,7 @@
 #![allow(unused_macros)]
 
 use crate::{context::RequestContext, Result};
-use diesel::pg::PgConnection;
+
 use serde::{de::Error, Deserialize, Deserializer};
 use std::fmt::Display;
 

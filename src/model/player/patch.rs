@@ -8,7 +8,7 @@ use crate::{
     schema::players,
     Result,
 };
-use diesel::{result::Error, Connection, ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{result::Error, Connection, ExpressionMethods, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 

@@ -8,7 +8,7 @@ use crate::{
     operation::{Get, Post},
     video, Result,
 };
-use diesel::{Connection, PgConnection, RunQueryDsl};
+use diesel::{Connection, RunQueryDsl};
 use log::{debug, info};
 use serde_derive::Deserialize;
 

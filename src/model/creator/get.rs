@@ -3,7 +3,7 @@ use crate::{
     citext::CiStr, context::RequestContext, error::PointercrateError, model::Demon, operation::Get,
     schema::creators, Result,
 };
-use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Creators {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {

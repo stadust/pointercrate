@@ -14,7 +14,7 @@ pub use self::{
 #[macro_use]
 mod get {
     use crate::{context::RequestContext, Result};
-    use diesel::pg::PgConnection;
+    
 
     pub trait Get<Key>: Sized {
         fn get(id: Key, ctx: RequestContext) -> Result<Self>;
@@ -86,7 +86,7 @@ mod get {
 #[macro_use]
 mod post {
     use crate::{context::RequestContext, Result};
-    use diesel::pg::PgConnection;
+    
 
     pub trait Post<T>: Sized {
         fn create_from(from: T, ctx: RequestContext) -> Result<Self>;
@@ -118,7 +118,7 @@ mod post {
 #[macro_use]
 mod delete {
     use crate::{context::RequestContext, Result};
-    use diesel::pg::PgConnection;
+    
 
     use std::fmt::Display;
 

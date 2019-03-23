@@ -7,7 +7,7 @@ use crate::{
     operation::Get,
     Result,
 };
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Demon {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {

@@ -1,6 +1,6 @@
 use super::{Submitter, SubmitterWithRecords};
 use crate::{context::RequestContext, error::PointercrateError, model::By, operation::Get, Result};
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 use ipnetwork::IpNetwork;
 use std::net::Ipv4Addr;
 

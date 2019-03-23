@@ -8,7 +8,7 @@ use crate::{
     schema::demons,
     Result,
 };
-use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {

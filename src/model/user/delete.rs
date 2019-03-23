@@ -3,7 +3,7 @@ use crate::{
     context::RequestContext, error::PointercrateError, middleware::auth::Me, operation::Delete,
     schema::members, Result,
 };
-use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{delete, ExpressionMethods, RunQueryDsl};
 use log::info;
 
 impl Delete for User {

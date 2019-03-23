@@ -12,7 +12,7 @@ use crate::{
     schema::records,
     Result,
 };
-use diesel::{Connection, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 

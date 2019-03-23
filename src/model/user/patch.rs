@@ -7,7 +7,7 @@ use crate::{
     schema::members,
     Result,
 };
-use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{ExpressionMethods, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 

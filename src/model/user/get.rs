@@ -3,7 +3,7 @@ use crate::{
     context::RequestContext, error::PointercrateError, middleware::auth::Me, operation::Get,
     permissions::Permissions, Result,
 };
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 
 impl Get<i32> for User {
     fn get(id: i32, ctx: RequestContext) -> Result<User> {

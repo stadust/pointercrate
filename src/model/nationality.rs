@@ -8,7 +8,7 @@ use crate::{
     Result,
 };
 use derive_more::Constructor;
-use diesel::{pg::PgConnection, result::Error, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 use serde_derive::Serialize;
 
 #[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor)]

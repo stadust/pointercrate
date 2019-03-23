@@ -3,7 +3,7 @@ use crate::{
     context::RequestContext, error::PointercrateError, model::Model, operation::Post,
     schema::members, Result,
 };
-use diesel::{insert_into, result::Error, Connection, PgConnection, RunQueryDsl};
+use diesel::{insert_into, result::Error, Connection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 

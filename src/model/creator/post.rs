@@ -8,7 +8,7 @@ use crate::{
     schema::creators,
     Result,
 };
-use diesel::{insert_into, Connection, PgConnection, RunQueryDsl};
+use diesel::{insert_into, Connection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
