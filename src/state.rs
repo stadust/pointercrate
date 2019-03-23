@@ -173,8 +173,8 @@ impl PointercrateState {
             <D::PaginationColumn as Expression>::SqlType,
         >>::Expression: QueryFragment<Pg>,
     {
-        let auth = req.extensions_mut().remove().unwrap();
         let req_data = RequestData::from_request(req);
+        let auth = req.extensions_mut().remove().unwrap();
         let clone = self.clone();
 
         match auth {

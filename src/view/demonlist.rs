@@ -660,7 +660,7 @@ fn stats_viewer() -> Markup {
                     div.search.seperated style = "margin-bottom: 0px"{
                         input#pagination-filter placeholder = "Enter to search..." type = "text" style = "height: 1em";
                     }
-                    p.info-red.output style = "margin: 0px 10px"{}
+                    p.info-red.output style = "margin: 10px 10px 0px"{}
                     div style="position:relative; margin: 0px 10px; min-height: 400px; flex-grow:1" {
                         ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
                     }

@@ -74,10 +74,12 @@ impl RequestData {
     }
 
     pub fn from_request<S>(req: &HttpRequest<S>) -> Self {
+        let mut extensions_mut = req.extensions_mut();
+
         RequestData::External {
             user: None,
-            if_match: req.extensions_mut().remove(),
-            ip: req.extensions_mut().remove().unwrap(),
+            if_match: extensions_mut.remove(),
+            ip: extensions_mut.remove().unwrap(),
         }
     }
 }
