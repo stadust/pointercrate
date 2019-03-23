@@ -61,10 +61,6 @@ impl Paginator for UserPagination {
 
 impl Paginate<UserPagination> for User {
     fn load(pagination: &UserPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        if pagination.limit() > 100 || pagination.limit() < 1 {
-            return Err(PointercrateError::InvalidPaginationLimit)
-        }
-
         ctx.check_permissions(perms!(Administrator))?;
 
         let mut query = pagination.filter(User::boxed_all());

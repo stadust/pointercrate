@@ -70,10 +70,6 @@ impl Paginator for DemonPagination {
 
 impl Paginate<DemonPagination> for PartialDemon {
     fn load(pagination: &DemonPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        if pagination.limit() > 100 || pagination.limit() < 1 {
-            return Err(PointercrateError::InvalidPaginationLimit)
-        }
-
         let mut query = pagination.filter(PartialDemon::boxed_all());
 
         filter!(query[

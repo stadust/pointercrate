@@ -66,11 +66,6 @@ impl Paginator for PlayerPagination {
 
 impl Paginate<PlayerPagination> for ShortPlayer {
     fn load(pagination: &PlayerPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        // FIXME: we can move this check to the database actor
-        if pagination.limit() > 100 || pagination.limit() < 1 {
-            return Err(PointercrateError::InvalidPaginationLimit)
-        }
-
         ctx.check_permissions(
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
         )?;

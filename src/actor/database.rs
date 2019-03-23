@@ -547,6 +547,10 @@ where
         let connection = &*self.connection_for(&msg.2)?;
         let ctx = msg.2.ctx(connection);
 
+        if msg.0.limit() > 100 || msg.0.limit() < 1 {
+            return Err(PointercrateError::InvalidPaginationLimit)
+        }
+
         let result = P::load(&msg.0, ctx)?;
 
         let first = msg.0.first(connection)?.map(|d| {
