@@ -57,7 +57,7 @@ impl<S> Middleware<S> for Precondition {
                         }
                     }
 
-                    debug!("IfMatch values are {:?}", hashes);
+                    debug!("If-Match values are {:?}", hashes);
 
                     req.extensions_mut().insert(IfMatch(hashes));
                 },

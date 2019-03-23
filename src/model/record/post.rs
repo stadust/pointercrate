@@ -21,8 +21,6 @@ pub struct Submission {
     pub video: Option<String>,
     #[serde(default)]
     pub status: RecordStatus,
-    #[serde(rename = "check", default)]
-    pub verify_only: bool,
 }
 
 impl PostData for (Submission, Submitter) {
@@ -44,7 +42,6 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                 demon,
                 video,
                 status,
-                verify_only,
             },
             submitter,
         ): (Submission, Submitter),
@@ -152,11 +149,6 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                         })
                     }
                 }
-
-            }
-
-            if verify_only {
-                return Ok(None)
             }
 
             // If none of the duplicates caused us to reject the submission, we now delete submissions marked for deleting
