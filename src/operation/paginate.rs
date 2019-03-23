@@ -10,6 +10,7 @@ use diesel::{
     Queryable, RunQueryDsl, SelectableExpression,
 };
 use serde::{Deserialize, Serialize};
+use crate::context::RequestContext;
 
 pub trait Paginator: Sized + Serialize
 where
@@ -163,7 +164,7 @@ where
         <P::PaginationColumn as Expression>::SqlType,
     >>::Expression: QueryFragment<Pg>,
 {
-    fn load(paginator: &P, connection: &PgConnection) -> Result<Vec<Self>>;
+    fn load(paginator: &P, ctx: RequestContext, connection: &PgConnection) -> Result<Vec<Self>>;
 }
 
 macro_rules! __op {

@@ -53,6 +53,12 @@ pub struct User {
     pub youtube_channel: Option<String>,
 }
 
+impl PartialEq for User {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 impl Display for User {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self.display_name {

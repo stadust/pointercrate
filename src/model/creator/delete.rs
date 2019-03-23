@@ -1,10 +1,14 @@
 use super::Creator;
-use crate::{error::PointercrateError, operation::Delete, schema::creators, Result};
+use crate::{
+    context::RequestContext, error::PointercrateError, operation::Delete, schema::creators, Result,
+};
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 
 impl Delete for Creator {
-    fn delete(self, connection: &PgConnection) -> Result<()> {
+    fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
         info!(
             "Removing creator {} from demon {}",
             self.creator, self.demon

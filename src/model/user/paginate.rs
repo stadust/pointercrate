@@ -1,5 +1,6 @@
 use super::{Permissions, User};
 use crate::{
+    context::RequestContext,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
@@ -59,10 +60,14 @@ impl Paginator for UserPagination {
 }
 
 impl Paginate<UserPagination> for User {
-    fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(
+        pagination: &UserPagination, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
+
+        ctx.check_permissions(perms!(Administrator))?;
 
         let mut query = pagination.filter(User::boxed_all());
 

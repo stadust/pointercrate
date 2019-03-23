@@ -1,6 +1,7 @@
 use super::{Record, RecordStatus};
 use crate::{
     citext::CiString,
+    context::RequestContext,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
@@ -81,7 +82,9 @@ impl Paginator for RecordPagination {
 }
 
 impl Paginate<RecordPagination> for Record {
-    fn load(pagination: &RecordPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(
+        pagination: &RecordPagination, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Vec<Self>> {
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
@@ -96,6 +99,18 @@ impl Paginate<RecordPagination> for Record {
             demons::position > pagination.demon_position_gt
         ]);
 
-        pagination_result!(query, pagination, records::id, connection)
+        if !ctx.is_list_mod() {
+            query = query.filter(records::status_.eq(RecordStatus::Approved));
+        }
+
+        let mut records: Vec<Record> = pagination_result!(query, pagination, records::id, connection)?;
+
+        if !ctx.is_list_mod() {
+            for record in &mut records {
+                record.submitter = None;
+            }
+        }
+
+        Ok(records)
     }
 }

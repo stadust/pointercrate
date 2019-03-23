@@ -2,9 +2,10 @@ use super::{Record, RecordStatus};
 use crate::{
     citext::CiString,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    context::RequestContext,
     error::PointercrateError,
     model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
-    operation::{Delete, Get, Post, PostData},
+    operation::{Delete, Get, Post},
     permissions::PermissionsSet,
     video, Result,
 };
@@ -23,30 +24,23 @@ pub struct Submission {
     pub status: RecordStatus,
 }
 
-impl PostData for (Submission, Submitter) {
-    fn required_permissions(&self) -> PermissionsSet {
-        if self.0.status != RecordStatus::Submitted || self.0.video.is_none() {
-            perms!(ListHelper or ListModerator or ListAdministrator)
-        } else {
-            PermissionsSet::default()
-        }
-    }
-}
-
-impl Post<(Submission, Submitter)> for Option<Record> {
+impl Post<Submission> for Option<Record> {
     fn create_from(
-        (
-            Submission {
-                progress,
-                player,
-                demon,
-                video,
-                status,
-            },
-            submitter,
-        ): (Submission, Submitter),
-        connection: &PgConnection,
+        Submission {
+            progress,
+            player,
+            demon,
+            video,
+            status,
+        }: Submission,
+        ctx: RequestContext, connection: &PgConnection,
     ) -> Result<Self> {
+        if status != RecordStatus::Submitted || video.is_none() {
+            ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
+        }
+
+        let submitter = Submitter::get((), ctx, connection)?;
+
         info!(
             "Processing record addition '{}% on {} by {} ({})'",
             progress, demon, player, status
@@ -65,8 +59,8 @@ impl Post<(Submission, Submitter)> for Option<Record> {
 
         connection.transaction(||{
             // Resolve player and demon name against the database
-            let player = EmbeddedPlayer::get(player.as_ref(), connection)?;
-            let demon = Demon::get(demon.as_ref(), connection)?;
+            let player = EmbeddedPlayer::get(player.as_ref(),ctx, connection)?;
+            let demon = Demon::get(demon.as_ref(), ctx, connection)?;
 
             // Banned player can't have records on the list
             if player.banned {
@@ -158,7 +152,8 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                     record.id
                 );
 
-                record.delete(connection)?;
+                //FIXME: reimpl
+                //record.delete(connection)?;
             }
 
             debug!("All duplicates either already accepted, or has lower progress, accepting!");

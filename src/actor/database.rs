@@ -1,12 +1,13 @@
 use crate::{
+    context::{RequestContext, RequestData},
     error::PointercrateError,
     middleware::{
         auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
         cond::IfMatch,
     },
     model::{demon::PartialDemon, user::PatchMe, Model, User},
-    operation::{Delete, Get, Paginate, Paginator, Patch, Post, PostData},
-    permissions::{self, AccessRestrictions, Permissions},
+    operation::{Delete, Get, Paginate, Paginator, Patch, Post},
+    permissions::{self, Permissions},
     view::demonlist::DemonlistOverview,
     Result,
 };
@@ -20,6 +21,7 @@ use diesel::{
     AppearsOnTable, Connection, Expression, QueryDsl, QuerySource, RunQueryDsl,
     SelectableExpression,
 };
+use ipnetwork::IpNetwork;
 use joinery::Joinable;
 use log::{debug, info, trace, warn};
 use std::{hash::Hash, marker::PhantomData};
@@ -84,6 +86,27 @@ impl DatabaseActor {
             None => self.connection(),
         }
     }
+
+    fn connection_for(
+        &self, data: &RequestData,
+    ) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
+        match data {
+            RequestData::External {
+                user: Some(Me(ref user)),
+                ..
+            } => self.audited_connection(user),
+            _ => self.connection(),
+        }
+    }
+
+    fn maybe_audited_connection2(
+        &self, maybe_user: Option<&User>,
+    ) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
+        match maybe_user {
+            Some(user) => self.audited_connection(user),
+            None => self.connection(),
+        }
+    }
 }
 
 impl Actor for DatabaseActor {
@@ -118,6 +141,7 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
                 Permissions::ListModerator,
                 Permissions::ListHelper,
             ),
+            RequestContext::Internal,
             connection,
         )?;
         let all_demons = PartialDemon::all()
@@ -159,7 +183,7 @@ impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
                 if let Authorization::Basic { username, password } = msg.0 {
                     debug!("Trying to authorize user {}", username);
 
-                    let user = User::get(username, &*self.connection()?)
+                    let user = User::get(username, RequestContext::Internal, &*self.connection()?)
                         .map_err(|_| PointercrateError::Unauthorized)?;
 
                     user.verify_password(&password).map(Me)
@@ -189,7 +213,7 @@ impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
                         id
                     );
 
-                    let user = User::get(id, &*self.connection()?)
+                    let user = User::get(id, RequestContext::Internal, &*self.connection()?)
                         .map_err(|_| PointercrateError::Unauthorized)?;
 
                     let user = user.validate_token(&access_token)?;
@@ -241,7 +265,7 @@ impl Handler<Invalidate> for DatabaseActor {
             info!("Invalidating all access tokens for user {}", user.0.id);
 
             self.handle(
-                PatchMessage::<Me, Me, _>::unconditional(user, patch, None),
+                PatchMessage::<Me, Me, _>::new(user, patch, RequestData::Internal),
                 ctx,
             )
             .map(|_| ())
@@ -343,42 +367,23 @@ impl Handler<Basic> for DatabaseActor {
 /// Calls [`Get::get`] with the provided key and a database connection from the internal connection
 /// pool when handled
 #[derive(Debug)]
-pub struct GetMessage<Key, G: Get<Key> + AccessRestrictions>(
-    pub Key,
-    pub Option<User>,
-    pub PhantomData<G>,
-);
+pub struct GetMessage<Key, G: Get<Key>>(pub Key, pub RequestData, pub PhantomData<G>);
 
-impl<Key, G: Get<Key> + AccessRestrictions + 'static> Message for GetMessage<Key, G> {
-    type Result = Result<G>;
-}
-
-impl<Key, G: Get<Key> + AccessRestrictions + 'static> Handler<GetMessage<Key, G>>
-    for DatabaseActor
-{
-    type Result = Result<G>;
-
-    fn handle(&mut self, msg: GetMessage<Key, G>, _: &mut Self::Context) -> Self::Result {
-        G::pre_access(msg.1.as_ref())?;
-
-        let object = G::get(msg.0, &*self.maybe_audited_connection(&msg.1)?)?;
-
-        object.access(msg.1.as_ref())
+impl<Key, G: Get<Key>> GetMessage<Key, G> {
+    pub fn new(key: Key, data: RequestData) -> Self {
+        GetMessage(key, data, PhantomData)
     }
 }
 
-#[derive(Debug)]
-pub struct GetInternal<Key, G: Get<Key>>(pub Key, pub PhantomData<G>);
-
-impl<Key, G: Get<Key> + 'static> Message for GetInternal<Key, G> {
+impl<Key, G: Get<Key> + 'static> Message for GetMessage<Key, G> {
     type Result = Result<G>;
 }
 
-impl<Key, G: Get<Key> + 'static> Handler<GetInternal<Key, G>> for DatabaseActor {
+impl<Key, G: Get<Key> + 'static> Handler<GetMessage<Key, G>> for DatabaseActor {
     type Result = Result<G>;
 
-    fn handle(&mut self, msg: GetInternal<Key, G>, _: &mut Self::Context) -> Self::Result {
-        G::get(msg.0, &*self.connection()?)
+    fn handle(&mut self, msg: GetMessage<Key, G>, _: &mut Self::Context) -> Self::Result {
+        G::get(msg.0, msg.1.ctx(), &*self.connection_for(&msg.1)?)
     }
 }
 
@@ -388,23 +393,17 @@ impl<Key, G: Get<Key> + 'static> Handler<GetInternal<Key, G>> for DatabaseActor 
 ///
 /// Calls [`Post::create_from`] with the provided [`PostData`] when handled
 #[derive(Debug)]
-pub struct PostMessage<T: PostData, P: Post<T> + 'static>(
-    pub T,
-    pub Option<User>,
-    pub PhantomData<P>,
-);
+pub struct PostMessage<T, P: Post<T> + 'static>(pub T, pub RequestData, pub PhantomData<P>);
 
-impl<T: PostData, P: Post<T> + 'static> Message for PostMessage<T, P> {
+impl<T, P: Post<T> + 'static> Message for PostMessage<T, P> {
     type Result = Result<P>;
 }
 
-impl<T: PostData, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseActor {
+impl<T, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseActor {
     type Result = Result<P>;
 
     fn handle(&mut self, msg: PostMessage<T, P>, _: &mut Self::Context) -> Self::Result {
-        permissions::demand(msg.0.required_permissions(), msg.1.as_ref())?;
-
-        P::create_from(msg.0, &*self.maybe_audited_connection(&msg.1)?)
+        P::create_from(msg.0, msg.1.ctx(), &*self.connection_for(&msg.1)?)
     }
 }
 
@@ -412,12 +411,7 @@ impl<T: PostData, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseA
 ///
 /// Called [`Delete::delete`] when handled
 #[derive(Debug)]
-pub struct DeleteMessage<Key, D>(
-    pub Key,
-    pub Option<IfMatch>,
-    pub Option<User>,
-    pub PhantomData<D>,
-)
+pub struct DeleteMessage<Key, D>(pub Key, pub RequestData, pub PhantomData<D>)
 where
     D: Get<Key> + Delete + Hash;
 
@@ -425,116 +419,106 @@ impl<Key, D> DeleteMessage<Key, D>
 where
     D: Get<Key> + Delete + Hash,
 {
-    pub fn unconditional(key: Key) -> Self {
-        DeleteMessage(key, None, None, PhantomData)
-    }
-
-    pub fn new(key: Key, if_match: IfMatch, user: Option<User>) -> Self {
-        DeleteMessage(key, Some(if_match), user, PhantomData)
+    pub fn new(key: Key, data: RequestData) -> Self {
+        DeleteMessage(key, data, PhantomData)
     }
 }
 
 impl<Key, D> Message for DeleteMessage<Key, D>
 where
-    D: Get<Key> + Delete + AccessRestrictions + Hash,
+    D: Get<Key> + Delete + Hash,
 {
     type Result = Result<()>;
 }
 
 impl<Key, D> Handler<DeleteMessage<Key, D>> for DatabaseActor
 where
-    D: Get<Key> + Delete + AccessRestrictions + Hash,
+    D: Get<Key> + Delete + Hash,
 {
     type Result = Result<()>;
 
-    fn handle(&mut self, msg: DeleteMessage<Key, D>, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.maybe_audited_connection(&msg.2)?;
+    fn handle(
+        &mut self, DeleteMessage(key, data, _): DeleteMessage<Key, D>, _: &mut Self::Context,
+    ) -> Self::Result {
+        let connection = &*self.connection_for(&data)?;
+        let ctx = data.ctx();
 
-        connection.transaction(|| {
-            D::pre_access(msg.2.as_ref())?;
-
-            let object = D::get(msg.0, connection)?.access(msg.2.as_ref())?;
-            object.pre_delete(msg.2.as_ref())?;
-
-            match msg.1 {
-                Some(condition) => object.delete_if_match(condition, connection),
-                None => object.delete(connection),
-            }
-        })
+        connection.transaction(|| D::get(key, ctx, connection)?.delete(ctx, connection))
     }
 }
 
 #[derive(Debug)]
-pub struct PatchMessage<Key, P, H>
-where
-    P: Get<Key> + AccessRestrictions + Patch<H> + Hash,
-{
-    key: Key,
-    patch_data: H,
-    condition: Option<IfMatch>,
-    patcher: Option<User>,
-    phantom: PhantomData<P>,
+pub(super) struct DeleteRecordDirectly(pub i32);
+
+impl Message for DeleteRecordDirectly {
+    type Result = Result<()>;
 }
+
+impl Handler<DeleteRecordDirectly> for DatabaseActor {
+    type Result = Result<()>;
+
+    fn handle(&mut self, msg: DeleteRecordDirectly, ctx: &mut Self::Context) -> Self::Result {
+        use diesel::ExpressionMethods;
+
+        let connection = &*self.connection()?;
+
+        diesel::delete(crate::schema::records::table)
+            .filter(crate::schema::records::id.eq(msg.0))
+            .execute(connection)
+            .map(|_| ())
+            .map_err(PointercrateError::database)
+    }
+}
+
+#[derive(Debug)]
+pub struct PatchMessage<Key, P, H>(Key, H, RequestData, PhantomData<P>)
+where
+    P: Get<Key> + Patch<H> + Hash;
 
 impl<Key, P, H> PatchMessage<Key, P, H>
 where
-    P: Get<Key> + AccessRestrictions + Patch<H> + Hash,
+    P: Get<Key> + Patch<H> + Hash,
 {
-    pub fn unconditional(key: Key, fix: H, patcher: Option<User>) -> Self {
-        PatchMessage::new(key, fix, patcher, None)
-    }
-
-    pub fn new(key: Key, fix: H, patcher: Option<User>, if_match: Option<IfMatch>) -> Self {
-        PatchMessage {
-            key,
-            patch_data: fix,
-            condition: if_match,
-            patcher,
-            phantom: PhantomData,
-        }
+    pub fn new(key: Key, fix: H, request_data: RequestData) -> Self {
+        PatchMessage(key, fix, request_data, PhantomData)
     }
 }
 
 impl<Key, P, H> Message for PatchMessage<Key, P, H>
 where
-    P: Get<Key> + AccessRestrictions + Patch<H> + Hash + 'static,
+    P: Get<Key> + Patch<H> + Hash + 'static,
 {
     type Result = Result<P>;
 }
 
 impl<Key, P, H> Handler<PatchMessage<Key, P, H>> for DatabaseActor
 where
-    P: Get<Key> + AccessRestrictions + Patch<H> + Hash + 'static,
+    P: Get<Key> + Patch<H> + Hash + 'static,
 {
     type Result = Result<P>;
 
-    fn handle(&mut self, msg: PatchMessage<Key, P, H>, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.maybe_audited_connection(&msg.patcher)?;
+    fn handle(
+        &mut self, PatchMessage(key, patch_data, request_data, _): PatchMessage<Key, P, H>,
+        _: &mut Self::Context,
+    ) -> Self::Result {
+        let connection = &*self.connection_for(&request_data)?;
+        let ctx = request_data.ctx();
 
         connection.transaction(|| {
-            P::pre_access(msg.patcher.as_ref())?;
+            let object = P::get(key, ctx, connection)?;
 
-            let object = P::get(msg.key, connection)?.access(msg.patcher.as_ref())?;
-            object.pre_patch(msg.patcher.as_ref())?;
+            ctx.check_if_match(&object)?;
 
-            permissions::demand(
-                object.permissions_for(&msg.patch_data),
-                msg.patcher.as_ref(),
-            )?;
-
-            match msg.condition {
-                Some(condition) => object.patch_if_match(msg.patch_data, condition, connection),
-                None => object.patch(msg.patch_data, connection),
-            }
+            object.patch(patch_data, ctx, connection)
         })
     }
 }
 
 #[derive(Debug)]
-pub struct PaginateMessage<P, D>(pub D, pub String, pub Option<User>, pub PhantomData<P>)
+pub struct PaginateMessage<P, D>(pub D, pub String, pub RequestData, pub PhantomData<P>)
 where
     D: Paginator<Model = P>,
-    P: Paginate<D> + AccessRestrictions,
+    P: Paginate<D>,
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -553,7 +537,7 @@ where
 impl<P, D> Message for PaginateMessage<P, D>
 where
     D: Paginator<Model = P>,
-    P: Paginate<D> + AccessRestrictions+ 'static,
+    P: Paginate<D> + 'static,
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -575,7 +559,7 @@ where
 impl<P, D> Handler<PaginateMessage<P, D>> for DatabaseActor
 where
     D: Paginator<Model = P>,
-    P: Paginate<D> + AccessRestrictions +'static,
+    P: Paginate<D> + 'static,
     <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
     <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
     Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -594,11 +578,10 @@ where
     type Result = Result<(Vec<P>, String)>;
 
     fn handle(&mut self, msg: PaginateMessage<P, D>, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.maybe_audited_connection(&msg.2)?;
+        let connection = &*self.connection_for(&msg.2)?;
+        let ctx = msg.2.ctx();
 
-        P::pre_page_access(msg.2.as_ref())?;
-
-        let result = P::page_access(P::load(&msg.0, connection)?, msg.2.as_ref())?;
+        let result = P::load(&msg.0, ctx, connection)?;
 
         let first = msg.0.first(connection)?.map(|d| {
             format!(

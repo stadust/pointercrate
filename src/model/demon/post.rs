@@ -1,8 +1,9 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     model::{creator::Creator, EmbeddedPlayer},
-    operation::{Get, Post, PostData},
+    operation::{Get, Post},
     permissions::PermissionsSet,
     schema::demons,
     video, Result,
@@ -34,7 +35,11 @@ pub struct NewDemon<'a> {
 }
 
 impl Post<PostDemon> for Demon {
-    fn create_from(mut data: PostDemon, connection: &PgConnection) -> Result<Demon> {
+    fn create_from(
+        mut data: PostDemon, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Demon> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
         info!("Creating new demon from {:?}", data);
 
         Demon::validate_requirement(&mut data.requirement)?;
@@ -48,8 +53,8 @@ impl Post<PostDemon> for Demon {
             Demon::validate_name(&mut data.name, connection)?;
             Demon::validate_position(&mut data.position, connection)?;
 
-            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), connection)?;
-            let verifier = EmbeddedPlayer::get(data.verifier.as_ref(), connection)?;
+            let publisher = EmbeddedPlayer::get(data.publisher.as_ref(), ctx,  connection)?;
+            let verifier = EmbeddedPlayer::get(data.verifier.as_ref(), ctx, connection)?;
 
             let new = NewDemon {
                 name: data.name.as_ref(),
@@ -67,7 +72,11 @@ impl Post<PostDemon> for Demon {
                 .execute(connection)?;
 
             for creator in &data.creators {
-                Creator::create_from((data.name.as_ref(), creator.as_ref()), connection)?;
+                Creator::create_from(
+                    (data.name.as_ref(), creator.as_ref()),
+                    RequestContext::Internal,
+                    connection,
+                )?;
             }
 
             Ok(Demon {
@@ -83,13 +92,9 @@ impl Post<PostDemon> for Demon {
 }
 
 impl Post<PostDemon> for DemonWithCreatorsAndRecords {
-    fn create_from(data: PostDemon, connection: &PgConnection) -> Result<Self> {
-        DemonWithCreatorsAndRecords::get(Demon::create_from(data, connection)?, connection)
-    }
-}
-
-impl PostData for PostDemon {
-    fn required_permissions(&self) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
+    fn create_from(
+        data: PostDemon, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
+        DemonWithCreatorsAndRecords::get(Demon::create_from(data, ctx, connection)?, ctx, connection)
     }
 }

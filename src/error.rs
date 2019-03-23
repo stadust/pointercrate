@@ -95,7 +95,10 @@ pub enum PointercrateError {
     ///
     /// Error Code `40304`
     //#[fail(display = "You are banned from submitting records to the demonlist!")]
-    #[fail(display = "Submitters are currently only allowed on a case-by-case basis. Please ask a list mod to approve the following ID: {}", _0)]
+    #[fail(
+        display = "Submitters are currently only allowed on a case-by-case basis. Please ask a list mod to approve the following ID: {}",
+        _0
+    )]
     BannedFromSubmissions(i32),
 
     /// `404 NOT FOUND`
@@ -340,6 +343,9 @@ pub enum PointercrateError {
     )]
     InternalServerError,
 
+    #[fail(display = "The server internally entered an invalid state: {}", _0)]
+    InvalidInternalStateError { cause: &'static str },
+
     /// `500 INTERNAL SERVER ERROR`
     ///
     /// Error Code `50003`
@@ -383,6 +389,12 @@ impl PointercrateError {
         error!("Internal server error: {0}!\t\tDebug output: {0:?}", error);
 
         PointercrateError::InternalServerError
+    }
+
+    pub fn invalid_state(message: &'static str) -> PointercrateError {
+        error!("Internal server error: {}!", message);
+
+        PointercrateError::InvalidInternalStateError { cause: message }
     }
 
     pub fn bad_request(message: &str) -> PointercrateError {
@@ -443,6 +455,7 @@ impl PointercrateError {
             PointercrateError::PreconditionRequired => 42800,
 
             PointercrateError::InternalServerError => 50000,
+            PointercrateError::InvalidInternalStateError { .. } => 50001,
             PointercrateError::DatabaseError => 50003,
             PointercrateError::DatabaseConnectionError => 50005,
         }

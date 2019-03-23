@@ -1,5 +1,6 @@
 use crate::{
     citext::{CiString, CiText},
+    context::RequestContext,
     error::PointercrateError,
     model::{
         player::{players_with_score, RankedPlayer2, ShortPlayer},
@@ -66,10 +67,17 @@ impl Paginator for PlayerPagination {
 }
 
 impl Paginate<PlayerPagination> for ShortPlayer {
-    fn load(pagination: &PlayerPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(
+        pagination: &PlayerPagination, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Vec<Self>> {
+        // FIXME: we can move this check to the database actor
         if pagination.limit() > 100 || pagination.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)
         }
+
+        ctx.check_permissions(
+            perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
+        )?;
 
         let mut query = pagination.filter(ShortPlayer::boxed_all());
 
@@ -102,8 +110,7 @@ impl Paginator for RankingPagination {
     fn filter<'a, ST>(
         &'a self,
         mut query: BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg>,
-    ) -> BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg>
-    {
+    ) -> BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg> {
         filter!(query[players_with_score::iso_country_code = self.nation]);
 
         if let Some(ref like_name) = self.name_contains {
@@ -142,7 +149,9 @@ impl Paginator for RankingPagination {
 }
 
 impl Paginate<RankingPagination> for RankedPlayer2 {
-    fn load(pagination: &RankingPagination, connection: &PgConnection) -> Result<Vec<Self>> {
+    fn load(
+        pagination: &RankingPagination, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Vec<Self>> {
         let mut query = pagination.filter(RankedPlayer2::boxed_all());
 
         filter!(query[

@@ -1,4 +1,4 @@
-use crate::{actor::database::DeleteMessage, model::record::Record};
+use crate::{actor::database::DeleteMessage, context::RequestData, model::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
 use chrono::Duration;
 use gdcf::{
@@ -14,13 +14,13 @@ use gdcf_model::{
 };
 use gdrs::BoomlingsClient;
 use log::{debug, error, info, warn};
+use reqwest::r#async::Client;
 use serde_json::json;
 use std::sync::Arc;
 use tokio::{
     self,
     prelude::future::{result, Either, Future},
 };
-use reqwest::r#async::Client;
 
 /// Actor for whatever the fuck just happens to need to be done and isn't database access
 #[allow(missing_debug_implementations)]
@@ -49,7 +49,9 @@ impl HttpActor {
         HttpActor {
             deletor,
             gdcf: Gdcf::new(client, cache),
-            http_client: Client::builder().build().expect("Failed to create reqwest client"),
+            http_client: Client::builder()
+                .build()
+                .expect("Failed to create reqwest client"),
             discord_webhook_url: Arc::new(std::env::var("DISCORD_WEBHOOK").ok()),
         }
         .start()
@@ -265,7 +267,7 @@ impl Handler<PostProcessRecord> for HttpActor {
                     warn!("A HEAD request to video yielded an error response, automatically deleting submission!");
 
                     deletor
-                        .send(DeleteMessage::unconditional(record_id))
+                        .send(DeleteMessage::new(record_id, RequestData::Internal))
                         .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to delete record {} - {:?}!", record_id, error))
                         .map(|_| ())
                         .and_then(|_| Err(()))

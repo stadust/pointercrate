@@ -1,6 +1,7 @@
 use super::{Record, RecordStatus};
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     error::PointercrateError,
     model::{
         demon::{Demon, EmbeddedDemon},
@@ -27,7 +28,11 @@ make_patch! {
 }
 
 impl Patch<PatchRecord> for Record {
-    fn patch(mut self, mut patch: PatchRecord, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        mut self, mut patch: PatchRecord, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
+        ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
+
         info!("Patching record {} with {}", self, patch);
 
         validate_nullable!(patch: Record::validate_video[video]);
@@ -37,6 +42,7 @@ impl Patch<PatchRecord> for Record {
                 None => self.demon.name.as_ref(),
                 Some(ref demon) => demon.as_ref(),
             },
+            ctx,
             connection,
         )?;
         let progress = patch.progress.unwrap_or(self.progress);
@@ -53,7 +59,7 @@ impl Patch<PatchRecord> for Record {
                 position: demon.position,
             }
         };
-        let map2 = |name: &CiStr| EmbeddedPlayer::get(name, connection);
+        let map2 = |name: &CiStr| EmbeddedPlayer::get(name, ctx, connection);
 
         map_patch!(self, patch: map => demon);
         try_map_patch!(self, patch: map2 => player);
@@ -104,9 +110,5 @@ impl Patch<PatchRecord> for Record {
 
                 Ok(self)
         })
-    }
-
-    fn permissions_for(&self, _: &PatchRecord) -> PermissionsSet {
-        perms!(ListHelper or ListModerator or ListAdministrator)
     }
 }

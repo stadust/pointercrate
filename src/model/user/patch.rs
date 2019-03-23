@@ -1,5 +1,6 @@
 use super::{Permissions, PermissionsSet, User};
 use crate::{
+    context::RequestContext,
     middleware::auth::Me,
     operation::{deserialize_non_optional, deserialize_optional, Patch},
     schema::members,
@@ -8,6 +9,7 @@ use crate::{
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
+use crate::error::PointercrateError;
 
 make_patch! {
     struct PatchMe {
@@ -25,7 +27,9 @@ make_patch! {
 }
 
 impl Patch<PatchMe> for Me {
-    fn patch(mut self, mut patch: PatchMe, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        mut self, mut patch: PatchMe, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
         //info!("Patching user {} with {}", self, patch);
 
         validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
@@ -43,15 +47,45 @@ impl Patch<PatchMe> for Me {
 
         Ok(self)
     }
-
-    fn permissions_for(&self, _: &PatchMe) -> PermissionsSet {
-        // We can always modify our own account
-        PermissionsSet::default()
-    }
 }
 
 impl Patch<PatchUser> for User {
-    fn patch(mut self, mut patch: PatchUser, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        mut self, mut patch: PatchUser, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
+        match patch {
+            PatchUser {
+                display_name: None,
+                permissions: None,
+            } => ctx.check_permissions(perms!(Administrator))?,
+
+            PatchUser {
+                display_name: Some(_),
+                permissions: None,
+            } => ctx.check_permissions(perms!(Moderator))?,
+
+            PatchUser {
+                display_name: None,
+                permissions: Some(ref perms),
+            } => ctx.check_permissions((*perms ^ self.permissions()).assignable_from())?,
+
+            PatchUser {
+                display_name: Some(_),
+                permissions: Some(ref perms),
+            } =>
+                ctx.check_permissions(
+                    (*perms ^ self.permissions())
+                        .assignable_from()
+                        .cross(&PermissionsSet::one(Permissions::Moderator)),
+                )?,
+        }
+
+        if let RequestContext::External { user, .. } = ctx {
+            if &self == user.unwrap() {
+                return Err(PointercrateError::PatchSelf)
+            }
+        }
+
         info!("Patching user {} with {}", self, patch);
 
         validate_nullable!(patch: User::validate_name[display_name]);
@@ -67,32 +101,5 @@ impl Patch<PatchUser> for User {
             .execute(connection)?;
 
         Ok(self)
-    }
-
-    fn permissions_for(&self, patch: &PatchUser) -> PermissionsSet {
-        match patch {
-            PatchUser {
-                display_name: None,
-                permissions: None,
-            } => perms!(Administrator),
-
-            PatchUser {
-                display_name: Some(_),
-                permissions: None,
-            } => perms!(Moderator),
-
-            PatchUser {
-                display_name: None,
-                permissions: Some(perms),
-            } => (*perms ^ self.permissions()).assignable_from(),
-
-            PatchUser {
-                display_name: Some(_),
-                permissions: Some(perms),
-            } =>
-                (*perms ^ self.permissions())
-                    .assignable_from()
-                    .cross(&PermissionsSet::one(Permissions::Moderator)),
-        }
     }
 }

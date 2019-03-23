@@ -268,19 +268,8 @@ impl PermissionsSet {
         self.perms.is_empty()
     }
 }
-
+/*
 pub trait AccessRestrictions {
-    fn pre_access(_: Option<&User>) -> Result<()> {
-        Ok(())
-    }
-
-    fn access(self, _: Option<&User>) -> Result<Self>
-    where
-        Self: Sized,
-    {
-        Ok(self)
-    }
-
     fn pre_page_access(_: Option<&User>) -> Result<()> {
         Ok(())
     }
@@ -290,10 +279,6 @@ pub trait AccessRestrictions {
         Self: Sized,
     {
         Ok(page)
-    }
-
-    fn pre_delete(&self, _: Option<&User>) -> Result<()> {
-        Ok(())
     }
 
     fn pre_patch(&self, _: Option<&User>) -> Result<()> {
@@ -315,7 +300,7 @@ pub fn demand(permissions: PermissionsSet, user: Option<&User>) -> Result<()> {
         _ => Ok(()),
     }
 }
-
+*/
 impl Display for PermissionsSet {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         let mut sep = "";

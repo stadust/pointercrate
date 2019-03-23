@@ -1,12 +1,22 @@
 use super::User;
 use crate::{
-    error::PointercrateError, middleware::auth::Me, operation::Delete, schema::members, Result,
+    context::RequestContext, error::PointercrateError, middleware::auth::Me, operation::Delete,
+    schema::members, Result,
 };
 use diesel::{delete, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 
 impl Delete for User {
-    fn delete(self, connection: &PgConnection) -> Result<()> {
+    fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()> {
+        ctx.check_permissions(perms!(Administrator))?;
+        ctx.check_if_match(&self)?;
+
+        if let RequestContext::External { user, .. } = ctx {
+            if &self == user.unwrap() {
+                return Err(PointercrateError::DeleteSelf)
+            }
+        }
+
         info!("Deleting user {}", self);
 
         delete(members::table)
@@ -18,7 +28,7 @@ impl Delete for User {
 }
 
 impl Delete for Me {
-    fn delete(self, connection: &PgConnection) -> Result<()> {
+    fn delete(self, ctx: RequestContext, connection: &PgConnection) -> Result<()> {
         info!("Self-deleting user {}", self.0);
 
         delete(members::table)

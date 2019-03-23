@@ -19,6 +19,7 @@ use gdcf_model::{
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
+use crate::middleware::auth::Token;
 
 struct ListSection {
     name: &'static str,
@@ -200,8 +201,9 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"))
         .into_future()
         .and_then(move |position| {
-            state.get_unauthorized(position.into_inner()).and_then(
-                move |data: DemonWithCreatorsAndRecords| {
+            state
+                .get::<Token, _, _>(&req_clone, position.into_inner())
+                .and_then(move |data: DemonWithCreatorsAndRecords| {
                     state
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
@@ -220,8 +222,7 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                                     .unwrap()
                                 })
                         })
-                },
-            )
+                })
         })
         .responder()
 }

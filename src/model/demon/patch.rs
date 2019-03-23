@@ -10,6 +10,7 @@ use crate::{
 use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
+use crate::context::RequestContext;
 
 make_patch! {
     struct PatchDemon {
@@ -23,13 +24,15 @@ make_patch! {
 }
 
 impl Patch<PatchDemon> for Demon {
-    fn patch(mut self, mut patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchDemon, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
         info!("Patching demon {} with {}", self.name, patch);
 
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name: &CiStr| EmbeddedPlayer::get(name, connection);
+        let map = |name: &CiStr| EmbeddedPlayer::get(name, ctx, connection);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);
@@ -58,30 +61,22 @@ impl Patch<PatchDemon> for Demon {
             Ok(self)
         })
     }
-
-    fn permissions_for(&self, _: &PatchDemon) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
-    }
 }
 
 impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
-    fn patch(self, patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+    fn patch(self, patch: PatchDemon, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         let DemonWithCreatorsAndRecords {
             demon,
             creators,
             records,
         } = self;
 
-        let demon = demon.patch(patch, connection)?;
+        let demon = demon.patch(patch, ctx, connection)?;
 
         Ok(DemonWithCreatorsAndRecords {
             demon,
             creators,
             records,
         })
-    }
-
-    fn permissions_for(&self, _: &PatchDemon) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }

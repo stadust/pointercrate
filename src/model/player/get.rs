@@ -1,20 +1,24 @@
 use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
 use crate::{
     citext::CiStr,
+    context::RequestContext,
     error::PointercrateError,
     model::{
-        creator::created_by, demon::EmbeddedDemon, player::ShortPlayer, user::User, By, Model,
+        creator::created_by,
+        demon::EmbeddedDemon,
+        player::{RankedPlayer2, ShortPlayer},
+        user::User,
+        By, Model,
     },
     operation::Get,
-    permissions::{self, AccessRestrictions},
+    permissions,
     schema::demons,
     Result,
 };
 use diesel::{result::Error, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
-use crate::model::player::RankedPlayer2;
 
 impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
-    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
+    fn get(name: &'a CiStr, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         let name = CiStr::from_str(name.trim());
 
         match EmbeddedPlayer::by(name).first(connection) {
@@ -27,7 +31,7 @@ impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
 }
 
 impl Get<i32> for EmbeddedPlayer {
-    fn get(id: i32, connection: &PgConnection) -> Result<Self> {
+    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match EmbeddedPlayer::by(id).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
@@ -41,7 +45,7 @@ impl Get<i32> for EmbeddedPlayer {
 }
 
 impl Get<i32> for ShortPlayer {
-    fn get(id: i32, connection: &PgConnection) -> Result<Self> {
+    fn get(id: i32, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         match ShortPlayer::by(id).first(connection) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
@@ -58,12 +62,12 @@ impl<T> Get<T> for PlayerWithDemonsAndRecords
 where
     ShortPlayer: Get<T>,
 {
-    fn get(t: T, connection: &PgConnection) -> Result<Self> {
-        let player = ShortPlayer::get(t, connection)?;
+    fn get(t: T, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+        let player = ShortPlayer::get(t, ctx, connection)?;
         let pid = player.inner.id;
 
         Ok(PlayerWithDemonsAndRecords {
-            records: Get::get(pid, connection)?,
+            records: Get::get(pid, ctx, connection)?,
             created: created_by(pid).load(connection)?,
             verified: EmbeddedDemon::all()
                 .filter(demons::verifier.eq(&pid))
@@ -75,16 +79,3 @@ where
         })
     }
 }
-
-// Everyone can access player objects (through the stats viewer)
-impl AccessRestrictions for ShortPlayer {
-    fn pre_page_access(user: Option<&User>) -> Result<()> {
-        permissions::demand(
-            perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
-            user,
-        )
-    }
-}
-impl AccessRestrictions for PlayerWithDemonsAndRecords {}
-impl AccessRestrictions for EmbeddedPlayer {}
-impl AccessRestrictions for RankedPlayer2 {}

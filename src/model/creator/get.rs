@@ -1,17 +1,18 @@
 use super::{Creator, Creators};
 use crate::{
     citext::CiStr,
+    context::RequestContext,
     error::PointercrateError,
     model::{user::User, Demon},
     operation::Get,
-    permissions::{self, AccessRestrictions},
+    permissions::{self},
     schema::creators,
     Result,
 };
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Creators {
-    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
+    fn get(name: &'a CiStr, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
         super::creators_of(name)
             .load(connection)
             .map(Creators)
@@ -20,8 +21,10 @@ impl<'a> Get<&'a CiStr> for Creators {
 }
 
 impl Get<(i16, i32)> for Creator {
-    fn get((demon_position, player_id): (i16, i32), connection: &PgConnection) -> Result<Self> {
-        let demon = Demon::get(demon_position, connection)?;
+    fn get(
+        (demon_position, player_id): (i16, i32), ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
+        let demon = Demon::get(demon_position, ctx, connection)?;
 
         creators::table
             .select((creators::demon, creators::creator))
@@ -32,8 +35,3 @@ impl Get<(i16, i32)> for Creator {
     }
 }
 
-impl AccessRestrictions for Creator {
-    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(ListModerator or ListAdministrator), user)
-    }
-}

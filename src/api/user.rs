@@ -19,13 +19,13 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let pagination = serde_urlencoded::from_str(query_string)
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
+    let req = req.clone();
 
     pagination
         .into_future()
         .and_then(move |pagination: UserPagination| {
-            state.paginate::<Token, User, _>(pagination, "/api/v1/users/".to_string(), auth)
+            req.state()
+                .paginate::<Token, User, _>(&req, pagination, "/api/v1/users/".to_string())
         })
         .map(|(users, links)| HttpResponse::Ok().header("Links", links).json(users))
         .responder()

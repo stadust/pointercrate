@@ -1,6 +1,7 @@
 use super::Page;
 use crate::{
-    api::PCResponder, model::user::User, permissions::Permissions, state::PointercrateState,
+    actor::database::GetMessage, api::PCResponder, context::RequestData, model::user::User,
+    permissions::Permissions, state::PointercrateState,
 };
 use actix_web::{AsyncResponder, HttpRequest, Responder};
 use maud::{html, Markup, PreEscaped};
@@ -16,7 +17,10 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
 
     req.state()
-        .get_internal((Permissions::ListAdministrator, Permissions::Administrator))
+        .database(GetMessage::new(
+            (Permissions::ListAdministrator, Permissions::Administrator),
+            RequestData::Internal,
+        ))
         .map(move |(demonlist_team, pointercrate_team)| {
             Homepage {
                 demonlist_team,

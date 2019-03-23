@@ -1,6 +1,7 @@
 use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
 use crate::{
     citext::CiString,
+    context::RequestContext,
     error::PointercrateError,
     model::{nationality::Nationality, player::ShortPlayer, By},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
@@ -21,7 +22,11 @@ make_patch! {
 }
 
 impl Patch<PatchPlayer> for ShortPlayer {
-    fn patch(mut self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        mut self, patch: PatchPlayer, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
         info!("Patching player {} with {}", self, patch);
 
         connection.transaction(|| {
@@ -43,7 +48,7 @@ impl Patch<PatchPlayer> for ShortPlayer {
 
             if let Some(nationality) = patch.nationality {
                 self.nationality = nationality
-                    .map(|nation| Nationality::get(nation.as_ref(), connection))
+                    .map(|nation| Nationality::get(nation.as_ref(), ctx, connection))
                     .transpose()?;
             }
 
@@ -61,14 +66,12 @@ impl Patch<PatchPlayer> for ShortPlayer {
             Ok(self)
         })
     }
-
-    fn permissions_for(&self, _: &PatchPlayer) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
-    }
 }
 
 impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
-    fn patch(self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
+    fn patch(
+        self, patch: PatchPlayer, ctx: RequestContext, connection: &PgConnection,
+    ) -> Result<Self> {
         let PlayerWithDemonsAndRecords {
             player,
             records,
@@ -77,7 +80,7 @@ impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
             published,
         } = self;
 
-        let player = player.patch(patch, connection)?;
+        let player = player.patch(patch, ctx, connection)?;
 
         Ok(PlayerWithDemonsAndRecords {
             player,
@@ -86,9 +89,5 @@ impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
             verified,
             published,
         })
-    }
-
-    fn permissions_for(&self, _: &PatchPlayer) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }

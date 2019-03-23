@@ -8,6 +8,7 @@ use crate::{
 use diesel::{ExpressionMethods, PgConnection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
+use crate::context::RequestContext;
 
 make_patch! {
     struct PatchSubmitter {
@@ -16,7 +17,9 @@ make_patch! {
 }
 
 impl Patch<PatchSubmitter> for Submitter {
-    fn patch(mut self, patch: PatchSubmitter, connection: &PgConnection) -> Result<Self> {
+    fn patch(mut self, patch: PatchSubmitter, ctx: RequestContext, connection: &PgConnection) -> Result<Self> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
         info!("Patching player {} with {}", self.id, patch);
 
         patch!(self, patch: banned);
@@ -27,9 +30,5 @@ impl Patch<PatchSubmitter> for Submitter {
             .execute(connection)?;
 
         Ok(self)
-    }
-
-    fn permissions_for(&self, _: &PatchSubmitter) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }

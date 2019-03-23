@@ -57,6 +57,18 @@ impl TAuthType for Token {
 #[serde(transparent)]
 pub struct Me(pub User);
 
+impl PartialEq<User> for Me {
+    fn eq(&self, other: &User) -> bool {
+        &self.0 == other
+    }
+}
+
+impl PartialEq<Me> for User {
+    fn eq(&self, other: &Me) -> bool {
+        self == &other.0
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub id: i32,

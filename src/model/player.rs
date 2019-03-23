@@ -5,6 +5,7 @@ pub use self::{
 use super::Model;
 use crate::{
     citext::{CiStr, CiString},
+    error::PointercrateError,
     model::{
         demon::EmbeddedDemon,
         nationality::Nationality,
@@ -190,9 +191,11 @@ impl EmbeddedPlayer {
             .set(records::player.eq(self.id))
             .execute(conn)?;
 
-        with.delete(conn)?;
-
-        Ok(())
+        diesel::delete(players::table)
+            .filter(players::id.eq(with.id))
+            .execute(conn)
+            .map(|_| ())
+            .map_err(PointercrateError::database)
     }
 }
 
