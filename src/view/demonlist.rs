@@ -1,10 +1,13 @@
 use super::Page;
 use crate::{
-    actor::{database::GetDemonlistOverview, http::GetDemon},
+    actor::{
+        database::{GetDemonlistOverview, GetMessage},
+        http::GetDemon,
+    },
     api::PCResponder,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    context::RequestData,
     error::PointercrateError,
-    middleware::auth::Token,
     model::{
         demon::{self, Demon, DemonWithCreatorsAndRecords, PartialDemon},
         user::User,
@@ -196,13 +199,14 @@ pub struct Demonlist {
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
     let state = req.state().clone();
+    let request_data = RequestData::from_request(req);
 
     Path::<i16>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"))
         .into_future()
         .and_then(move |position| {
             state
-                .get::<Token, _, _>(&req_clone, position.into_inner())
+                .database(GetMessage::new(position.into_inner(), request_data))
                 .and_then(move |data: DemonWithCreatorsAndRecords| {
                     state
                         .database(GetDemonlistOverview)
