@@ -553,25 +553,25 @@ where
 
         let result = P::load(&msg.0, ctx)?;
 
-        let first = msg.0.first(connection)?.map(|d| {
+        let first = msg.0.first(ctx)?.map(|d| {
             format!(
                 "<{}?{}>; rel=first",msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
-        let last = msg.0.last(connection)?.map(|d| {
+        let last = msg.0.last(ctx)?.map(|d| {
             format!(
                 "<{}?{}>; rel=last",msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
-        let next = msg.0.next(connection)?.map(|d| {
+        let next = msg.0.next(ctx)?.map(|d| {
             format!(
                 "<{}?{}>; rel=next",msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
-        let prev = msg.0.prev(connection)?.map(|d| {
+        let prev = msg.0.prev(ctx)?.map(|d| {
             format!(
                 "<{}?{}>; rel=prev", msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()

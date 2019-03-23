@@ -16,10 +16,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 #![recursion_limit = "512"]
 
-// TODO: manual deserialization of json and urlencoded (for pagaination) request data so we can
-// provided better error reporting
-
-// idk why we still need this extern crate, but removing it break the diesel derives
+// diesel refuses to upgrade to rust 2018, so we're stuck with this extern crate declaration
 #[macro_use]
 extern crate diesel;
 

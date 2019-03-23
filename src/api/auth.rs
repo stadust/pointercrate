@@ -6,7 +6,7 @@ use crate::{
     context::RequestData,
     middleware::{
         auth::{Basic, Me, Token},
-        cond::{HttpResponseBuilderExt},
+        cond::HttpResponseBuilderExt,
     },
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,

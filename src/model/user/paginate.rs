@@ -63,7 +63,7 @@ impl Paginate<UserPagination> for User {
     fn load(pagination: &UserPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         ctx.check_permissions(perms!(Administrator))?;
 
-        let mut query = pagination.filter(User::boxed_all());
+        let mut query = pagination.filter(User::boxed_all(), ctx);
 
         // FIXME: this needs to happen in the filter method!
         if let Some(permissions) = pagination.has_permissions {

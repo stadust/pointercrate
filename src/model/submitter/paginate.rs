@@ -59,7 +59,7 @@ impl Paginate<SubmitterPagination> for Submitter {
     fn load(pagination: &SubmitterPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         ctx.check_permissions(perms!(ListAdministrator))?;
 
-        let mut query = pagination.filter(Submitter::boxed_all());
+        let mut query = pagination.filter(Submitter::boxed_all(), ctx);
 
         filter!(query[
             submitters::submitter_id > pagination.after_id,

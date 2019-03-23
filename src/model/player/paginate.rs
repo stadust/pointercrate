@@ -70,7 +70,7 @@ impl Paginate<PlayerPagination> for ShortPlayer {
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
         )?;
 
-        let mut query = pagination.filter(ShortPlayer::boxed_all());
+        let mut query = pagination.filter(ShortPlayer::boxed_all(), ctx);
 
         filter!(query[
             players::id > pagination.after_id,
@@ -101,6 +101,7 @@ impl Paginator for RankingPagination {
     fn filter<'a, ST>(
         &'a self,
         mut query: BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg>,
+        _ctx: RequestContext,
     ) -> BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg> {
         filter!(query[players_with_score::iso_country_code = self.nation]);
 
@@ -141,7 +142,7 @@ impl Paginator for RankingPagination {
 
 impl Paginate<RankingPagination> for RankedPlayer2 {
     fn load(pagination: &RankingPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(RankedPlayer2::boxed_all());
+        let mut query = pagination.filter(RankedPlayer2::boxed_all(), ctx);
 
         filter!(query[
             players_with_score::index > pagination.after_id,

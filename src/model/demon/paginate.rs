@@ -70,7 +70,7 @@ impl Paginator for DemonPagination {
 
 impl Paginate<DemonPagination> for PartialDemon {
     fn load(pagination: &DemonPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(PartialDemon::boxed_all());
+        let mut query = pagination.filter(PartialDemon::boxed_all(), ctx);
 
         filter!(query[
             demons::position > pagination.after_position,
