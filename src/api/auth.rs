@@ -6,7 +6,7 @@ use crate::{
     context::RequestData,
     middleware::{
         auth::{Basic, Me, Token},
-        cond::{HttpResponseBuilderExt, IfMatch},
+        cond::{HttpResponseBuilderExt},
     },
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,
@@ -98,17 +98,11 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/auth/me/");
 
     let state = req.state().clone();
-    let if_match: IfMatch = req.extensions_mut().remove().unwrap();
-    let ip = req.extensions_mut().remove().unwrap();
+    let request_data = RequestData::from_request(req);
 
     state
         .auth::<Basic>(req.extensions_mut().remove().unwrap())
-        .and_then(move |me| {
-            state.database(DeleteMessage::<Me, Me>::new(
-                me,
-                RequestData::new(ip).with_if_match(Some(if_match)),
-            ))
-        })
+        .and_then(move |me| state.database(DeleteMessage::<Me, Me>::new(me, request_data)))
         .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }
