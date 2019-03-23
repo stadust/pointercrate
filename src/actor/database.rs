@@ -431,29 +431,6 @@ where
 }
 
 #[derive(Debug)]
-pub(super) struct DeleteRecordDirectly(pub i32);
-
-impl Message for DeleteRecordDirectly {
-    type Result = Result<()>;
-}
-
-impl Handler<DeleteRecordDirectly> for DatabaseActor {
-    type Result = Result<()>;
-
-    fn handle(&mut self, msg: DeleteRecordDirectly, _ctx: &mut Self::Context) -> Self::Result {
-        use diesel::ExpressionMethods;
-
-        let connection = &*self.connection()?;
-
-        diesel::delete(crate::schema::records::table)
-            .filter(crate::schema::records::id.eq(msg.0))
-            .execute(connection)
-            .map(|_| ())
-            .map_err(PointercrateError::database)
-    }
-}
-
-#[derive(Debug)]
 pub struct PatchMessage<Key, P, H>(Key, H, RequestData, PhantomData<P>)
 where
     P: Get<Key> + Patch<H> + Hash;
