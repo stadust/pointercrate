@@ -27,9 +27,7 @@ make_patch! {
 }
 
 impl Patch<PatchMe> for Me {
-    fn patch(
-        mut self, mut patch: PatchMe, ctx: RequestContext
-    ) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchMe, ctx: RequestContext) -> Result<Self> {
         validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
 
         patch!(self.0, patch: display_name, youtube_channel);
@@ -48,9 +46,7 @@ impl Patch<PatchMe> for Me {
 }
 
 impl Patch<PatchUser> for User {
-    fn patch(
-        mut self, mut patch: PatchUser, ctx: RequestContext
-    ) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchUser, ctx: RequestContext) -> Result<Self> {
         match patch {
             PatchUser {
                 display_name: None,

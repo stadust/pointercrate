@@ -14,7 +14,6 @@ pub use self::{
 #[macro_use]
 mod get {
     use crate::{context::RequestContext, Result};
-    
 
     pub trait Get<Key>: Sized {
         fn get(id: Key, ctx: RequestContext) -> Result<Self>;
@@ -25,13 +24,8 @@ mod get {
         G1: Get<Key1>,
         G2: Get<Key2>,
     {
-        fn get(
-            (key1, key2): (Key1, Key2), ctx: RequestContext
-        ) -> Result<Self> {
-            Ok((
-                G1::get(key1, ctx)?,
-                G2::get(key2, ctx)?,
-            ))
+        fn get((key1, key2): (Key1, Key2), ctx: RequestContext) -> Result<Self> {
+            Ok((G1::get(key1, ctx)?, G2::get(key2, ctx)?))
         }
     }
 
@@ -41,9 +35,7 @@ mod get {
         G2: Get<Key2>,
         G3: Get<Key3>,
     {
-        fn get(
-            (key1, key2, key3): (Key1, Key2, Key3), ctx: RequestContext
-        ) -> Result<Self> {
+        fn get((key1, key2, key3): (Key1, Key2, Key3), ctx: RequestContext) -> Result<Self> {
             Ok((
                 G1::get(key1, ctx)?,
                 G2::get(key2, ctx)?,
@@ -86,7 +78,6 @@ mod get {
 #[macro_use]
 mod post {
     use crate::{context::RequestContext, Result};
-    
 
     pub trait Post<T>: Sized {
         fn create_from(from: T, ctx: RequestContext) -> Result<Self>;
@@ -118,7 +109,6 @@ mod post {
 #[macro_use]
 mod delete {
     use crate::{context::RequestContext, Result};
-    
 
     use std::fmt::Display;
 

@@ -27,9 +27,7 @@ make_patch! {
 }
 
 impl Patch<PatchRecord> for Record {
-    fn patch(
-        mut self, mut patch: PatchRecord, ctx: RequestContext
-    ) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchRecord, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
 
         let connection = ctx.connection();

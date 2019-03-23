@@ -99,11 +99,10 @@ impl PointercrateState {
         let clone = self.clone();
 
         match auth {
-            Authorization::Unauthorized =>
-                Either::A(self.database(PostMessage(t, data, PhantomData))),
+            Authorization::Unauthorized => Either::A(self.database(PostMessage::new(t, data))),
             auth =>
                 Either::B(self.database(Auth::<A>::new(auth)).and_then(move |user| {
-                    clone.database(PostMessage(t, data.with_user(user), PhantomData))
+                    clone.database(PostMessage::new(t, data.with_user(user)))
                 })),
         }
     }

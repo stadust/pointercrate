@@ -375,7 +375,13 @@ impl<Key, G: Get<Key> + 'static> Handler<GetMessage<Key, G>> for DatabaseActor {
 ///
 /// Calls [`Post::create_from`] with the provided [`PostData`] when handled
 #[derive(Debug)]
-pub struct PostMessage<T, P: Post<T> + 'static>(pub T, pub RequestData, pub PhantomData<P>);
+pub struct PostMessage<T, P: Post<T> + 'static>(T, RequestData, PhantomData<P>);
+
+impl<T, P: Post<T> + 'static> PostMessage<T, P> {
+    pub fn new(post_data: T, request_data: RequestData) -> Self {
+        PostMessage(post_data, request_data, PhantomData)
+    }
+}
 
 impl<T, P: Post<T> + 'static> Message for PostMessage<T, P> {
     type Result = Result<P>;

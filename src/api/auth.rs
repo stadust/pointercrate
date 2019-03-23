@@ -2,7 +2,7 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::{DeleteMessage, Invalidate, PatchMessage},
+    actor::database::{DeleteMessage, Invalidate, PatchMessage, PostMessage},
     context::RequestData,
     middleware::{
         auth::{Basic, Me, Token},
@@ -21,11 +21,13 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/auth/register/");
 
     let state = req.state().clone();
-    let req = req.clone();
+    let request_data = RequestData::from_request(req);
 
     req.json()
         .from_err()
-        .and_then(move |registration: Registration| state.post::<Token, _, _>(&req, registration))
+        .and_then(move |registration: Registration| {
+            state.database(PostMessage::new(registration, request_data))
+        })
         .map(|user: User| {
             HttpResponse::Created()
                 .header("Location", "/api/v1/auth/me/")
