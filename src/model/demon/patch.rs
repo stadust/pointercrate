@@ -25,6 +25,7 @@ make_patch! {
 impl Patch<PatchDemon> for Demon {
     fn patch(mut self, mut patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+        ctx.check_if_match(&self)?;
 
         info!("Patching demon {} with {}", self.name, patch);
 

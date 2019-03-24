@@ -38,8 +38,6 @@ impl<S> Middleware<S> for Precondition {
             match if_match {
                 None => {
                     warn!("PATCH or DELETE request without conditional header");
-
-                    return Err(PointercrateError::PreconditionRequired)?
                 },
                 Some(if_match) => {
                     let mut hashes = Vec::new();

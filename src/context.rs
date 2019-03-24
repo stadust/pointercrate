@@ -116,7 +116,8 @@ impl<'a> RequestContext<'a> {
     pub fn check_if_match<H: Hash>(&self, h: H) -> Result<()> {
         match self {
             RequestContext::External {
-                if_match: Some(if_match),..
+                if_match: Some(if_match),
+                ..
             } => {
                 let mut hasher = DefaultHasher::new();
                 h.hash(&mut hasher);
@@ -128,7 +129,7 @@ impl<'a> RequestContext<'a> {
                 }
             },
             RequestContext::External { if_match: None, .. } =>
-                Err(PointercrateError::invalid_state("Checked precondition on request that doesn't check precondition (this doesn't make sense!)")),
+                Err(PointercrateError::PreconditionRequired),
             _ => Ok(()),
         }
     }

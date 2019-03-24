@@ -29,6 +29,8 @@ impl Delete for User {
 
 impl Delete for Me {
     fn delete(self, ctx: RequestContext) -> Result<()> {
+        ctx.check_if_match(&self)?;
+
         info!("Self-deleting user {}", self.0);
 
         delete(members::table)

@@ -28,6 +28,8 @@ make_patch! {
 
 impl Patch<PatchMe> for Me {
     fn patch(mut self, mut patch: PatchMe, ctx: RequestContext) -> Result<Self> {
+        ctx.check_if_match(&self)?;
+
         validate!(patch: User::validate_password[password], User::validate_channel[youtube_channel]);
 
         patch!(self.0, patch: display_name, youtube_channel);
@@ -79,6 +81,7 @@ impl Patch<PatchUser> for User {
                 return Err(PointercrateError::PatchSelf)
             }
         }
+        ctx.check_if_match(&self)?;
 
         info!("Patching user {} with {}", self, patch);
 

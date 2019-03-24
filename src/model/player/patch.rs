@@ -23,6 +23,12 @@ make_patch! {
 impl Patch<PatchPlayer> for ShortPlayer {
     fn patch(mut self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+        ctx.check_if_match(&self)?;
+        ctx.check_if_match(&self)?;
+        ctx.check_if_match(&self)?;
+        ctx.check_if_match(&self)?;
+        ctx.check_if_match(&self)?;
+        ctx.check_if_match(&self)?;
 
         let connection = ctx.connection();
 

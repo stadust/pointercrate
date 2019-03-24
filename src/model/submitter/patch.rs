@@ -18,6 +18,7 @@ make_patch! {
 impl Patch<PatchSubmitter> for Submitter {
     fn patch(mut self, patch: PatchSubmitter, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+        ctx.check_if_match(&self)?;
 
         info!("Patching player {} with {}", self.id, patch);
 
