@@ -24,11 +24,6 @@ impl Patch<PatchPlayer> for ShortPlayer {
     fn patch(mut self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
         ctx.check_if_match(&self)?;
-        ctx.check_if_match(&self)?;
-        ctx.check_if_match(&self)?;
-        ctx.check_if_match(&self)?;
-        ctx.check_if_match(&self)?;
-        ctx.check_if_match(&self)?;
 
         let connection = ctx.connection();
 
@@ -75,22 +70,9 @@ impl Patch<PatchPlayer> for ShortPlayer {
 
 impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
     fn patch(self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
-        let PlayerWithDemonsAndRecords {
-            player,
-            records,
-            created,
-            verified,
-            published,
-        } = self;
-
-        let player = player.patch(patch, ctx)?;
-
         Ok(PlayerWithDemonsAndRecords {
-            player,
-            records,
-            created,
-            verified,
-            published,
+            player: self.player.patch(patch, ctx)?,
+            ..self
         })
     }
 }

@@ -67,18 +67,9 @@ impl Patch<PatchDemon> for Demon {
 
 impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
     fn patch(self, patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
-        let DemonWithCreatorsAndRecords {
-            demon,
-            creators,
-            records,
-        } = self;
-
-        let demon = demon.patch(patch, ctx)?;
-
         Ok(DemonWithCreatorsAndRecords {
-            demon,
-            creators,
-            records,
+            demon: self.demon.patch(patch, ctx)?,
+            ..self
         })
     }
 }

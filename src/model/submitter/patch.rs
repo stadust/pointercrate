@@ -1,6 +1,7 @@
 use super::Submitter;
 use crate::{
     context::RequestContext,
+    model::submitter::SubmitterWithRecords,
     operation::{deserialize_non_optional, Patch},
     schema::submitters,
     Result,
@@ -30,5 +31,14 @@ impl Patch<PatchSubmitter> for Submitter {
             .execute(ctx.connection())?;
 
         Ok(self)
+    }
+}
+
+impl Patch<PatchSubmitter> for SubmitterWithRecords {
+    fn patch(self, patch: PatchSubmitter, ctx: RequestContext) -> Result<Self> {
+        Ok(SubmitterWithRecords {
+            submitter: self.submitter.patch(patch, ctx)?,
+            ..self
+        })
     }
 }

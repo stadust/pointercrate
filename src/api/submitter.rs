@@ -45,5 +45,5 @@ patch_handler!(
     i32,
     "Submitter ID",
     PatchSubmitter,
-    Submitter
+    SubmitterWithRecords
 );
