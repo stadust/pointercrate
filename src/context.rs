@@ -113,7 +113,7 @@ impl<'a> RequestContext<'a> {
         }
     }
 
-    pub fn check_if_match<H: Hash>(&self, h: H) -> Result<()> {
+    pub fn check_if_match<H: Hash>(&self, h: &H) -> Result<()> {
         match self {
             RequestContext::External {
                 if_match: Some(if_match),
