@@ -837,7 +837,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "List demons that receive a hacked update changing difficulty will be moved the the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
+                        "List demons that receive a hacked update changing difficulty will be moved to the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
                     }
                 }
                 h3 {
@@ -850,7 +850,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include but aren't limited to: speedhacks, noclip, auto, nerfs, macros, fps bypass, etc."
+                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include, but aren't limited to, speedhacks, noclip, auto, nerfs, macros, fps bypass, etc."
                     }
                 }
                 li {
@@ -873,7 +873,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "Being in a group in which people beat levels for th same channel will cause your records to be temporarily removed from the list."
+                        "Being in a group in which people beat levels for the same channel will cause your records to be temporarily removed from the list."
                     }
                 }
                 h3 {
