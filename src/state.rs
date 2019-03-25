@@ -22,7 +22,6 @@ use diesel::{
     sql_types::{HasSqlType, NotNull, SqlOrd},
     AppearsOnTable, Expression, QuerySource, SelectableExpression,
 };
-
 use std::{collections::HashMap, hash::Hash, marker::PhantomData, sync::Arc};
 use tokio::prelude::{future::Either, Future};
 

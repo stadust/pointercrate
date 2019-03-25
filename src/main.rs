@@ -50,8 +50,10 @@ pub mod bitstring;
 pub mod citext;
 pub mod config;
 pub mod context;
+pub mod documentation;
 pub mod error;
 pub mod middleware;
+pub mod ratelimit;
 #[allow(unused_imports)]
 pub mod schema;
 pub mod state;
@@ -79,39 +81,19 @@ fn main() {
     let database = DatabaseActor::from_env();
     let gdcf = HttpActor::from_env(database.clone().recipient());
 
+    let documentation_toc = documentation::read_table_of_contents().unwrap();
+    let documentation_topics = documentation::read_documentation_topics().unwrap();
+
+    let state = PointercrateState {
+        database,
+        gdcf,
+
+        documentation_toc: Arc::new(documentation_toc),
+        documentation_topics: Arc::new(documentation_topics),
+    };
+
     let app_factory = move || {
-        let doc_files_location =
-            std::env::var("DOCUMENTATION").unwrap_or(env!("OUT_DIR").to_string());
-        let doc_files_location = std::path::Path::new(&doc_files_location);
-
-        let toc = std::fs::read_to_string(doc_files_location.join("../output")).unwrap();
-        let mut map = std::collections::HashMap::new();
-        for entry in std::fs::read_dir(doc_files_location).unwrap() {
-            let entry = entry.unwrap();
-            if let Some("html") = entry.path().extension().and_then(std::ffi::OsStr::to_str) {
-                let cnt = std::fs::read_to_string(entry.path()).unwrap();
-
-                map.insert(
-                    entry
-                        .path()
-                        .file_stem()
-                        .and_then(std::ffi::OsStr::to_str)
-                        .unwrap()
-                        .to_string(),
-                    cnt,
-                );
-            }
-        }
-
-        let state = PointercrateState {
-            database: database.clone(),
-            gdcf: gdcf.clone(),
-
-            documentation_toc: Arc::new(toc),
-            documentation_topics: Arc::new(map),
-        };
-
-        App::with_state(state)
+        App::with_state(state.clone())
             .middleware(IpResolve)
             .middleware(Authorizer)
             .middleware(Precondition)
@@ -301,13 +283,8 @@ fn main() {
             })
     };
 
-    let port = match std::env::var("PORT") {
-        Ok(port) => port.parse().unwrap_or(8088),
-        _ => 8088,
-    };
-
     server::new(app_factory)
-        .bind(SocketAddr::from(([127, 0, 0, 1], port)))
+        .bind(SocketAddr::from(([127, 0, 0, 1], *config::PORT)))
         .unwrap()
         .run();
 }
