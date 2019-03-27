@@ -1,7 +1,7 @@
 use super::User;
 use crate::{
     context::RequestContext, error::PointercrateError, model::Model, operation::Post,
-    schema::members, Result,
+    ratelimit::RatelimitScope, schema::members, Result,
 };
 use diesel::{insert_into, result::Error, Connection, RunQueryDsl};
 use log::info;
@@ -22,6 +22,8 @@ struct NewUser<'a> {
 
 impl Post<Registration> for User {
     fn create_from(mut registration: Registration, ctx: RequestContext) -> Result<User> {
+        ctx.ratelimit(RatelimitScope::Registration)?;
+
         info!("Creating new user from {:?}", registration);
 
         User::validate_name(&mut registration.name)?;

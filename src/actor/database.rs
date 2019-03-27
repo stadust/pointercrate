@@ -19,13 +19,29 @@ use diesel::{
     SelectableExpression,
 };
 
+use crate::ratelimit::Ratelimits;
 use joinery::Joinable;
 use log::{debug, info, trace, warn};
 use std::{hash::Hash, marker::PhantomData};
 
 /// Actor that executes database related actions on a thread pool
 #[allow(missing_debug_implementations)]
-pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>);
+#[derive(Clone)]
+pub struct DatabaseActor(pub Pool<ConnectionManager<PgConnection>>, pub Ratelimits);
+
+struct ActorConstruct(DatabaseActor);
+
+// Sync is not implemented for DatabaseActor because the ratelimiters inside of the Ratelimits
+// object internally have ReadHandlers into an evmap, which are not sync. It if not safe to share
+// references to those across threads, according to the evmap documentation, you gotta clone them
+// and then Send them. HOWEVER, ActorConstruct never accesses that evmap, the only thing it does is
+// clone the DatabaseActor, which clones the handles. So we're fine with it being Sync.
+//
+// That this is OK can easily be verified by replacing the Sync bound on the closure we pass to
+// SyncArbiter::start() with a Clone bound and instead of putting it into an Arc, clone it into each
+// thread and put it into a Box (these are very minor changes to the actix source). With that
+// modification, the code below compiles without the unsafe Sync impl.
+unsafe impl Sync for ActorConstruct {}
 
 impl DatabaseActor {
     /// Initializes a [`DatabaseActor`] from environment data
@@ -40,8 +56,10 @@ impl DatabaseActor {
         let pool = Pool::builder()
             .build(manager)
             .expect("Failed to create database connection pool");
+        let ratelimits = Ratelimits::initialize();
+        let construct = ActorConstruct(DatabaseActor(pool, ratelimits));
 
-        SyncArbiter::start(4, move || DatabaseActor(pool.clone()))
+        SyncArbiter::start(4, move || construct.0.clone())
     }
 
     /// Gets a connection from the connection pool
@@ -157,6 +175,8 @@ impl<T: TAuthType> Handler<Auth<T>> for DatabaseActor {
         match T::auth_type() {
             AuthType::Basic => {
                 info!("We are expected to perform basic authentication");
+
+                // TODO: ratelimiting here
 
                 if let Authorization::Basic { username, password } = msg.0 {
                     debug!("Trying to authorize user {}", username);
@@ -365,7 +385,7 @@ impl<Key, G: Get<Key> + 'static> Handler<GetMessage<Key, G>> for DatabaseActor {
 
     fn handle(&mut self, msg: GetMessage<Key, G>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self.connection_for(&msg.1)?;
-        G::get(msg.0, msg.1.ctx(connection))
+        G::get(msg.0, msg.1.ctx(connection, &self.1))
     }
 }
 
@@ -392,7 +412,7 @@ impl<T, P: Post<T> + 'static> Handler<PostMessage<T, P>> for DatabaseActor {
 
     fn handle(&mut self, msg: PostMessage<T, P>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self.connection_for(&msg.1)?;
-        P::create_from(msg.0, msg.1.ctx(connection))
+        P::create_from(msg.0, msg.1.ctx(connection, &self.1))
     }
 }
 
@@ -430,7 +450,7 @@ where
         &mut self, DeleteMessage(key, data, _): DeleteMessage<Key, D>, _: &mut Self::Context,
     ) -> Self::Result {
         let connection = &*self.connection_for(&data)?;
-        let ctx = data.ctx(connection);
+        let ctx = data.ctx(connection, &self.1);
 
         connection.transaction(|| D::get(key, ctx)?.delete(ctx))
     }
@@ -468,7 +488,7 @@ where
         _: &mut Self::Context,
     ) -> Self::Result {
         let connection = &*self.connection_for(&request_data)?;
-        let ctx = request_data.ctx(connection);
+        let ctx = request_data.ctx(connection, &self.1);
 
         connection.transaction(|| {
             let object = P::get(key, ctx)?;
@@ -545,7 +565,7 @@ where
 
     fn handle(&mut self, msg: PaginateMessage<P, D>, _: &mut Self::Context) -> Self::Result {
         let connection = &*self.connection_for(&msg.2)?;
-        let ctx = msg.2.ctx(connection);
+        let ctx = msg.2.ctx(connection, &self.1);
 
         if msg.0.limit() > 100 || msg.0.limit() < 1 {
             return Err(PointercrateError::InvalidPaginationLimit)

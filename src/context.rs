@@ -2,6 +2,7 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Me, cond::IfMatch},
     permissions::PermissionsSet,
+    ratelimit::{RatelimitScope, Ratelimits},
     Result,
 };
 use actix_web::HttpRequest;
@@ -31,6 +32,16 @@ pub enum RequestContext<'a> {
         user: Option<&'a Me>,
         if_match: Option<&'a IfMatch>,
         connection: &'a PgConnection,
+
+        /// A [`Ratelimits`] instance thought which the ratelimits for the current pointercrate
+        /// instance can be managed.
+        ///
+        /// ## Why are we taking a normal reference?
+        /// [`RequestContext`]  should stay Copy. A [`Ratelimits`] is, while just a collection of
+        /// pointers, not copy. It is, however, very easy to clone. Since checking a ratelimit
+        /// shouldn't really be a hot code path, it's just fine to clone from this reference to get
+        /// an owned [`Ratelimits`] everytime we want to check a ratelimit.
+        ratelimits: &'a Ratelimits,
     },
 }
 
@@ -60,7 +71,9 @@ impl RequestData {
         self
     }
 
-    pub fn ctx<'a>(&'a self, connection: &'a PgConnection) -> RequestContext<'a> {
+    pub fn ctx<'a>(
+        &'a self, connection: &'a PgConnection, ratelimits: &'a Ratelimits,
+    ) -> RequestContext<'a> {
         match self {
             RequestData::Internal => RequestContext::Internal(connection),
             RequestData::External { ip, user, if_match } =>
@@ -69,6 +82,7 @@ impl RequestData {
                     user: user.as_ref(),
                     if_match: if_match.as_ref(),
                     connection,
+                    ratelimits,
                 },
         }
     }
@@ -138,6 +152,19 @@ impl<'a> RequestContext<'a> {
         match self {
             RequestContext::Internal(connection) => connection,
             RequestContext::External { connection, .. } => connection,
+        }
+    }
+
+    pub fn ratelimit(&self, bucket: RatelimitScope) -> Result<()> {
+        if let RequestContext::External { ratelimits, ip, .. } = self {
+            ratelimits.check(bucket, *ip).map_err(|remaining| {
+                PointercrateError::Ratelimited {
+                    scope: bucket,
+                    remaining
+                }
+            })
+        } else {
+            Ok(())
         }
     }
 }

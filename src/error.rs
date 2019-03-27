@@ -1,6 +1,6 @@
 //! Moduling containing the [`PointercrateError`] enum.
 
-use crate::{model::record::RecordStatus, permissions::PermissionsSet};
+use crate::{model::record::RecordStatus, permissions::PermissionsSet, ratelimit::RatelimitScope};
 use actix_web::{
     error::JsonPayloadError,
     http::{Method, StatusCode},
@@ -13,6 +13,7 @@ use log::error;
 use serde::ser::{SerializeSeq, Serializer};
 use serde_derive::Serialize;
 use serde_json::json;
+use std::time::Duration;
 
 #[derive(Debug, Fail, Serialize)]
 #[serde(untagged)]
@@ -337,6 +338,17 @@ pub enum PointercrateError {
     #[fail(display = "This request is required to be conditional; try using \"If-Match\"")]
     PreconditionRequired,
 
+    /// `429 TOO MANY REQUESTS`
+    ///
+    /// Error Code `42900`
+    #[fail(display = "{}. Try again at in {:?}", scope, remaining)]
+    Ratelimited {
+        #[serde(skip)]
+        scope: RatelimitScope,
+
+        remaining: Duration,
+    },
+
     /// `500 INTERNAL SERVER ERROR`
     #[fail(
         display = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application. Please notify a server administrator and have them look at the server logs!"
@@ -453,6 +465,8 @@ impl PointercrateError {
             PointercrateError::NotYouTube => 42226,
 
             PointercrateError::PreconditionRequired => 42800,
+
+            PointercrateError::Ratelimited { .. } => 42900,
 
             PointercrateError::InternalServerError => 50000,
             PointercrateError::InvalidInternalStateError { .. } => 50001,
