@@ -594,13 +594,13 @@ fn submission_panel() -> Markup {
     html! {
         div.panel.fade.closable#submitter style = "display: none" {
             span.plus.cross.hover {}
-            div.underlined {
-                h2 {"Record Submission"}
-            }
-            p.info-red.output#submission-error {}
-            p.info-green.output#submission-success {}
             div.flex {
                 form#submission-form novalidate = "" {
+                    div.underlined {
+                        h2 {"Record Submission"}
+                    }
+                    p.info-red.output {}
+                    p.info-green.output {}
                     h3 {
                         "Demon:"
                     }

@@ -160,7 +160,7 @@ impl<'a> RequestContext<'a> {
             ratelimits.check(bucket, *ip).map_err(|remaining| {
                 PointercrateError::Ratelimited {
                     scope: bucket,
-                    remaining
+                    remaining,
                 }
             })
         } else {

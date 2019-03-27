@@ -225,9 +225,6 @@ $(document).ready(function() {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
-  var errorOutput = $("#submission-error");
-  var successOutput = $("#submission-success");
-
   submissionForm.onSubmit(function(event) {
     $.ajax({
       method: "POST",
@@ -240,17 +237,9 @@ $(document).ready(function() {
         video: video.value,
         progress: parseInt(progress.value)
       }),
-      error: data => {
-        if (data.status == 429) {
-            errorOutput.text("You are submitting too many records too fast! Try again later");
-        } else {
-            errorOutput.text(data.responseJSON.message);
-        }
-        errorOutput.slideDown(100);
-      },
+      error: data => submissionForm.setError(data.responseJSON.message),
       success: () => {
-        successOutput.text("Record successfully submitted");
-        successOutput.slideDown(100);
+        submissionForm.setSuccess("Record successfully submitted");
 
         player.value = "";
         progress.value = "";
