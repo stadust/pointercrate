@@ -6,6 +6,7 @@ use crate::{
     error::PointercrateError,
     model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
     operation::{Delete, Get, Post},
+    ratelimit::RatelimitScope,
     video, Result,
 };
 use diesel::{Connection, RunQueryDsl};
@@ -145,6 +146,14 @@ impl Post<Submission> for Option<Record> {
                     }
                 }
             }
+
+            // At this point all the validation checks are done. Only the ratelimit is left!
+            // We wanna exempt list mods though
+            if !ctx.is_list_mod() {
+                ctx.ratelimit(RatelimitScope::RecordSubmission)?;
+                ctx.ratelimit(RatelimitScope::RecordSubmissionGlobal)?;
+            }
+
 
             // If none of the duplicates caused us to reject the submission, we now delete submissions marked for deleting
             for record in to_delete {

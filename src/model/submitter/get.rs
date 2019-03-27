@@ -1,5 +1,8 @@
 use super::{Submitter, SubmitterWithRecords};
-use crate::{context::RequestContext, error::PointercrateError, model::By, operation::Get, Result};
+use crate::{
+    context::RequestContext, error::PointercrateError, model::By, operation::Get,
+    ratelimit::RatelimitScope, Result,
+};
 use diesel::{result::Error, RunQueryDsl};
 use ipnetwork::IpNetwork;
 use std::net::Ipv4Addr;
@@ -17,7 +20,9 @@ impl Get<()> for Submitter {
                 match Submitter::by(&ip).first(connection) {
                     Ok(submitter) => Ok(submitter),
                     Err(Error::NotFound) =>
-                        Submitter::insert(&ip, connection).map_err(PointercrateError::database),
+                        ctx.ratelimit(RatelimitScope::NewSubmitter).and_then(|_| {
+                            Submitter::insert(&ip, connection).map_err(PointercrateError::database)
+                        }),
                     Err(err) => Err(PointercrateError::database(err)),
                 },
         }

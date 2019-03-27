@@ -78,15 +78,14 @@ fn main() {
 
     let _system = System::new("pointercrate");
 
-    let database = DatabaseActor::from_env();
-    let gdcf = HttpActor::from_env(database.clone().recipient());
-
     let documentation_toc = documentation::read_table_of_contents().unwrap();
     let documentation_topics = documentation::read_documentation_topics().unwrap();
 
+    let database = DatabaseActor::from_env();
+
     let state = PointercrateState {
+        gdcf: HttpActor::from_env(database.clone().recipient()),
         database,
-        gdcf,
 
         documentation_toc: Arc::new(documentation_toc),
         documentation_topics: Arc::new(documentation_topics),
