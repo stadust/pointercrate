@@ -31,6 +31,8 @@ impl Patch<PatchRecord> for Record {
         ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
         ctx.check_if_match(&self)?;
 
+        // FIXME: This needs to do the whole "locate duplicate, compare, delete" dance
+
         let connection = ctx.connection();
 
         info!("Patching record {} with {}", self, patch);

@@ -53,7 +53,7 @@ pub mod context;
 pub mod documentation;
 pub mod error;
 pub mod middleware;
-//pub mod ratelimit;
+pub mod ratelimit;
 #[allow(unused_imports)]
 pub mod schema;
 pub mod state;
