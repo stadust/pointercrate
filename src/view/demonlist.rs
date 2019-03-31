@@ -807,7 +807,7 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
             }
             div.underlined {
                 h2 {
-                    "List Helpers"
+                    "OFFICIAL List Helpers"
                 }
             }
             p {
