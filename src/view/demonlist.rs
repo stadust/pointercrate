@@ -94,7 +94,7 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center.container {
                 div.left {
-                    h1 {
+                    h1.panel.fade {
                         "PLEASE KEEP IN MIND THAT THE FOLLOWING RANKING IS COMPLETELY " b{"OFFICIAL!"}
                     }
                     (submission_panel())

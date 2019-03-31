@@ -52,7 +52,7 @@ impl Page for Homepage {
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html! {
-            h1 {"Shoutout to Mohammed who failed at DDoS-ing a 3$ server for a whole week!"}
+            h1.panel.fade {"Shoutout to Mohammed who failed at DDoS-ing a 3$ server for a whole week!"}
             div.tabbed.information-banner.left {
                 div.tab-display {
                     div.information {
