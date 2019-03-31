@@ -679,7 +679,7 @@ fn stats_viewer() -> Markup {
                     }
                     div#stats-data style = "display:none" {
                         div.flex.col {
-                            h3#player-name style = "font-size:1.4em" {}
+                            h3#player-name style = "font-size:1.4em; overflow: hidden" {}
                             div.stats-container.flex.space {
                                 span {
                                     b {

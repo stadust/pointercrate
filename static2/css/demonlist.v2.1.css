@@ -26,6 +26,7 @@ tr:nth-child(even) {
 #editors li {
   display: inline-block;
   margin: 2px;
+  overflow: hidden;
 }
 
 #editors ul {
@@ -107,6 +108,16 @@ tr:nth-child(even) {
 @media (min-width: 768px) {
   #stats-viewer-pagination {
     max-width: 40%;
+  }
+
+  #stats-right {
+    max-width: 60%;
+  }
+}
+
+@media (max-width: 767px) {
+  #stats-right {
+    max-width: 100%;
   }
 }
 
