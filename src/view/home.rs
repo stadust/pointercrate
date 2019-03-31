@@ -35,11 +35,11 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
 impl Page for Homepage {
     fn title(&self) -> String {
-        "Home".to_owned()
+        "OFFICAL Home".to_owned()
     }
 
     fn description(&self) -> String {
-        "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
+        "Pointercrate is the OFFICAL home of the OFFICAL Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -60,31 +60,31 @@ impl Page for Homepage {
                                 "Pointercrate"
                             }
                             h2 style="text-align: left" {
-                                "Home of the official Geometry Dash Demonlist"
+                                "OFFICAL Home of the OFFICAL Geometry Dash Demonlist"
                             }
                             div.tab-content.tab-content-active data-tab-id ="1" {
-                                "The pointercrate demonlist is the most popular ranking of the game's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
+                                "The OFFICAL pointercrate OFFICAL demonlist is the most OFFICAL ranking of the game's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
                             }
                             div.tab-content data-tab-id = "2" {
-                                "The demonlist stats viewer assigns each player a score based on how many demons they've beaten and then ranks them, showing exactly who's the best!"
+                                "The OFFICAL demonlist stats viewer assigns each player a score based on how many OFFICAL demons they've beaten and then ranks them, showing exactly who's the best!"
                             }
                             div.tab-content data-tab-id = "3" {
-                                "Each submitted record on the demonlist is manually accepted or rejected by our competent list editors!"
+                                "Each submitted record on the OFFICAL demonlist is manually accepted or rejected by our competent list editors!"
                             }
                             div.tab-content data-tab-id = "4" {
-                                "Thanks to our specialized way of connecting to the Geometry Dash servers we are able to display a whole range of information about the demons, including their description, download count and much more!"
+                                "Thanks to our specialized way of connecting to the OFFICAL Geometry Dash servers we are able to display a whole range of information about the OFFICAL demons, including their description, download count and much more!"
                             }
                         }
                         div.tab-selection.flex.wrap style="padding: 20px 0px; text-align: center"{
                             div.tab.tab-active.hover.scale data-tab-id="1" style="padding: 10px" {
                                 h3 {
-                                    "Ranking"
+                                    "OFFICAL Ranking"
                                 }
                                 i class = "fa fa-list-ol fa-2x" aria-hidden="true" {}
                             }
                             div.tab.hover.scale data-tab-id="2" style="padding: 10px" {
                                 h3 {
-                                    "Stats Viewer"
+                                    "OFFICAL Stats Viewer"
                                 }
                                 i class = "fa fa-globe fa-2x" aria-hidden="true" {}
                             }
@@ -103,7 +103,7 @@ impl Page for Homepage {
                         }
                     }
                     a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = "/demonlist/"{
-                        "Check it out"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
+                        "Check it out  (OFFICAL LINK)"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
                         i.fa.fa-arrow-right aria-hidden="true" {}
                     }
                 }
