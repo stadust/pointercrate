@@ -83,7 +83,7 @@ pub trait Page {
                         link rel = "stylesheet" href = {(STATIC) (sheet)};
                     }
                 }
-                body style={"background-image: url(" (STATIC) "images/squares3.png)"}{
+                body style={"background-image: url(" (STATIC) "images/bg.png); background-size: 150px; background-repeat:repeat"}{
                     (nav_bar(req))
                     div {}
                     (self.body(req))
