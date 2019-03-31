@@ -112,7 +112,7 @@ pub fn nav_bar(req: &HttpRequest<PointercrateState>) -> Markup {
                 a.nav-item.hover.white href = "/demonlist/" title = "Geometry Dash Demonlist" {
                     span style ="display:flex; flex-direction:column;" {
                         span style ="font-size: 50%" {"Geometry Dash"}
-                        span {"DEMONLIST"}
+                        span {"OFFICIAL" br; "DEMONLIST"}
                     }
                 }
                 div.nav-item.collapse-button {

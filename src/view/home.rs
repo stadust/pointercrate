@@ -35,11 +35,11 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
 
 impl Page for Homepage {
     fn title(&self) -> String {
-        "OFFICAL Home".to_owned()
+        "OFFICIAL Home".to_owned()
     }
 
     fn description(&self) -> String {
-        "Pointercrate is the OFFICAL home of the OFFICAL Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
+        "Pointercrate is the OFFICIAL home of the OFFICIAL Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -52,6 +52,7 @@ impl Page for Homepage {
 
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html! {
+            h1 {"Shoutout to Mohammed who failed at DDoS-ing a 3$ server for a whole week!"}
             div.tabbed.information-banner.left {
                 div.tab-display {
                     div.information {
@@ -60,59 +61,59 @@ impl Page for Homepage {
                                 "Pointercrate"
                             }
                             h2 style="text-align: left" {
-                                "OFFICAL Home of the OFFICAL Geometry Dash Demonlist"
+                                "OFFICIAL Home of the OFFICIAL Geometry Dash Demonlist"
                             }
                             div.tab-content.tab-content-active data-tab-id ="1" {
-                                "The OFFICAL pointercrate OFFICAL demonlist is the most OFFICAL ranking of the game's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
+                                "The OFFICIAL pointercrate OFFICIAL demonlist is the most OFFICIAL ranking of the game's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
                             }
                             div.tab-content data-tab-id = "2" {
-                                "The OFFICAL demonlist stats viewer assigns each player a score based on how many OFFICAL demons they've beaten and then ranks them, showing exactly who's the best!"
+                                "The OFFICIAL demonlist stats viewer assigns each player a score based on how many OFFICIAL demons they've beaten and then ranks them, showing exactly who's the best!"
                             }
                             div.tab-content data-tab-id = "3" {
-                                "Each submitted record on the OFFICAL demonlist is manually accepted or rejected by our competent list editors!"
+                                "Each submitted record on the OFFICIAL demonlist is manually accepted or rejected by our competent list editors!"
                             }
                             div.tab-content data-tab-id = "4" {
-                                "Thanks to our specialized way of connecting to the OFFICAL Geometry Dash servers we are able to display a whole range of information about the OFFICAL demons, including their description, download count and much more!"
+                                "Thanks to our specialized way of connecting to the OFFICIAL Geometry Dash servers we are able to display a whole range of information about the OFFICIAL demons, including their description, download count and much more!"
                             }
                         }
                         div.tab-selection.flex.wrap style="padding: 20px 0px; text-align: center"{
                             div.tab.tab-active.hover.scale data-tab-id="1" style="padding: 10px" {
                                 h3 {
-                                    "OFFICAL Ranking"
+                                    "OFFICIAL Ranking"
                                 }
                                 i class = "fa fa-list-ol fa-2x" aria-hidden="true" {}
                             }
                             div.tab.hover.scale data-tab-id="2" style="padding: 10px" {
                                 h3 {
-                                    "OFFICAL Stats Viewer"
+                                    "OFFICIAL Stats Viewer"
                                 }
                                 i class = "fa fa-globe fa-2x" aria-hidden="true" {}
                             }
                             div.tab.hover.scale data-tab-id="3" style="padding: 10px" {
                                 h3 {
-                                    "Records"
+                                    "OFFICIAL Records"
                                 }
                                 i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
                             }
                             div.tab.hover.scale data-tab-id="4" style="padding: 10px" {
                                 h3 {
-                                    "Informative"
+                                    "OFFICIAL Information"
                                 }
                                 i class = "fa fa-info fa-2x" aria-hidden="true" {}
                             }
                         }
                     }
                     a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = "/demonlist/"{
-                        "Check it out  (OFFICAL LINK)"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
+                        "Check it out  (OFFICIAL LINK)"(PreEscaped("&nbsp;&nbsp;&nbsp;"))
                         i.fa.fa-arrow-right aria-hidden="true" {}
                     }
                 }
             }
             div.center.information-stripe {
                 div.flex style="flex-wrap: wrap; align-items: center" {
-                    span { "Over 13 000 daily visitors!" }
-                    span { "Over 150 ranked demons!" }
-                    span { "Over 15 000 records!" }
+                    span { "Over 13 000 OFFICIAL daily visitors!" }
+                    span { "Over 150 OFFICIALLY ranked demons!" }
+                    span { "Over 15 000 OFFICIAL records!" }
                 }
             }
             div.center.information-banner.right {

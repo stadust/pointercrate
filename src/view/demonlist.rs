@@ -94,6 +94,9 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center.container {
                 div.left {
+                    h1 {
+                        "PLEASE KEEP IN MIND THAT THE FOLLOWING RANKING IS COMPLETELY " b{"OFFICIAL!"}
+                    }
                     (submission_panel())
                     (stats_viewer())
                     @for demon in &self.demon_overview {
@@ -271,7 +274,7 @@ impl Page for Demonlist {
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 style = "overflow: hidden"{
-                                "OFFICAL " (self.data.demon.name)
+                                "OFFICIAL " (self.data.demon.name)
                             }
                             h3 {
                                 @if self.data.creators.0.len() > 3 {
@@ -597,7 +600,7 @@ fn submission_panel() -> Markup {
             div.flex {
                 form#submission-form novalidate = "" {
                     div.underlined {
-                        h2 {"OFFICAL Record Submission"}
+                        h2 {"OFFICIAL Record Submission"}
                     }
                     p.info-red.output {}
                     p.info-green.output {}
@@ -645,7 +648,7 @@ fn submission_panel() -> Markup {
                         input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="OFFICALLY Submit record";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="OFFICIALLY Submit record";
                 }
             }
         }
@@ -657,7 +660,7 @@ fn stats_viewer() -> Markup {
         div.panel.fade.closable#statsviewer style = "display:none" {
             span.plus.cross.hover {}
             h2.underlined.pad {
-                "OFFICAL Stats Viewer"
+                "OFFICIAL Stats Viewer"
             }
             div.flex#stats-viewer-cont {
                 div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column"{
@@ -786,7 +789,7 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
         div.panel.fade.js-scroll-anim#editors data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "OFFICAL List Editors:"
+                    "OFFICIAL List Editors:"
                 }
             }
             p {
@@ -823,7 +826,7 @@ fn rules_panel() -> Markup {
     html! {
         did#rules.panel.fade.flex.js-scroll-anim.js-collapse data-anim = "fade" style = "flex-direction: column" {
             h2.underlined.pad {
-                "OFFICAL Rules:"
+                "OFFICIAL Rules:"
                 span.arrow.hover {}
             }
             ul.roman.js-collapse-content style="display:none" {
@@ -922,7 +925,7 @@ fn stats_viewer_panel() -> Markup {
         div#stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "OFFICAL Stats Viewer"
+                    "OFFICIAL Stats Viewer"
                 }
             }
             p {
@@ -940,7 +943,7 @@ fn discord_panel() -> Markup {
         div.panel.fade.js-scroll-anim#discord data-anim = "fade" {
             iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
-                "Join the OFFICAL demonlist discord server, where you can get in touch with the OFFICAL demonlist team!"
+                "Join the OFFICIAL demonlist discord server, where you can get in touch with the OFFICIAL demonlist team!"
             }
         }
     }
