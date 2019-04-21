@@ -271,7 +271,17 @@ impl Page for Demonlist {
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 style = "overflow: hidden"{
+                                @if self.data.demon.position != 1 {
+                                    a href=(format!("/demonlist/{:?}", self.data.demon.position - 1)) {
+                                        i class="fa fa-chevron-left" style="padding-right: 5%" {}
+                                    }
+                                }
                                 (self.data.demon.name)
+                                @if self.data.demon.position as usize != self.overview.demon_overview.len() {
+                                    a href=(format!("/demonlist/{:?}", self.data.demon.position + 1)) {
+                                        i class="fa fa-chevron-right" style="padding-left: 5%" {}
+                                    }
+                                }
                             }
                             h3 {
                                 @if self.data.creators.0.len() > 3 {
