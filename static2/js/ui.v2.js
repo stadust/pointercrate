@@ -129,6 +129,18 @@ $(document).ready(function() {
     Search.allSearchBars.push(new Search(element));
   });
 
+  // close all dropdowns if clicked outside of dropdown
+
+  $(document).click(() => {
+    if (!$(event.target).hasClass('dropdown') && !$(event.target).hasClass('js-toggle')) {
+      if (DropDown.currentlyShown) { // don't try to hide undefined
+        DropDown.hideDropDown(DropDown.currentlyShown);
+        // remove active class to remove highlight
+        $(".js-toggle.active").removeClass("active");
+      }
+    }
+  });
+  
   // toggle button event handling
 
   var toggleGroups = {};
