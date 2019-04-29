@@ -71,7 +71,7 @@ impl Post<PostDemon> for Demon {
                 .values(&new)
                 .execute(connection)?;
             
-            let creators_hash: HashSet<CiString> = data.creators.iter().cloned().collect();
+            let creators_hash: HashSet<CiString> = data.creators.into_iter().collect();
             
             for creator in creators_hash {
                 Creator::create_from(
