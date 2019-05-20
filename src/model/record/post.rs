@@ -162,7 +162,7 @@ impl Post<Submission> for Option<Record> {
                     record.id
                 );
 
-                record.delete(ctx)?;
+                record.delete(RequestContext::Internal(ctx.connection()))?;
             }
 
             debug!("All duplicates either already accepted, or has lower progress, accepting!");
