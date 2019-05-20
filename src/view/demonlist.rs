@@ -33,7 +33,7 @@ struct ListSection {
 
 static MAIN_SECTION: ListSection = ListSection {
     name: "Main List",
-    description: "The main section of the demonlist. These demons are the hardest rated levels in the game. Records are accepted above a given threshold and award a large amount of points!",
+    description: "The main section of the Demonlist. These demons are the hardest rated levels in the game. Records are accepted above a given threshold and award a large amount of points!",
     id: "mainlist",
     numbered: true,
 };
@@ -75,7 +75,7 @@ impl Page for DemonlistOverview {
     }
 
     fn description(&self) -> String {
-        "The official Geometry Dash Demonlist on pointercrate!".to_string()
+        "The official pointercrate Demonlist!".to_string()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -171,7 +171,7 @@ impl Page for DemonlistOverview {
                         ]
                     }},
                     "name": "Geometry Dash Demonlist",
-                    "description": "The official Geometry Dash Demonlist on pointercrate!",
+                    "description": "The official pointercrate Demonlist!",
                     "url": "https://pointercrate.com/demonlist/"
                 }}
                 </script>
@@ -940,7 +940,7 @@ fn discord_panel() -> Markup {
         div.panel.fade.js-scroll-anim#discord data-anim = "fade" {
             iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
-                "Join the official demonlist discord server, where you can get in touch with the demonlist team!"
+                "Join the official Demonlist discord server, where you can get in touch with the demonlist team!"
             }
         }
     }

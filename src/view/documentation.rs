@@ -31,7 +31,7 @@ impl<'a> Page for Documentation<'a> {
     }
 
     fn description(&self) -> String {
-        "The pointercrate API, which allows you to programmatically interface with the demonlist"
+        "The pointercrate API, which allows you to programmatically interface with the Demonlist"
             .to_owned()
     }
 
@@ -89,7 +89,7 @@ impl<'a> Page for Documentation<'a> {
       }]
     },
     "name": "API Documentation",
-    "description": "The pointercrate API, which allows you to programmatically interface with the demonlist",
+    "description": "The pointercrate API, which allows you to programmatically interface with the Demonlist",
     "url": "https://pointercrate.com/documentation/account/",
     "dateCreated": "2017-04-08"
   }
