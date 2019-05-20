@@ -279,7 +279,7 @@ impl Page for Homepage {
                         div style = "flex-basis: 0; padding: 5px" {
                             h3 { "Pointercrate Team: "}
                             p {
-                                "Pointercrate as an entity independent from the emonlist is administrated and moderated by the following people:"
+                                "Pointercrate as an entity independent from the Demonlist is administrated and moderated by the following people:"
                             }
                             div.flex.wrap style = "padding: 20px" {
                                 @for member in &self.pointercrate_team {
