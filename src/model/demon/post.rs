@@ -10,6 +10,7 @@ use crate::{
 use diesel::{insert_into, Connection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
+use std::collections::HashSet;
 
 #[derive(Deserialize, Debug)]
 pub struct PostDemon {
@@ -69,8 +70,10 @@ impl Post<PostDemon> for Demon {
             insert_into(demons::table)
                 .values(&new)
                 .execute(connection)?;
-
-            for creator in &data.creators {
+            
+            let creators_hash: HashSet<CiString> = data.creators.into_iter().collect();
+            
+            for creator in creators_hash {
                 Creator::create_from(
                     (data.name.as_ref(), creator.as_ref()),
                     RequestContext::Internal(connection),
