@@ -16,7 +16,6 @@ use diesel::{
 };
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_derive::Serialize;
 use std::fmt::{Display, Formatter};
 
 mod delete;

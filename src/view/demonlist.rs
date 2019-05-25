@@ -193,7 +193,7 @@ impl Page for DemonlistOverview {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
-    server_level: Option<Level<u64, Creator>>,
+    server_level: Option<Level<u64, Option<Creator>>>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {

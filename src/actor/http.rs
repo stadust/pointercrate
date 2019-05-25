@@ -1,12 +1,11 @@
 use crate::{actor::database::DeleteMessage, context::RequestData, model::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
-use chrono::Duration;
 use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
-    cache::CachedObject,
-    Gdcf, GdcfFuture,
+    cache::CacheEntry,
+    Gdcf,
 };
-use gdcf_dbcache::cache::{DatabaseCache, DatabaseCacheConfig, Pg};
+use gdcf_diesel::Cache;
 use gdcf_model::{
     level::{DemonRating, Level, LevelRating},
     song::NewgroundsSong,
@@ -25,7 +24,7 @@ use tokio::{
 /// Actor for whatever the fuck just happens to need to be done and isn't database access
 #[allow(missing_debug_implementations)]
 pub struct HttpActor {
-    gdcf: Gdcf<BoomlingsClient, DatabaseCache<Pg>>,
+    gdcf: Gdcf<BoomlingsClient, Cache>,
     http_client: Client,
     discord_webhook_url: Arc<Option<String>>,
     deletor: Recipient<DeleteMessage<i32, Record>>,
@@ -37,11 +36,7 @@ impl HttpActor {
 
         let gdcf_url = std::env::var("GDCF_DATABASE_URL").expect("GDCF_DATABASE_URL is not set");
 
-        let mut config = DatabaseCacheConfig::postgres_config(&gdcf_url)
-            .expect("Failed to connect to GDCF database");
-        config.invalidate_after(Duration::minutes(30));
-
-        let cache = DatabaseCache::new(config);
+        let cache = Cache::postgres(gdcf_url).expect("haha is break");
         let client = BoomlingsClient::new();
 
         cache.initialize().unwrap();
@@ -117,20 +112,20 @@ impl Actor for HttpActor {
 pub struct LevelById(pub u64);
 
 impl Message for LevelById {
-    type Result = Option<Level<NewgroundsSong, Creator>>;
+    type Result = Option<Level<NewgroundsSong, Option<Creator>>>;
 }
 
 impl Handler<LevelById> for HttpActor {
-    type Result = Option<Level<NewgroundsSong, Creator>>;
+    type Result = Option<Level<NewgroundsSong, Option<Creator>>>;
 
     fn handle(&mut self, LevelById(id): LevelById, ctx: &mut Self::Context) -> Self::Result {
-        let GdcfFuture { cached, inner } = self.gdcf.level(id.into());
+        let (future, cached) = self.gdcf.level(id.into()).deconstruct().ok()?;
 
-        if let Some(inner) = inner {
+        if let Some(inner) = future {
             ctx.spawn(inner.map(|_| ()).map_err(|_| ()).into_actor(self));
         }
 
-        cached.map(CachedObject::extract)
+        cached.map(CacheEntry::into_inner)
     }
 }
 
@@ -138,29 +133,35 @@ impl Handler<LevelById> for HttpActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Option<Level<u64, Creator>>;
+    type Result = Option<Level<u64, Option<Creator>>>;
 }
 
 impl Handler<GetDemon> for HttpActor {
-    type Result = Option<Level<u64, Creator>>;
+    type Result = Option<Level<u64, Option<Creator>>>;
 
-    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Option<Level<u64, Creator>> {
-        let GdcfFuture { cached, inner } = self.gdcf.levels::<u64, Creator>(
-            LevelsRequest::default()
-                .request_type(LevelRequestType::MostLiked)
-                .search(msg.0.clone())
-                .with_rating(LevelRating::Demon(DemonRating::Hard))
-                .filter(SearchFilters::default().rated()),
-        );
+    fn handle(
+        &mut self, msg: GetDemon, ctx: &mut Context<Self>,
+    ) -> Option<Level<u64, Option<Creator>>> {
+        let (future, cached) = self
+            .gdcf
+            .levels::<u64, Option<Creator>>(
+                LevelsRequest::default()
+                    .request_type(LevelRequestType::MostLiked)
+                    .search(msg.0.clone())
+                    .with_rating(LevelRating::Demon(DemonRating::Hard))
+                    .filter(SearchFilters::default().rated()),
+            )
+            .deconstruct()
+            .ok()?;
 
-        if let Some(inner) = inner {
+        if let Some(future) = future {
             debug!(
                 "Spawning future to asynchronously perform LevelsRequest for {}",
                 msg.0
             );
 
             ctx.spawn(
-                inner
+                future
                     .map(|_| info!("LevelsRequest successful"))
                     .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
                     .into_actor(self),
@@ -168,32 +169,38 @@ impl Handler<GetDemon> for HttpActor {
         }
 
         match cached {
-            Some(inner) => {
-                let inner = inner.extract();
+            Some(cached) => {
+                let cached = cached.into_inner();
 
-                if !inner.is_empty() {
-                    let best_match = inner
+                if !cached.is_empty() {
+                    let best_match = cached
                         .iter()
                         .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
                         .unwrap();
 
-                    let GdcfFuture { cached, inner } = self.gdcf.level(best_match.level_id.into());
+                    let (future, cached) = self
+                        .gdcf
+                        .level(best_match.level_id.into())
+                        .deconstruct()
+                        .ok()?;
 
-                    if let Some(inner) = inner {
+                    if let Some(future) = future {
                         debug!(
                             "Spawning future to asynchronously perform LevelRequest for {}",
                             msg.0
                         );
 
                         ctx.spawn(
-                            inner
-                                .map(|level| info!("Successfully retrieved level {}", level))
+                            future
+                                .map(|level| {
+                                    info!("Successfully retrieved level {}", level.inner())
+                                })
                                 .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
                                 .into_actor(self),
                         );
                     }
 
-                    cached.map(CachedObject::extract)
+                    cached.map(CacheEntry::into_inner)
                 } else {
                     None
                 }
