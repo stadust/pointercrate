@@ -352,7 +352,7 @@ impl Page for Demonlist {
                                     br;
                                     @match stats {
                                         Some(ref stats) => (stats.object_count),
-                                        _ => (level.base.object_amount)
+                                        _ => (level.base.object_amount.unwrap_or(0))
                                     }
                                 }
                             }
