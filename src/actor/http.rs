@@ -189,7 +189,7 @@ impl Handler<GetDemon> for HttpActor {
 
                     ctx.spawn(
                         future
-                            .map(|level| info!("Successfully retrieved level {:?}", level))
+                            .map(|level| info!("Successfully retrieved level {}", level))
                             .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
                             .into_actor(self),
                     );
