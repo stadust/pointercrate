@@ -5,7 +5,7 @@ use gdcf::{
     cache::CacheEntry,
     Gdcf,
 };
-use gdcf_diesel::Cache;
+use gdcf_diesel::{Cache, Entry, Error};
 use gdcf_model::{
     level::{DemonRating, Level, LevelRating},
     song::NewgroundsSong,
@@ -112,20 +112,20 @@ impl Actor for HttpActor {
 pub struct LevelById(pub u64);
 
 impl Message for LevelById {
-    type Result = Option<Level<NewgroundsSong, Option<Creator>>>;
+    type Result = Result<CacheEntry<Level<NewgroundsSong, Option<Creator>>, Entry>, Error>;
 }
 
 impl Handler<LevelById> for HttpActor {
-    type Result = Option<Level<NewgroundsSong, Option<Creator>>>;
+    type Result = Result<CacheEntry<Level<NewgroundsSong, Option<Creator>>, Entry>, Error>;
 
     fn handle(&mut self, LevelById(id): LevelById, ctx: &mut Self::Context) -> Self::Result {
-        let (future, cached) = self.gdcf.level(id.into()).deconstruct().ok()?;
+        let (entry, future) = self.gdcf.level(id.into())?.into();
 
-        if let Some(inner) = future {
-            ctx.spawn(inner.map(|_| ()).map_err(|_| ()).into_actor(self));
+        if let Some(future) = future {
+            ctx.spawn(future.map(|_| ()).map_err(|_| ()).into_actor(self));
         }
 
-        cached.map(CacheEntry::into_inner)
+        Ok(entry)
     }
 }
 
@@ -133,16 +133,14 @@ impl Handler<LevelById> for HttpActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Option<Level<u64, Option<Creator>>>;
+    type Result = Result<CacheEntry<Level<u64, Option<Creator>>, Entry>, Error>;
 }
 
 impl Handler<GetDemon> for HttpActor {
-    type Result = Option<Level<u64, Option<Creator>>>;
+    type Result = Result<CacheEntry<Level<u64, Option<Creator>>, Entry>, Error>;
 
-    fn handle(
-        &mut self, msg: GetDemon, ctx: &mut Context<Self>,
-    ) -> Option<Level<u64, Option<Creator>>> {
-        let (future, cached) = self
+    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Self::Result {
+        let (cache_entry, future) = self
             .gdcf
             .levels::<u64, Option<Creator>>(
                 LevelsRequest::default()
@@ -150,9 +148,8 @@ impl Handler<GetDemon> for HttpActor {
                     .search(msg.0.clone())
                     .with_rating(LevelRating::Demon(DemonRating::Hard))
                     .filter(SearchFilters::default().rated()),
-            )
-            .deconstruct()
-            .ok()?;
+            )?
+            .into();
 
         if let Some(future) = future {
             debug!(
@@ -168,44 +165,38 @@ impl Handler<GetDemon> for HttpActor {
             );
         }
 
-        match cached {
-            Some(cached) => {
-                let cached = cached.into_inner();
-
-                if !cached.is_empty() {
-                    let best_match = cached
-                        .iter()
-                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
-                        .unwrap();
-
-                    let (future, cached) = self
-                        .gdcf
-                        .level(best_match.level_id.into())
-                        .deconstruct()
-                        .ok()?;
-
-                    if let Some(future) = future {
-                        debug!(
-                            "Spawning future to asynchronously perform LevelRequest for {}",
-                            msg.0
-                        );
-
-                        ctx.spawn(
-                            future
-                                .map(|level| {
-                                    info!("Successfully retrieved level {}", level.inner())
-                                })
-                                .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
-                                .into_actor(self),
-                        );
-                    }
-
-                    cached.map(CacheEntry::into_inner)
-                } else {
-                    None
+        match cache_entry {
+            CacheEntry::DeducedAbsent => Ok(CacheEntry::DeducedAbsent),
+            CacheEntry::Missing => Ok(CacheEntry::Missing),
+            CacheEntry::MarkedAbsent(meta) => Ok(CacheEntry::MarkedAbsent(meta)),
+            CacheEntry::Cached(levels, meta) => {
+                if levels.is_empty() {
+                    return Ok(CacheEntry::DeducedAbsent) // TODO: figure out if this is necessary
                 }
+
+                let best_match = levels
+                    .iter()
+                    .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
+                    .unwrap();
+
+                let (entry, future) = self.gdcf.level(best_match.level_id.into())?.into();
+
+                if let Some(future) = future {
+                    debug!(
+                        "Spawning future to asynchronously perform LevelRequest for {}",
+                        msg.0
+                    );
+
+                    ctx.spawn(
+                        future
+                            .map(|level| info!("Successfully retrieved level {:?}", level))
+                            .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
+                            .into_actor(self),
+                    );
+                }
+
+                Ok(entry)
             },
-            None => None,
         }
     }
 }
