@@ -99,7 +99,7 @@ impl Page for DemonlistOverview {
                     (stats_viewer())
                     @for demon in &self.demon_overview {
                         @if demon.position <= *EXTENDED_LIST_SIZE {
-                            div.panel.fade {
+                            div.panel.fade style="overflow:hidden" {
                                 div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
                                     @if let Some(ref video) = demon.video {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
@@ -533,7 +533,9 @@ impl Page for Demonlist {
 }
 
 fn dropdowns(
-    req: &HttpRequest<PointercrateState>, all_demons: &[PartialDemon], current: Option<&Demon>,
+    req: &HttpRequest<PointercrateState>,
+    all_demons: &[PartialDemon],
+    current: Option<&Demon>,
 ) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < *LIST_SIZE as usize {
         (&all_demons[..], Default::default(), Default::default())
@@ -563,7 +565,9 @@ fn dropdowns(
 }
 
 fn dropdown(
-    req: &HttpRequest<PointercrateState>, section: &ListSection, demons: &[PartialDemon],
+    req: &HttpRequest<PointercrateState>,
+    section: &ListSection,
+    demons: &[PartialDemon],
     current: Option<&Demon>,
 ) -> Markup {
     let format = |demon: &PartialDemon| -> Markup {

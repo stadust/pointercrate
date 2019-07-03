@@ -51,6 +51,7 @@ tr:nth-child(even) {
   #rules,
   #discord {
     order: -1;
+    width: 100%;
   }
 
   #discord {
@@ -140,6 +141,7 @@ tr:nth-child(even) {
 
 .stats-container {
   margin: 5px 0%;
+  flex-wrap: wrap;
 }
 
 .stats-container > * {

@@ -53,7 +53,8 @@ impl HttpActor {
     }
 
     pub fn execute_discord_webhook(
-        &self, data: serde_json::Value,
+        &self,
+        data: serde_json::Value,
     ) -> impl Future<Item = (), Error = ()> {
         if let Some(ref uri) = *self.discord_webhook_url {
             info!("Executing discord webhook!");
@@ -212,7 +213,9 @@ impl Handler<PostProcessRecord> for HttpActor {
     type Result = Option<Record>;
 
     fn handle(
-        &mut self, PostProcessRecord(record): PostProcessRecord, ctx: &mut Self::Context,
+        &mut self,
+        PostProcessRecord(record): PostProcessRecord,
+        ctx: &mut Self::Context,
     ) -> Self::Result {
         if let Some(ref record) = record {
             info!("Post processing record {}", record);
