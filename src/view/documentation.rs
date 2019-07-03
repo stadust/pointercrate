@@ -45,7 +45,7 @@ impl<'a> Page for Documentation<'a> {
 
     fn body(&self, _: &HttpRequest<PointercrateState>) -> Markup {
         html! {
-            div#container class="m-center flex" {
+            div class="m-center flex container" {
                 div.left {
                     (PreEscaped(self.content))
                 }
