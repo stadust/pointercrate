@@ -37,18 +37,20 @@ Note that the `next` and `prev` links are only provided if there actually is a n
 
 ## Filtering
 
-Most endpoints that support pagination also support filtering their results.
+Most endpoints that support pagination also support filtering their results beyond simply using the pagination parameters.
 
 If this is supported, the documentation specifies the filterable fields for a given endpoint.
 It is then possible to specify conditions in the query string, which the returned objects must meet.
 
 There are two ways of filtering the result set:
 
-- **Filtering by equality**: The objects returned can be filtered by a specific field's value by specifying the field and a value in the query string, i.e. `/api/v1/records?id=54`
+- **Filtering by equality**: The objects returned can be filtered by a specific field's value by specifying the field and a value in the query string, i.e. `/api/v1/players/?banned=true`
 - **Filtering by inequality**: The objects returned can be filtered by whether a field is smaller/greater than a specific value by specifying the field,
-  suffixed with either `__lt` or `__gt`, and the value to check for inequality against in the query string, i.e. `/api/v1/records?id__gt=20`. Note that this doesn't work for all fields (since a lexicographical filtering on the record status hardly seems useful)
+  suffixed with either `__lt` or `__gt`, and the value to check for inequality against in the query string, i.e. `/api/v1/demons/?record_requirement__gt=75`. Note that this doesn't work for all fields (since a lexicographical filtering on the record status hardly seems useful)
 
-Multiple conditions can be combined, i.e. `/api/v1/records?status=APPROVED&id__gt=200&id__lt=1000`.
+Multiple conditions can be combined, i.e. `/api/v1/records/?after=200&limit=10&status=APPROVED&progress__lt=100`. This request would return the first 10 approved records with a record ID greater than 200 and a progress less than 100.
+
+Note that filtering explicitly on the ID field is *not* possible. You have to use the special `before` and `after` parameters for that. You also cannot use equality filtering on the ID field. Use the specific endpoint for retrieving single objects instead.
 
 ### Errors:
 

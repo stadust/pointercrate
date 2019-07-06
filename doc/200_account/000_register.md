@@ -8,7 +8,7 @@
 
 <div class='info-yellow'>
 <b>Rate Limits:</b><br>
-This endpoint is ratelimited at 1 successful request per day
+This endpoint is ratelimited at 1 successful request per day and at 5 failed requests per 6 hours
 </div>
 
 Registers a new pointercrate account.
