@@ -48,7 +48,7 @@ static EXTENDED_SECTION: ListSection = ListSection {
 
 static LEGACY_SECTION: ListSection  = ListSection{
     name: "Legacy List",
-    description: "These are demons that used to be in the top 100, but got pushed off as new demons were added. They are here for nostalgic reasons. This list is in no order whatsoever and will not be maintained any longer at all. This means no new records will be added for these demons.",
+    description: "These are demons that used to be on the list, but got pushed off as new demons were added. They are here for nostalgic reasons. This list is in no order whatsoever and will not be maintained any longer at all. This means no new records will be added for these demons.",
     id: "legacy",
     numbered: false,
 };
