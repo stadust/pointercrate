@@ -1,8 +1,12 @@
 use super::Page;
 use crate::{
-    actor::{database::GetDemonlistOverview, http::GetDemon},
+    actor::{
+        database::{GetDemonlistOverview, GetMessage},
+        http::GetDemon,
+    },
     api::PCResponder,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    context::RequestData,
     error::PointercrateError,
     model::{
         demon::{self, Demon, DemonWithCreatorsAndRecords, PartialDemon},
@@ -12,6 +16,7 @@ use crate::{
     video,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpRequest, Path, Responder};
+use gdcf::cache::CacheEntry;
 use gdcf_model::{
     level::{data::LevelInformationSource, Level, Password},
     user::Creator,
@@ -30,7 +35,7 @@ struct ListSection {
 
 static MAIN_SECTION: ListSection = ListSection {
     name: "Main List",
-    description: "The main section of the demonlist. These demons are the hardest rated levels in the game. Records are accepted above a given threshold and award a large amount of points!",
+    description: "The main section of the Demonlist. These demons are the hardest rated levels in the game. Records are accepted above a given threshold and award a large amount of points!",
     id: "mainlist",
     numbered: true,
 };
@@ -44,7 +49,7 @@ static EXTENDED_SECTION: ListSection = ListSection {
 
 static LEGACY_SECTION: ListSection  = ListSection{
     name: "Legacy List",
-    description: "These are demons that used to be in the top 100, but got pushed off as new demons were added. They are here for nostalgic reasons. This list is in no order whatsoever and will not be maintained any longer at all. This means no new records will be added for these demons.",
+    description: "These are demons that used to be on the list, but got pushed off as new demons were added. They are here for nostalgic reasons. This list is in no order whatsoever and will not be maintained any longer at all. This means no new records will be added for these demons.",
     id: "legacy",
     numbered: false,
 };
@@ -73,7 +78,7 @@ impl Page for DemonlistOverview {
     }
 
     fn description(&self) -> String {
-        "The official Geometry Dash Demonlist on pointercrate!".to_string()
+        "The official pointercrate Demonlist!".to_string()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -96,7 +101,7 @@ impl Page for DemonlistOverview {
                     (stats_viewer(&self.nations))
                     @for demon in &self.demon_overview {
                         @if demon.position <= *EXTENDED_LIST_SIZE {
-                            div.panel.fade {
+                            div.panel.fade style="overflow:hidden" {
                                 div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
                                     @if let Some(ref video) = demon.video {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
@@ -169,7 +174,7 @@ impl Page for DemonlistOverview {
                         ]
                     }},
                     "name": "Geometry Dash Demonlist",
-                    "description": "The official Geometry Dash Demonlist on pointercrate!",
+                    "description": "The official pointercrate Demonlist!",
                     "url": "https://pointercrate.com/demonlist/"
                 }}
                 </script>
@@ -191,19 +196,21 @@ impl Page for DemonlistOverview {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
-    server_level: Option<Level<u64, Creator>>,
+    server_level: CacheEntry<Level<u64, Option<Creator>>, gdcf_diesel::Entry>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
     let state = req.state().clone();
+    let request_data = RequestData::from_request(req);
 
     Path::<i16>::extract(req)
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"))
         .into_future()
         .and_then(move |position| {
-            state.get_unauthorized(position.into_inner()).and_then(
-                move |data: DemonWithCreatorsAndRecords| {
+            state
+                .database(GetMessage::new(position.into_inner(), request_data))
+                .and_then(move |data: DemonWithCreatorsAndRecords| {
                     state
                         .database(GetDemonlistOverview)
                         .and_then(move |overview| {
@@ -211,19 +218,24 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                                 .gdcf
                                 .send(GetDemon(data.demon.name.to_string()))
                                 .map_err(PointercrateError::internal)
-                                .map(move |demon| {
+                                .and_then(move |result| {
+                                    match result {
+                                        Ok(entry) => Ok(entry),
+                                        Err(err) => Err(PointercrateError::internal(err)),
+                                    }
+                                })
+                                .map(move |entry| {
                                     Demonlist {
                                         overview,
                                         data,
-                                        server_level: demon,
+                                        server_level: entry,
                                     }
                                     .render(&req_clone)
                                     .respond_to(&req_clone)
                                     .unwrap()
                                 })
                         })
-                },
-            )
+                })
         })
         .responder()
 }
@@ -237,7 +249,7 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        if let Some(ref level) = self.server_level {
+        if let CacheEntry::Cached(ref level, _) = self.server_level {
             if let Some(ref description) = level.base.description {
                 return format!("{}: {}", self.title(), description)
             }
@@ -268,7 +280,17 @@ impl Page for Demonlist {
                     div.panel.fade.js-scroll-anim data-anim = "fade" {
                         div.underlined {
                             h1 style = "overflow: hidden"{
+                                @if self.data.demon.position != 1 {
+                                    a href=(format!("/demonlist/{:?}", self.data.demon.position - 1)) {
+                                        i class="fa fa-chevron-left" style="padding-right: 5%" {}
+                                    }
+                                }
                                 (self.data.demon.name)
+                                @if self.data.demon.position as usize != self.overview.demon_overview.len() {
+                                    a href=(format!("/demonlist/{:?}", self.data.demon.position + 1)) {
+                                        i class="fa fa-chevron-right" style="padding-left: 5%" {}
+                                    }
+                                }
                             }
                             h3 {
                                 @if self.data.creators.0.len() > 3 {
@@ -286,7 +308,7 @@ impl Page for Demonlist {
                                 }
                             }
                         }
-                        @if let Some(ref level) = self.server_level {
+                        @if let CacheEntry::Cached(ref level, _) = self.server_level {
                             @if let Some(ref description) = level.base.description {
                                 div.underlined.pad {
                                     q {
@@ -299,47 +321,59 @@ impl Page for Demonlist {
                             iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" data-attr = "src" data-attr-value = (video::embed(video)) {"Verification Video"}
                         }
                         div.underlined.pad.flex.wrap#level-info {
-                            @if let Some(ref level) = self.server_level {
-                                @let level_data = level.decompress_data().ok();
-                                @let level_data = level_data.as_ref().and_then(|data| gdcf_parse::level::data::parse_lazy_parallel(data).ok());
-                                @let stats = level_data.map(LevelInformationSource::stats);
+                            @match self.server_level {
+                                CacheEntry::Missing => {
+                                    p.info-yellow {
+                                        "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
+                                    }
+                                },
+                                CacheEntry::DeducedAbsent | CacheEntry::MarkedAbsent(_) => {
+                                    p.info-red {
+                                        "This demon has not been found on the Geometry Dash servers. Its name was most likely misspelled when entered into the database. Please contact a list moderator to fix this."
+                                    }
+                                },
+                                CacheEntry::Cached(ref level, ref meta) => {
+                                    @let level_data = level.decompress_data().ok();
+                                    @let level_data = level_data.as_ref().and_then(|data| gdcf_parse::level::data::parse_lazy_parallel(data).ok());
+                                    @let stats = level_data.map(LevelInformationSource::stats);
 
-                                span {
-                                    b {
-                                        "Level Password: "
+                                    span {
+                                        b {
+                                            "Level Password: "
+                                        }
+                                        br;
+                                        @match level.password {
+                                            Password::NoCopy => "Not copyable",
+                                            Password::FreeCopy => "Free to copy",
+                                            Password::PasswordCopy(ref pw) => (pw)
+                                        }
                                     }
-                                    br;
-                                    @match level.password {
-                                        Password::NoCopy => "Not copyable",
-                                        Password::FreeCopy => "Free to copy",
-                                        Password::PasswordCopy(ref pw) => (pw)
+                                    span {
+                                        b {
+                                            "Level ID: "
+                                        }
+                                        br;
+                                        (level.base.level_id)
                                     }
-                                }
-                                span {
-                                    b {
-                                        "Level ID: "
+                                    span {
+                                        b {
+                                            "Level length: "
+                                        }
+                                        br;
+                                        @match stats {
+                                            Some(ref stats) => (format!("{}m:{:02}s", stats.duration.as_secs() / 60, stats.duration.as_secs() % 60)),
+                                            _ => (level.base.length.to_string())
+                                        }
                                     }
-                                    br;
-                                    (level.base.level_id)
-                                }
-                                span {
-                                    b {
-                                        "Level length: "
-                                    }
-                                    br;
-                                    @match stats {
-                                        Some(ref stats) => (format!("{}m:{:02}s", stats.duration.as_secs() / 60, stats.duration.as_secs() % 60)),
-                                        _ => (level.base.length.to_string())
-                                    }
-                                }
-                                span {
-                                    b {
-                                        "Object count: "
-                                    }
-                                    br;
-                                    @match stats {
-                                        Some(ref stats) => (stats.object_count),
-                                        _ => (level.base.object_amount)
+                                    span {
+                                        b {
+                                            "Object count: "
+                                        }
+                                        br;
+                                        @match stats {
+                                            Some(ref stats) => (stats.object_count),
+                                            _ => (level.base.object_amount.unwrap_or(0))
+                                        }
                                     }
                                 }
                             }
@@ -501,7 +535,9 @@ impl Page for Demonlist {
 }
 
 fn dropdowns(
-    req: &HttpRequest<PointercrateState>, all_demons: &[PartialDemon], current: Option<&Demon>,
+    req: &HttpRequest<PointercrateState>,
+    all_demons: &[PartialDemon],
+    current: Option<&Demon>,
 ) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < *LIST_SIZE as usize {
         (&all_demons[..], Default::default(), Default::default())
@@ -531,7 +567,9 @@ fn dropdowns(
 }
 
 fn dropdown(
-    req: &HttpRequest<PointercrateState>, section: &ListSection, demons: &[PartialDemon],
+    req: &HttpRequest<PointercrateState>,
+    section: &ListSection,
+    demons: &[PartialDemon],
     current: Option<&Demon>,
 ) -> Markup {
     let format = |demon: &PartialDemon| -> Markup {
@@ -591,13 +629,13 @@ fn submission_panel() -> Markup {
     html! {
         div.panel.fade.closable#submitter style = "display: none" {
             span.plus.cross.hover {}
-            div.underlined {
-                h2 {"Record Submission"}
-            }
-            p.info-red.output#submission-error {}
-            p.info-green.output#submission-success {}
             div.flex {
                 form#submission-form novalidate = "" {
+                    div.underlined {
+                        h2 {"Record Submission"}
+                    }
+                    p.info-red.output {}
+                    p.info-green.output {}
                     h3 {
                         "Demon:"
                     }
@@ -677,7 +715,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                     div.search.seperated style = "margin-bottom: 0px"{
                         input#pagination-filter placeholder = "Enter to search..." type = "text" style = "height: 1em";
                     }
-                    p.info-red.output style = "margin: 0px 10px"{}
+                    p.info-red.output style = "margin: 10px 10px 0px"{}
                     div style="position:relative; margin: 0px 10px; min-height: 400px; flex-grow:1" {
                         ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
                     }
@@ -692,7 +730,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                     }
                     div#stats-data style = "display:none" {
                         div.flex.col {
-                            h3#player-name style = "font-size:1.4em" {}
+                            h3#player-name style = "font-size:1.4em; overflow: hidden" {}
                             div.stats-container.flex.space {
                                 span {
                                     b {
@@ -850,7 +888,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "List demons that receive a hacked update changing difficulty will be moved the the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
+                        "List demons that receive a hacked update changing difficulty will be moved to the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
                     }
                 }
                 h3 {
@@ -863,7 +901,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include but aren't limited to: speedhacks, noclip, auto, nerfs, macros, fps bypass, etc."
+                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include, but aren't limited to, speedhacks, noclip, auto, nerfs, macros, fps bypass, etc."
                     }
                 }
                 li {
@@ -886,7 +924,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        "Being in a group in which people beat levels for th same channel will cause your records to be temporarily removed from the list."
+                        "Being in a group in which people beat levels for the same channel will cause your records to be temporarily removed from the list."
                     }
                 }
                 h3 {
@@ -953,7 +991,7 @@ fn discord_panel() -> Markup {
         div.panel.fade.js-scroll-anim#discord data-anim = "fade" {
             iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
-                "Join the official demonlist discord server, where you can get in touch with the demonlist team!"
+                "Join the official Demonlist discord server, where you can get in touch with the demonlist team!"
             }
         }
     }

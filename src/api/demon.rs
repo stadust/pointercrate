@@ -24,16 +24,15 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let pagination = serde_urlencoded::from_str(query_string)
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
+    let req = req.clone();
 
     pagination
         .into_future()
         .and_then(move |pagination: DemonPagination| {
-            state.paginate::<Token, PartialDemon, _>(
+            req.state().paginate::<Token, PartialDemon, _>(
+                &req,
                 pagination,
                 "/api/v1/demons/".to_string(),
-                auth,
             )
         })
         .map(|(demons, links)| HttpResponse::Ok().header("Links", links).json(demons))
@@ -58,37 +57,29 @@ patch_handler!(
 pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/demons/{{position}}/creators/");
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
-    let position = Path::<i16>::extract(req)
+    let req = req.clone();
+    let position = Path::<i16>::extract(&req)
         .map_err(|_| PointercrateError::bad_request("Demon position must be integer"));
 
     req.json()
         .from_err()
         .and_then(move |post: PostCreator| Ok((position?.into_inner(), post.creator)))
-        .and_then(move |data| state.post::<Token, _, _>(data, auth))
+        .and_then(move |data| req.state().post::<Token, _, _>(&req, data))
         .map(|_: Creator| HttpResponse::Created().finish())
         .responder()
 }
 
 pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
-    use crate::middleware::auth::Token;
+    info!("DELETE /api/v1/demons/[position]/creators/[player id]/");
 
-    info!(
-        "DELETE {}",
-        "/api/v1/demons/[position]/creators/[player id]/"
-    );
+    let req = req.clone();
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
-
-    Path::<(i16, i32)>::extract(req)
-        .map_err(|_| {
-            PointercrateError::bad_request("Demon position and player ID must be interger")
-        })
+    Path::<(i16, i32)>::extract(&req)
+        .map_err(|_| PointercrateError::bad_request("Demon position and player ID must be integer"))
         .into_future()
         .and_then(move |resource_id| {
-            state.delete::<Token, (i16, i32), Creator>(resource_id.into_inner(), None, auth)
+            req.state()
+                .delete::<Token, (i16, i32), Creator>(&req, resource_id.into_inner())
         })
         .map(|_| HttpResponse::NoContent().finish())
         .responder()

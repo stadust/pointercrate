@@ -1,4 +1,4 @@
-use crate::{bitstring::Bits, error::PointercrateError, model::user::User, Result};
+use crate::bitstring::Bits;
 use bitflags::bitflags;
 use joinery::Joinable;
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
@@ -89,6 +89,7 @@ macro_rules! perms {
             let mut perm_set = HashSet::new();
 
             $(
+                #[allow(unused_results)]
                 perm_set.insert($(Permissions::$perm|)+ Permissions::empty());
             )*
 
@@ -266,53 +267,6 @@ impl PermissionsSet {
 
     pub fn is_empty(&self) -> bool {
         self.perms.is_empty()
-    }
-}
-
-pub trait AccessRestrictions {
-    fn pre_access(_: Option<&User>) -> Result<()> {
-        Ok(())
-    }
-
-    fn access(self, _: Option<&User>) -> Result<Self>
-    where
-        Self: Sized,
-    {
-        Ok(self)
-    }
-
-    fn pre_page_access(_: Option<&User>) -> Result<()> {
-        Ok(())
-    }
-
-    fn page_access(page: Vec<Self>, _: Option<&User>) -> Result<Vec<Self>>
-    where
-        Self: Sized,
-    {
-        Ok(page)
-    }
-
-    fn pre_delete(&self, _: Option<&User>) -> Result<()> {
-        Ok(())
-    }
-
-    fn pre_patch(&self, _: Option<&User>) -> Result<()> {
-        Ok(())
-    }
-}
-
-pub fn demand(permissions: PermissionsSet, user: Option<&User>) -> Result<()> {
-    if permissions.is_empty() {
-        return Ok(())
-    }
-
-    match user {
-        None => Err(PointercrateError::Unauthorized),
-        Some(user) if !user.has_any(&permissions) =>
-            Err(PointercrateError::MissingPermissions {
-                required: permissions,
-            }),
-        _ => Ok(()),
     }
 }
 

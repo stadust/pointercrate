@@ -1,14 +1,14 @@
 use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
 use crate::{
     citext::CiString,
+    context::RequestContext,
     error::PointercrateError,
     model::{nationality::Nationality, player::ShortPlayer, By},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
-    permissions::PermissionsSet,
     schema::players,
     Result,
 };
-use diesel::{result::Error, Connection, ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{result::Error, Connection, ExpressionMethods, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -21,7 +21,12 @@ make_patch! {
 }
 
 impl Patch<PatchPlayer> for ShortPlayer {
-    fn patch(mut self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
+    fn patch(mut self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+        ctx.check_if_match(&self)?;
+
+        let connection = ctx.connection();
+
         info!("Patching player {} with {}", self, patch);
 
         connection.transaction(|| {
@@ -43,7 +48,7 @@ impl Patch<PatchPlayer> for ShortPlayer {
 
             if let Some(nationality) = patch.nationality {
                 self.nationality = nationality
-                    .map(|nation| Nationality::get(nation.as_ref(), connection))
+                    .map(|nation| Nationality::get(nation.as_ref(), ctx))
                     .transpose()?;
             }
 
@@ -61,34 +66,13 @@ impl Patch<PatchPlayer> for ShortPlayer {
             Ok(self)
         })
     }
-
-    fn permissions_for(&self, _: &PatchPlayer) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
-    }
 }
 
 impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
-    fn patch(self, patch: PatchPlayer, connection: &PgConnection) -> Result<Self> {
-        let PlayerWithDemonsAndRecords {
-            player,
-            records,
-            created,
-            verified,
-            published,
-        } = self;
-
-        let player = player.patch(patch, connection)?;
-
+    fn patch(self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
         Ok(PlayerWithDemonsAndRecords {
-            player,
-            records,
-            created,
-            verified,
-            published,
+            player: self.player.patch(patch, ctx)?,
+            ..self
         })
-    }
-
-    fn permissions_for(&self, _: &PatchPlayer) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }

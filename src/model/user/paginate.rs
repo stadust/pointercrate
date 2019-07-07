@@ -1,12 +1,13 @@
 use super::{Permissions, User};
 use crate::{
+    context::RequestContext,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
     schema::members,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -59,12 +60,10 @@ impl Paginator for UserPagination {
 }
 
 impl Paginate<UserPagination> for User {
-    fn load(pagination: &UserPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        if pagination.limit() > 100 || pagination.limit() < 1 {
-            return Err(PointercrateError::InvalidPaginationLimit)
-        }
+    fn load(pagination: &UserPagination, ctx: RequestContext) -> Result<Vec<Self>> {
+        ctx.check_permissions(perms!(Administrator))?;
 
-        let mut query = pagination.filter(User::boxed_all());
+        let mut query = pagination.filter(User::boxed_all(), ctx);
 
         // FIXME: this needs to happen in the filter method!
         if let Some(permissions) = pagination.has_permissions {
@@ -79,6 +78,6 @@ impl Paginate<UserPagination> for User {
             members::member_id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, members::member_id, connection)
+        pagination_result!(query, pagination, members::member_id, ctx.connection())
     }
 }

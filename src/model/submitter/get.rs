@@ -1,28 +1,39 @@
 use super::{Submitter, SubmitterWithRecords};
 use crate::{
-    error::PointercrateError,
-    model::{user::User, By},
-    operation::Get,
-    permissions::{self, AccessRestrictions},
-    Result,
+    context::RequestContext, error::PointercrateError, model::By, operation::Get,
+    ratelimit::RatelimitScope, Result,
 };
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 use ipnetwork::IpNetwork;
+use std::net::Ipv4Addr;
 
-impl Get<IpNetwork> for Submitter {
-    fn get(ip: IpNetwork, connection: &PgConnection) -> Result<Self> {
-        match Submitter::by(&ip).first(connection) {
-            Ok(submitter) => Ok(submitter),
-            Err(Error::NotFound) =>
-                Submitter::insert(&ip, connection).map_err(PointercrateError::database),
-            Err(err) => Err(PointercrateError::database(err)),
+impl Get<()> for Submitter {
+    fn get(_: (), ctx: RequestContext) -> Result<Self> {
+        match ctx {
+            RequestContext::Internal(_) =>
+                Ok(Submitter {
+                    id: 0,
+                    ip: IpNetwork::V4(Ipv4Addr::new(127, 0, 0, 1).into()),
+                    banned: false,
+                }),
+            RequestContext::External { ip, connection, .. } =>
+                match Submitter::by(&ip).first(connection) {
+                    Ok(submitter) => Ok(submitter),
+                    Err(Error::NotFound) =>
+                        ctx.ratelimit(RatelimitScope::NewSubmitter).and_then(|_| {
+                            Submitter::insert(&ip, connection).map_err(PointercrateError::database)
+                        }),
+                    Err(err) => Err(PointercrateError::database(err)),
+                },
         }
     }
 }
 
 impl Get<i32> for Submitter {
-    fn get(id: i32, connection: &PgConnection) -> Result<Self> {
-        match Submitter::by(id).first(connection) {
+    fn get(id: i32, ctx: RequestContext) -> Result<Self> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+
+        match Submitter::by(id).first(ctx.connection()) {
             Ok(submitter) => Ok(submitter),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -34,32 +45,16 @@ impl Get<i32> for Submitter {
     }
 }
 
-impl AccessRestrictions for Submitter {
-    fn pre_access(user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(ListModerator or ListAdministrator), user)
-    }
-
-    fn pre_page_access(user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(ListAdministrator), user)
-    }
-}
-
 impl<T> Get<T> for SubmitterWithRecords
 where
     Submitter: Get<T>,
 {
-    fn get(t: T, connection: &PgConnection) -> Result<Self> {
-        let submitter = Submitter::get(t, connection)?;
+    fn get(t: T, ctx: RequestContext) -> Result<Self> {
+        let submitter = Submitter::get(t, ctx)?;
 
         Ok(SubmitterWithRecords {
-            records: Get::get(&submitter, connection)?,
+            records: Get::get(&submitter, ctx)?,
             submitter,
         })
-    }
-}
-
-impl AccessRestrictions for SubmitterWithRecords {
-    fn pre_access(user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(ListModerator or ListAdministrator), user)
     }
 }

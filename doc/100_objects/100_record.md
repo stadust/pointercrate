@@ -7,7 +7,7 @@ Each record on the list is represented by a `Record` object. The following invar
 - The `progress` value lies within `demon.requirement` and `100`
 - Every `video` value is unique
 - Every combination of `demon`, `player` and `status` values is unique
-- Every `video` value is in one of the formats listed [here](/documentation/#video)
+- Every `video` value is in one of the formats listed [here](/documentation/#video), or `null`
 
 The object only contains the submitter information if the object has been requested with sufficient permissions.
 Requests without `ExtendedAccess` permissions can only retrieve approved records

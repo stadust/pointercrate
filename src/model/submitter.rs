@@ -11,8 +11,9 @@ mod patch;
 
 pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 use crate::model::By;
+use std::hash::{Hash, Hasher};
 
-#[derive(Queryable, Debug, Identifiable, Serialize, Hash, Display)]
+#[derive(Queryable, Debug, Identifiable, Serialize, Hash, Display, Copy, Clone)]
 #[table_name = "submitters"]
 #[primary_key("submitter_id")]
 #[display(fmt = "{} (Banned: {})", id, banned)]
@@ -22,12 +23,18 @@ pub struct Submitter {
     pub banned: bool,
 }
 
-#[derive(Debug, Serialize, Hash, Display)]
+#[derive(Debug, Serialize, Display)]
 #[display(fmt = "{}", submitter)]
 pub struct SubmitterWithRecords {
     #[serde(flatten)]
     submitter: Submitter,
     records: Vec<EmbeddedRecordPD>,
+}
+
+impl Hash for SubmitterWithRecords {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.submitter.hash(state)
+    }
 }
 
 #[derive(Insertable, Debug)]

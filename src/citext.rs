@@ -11,10 +11,10 @@ use diesel::{
     serialize::{self, IsNull, Output, ToSql},
 };
 use serde::{Serialize, Serializer};
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Deserialize;
 use std::{borrow::Borrow, cmp::Ordering, io::Write, ops::Deref};
 
-#[derive(SqlType, Debug)]
+#[derive(SqlType, Debug, Copy, Clone)]
 #[postgres(type_name = "CITEXT")]
 pub struct CiText;
 

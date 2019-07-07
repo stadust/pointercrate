@@ -1,24 +1,19 @@
-use crate::{actor::database::DeleteMessage, model::record::Record};
+use crate::{actor::database::DeleteMessage, context::RequestData, model::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
-use chrono::Duration;
 use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
-    cache::CachedObject,
-    Gdcf, GdcfFuture,
+    cache::CacheEntry,
+    Gdcf,
 };
-use gdcf_dbcache::cache::{DatabaseCache, DatabaseCacheConfig, Pg};
+use gdcf_diesel::{Cache, Entry, Error};
 use gdcf_model::{
     level::{DemonRating, Level, LevelRating},
     song::NewgroundsSong,
     user::Creator,
 };
 use gdrs::BoomlingsClient;
-use hyper::{
-    client::{Client, HttpConnector},
-    Body, Request,
-};
-use hyper_tls::HttpsConnector;
 use log::{debug, error, info, warn};
+use reqwest::r#async::Client;
 use serde_json::json;
 use std::sync::Arc;
 use tokio::{
@@ -29,8 +24,8 @@ use tokio::{
 /// Actor for whatever the fuck just happens to need to be done and isn't database access
 #[allow(missing_debug_implementations)]
 pub struct HttpActor {
-    gdcf: Gdcf<BoomlingsClient, DatabaseCache<Pg>>,
-    http_client: Client<HttpsConnector<HttpConnector>>,
+    gdcf: Gdcf<BoomlingsClient, Cache>,
+    http_client: Client,
     discord_webhook_url: Arc<Option<String>>,
     deletor: Recipient<DeleteMessage<i32, Record>>,
 }
@@ -41,11 +36,7 @@ impl HttpActor {
 
         let gdcf_url = std::env::var("GDCF_DATABASE_URL").expect("GDCF_DATABASE_URL is not set");
 
-        let mut config = DatabaseCacheConfig::postgres_config(&gdcf_url)
-            .expect("Failed to connect to GDCF database");
-        config.invalidate_after(Duration::minutes(30));
-
-        let cache = DatabaseCache::new(config);
+        let cache = Cache::postgres(gdcf_url).expect("haha is break");
         let client = BoomlingsClient::new();
 
         cache.initialize().unwrap();
@@ -53,26 +44,27 @@ impl HttpActor {
         HttpActor {
             deletor,
             gdcf: Gdcf::new(client, cache),
-            http_client: Client::builder().build(HttpsConnector::new(4).unwrap()),
+            http_client: Client::builder()
+                .build()
+                .expect("Failed to create reqwest client"),
             discord_webhook_url: Arc::new(std::env::var("DISCORD_WEBHOOK").ok()),
         }
         .start()
     }
 
     pub fn execute_discord_webhook(
-        &self, data: serde_json::Value,
+        &self,
+        data: serde_json::Value,
     ) -> impl Future<Item = (), Error = ()> {
         if let Some(ref uri) = *self.discord_webhook_url {
             info!("Executing discord webhook!");
 
-            let request = Request::post(uri)
-                .header("Content-Type", "application/json")
-                .body(Body::from(data.to_string()))
-                .unwrap();
-
             let future = self
                 .http_client
-                .request(request)
+                .post(uri)
+                .header("Content-Type", "application/json")
+                .body(data.to_string())
+                .send()
                 .map_err(move |error| {
                     error!(
                         "INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}",
@@ -97,10 +89,9 @@ impl HttpActor {
             url
         );
 
-        let request = Request::head(url).body(Body::empty()).unwrap();
-
         self.http_client
-            .request(request)
+            .head(url)
+            .send()
             .map_err(|error| error!("INTERNAL SERVER ERROR: HEAD request failed: {:?}", error))
             .and_then(|response| {
                 let status = response.status().as_u16();
@@ -118,24 +109,24 @@ impl Actor for HttpActor {
     type Context = Context<Self>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct LevelById(pub u64);
 
 impl Message for LevelById {
-    type Result = Option<Level<NewgroundsSong, Creator>>;
+    type Result = Result<CacheEntry<Level<NewgroundsSong, Option<Creator>>, Entry>, Error>;
 }
 
 impl Handler<LevelById> for HttpActor {
-    type Result = Option<Level<NewgroundsSong, Creator>>;
+    type Result = Result<CacheEntry<Level<NewgroundsSong, Option<Creator>>, Entry>, Error>;
 
     fn handle(&mut self, LevelById(id): LevelById, ctx: &mut Self::Context) -> Self::Result {
-        let GdcfFuture { cached, inner } = self.gdcf.level(id.into());
+        let (entry, future) = self.gdcf.level(id.into())?.into();
 
-        if let Some(inner) = inner {
-            ctx.spawn(inner.map(|_| ()).map_err(|_| ()).into_actor(self));
+        if let Some(future) = future {
+            ctx.spawn(future.map(|_| ()).map_err(|_| ()).into_actor(self));
         }
 
-        cached.map(CachedObject::extract)
+        Ok(entry)
     }
 }
 
@@ -143,67 +134,70 @@ impl Handler<LevelById> for HttpActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Option<Level<u64, Creator>>;
+    type Result = Result<CacheEntry<Level<u64, Option<Creator>>, Entry>, Error>;
 }
 
 impl Handler<GetDemon> for HttpActor {
-    type Result = Option<Level<u64, Creator>>;
+    type Result = Result<CacheEntry<Level<u64, Option<Creator>>, Entry>, Error>;
 
-    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Option<Level<u64, Creator>> {
-        let GdcfFuture { cached, inner } = self.gdcf.levels::<u64, Creator>(
-            LevelsRequest::default()
-                .request_type(LevelRequestType::MostLiked)
-                .search(msg.0.clone())
-                .with_rating(LevelRating::Demon(DemonRating::Hard))
-                .filter(SearchFilters::default().rated()),
-        );
+    fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Self::Result {
+        let (cache_entry, future) = self
+            .gdcf
+            .levels::<u64, Option<Creator>>(
+                LevelsRequest::default()
+                    .request_type(LevelRequestType::MostLiked)
+                    .search(msg.0.clone())
+                    .with_rating(LevelRating::Demon(DemonRating::Hard))
+                    .filter(SearchFilters::default().rated()),
+            )?
+            .into();
 
-        if let Some(inner) = inner {
+        if let Some(future) = future {
             debug!(
                 "Spawning future to asynchronously perform LevelsRequest for {}",
                 msg.0
             );
 
             ctx.spawn(
-                inner
+                future
                     .map(|_| info!("LevelsRequest successful"))
                     .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
                     .into_actor(self),
             );
         }
 
-        match cached {
-            Some(inner) => {
-                let inner = inner.extract();
-
-                if !inner.is_empty() {
-                    let best_match = inner
-                        .iter()
-                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
-                        .unwrap();
-
-                    let GdcfFuture { cached, inner } = self.gdcf.level(best_match.level_id.into());
-
-                    if let Some(inner) = inner {
-                        debug!(
-                            "Spawning future to asynchronously perform LevelRequest for {}",
-                            msg.0
-                        );
-
-                        ctx.spawn(
-                            inner
-                                .map(|level| info!("Successfully retrieved level {}", level))
-                                .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
-                                .into_actor(self),
-                        );
-                    }
-
-                    cached.map(CachedObject::extract)
-                } else {
-                    None
+        match cache_entry {
+            CacheEntry::DeducedAbsent => Ok(CacheEntry::DeducedAbsent),
+            CacheEntry::Missing => Ok(CacheEntry::Missing),
+            CacheEntry::MarkedAbsent(meta) => Ok(CacheEntry::MarkedAbsent(meta)),
+            CacheEntry::Cached(levels, meta) => {
+                if levels.is_empty() {
+                    return Ok(CacheEntry::DeducedAbsent) // TODO: figure out if this is necessary
                 }
+
+                let best_match = levels
+                    .iter()
+                    .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
+                    .unwrap();
+
+                let (entry, future) = self.gdcf.level(best_match.level_id.into())?.into();
+
+                if let Some(future) = future {
+                    debug!(
+                        "Spawning future to asynchronously perform LevelRequest for {}",
+                        msg.0
+                    );
+
+                    ctx.spawn(
+                        future
+                            .map(|level| info!("Successfully retrieved level {}", level))
+                            .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
+                            .into_actor(self),
+                    );
+                }
+
+                Ok(entry)
             },
-            None => None,
         }
     }
 }
@@ -219,7 +213,9 @@ impl Handler<PostProcessRecord> for HttpActor {
     type Result = Option<Record>;
 
     fn handle(
-        &mut self, PostProcessRecord(record): PostProcessRecord, ctx: &mut Self::Context,
+        &mut self,
+        PostProcessRecord(record): PostProcessRecord,
+        ctx: &mut Self::Context,
     ) -> Self::Result {
         if let Some(ref record) = record {
             info!("Post processing record {}", record);
@@ -272,7 +268,7 @@ impl Handler<PostProcessRecord> for HttpActor {
                     warn!("A HEAD request to video yielded an error response, automatically deleting submission!");
 
                     deletor
-                        .send(DeleteMessage::unconditional(record_id))
+                        .send(DeleteMessage::new(record_id, RequestData::Internal))
                         .map_err(move |error| error!("INTERNAL SERVER ERROR: Failure to delete record {} - {:?}!", record_id, error))
                         .map(|_| ())
                         .and_then(|_| Err(()))

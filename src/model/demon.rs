@@ -24,6 +24,7 @@ mod post;
 pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     model::By,
 };
 
@@ -353,7 +354,7 @@ impl Demon {
 
             diesel::update(demons::table)
                 .filter(demons::position.ge(to))
-                .filter(demons::position.gt(self.position))
+                .filter(demons::position.lt(self.position))
                 .set(demons::position.eq(demons::position + 1))
                 .execute(connection)?;
         }
@@ -389,7 +390,7 @@ impl Demon {
     pub fn validate_name(name: &mut CiString, connection: &PgConnection) -> Result<()> {
         *name = CiString(name.trim().to_string());
 
-        match Demon::get(name.as_ref(), connection) {
+        match Demon::get(name.as_ref(), RequestContext::Internal(connection)) {
             Ok(demon) =>
                 Err(PointercrateError::DemonExists {
                     position: demon.position,

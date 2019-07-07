@@ -43,7 +43,7 @@ pub trait Model {
     }
 }
 
-trait By<T: Column + Default + ExpressionMethods, U: AsExpression<T::SqlType>/*U: Expression<SqlType = T::SqlType>*/>: Model {
+trait By<T: Column + Default + ExpressionMethods, U: AsExpression<T::SqlType>>: Model {
     fn with(u: U) -> diesel::dsl::Eq<T, U> {
         T::default().eq(u)
     }

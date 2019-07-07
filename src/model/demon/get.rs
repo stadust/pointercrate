@@ -1,17 +1,17 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::CiStr,
+    context::RequestContext,
     error::PointercrateError,
-    model::{creator::Creators, demon::PartialDemon, record::EmbeddedRecordP, By},
+    model::{creator::Creators, record::EmbeddedRecordP, By},
     operation::Get,
-    permissions::AccessRestrictions,
     Result,
 };
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Demon {
-    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
-        match Demon::by(name).first(connection) {
+    fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {
+        match Demon::by(name).first(ctx.connection()) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -24,8 +24,8 @@ impl<'a> Get<&'a CiStr> for Demon {
 }
 
 impl Get<i16> for Demon {
-    fn get(position: i16, connection: &PgConnection) -> Result<Self> {
-        match Demon::by(position).first(connection) {
+    fn get(position: i16, ctx: RequestContext) -> Result<Self> {
+        match Demon::by(position).first(ctx.connection()) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -38,9 +38,9 @@ impl Get<i16> for Demon {
 }
 
 impl Get<Demon> for DemonWithCreatorsAndRecords {
-    fn get(demon: Demon, connection: &PgConnection) -> Result<Self> {
-        let creators = Creators::get(demon.name.as_ref(), connection)?;
-        let records = Vec::<EmbeddedRecordP>::get(&demon, connection)?;
+    fn get(demon: Demon, ctx: RequestContext) -> Result<Self> {
+        let creators = Creators::get(demon.name.as_ref(), ctx)?;
+        let records = Vec::<EmbeddedRecordP>::get(&demon, ctx)?;
 
         Ok(DemonWithCreatorsAndRecords {
             demon,
@@ -54,11 +54,7 @@ impl<T> Get<T> for DemonWithCreatorsAndRecords
 where
     Demon: Get<T>,
 {
-    fn get(t: T, connection: &PgConnection) -> Result<Self> {
-        DemonWithCreatorsAndRecords::get(Demon::get(t, connection)?, connection)
+    fn get(t: T, ctx: RequestContext) -> Result<Self> {
+        DemonWithCreatorsAndRecords::get(Demon::get(t, ctx)?, ctx)
     }
 }
-
-impl AccessRestrictions for Demon {}
-impl AccessRestrictions for PartialDemon {}
-impl AccessRestrictions for DemonWithCreatorsAndRecords {}

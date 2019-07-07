@@ -53,6 +53,12 @@ pub struct User {
     pub youtube_channel: Option<String>,
 }
 
+impl PartialEq for User {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 impl Display for User {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self.display_name {
@@ -311,6 +317,7 @@ mod b64 {
     // Bcrypt has its own base64 alphabet
     // ./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
     lazy_static! {
+        #[allow(unused_results)]
         static ref BCRYPT_TO_STANDARD: HashMap<char, &'static str> = {
             let mut m = HashMap::new();
             m.insert('/', "B");

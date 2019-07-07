@@ -24,7 +24,7 @@ pub enum Authorization {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum AuthType {
     Basic,
     Token,
@@ -34,10 +34,10 @@ pub trait TAuthType: Send + Sync + 'static {
     fn auth_type() -> AuthType;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Basic;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Token;
 
 impl TAuthType for Basic {
@@ -57,12 +57,24 @@ impl TAuthType for Token {
 #[serde(transparent)]
 pub struct Me(pub User);
 
-#[derive(Debug, Deserialize, Serialize)]
+impl PartialEq<User> for Me {
+    fn eq(&self, other: &User) -> bool {
+        &self.0 == other
+    }
+}
+
+impl PartialEq<Me> for User {
+    fn eq(&self, other: &Me) -> bool {
+        self == &other.0
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Copy, Clone)]
 pub struct Claims {
     pub id: i32,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Copy, Clone)]
 pub struct CSRFClaims {
     pub id: i32,
     pub exp: u64,
@@ -87,7 +99,7 @@ pub struct CSRFClaims {
 /// request processing is aborted.
 /// + No authorization: The [`Authorization::Unauthoried`] variant is
 /// constructed
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Authorizer;
 
 impl Middleware<PointercrateState> for Authorizer {

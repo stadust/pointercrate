@@ -9,6 +9,7 @@ Each player on the list is represented by a `Player` object. The following invar
 Note that it is not possible to retrieve a player's demonlist score via the API. You can calculate it yourself based on the `records` list
 
 ## Embedded Form 
+
 When part of the representation of another object, a player has the following fields:
 
 | Field  | Type    | Description                                   |

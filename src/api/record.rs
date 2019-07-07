@@ -5,14 +5,11 @@ use crate::{
     actor::http::PostProcessRecord,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::{
-        record::{PatchRecord, Record, RecordPagination, Submission},
-        Submitter,
-    },
+    model::record::{PatchRecord, Record, RecordPagination, Submission},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
-use ipnetwork::IpNetwork;
+
 use log::info;
 use tokio::prelude::future::{Future, IntoFuture};
 
@@ -24,13 +21,16 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let pagination = serde_urlencoded::from_str(query_string)
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
+    let req = req.clone();
 
     pagination
         .into_future()
         .and_then(move |pagination: RecordPagination| {
-            state.paginate::<Token, Record, _>(pagination, "/api/v1/records/".to_string(), auth)
+            req.state().paginate::<Token, Record, _>(
+                &req,
+                pagination,
+                "/api/v1/records/".to_string(),
+            )
         })
         .map(|(players, links)| HttpResponse::Ok().header("Links", links).json(players))
         .responder()
@@ -40,22 +40,14 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
 pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/records/");
 
-    let state = req.state().clone();
-    let remote_addr = req.extensions_mut().remove::<IpNetwork>().unwrap();
-    let auth = req.extensions_mut().remove().unwrap();
+    let req = req.clone();
 
     req.json()
         .from_err()
         .and_then(move |submission: Submission| {
-            state
-                .get_internal(remote_addr)
-                .and_then(move |submitter: Submitter| {
-                    state
-                        .post::<Token, _, _>((submission, submitter), auth)
-                        .and_then(move |record: Option<Record>| {
-                            state.http(PostProcessRecord(record))
-                        })
-                })
+            req.state()
+                .post::<Token, _, _>(&req, submission)
+                .and_then(move |record: Option<Record>| req.state().http(PostProcessRecord(record)))
         })
         .map(|record: Option<Record>| {
             match record {

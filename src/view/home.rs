@@ -1,6 +1,7 @@
 use super::Page;
 use crate::{
-    api::PCResponder, model::user::User, permissions::Permissions, state::PointercrateState,
+    actor::database::GetMessage, api::PCResponder, context::RequestData, model::user::User,
+    permissions::Permissions, state::PointercrateState,
 };
 use actix_web::{AsyncResponder, HttpRequest, Responder};
 use maud::{html, Markup, PreEscaped};
@@ -16,7 +17,10 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let req_clone = req.clone();
 
     req.state()
-        .get_internal((Permissions::ListAdministrator, Permissions::Administrator))
+        .database(GetMessage::new(
+            (Permissions::ListAdministrator, Permissions::Administrator),
+            RequestData::Internal,
+        ))
         .map(move |(demonlist_team, pointercrate_team)| {
             Homepage {
                 demonlist_team,
@@ -35,7 +39,7 @@ impl Page for Homepage {
     }
 
     fn description(&self) -> String {
-        "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
+        "Pointercrate is the home of the official Demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players".to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -56,16 +60,16 @@ impl Page for Homepage {
                                 "Pointercrate"
                             }
                             h2 style="text-align: left" {
-                                "Home of the official Geometry Dash Demonlist"
+                                "Home of the official Demonlist"
                             }
                             div.tab-content.tab-content-active data-tab-id ="1" {
-                                "The pointercrate demonlist is the most popular ranking of the game's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
+                                "The pointercrate Demonlist is the most popular ranking of Geometry Dashs's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
                             }
                             div.tab-content data-tab-id = "2" {
-                                "The demonlist stats viewer assigns each player a score based on how many demons they've beaten and then ranks them, showing exactly who's the best!"
+                                "The Demonlist stats viewer assigns each player a score based on how many demons they've beaten and then ranks them, showing exactly who's the best!"
                             }
                             div.tab-content data-tab-id = "3" {
-                                "Each submitted record on the demonlist is manually accepted or rejected by our competent list editors!"
+                                "Each submitted record on the Demonlist is manually accepted or rejected by our competent list editors!"
                             }
                             div.tab-content data-tab-id = "4" {
                                 "Thanks to our specialized way of connecting to the Geometry Dash servers we are able to display a whole range of information about the demons, including their description, download count and much more!"
@@ -151,7 +155,7 @@ impl Page for Homepage {
                                     "I have (yet again) redesigned the home page! Most notably, it has been merged it with the former about page, as both were very under-utilized."
                                 }
                                 li {
-                                    "The demonlist now has an overview page over"
+                                    "The Demonlist now has an overview page over"
                                     a href = "/demonlist/" { " here. " }
                                     "which shows an actual list (revolutionary, I know) of all demons"
                                 }
@@ -163,7 +167,7 @@ impl Page for Homepage {
                                 }
                             }
                             p {
-                                "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."
+                                "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the Demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."
                             }
                         }
                         div.tab-content data-tab-id ="100" {
@@ -171,7 +175,7 @@ impl Page for Homepage {
                                 "2018-04-04: Anniversary Update!"
                             }
                             p {
-                                "Its been one year since I rented the pointercrate domain and started hosting the demonlist! Today I'm happy to announce the official pointercrate API, which can be used to programmatically access the demonlist. The documentation can be found"
+                                "Its been one year since I rented the pointercrate domain and started hosting the Demonlist! Today I'm happy to announce the official pointercrate API, which can be used to programmatically access the Demonlist. The documentation can be found"
                                 a href = "/documentation/" { " here. " }
                                 "Further minor changes include:"
                             }
@@ -183,10 +187,10 @@ impl Page for Homepage {
                                     "The website now embeds nicely into discord!"
                                 }
                                 li {
-                                    "We added a link to the official demonlist discord server, which is an awesome place where I get help with spellchecking"
+                                    "We added a link to the official Demonlist discord server, which is an awesome place where I get help with spellchecking"
                                 }
                                 li {
-                                    "There is now a public discord bot that integrates with the demonlist! Find it in the discord server!"
+                                    "There is now a public discord bot that integrates with the Demonlist! Find it in the discord server!"
                                 }
                                 li {
                                     "The API is actually just the first step in something way more awesome hopefully coming \"soon\"... :)"
@@ -208,7 +212,7 @@ impl Page for Homepage {
                                     "Scrollbars were working weirdly or not at all"
                                 }
                                 li {
-                                    "On mobile you couldn't close the demonlist after clicking that weird button in the bottom left corner"
+                                    "On mobile you couldn't close the Demonlist after clicking that weird button in the bottom left corner"
                                 }
                                 li {
                                     "There was way too much blue"
@@ -275,7 +279,7 @@ impl Page for Homepage {
                         div style = "flex-basis: 0; padding: 5px" {
                             h3 { "Pointercrate Team: "}
                             p {
-                                "Pointercrate as an entity independent from the demonlist is administrated and moderated by the following people:"
+                                "Pointercrate as an entity independent from the Demonlist is administrated and moderated by the following people:"
                             }
                             div.flex.wrap style = "padding: 20px" {
                                 @for member in &self.pointercrate_team {
@@ -314,7 +318,7 @@ impl Page for Homepage {
     "@context": "http://schema.org",
     "@type": "Organization",
     "name": "pointercrate",
-    "description": "Pointercrate is the home of the official Geometry Dash demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players",
+    "description": "Pointercrate is the home of the official Demonlist, a ranking of the hardest rated demons maintained by some of the game's most skilled players",
     "url": "https://pointercrate.com/",
     "logo": "https://pointercrate.com/static2/images/pointercrate2.png",
     "sameAs": [

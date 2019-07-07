@@ -6,7 +6,7 @@
 
 <div class='info-yellow'>
 <b>Rate Limits:</b><br>
-This endpoint is ratelimited at 5 requests per 10 minutes
+This endpoint is ratelimited at 3 successfully submitted records per 20 minutes per submitter and 20 records per hour globally. Further there are only 5 new IP adresses allowed to make submissions per hour (this limit is only relevant for your first time submitting a record).
 </div>
 
 <div class='info-yellow'>

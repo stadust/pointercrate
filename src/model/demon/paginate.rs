@@ -1,13 +1,14 @@
 use super::PartialDemon;
 use crate::{
     citext::CiString,
+    context::RequestContext,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
     schema::demons,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -68,12 +69,8 @@ impl Paginator for DemonPagination {
 }
 
 impl Paginate<DemonPagination> for PartialDemon {
-    fn load(pagination: &DemonPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        if pagination.limit() > 100 || pagination.limit() < 1 {
-            return Err(PointercrateError::InvalidPaginationLimit)
-        }
-
-        let mut query = pagination.filter(PartialDemon::boxed_all());
+    fn load(pagination: &DemonPagination, ctx: RequestContext) -> Result<Vec<Self>> {
+        let mut query = pagination.filter(PartialDemon::boxed_all(), ctx);
 
         filter!(query[
             demons::position > pagination.after_position,
@@ -86,7 +83,7 @@ impl Paginate<DemonPagination> for PartialDemon {
             before_position,
             after_position,
             demons::position,
-            connection
+            ctx.connection()
         )
     }
 }

@@ -1,13 +1,13 @@
 use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
+    context::RequestContext,
     model::player::EmbeddedPlayer,
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
-    permissions::PermissionsSet,
     schema::demons,
     Result,
 };
-use diesel::{Connection, ExpressionMethods, PgConnection, RunQueryDsl};
+use diesel::{Connection, ExpressionMethods, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -23,13 +23,18 @@ make_patch! {
 }
 
 impl Patch<PatchDemon> for Demon {
-    fn patch(mut self, mut patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
+    fn patch(mut self, mut patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
+        ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
+        ctx.check_if_match(&self)?;
+
         info!("Patching demon {} with {}", self.name, patch);
+
+        let connection = ctx.connection();
 
         validate_db!(patch, connection: Demon::validate_name[name], Demon::validate_position[position]);
         validate_nullable!(patch: Demon::validate_video[video]);
 
-        let map = |name: &CiStr| EmbeddedPlayer::get(name, connection);
+        let map = |name: &CiStr| EmbeddedPlayer::get(name, ctx);
 
         patch!(self, patch: name, video, requirement);
         try_map_patch!(self, patch: map => verifier, map => publisher);
@@ -58,30 +63,13 @@ impl Patch<PatchDemon> for Demon {
             Ok(self)
         })
     }
-
-    fn permissions_for(&self, _: &PatchDemon) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
-    }
 }
 
 impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
-    fn patch(self, patch: PatchDemon, connection: &PgConnection) -> Result<Self> {
-        let DemonWithCreatorsAndRecords {
-            demon,
-            creators,
-            records,
-        } = self;
-
-        let demon = demon.patch(patch, connection)?;
-
+    fn patch(self, patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
         Ok(DemonWithCreatorsAndRecords {
-            demon,
-            creators,
-            records,
+            demon: self.demon.patch(patch, ctx)?,
+            ..self
         })
-    }
-
-    fn permissions_for(&self, _: &PatchDemon) -> PermissionsSet {
-        perms!(ListModerator or ListAdministrator)
     }
 }

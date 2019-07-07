@@ -6,7 +6,7 @@ use actix_web::{
 use log::{trace, warn};
 use mime::Mime;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct MimeProcess;
 
 #[derive(Debug)]

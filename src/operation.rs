@@ -8,16 +8,15 @@ pub use self::{
     get::Get,
     paginate::{Paginate, Paginator},
     patch::{deserialize_non_optional, deserialize_optional, Patch},
-    post::{Post, PostData},
+    post::Post,
 };
 
 #[macro_use]
 mod get {
-    use crate::Result;
-    use diesel::pg::PgConnection;
+    use crate::{context::RequestContext, Result};
 
     pub trait Get<Key>: Sized {
-        fn get(id: Key, connection: &PgConnection) -> Result<Self>;
+        fn get(id: Key, ctx: RequestContext) -> Result<Self>;
     }
 
     impl<G1, G2, Key1, Key2> Get<(Key1, Key2)> for (G1, G2)
@@ -25,8 +24,8 @@ mod get {
         G1: Get<Key1>,
         G2: Get<Key2>,
     {
-        fn get((key1, key2): (Key1, Key2), connection: &PgConnection) -> Result<Self> {
-            Ok((G1::get(key1, connection)?, G2::get(key2, connection)?))
+        fn get((key1, key2): (Key1, Key2), ctx: RequestContext) -> Result<Self> {
+            Ok((G1::get(key1, ctx)?, G2::get(key2, ctx)?))
         }
     }
 
@@ -36,11 +35,11 @@ mod get {
         G2: Get<Key2>,
         G3: Get<Key3>,
     {
-        fn get((key1, key2, key3): (Key1, Key2, Key3), connection: &PgConnection) -> Result<Self> {
+        fn get((key1, key2, key3): (Key1, Key2, Key3), ctx: RequestContext) -> Result<Self> {
             Ok((
-                G1::get(key1, connection)?,
-                G2::get(key2, connection)?,
-                G3::get(key3, connection)?,
+                G1::get(key1, ctx)?,
+                G2::get(key2, ctx)?,
+                G3::get(key3, ctx)?,
             ))
         }
     }
@@ -49,21 +48,21 @@ mod get {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_localization: expr, $resource_type: ty) => {
             /// `GET` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                use crate::middleware::auth::{Authorization, Token};
+                use crate::middleware::auth::Token;
 
                 info!("GET {}", $endpoint);
-
-                let state = req.state().clone();
-                let auth: Authorization = req.extensions_mut().remove().unwrap();
 
                 let resource_id = Path::<$id_type>::extract(req).map_err(|_| {
                     PointercrateError::bad_request(&format!("{} must be integer", $id_localization))
                 });
 
+                let req = req.clone();
+
                 resource_id
                     .into_future()
                     .and_then(move |resource_id| {
-                        state.get::<Token, _, _>(resource_id.into_inner(), auth)
+                        req.state()
+                            .get::<Token, _, _>(&req, resource_id.into_inner())
                     })
                     .map(|resource: $resource_type| HttpResponse::Ok().json_with_etag(resource))
                     .responder()
@@ -78,17 +77,11 @@ mod get {
 
 #[macro_use]
 mod post {
-    use crate::{permissions::PermissionsSet, Result};
-    use diesel::pg::PgConnection;
+    use crate::{context::RequestContext, Result};
 
-    pub trait Post<T: PostData>: Sized {
-        fn create_from(from: T, connection: &PgConnection) -> Result<Self>;
+    pub trait Post<T>: Sized {
+        fn create_from(from: T, ctx: RequestContext) -> Result<Self>;
     }
-
-    pub trait PostData {
-        fn required_permissions(&self) -> PermissionsSet;
-    }
-
     macro_rules! post_handler {
         ($handler_name: ident, $endpoint: expr, $post_type: ty, $target_type: ty) => {
             /// `POST` handler
@@ -97,12 +90,11 @@ mod post {
 
                 info!("POST {}", $endpoint);
 
-                let auth = req.extensions_mut().remove().unwrap();
-                let state = req.state().clone();
+                let req = req.clone();
 
                 req.json()
                     .from_err()
-                    .and_then(move |post: $post_type| state.post::<Token, _, _>(post, auth))
+                    .and_then(move |post: $post_type| req.state().post::<Token, _, _>(&req, post))
                     .map(|created: $target_type| HttpResponse::Created().json_with_etag(created))
                     .responder()
             }
@@ -116,57 +108,33 @@ mod post {
 
 #[macro_use]
 mod delete {
-    use crate::{error::PointercrateError, middleware::cond::IfMatch, Result};
-    use diesel::pg::PgConnection;
-    use log::info;
-    use std::{
-        collections::hash_map::DefaultHasher,
-        fmt::Display,
-        hash::{Hash, Hasher},
-    };
+    use crate::{context::RequestContext, Result};
+
+    use std::fmt::Display;
 
     pub trait Delete: Display {
-        fn delete(self, connection: &PgConnection) -> Result<()>;
-
-        fn delete_if_match(self, condition: IfMatch, connection: &PgConnection) -> Result<()>
-        where
-            Self: Hash + Sized,
-        {
-            info!("Patching {} only if {} is met", self, condition);
-
-            let mut hasher = DefaultHasher::new();
-            self.hash(&mut hasher);
-
-            if condition.met(hasher.finish()) {
-                self.delete(connection)
-            } else {
-                Err(PointercrateError::PreconditionFailed)
-            }
-        }
+        fn delete(self, ctx: RequestContext) -> Result<()>;
     }
 
     macro_rules! delete_handler {
         ($handler_name: ident, $endpoint: expr, $id_type: ty, $id_name: expr, $resource_type: ty) => {
             /// `DELETE` handler
             pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-                use crate::middleware::{auth::Token, cond::IfMatch};
+                use crate::middleware::auth::Token;
 
                 info!("DELETE {}", $endpoint);
 
-                let state = req.state().clone();
-                let if_match: IfMatch = req.extensions_mut().remove().unwrap();
-                let auth = req.extensions_mut().remove().unwrap();
+                let req = req.clone();
 
-                Path::<$id_type>::extract(req)
+                Path::<$id_type>::extract(&req)
                     .map_err(|_| {
                         PointercrateError::bad_request(&format!("{} must be interger", $id_name))
                     })
                     .into_future()
                     .and_then(move |resource_id| {
-                        state.delete::<Token, $id_type, $resource_type>(
+                        req.state().delete::<Token, $id_type, $resource_type>(
+                            &req,
                             resource_id.into_inner(),
-                            Some(if_match),
-                            auth,
                         )
                     })
                     .map(|_| HttpResponse::NoContent().finish())

@@ -26,6 +26,7 @@ tr:nth-child(even) {
 #editors li {
   display: inline-block;
   margin: 2px;
+  overflow: hidden;
 }
 
 #editors ul {
@@ -50,6 +51,7 @@ tr:nth-child(even) {
   #rules,
   #discord {
     order: -1;
+    width: 100%;
   }
 
   #discord {
@@ -108,6 +110,16 @@ tr:nth-child(even) {
   #stats-viewer-pagination {
     max-width: 40%;
   }
+
+  #stats-right {
+    max-width: 60%;
+  }
+}
+
+@media (max-width: 767px) {
+  #stats-right {
+    max-width: 100%;
+  }
 }
 
 #level-info span {
@@ -129,6 +141,7 @@ tr:nth-child(even) {
 
 .stats-container {
   margin: 5px 0%;
+  flex-wrap: wrap;
 }
 
 .stats-container > * {

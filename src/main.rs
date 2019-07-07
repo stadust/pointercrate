@@ -15,10 +15,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 #![recursion_limit = "512"]
 
-// TODO: manual deserialization of json and urlencoded (for pagaination) request data so we can
-// provided better error reporting
-
-// idk why we still need this extern crate, but removing it break the diesel derives
+// diesel refuses to upgrade to rust 2018, so we're stuck with this extern crate declaration
 #[macro_use]
 extern crate diesel;
 
@@ -39,6 +36,7 @@ use actix_web::{
     http::{Method, NormalizePath, StatusCode},
     server, App, FromRequest, Path, Responder,
 };
+use gdcf::cache::CacheEntry;
 use std::{net::SocketAddr, sync::Arc};
 
 #[macro_use]
@@ -52,8 +50,11 @@ pub mod api;
 pub mod bitstring;
 pub mod citext;
 pub mod config;
+pub mod context;
+pub mod documentation;
 pub mod error;
 pub mod middleware;
+pub mod ratelimit;
 #[allow(unused_imports)]
 pub mod schema;
 pub mod state;
@@ -78,42 +79,21 @@ fn main() {
 
     let _system = System::new("pointercrate");
 
+    let documentation_toc = documentation::read_table_of_contents().unwrap();
+    let documentation_topics = documentation::read_documentation_topics().unwrap();
+
     let database = DatabaseActor::from_env();
-    let gdcf = HttpActor::from_env(database.clone().recipient());
+
+    let state = PointercrateState {
+        gdcf: HttpActor::from_env(database.clone().recipient()),
+        database,
+
+        documentation_toc: Arc::new(documentation_toc),
+        documentation_topics: Arc::new(documentation_topics),
+    };
 
     let app_factory = move || {
-        let doc_files_location =
-            std::env::var("DOCUMENTATION").unwrap_or(env!("OUT_DIR").to_string());
-        let doc_files_location = std::path::Path::new(&doc_files_location);
-
-        let toc = std::fs::read_to_string(doc_files_location.join("../output")).unwrap();
-        let mut map = std::collections::HashMap::new();
-        for entry in std::fs::read_dir(doc_files_location).unwrap() {
-            let entry = entry.unwrap();
-            if let Some("html") = entry.path().extension().and_then(std::ffi::OsStr::to_str) {
-                let cnt = std::fs::read_to_string(entry.path()).unwrap();
-
-                map.insert(
-                    entry
-                        .path()
-                        .file_stem()
-                        .and_then(std::ffi::OsStr::to_str)
-                        .unwrap()
-                        .to_string(),
-                    cnt,
-                );
-            }
-        }
-
-        let state = PointercrateState {
-            database: database.clone(),
-            gdcf: gdcf.clone(),
-
-            documentation_toc: Arc::new(toc),
-            documentation_topics: Arc::new(map),
-        };
-
-        App::with_state(state)
+        App::with_state(state.clone())
             .middleware(IpResolve)
             .middleware(Authorizer)
             .middleware(Precondition)
@@ -197,7 +177,22 @@ fn main() {
                                         .send(LevelById(position.into_inner()))
                                         .map_err(PointercrateError::internal)
                                 })
-                                .map(|resource| HttpResponse::Ok().json(resource))
+                                .map(|cache_entry| {
+                                    match cache_entry.unwrap() {
+                                        // FIXME: error handling
+                                        CacheEntry::Missing => HttpResponse::NoContent().finish(),
+                                        CacheEntry::DeducedAbsent =>
+                                            HttpResponse::NotFound().finish(),
+                                        CacheEntry::MarkedAbsent(meta) =>
+                                            HttpResponse::NotFound()
+                                                .header("X-CACHED-AT", meta.cached_at().to_string())
+                                                .finish(),
+                                        CacheEntry::Cached(object, meta) =>
+                                            HttpResponse::Ok()
+                                                .header("X-CACHED-AT", meta.cached_at().to_string())
+                                                .json(object),
+                                    }
+                                })
                                 .responder()
                         })
                     })
@@ -303,13 +298,8 @@ fn main() {
             })
     };
 
-    let port = match std::env::var("PORT") {
-        Ok(port) => port.parse().unwrap_or(8088),
-        _ => 8088,
-    };
-
     server::new(app_factory)
-        .bind(SocketAddr::from(([127, 0, 0, 1], port)))
+        .bind(SocketAddr::from(([127, 0, 0, 1], *config::PORT)))
         .unwrap()
         .run();
 }

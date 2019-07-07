@@ -1,13 +1,9 @@
 use super::User;
 use crate::{
-    error::PointercrateError,
-    model::Model,
-    operation::{Post, PostData},
-    permissions::PermissionsSet,
-    schema::members,
-    Result,
+    context::RequestContext, error::PointercrateError, model::Model, operation::Post,
+    ratelimit::RatelimitScope, schema::members, Result,
 };
-use diesel::{insert_into, result::Error, Connection, PgConnection, RunQueryDsl};
+use diesel::{insert_into, result::Error, Connection, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -25,16 +21,22 @@ struct NewUser<'a> {
 }
 
 impl Post<Registration> for User {
-    fn create_from(mut registration: Registration, connection: &PgConnection) -> Result<User> {
+    fn create_from(mut registration: Registration, ctx: RequestContext) -> Result<User> {
         info!("Creating new user from {:?}", registration);
 
         User::validate_name(&mut registration.name)?;
         User::validate_password(&mut registration.password)?;
 
+        let connection = ctx.connection();
+
+        ctx.ratelimit(RatelimitScope::SoftRegistration)?;
+
         connection.transaction(|| {
             match User::by_name(&registration.name).first::<User>(connection) {
                 Ok(_) => Err(PointercrateError::NameTaken),
                 Err(Error::NotFound) => {
+                    ctx.ratelimit(RatelimitScope::Registration)?;
+
                     info!("Registering new user with name {}", registration.name);
 
                     let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
@@ -53,13 +55,5 @@ impl Post<Registration> for User {
                 Err(err) => Err(PointercrateError::database(err)),
             }
         })
-    }
-}
-
-impl PostData for Registration {
-    fn required_permissions(&self) -> PermissionsSet {
-        // Obviously, you cannot have any permissions before registering, as you generally dont have
-        // an account (and if you're sending along authorization for an existing account, WHY??)
-        PermissionsSet::default()
     }
 }

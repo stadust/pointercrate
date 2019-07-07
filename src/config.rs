@@ -9,6 +9,7 @@ lazy_static! {
         let file = File::open(path).unwrap();
         file.bytes().collect::<Result<Vec<u8>, _>>().unwrap()
     };
+    pub static ref PORT: u16 = from_env_or_default("PORT", 8088);
 }
 
 fn from_env_or_default<T: FromStr>(key: &str, default: T) -> T

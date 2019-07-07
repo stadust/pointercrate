@@ -2,10 +2,11 @@
 
 use super::PCResponder;
 use crate::{
-    actor::database::{DeleteMessage, Invalidate, PatchMessage},
+    actor::database::{DeleteMessage, Invalidate, PatchMessage, PostMessage},
+    context::RequestData,
     middleware::{
         auth::{Basic, Me, Token},
-        cond::{HttpResponseBuilderExt, IfMatch},
+        cond::HttpResponseBuilderExt,
     },
     model::user::{PatchMe, Registration, User},
     state::PointercrateState,
@@ -20,10 +21,13 @@ pub fn register(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("POST /api/v1/auth/register/");
 
     let state = req.state().clone();
+    let request_data = RequestData::from_request(req);
 
     req.json()
         .from_err()
-        .and_then(move |registration: Registration| state.post_unauthorized(registration))
+        .and_then(move |registration: Registration| {
+            state.database(PostMessage::new(registration, request_data))
+        })
         .map(|user: User| {
             HttpResponse::Created()
                 .header("Location", "/api/v1/auth/me/")
@@ -71,19 +75,17 @@ pub fn me(req: &HttpRequest<PointercrateState>) -> PCResponder {
 pub fn patch_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("PATCH /api/v1/auth/me/");
 
-    let state = req.state().clone();
+    let req = req.clone();
     let auth = req.extensions_mut().remove().unwrap();
-    let if_match: IfMatch = req.extensions_mut().remove().unwrap();
 
     req.json()
         .from_err()
         .and_then(move |patch: PatchMe| {
-            state.auth::<Basic>(auth).and_then(move |user| {
-                state.database(PatchMessage::<Me, Me, _>::new(
+            req.state().auth::<Basic>(auth).and_then(move |user| {
+                req.state().database(PatchMessage::<Me, Me, _>::new(
                     user,
                     patch,
-                    None,
-                    Some(if_match),
+                    RequestData::from_request(&req),
                 ))
             })
         })
@@ -96,11 +98,11 @@ pub fn delete_me(req: &HttpRequest<PointercrateState>) -> PCResponder {
     info!("DELETE /api/v1/auth/me/");
 
     let state = req.state().clone();
-    let if_match: IfMatch = req.extensions_mut().remove().unwrap();
+    let request_data = RequestData::from_request(req);
 
     state
         .auth::<Basic>(req.extensions_mut().remove().unwrap())
-        .and_then(move |me| state.database(DeleteMessage::<Me, Me>::new(me, if_match, None)))
+        .and_then(move |me| state.database(DeleteMessage::<Me, Me>::new(me, request_data)))
         .map(|_| HttpResponse::NoContent().finish())
         .responder()
 }

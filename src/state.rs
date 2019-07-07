@@ -1,22 +1,20 @@
 use crate::{
     actor::{
         database::{
-            Auth, DatabaseActor, DeleteMessage, GetInternal, GetMessage, PaginateMessage,
-            PatchMessage, PostMessage,
+            Auth, DatabaseActor, DeleteMessage, GetMessage, PaginateMessage, PatchMessage,
+            PostMessage,
         },
         http::HttpActor,
     },
+    context::RequestData,
     error::PointercrateError,
-    middleware::{
-        auth::{Authorization, Me, TAuthType, Token},
-        cond::IfMatch,
-    },
+    middleware::auth::{Authorization, Me, TAuthType},
     model::Model,
-    operation::{Delete, Get, Paginate, Paginator, Patch, Post, PostData},
-    permissions::AccessRestrictions,
+    operation::{Delete, Get, Paginate, Paginator, Patch, Post},
     Result,
 };
 use actix::{Addr, Handler, Message};
+use actix_web::HttpRequest;
 use diesel::{
     expression::{AsExpression, NonAggregate},
     pg::Pg,
@@ -65,126 +63,101 @@ impl PointercrateState {
         self.database(Auth::<T>(auth, PhantomData))
     }
 
-    pub fn get_unauthorized<Key, G>(
-        &self, key: Key,
-    ) -> impl Future<Item = G, Error = PointercrateError>
-    where
-        G: Get<Key> + AccessRestrictions + Send + 'static,
-        Key: Send + 'static,
-    {
-        // Auth type doesnt matter, as we don't do auth
-        self.get::<Token, _, _>(key, Authorization::Unauthorized)
-    }
-
     pub fn get<T, Key, G>(
-        &self, key: Key, auth: Authorization,
+        &self, req: &HttpRequest<Self>, key: Key,
     ) -> impl Future<Item = G, Error = PointercrateError>
     where
         T: TAuthType,
-        G: Get<Key> + AccessRestrictions + Send + 'static,
+        G: Get<Key> + Send + 'static,
         Key: Send + 'static,
     {
+        let auth = req.extensions_mut().remove().unwrap();
+        let data = RequestData::from_request(req);
         let clone = self.clone();
 
         match auth {
             Authorization::Unauthorized =>
-                Either::A(self.database(GetMessage(key, None, PhantomData))),
+                Either::A(self.database(GetMessage(key, data, PhantomData))),
             auth =>
                 Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
-                    clone.database(GetMessage(key, Some(user.0), PhantomData))
+                    clone.database(GetMessage(key, data.with_user(user), PhantomData))
                 })),
         }
     }
 
-    pub fn get_internal<Key, G>(&self, key: Key) -> impl Future<Item = G, Error = PointercrateError>
-    where
-        G: Get<Key> + Send + 'static,
-        Key: Send + 'static,
-    {
-        self.database(GetInternal(key, PhantomData))
-    }
-
-    pub fn post_unauthorized<T, P>(&self, t: T) -> impl Future<Item = P, Error = PointercrateError>
-    where
-        T: PostData + Send + 'static,
-        P: Post<T> + Send + 'static,
-    {
-        self.post::<Token, _, _>(t, Authorization::Unauthorized)
-    }
-
     pub fn post<A, T, P>(
-        &self, t: T, auth: Authorization,
+        &self, req: &HttpRequest<Self>, t: T,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
         A: TAuthType,
-        T: PostData + Send + 'static,
+        T: Send + 'static,
         P: Post<T> + Send + 'static,
     {
+        let auth = req.extensions_mut().remove().unwrap();
+        let data = RequestData::from_request(req);
         let clone = self.clone();
 
         match auth {
-            Authorization::Unauthorized =>
-                Either::A(self.database(PostMessage(t, None, PhantomData))),
+            Authorization::Unauthorized => Either::A(self.database(PostMessage::new(t, data))),
             auth =>
                 Either::B(self.database(Auth::<A>::new(auth)).and_then(move |user| {
-                    clone.database(PostMessage(t, Some(user.0), PhantomData))
+                    clone.database(PostMessage::new(t, data.with_user(user)))
                 })),
         }
     }
 
     pub fn delete<T, Key, D>(
-        &self, key: Key, condition: Option<IfMatch>, auth: Authorization,
+        &self, req: &HttpRequest<Self>, key: Key,
     ) -> impl Future<Item = (), Error = PointercrateError>
     where
         T: TAuthType,
         Key: Send + 'static,
-        D: Get<Key> + AccessRestrictions + Delete + Hash + Send + 'static,
+        D: Get<Key> + Delete + Hash + Send + 'static,
     {
+        let auth = req.extensions_mut().remove().unwrap();
+        let data = RequestData::from_request(req);
         let clone = self.clone();
 
         match auth {
             Authorization::Unauthorized =>
-                Either::A(self.database(DeleteMessage::<Key, D>(key, condition, None, PhantomData))),
+                Either::A(self.database(DeleteMessage::<Key, D>::new(key, data))),
             auth =>
                 Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
-                    clone.database(DeleteMessage::<Key, D>(
-                        key,
-                        condition,
-                        Some(user.0),
-                        PhantomData,
-                    ))
+                    clone.database(DeleteMessage::<Key, D>::new(key, data.with_user(user)))
                 })),
         }
     }
 
     pub fn patch<T, Key, P, H>(
-        &self, auth: Authorization, key: Key, fix: H, condition: IfMatch,
+        &self, req: &HttpRequest<Self>, key: Key, fix: H,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
         T: TAuthType,
         Key: Send + 'static,
         H: Send + 'static,
-        P: Get<Key> + AccessRestrictions + Patch<H> + Send + Hash + 'static,
+        P: Get<Key> + Patch<H> + Send + Hash + 'static,
     {
+        let auth = req.extensions_mut().remove().unwrap();
+        let data = RequestData::from_request(req);
         let clone = self.clone();
 
         match auth {
             Authorization::Unauthorized =>
-                Either::A(self.database(PatchMessage::new(key, fix, None, Some(condition)))),
+                Either::A(self.database(PatchMessage::new(key, fix, data))),
             auth =>
                 Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
-                    clone.database(PatchMessage::new(key, fix, Some(user.0), Some(condition)))
+                    clone.database(PatchMessage::new(key, fix, data.with_user(user)))
                 })),
         }
     }
 
     pub fn paginate<T, P, D>(
-        &self, data: D, uri: String, auth: Authorization
+        &self, req: &HttpRequest<Self>, data: D, uri: String,
     ) -> impl Future<Item = (Vec<P>, String), Error = PointercrateError>
     where
         T: TAuthType,
         D: Paginator<Model = P> + Send + 'static,
-        P: Paginate<D> + AccessRestrictions + Send + 'static,
+        P: Paginate<D> + Send + 'static,
         <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
         <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
         Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
@@ -199,14 +172,21 @@ impl PointercrateState {
             <D::PaginationColumn as Expression>::SqlType,
         >>::Expression: QueryFragment<Pg>,
     {
+        let req_data = RequestData::from_request(req);
+        let auth = req.extensions_mut().remove().unwrap();
         let clone = self.clone();
 
         match auth {
             Authorization::Unauthorized =>
-                Either::A(self.database(PaginateMessage(data, uri, None, PhantomData))),
+                Either::A(self.database(PaginateMessage(data, uri, req_data, PhantomData))),
             auth =>
                 Either::B(self.database(Auth::<T>::new(auth)).and_then(move |user| {
-                    clone.database(PaginateMessage(data, uri, Some(user.0), PhantomData))
+                    clone.database(PaginateMessage(
+                        data,
+                        uri,
+                        req_data.with_user(user),
+                        PhantomData,
+                    ))
                 })),
         }
     }

@@ -2,13 +2,14 @@ use super::{Record, RecordStatus};
 use crate::{
     citext::CiString,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
+    context::RequestContext,
     error::PointercrateError,
     model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
-    operation::{Delete, Get, Post, PostData},
-    permissions::PermissionsSet,
+    operation::{Delete, Get, Post},
+    ratelimit::RatelimitScope,
     video, Result,
 };
-use diesel::{Connection, PgConnection, RunQueryDsl};
+use diesel::{Connection, RunQueryDsl};
 use log::{debug, info};
 use serde_derive::Deserialize;
 
@@ -21,35 +22,25 @@ pub struct Submission {
     pub video: Option<String>,
     #[serde(default)]
     pub status: RecordStatus,
-    #[serde(rename = "check", default)]
-    pub verify_only: bool,
 }
 
-impl PostData for (Submission, Submitter) {
-    fn required_permissions(&self) -> PermissionsSet {
-        if self.0.status != RecordStatus::Submitted {
-            perms!(ListHelper or ListModerator or ListAdministrator)
-        } else {
-            PermissionsSet::default()
-        }
-    }
-}
-
-impl Post<(Submission, Submitter)> for Option<Record> {
+impl Post<Submission> for Option<Record> {
     fn create_from(
-        (
-            Submission {
-                progress,
-                player,
-                demon,
-                video,
-                status,
-                verify_only,
-            },
-            submitter,
-        ): (Submission, Submitter),
-        connection: &PgConnection,
+        Submission {
+            progress,
+            player,
+            demon,
+            video,
+            status,
+        }: Submission,
+        ctx: RequestContext,
     ) -> Result<Self> {
+        if status != RecordStatus::Submitted || video.is_none() {
+            ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
+        }
+
+        let submitter = Submitter::get((), ctx)?;
+
         info!(
             "Processing record addition '{}% on {} by {} ({})'",
             progress, demon, player, status
@@ -66,10 +57,12 @@ impl Post<(Submission, Submitter)> for Option<Record> {
             None => None,
         };
 
+        let connection = ctx.connection();
+
         connection.transaction(||{
             // Resolve player and demon name against the database
-            let player = EmbeddedPlayer::get(player.as_ref(), connection)?;
-            let demon = Demon::get(demon.as_ref(), connection)?;
+            let player = EmbeddedPlayer::get(player.as_ref(),ctx)?;
+            let demon = Demon::get(demon.as_ref(), ctx)?;
 
             // Banned player can't have records on the list
             if player.banned {
@@ -152,12 +145,15 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                         })
                     }
                 }
-
             }
 
-            if verify_only {
-                return Ok(None)
+            // At this point all the validation checks are done. Only the ratelimit is left!
+            // We wanna exempt list mods though
+            if !ctx.is_list_mod() {
+                ctx.ratelimit(RatelimitScope::RecordSubmission)?;
+                ctx.ratelimit(RatelimitScope::RecordSubmissionGlobal)?;
             }
+
 
             // If none of the duplicates caused us to reject the submission, we now delete submissions marked for deleting
             for record in to_delete {
@@ -166,7 +162,7 @@ impl Post<(Submission, Submitter)> for Option<Record> {
                     record.id
                 );
 
-                record.delete(connection)?;
+                record.delete(RequestContext::Internal(ctx.connection()))?;
             }
 
             debug!("All duplicates either already accepted, or has lower progress, accepting!");

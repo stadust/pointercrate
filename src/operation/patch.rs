@@ -3,37 +3,13 @@
 // patch operations, who knows
 #![allow(unused_macros)]
 
-use crate::{
-    error::PointercrateError, middleware::cond::IfMatch, permissions::PermissionsSet, Result,
-};
-use diesel::pg::PgConnection;
-use log::info;
+use crate::{context::RequestContext, Result};
+
 use serde::{de::Error, Deserialize, Deserializer};
-use std::{
-    collections::hash_map::DefaultHasher,
-    fmt::Display,
-    hash::{Hash, Hasher},
-};
+use std::fmt::Display;
 
 pub trait Patch<P>: Display + Sized {
-    fn patch(self, patch: P, connection: &PgConnection) -> Result<Self>;
-    fn permissions_for(&self, patch: &P) -> PermissionsSet;
-
-    fn patch_if_match(self, patch: P, condition: IfMatch, connection: &PgConnection) -> Result<Self>
-    where
-        Self: Hash,
-    {
-        info!("Patching {} only if {} is met", self, condition);
-
-        let mut hasher = DefaultHasher::new();
-        self.hash(&mut hasher);
-
-        if condition.met(hasher.finish()) {
-            self.patch(patch, connection)
-        } else {
-            Err(PointercrateError::PreconditionFailed)
-        }
-    }
+    fn patch(self, patch: P, ctx: RequestContext) -> Result<Self>;
 }
 
 #[allow(clippy::option_option)]
@@ -231,23 +207,22 @@ macro_rules! patch_handler {
     ($handler_name: ident, $endpoint: expr, $id_type: ty, $localized_id: expr, $patch_type: ty, $target_type: ty) => {
         /// `PATCH` handler
         pub fn $handler_name(req: &HttpRequest<PointercrateState>) -> PCResponder {
-            use crate::middleware::{auth::Token, cond::IfMatch};
+            use crate::middleware::auth::Token;
 
             info!("PATCH {}", stringify!($endpoint));
-
-            let state = req.state().clone();
-            let if_match: IfMatch = req.extensions_mut().remove().unwrap();
-            let auth = req.extensions_mut().remove().unwrap();
 
             let resource_id = Path::<$id_type>::extract(req).map_err(|_| {
                 PointercrateError::bad_request(&format!("{} must be integer", $localized_id))
             });
 
+            let req = req.clone();
+
             req.json()
                 .from_err()
                 .and_then(move |patch: $patch_type| Ok((patch, resource_id?.into_inner())))
                 .and_then(move |(patch, resource_id)| {
-                    state.patch::<Token, _, _, _>(auth, resource_id, patch, if_match)
+                    req.state()
+                        .patch::<Token, _, _, _>(&req, resource_id, patch)
                 })
                 .map(move |updated: $target_type| HttpResponse::Ok().json_with_etag(updated))
                 .responder()

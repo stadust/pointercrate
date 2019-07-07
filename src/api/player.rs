@@ -20,16 +20,15 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let pagination = serde_urlencoded::from_str(query_string)
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
+    let req = req.clone();
 
     pagination
         .into_future()
         .and_then(move |pagination: PlayerPagination| {
-            state.paginate::<Token, ShortPlayer, _>(
+            req.state().paginate::<Token, ShortPlayer, _>(
+                &req,
                 pagination,
                 "/api/v1/players/".to_string(),
-                auth,
             )
         })
         .map(|(players, links)| HttpResponse::Ok().header("Links", links).json(players))
@@ -44,16 +43,15 @@ pub fn ranking(req: &HttpRequest<PointercrateState>) -> PCResponder {
     let pagination = serde_urlencoded::from_str(query_string)
         .map_err(|err| PointercrateError::bad_request(&err.to_string()));
 
-    let state = req.state().clone();
-    let auth = req.extensions_mut().remove().unwrap();
+    let req = req.clone();
 
     pagination
         .into_future()
         .and_then(move |pagination: RankingPagination| {
-            state.paginate::<Token, RankedPlayer2, _>(
+            req.state().paginate::<Token, RankedPlayer2, _>(
+                &req,
                 pagination,
                 "/api/v1/players/ranking/".to_string(),
-                auth,
             )
         })
         .map(|(players, links)| HttpResponse::Ok().header("Links", links).json(players))

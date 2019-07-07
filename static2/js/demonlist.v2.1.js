@@ -1,72 +1,35 @@
-class Submitter {
-  constructor() {
-    this.domElement = $("#submitter");
-    this.form = this.domElement.find("#submission-form");
-    this._output = this.domElement.find("#submission-output");
-
-    this._demon = this.domElement.find("#id_demon");
-    this._player = this.domElement.find("#id_player");
-    this._video = this.domElement.find("#id_video");
-    this._progress = this.domElement.find("#id_progress");
-  }
-
-  show() {
-    this.form[0].reset();
-    this._output.hide();
-
-    Dialog.showById("submission-dialog");
-  }
-
-  submit() {
-    this._output.slideUp(100);
-
-    $.ajax({
-      method: "POST",
-      url: "/api/v1/records/",
-      contentType: "application/json",
-      dataType: "json",
-      data: JSON.stringify({
-        demon: this.demon,
-        player: this.player,
-        video: this.video,
-        progress: this.progress
-      }),
-      statusCode: {
-        204: () => (this.output = "This record can be submitted!"),
-        429: () =>
-          (this.output =
-            "You are submitting too many records too fast! Try again later")
-      },
-      error: data => (this.output = data.responseJSON.message),
-      success: () => (this.output = "Record successfully submitted")
-    });
-
-    return false;
-  }
-
-  get demon() {
-    return this._demon.val();
-  }
-
-  get player() {
-    return this._player.val();
-  }
-
-  get video() {
-    return this._video.val();
-  }
-
-  get progress() {
-    return parseInt(this._progress.val());
-  }
-
-  set output(data) {
-    this._output.text(data);
-    this._output.slideDown(100);
-  }
-}
-
 class StatsViewer {
+  generatePlayer(player) {
+    var li = document.createElement("li");
+    var b = document.createElement("b");
+    var i = document.createElement("i");
+
+    li.className = "white hover";
+    li.dataset.id = player.id;
+    li.dataset.rank = player.rank;
+
+    b.appendChild(document.createTextNode("#" + player.rank + " "));
+    i.appendChild(document.createTextNode(player.score.toFixed(2)));
+
+    if (player.nationality) {
+      var span = document.createElement("span");
+
+      span.className =
+        "em em-flag-" + player.nationality.country_code.toLowerCase();
+
+      li.appendChild(span);
+      li.appendChild(document.createTextNode(" "));
+    }
+
+    li.appendChild(b);
+    li.appendChild(document.createTextNode(player.name));
+    li.appendChild(i);
+
+    li.addEventListener("click", e => this.updateView(e));
+
+    return li;
+  }
+
   constructor() {
     this.domElement = $("#statsviewer");
     this._name = this.domElement.find("#player-name");
@@ -86,37 +49,6 @@ class StatsViewer {
 
     this.paginator = undefined;
 
-    var generatePlayer = player => {
-      var li = document.createElement("li");
-      var b = document.createElement("b");
-      var i = document.createElement("i");
-
-      li.className = "white hover";
-      li.dataset.id = player.id;
-      li.dataset.rank = player.rank;
-
-      b.appendChild(document.createTextNode("#" + player.rank + " "));
-      i.appendChild(document.createTextNode(player.score.toFixed(2)));
-
-      if (player.nationality) {
-        var span = document.createElement("span");
-
-        span.className =
-          "em em-flag-" + player.nationality.country_code.toLowerCase();
-
-        li.appendChild(span);
-        li.appendChild(document.createTextNode(" "));
-      }
-
-      li.appendChild(b);
-      li.appendChild(document.createTextNode(player.name));
-      li.appendChild(i);
-
-      li.addEventListener("click", e => this.updateView(e));
-
-      return li;
-    };
-
     var filterInput = document.getElementById("pagination-filter");
     var pagination = document.getElementById("stats-viewer-pagination");
 
@@ -130,14 +62,14 @@ class StatsViewer {
           pagination,
           "/players/ranking/",
           { name_contains: filterInput.value },
-          generatePlayer
+          this.generatePlayer.bind(this)
         );
       } else {
         this.paginator = new Paginator(
           pagination,
           "/players/ranking/",
           {},
-          generatePlayer
+          this.generatePlayer.bind(this)
         );
       }
     };
@@ -222,7 +154,6 @@ class StatsViewer {
     this._verified.html(formatDemons(verified) || "None");
 
     let beaten = records.filter(record => record.progress == 100);
-    //.map(record => record.demon);
 
     let legacy = beaten.filter(
       record => record.demon.position > window.extended_list_length
@@ -260,7 +191,6 @@ class StatsViewer {
 
 $(document).ready(function() {
   window.statsViewer = new StatsViewer();
-  //window.submitter = new Submitter();
 
   var submissionForm = new Form(document.getElementById("submission-form"));
 
@@ -295,9 +225,6 @@ $(document).ready(function() {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
-  var errorOutput = $("#submission-error");
-  var successOutput = $("#submission-success");
-
   submissionForm.onSubmit(function(event) {
     $.ajax({
       method: "POST",
@@ -310,13 +237,9 @@ $(document).ready(function() {
         video: video.value,
         progress: parseInt(progress.value)
       }),
-      error: data => {
-        errorOutput.text(data.responseJSON.message);
-        errorOutput.slideDown(100);
-      },
+      error: data => submissionForm.setError(data.responseJSON.message),
       success: () => {
-        successOutput.text("Record successfully submitted");
-        successOutput.slideDown(100);
+        submissionForm.setSuccess("Record successfully submitted");
 
         player.value = "";
         progress.value = "";

@@ -139,6 +139,8 @@ class Form {
           }
         } else if (this.invalidHandler != undefined) {
           this.invalidHandler();
+        successOutput.text("Record successfully submitted");
+        successOutput.slideDown(100);
         }
       },
       false

@@ -1,39 +1,28 @@
 use super::{Creator, Creators};
 use crate::{
-    citext::CiStr,
-    error::PointercrateError,
-    model::{user::User, Demon},
-    operation::Get,
-    permissions::{self, AccessRestrictions},
-    schema::creators,
-    Result,
+    citext::CiStr, context::RequestContext, error::PointercrateError, model::Demon, operation::Get,
+    schema::creators, Result,
 };
-use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Creators {
-    fn get(name: &'a CiStr, connection: &PgConnection) -> Result<Self> {
+    fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {
         super::creators_of(name)
-            .load(connection)
+            .load(ctx.connection())
             .map(Creators)
             .map_err(PointercrateError::database)
     }
 }
 
 impl Get<(i16, i32)> for Creator {
-    fn get((demon_position, player_id): (i16, i32), connection: &PgConnection) -> Result<Self> {
-        let demon = Demon::get(demon_position, connection)?;
+    fn get((demon_position, player_id): (i16, i32), ctx: RequestContext) -> Result<Self> {
+        let demon = Demon::get(demon_position, ctx)?;
 
         creators::table
             .select((creators::demon, creators::creator))
             .filter(creators::demon.eq(&demon.name))
             .filter(creators::creator.eq(&player_id))
-            .get_result(connection)
+            .get_result(ctx.connection())
             .map_err(PointercrateError::database)
-    }
-}
-
-impl AccessRestrictions for Creator {
-    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(ListModerator or ListAdministrator), user)
     }
 }

@@ -14,7 +14,7 @@ use diesel::{
 };
 use std::io::Write;
 
-#[derive(SqlType, Debug)]
+#[derive(SqlType, Debug, Copy, Clone)]
 #[postgres(oid = "1560", array_oid = "1561")]
 pub struct BitString;
 

@@ -1,16 +1,15 @@
 use super::User;
 use crate::{
-    error::PointercrateError,
-    middleware::auth::Me,
-    operation::Get,
-    permissions::{self, AccessRestrictions, Permissions},
-    Result,
+    context::RequestContext, error::PointercrateError, middleware::auth::Me, operation::Get,
+    permissions::Permissions, Result,
 };
-use diesel::{result::Error, PgConnection, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl};
 
 impl Get<i32> for User {
-    fn get(id: i32, connection: &PgConnection) -> Result<User> {
-        match User::by_id(id).first(connection) {
+    fn get(id: i32, ctx: RequestContext) -> Result<User> {
+        ctx.check_permissions(perms!(Moderator or Administrator))?;
+
+        match User::by_id(id).first(ctx.connection()) {
             Ok(user) => Ok(user),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -23,8 +22,10 @@ impl Get<i32> for User {
 }
 
 impl Get<String> for User {
-    fn get(name: String, connection: &PgConnection) -> Result<User> {
-        match User::by_name(&name).first(connection) {
+    fn get(name: String, ctx: RequestContext) -> Result<User> {
+        ctx.check_permissions(perms!(Moderator or Administrator))?;
+
+        match User::by_name(&name).first(ctx.connection()) {
             Ok(user) => Ok(user),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -37,46 +38,15 @@ impl Get<String> for User {
 }
 
 impl Get<Permissions> for Vec<User> {
-    fn get(perms: Permissions, connection: &PgConnection) -> Result<Vec<User>> {
-        Ok(User::by_permissions(perms).load(connection)?)
-    }
-}
+    fn get(perms: Permissions, ctx: RequestContext) -> Result<Vec<User>> {
+        ctx.check_permissions(perms!(Administrator))?;
 
-// TODO: check jurisdiction in `access()` and `page_access()`
-impl AccessRestrictions for User {
-    fn pre_access(user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(Moderator or Administrator), user)
-    }
-
-    fn pre_page_access(user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(Administrator), user)
-    }
-
-    fn pre_delete(&self, user: Option<&User>) -> Result<()> {
-        permissions::demand(perms!(Administrator), user)?;
-
-        if self.id == user.unwrap().id {
-            return Err(PointercrateError::DeleteSelf)
-        }
-
-        Ok(())
-    }
-
-    fn pre_patch(&self, user: Option<&User>) -> Result<()> {
-        if let Some(user) = user {
-            if self.id == user.id {
-                return Err(PointercrateError::PatchSelf)
-            }
-        }
-
-        Ok(())
+        Ok(User::by_permissions(perms).load(ctx.connection())?)
     }
 }
 
 impl Get<Me> for Me {
-    fn get(me: Me, _: &PgConnection) -> Result<Me> {
+    fn get(me: Me, _ctx: RequestContext) -> Result<Me> {
         Ok(me)
     }
 }
-
-impl AccessRestrictions for Me {}

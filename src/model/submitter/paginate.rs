@@ -1,12 +1,13 @@
 use super::Submitter;
 use crate::{
+    context::RequestContext,
     error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator},
     schema::submitters,
     Result,
 };
-use diesel::{pg::Pg, query_builder::BoxedSelectStatement, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{pg::Pg, query_builder::BoxedSelectStatement, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
@@ -55,18 +56,21 @@ impl Paginator for SubmitterPagination {
 }
 
 impl Paginate<SubmitterPagination> for Submitter {
-    fn load(pagination: &SubmitterPagination, connection: &PgConnection) -> Result<Vec<Self>> {
-        if pagination.limit() > 100 || pagination.limit() < 1 {
-            return Err(PointercrateError::InvalidPaginationLimit)
-        }
+    fn load(pagination: &SubmitterPagination, ctx: RequestContext) -> Result<Vec<Self>> {
+        ctx.check_permissions(perms!(ListAdministrator))?;
 
-        let mut query = pagination.filter(Submitter::boxed_all());
+        let mut query = pagination.filter(Submitter::boxed_all(), ctx);
 
         filter!(query[
             submitters::submitter_id > pagination.after_id,
             submitters::submitter_id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, submitters::submitter_id, connection)
+        pagination_result!(
+            query,
+            pagination,
+            submitters::submitter_id,
+            ctx.connection()
+        )
     }
 }

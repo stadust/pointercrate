@@ -15,7 +15,7 @@ mod post;
 #[derive(Debug, Serialize)]
 pub struct Creators(pub Vec<EmbeddedPlayer>);
 
-#[derive(Debug, Queryable, Hash, Display)]
+#[derive(Debug, Queryable, Display, Hash)]
 #[display(fmt = "creator with id {} on demon {}", creator, demon)]
 pub struct Creator {
     demon: CiString,

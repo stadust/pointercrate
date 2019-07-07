@@ -15,7 +15,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Precondition;
 
 #[derive(Debug, Display)]
@@ -38,8 +38,6 @@ impl<S> Middleware<S> for Precondition {
             match if_match {
                 None => {
                     warn!("PATCH or DELETE request without conditional header");
-
-                    return Err(PointercrateError::PreconditionRequired)?
                 },
                 Some(if_match) => {
                     let mut hashes = Vec::new();
@@ -57,7 +55,7 @@ impl<S> Middleware<S> for Precondition {
                         }
                     }
 
-                    debug!("IfMatch values are {:?}", hashes);
+                    debug!("If-Match values are {:?}", hashes);
 
                     req.extensions_mut().insert(IfMatch(hashes));
                 },

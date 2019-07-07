@@ -5,13 +5,13 @@ pub use self::{
 use super::Model;
 use crate::{
     citext::{CiStr, CiString},
+    error::PointercrateError,
     model::{
         demon::EmbeddedDemon,
         nationality::Nationality,
         record::{EmbeddedRecordD, RecordStatus},
         By,
     },
-    operation::Delete,
     schema::{nationalities, players, records},
     Result,
 };
@@ -26,8 +26,8 @@ use diesel::{
 };
 use log::{info, trace};
 use serde_derive::Serialize;
+use std::hash::{Hash, Hasher};
 
-mod delete;
 mod get;
 mod paginate;
 mod patch;
@@ -82,7 +82,7 @@ pub struct ShortPlayer {
     pub nationality: Option<Nationality>,
 }
 
-#[derive(Debug, Serialize, Hash, Display)]
+#[derive(Debug, Serialize, Display)]
 #[display(fmt = "{}", player)]
 pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
@@ -91,6 +91,12 @@ pub struct PlayerWithDemonsAndRecords {
     pub created: Vec<EmbeddedDemon>,
     pub verified: Vec<EmbeddedDemon>,
     pub published: Vec<EmbeddedDemon>,
+}
+
+impl Hash for PlayerWithDemonsAndRecords {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.player.hash(state)
+    }
 }
 
 #[derive(Insertable, Debug)]
@@ -190,9 +196,11 @@ impl EmbeddedPlayer {
             .set(records::player.eq(self.id))
             .execute(conn)?;
 
-        with.delete(conn)?;
-
-        Ok(())
+        diesel::delete(players::table)
+            .filter(players::id.eq(with.id))
+            .execute(conn)
+            .map(|_| ())
+            .map_err(PointercrateError::database)
     }
 }
 

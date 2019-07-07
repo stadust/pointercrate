@@ -6,7 +6,7 @@ Each demon on the list is represented by a `Demon` object. The following assumpt
 
 - The `requirement` value lies between `0` and `100`.
 - There are no holes in the positioning and the `position` value is greater than `0`
-- Every `video` value, if provided, is in one of the formats listed [here](/documentation/#video)
+- Every `video` value, if provided, is in one of the formats listed [here](/documentation/#video), or `null`
 
 Note that although on the website the record requirement for demons on the extended list is always displayed as `100%`,
 `Demon` objects still save their requirement from when they were on the main list.
