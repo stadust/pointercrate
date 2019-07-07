@@ -13,7 +13,7 @@ fn main() {
 
     print!("<div class='panel fade' id='toc'>");
     print!("<h2>Table of contents</h2>");
-    print!("<div class='search seperated' style='margin:0px'>");
+    print!("<div class='search js-search seperated' style='margin:0px'>");
     print!("<input placeholder='Search...' type='text' style='height:1em'>");
     print!("</div>");
     print!("<ol style='padding-left: 0px'>");

@@ -10,6 +10,7 @@ use crate::{
     error::PointercrateError,
     model::{
         demon::{self, Demon, DemonWithCreatorsAndRecords, PartialDemon},
+        nationality::Nationality,
         user::User,
     },
     state::PointercrateState,
@@ -24,7 +25,6 @@ use gdcf_model::{
 use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
-use crate::model::nationality::Nationality;
 
 struct ListSection {
     name: &'static str,
@@ -60,7 +60,7 @@ pub struct DemonlistOverview {
     pub admins: Vec<User>,
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
-    pub nations: Vec<Nationality>
+    pub nations: Vec<Nationality>,
 }
 
 pub fn overview_handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -600,7 +600,7 @@ fn dropdown(
             }
 
             div.see-through.fade.dropdown#(section.id) {
-                div.search.seperated {
+                div.search.js-search.seperated {
                     input placeholder = "Filter..." type = "text" {}
                 }
                 p style = "margin: 10px" {
@@ -693,10 +693,17 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
             span.plus.cross.hover {}
             h2.underlined.pad {
                 "Stats Viewer"
-                div.dropdown-menu {
+                div.dropdown-menu.js-search {
                     input#nation-filter type="text" value = "International" style = "color: #444446; font-weight: bold;";
                     div.menu style = "font-size: 0.55em; font-weight: normal"{
                         ul#nation-list {
+                            li.white.hover.underlined {
+                                span.em.em-world_map {}
+                                (PreEscaped("&nbsp;"))
+                                b {"WORLD"}
+                                br;
+                                span style = "font-size: 90%; font-style: italic" { "International" }
+                            }
                             @for nation in nations {
                                 li.white.hover {
                                     span class = {"em em-flag-" (nation.country_code.to_lowercase())} {}
@@ -712,7 +719,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
             }
             div.flex#stats-viewer-cont {
                 div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column"{
-                    div.search.seperated style = "margin-bottom: 0px"{
+                    div.search.js-search.seperated style = "margin-bottom: 0px"{
                         input#pagination-filter placeholder = "Enter to search..." type = "text" style = "height: 1em";
                     }
                     p.info-red.output style = "margin: 10px 10px 0px"{}
