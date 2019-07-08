@@ -415,6 +415,20 @@ impl Demon {
 
         Ok(())
     }
+
+    pub fn score(&self, progress: i16) -> f64 {
+        let mut score =
+            150f64 * f64::exp((1f64 - f64::from(self.position)) * (1f64 / 30f64).ln() / (-149f64));
+
+        if progress != 100 {
+            score *= 0.25f64
+                + (f64::from(progress) - f64::from(self.requirement))
+                    / (100f64 - f64::from(self.requirement))
+                    * 0.25f64
+        }
+
+        score
+    }
 }
 
 impl Into<PartialDemon> for Demon {
@@ -444,26 +458,4 @@ impl Into<EmbeddedDemon> for PartialDemon {
             name: self.name,
         }
     }
-}
-/*
-pub fn score(position: i16, progress: i16, list_length: usize) -> f64 {
-    let position = f64::from(position);
-    let progress = f64::from(progress);
-    let list_length = list_length as f64;
-
-    f64::powf(progress / 100f64, position) * list_length
-        / (1f64
-            + (list_length - 1f64)
-                * f64::exp(
-                    (-4f64 * f64::ln(list_length - 1f64) * (list_length - position))
-                        / (3f64 * list_length),
-                ))
-}
-*/
-
-pub fn score(position: i16, progress: i16) -> f64 {
-    let position = f64::from(position);
-    let progress = f64::from(progress);
-
-    f64::powf(progress / 100.0, 5.0) * 100.0 * f64::exp(-0.03 * (position - 1.0))
 }
