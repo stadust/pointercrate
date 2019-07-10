@@ -35,10 +35,10 @@ table! {
     members (member_id) {
         member_id -> Int4,
         name -> Text,
+        password_hash -> Text,
+        permissions -> BitString,
         display_name -> Nullable<Text>,
         youtube_channel -> Nullable<Varchar>,
-        password_hash -> Text,
-        permissions -> Bit,
         nationality -> Nullable<Varchar>,
     }
 }
