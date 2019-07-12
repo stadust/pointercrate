@@ -37,7 +37,7 @@ CREATE VIEW players_with_score AS
             FROM records
             INNER JOIN demons
             ON demons.name = demon
-            WHERE demons.position <= 100 AND status_ = 'APPROVED'
+            WHERE demons.position <= 150 AND status_ = 'APPROVED'
 
             UNION
 
