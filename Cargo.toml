@@ -14,7 +14,7 @@ failure = "0.1.2"
 failure_derive = "0.1.2"
 dotenv = "^0.9"
 ipnetwork = "^0.13.0"
-serde = "^1.0.0"
+serde = {version = "^1.0.0", features = ["derive"]}
 serde_derive = "^1.0.0"
 serde_json = "1.0"
 url = "1.7"
