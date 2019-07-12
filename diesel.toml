@@ -3,5 +3,9 @@
 
 [print_schema]
 file = "src/schema.rs"
+<<<<<<< HEAD
 filter = {only_tables = ["creators", "demons", "demon_verifier_publisher_join", "members",  "players", "records", "submitters", "nationalities"]}
+=======
+filter = {only_tables = ["creators", "demons", "demon_verifier_publisher_join", "members",  "players", "records", "submitters", "nationality"]}
+>>>>>>> 5b6423a... Essentially basic nationality support
 import_types = ["diesel::sql_types::*", "crate::model::record::Record_status", "crate::citext::Citext", "crate::bitstring::BitString"]
