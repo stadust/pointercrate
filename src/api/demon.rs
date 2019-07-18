@@ -70,8 +70,6 @@ pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
 }
 
 pub fn delete_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {
-    use crate::middleware::auth::Token;
-
     info!("DELETE /api/v1/demons/[position]/creators/[player id]/");
 
     let req = req.clone();

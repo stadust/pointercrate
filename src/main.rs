@@ -36,6 +36,7 @@ use actix_web::{
     http::{Method, NormalizePath, StatusCode},
     server, App, FromRequest, Path, Responder,
 };
+use gdcf::cache::CacheEntry;
 use std::{net::SocketAddr, sync::Arc};
 
 #[macro_use]
@@ -176,7 +177,22 @@ fn main() {
                                         .send(LevelById(position.into_inner()))
                                         .map_err(PointercrateError::internal)
                                 })
-                                .map(|resource| HttpResponse::Ok().json(resource))
+                                .map(|cache_entry| {
+                                    match cache_entry.unwrap() {
+                                        // FIXME: error handling
+                                        CacheEntry::Missing => HttpResponse::NoContent().finish(),
+                                        CacheEntry::DeducedAbsent =>
+                                            HttpResponse::NotFound().finish(),
+                                        CacheEntry::MarkedAbsent(meta) =>
+                                            HttpResponse::NotFound()
+                                                .header("X-CACHED-AT", meta.cached_at().to_string())
+                                                .finish(),
+                                        CacheEntry::Cached(object, meta) =>
+                                            HttpResponse::Ok()
+                                                .header("X-CACHED-AT", meta.cached_at().to_string())
+                                                .json(object),
+                                    }
+                                })
                                 .responder()
                         })
                     })

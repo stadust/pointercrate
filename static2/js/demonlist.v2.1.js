@@ -46,6 +46,8 @@ class StatsViewer {
     this._error = this.domElement.find("#error-output");
     this._progress = this.domElement.find("#progress");
     this._content = this.domElement.find("#stats-data");
+    this._nation = undefined;
+    this._nationName = "International";
 
     this.paginator = undefined;
 
@@ -57,21 +59,22 @@ class StatsViewer {
         this.paginator.stop();
       }
 
-      if (filterInput.value) {
-        this.paginator = new Paginator(
-          pagination,
-          "/players/ranking/",
-          { name_contains: filterInput.value },
-          this.generatePlayer.bind(this)
-        );
-      } else {
-        this.paginator = new Paginator(
-          pagination,
-          "/players/ranking/",
-          {},
-          this.generatePlayer.bind(this)
-        );
+      let data = {}
+
+      if (this._nation) {
+        data.nation = this._nation;
       }
+
+      if (filterInput.value) {
+        data.name_contains = filterInput.value;
+      }
+
+      this.paginator = new Paginator(
+        pagination,
+        "/players/ranking/",
+        data,
+        this.generatePlayer.bind(this)
+      );
     };
 
     document
@@ -95,6 +98,31 @@ class StatsViewer {
 
       timeout = setTimeout(() => setPaginator(), 1000);
     });
+
+    var nationFilter = document.getElementById("nation-filter");
+    nationFilter.value = "International"; // in case some browser randomly decide to store text field values
+
+    nationFilter.addEventListener("focus", () => {
+        console.log("Focus on nation filter");
+        this._nationName = nationFilter.value;
+        nationFilter.value = '';
+        nationFilter.dispatchEvent(new Event('change'));
+    });
+
+    nationFilter.addEventListener("focusout", () => {
+        console.log("Focus of nation filter lost!");
+        nationFilter.value = this._nationName;
+    });
+
+    for(let li of nationFilter.parentNode.getElementsByTagName('li')) {
+        li.addEventListener('click', () => {
+            console.log("Selected nation " + li.dataset.name);
+            this._nationName = li.dataset.name;
+            this._nation = li.dataset.code;
+            nationFilter.value = this._nationName;
+            setPaginator();
+        });
+    }
   }
 
   updateView(event) {

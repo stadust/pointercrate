@@ -22,8 +22,6 @@ struct NewUser<'a> {
 
 impl Post<Registration> for User {
     fn create_from(mut registration: Registration, ctx: RequestContext) -> Result<User> {
-        ctx.ratelimit(RatelimitScope::Registration)?;
-
         info!("Creating new user from {:?}", registration);
 
         User::validate_name(&mut registration.name)?;
@@ -31,10 +29,14 @@ impl Post<Registration> for User {
 
         let connection = ctx.connection();
 
+        ctx.ratelimit(RatelimitScope::SoftRegistration)?;
+
         connection.transaction(|| {
             match User::by_name(&registration.name).first::<User>(connection) {
                 Ok(_) => Err(PointercrateError::NameTaken),
                 Err(Error::NotFound) => {
+                    ctx.ratelimit(RatelimitScope::Registration)?;
+
                     info!("Registering new user with name {}", registration.name);
 
                     let hash = bcrypt::hash(&registration.password, bcrypt::DEFAULT_COST).unwrap();
