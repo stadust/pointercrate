@@ -3,7 +3,7 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{
-        player::{players_with_score, RankedPlayer2, ShortPlayer},
+        demonlist::player::{players_with_score, RankedPlayer2, ShortPlayer},
         Model,
     },
     operation::{Paginate, Paginator},
@@ -41,7 +41,8 @@ impl Paginator for PlayerPagination {
     ]);
 
     fn page(
-        &self, last_on_page: Option<Self::PaginationColumnType>,
+        &self,
+        last_on_page: Option<Self::PaginationColumnType>,
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self {
         PlayerPagination {
@@ -117,7 +118,8 @@ impl Paginator for RankingPagination {
     }
 
     fn page(
-        &self, last_on_page: Option<Self::PaginationColumnType>,
+        &self,
+        last_on_page: Option<Self::PaginationColumnType>,
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self {
         Self {

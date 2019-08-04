@@ -1,15 +1,12 @@
 use super::Page;
 use crate::{
-    actor::{
-        database::{GetDemonlistOverview, GetMessage},
-        http::GetDemon,
-    },
+    actor::{database::GetMessage, demonlist::GetDemonlistOverview, http::GetDemon},
     api::PCResponder,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     context::RequestData,
     error::PointercrateError,
     model::{
-        demon::{Demon, DemonWithCreatorsAndRecords, PartialDemon},
+        demonlist::demon::{Demon, DemonWithCreatorsAndRecords, PartialDemon},
         nationality::Nationality,
         user::User,
     },

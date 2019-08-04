@@ -2,15 +2,16 @@ pub use self::{
     paginate::{PlayerPagination, RankingPagination},
     patch::PatchPlayer,
 };
-use super::Model;
 use crate::{
     citext::{CiStr, CiString},
     error::PointercrateError,
     model::{
-        demon::EmbeddedDemon,
+        demonlist::{
+            demon::EmbeddedDemon,
+            record::{EmbeddedRecordD, RecordStatus},
+        },
         nationality::Nationality,
-        record::{EmbeddedRecordD, RecordStatus},
-        By,
+        By, Model,
     },
     schema::{nationalities, players, records},
     Result,
@@ -134,7 +135,7 @@ impl EmbeddedPlayer {
         // demon) would hold for the current player, which is required for the next step to
         // work
         diesel::sql_query(format!(
-            include_str!("../../sql/prepare_player_ban.sql"),
+            include_str!("../../../sql/prepare_player_ban.sql"),
             self.id
         ))
         .execute(conn)?;
@@ -186,7 +187,7 @@ impl EmbeddedPlayer {
         .execute(conn)?;
 
         diesel::sql_query(format!(
-            include_str!("../../sql/prepare_player_merge.sql"),
+            include_str!("../../../sql/prepare_player_merge.sql"),
             self.id, with.id
         ))
         .execute(conn)?;

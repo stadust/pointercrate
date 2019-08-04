@@ -144,7 +144,7 @@ fn main() {
             .scope("/api/v1", |api_scope| {
                 api_scope
                     .resource("/list_information", |r| {
-                        r.get().f(api::misc::list_information);
+                        r.get().f(api::demonlist::misc::list_information);
                         r.route().f(allowed!(GET))
                     })
                     .nested("/users", |user_scope| {
@@ -199,63 +199,67 @@ fn main() {
                     .nested("/demons", |demon_scope| {
                         demon_scope
                             .resource("/", |r| {
-                                r.get().f(wrap(api::demon::paginate));
-                                r.post().f(wrap(api::demon::post));
+                                r.get().f(wrap(api::demonlist::demon::paginate));
+                                r.post().f(wrap(api::demonlist::demon::post));
                                 r.route().f(allowed!(GET, POST))
                             })
                             .resource("/{position}/", |r| {
-                                r.get().f(wrap(api::demon::get));
-                                r.method(Method::PATCH).f(wrap(api::demon::patch));
+                                r.get().f(wrap(api::demonlist::demon::get));
+                                r.method(Method::PATCH)
+                                    .f(wrap(api::demonlist::demon::patch));
                                 r.route().f(allowed!(GET, PATCH))
                             })
                             .resource("/{position}/creators/", |r| {
-                                r.post().f(wrap(api::demon::post_creator));
+                                r.post().f(wrap(api::demonlist::demon::post_creator));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/{position}/creators/{player_id}/", |r| {
-                                r.delete().f(wrap(api::demon::delete_creator));
+                                r.delete().f(wrap(api::demonlist::demon::delete_creator));
                                 r.route().f(allowed!(DELETE))
                             })
                     })
                     .nested("/players", |player_scope| {
                         player_scope
                             .resource("/", |r| {
-                                r.get().f(wrap(api::player::paginate));
+                                r.get().f(wrap(api::demonlist::player::paginate));
                                 r.route().f(allowed!(GET))
                             })
                             .resource("/ranking/", |r| {
-                                r.get().f(wrap(api::player::ranking));
+                                r.get().f(wrap(api::demonlist::player::ranking));
                                 r.route().f(allowed!(GET))
                             })
                             .resource("/{player_id}/", |r| {
-                                r.get().f(wrap(api::player::get));
-                                r.method(Method::PATCH).f(wrap(api::player::patch));
+                                r.get().f(wrap(api::demonlist::player::get));
+                                r.method(Method::PATCH)
+                                    .f(wrap(api::demonlist::player::patch));
                                 r.route().f(allowed!(GET, PATCH))
                             })
                     })
                     .nested("/records", |record_scope| {
                         record_scope
                             .resource("/", |r| {
-                                r.get().f(wrap(api::record::paginate));
-                                r.post().f(wrap(api::record::submit));
+                                r.get().f(wrap(api::demonlist::record::paginate));
+                                r.post().f(wrap(api::demonlist::record::submit));
                                 r.route().f(allowed!(GET, POST))
                             })
                             .resource("/{record_id}/", |r| {
-                                r.get().f(wrap(api::record::get));
-                                r.delete().f(wrap(api::record::delete));
-                                r.method(Method::PATCH).f(wrap(api::record::patch));
+                                r.get().f(wrap(api::demonlist::record::get));
+                                r.delete().f(wrap(api::demonlist::record::delete));
+                                r.method(Method::PATCH)
+                                    .f(wrap(api::demonlist::record::patch));
                                 r.route().f(allowed!(GET, DELETE, PATCH))
                             })
                     })
                     .nested("/submitters", |record_scope| {
                         record_scope
                             .resource("/", |r| {
-                                r.get().f(wrap(api::submitter::paginate));
+                                r.get().f(wrap(api::demonlist::submitter::paginate));
                                 r.route().f(allowed!(GET))
                             })
                             .resource("/{submitter_id}/", |r| {
-                                r.get().f(wrap(api::submitter::get));
-                                r.method(Method::PATCH).f(wrap(api::submitter::patch));
+                                r.get().f(wrap(api::demonlist::submitter::get));
+                                r.method(Method::PATCH)
+                                    .f(wrap(api::demonlist::submitter::patch));
                                 r.route().f(allowed!(GET, PATCH))
                             })
                     })

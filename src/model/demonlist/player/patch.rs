@@ -3,7 +3,7 @@ use crate::{
     citext::CiString,
     context::RequestContext,
     error::PointercrateError,
-    model::{nationality::Nationality, player::ShortPlayer, By},
+    model::{demonlist::player::ShortPlayer, nationality::Nationality, By},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     schema::players,
     Result,

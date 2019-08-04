@@ -1,6 +1,8 @@
 //! Moduling containing the [`PointercrateError`] enum.
 
-use crate::{model::record::RecordStatus, permissions::PermissionsSet, ratelimit::RatelimitScope};
+use crate::{
+    model::demonlist::record::RecordStatus, permissions::PermissionsSet, ratelimit::RatelimitScope,
+};
 use actix_web::{
     error::JsonPayloadError,
     http::{Method, StatusCode},

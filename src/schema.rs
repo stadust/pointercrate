@@ -1,6 +1,5 @@
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
@@ -12,7 +11,6 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
@@ -28,7 +26,6 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
@@ -45,7 +42,6 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
@@ -57,7 +53,6 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
@@ -71,7 +66,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
+    use crate::model::demonlist::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
@@ -88,7 +83,6 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::model::record::Record_status;
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 

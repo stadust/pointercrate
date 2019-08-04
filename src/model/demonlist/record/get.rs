@@ -2,7 +2,10 @@ use super::{EmbeddedRecordD, EmbeddedRecordP, EmbeddedRecordPD, Record};
 use crate::{
     context::RequestContext,
     error::PointercrateError,
-    model::{demon::Demon, record::RecordStatus, submitter::Submitter, By, Model},
+    model::{
+        demonlist::{demon::Demon, record::RecordStatus, submitter::Submitter},
+        By, Model,
+    },
     operation::Get,
     schema::{demons, records},
     Result,

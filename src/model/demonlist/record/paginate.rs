@@ -49,7 +49,8 @@ impl Paginator for RecordPagination {
     type PaginationColumnType = i32;
 
     fn filter<'a, ST>(
-        &'a self, mut query: BoxedSelectStatement<'a, ST, <Record as Model>::From, Pg>,
+        &'a self,
+        mut query: BoxedSelectStatement<'a, ST, <Record as Model>::From, Pg>,
         ctx: RequestContext,
     ) -> BoxedSelectStatement<'a, ST, <Record as Model>::From, Pg> {
         filter!(query[
@@ -71,7 +72,8 @@ impl Paginator for RecordPagination {
     }
 
     fn page(
-        &self, last_on_page: Option<Self::PaginationColumnType>,
+        &self,
+        last_on_page: Option<Self::PaginationColumnType>,
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self {
         RecordPagination {

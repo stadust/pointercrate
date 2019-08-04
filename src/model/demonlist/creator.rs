@@ -1,7 +1,7 @@
 pub use self::post::PostCreator;
 use crate::{
     citext::{CiStr, CiString, CiText},
-    model::player::EmbeddedPlayer,
+    model::demonlist::player::EmbeddedPlayer,
     schema::{creators, demons, players},
 };
 use derive_more::Display;

@@ -4,8 +4,10 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{
-        demon::{Demon, EmbeddedDemon},
-        player::EmbeddedPlayer,
+        demonlist::{
+            demon::{Demon, EmbeddedDemon},
+            player::EmbeddedPlayer,
+        },
         Model,
     },
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},

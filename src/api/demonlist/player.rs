@@ -1,8 +1,8 @@
-use super::PCResponder;
 use crate::{
+    api::PCResponder,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::player::{
+    model::demonlist::player::{
         PatchPlayer, PlayerPagination, PlayerWithDemonsAndRecords, RankedPlayer2,
         RankingPagination, ShortPlayer,
     },

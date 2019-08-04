@@ -2,7 +2,7 @@ use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
-    model::{creator::Creator, EmbeddedPlayer},
+    model::demonlist::{creator::Creator, player::EmbeddedPlayer},
     operation::{Get, Post},
     schema::demons,
     video, Result,
@@ -70,9 +70,9 @@ impl Post<PostDemon> for Demon {
             insert_into(demons::table)
                 .values(&new)
                 .execute(connection)?;
-            
+
             let creators_hash: HashSet<CiString> = data.creators.into_iter().collect();
-            
+
             for creator in creators_hash {
                 Creator::create_from(
                     (data.name.as_ref(), creator.as_ref()),

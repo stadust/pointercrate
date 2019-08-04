@@ -2,7 +2,7 @@ use super::{Demon, DemonWithCreatorsAndRecords};
 use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
-    model::player::EmbeddedPlayer,
+    model::demonlist::player::EmbeddedPlayer,
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     schema::demons,
     Result,

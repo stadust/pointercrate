@@ -58,13 +58,16 @@ impl PointercrateState {
     }
 
     pub fn auth<T: TAuthType>(
-        &self, auth: Authorization,
+        &self,
+        auth: Authorization,
     ) -> impl Future<Item = Me, Error = PointercrateError> {
         self.database(Auth::<T>(auth, PhantomData))
     }
 
     pub fn get<T, Key, G>(
-        &self, req: &HttpRequest<Self>, key: Key,
+        &self,
+        req: &HttpRequest<Self>,
+        key: Key,
     ) -> impl Future<Item = G, Error = PointercrateError>
     where
         T: TAuthType,
@@ -86,7 +89,9 @@ impl PointercrateState {
     }
 
     pub fn post<A, T, P>(
-        &self, req: &HttpRequest<Self>, t: T,
+        &self,
+        req: &HttpRequest<Self>,
+        t: T,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
         A: TAuthType,
@@ -107,7 +112,9 @@ impl PointercrateState {
     }
 
     pub fn delete<T, Key, D>(
-        &self, req: &HttpRequest<Self>, key: Key,
+        &self,
+        req: &HttpRequest<Self>,
+        key: Key,
     ) -> impl Future<Item = (), Error = PointercrateError>
     where
         T: TAuthType,
@@ -129,7 +136,10 @@ impl PointercrateState {
     }
 
     pub fn patch<T, Key, P, H>(
-        &self, req: &HttpRequest<Self>, key: Key, fix: H,
+        &self,
+        req: &HttpRequest<Self>,
+        key: Key,
+        fix: H,
     ) -> impl Future<Item = P, Error = PointercrateError>
     where
         T: TAuthType,

@@ -3,7 +3,7 @@ use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
     error::PointercrateError,
-    model::{Demon, EmbeddedPlayer},
+    model::demonlist::{Demon, EmbeddedPlayer},
     operation::{Get, Post},
     schema::creators,
     Result,
@@ -26,7 +26,8 @@ struct NewCreator<'a> {
 
 impl<'a> Post<(&'a CiStr, &'a CiStr)> for Creator {
     fn create_from(
-        (demon, player): (&'a CiStr, &'a CiStr), ctx: RequestContext,
+        (demon, player): (&'a CiStr, &'a CiStr),
+        ctx: RequestContext,
     ) -> Result<Creator> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
 

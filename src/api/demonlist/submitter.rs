@@ -1,10 +1,12 @@
 //! Module containing all the actix request handlers for the `/api/v1/submitters/` endpoints
 
-use super::PCResponder;
 use crate::{
+    api::PCResponder,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::submitter::{PatchSubmitter, Submitter, SubmitterPagination, SubmitterWithRecords},
+    model::demonlist::submitter::{
+        PatchSubmitter, Submitter, SubmitterPagination, SubmitterWithRecords,
+    },
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};

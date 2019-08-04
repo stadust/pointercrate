@@ -31,7 +31,8 @@ impl Paginator for SubmitterPagination {
     filter_method!(submitters[banned = banned]);
 
     fn page(
-        &self, last_on_page: Option<Self::PaginationColumnType>,
+        &self,
+        last_on_page: Option<Self::PaginationColumnType>,
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self {
         SubmitterPagination {

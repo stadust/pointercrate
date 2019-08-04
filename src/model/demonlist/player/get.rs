@@ -3,7 +3,10 @@ use crate::{
     citext::CiStr,
     context::RequestContext,
     error::PointercrateError,
-    model::{creator::created_by, demon::EmbeddedDemon, player::ShortPlayer, By, Model},
+    model::{
+        demonlist::{creator::created_by, demon::EmbeddedDemon, player::ShortPlayer},
+        By, Model,
+    },
     operation::Get,
     schema::demons,
     Result,

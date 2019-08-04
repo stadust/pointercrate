@@ -1,5 +1,7 @@
-use super::Model;
-use crate::{model::record::EmbeddedRecordPD, schema::submitters};
+use crate::{
+    model::{demonlist::record::EmbeddedRecordPD, Model},
+    schema::submitters,
+};
 use derive_more::Display;
 use diesel::{insert_into, pg::PgConnection, query_dsl::RunQueryDsl, result::QueryResult};
 use ipnetwork::IpNetwork;

@@ -1,10 +1,6 @@
 //! Module containg the actual actix request handlers
 pub mod auth;
-pub mod demon;
-pub mod misc;
-pub mod player;
-pub mod record;
-pub mod submitter;
+pub mod demonlist;
 pub mod user;
 
 use crate::{
@@ -41,7 +37,8 @@ pub fn wrap_direct(
 }
 
 fn handle_error(
-    req: &HttpRequest<PointercrateState>, error: PointercrateError,
+    req: &HttpRequest<PointercrateState>,
+    error: PointercrateError,
 ) -> Result<HttpResponse> {
     warn!("HTTP Error returned during request handling: {}", error);
 
@@ -96,7 +93,8 @@ fn preferred_mime_type(req: &HttpRequest<PointercrateState>) -> Result<mime::Mim
 /// calling another handler function and thus doesnt have to bother with
 /// futures
 pub fn error(
-    req: &HttpRequest<PointercrateState>, error: PointercrateError,
+    req: &HttpRequest<PointercrateState>,
+    error: PointercrateError,
 ) -> Result<HttpResponse> {
     handle_error(req, error)
 }

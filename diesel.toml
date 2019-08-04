@@ -4,4 +4,4 @@
 [print_schema]
 file = "src/schema.rs"
 filter = {only_tables = ["creators", "demons", "demon_verifier_publisher_join", "members",  "players", "records", "submitters", "nationalities"]}
-import_types = ["diesel::sql_types::*", "crate::model::record::Record_status", "crate::citext::Citext", "crate::bitstring::BitString"]
+import_types = ["diesel::sql_types::*", "crate::model::record::demonlist::Record_status", "crate::citext::Citext", "crate::bitstring::BitString"]

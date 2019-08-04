@@ -1,7 +1,9 @@
-use super::Model;
 use crate::{
     error::PointercrateError,
-    model::{creator::Creators, player::EmbeddedPlayer, record::EmbeddedRecordP},
+    model::{
+        demonlist::{creator::Creators, player::EmbeddedPlayer, record::EmbeddedRecordP},
+        Model,
+    },
     operation::Get,
     schema::{demons, players},
     Result,

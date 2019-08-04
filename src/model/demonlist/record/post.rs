@@ -4,7 +4,7 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     context::RequestContext,
     error::PointercrateError,
-    model::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
+    model::demonlist::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
     operation::{Delete, Get, Post},
     ratelimit::RatelimitScope,
     video, Result,

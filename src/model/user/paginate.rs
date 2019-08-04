@@ -36,7 +36,8 @@ impl Paginator for UserPagination {
     ]);
 
     fn page(
-        &self, last_on_page: Option<Self::PaginationColumnType>,
+        &self,
+        last_on_page: Option<Self::PaginationColumnType>,
         first_on_page: Option<Self::PaginationColumnType>,
     ) -> Self {
         UserPagination {

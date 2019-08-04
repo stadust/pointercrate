@@ -2,10 +2,8 @@ use crate::{
     context::{RequestContext, RequestData},
     error::PointercrateError,
     middleware::auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
-    model::{demon::PartialDemon, nationality::Nationality, user::PatchMe, Model, User},
+    model::{user::PatchMe, Model, User},
     operation::{Delete, Get, Paginate, Paginator, Patch, Post},
-    permissions::Permissions,
-    view::demonlist::DemonlistOverview,
     Result,
 };
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
@@ -15,8 +13,7 @@ use diesel::{
     query_builder::QueryFragment,
     r2d2::{ConnectionManager, Pool, PooledConnection},
     sql_types::{HasSqlType, NotNull, SqlOrd},
-    AppearsOnTable, Connection, Expression, QueryDsl, QuerySource, RunQueryDsl,
-    SelectableExpression,
+    AppearsOnTable, Connection, Expression, QuerySource, RunQueryDsl, SelectableExpression,
 };
 
 use crate::ratelimit::Ratelimits;
@@ -63,7 +60,7 @@ impl DatabaseActor {
     }
 
     /// Gets a connection from the connection pool
-    fn connection(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
+    pub(super) fn connection(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
         self.0
             .get()
             .map_err(|_| PointercrateError::DatabaseConnectionError)
@@ -119,43 +116,6 @@ impl Actor for DatabaseActor {
         info!(
             "Stopped pointercrate database actor! We can no longer interact with the database! :("
         )
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct GetDemonlistOverview;
-
-impl Message for GetDemonlistOverview {
-    type Result = Result<DemonlistOverview>;
-}
-
-impl Handler<GetDemonlistOverview> for DatabaseActor {
-    type Result = Result<DemonlistOverview>;
-
-    fn handle(&mut self, _: GetDemonlistOverview, _: &mut Self::Context) -> Self::Result {
-        let connection = &*self.connection()?;
-        let (admins, mods, helpers) = Get::get(
-            (
-                Permissions::ListAdministrator,
-                Permissions::ListModerator,
-                Permissions::ListHelper,
-            ),
-            RequestContext::Internal(connection),
-        )?;
-        let all_demons = PartialDemon::all()
-            .order_by(crate::schema::demons::position)
-            .load(connection)?;
-        let nations = Nationality::all()
-            .order_by(crate::schema::nationalities::iso_country_code)
-            .load(connection)?;
-
-        Ok(DemonlistOverview {
-            demon_overview: all_demons,
-            admins,
-            mods,
-            helpers,
-            nations,
-        })
     }
 }
 
@@ -281,91 +241,6 @@ impl Handler<Invalidate> for DatabaseActor {
         }
     }
 }
-
-/*
-/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] by access token
-///
-/// ## Errors
-/// + [`PointercrateError::Unauthorized`]: Authorization failed
-#[derive(Debug)]
-pub struct Token(pub Authorization);
-
-/// Message that indicates the [`DatabaseActor`] to authorize a [`User`] using basic auth
-///
-/// ## Errors
-/// + [`PointercrateError::Unauthorized`]: Authorization failed
-#[derive(Debug)]
-pub struct Basic(pub Authorization);
-
-impl Message for Token {
-    type Result = Result<User>;
-}
-
-// During authorization, all and every error that might come up will be converted into
-// `PointercrateError::Unauthorized`
-impl Handler<Token> for DatabaseActor {
-    type Result = Result<User>;
-
-    fn handle(&mut self, msg: Token, _: &mut Self::Context) -> Self::Result {
-        debug!("Attempting to perform token authorization (we're not logging the token for obvious reasons smh)");
-
-        if let Authorization::Token {
-            access_token,
-            csrf_token,
-        } = msg.0
-        {
-            // Well this is reassuring. Also we directly deconstruct it and only save the ID so we
-            // don't accidentally use unsafe values later on
-            let Claims { id, .. } = jsonwebtoken::dangerous_unsafe_decode::<Claims>(&access_token)
-                .map_err(|_| PointercrateError::Unauthorized)?
-                .claims;
-
-            debug!(
-                "The token identified the user with id {}, validating...",
-                id
-            );
-
-            let user =
-                User::get(id, &*self.connection()?).map_err(|_| PointercrateError::Unauthorized)?;
-
-            let user = user.validate_token(&access_token)?;
-
-            if let Some(ref csrf_token) = csrf_token {
-                user.validate_csrf_token(csrf_token)?
-            }
-
-            Ok(user)
-        } else {
-            Err(PointercrateError::Unauthorized)
-        }
-    }
-}
-
-impl Message for Basic {
-    type Result = Result<User>;
-}
-
-impl Handler<Basic> for DatabaseActor {
-    type Result = Result<User>;
-
-    fn handle(&mut self, msg: Basic, _: &mut Self::Context) -> Self::Result {
-        debug!("Attempting to perform basic authorization (we're not logging the password for even more obvious reasons smh)");
-
-        if let Authorization::Basic { username, password } = msg.0 {
-            debug!(
-                "Trying to authorize user {} (still not logging the password)",
-                username
-            );
-
-            let user = User::get(username, &*self.connection()?)
-                .map_err(|_| PointercrateError::Unauthorized)?;
-
-            user.verify_password(&password)
-        } else {
-            Err(PointercrateError::Unauthorized)
-        }
-    }
-}*/
 
 /// Message that requests the retrieval of an object of type `G` from the database using the
 /// provided key. The user object (if provided) will be the user any generated audit log entries

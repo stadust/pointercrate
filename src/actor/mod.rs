@@ -2,4 +2,5 @@
 //! handlers
 
 pub mod database;
+pub mod demonlist;
 pub mod http;

@@ -1,7 +1,9 @@
-use super::{All, EmbeddedPlayer, Model};
 use crate::{
     error::PointercrateError,
-    model::demon::EmbeddedDemon,
+    model::{
+        demonlist::{demon::EmbeddedDemon, player::EmbeddedPlayer},
+        All, Model,
+    },
     schema::{demons, players, records},
 };
 use derive_more::Display;
@@ -179,8 +181,13 @@ impl Record {
     }
 
     pub fn insert(
-        progress: i16, video: Option<&str>, status: RecordStatus, player: i32, submitter: i32,
-        demon: &CiStr, conn: &PgConnection,
+        progress: i16,
+        video: Option<&str>,
+        status: RecordStatus,
+        player: i32,
+        submitter: i32,
+        demon: &CiStr,
+        conn: &PgConnection,
     ) -> QueryResult<i32> {
         let new = NewRecord {
             progress,

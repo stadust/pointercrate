@@ -1,10 +1,10 @@
 //! Module containing all the actix request handlers for the `/api/v1/demons/` endpoints
 
-use super::PCResponder;
 use crate::{
+    api::PCResponder,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::{
+    model::demonlist::{
         creator::{Creator, PostCreator},
         demon::{
             DemonPagination, DemonWithCreatorsAndRecords, PartialDemon, PatchDemon, PostDemon,

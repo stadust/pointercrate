@@ -1,7 +1,7 @@
 use super::{Creator, Creators};
 use crate::{
-    citext::CiStr, context::RequestContext, error::PointercrateError, model::Demon, operation::Get,
-    schema::creators, Result,
+    citext::CiStr, context::RequestContext, error::PointercrateError, model::demonlist::Demon,
+    operation::Get, schema::creators, Result,
 };
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 

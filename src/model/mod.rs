@@ -1,15 +1,9 @@
 #[macro_use]
 pub mod user;
-pub mod creator;
-pub mod demon;
+pub mod demonlist;
 pub mod nationality;
-pub mod player;
-pub mod record;
-pub mod submitter;
 
-pub use self::{
-    demon::Demon, player::EmbeddedPlayer, record::Record, submitter::Submitter, user::User,
-};
+pub use self::user::User;
 
 use diesel::{
     dsl::{Eq, Filter, Select},

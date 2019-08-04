@@ -72,7 +72,9 @@ impl RequestData {
     }
 
     pub fn ctx<'a>(
-        &'a self, connection: &'a PgConnection, ratelimits: &'a Ratelimits,
+        &'a self,
+        connection: &'a PgConnection,
+        ratelimits: &'a Ratelimits,
     ) -> RequestContext<'a> {
         match self {
             RequestData::Internal => RequestContext::Internal(connection),

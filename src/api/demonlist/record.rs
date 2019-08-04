@@ -1,11 +1,11 @@
 //! Module containing all the actix request handlers for the `/api/v1/records/` endpoints
 
-use super::PCResponder;
 use crate::{
-    actor::http::PostProcessRecord,
+    actor::demonlist::PostProcessRecord,
+    api::PCResponder,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::record::{PatchRecord, Record, RecordPagination, Submission},
+    model::demonlist::record::{PatchRecord, Record, RecordPagination, Submission},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};

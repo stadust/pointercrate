@@ -1,7 +1,7 @@
 use super::Submitter;
 use crate::{
     context::RequestContext,
-    model::submitter::SubmitterWithRecords,
+    model::demonlist::submitter::SubmitterWithRecords,
     operation::{deserialize_non_optional, Patch},
     schema::submitters,
     Result,
