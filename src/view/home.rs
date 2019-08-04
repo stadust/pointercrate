@@ -63,7 +63,7 @@ impl Page for Homepage {
                                 "Home of the official Demonlist"
                             }
                             div.tab-content.tab-content-active data-tab-id ="1" {
-                                "The pointercrate Demonlist is the most popular ranking of Geometry Dashs's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
+                                "The pointercrate Demonlist is the most popular ranking of Geometry Dash's hardest demons with multiple thousand visitors each day! Even RobTop himself likes it!"
                             }
                             div.tab-content data-tab-id = "2" {
                                 "The Demonlist stats viewer assigns each player a score based on how many demons they've beaten and then ranks them, showing exactly who's the best!"
