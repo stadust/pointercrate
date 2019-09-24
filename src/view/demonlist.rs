@@ -193,7 +193,7 @@ impl Page for DemonlistOverview {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
-    server_level: CacheEntry<Level<u64, Option<Creator>>, gdcf_diesel::Entry>,
+    server_level: CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -218,7 +218,7 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                                 .and_then(move |result| {
                                     match result {
                                         Ok(entry) => Ok(entry),
-                                        Err(err) => Err(PointercrateError::internal(err)),
+                                        Err(_) => Err(PointercrateError::InternalServerError),
                                     }
                                 })
                                 .map(move |entry| {

@@ -1,24 +1,27 @@
-use crate::{actor::database::DeleteMessage, model::demonlist::record::Record};
+use std::sync::Arc;
+
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
 use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
     cache::CacheEntry,
+    future::CloneCached,
     Gdcf,
 };
-use gdcf_diesel::{Cache, Entry, Error};
+use gdcf_diesel::{Cache, Entry};
 use gdcf_model::{
-    level::{DemonRating, Level, LevelRating},
+    level::{DemonRating, Level, LevelRating, PartialLevel},
     song::NewgroundsSong,
     user::Creator,
 };
 use gdrs::BoomlingsClient;
 use log::{debug, error, info, warn};
 use reqwest::r#async::Client;
-use std::sync::Arc;
 use tokio::{
     self,
     prelude::future::{result, Either, Future},
 };
+
+use crate::{actor::database::DeleteMessage, model::demonlist::record::Record};
 
 /// Actor for whatever the fuck just happens to need to be done and isn't database access
 #[allow(missing_debug_implementations)]
@@ -112,20 +115,30 @@ impl Actor for HttpActor {
 pub struct LevelById(pub u64);
 
 impl Message for LevelById {
-    type Result = Result<CacheEntry<Level<NewgroundsSong, Option<Creator>>, Entry>, Error>;
+    type Result = Result<CacheEntry<Level<Option<NewgroundsSong>, Option<Creator>>, Entry>, ()>;
 }
 
 impl Handler<LevelById> for HttpActor {
-    type Result = Result<CacheEntry<Level<NewgroundsSong, Option<Creator>>, Entry>, Error>;
+    type Result = Result<CacheEntry<Level<Option<NewgroundsSong>, Option<Creator>>, Entry>, ()>;
 
     fn handle(&mut self, LevelById(id): LevelById, ctx: &mut Self::Context) -> Self::Result {
-        let (entry, future) = self.gdcf.level(id.into())?.into();
+        let future = self
+            .gdcf
+            .level(id)
+            .map_err(|err| error!("GDCF database access failed: {:?}", err))?
+            .upgrade::<Level<Option<NewgroundsSong>, _>>()
+            .upgrade::<Level<_, Option<Creator>>>();
 
-        if let Some(future) = future {
-            ctx.spawn(future.map(|_| ()).map_err(|_| ()).into_actor(self));
-        }
+        let cached = future.clone_cached()?;
 
-        Ok(entry)
+        ctx.spawn(
+            future
+                .map(|_| ())
+                .map_err(|error| error!("Error while refreshing GDCF cache: {}", error))
+                .into_actor(self),
+        );
+
+        Ok(cached)
     }
 }
 
@@ -133,70 +146,44 @@ impl Handler<LevelById> for HttpActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Result<CacheEntry<Level<u64, Option<Creator>>, Entry>, Error>;
+    type Result = Result<CacheEntry<Level<Option<u64>, Option<Creator>>, Entry>, ()>;
 }
 
 impl Handler<GetDemon> for HttpActor {
-    type Result = Result<CacheEntry<Level<u64, Option<Creator>>, Entry>, Error>;
+    type Result = Result<CacheEntry<Level<Option<u64>, Option<Creator>>, Entry>, ()>;
 
     fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Self::Result {
-        let (cache_entry, future) = self
+        let future = self
             .gdcf
-            .levels::<u64, Option<Creator>>(
+            .levels(
                 LevelsRequest::default()
                     .request_type(LevelRequestType::MostLiked)
                     .search(msg.0.clone())
                     .with_rating(LevelRating::Demon(DemonRating::Hard))
                     .filter(SearchFilters::default().rated()),
-            )?
-            .into();
+            )
+            .map_err(|err| error!("GDCF database access failed: {:?}", err))?
+            .upgrade_all::<PartialLevel<_, Option<Creator>>>()
+            .upgrade_all::<Level<_, _>>();
 
-        if let Some(future) = future {
-            debug!(
-                "Spawning future to asynchronously perform LevelsRequest for {}",
-                msg.0
-            );
+        //println!("{:?}, {:?}", future, future.clone_cached());
 
-            ctx.spawn(
-                future
-                    .map(|_| info!("LevelsRequest successful"))
-                    .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
-                    .into_actor(self),
-            );
-        }
+        let result = future.clone_cached().map(|cache_entry| {
+            cache_entry.map(|demons| {
+                demons
+                    .into_iter()
+                    .max_by(|x, y| x.base.difficulty.cmp(&y.base.difficulty))
+                    .unwrap()
+            })
+        });
 
-        match cache_entry {
-            CacheEntry::DeducedAbsent => Ok(CacheEntry::DeducedAbsent),
-            CacheEntry::Missing => Ok(CacheEntry::Missing),
-            CacheEntry::MarkedAbsent(meta) => Ok(CacheEntry::MarkedAbsent(meta)),
-            CacheEntry::Cached(levels, meta) => {
-                if levels.is_empty() {
-                    return Ok(CacheEntry::DeducedAbsent) // TODO: figure out if this is necessary
-                }
+        ctx.spawn(
+            future
+                .map(|_| info!("LevelsRequest successful"))
+                .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
+                .into_actor(self),
+        );
 
-                let best_match = levels
-                    .iter()
-                    .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
-                    .unwrap();
-
-                let (entry, future) = self.gdcf.level(best_match.level_id.into())?.into();
-
-                if let Some(future) = future {
-                    debug!(
-                        "Spawning future to asynchronously perform LevelRequest for {}",
-                        msg.0
-                    );
-
-                    ctx.spawn(
-                        future
-                            .map(|level| info!("Successfully retrieved level {}", level))
-                            .map_err(|err| error!("Error during GDCF cache refresh! {:?}", err))
-                            .into_actor(self),
-                    );
-                }
-
-                Ok(entry)
-            },
-        }
+        result
     }
 }
