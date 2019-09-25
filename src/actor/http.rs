@@ -115,21 +115,22 @@ impl Actor for HttpActor {
 pub struct LevelById(pub u64);
 
 impl Message for LevelById {
-    type Result = Result<CacheEntry<Level<Option<NewgroundsSong>, Option<Creator>>, Entry>, ()>;
+    type Result = Option<CacheEntry<Level<Option<NewgroundsSong>, Option<Creator>>, Entry>>;
 }
 
 impl Handler<LevelById> for HttpActor {
-    type Result = Result<CacheEntry<Level<Option<NewgroundsSong>, Option<Creator>>, Entry>, ()>;
+    type Result = Option<CacheEntry<Level<Option<NewgroundsSong>, Option<Creator>>, Entry>>;
 
     fn handle(&mut self, LevelById(id): LevelById, ctx: &mut Self::Context) -> Self::Result {
         let future = self
             .gdcf
             .level(id)
-            .map_err(|err| error!("GDCF database access failed: {:?}", err))?
+            .map_err(|err| error!("GDCF database access failed: {:?}", err))
+            .ok()?
             .upgrade::<Level<Option<NewgroundsSong>, _>>()
             .upgrade::<Level<_, Option<Creator>>>();
 
-        let cached = future.clone_cached()?;
+        let cached = future.clone_cached();
 
         ctx.spawn(
             future
@@ -138,7 +139,7 @@ impl Handler<LevelById> for HttpActor {
                 .into_actor(self),
         );
 
-        Ok(cached)
+        cached.ok()
     }
 }
 
