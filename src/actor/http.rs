@@ -146,11 +146,11 @@ impl Handler<LevelById> for HttpActor {
 pub struct GetDemon(pub String);
 
 impl Message for GetDemon {
-    type Result = Result<CacheEntry<Level<Option<u64>, Option<Creator>>, Entry>, ()>;
+    type Result = Option<CacheEntry<Level<Option<u64>, Option<Creator>>, Entry>>;
 }
 
 impl Handler<GetDemon> for HttpActor {
-    type Result = Result<CacheEntry<Level<Option<u64>, Option<Creator>>, Entry>, ()>;
+    type Result = Option<CacheEntry<Level<Option<u64>, Option<Creator>>, Entry>>;
 
     fn handle(&mut self, msg: GetDemon, ctx: &mut Context<Self>) -> Self::Result {
         let future = self
@@ -162,11 +162,10 @@ impl Handler<GetDemon> for HttpActor {
                     .with_rating(LevelRating::Demon(DemonRating::Hard))
                     .filter(SearchFilters::default().rated()),
             )
-            .map_err(|err| error!("GDCF database access failed: {:?}", err))?
+            .map_err(|err| error!("GDCF database access failed: {:?}", err))
+            .ok()?
             .upgrade_all::<PartialLevel<_, Option<Creator>>>()
             .upgrade_all::<Level<_, _>>();
-
-        //println!("{:?}, {:?}", future, future.clone_cached());
 
         let result = future.clone_cached().map(|cache_entry| {
             cache_entry.map(|demons| {
@@ -184,6 +183,6 @@ impl Handler<GetDemon> for HttpActor {
                 .into_actor(self),
         );
 
-        result
+        result.ok()
     }
 }

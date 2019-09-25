@@ -193,7 +193,7 @@ impl Page for DemonlistOverview {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: DemonWithCreatorsAndRecords,
-    server_level: CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>,
+    server_level: Option<CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>>,
 }
 
 pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
@@ -215,12 +215,6 @@ pub fn handler(req: &HttpRequest<PointercrateState>) -> PCResponder {
                                 .gdcf
                                 .send(GetDemon(data.demon.name.to_string()))
                                 .map_err(PointercrateError::internal)
-                                .and_then(move |result| {
-                                    match result {
-                                        Ok(entry) => Ok(entry),
-                                        Err(_) => Err(PointercrateError::InternalServerError),
-                                    }
-                                })
                                 .map(move |entry| {
                                     Demonlist {
                                         overview,
@@ -246,7 +240,7 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        if let CacheEntry::Cached(ref level, _) = self.server_level {
+        if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
             if let Some(ref description) = level.base.description {
                 return format!("{}: {}", self.title(), description)
             }
@@ -305,7 +299,7 @@ impl Page for Demonlist {
                                 }
                             }
                         }
-                        @if let CacheEntry::Cached(ref level, _) = self.server_level {
+                        @if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
                             @if let Some(ref description) = level.base.description {
                                 div.underlined.pad {
                                     q {
@@ -319,17 +313,22 @@ impl Page for Demonlist {
                         }
                         div.underlined.pad.flex.wrap#level-info {
                             @match self.server_level {
-                                CacheEntry::Missing => {
+                                None => {
+                                    p.info-red {
+                                        "An internal error occured while trying to access the GDCF database, or while processing Geometry Dash data. This is a bug."
+                                    }
+                                }
+                                Some(CacheEntry::Missing) => {
                                     p.info-yellow {
                                         "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
                                     }
                                 },
-                                CacheEntry::DeducedAbsent | CacheEntry::MarkedAbsent(_) => {
+                                Some(CacheEntry::DeducedAbsent) | Some(CacheEntry::MarkedAbsent(_)) => {
                                     p.info-red {
                                         "This demon has not been found on the Geometry Dash servers. Its name was most likely misspelled when entered into the database. Please contact a list moderator to fix this."
                                     }
                                 },
-                                CacheEntry::Cached(ref level, ref meta) => {
+                                Some(CacheEntry::Cached(ref level, ref meta)) => {
                                     @let level_data = level.decompress_data().ok();
                                     @let level_data = level_data.as_ref().and_then(|data| gdcf_parse::level::data::parse_lazy_parallel(data).ok());
                                     @let stats = level_data.map(LevelInformationSource::stats);
