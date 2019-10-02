@@ -1,8 +1,6 @@
 combine_control_expr = false
 comment_width = 100
 condense_wildcard_suffixes = true
-editon = 2018
-fn_args_density = "Compressed"
 force_multiline_blocks = true
 match_arm_blocks = false
 match_block_trailing_comma = true

@@ -3,7 +3,9 @@ use crate::{
     schema::submitters,
 };
 use derive_more::Display;
-use diesel::{insert_into, pg::PgConnection, query_dsl::RunQueryDsl, result::QueryResult};
+use diesel::{
+    insert_into, pg::PgConnection, query_dsl::RunQueryDsl, result::QueryResult, Queryable,
+};
 use ipnetwork::IpNetwork;
 use serde_derive::Serialize;
 
@@ -15,14 +17,22 @@ pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 use crate::model::By;
 use std::hash::{Hash, Hasher};
 
-#[derive(Queryable, Debug, Identifiable, Serialize, Hash, Display, Copy, Clone)]
-#[table_name = "submitters"]
-#[primary_key("submitter_id")]
+#[derive(Debug, Serialize, Hash, Display, Copy, Clone)]
 #[display(fmt = "{} (Banned: {})", id, banned)]
 pub struct Submitter {
     pub id: i32,
-    pub ip: IpNetwork,
     pub banned: bool,
+}
+
+impl Queryable<(diesel::sql_types::Int4, diesel::sql_types::Bool), diesel::pg::Pg> for Submitter {
+    type Row = (i32, bool);
+
+    fn build(row: Self::Row) -> Self {
+        Submitter {
+            id: row.0,
+            banned: row.1,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Display)]
@@ -53,17 +63,16 @@ impl Submitter {
     pub fn insert(ip: &IpNetwork, conn: &PgConnection) -> QueryResult<Submitter> {
         let new = NewSubmitter { ip };
 
-        insert_into(submitters::table).values(&new).get_result(conn)
+        insert_into(submitters::table)
+            .values(&new)
+            .returning((submitters::submitter_id, submitters::banned))
+            .get_result(conn)
     }
 }
 
 impl Model for Submitter {
     type From = submitters::table;
-    type Selection = (
-        submitters::submitter_id,
-        submitters::ip_address,
-        submitters::banned,
-    );
+    type Selection = (submitters::submitter_id, submitters::banned);
 
     fn from() -> Self::From {
         submitters::table

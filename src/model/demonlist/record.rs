@@ -20,6 +20,7 @@ mod patch;
 mod post;
 
 pub use self::{paginate::RecordPagination, patch::PatchRecord, post::Submission};
+use crate::model::demonlist::Submitter;
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -133,7 +134,7 @@ pub struct FullRecord {
     pub status: RecordStatus,
     pub player: EmbeddedPlayer,
     pub demon: MinimalDemon,
-    pub submitter: Option<(i32, bool)>,
+    pub submitter: Option<Submitter>,
 }
 
 table! {
@@ -275,7 +276,10 @@ impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> fo
                 position: row.8,
                 name: row.7,
             },
-            submitter: Some((row.9, row.10)),
+            submitter: Some(Submitter {
+                id: row.9,
+                banned: row.10,
+            }),
         }
     }
 }
