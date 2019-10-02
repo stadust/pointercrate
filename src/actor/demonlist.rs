@@ -5,7 +5,7 @@ use crate::{
     },
     context::{RequestContext, RequestData},
     model::{
-        demonlist::{demon::PartialDemon, Record},
+        demonlist::{demon::DemonWithPublisher, Record},
         nationality::Nationality,
         Model,
     },
@@ -40,8 +40,8 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
             ),
             RequestContext::Internal(connection),
         )?;
-        let all_demons = PartialDemon::all()
-            .order_by(crate::schema::demons::position)
+        let all_demons = DemonWithPublisher::all()
+            .order_by(crate::model::demonlist::demon::demons_p::position)
             .load(connection)?;
         let nations = Nationality::all()
             .order_by(crate::schema::nationalities::iso_country_code)

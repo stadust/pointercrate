@@ -1,11 +1,12 @@
-use super::PartialDemon;
 use crate::{
     citext::CiString,
     context::RequestContext,
     error::PointercrateError,
-    model::Model,
+    model::{
+        demonlist::{demon::demons_pv, Demon},
+        Model,
+    },
     operation::{Paginate, Paginator},
-    schema::demons,
     Result,
 };
 use diesel::{pg::Pg, query_builder::BoxedSelectStatement, QueryDsl, RunQueryDsl};
@@ -33,11 +34,11 @@ pub struct DemonPagination {
 }
 
 impl Paginator for DemonPagination {
-    type Model = PartialDemon;
-    type PaginationColumn = demons::position;
+    type Model = Demon;
+    type PaginationColumn = demons_pv::position;
     type PaginationColumnType = i16;
 
-    filter_method!(demons[
+    filter_method!(demons_pv[
         name = name,
         requirement = requirement,
         requirement < requirement_lt,
@@ -69,13 +70,13 @@ impl Paginator for DemonPagination {
     }
 }
 
-impl Paginate<DemonPagination> for PartialDemon {
+impl Paginate<DemonPagination> for Demon {
     fn load(pagination: &DemonPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(PartialDemon::boxed_all(), ctx);
+        let mut query = pagination.filter(Demon::boxed_all(), ctx);
 
         filter!(query[
-            demons::position > pagination.after_position,
-            demons::position < pagination.before_position
+            demons_pv::position > pagination.after_position,
+            demons_pv::position < pagination.before_position
         ]);
 
         pagination_result!(
@@ -83,7 +84,7 @@ impl Paginate<DemonPagination> for PartialDemon {
             pagination,
             before_position,
             after_position,
-            demons::position,
+            demons_pv::position,
             ctx.connection()
         )
     }

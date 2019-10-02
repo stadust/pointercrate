@@ -6,9 +6,8 @@ use crate::{
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::demonlist::{
         creator::{Creator, PostCreator},
-        demon::{
-            DemonPagination, DemonWithCreatorsAndRecords, PartialDemon, PatchDemon, PostDemon,
-        },
+        demon::{DemonPagination, DemonWithCreatorsAndRecords, PatchDemon, PostDemon},
+        Demon,
     },
     state::PointercrateState,
 };
@@ -29,11 +28,8 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     pagination
         .into_future()
         .and_then(move |pagination: DemonPagination| {
-            req.state().paginate::<Token, PartialDemon, _>(
-                &req,
-                pagination,
-                "/api/v1/demons/".to_string(),
-            )
+            req.state()
+                .paginate::<Token, Demon, _>(&req, pagination, "/api/v1/demons/".to_string())
         })
         .map(|(demons, links)| HttpResponse::Ok().header("Links", links).json(demons))
         .responder()
