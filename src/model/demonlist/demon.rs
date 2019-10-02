@@ -92,7 +92,7 @@ table! {
 /// id, name, position, video and publisher name of all demons that have a non-null position
 #[derive(Debug, Hash, Eq, PartialEq, Serialize, Display)]
 #[display(fmt = "{} (at {})", name, position)]
-pub struct DemonWithPublisher {
+pub struct MinimalDemonP {
     pub name: CiString,
     pub position: i16,
     pub video: Option<String>,
@@ -104,7 +104,7 @@ pub struct DemonWithPublisher {
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
 #[derive(Debug, Hash, Serialize, Queryable, Display)]
 #[display(fmt = "{} (at {})", name, position)]
-pub struct EmbeddedDemon {
+pub struct MinimalDemon {
     pub position: i16,
     pub name: CiString,
 }
@@ -169,7 +169,7 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
     }
 }
 
-impl Model for DemonWithPublisher {
+impl Model for MinimalDemonP {
     type From = demons_p::table;
     type Selection = (
         demons_p::name,
@@ -189,13 +189,11 @@ impl Model for DemonWithPublisher {
     }
 }
 
-impl Queryable<<<DemonWithPublisher as Model>::Selection as Expression>::SqlType, Pg>
-    for DemonWithPublisher
-{
+impl Queryable<<<MinimalDemonP as Model>::Selection as Expression>::SqlType, Pg> for MinimalDemonP {
     type Row = (CiString, i16, Option<String>, i32, CiString, bool);
 
     fn build(row: Self::Row) -> Self {
-        DemonWithPublisher {
+        MinimalDemonP {
             name: row.0,
             position: row.1,
             video: row.2,
@@ -208,7 +206,7 @@ impl Queryable<<<DemonWithPublisher as Model>::Selection as Expression>::SqlType
     }
 }
 
-impl Model for EmbeddedDemon {
+impl Model for MinimalDemon {
     type From = demons::table;
     type Selection = (demons::position, demons::name);
 
@@ -221,16 +219,20 @@ impl Model for EmbeddedDemon {
     }
 }
 
+/// Struct modelling the "full" version of a demon.
+///
+/// In addition to containing publisher/verifier information it also contains a list of the demon's
+/// creators and a list of accepted records
 #[derive(Debug, Serialize, Display)]
 #[display(fmt = "{}", demon)]
-pub struct DemonWithCreatorsAndRecords {
+pub struct FullDemon {
     #[serde(flatten)]
     pub demon: Demon,
     pub creators: Creators,
     pub records: Vec<MinimalRecordP>,
 }
 
-impl Hash for DemonWithCreatorsAndRecords {
+impl Hash for FullDemon {
     fn hash<H: Hasher>(&self, state: &mut H) {
         // We only hash the demon here, because the creators don't matter for the ETag value - they
         // are modified through a different endpoint than the demon objects themselves, and
@@ -239,7 +241,7 @@ impl Hash for DemonWithCreatorsAndRecords {
     }
 }
 
-impl DemonWithCreatorsAndRecords {
+impl FullDemon {
     pub fn headline(&self) -> String {
         let publisher = &self.demon.publisher.name;
         let verifier = &self.demon.verifier.name;

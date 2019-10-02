@@ -1,4 +1,4 @@
-use super::{Demon, DemonWithCreatorsAndRecords};
+use super::{Demon, FullDemon};
 use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
@@ -65,9 +65,9 @@ impl Patch<PatchDemon> for Demon {
     }
 }
 
-impl Patch<PatchDemon> for DemonWithCreatorsAndRecords {
+impl Patch<PatchDemon> for FullDemon {
     fn patch(self, patch: PatchDemon, ctx: RequestContext) -> Result<Self> {
-        Ok(DemonWithCreatorsAndRecords {
+        Ok(FullDemon {
             demon: self.demon.patch(patch, ctx)?,
             ..self
         })

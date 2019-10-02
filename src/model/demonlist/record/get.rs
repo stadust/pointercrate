@@ -6,7 +6,7 @@ use crate::{
     model::{
         demonlist::{
             demon::Demon,
-            record::{records_d, records_p, records_pd, RecordStatus},
+            record::{records_d, records_p, records_pd, FullRecord, RecordStatus},
             submitter::Submitter,
         },
         By, Model,
@@ -15,6 +15,30 @@ use crate::{
     Result,
 };
 use diesel::{result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
+
+impl Get<i32> for FullRecord {
+    fn get(id: i32, ctx: RequestContext) -> Result<Self> {
+        let mut record: FullRecord = match FullRecord::by(id).first(ctx.connection()) {
+            Ok(record) => record,
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Record",
+                    identified_by: id.to_string(),
+                })?,
+            Err(err) => Err(PointercrateError::database(err))?,
+        };
+
+        if !ctx.is_list_mod() {
+            record.submitter = None;
+        }
+
+        if record.status != RecordStatus::Approved {
+            ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
+        }
+
+        Ok(record)
+    }
+}
 
 impl Get<i32> for Record {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {

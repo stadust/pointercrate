@@ -6,7 +6,7 @@ use crate::{
     error::PointercrateError,
     model::{
         demonlist::{
-            record::{DatabaseRecord, EmbeddedDemon},
+            record::{DatabaseRecord, MinimalDemon},
             Demon, EmbeddedPlayer, Submitter,
         },
         Model,
@@ -216,7 +216,7 @@ impl Post<Submission> for Option<Record> {
                 status,
                 player,
                 submitter: Some(submitter.id),
-                demon: EmbeddedDemon {
+                demon: MinimalDemon {
                     position: demon.position,
                     name: demon.name
                 }

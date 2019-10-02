@@ -4,7 +4,7 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{
-        demonlist::{creator::created_by, demon::EmbeddedDemon, player::ShortPlayer},
+        demonlist::{creator::created_by, demon::MinimalDemon, player::ShortPlayer},
         By, Model,
     },
     operation::Get,
@@ -65,10 +65,10 @@ where
         Ok(PlayerWithDemonsAndRecords {
             records: Get::get(pid, ctx)?,
             created: created_by(pid).load(ctx.connection())?,
-            verified: EmbeddedDemon::all()
+            verified: MinimalDemon::all()
                 .filter(demons::verifier.eq(&pid))
                 .load(ctx.connection())?,
-            published: EmbeddedDemon::all()
+            published: MinimalDemon::all()
                 .filter(demons::publisher.eq(&pid))
                 .load(ctx.connection())?,
             player,

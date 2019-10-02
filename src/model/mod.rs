@@ -5,7 +5,7 @@
 //!   `Database`
 //! * A struct modelling the object with nearly all additional information available. This
 //!   representation is used for the endpoints that return a single object. This struct is prefixed
-//!   with `Full`.
+//!   with `Full`. This is generally also the struct with a `Patch` implementation.
 //! * A struct modelling the object the way it should be presented by the paginating endpoints. This
 //!   struct doesn't have any special prefix.
 //! * A variety of "minimal" representations. These are returned if the object is presented as

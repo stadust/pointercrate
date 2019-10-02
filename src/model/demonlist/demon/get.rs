@@ -1,4 +1,4 @@
-use super::{Demon, DemonWithCreatorsAndRecords};
+use super::{Demon, FullDemon};
 use crate::{
     citext::CiStr,
     context::RequestContext,
@@ -40,12 +40,12 @@ impl Get<i16> for Demon {
     }
 }
 
-impl Get<Demon> for DemonWithCreatorsAndRecords {
+impl Get<Demon> for FullDemon {
     fn get(demon: Demon, ctx: RequestContext) -> Result<Self> {
         let creators = Creators::get(demon.name.as_ref(), ctx)?;
         let records = Vec::<MinimalRecordP>::get(&demon, ctx)?;
 
-        Ok(DemonWithCreatorsAndRecords {
+        Ok(FullDemon {
             demon,
             creators,
             records,
@@ -53,11 +53,11 @@ impl Get<Demon> for DemonWithCreatorsAndRecords {
     }
 }
 
-impl<T> Get<T> for DemonWithCreatorsAndRecords
+impl<T> Get<T> for FullDemon
 where
     Demon: Get<T>,
 {
     fn get(t: T, ctx: RequestContext) -> Result<Self> {
-        DemonWithCreatorsAndRecords::get(Demon::get(t, ctx)?, ctx)
+        FullDemon::get(Demon::get(t, ctx)?, ctx)
     }
 }

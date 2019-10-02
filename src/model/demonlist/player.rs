@@ -7,7 +7,7 @@ use crate::{
     error::PointercrateError,
     model::{
         demonlist::{
-            demon::EmbeddedDemon,
+            demon::MinimalDemon,
             record::{MinimalRecordD, RecordStatus},
         },
         nationality::Nationality,
@@ -89,9 +89,9 @@ pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
     pub player: ShortPlayer,
     pub records: Vec<MinimalRecordD>,
-    pub created: Vec<EmbeddedDemon>,
-    pub verified: Vec<EmbeddedDemon>,
-    pub published: Vec<EmbeddedDemon>,
+    pub created: Vec<MinimalDemon>,
+    pub verified: Vec<MinimalDemon>,
+    pub published: Vec<MinimalDemon>,
 }
 
 impl Hash for PlayerWithDemonsAndRecords {

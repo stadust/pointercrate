@@ -5,7 +5,7 @@ use crate::{
     },
     context::{RequestContext, RequestData},
     model::{
-        demonlist::{demon::DemonWithPublisher, Record},
+        demonlist::{demon::MinimalDemonP, Record},
         nationality::Nationality,
         Model,
     },
@@ -40,7 +40,7 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
             ),
             RequestContext::Internal(connection),
         )?;
-        let all_demons = DemonWithPublisher::all()
+        let all_demons = MinimalDemonP::all()
             .order_by(crate::model::demonlist::demon::demons_p::position)
             .load(connection)?;
         let nations = Nationality::all()

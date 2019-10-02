@@ -1,4 +1,4 @@
-use super::{Demon, DemonWithCreatorsAndRecords};
+use super::{Demon, FullDemon};
 use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
@@ -92,8 +92,8 @@ impl Post<PostDemon> for Demon {
     }
 }
 
-impl Post<PostDemon> for DemonWithCreatorsAndRecords {
+impl Post<PostDemon> for FullDemon {
     fn create_from(data: PostDemon, ctx: RequestContext) -> Result<Self> {
-        DemonWithCreatorsAndRecords::get(Demon::create_from(data, ctx)?, ctx)
+        FullDemon::get(Demon::create_from(data, ctx)?, ctx)
     }
 }

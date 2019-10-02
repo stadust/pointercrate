@@ -5,7 +5,7 @@ use crate::{
     api::PCResponder,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::demonlist::record::{PatchRecord, Record, RecordPagination, Submission},
+    model::demonlist::record::{FullRecord, PatchRecord, Record, RecordPagination, Submission},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
@@ -58,12 +58,12 @@ pub fn submit(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", Record);
+get_handler!("/api/v1/records/[record_id]/", i32, "Record ID", FullRecord);
 patch_handler!(
     "/api/v1/records/[record id]/",
     i32,
     "Record ID",
     PatchRecord,
-    Record
+    FullRecord
 );
 delete_handler!("/api/v1/records/[record id]/", i32, "Record ID", Record);

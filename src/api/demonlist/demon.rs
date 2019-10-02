@@ -6,7 +6,7 @@ use crate::{
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::demonlist::{
         creator::{Creator, PostCreator},
-        demon::{DemonPagination, DemonWithCreatorsAndRecords, PatchDemon, PostDemon},
+        demon::{DemonPagination, FullDemon, PatchDemon, PostDemon},
         Demon,
     },
     state::PointercrateState,
@@ -35,19 +35,19 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-post_handler!("/api/v1/demons/", PostDemon, DemonWithCreatorsAndRecords);
+post_handler!("/api/v1/demons/", PostDemon, FullDemon);
 get_handler!(
     "/api/v1/demons/[position]/",
     i16,
     "Demon position",
-    DemonWithCreatorsAndRecords
+    FullDemon
 );
 patch_handler!(
     "/api/v1/demons/[position]/",
     i16,
     "Demon position",
     PatchDemon,
-    DemonWithCreatorsAndRecords
+    FullDemon
 );
 
 pub fn post_creator(req: &HttpRequest<PointercrateState>) -> PCResponder {

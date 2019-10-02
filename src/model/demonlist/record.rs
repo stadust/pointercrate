@@ -2,7 +2,7 @@ use crate::{
     citext::CiString,
     error::PointercrateError,
     model::{
-        demonlist::{demon::EmbeddedDemon, player::EmbeddedPlayer},
+        demonlist::{demon::MinimalDemon, player::EmbeddedPlayer},
         By, Model,
     },
     schema::records,
@@ -132,7 +132,7 @@ pub struct FullRecord {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub player: EmbeddedPlayer,
-    pub demon: EmbeddedDemon,
+    pub demon: MinimalDemon,
     pub submitter: Option<(i32, bool)>,
 }
 
@@ -163,7 +163,7 @@ pub struct Record {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub player: EmbeddedPlayer,
-    pub demon: EmbeddedDemon,
+    pub demon: MinimalDemon,
     pub submitter: Option<i32>,
 }
 
@@ -174,7 +174,7 @@ pub struct EmbeddedRecordPD {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub demon: EmbeddedDemon,
+    pub demon: MinimalDemon,
     pub player: EmbeddedPlayer,
 }
 
@@ -201,7 +201,7 @@ pub struct MinimalRecordD {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub demon: EmbeddedDemon,
+    pub demon: MinimalDemon,
 }
 
 table! {
@@ -243,6 +243,8 @@ impl Model for FullRecord {
     }
 }
 
+impl By<records_pds::id, i32> for FullRecord {}
+
 impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> for FullRecord {
     type Row = (
         i32,
@@ -269,7 +271,7 @@ impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> fo
                 name: row.5,
                 banned: row.6,
             },
-            demon: EmbeddedDemon {
+            demon: MinimalDemon {
                 position: row.8,
                 name: row.7,
             },
@@ -323,7 +325,7 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
                 name: row.6,
                 banned: row.7,
             },
-            demon: EmbeddedDemon {
+            demon: MinimalDemon {
                 name: row.8,
                 position: row.9,
             },
@@ -388,7 +390,7 @@ impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, 
                 name: row.5,
                 banned: row.6,
             },
-            demon: EmbeddedDemon {
+            demon: MinimalDemon {
                 name: row.7,
                 position: row.8,
             },
@@ -421,7 +423,7 @@ impl Queryable<<<MinimalRecordD as Model>::Selection as Expression>::SqlType, Pg
             video: row.2,
             status: row.3,
             // skip index 4, player id
-            demon: EmbeddedDemon {
+            demon: MinimalDemon {
                 name: row.5,
                 position: row.6,
             },

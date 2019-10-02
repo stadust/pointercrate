@@ -5,9 +5,9 @@ use crate::{
     error::PointercrateError,
     model::{
         demonlist::{
-            demon::{Demon, EmbeddedDemon},
+            demon::{Demon, MinimalDemon},
             player::EmbeddedPlayer,
-            record::DatabaseRecord,
+            record::{DatabaseRecord, FullRecord},
         },
         Model,
     },
@@ -29,7 +29,7 @@ make_patch! {
     }
 }
 
-impl Patch<PatchRecord> for Record {
+impl Patch<PatchRecord> for FullRecord {
     fn patch(mut self, mut patch: PatchRecord, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
         ctx.check_if_match(&self)?;
@@ -58,7 +58,7 @@ impl Patch<PatchRecord> for Record {
         }
 
         let map = move |_| {
-            EmbeddedDemon {
+            MinimalDemon {
                 name: demon.name,
                 position: demon.position,
             }
