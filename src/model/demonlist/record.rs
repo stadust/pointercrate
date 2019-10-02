@@ -1,16 +1,14 @@
 use crate::{
+    citext::CiString,
     error::PointercrateError,
     model::{
         demonlist::{demon::EmbeddedDemon, player::EmbeddedPlayer},
-        All, Model,
+        By, Model,
     },
-    schema::{demons, players, records},
+    schema::records,
 };
 use derive_more::Display;
-use diesel::{
-    deserialize::Queryable, expression::bound::Bound, pg::Pg, query_dsl::QueryDsl, sql_types,
-    BoolExpressionMethods, Expression, ExpressionMethods, Table,
-};
+use diesel::{deserialize::Queryable, pg::Pg, Expression, Table};
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::{Display, Formatter};
@@ -22,10 +20,6 @@ mod patch;
 mod post;
 
 pub use self::{paginate::RecordPagination, patch::PatchRecord, post::Submission};
-use crate::{
-    citext::{CiStr, CiString, CiText},
-    model::By,
-};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -174,6 +168,33 @@ pub struct Record {
 }
 
 #[derive(Debug, Hash, Serialize, Display)]
+#[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
+pub struct EmbeddedRecordPD {
+    pub id: i32,
+    pub progress: i16,
+    pub video: Option<String>,
+    pub status: RecordStatus,
+    pub demon: EmbeddedDemon,
+    pub player: EmbeddedPlayer,
+}
+
+table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+    use crate::model::demonlist::record::Record_status;
+
+    records_d (id) {
+        id -> Int4,
+        progress -> Int2,
+        video -> Nullable<Varchar>,
+        status_ -> Record_status,
+        player -> Int4,
+        demon_name -> CiText,
+        position -> Int2,
+    }
+}
+
+#[derive(Debug, Hash, Serialize, Display)]
 #[display(fmt = "{}% on {} (ID: {})", progress, demon, id)]
 pub struct MinimalRecordD {
     pub id: i32,
@@ -183,6 +204,22 @@ pub struct MinimalRecordD {
     pub demon: EmbeddedDemon,
 }
 
+table! {
+    use crate::citext::CiText;
+    use diesel::sql_types::*;
+    use crate::model::demonlist::record::Record_status;
+
+    records_p (id) {
+        id -> Int4,
+        progress -> Int2,
+        video -> Nullable<Varchar>,
+        status_ -> Record_status,
+        demon -> CiText,
+        player_id -> Int4,
+        player_name -> CiText,
+        player_banned -> Bool,
+    }
+}
 #[derive(Debug, Hash, Serialize, Display)]
 #[display(fmt = "{} - {}% (ID: {})", player, progress, id)]
 pub struct MinimalRecordP {
@@ -294,60 +331,7 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
     }
 }
 
-#[derive(Debug, Hash, Serialize, Display)]
-#[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
-pub struct EmbeddedRecordPD {
-    pub id: i32,
-    pub progress: i16,
-    pub video: Option<String>,
-    pub status: RecordStatus,
-    pub demon: EmbeddedDemon,
-    pub player: EmbeddedPlayer,
-}
-
-type WithVideo<'a> =
-    diesel::dsl::Eq<records::video, Bound<sql_types::Nullable<sql_types::Text>, Option<&'a str>>>;
-
-type WithPlayerAndDemon<'a> = diesel::dsl::And<
-    diesel::dsl::Eq<records::player, Bound<sql_types::Int4, i32>>,
-    diesel::dsl::Eq<records::demon, Bound<CiText, &'a CiStr>>,
->;
-type ByPlayerAndDemon<'a> = diesel::dsl::Filter<All<DatabaseRecord>, WithPlayerAndDemon<'a>>;
-
-type WithExisting<'a> = diesel::dsl::Or<WithPlayerAndDemon<'a>, WithVideo<'a>>;
-type ByExisting<'a> = diesel::dsl::Filter<All<DatabaseRecord>, WithExisting<'a>>;
-
-type WithStatus = diesel::dsl::Eq<records::status_, Bound<Record_status, RecordStatus>>;
-
-impl DatabaseRecord {
-    pub fn with_player_and_demon(player: i32, demon: &CiStr) -> WithPlayerAndDemon {
-        records::player.eq(player).and(records::demon.eq(demon))
-    }
-
-    pub fn by_player_and_demon(player: i32, demon: &CiStr) -> ByPlayerAndDemon {
-        DatabaseRecord::all().filter(DatabaseRecord::with_player_and_demon(player, demon))
-    }
-
-    pub fn get_existing<'a>(player: i32, demon: &'a CiStr, video: &'a str) -> ByExisting<'a> {
-        DatabaseRecord::all().filter(
-            DatabaseRecord::with_player_and_demon(player, demon).or(records::video.eq(Some(video))),
-        )
-    }
-
-    pub fn with_status(status: RecordStatus) -> WithStatus {
-        records::status_.eq(status)
-    }
-}
-
 impl Record {
-    pub fn progress(&self) -> i16 {
-        self.progress
-    }
-
-    pub fn status(&self) -> RecordStatus {
-        self.status
-    }
-
     pub fn validate_video(video: &mut String) -> Result<(), PointercrateError> {
         *video = crate::video::validate(video)?;
 
@@ -355,79 +339,22 @@ impl Record {
     }
 }
 
-type WithPlayer = diesel::dsl::Eq<records::player, Bound<sql_types::Int4, i32>>;
-type ByPlayer = diesel::dsl::Filter<All<MinimalRecordD>, WithPlayer>;
-
-type ByPlayerAndStatus =
-    diesel::dsl::Filter<All<MinimalRecordD>, diesel::dsl::And<WithPlayer, WithStatus>>;
-
-impl MinimalRecordD {
-    fn by_player(player_id: i32) -> ByPlayer {
-        MinimalRecordD::all().filter(records::player.eq(player_id))
-    }
-
-    fn by_player_and_status(player_id: i32, status: RecordStatus) -> ByPlayerAndStatus {
-        Self::by_player(player_id).filter(DatabaseRecord::with_status(status))
-    }
-}
-
-type WithDemon<'a> = diesel::dsl::Eq<records::demon, Bound<CiText, &'a CiStr>>;
-type ByDemon<'a> = diesel::dsl::Filter<All<MinimalRecordP>, WithDemon<'a>>;
-
-type ByDemonAndStatus<'a> =
-    diesel::dsl::Filter<All<MinimalRecordP>, diesel::dsl::And<WithDemon<'a>, WithStatus>>;
-
-impl MinimalRecordP {
-    fn by_demon(demon: &CiStr) -> ByDemon {
-        MinimalRecordP::all().filter(records::demon.eq(demon))
-    }
-
-    fn by_demon_and_status(demon: &CiStr, status: RecordStatus) -> ByDemonAndStatus {
-        Self::by_demon(demon).filter(DatabaseRecord::with_status(status))
-    }
-}
-
 impl Model for EmbeddedRecordPD {
-    #[allow(clippy::type_complexity)]
-    type From = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            diesel::query_source::joins::JoinOn<
-                diesel::query_source::joins::Join<
-                    records::table,
-                    demons::table,
-                    diesel::query_source::joins::Inner,
-                >,
-                diesel::expression::operators::Eq<records::demon, demons::name>,
-            >,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<records::player, players::id>,
-    >;
+    type From = records_pd::table;
     type Selection = (
-        records::id,
-        records::progress,
-        records::status_,
-        records::video,
-        players::id,
-        players::name,
-        players::banned,
-        demons::name,
-        demons::position,
+        records_pd::id,
+        records_pd::progress,
+        records_pd::status_,
+        records_pd::video,
+        records_pd::player_id,
+        records_pd::player_name,
+        records_pd::player_banned,
+        records_pd::demon_name,
+        records_pd::position,
     );
 
     fn from() -> Self::From {
-        diesel::query_source::joins::Join::new(
-            diesel::query_source::joins::Join::new(
-                records::table,
-                demons::table,
-                diesel::query_source::joins::Inner,
-            )
-            .on(records::demon.eq(demons::name)),
-            players::table,
-            diesel::query_source::joins::Inner,
-        )
-        .on(records::player.eq(players::id))
+        records_pd::table
     }
 
     fn selection() -> Self::Selection {
@@ -470,106 +397,76 @@ impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, 
 }
 
 impl Model for MinimalRecordD {
-    #[allow(clippy::type_complexity)]
-    type From = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            records::table,
-            demons::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<records::demon, demons::name>,
-    >;
-    type Selection = (
-        records::id,
-        records::progress,
-        records::status_,
-        records::video,
-        demons::name,
-        demons::position,
-    );
+    type From = records_d::table;
+    type Selection = <records_d::table as Table>::AllColumns;
 
     fn from() -> Self::From {
-        diesel::query_source::joins::Join::new(
-            records::table,
-            demons::table,
-            diesel::query_source::joins::Inner,
-        )
-        .on(records::demon.eq(demons::name))
+        records_d::table
     }
 
     fn selection() -> Self::Selection {
-        Self::Selection::default()
+        records_d::all_columns
     }
 }
 
 impl Queryable<<<MinimalRecordD as Model>::Selection as Expression>::SqlType, Pg>
     for MinimalRecordD
 {
-    type Row = (i32, i16, RecordStatus, Option<String>, CiString, i16);
+    type Row = (i32, i16, Option<String>, RecordStatus, i32, CiString, i16);
 
     fn build(row: Self::Row) -> Self {
         MinimalRecordD {
             id: row.0,
             progress: row.1,
-            status: row.2,
-            video: row.3,
+            video: row.2,
+            status: row.3,
+            // skip index 4, player id
             demon: EmbeddedDemon {
-                name: row.4,
-                position: row.5,
+                name: row.5,
+                position: row.6,
             },
         }
     }
 }
 
 impl Model for MinimalRecordP {
-    #[allow(clippy::type_complexity)]
-    type From = diesel::query_source::joins::JoinOn<
-        diesel::query_source::joins::Join<
-            records::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        >,
-        diesel::expression::operators::Eq<records::player, players::id>,
-    >;
-    type Selection = (
-        records::id,
-        records::progress,
-        records::status_,
-        records::video,
-        players::id,
-        players::name,
-        players::banned,
-    );
+    type From = records_p::table;
+    type Selection = <records_p::table as Table>::AllColumns;
 
     fn from() -> Self::From {
-        diesel::query_source::joins::Join::new(
-            records::table,
-            players::table,
-            diesel::query_source::joins::Inner,
-        )
-        .on(records::player.eq(players::id))
+        records_p::table
     }
 
     fn selection() -> Self::Selection {
-        Self::Selection::default()
+        records_p::all_columns
     }
 }
 
 impl Queryable<<<MinimalRecordP as Model>::Selection as Expression>::SqlType, Pg>
     for MinimalRecordP
 {
-    type Row = (i32, i16, RecordStatus, Option<String>, i32, CiString, bool);
+    type Row = (
+        i32,
+        i16,
+        Option<String>,
+        RecordStatus,
+        CiString,
+        i32,
+        CiString,
+        bool,
+    );
 
     fn build(row: Self::Row) -> Self {
         MinimalRecordP {
             id: row.0,
             progress: row.1,
-            status: row.2,
-            video: row.3,
+            video: row.2,
+            status: row.3,
+            // skip index 4, demon name
             player: EmbeddedPlayer {
-                id: row.4,
-                name: row.5,
-                banned: row.6,
+                id: row.5,
+                name: row.6,
+                banned: row.7,
             },
         }
     }

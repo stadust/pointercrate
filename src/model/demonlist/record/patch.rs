@@ -15,7 +15,7 @@ use crate::{
     schema::records,
     Result,
 };
-use diesel::{Connection, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{BoolExpressionMethods, Connection, ExpressionMethods, QueryDsl, RunQueryDsl};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -72,7 +72,8 @@ impl Patch<PatchRecord> for Record {
         connection.transaction(move || {
             // If there is a record that would validate the unique (status_, demon, player),
             // with higher progress than this one, this query would find it
-            let max_progress: Option<i16> = records::table.select(records::all_columns)
+            let max_progress: Option<i16> = records::table
+                .select(records::all_columns)
                 .filter(records::player.eq(&self.player.id))
                 .filter(records::demon.eq(&self.demon.name))
                 .filter(records::status_.eq(&self.status))
@@ -82,7 +83,8 @@ impl Patch<PatchRecord> for Record {
 
             if let Some(max_progress) = max_progress {
                 if max_progress > self.progress {
-                    // We simply make `self` the same as that record, causing it to later get deleted
+                    // We simply make `self` the same as that record, causing it to later get
+                    // deleted
                     let record = DatabaseRecord::all()
                         .filter(records::player.eq(&self.player.id))
                         .filter(records::demon.eq(&self.demon.name))
@@ -95,11 +97,23 @@ impl Patch<PatchRecord> for Record {
                 }
             }
 
-            // By now, our record is for sure the one with the highest progress - all others can be deleted
-            diesel::sql_query(format!(
-                "DELETE FROM records WHERE player = '{0}' AND demon = '{1}' AND (status_ = '{2}' OR '{2}' = 'approved') AND progress <= {3} AND id <> {4}",
-                self.player.id, self.demon.name, self.status.to_string().to_uppercase(), self.progress, self.id
-            )).execute(connection)?;
+            let demon_name: &CiStr = self.demon.name.as_ref();
+
+            // By now, our record is for sure the one with the highest progress - all others can be
+            // deleted
+            diesel::delete(
+                records::table
+                    .filter(records::player.eq(self.player.id))
+                    .filter(records::demon.eq(demon_name))
+                    .filter(
+                        records::status_
+                            .eq(RecordStatus::Approved)
+                            .or(records::status_.eq(self.status)),
+                    )
+                    .filter(records::progress.le(self.progress))
+                    .filter(records::id.ne(self.id)),
+            )
+            .execute(connection)?;
 
             diesel::update(records::table)
                 .filter(records::id.eq(&self.id))
@@ -112,7 +126,7 @@ impl Patch<PatchRecord> for Record {
                 ))
                 .execute(connection)?;
 
-                Ok(self)
+            Ok(self)
         })
     }
 }

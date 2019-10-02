@@ -4,16 +4,21 @@ use crate::{
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     context::RequestContext,
     error::PointercrateError,
-    model::demonlist::{
-        record::{DatabaseRecord, EmbeddedDemon},
-        Demon, EmbeddedPlayer, Submitter,
+    model::{
+        demonlist::{
+            record::{DatabaseRecord, EmbeddedDemon},
+            Demon, EmbeddedPlayer, Submitter,
+        },
+        Model,
     },
     operation::{Delete, Get, Post},
     ratelimit::RatelimitScope,
     schema::records,
     video, Result,
 };
-use diesel::{insert_into, Connection, RunQueryDsl};
+use diesel::{
+    insert_into, BoolExpressionMethods, Connection, ExpressionMethods, QueryDsl, RunQueryDsl,
+};
 use log::{debug, info};
 use serde_derive::Deserialize;
 
@@ -108,10 +113,15 @@ impl Post<Submission> for Option<Record> {
             // (demon, player) combination exists. If a video exists, we also check if a record with
             // exactly that video exists. Note that in the second case, two records can be matched,
             // which is why we need the loop here
-            let records: Vec<DatabaseRecord> = match video {
-                Some(ref video) =>
-                    DatabaseRecord::get_existing(player.id, demon.name.as_ref(), video).get_results(connection)?,
-                None => DatabaseRecord::by_player_and_demon(player.id, demon.name.as_ref()).get_results(connection)?,
+            let demon_name: &CiStr = demon.name.as_ref();
+            let same_demon_and_player = records::player
+                .eq(player.id)
+                .and(records::demon.eq(demon_name));
+
+            let records: Vec<DatabaseRecord> = if video.is_some() {
+                DatabaseRecord::all().filter(same_demon_and_player.or(records::video.eq(video.as_ref()))).get_results(connection)?
+            } else {
+                DatabaseRecord::all().filter(same_demon_and_player).get_results(connection)?
             };
 
             let video_ref = video.as_ref().map(AsRef::as_ref);
