@@ -91,7 +91,7 @@ pub struct DatabaseRecord {
     id: i32,
     progress: i16,
     video: Option<String>,
-    pub(crate) status: RecordStatus,
+    status: RecordStatus,
     player_id: i32,
     submitter_id: i32,
     demon_name: CiString,
