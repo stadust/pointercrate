@@ -58,7 +58,7 @@ pub struct EmbeddedPlayer {
 
 #[derive(Debug, PartialEq, Serialize, Display)]
 #[display(fmt = "{} (ID: {}) at rank {} with score {}", name, id, rank, score)]
-pub struct RankedPlayer2 {
+pub struct RankedPlayer {
     pub id: i32,
     pub name: CiString,
     pub rank: i64,
@@ -250,7 +250,7 @@ impl Model for ShortPlayer {
     }
 }
 
-impl Model for RankedPlayer2 {
+impl Model for RankedPlayer {
     type From = players_with_score::table;
     type Selection = (
         players_with_score::id,
@@ -291,7 +291,7 @@ impl Queryable<<<ShortPlayer as Model>::Selection as Expression>::SqlType, Pg> f
     }
 }
 
-impl Queryable<<<RankedPlayer2 as Model>::Selection as Expression>::SqlType, Pg> for RankedPlayer2 {
+impl Queryable<<<RankedPlayer as Model>::Selection as Expression>::SqlType, Pg> for RankedPlayer {
     type Row = (
         i32,
         CiString,
@@ -307,7 +307,7 @@ impl Queryable<<<RankedPlayer2 as Model>::Selection as Expression>::SqlType, Pg>
             (Some(country_code), Some(name)) => Some(Nationality::new(country_code, name)),
             _ => None,
         };
-        RankedPlayer2 {
+        RankedPlayer {
             id: row.0,
             name: row.1,
             rank: row.2,

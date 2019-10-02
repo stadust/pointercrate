@@ -3,7 +3,7 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{
-        demonlist::player::{players_with_score, RankedPlayer2, ShortPlayer},
+        demonlist::player::{players_with_score, RankedPlayer, ShortPlayer},
         Model,
     },
     operation::{Paginate, Paginator},
@@ -95,15 +95,15 @@ pub struct RankingPagination {
 }
 
 impl Paginator for RankingPagination {
-    type Model = RankedPlayer2;
+    type Model = RankedPlayer;
     type PaginationColumn = players_with_score::index;
     type PaginationColumnType = i64;
 
     fn filter<'a, ST>(
         &'a self,
-        mut query: BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg>,
+        mut query: BoxedSelectStatement<'a, ST, <RankedPlayer as crate::model::Model>::From, Pg>,
         _ctx: RequestContext,
-    ) -> BoxedSelectStatement<'a, ST, <RankedPlayer2 as crate::model::Model>::From, Pg> {
+    ) -> BoxedSelectStatement<'a, ST, <RankedPlayer as crate::model::Model>::From, Pg> {
         filter!(query[players_with_score::iso_country_code = self.nation]);
 
         if let Some(ref like_name) = self.name_contains {
@@ -142,9 +142,9 @@ impl Paginator for RankingPagination {
     }
 }
 
-impl Paginate<RankingPagination> for RankedPlayer2 {
+impl Paginate<RankingPagination> for RankedPlayer {
     fn load(pagination: &RankingPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(RankedPlayer2::boxed_all(), ctx);
+        let mut query = pagination.filter(RankedPlayer::boxed_all(), ctx);
 
         filter!(query[
             players_with_score::index > pagination.after_id,
