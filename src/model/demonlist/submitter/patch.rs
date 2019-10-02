@@ -1,7 +1,7 @@
 use super::Submitter;
 use crate::{
     context::RequestContext,
-    model::demonlist::submitter::SubmitterWithRecords,
+    model::demonlist::submitter::FullSubmitter,
     operation::{deserialize_non_optional, Patch},
     schema::submitters,
     Result,
@@ -34,9 +34,9 @@ impl Patch<PatchSubmitter> for Submitter {
     }
 }
 
-impl Patch<PatchSubmitter> for SubmitterWithRecords {
+impl Patch<PatchSubmitter> for FullSubmitter {
     fn patch(self, patch: PatchSubmitter, ctx: RequestContext) -> Result<Self> {
-        Ok(SubmitterWithRecords {
+        Ok(FullSubmitter {
             submitter: self.submitter.patch(patch, ctx)?,
             ..self
         })

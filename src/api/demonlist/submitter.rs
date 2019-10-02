@@ -4,9 +4,7 @@ use crate::{
     api::PCResponder,
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
-    model::demonlist::submitter::{
-        PatchSubmitter, Submitter, SubmitterPagination, SubmitterWithRecords,
-    },
+    model::demonlist::submitter::{FullSubmitter, PatchSubmitter, Submitter, SubmitterPagination},
     state::PointercrateState,
 };
 use actix_web::{AsyncResponder, FromRequest, HttpMessage, HttpRequest, HttpResponse, Path};
@@ -40,12 +38,12 @@ get_handler!(
     "/api/v1/submitters/[id]",
     i32,
     "Submitter ID",
-    SubmitterWithRecords
+    FullSubmitter
 );
 patch_handler!(
     "/api/v1/submitters/[id]/",
     i32,
     "Submitter ID",
     PatchSubmitter,
-    SubmitterWithRecords
+    FullSubmitter
 );

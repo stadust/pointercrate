@@ -1,4 +1,4 @@
-use super::{Submitter, SubmitterWithRecords};
+use super::{FullSubmitter, Submitter};
 use crate::{
     context::RequestContext, error::PointercrateError, model::By, operation::Get,
     ratelimit::RatelimitScope, Result,
@@ -42,14 +42,14 @@ impl Get<i32> for Submitter {
     }
 }
 
-impl<T> Get<T> for SubmitterWithRecords
+impl<T> Get<T> for FullSubmitter
 where
     Submitter: Get<T>,
 {
     fn get(t: T, ctx: RequestContext) -> Result<Self> {
         let submitter = Submitter::get(t, ctx)?;
 
-        Ok(SubmitterWithRecords {
+        Ok(FullSubmitter {
             records: Get::get(&submitter, ctx)?,
             submitter,
         })

@@ -37,13 +37,13 @@ impl Queryable<(diesel::sql_types::Int4, diesel::sql_types::Bool), diesel::pg::P
 
 #[derive(Debug, Serialize, Display)]
 #[display(fmt = "{}", submitter)]
-pub struct SubmitterWithRecords {
+pub struct FullSubmitter {
     #[serde(flatten)]
     submitter: Submitter,
     records: Vec<EmbeddedRecordPD>,
 }
 
-impl Hash for SubmitterWithRecords {
+impl Hash for FullSubmitter {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.submitter.hash(state)
     }
