@@ -4,7 +4,7 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{
-        demonlist::{creator::Creators, record::EmbeddedRecordP},
+        demonlist::{creator::Creators, record::MinimalRecordP},
         By,
     },
     operation::Get,
@@ -43,7 +43,7 @@ impl Get<i16> for Demon {
 impl Get<Demon> for DemonWithCreatorsAndRecords {
     fn get(demon: Demon, ctx: RequestContext) -> Result<Self> {
         let creators = Creators::get(demon.name.as_ref(), ctx)?;
-        let records = Vec::<EmbeddedRecordP>::get(&demon, ctx)?;
+        let records = Vec::<MinimalRecordP>::get(&demon, ctx)?;
 
         Ok(DemonWithCreatorsAndRecords {
             demon,

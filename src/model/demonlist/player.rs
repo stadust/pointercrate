@@ -8,7 +8,7 @@ use crate::{
     model::{
         demonlist::{
             demon::EmbeddedDemon,
-            record::{EmbeddedRecordD, RecordStatus},
+            record::{MinimalRecordD, RecordStatus},
         },
         nationality::Nationality,
         By, Model,
@@ -88,7 +88,7 @@ pub struct ShortPlayer {
 pub struct PlayerWithDemonsAndRecords {
     #[serde(flatten)]
     pub player: ShortPlayer,
-    pub records: Vec<EmbeddedRecordD>,
+    pub records: Vec<MinimalRecordD>,
     pub created: Vec<EmbeddedDemon>,
     pub verified: Vec<EmbeddedDemon>,
     pub published: Vec<EmbeddedDemon>,

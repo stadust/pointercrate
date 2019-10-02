@@ -1,15 +1,19 @@
 use super::{Record, RecordStatus};
 use crate::{
-    citext::CiString,
+    citext::{CiStr, CiString},
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     context::RequestContext,
     error::PointercrateError,
-    model::demonlist::{record::EmbeddedDemon, Demon, EmbeddedPlayer, Submitter},
+    model::demonlist::{
+        record::{DatabaseRecord, EmbeddedDemon},
+        Demon, EmbeddedPlayer, Submitter,
+    },
     operation::{Delete, Get, Post},
     ratelimit::RatelimitScope,
+    schema::records,
     video, Result,
 };
-use diesel::{Connection, RunQueryDsl};
+use diesel::{insert_into, Connection, RunQueryDsl};
 use log::{debug, info};
 use serde_derive::Deserialize;
 
@@ -22,6 +26,18 @@ pub struct Submission {
     pub video: Option<String>,
     #[serde(default)]
     pub status: RecordStatus,
+}
+
+#[derive(Insertable, Debug)]
+#[table_name = "records"]
+struct NewRecord<'a> {
+    progress: i16,
+    video: Option<&'a str>,
+    #[column_name = "status_"]
+    status: RecordStatus,
+    player: i32,
+    submitter: i32,
+    demon: &'a CiStr,
 }
 
 impl Post<Submission> for Option<Record> {
@@ -92,10 +108,10 @@ impl Post<Submission> for Option<Record> {
             // (demon, player) combination exists. If a video exists, we also check if a record with
             // exactly that video exists. Note that in the second case, two records can be matched,
             // which is why we need the loop here
-            let records: Vec<Record> = match video {
+            let records: Vec<DatabaseRecord> = match video {
                 Some(ref video) =>
-                    Record::get_existing(player.id, demon.name.as_ref(), video).get_results(connection)?,
-                None => Record::by_player_and_demon(player.id, demon.name.as_ref()).get_results(connection)?,
+                    DatabaseRecord::get_existing(player.id, demon.name.as_ref(), video).get_results(connection)?,
+                None => DatabaseRecord::by_player_and_demon(player.id, demon.name.as_ref()).get_results(connection)?,
             };
 
             let video_ref = video.as_ref().map(AsRef::as_ref);
@@ -109,38 +125,38 @@ impl Post<Submission> for Option<Record> {
                 // deleting.
 
                 // First we reject all records where the video is already in the database
-                debug!("Existing record is {} with status {}", record, record.status());
+                debug!("Existing record is {} with status {}", record, record.status);
 
                 if record.video == video {
                     return Err(PointercrateError::SubmissionExists {
                         existing: record.id,
-                        status: record.status()
+                        status: record.status
                     })
                 }
 
                 // Then we reject all records, where the same player/demon combo has already been rejected
-                if record.status() == RecordStatus::Rejected {
+                if record.status == RecordStatus::Rejected {
                     return Err(PointercrateError::SubmissionExists {
-                        status: record.status(),
+                        status: record.status,
                         existing: record.id,
                     })
                 }
 
                 // Then we reject all submissions, where any other record with higher progress with the same player/demon exists (approved or submited)
-                if status == RecordStatus::Submitted && record.progress() >= progress {
+                if status == RecordStatus::Submitted && record.progress >= progress {
                     return Err(PointercrateError::SubmissionExists {
-                        status: record.status(),
+                        status: record.status,
                         existing: record.id,
                     })
                 }
 
                 // Lastly, we handle the case where existing and new have the same status. This should be pretty self explaining
-                if record.status() == status {
-                    if record.progress() < progress {
+                if record.status == status {
+                    if record.progress < progress {
                         to_delete.push(record)
                     } else {
                         return Err(PointercrateError::SubmissionExists {
-                            status: record.status(),
+                            status: record.status,
                             existing: record.id,
                         })
                     }
@@ -167,15 +183,19 @@ impl Post<Submission> for Option<Record> {
 
             debug!("All duplicates either already accepted, or has lower progress, accepting!");
 
-            let id = Record::insert(
+            let new = NewRecord {
                 progress,
-                video_ref,
+                video: video_ref,
                 status,
-                player.id,
-                submitter.id,
-                demon.name.as_ref(),
-                connection
-            )?;
+                player: player.id,
+                submitter: submitter.id,
+                demon: demon.name.as_ref(),
+            };
+
+            let id = insert_into(records::table)
+                .values(&new)
+                .returning(records::id)
+                .get_result(connection)?;
 
             info!("Submission successful! Created new record with ID {}", id);
 

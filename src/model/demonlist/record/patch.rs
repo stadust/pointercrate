@@ -7,6 +7,7 @@ use crate::{
         demonlist::{
             demon::{Demon, EmbeddedDemon},
             player::EmbeddedPlayer,
+            record::DatabaseRecord,
         },
         Model,
     },
@@ -71,7 +72,7 @@ impl Patch<PatchRecord> for Record {
         connection.transaction(move || {
             // If there is a record that would validate the unique (status_, demon, player),
             // with higher progress than this one, this query would find it
-            let max_progress: Option<i16> = Record::all()
+            let max_progress: Option<i16> = records::table.select(records::all_columns)
                 .filter(records::player.eq(&self.player.id))
                 .filter(records::demon.eq(&self.demon.name))
                 .filter(records::status_.eq(&self.status))
@@ -82,12 +83,12 @@ impl Patch<PatchRecord> for Record {
             if let Some(max_progress) = max_progress {
                 if max_progress > self.progress {
                     // We simply make `self` the same as that record, causing it to later get deleted
-                    let record = Record::all()
+                    let record = DatabaseRecord::all()
                         .filter(records::player.eq(&self.player.id))
                         .filter(records::demon.eq(&self.demon.name))
                         .filter(records::status_.eq(&self.status))
                         .filter(records::progress.eq(&max_progress))
-                        .get_result::<Record>(connection)?;
+                        .get_result::<DatabaseRecord>(connection)?;
 
                     self.video = record.video;
                     self.progress = record.progress;

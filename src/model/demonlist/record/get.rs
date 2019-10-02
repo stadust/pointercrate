@@ -1,4 +1,4 @@
-use super::{EmbeddedRecordD, EmbeddedRecordP, EmbeddedRecordPD, Record};
+use super::{EmbeddedRecordPD, MinimalRecordD, MinimalRecordP, Record};
 use crate::{
     context::RequestContext,
     error::PointercrateError,
@@ -36,20 +36,20 @@ impl Get<i32> for Record {
     }
 }
 
-impl Get<i32> for Vec<EmbeddedRecordD> {
+impl Get<i32> for Vec<MinimalRecordD> {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
         Ok(
-            EmbeddedRecordD::by_player_and_status(id, RecordStatus::Approved)
+            MinimalRecordD::by_player_and_status(id, RecordStatus::Approved)
                 .order_by(demons::name)
                 .load(ctx.connection())?,
         )
     }
 }
 
-impl<'a> Get<&'a Demon> for Vec<EmbeddedRecordP> {
+impl<'a> Get<&'a Demon> for Vec<MinimalRecordP> {
     fn get(demon: &'a Demon, ctx: RequestContext) -> Result<Self> {
         Ok(
-            EmbeddedRecordP::by_demon_and_status(demon.name.as_ref(), RecordStatus::Approved)
+            MinimalRecordP::by_demon_and_status(demon.name.as_ref(), RecordStatus::Approved)
                 .order_by((records::progress.desc(), records::id))
                 .load(ctx.connection())?,
         )
