@@ -2,7 +2,7 @@
 
 # List of Errors
 
-In generic it is the goal to have the API provide as detailed errors as possible. The generic error variants should be returned as rarely as possible. If you feel like a specific error could be communicated better, feel free to open an issue in the GitHub repository!
+In general it is the goal to have the API provide as detailed errors as possible. The generic error variants should be returned as rarely as possible. If you feel like a specific error could be communicated better, feel free to open an issue in the GitHub repository!
 
 | Status code | Error code | Description                                                                                                                                                        | Data                                                                                      |
 | ----------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
