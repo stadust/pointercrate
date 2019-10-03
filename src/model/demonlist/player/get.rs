@@ -8,10 +8,17 @@ use crate::{
         By, Model,
     },
     operation::Get,
-    schema::demons,
+    schema::{demons, players},
     Result,
 };
-use diesel::{result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{insert_into, result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
+use log::info;
+
+#[derive(Insertable, Debug)]
+#[table_name = "players"]
+struct NewPlayer<'a> {
+    name: &'a CiStr,
+}
 
 impl<'a> Get<&'a CiStr> for DatabasePlayer {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {
@@ -19,8 +26,15 @@ impl<'a> Get<&'a CiStr> for DatabasePlayer {
 
         match DatabasePlayer::by(name).first(ctx.connection()) {
             Ok(player) => Ok(player),
-            Err(Error::NotFound) =>
-                DatabasePlayer::insert(&name, ctx.connection()).map_err(PointercrateError::database),
+            Err(Error::NotFound) => {
+                info!("Creating new player with name {}", name);
+
+                insert_into(players::table)
+                    .values(&NewPlayer { name })
+                    .returning(DatabasePlayer::selection())
+                    .get_result(ctx.connection())
+                    .map_err(PointercrateError::database)
+            },
             Err(err) => Err(PointercrateError::database(err)),
         }
     }

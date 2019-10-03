@@ -19,19 +19,37 @@ use crate::{
 use derive_more::Display;
 use diesel::{
     expression::Expression,
-    insert_into,
     pg::Pg,
     query_source::joins::{Join, JoinOn, LeftOuter},
     ExpressionMethods, NullableExpressionMethods, PgConnection, QueryResult, Queryable,
-    RunQueryDsl,
+    RunQueryDsl, Table,
 };
-use log::{info, trace};
+use log::trace;
 use serde_derive::Serialize;
 use std::hash::{Hash, Hasher};
 
 mod get;
 mod paginate;
 mod patch;
+
+#[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display)]
+#[display(fmt = "{} (ID: {})", name, id)]
+pub struct DatabasePlayer {
+    pub id: i32,
+    pub name: CiString,
+    pub banned: bool,
+}
+
+#[derive(Debug, Serialize, Display)]
+#[display(fmt = "{}", player)]
+pub struct FullPlayer {
+    #[serde(flatten)]
+    pub player: Player,
+    pub records: Vec<MinimalRecordD>,
+    pub created: Vec<MinimalDemon>,
+    pub verified: Vec<MinimalDemon>,
+    pub published: Vec<MinimalDemon>,
+}
 
 table! {
     use diesel::sql_types::*;
@@ -46,14 +64,6 @@ table! {
         iso_country_code -> Nullable<Varchar>,
         nation -> Nullable<CiText>,
     }
-}
-
-#[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display)]
-#[display(fmt = "{} (ID: {})", name, id)]
-pub struct DatabasePlayer {
-    pub id: i32,
-    pub name: CiString,
-    pub banned: bool,
 }
 
 #[derive(Debug, PartialEq, Serialize, Display)]
@@ -75,27 +85,10 @@ pub struct Player {
     pub nationality: Option<Nationality>,
 }
 
-#[derive(Debug, Serialize, Display)]
-#[display(fmt = "{}", player)]
-pub struct FullPlayer {
-    #[serde(flatten)]
-    pub player: Player,
-    pub records: Vec<MinimalRecordD>,
-    pub created: Vec<MinimalDemon>,
-    pub verified: Vec<MinimalDemon>,
-    pub published: Vec<MinimalDemon>,
-}
-
 impl Hash for FullPlayer {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.player.hash(state)
     }
-}
-
-#[derive(Insertable, Debug)]
-#[table_name = "players"]
-struct NewPlayer<'a> {
-    name: &'a CiStr,
 }
 
 impl By<players::id, i32> for DatabasePlayer {}
@@ -105,15 +98,6 @@ impl By<players::id, i32> for Player {}
 impl By<players::name, &CiStr> for Player {}
 
 impl DatabasePlayer {
-    pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<DatabasePlayer> {
-        info!("Creating new player with name {}", name);
-
-        insert_into(players::table)
-            .values(&NewPlayer { name })
-            .returning(DatabasePlayer::selection())
-            .get_result(conn)
-    }
-
     pub fn ban(&self, conn: &PgConnection) -> QueryResult<()> {
         // delete all submissions
         diesel::delete(records::table)
@@ -199,14 +183,14 @@ impl DatabasePlayer {
 
 impl Model for DatabasePlayer {
     type From = players::table;
-    type Selection = (players::id, players::name, players::banned);
+    type Selection = <players::table as Table>::AllColumns;
 
     fn from() -> Self::From {
         players::table
     }
 
     fn selection() -> Self::Selection {
-        Self::Selection::default()
+        players::all_columns
     }
 }
 
