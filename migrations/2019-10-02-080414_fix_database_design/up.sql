@@ -57,7 +57,7 @@ CREATE VIEW players_n AS  -- players with nationality
     SELECT players.id, players.name, players.banned,
            nationalities.iso_country_code, nationalities.nation
     FROM players
-    INNER JOIN nationalities
+    LEFT OUTER JOIN nationalities
     ON players.nationality = nationalities.iso_country_code;
 
 DROP VIEW IF EXISTS demon_verifier_publisher_join;
