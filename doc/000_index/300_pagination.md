@@ -23,9 +23,11 @@ Note that there is no way to get the total amount of pages, as both page bounds 
 
 | Query Parameter | Description                                                                                         | Default                               |
 | --------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| limit           | The maximum amount of object to return. Must lie between `1` and `100`                              | 50                                    |
-| after           | The id of the last object on the previous page, thus specifying the start point of the current page | The very first item in the result set |
-| before          | The id of the first object on the next page, thus specifying the end point of the current page      | The very last item in the result set  |
+| limit           | The maximum amount of object to return. Must lie between `1` and `100`                              | `50`                                    |
+| after           | The id of the last object on the previous page, thus specifying the start point of the current page | `null` |
+| before          | The id of the first object on the next page, thus specifying the end point of the current page      | `null`  |
+
+Omitting `before` or `after`, which implicitly sets them to `null`, makes the server act like they're set to negative/positive infinity respectively.
 
 ## Pagination Response Headers
 
@@ -33,7 +35,7 @@ Paginatable endpoints provide the `Links` header to simply access to the next, p
 The header is set to a comma-seperated
 list of links in the form `<[link]>; rel=[page]`, where page is one of `next`, `prev`, `first` or `last`.
 
-Note that the `next` and `prev` links are only provided if there actually is a next or previous page of results respectively. The `first` and `last` links are always provided.
+Note that the `next` and `prev` links are only provided if there actually is a next or previous page of results respectively. The `last` link is only provided if there actually is data to be returned. The `first` links is always provided, however it is simply the request you made stripped of the `before` and `after` values.
 
 ## Filtering
 
@@ -46,7 +48,7 @@ There are two ways of filtering the result set:
 
 - **Filtering by equality**: The objects returned can be filtered by a specific field's value by specifying the field and a value in the query string, i.e. `/api/v1/players/?banned=true`
 - **Filtering by inequality**: The objects returned can be filtered by whether a field is smaller/greater than a specific value by specifying the field,
-  suffixed with either `__lt` or `__gt`, and the value to check for inequality against in the query string, i.e. `/api/v1/demons/?record_requirement__gt=75`. Note that this doesn't work for all fields (since a lexicographical filtering on the record status hardly seems useful)
+  suffixed with either `__lt` or `__gt`, and the value to check for inequality against in the query string, i.e. `/api/v1/records/?progress__gt=75`. Note that this doesn't work for all fields (since a lexicographical filtering on the record status hardly seems useful)
 
 Multiple conditions can be combined, i.e. `/api/v1/records/?after=200&limit=10&status=APPROVED&progress__lt=100`. This request would return the first 10 approved records with a record ID greater than 200 and a progress less than 100.
 
