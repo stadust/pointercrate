@@ -29,6 +29,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | name      | string  | The name of the demon                            |
 | position  | integer | The position of the demon                        |
 | publisher | [Player](#player)  | The player that published this demon |
+| verifier | [Player](#player)  | The player that verified this demon |
 | video     | URL?    | The verification video                           |
 
 ## Full Form
@@ -67,6 +68,11 @@ The listed record objects do not contain the current demon embedded into the `de
     "name": "Pennutoh",
     "id": 123,
     "banned": false
+  },
+  "verifier": {
+    "banned": false,
+    "id": 3,
+    "name": "Sunix"
   },
   "video": "https://www.youtube.com/watch?v=cHEGAqOgddA"
 }
