@@ -1,5 +1,3 @@
-% players
-
 <div class='panel fade js-scroll-anim' data-anim='fade'>
 
 # Player ranking{id=get-ranking}
