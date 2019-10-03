@@ -63,14 +63,6 @@ pub struct RankedPlayer {
     pub name: CiString,
     pub rank: i64,
     pub score: f64,
-
-    /// This field exists solely for pagination purposes, code should never interact with it.
-    /// It is not possible to paginate reliable over the `rank` value, since it can contain
-    /// duplicates. All our other values aren't ordered. This field is simply something that
-    /// counts the rows returned from the database deterministically
-    #[serde(skip)]
-    pub index: i64,
-
     pub nationality: Option<Nationality>,
 }
 
@@ -312,7 +304,6 @@ impl Queryable<<<RankedPlayer as Model>::Selection as Expression>::SqlType, Pg> 
             name: row.1,
             rank: row.2,
             score: row.3,
-            index: row.4,
             nationality,
         }
     }
