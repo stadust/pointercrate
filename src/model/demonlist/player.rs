@@ -22,7 +22,7 @@ use diesel::{
     pg::Pg,
     query_source::joins::{Join, JoinOn, LeftOuter},
     ExpressionMethods, NullableExpressionMethods, PgConnection, QueryResult, Queryable,
-    RunQueryDsl, Table,
+    RunQueryDsl,
 };
 use log::trace;
 use serde_derive::Serialize;
@@ -183,14 +183,14 @@ impl DatabasePlayer {
 
 impl Model for DatabasePlayer {
     type From = players::table;
-    type Selection = <players::table as Table>::AllColumns;
+    type Selection = (players::id, players::name, players::banned);
 
     fn from() -> Self::From {
         players::table
     }
 
     fn selection() -> Self::Selection {
-        players::all_columns
+        Self::Selection::default()
     }
 }
 
