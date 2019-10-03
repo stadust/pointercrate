@@ -2,18 +2,15 @@ use crate::{
     context::{RequestContext, RequestData},
     error::PointercrateError,
     middleware::auth::{AuthType, Authorization, Basic, Claims, Me, TAuthType},
-    model::{user::PatchMe, Model, User},
+    model::{user::PatchMe, User},
     operation::{Delete, Get, Paginate, Paginator, Patch, Post},
     Result,
 };
 use actix::{Actor, Addr, Handler, Message, SyncArbiter, SyncContext};
 use diesel::{
-    expression::{AsExpression, NonAggregate},
-    pg::{Pg, PgConnection},
-    query_builder::QueryFragment,
+    pg::PgConnection,
     r2d2::{ConnectionManager, Pool, PooledConnection},
-    sql_types::{HasSqlType, NotNull, SqlOrd},
-    AppearsOnTable, Connection, Expression, QuerySource, RunQueryDsl, SelectableExpression,
+    Connection, RunQueryDsl,
 };
 
 use crate::ratelimit::Ratelimits;
@@ -387,63 +384,21 @@ where
 #[derive(Debug)]
 pub struct PaginateMessage<P, D>(pub D, pub String, pub RequestData, pub PhantomData<P>)
 where
-    D: Paginator<Model = P>,
-    P: Paginate<D>,
-    <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
-    <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
-    Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
-    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: NonAggregate,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: QueryFragment<Pg>;
+    D: Paginator,
+    P: Paginate<D>;
 
 impl<P, D> Message for PaginateMessage<P, D>
 where
-    D: Paginator<Model = P>,
+    D: Paginator,
     P: Paginate<D> + 'static,
-    <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
-    <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
-    Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
-    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-        D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: NonAggregate,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: QueryFragment<Pg>,
 {
     type Result = Result<(Vec<P>, String)>;
 }
 
 impl<P, D> Handler<PaginateMessage<P, D>> for DatabaseActor
 where
-    D: Paginator<Model = P>,
+    D: Paginator,
     P: Paginate<D> + 'static,
-    <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
-    <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
-    Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
-    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-    D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: NonAggregate,
-    <D::PaginationColumnType as AsExpression<
-        <D::PaginationColumn as Expression>::SqlType,
-    >>::Expression: QueryFragment<Pg>,
 {
     type Result = Result<(Vec<P>, String)>;
 
@@ -459,25 +414,29 @@ where
 
         let first = msg.0.first(ctx)?.map(|d| {
             format!(
-                "<{}?{}>; rel=first",msg.1,
+                "<{}?{}>; rel=first",
+                msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
         let last = msg.0.last(ctx)?.map(|d| {
             format!(
-                "<{}?{}>; rel=last",msg.1,
+                "<{}?{}>; rel=last",
+                msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
         let next = msg.0.next(ctx)?.map(|d| {
             format!(
-                "<{}?{}>; rel=next",msg.1,
+                "<{}?{}>; rel=next",
+                msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });
-        let prev = msg.0.prev(ctx)?.map(|d| {
+        let prev = msg.0.previous(ctx)?.map(|d| {
             format!(
-                "<{}?{}>; rel=prev", msg.1,
+                "<{}?{}>; rel=prev",
+                msg.1,
                 serde_urlencoded::ser::to_string(d).unwrap()
             )
         });

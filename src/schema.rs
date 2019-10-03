@@ -36,7 +36,8 @@ table! {
         permissions -> BitString,
         display_name -> Nullable<Text>,
         youtube_channel -> Nullable<Varchar>,
-        nationality -> Nullable<Varchar>,
+        // FIXME: implement lol
+        //nationality -> Nullable<Varchar>,
     }
 }
 
@@ -95,7 +96,7 @@ table! {
 
 joinable!(creators -> demons (demon));
 joinable!(creators -> players (creator));
-joinable!(members -> nationalities (nationality));
+//joinable!(members -> nationalities (nationality));
 joinable!(players -> nationalities (nationality));
 joinable!(records -> demons (demon));
 joinable!(records -> players (player));

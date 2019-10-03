@@ -9,19 +9,11 @@ use crate::{
     context::RequestData,
     error::PointercrateError,
     middleware::auth::{Authorization, Me, TAuthType},
-    model::Model,
     operation::{Delete, Get, Paginate, Paginator, Patch, Post},
     Result,
 };
 use actix::{Addr, Handler, Message};
 use actix_web::HttpRequest;
-use diesel::{
-    expression::{AsExpression, NonAggregate},
-    pg::Pg,
-    query_builder::QueryFragment,
-    sql_types::{HasSqlType, NotNull, SqlOrd},
-    AppearsOnTable, Expression, QuerySource, SelectableExpression,
-};
 use std::{collections::HashMap, hash::Hash, marker::PhantomData, sync::Arc};
 use tokio::prelude::{future::Either, Future};
 
@@ -162,25 +154,15 @@ impl PointercrateState {
     }
 
     pub fn paginate<T, P, D>(
-        &self, req: &HttpRequest<Self>, data: D, uri: String,
+        &self,
+        req: &HttpRequest<Self>,
+        data: D,
+        uri: String,
     ) -> impl Future<Item = (Vec<P>, String), Error = PointercrateError>
     where
         T: TAuthType,
-        D: Paginator<Model = P> + Send + 'static,
+        D: Paginator + Send + 'static,
         P: Paginate<D> + Send + 'static,
-        <D::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,
-        <<D::Model as Model>::From as QuerySource>::FromClause: QueryFragment<Pg>,
-        Pg: HasSqlType<<D::PaginationColumn as Expression>::SqlType>,
-        D::PaginationColumn: SelectableExpression<<D::Model as Model>::From>,
-        <D::PaginationColumnType as AsExpression<
-            <D::PaginationColumn as Expression>::SqlType,
-        >>::Expression: AppearsOnTable<<D::Model as Model>::From>,
-        <D::PaginationColumnType as AsExpression<
-            <D::PaginationColumn as Expression>::SqlType,
-        >>::Expression: NonAggregate,
-        <D::PaginationColumnType as AsExpression<
-            <D::PaginationColumn as Expression>::SqlType,
-        >>::Expression: QueryFragment<Pg>,
     {
         let req_data = RequestData::from_request(req);
         let auth = req.extensions_mut().remove().unwrap();

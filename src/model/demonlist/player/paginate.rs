@@ -6,11 +6,11 @@ use crate::{
         demonlist::player::{players_with_score, RankedPlayer, ShortPlayer},
         Model,
     },
-    operation::{Paginate, Paginator},
+    operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     schema::players,
     Result,
 };
-use diesel::{dsl::sql, pg::Pg, query_builder::BoxedSelectStatement, QueryDsl, RunQueryDsl};
+use diesel::{dsl::sql, ExpressionMethods, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -21,7 +21,7 @@ pub struct PlayerPagination {
     #[serde(rename = "after")]
     after_id: Option<i32>,
 
-    limit: Option<i64>,
+    limit: Option<u8>,
 
     name: Option<CiString>,
     banned: Option<bool>,
@@ -29,41 +29,27 @@ pub struct PlayerPagination {
     nation: Option<String>,
 }
 
-impl Paginator for PlayerPagination {
-    type Model = ShortPlayer;
+impl TablePaginator for PlayerPagination {
+    type ColumnType = i32;
     type PaginationColumn = players::id;
-    type PaginationColumnType = i32;
+    type Table = players::table;
 
-    filter_method!(players[
-        name = name,
-        banned = banned,
-        nationality = nation
-    ]);
+    fn query(&self, _: RequestContext) -> PaginatorQuery<players::table> {
+        let mut query = ShortPlayer::boxed_all();
 
-    fn page(
-        &self,
-        last_on_page: Option<Self::PaginationColumnType>,
-        first_on_page: Option<Self::PaginationColumnType>,
-    ) -> Self {
-        PlayerPagination {
-            before_id: last_on_page.map(|i| i + 1),
-            after_id: first_on_page.map(|i| i - 1),
-            ..self.clone()
-        }
-    }
+        filter!(query[
+            players::name = self.name,
+            players::banned = self.banned,
+            players::nationality = self.nation
+        ]);
 
-    fn limit(&self) -> i64 {
-        self.limit.unwrap_or(50)
-    }
-
-    fn before(&self) -> Option<i32> {
-        self.before_id
-    }
-
-    fn after(&self) -> Option<i32> {
-        self.after_id
+        // FIXME: once players have their views
+        //query
+        unimplemented!()
     }
 }
+
+delegate_to_table_paginator!(PlayerPagination);
 
 impl Paginate<PlayerPagination> for ShortPlayer {
     fn load(pagination: &PlayerPagination, ctx: RequestContext) -> Result<Vec<Self>> {
@@ -71,14 +57,15 @@ impl Paginate<PlayerPagination> for ShortPlayer {
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),
         )?;
 
-        let mut query = pagination.filter(ShortPlayer::boxed_all(), ctx);
+        let mut query = pagination.query(ctx);
 
-        filter!(query[
+        /*filter!(query[
             players::id > pagination.after_id,
             players::id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, players::id, ctx.connection())
+        pagination_result!(query, pagination, players::id, ctx.connection())*/
+        unimplemented!()
     }
 }
 
@@ -90,21 +77,24 @@ pub struct RankingPagination {
     #[serde(rename = "after")]
     after_id: Option<i64>,
 
+    // FIXME: ???
+    limit: Option<u8>,
+
     nation: Option<String>,
     name_contains: Option<CiString>,
 }
 
-impl Paginator for RankingPagination {
-    type Model = RankedPlayer;
+impl TablePaginator for RankingPagination {
+    type ColumnType = i64;
     type PaginationColumn = players_with_score::index;
-    type PaginationColumnType = i64;
+    type Table = players_with_score::table;
 
-    fn filter<'a, ST>(
-        &'a self,
-        mut query: BoxedSelectStatement<'a, ST, <RankedPlayer as crate::model::Model>::From, Pg>,
-        _ctx: RequestContext,
-    ) -> BoxedSelectStatement<'a, ST, <RankedPlayer as crate::model::Model>::From, Pg> {
-        filter!(query[players_with_score::iso_country_code = self.nation]);
+    fn query(&self, _: RequestContext) -> PaginatorQuery<players_with_score::table> {
+        let mut query = RankedPlayer::boxed_all();
+
+        if let Some(ref nation) = self.nation {
+            query = query.filter(players_with_score::iso_country_code.eq(nation));
+        }
 
         if let Some(ref like_name) = self.name_contains {
             query = query.filter(
@@ -116,35 +106,13 @@ impl Paginator for RankingPagination {
 
         query
     }
-
-    fn page(
-        &self,
-        last_on_page: Option<Self::PaginationColumnType>,
-        first_on_page: Option<Self::PaginationColumnType>,
-    ) -> Self {
-        Self {
-            before_id: last_on_page.map(|i| i + 1),
-            after_id: first_on_page.map(|i| i - 1),
-            ..self.clone()
-        }
-    }
-
-    fn limit(&self) -> i64 {
-        50
-    }
-
-    fn before(&self) -> Option<i64> {
-        self.before_id
-    }
-
-    fn after(&self) -> Option<i64> {
-        self.after_id
-    }
 }
+
+delegate_to_table_paginator!(RankingPagination);
 
 impl Paginate<RankingPagination> for RankedPlayer {
     fn load(pagination: &RankingPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(RankedPlayer::boxed_all(), ctx);
+        let mut query = pagination.query(ctx);
 
         filter!(query[
             players_with_score::index > pagination.after_id,

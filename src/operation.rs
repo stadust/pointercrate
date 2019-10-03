@@ -6,7 +6,7 @@ mod patch;
 pub use self::{
     delete::Delete,
     get::Get,
-    paginate::{Paginate, Paginator},
+    paginate::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     patch::{deserialize_non_optional, deserialize_optional, Patch},
     post::Post,
 };

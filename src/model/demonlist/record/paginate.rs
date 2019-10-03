@@ -4,12 +4,10 @@ use crate::{
     context::RequestContext,
     error::PointercrateError,
     model::{demonlist::record::records_pd, Model},
-    operation::{Paginate, Paginator},
+    operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     Result,
 };
-use diesel::{
-    pg::Pg, query_builder::BoxedSelectStatement, ExpressionMethods, QueryDsl, RunQueryDsl,
-};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -20,7 +18,7 @@ pub struct RecordPagination {
     #[serde(rename = "after")]
     after_id: Option<i32>,
 
-    limit: Option<i64>,
+    limit: Option<u8>,
 
     progress: Option<i16>,
     #[serde(rename = "progress__lt")]
@@ -42,16 +40,14 @@ pub struct RecordPagination {
     video: Option<String>,
 }
 
-impl Paginator for RecordPagination {
-    type Model = Record;
+impl TablePaginator for RecordPagination {
+    type ColumnType = i32;
     type PaginationColumn = records_pd::id;
-    type PaginationColumnType = i32;
+    type Table = records_pd::table;
 
-    fn filter<'a, ST>(
-        &'a self,
-        mut query: BoxedSelectStatement<'a, ST, <Record as Model>::From, Pg>,
-        ctx: RequestContext,
-    ) -> BoxedSelectStatement<'a, ST, <Record as Model>::From, Pg> {
+    fn query(&self, ctx: RequestContext) -> PaginatorQuery<records_pd::table> {
+        let mut query = Record::boxed_all();
+
         filter!(query[
             records_pd::progress = self.progress,
             records_pd::progress < self.progress_lt,
@@ -69,35 +65,13 @@ impl Paginator for RecordPagination {
 
         query
     }
-
-    fn page(
-        &self,
-        last_on_page: Option<Self::PaginationColumnType>,
-        first_on_page: Option<Self::PaginationColumnType>,
-    ) -> Self {
-        RecordPagination {
-            before_id: last_on_page.map(|i| i + 1),
-            after_id: first_on_page.map(|i| i - 1),
-            ..self.clone()
-        }
-    }
-
-    fn limit(&self) -> i64 {
-        self.limit.unwrap_or(50)
-    }
-
-    fn before(&self) -> Option<i32> {
-        self.before_id
-    }
-
-    fn after(&self) -> Option<i32> {
-        self.after_id
-    }
 }
+
+delegate_to_table_paginator!(RecordPagination);
 
 impl Paginate<RecordPagination> for Record {
     fn load(pagination: &RecordPagination, ctx: RequestContext) -> Result<Vec<Self>> {
-        let mut query = pagination.filter(Record::boxed_all(), ctx);
+        let mut query = pagination.query(ctx);
 
         filter!(query[
             records_pd::id > pagination.after_id,
