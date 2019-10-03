@@ -6,7 +6,7 @@ Everyone who submits a record gets assigned an incremental submitter id, interna
 
 - If the submitter is banned, he cannot submit new records and all his previously submitted records are either marked as `approved` or `rejected`
 
-## Short Form
+## Minimal/Listed Form
 
 The short form is returned by the [`GET /submitters/`](/documentation/submitter/#submitter-listing) pagination endpoint.
 
@@ -15,7 +15,7 @@ The short form is returned by the [`GET /submitters/`](/documentation/submitter/
 | id     | int     | The submitter's ID                               |
 | banned | boolean | Value indicating whether the submitter is banned |
 
-## Long Form
+## Full Form
 
 The long form is returned by the [`GET /submitters/`](/documentation/submitter/#submitter-retrieval) endpoint.
 
@@ -46,9 +46,16 @@ The long form is returned by the [`GET /submitters/`](/documentation/submitter/#
     {
       "id": 1,
       "progress": 100,
-      "demon": "Cadrega City",
+      "demon": {
+        "name": "Cadrega City",
+        "position": 1
+      },
       "status": "rejected",
-      "player": "Aquatias"
+      "player": {
+        "name": "Aquatias",
+        "id": 3424,
+        "banned": false
+      }
     }
   ]
 }

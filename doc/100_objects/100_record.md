@@ -12,9 +12,9 @@ Each record on the list is represented by a `Record` object. The following invar
 The object only contains the submitter information if the object has been requested with sufficient permissions.
 Requests without `ExtendedAccess` permissions can only retrieve approved records
 
-## Embedded Form
+## Minimal Form
 
-The embedded form of record objects is returned if a record object is part of another object
+The minimal (formerly called embedded form) form of record objects is returned if a record object is part of another object. 
 
 | Field    | Type                           | Description                                |
 | -------- | ------------------------------ | ------------------------------------------ |
@@ -30,9 +30,23 @@ Depending on the context the object is returned in, one (or both) of the followi
 | player | [Player](#player) | The record holder                |
 | demon  | [Demon](#demon)   | The demon the record was made on |
 
-## Long Form
+## Listed Form
 
-The long form of record objects is returned by [`GET /records/`](/documentation/records/#get-records) and [`GET /records/{record_id}`](/documentation/records/#record-retrieval). There is no short form for the pagination endpoint
+The listed form (formerly called short form) of record objects is returned by [`GET /records/`](/documentation/records/#get-records). 
+
+| Field    | Type                           | Description                                |
+| -------- | ------------------------------ | ------------------------------------------ |
+| id       | integer                        | The record's id                            |
+| progress | integer                        | The progress achieved by the record holder |
+| status   | [RecordStatus](#record-status) | The record's status.                       |
+| video    | URL?                           | The record's video.                        |
+| player | [Player](#player) | The record holder                |
+| demon  | [Demon](#demon)   | The demon the record was made on |
+| submitter | integer | The internal ID of the submitter|
+
+## Full Form
+
+The full (formerly called long form) form of record objects is returned by [`GET /records/{record_id}`](/documentation/records/#record-retrieval).
 
 | Field     | Type                           | Description                                             |
 | --------- | ------------------------------ | ------------------------------------------------------- |
@@ -42,7 +56,7 @@ The long form of record objects is returned by [`GET /records/`](/documentation/
 | status    | [RecordStatus](#record-status) | The record's status.                                    |
 | player    | [Player](#player)              | The record holder                                       |
 | demon     | [Demon](#demon)                | The demon the record was made on                        |
-| submitter | integer?                       | The internal ID of the person that submitted the record |
+| submitter | [Submitter](#submitter)?       | The person that submitted the record, as an submitter object |
 
 ## Enum RecordStatus{id=record-status}
 
@@ -54,19 +68,26 @@ The long form of record objects is returned by [`GET /records/`](/documentation/
 
 ## Example objects
 
-### Embedded form
+### Minimal form
+
+Here with an embedded demon object:
 
 ```json
 {
   "id": 1,
   "progress": 100,
-  "demon": "Cadrega City",
+  "demon": {
+    "name": "Cadrega City", 
+    "position": 1
+  },
   "status": "approved",
   "player": "Aquatias"
 }
 ```
 
-### Long form
+### Full form
+
+Here without an embedded submitter object
 
 ```json
 {

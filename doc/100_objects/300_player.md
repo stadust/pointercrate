@@ -8,7 +8,7 @@ Each player on the list is represented by a `Player` object. The following invar
 
 Note that it is not possible to retrieve a player's demonlist score via the API. You can calculate it yourself based on the `records` list
 
-## Embedded Form 
+## Minimal Form 
 
 When part of the representation of another object, a player has the following fields:
 
@@ -18,7 +18,7 @@ When part of the representation of another object, a player has the following fi
 | name   | string  | The player's name                             |
 | banned | boolean | Value indicating whether the player is banned |
 
-## Short Form
+## Listed Form
 
 When retrieving players via [`GET /players/`](/documentation/players/#get-players) 
 
@@ -29,7 +29,9 @@ When retrieving players via [`GET /players/`](/documentation/players/#get-player
 | banned | boolean | Value indicating whether the player is banned |
 | nationality| [Nationality](#nationality) | The player's nationality, if set|
 
-## Long Form
+## Full Form
+
+The listed record objects do not contain the current player embedded into the `player` field.
 
 | Field     | Type                    | Description                                   |
 | --------- | ----------------------- | --------------------------------------------- |
@@ -45,7 +47,7 @@ When retrieving players via [`GET /players/`](/documentation/players/#get-player
 
 ## Example objects
 
-### Embedded form
+### Minimal form
 
 ```json
 {
@@ -55,7 +57,7 @@ When retrieving players via [`GET /players/`](/documentation/players/#get-player
 }
 ```
 
-### Short
+### Listed Form
 
 ```json
 {
@@ -69,7 +71,7 @@ When retrieving players via [`GET /players/`](/documentation/players/#get-player
 }
 ```
 
-### Long form
+### Full form
 
 ```json
 {
@@ -81,7 +83,6 @@ When retrieving players via [`GET /players/`](/documentation/players/#get-player
       "name": "Cadrega City",
       "progress": 100,
       "status": "approved",
-      "player": "Pennutoh"
     }
   ],
   "id": 2,

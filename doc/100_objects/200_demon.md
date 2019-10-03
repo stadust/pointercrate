@@ -11,7 +11,7 @@ Each demon on the list is represented by a `Demon` object. The following assumpt
 Note that although on the website the record requirement for demons on the extended list is always displayed as `100%`,
 `Demon` objects still save their requirement from when they were on the main list.
 
-## Embedded Form
+## Minimal Form
 
 When embedded into other objects (for example, as part of a [Record](/documentation/objects/#record)), only the following minimal representation of each demon is provided:
 
@@ -20,7 +20,7 @@ When embedded into other objects (for example, as part of a [Record](/documentat
 | name     | string  | The name of the demon     |
 | position | integer | The position of the demon |
 
-## Short Form
+## Listed Form
 
 When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), only the following partial representation of each demon is provided:
 
@@ -28,10 +28,12 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | --------- | ------- | ------------------------------------------------ |
 | name      | string  | The name of the demon                            |
 | position  | integer | The position of the demon                        |
-| publisher | string  | The name of the player that published this demon |
+| publisher | [Player](#player)  | The player that published this demon |
 | video     | URL?    | The verification video                           |
 
-## Long Form
+## Full Form
+
+The listed record objects do not contain the current demon embedded into the `demon` field.
 
 | Field       | Type                    | Description                                                             |
 | ----------- | ----------------------- | ----------------------------------------------------------------------- |
@@ -46,7 +48,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 
 ## Example objects
 
-### Embedded form
+### Minimal form
 
 ```json
 {
@@ -55,14 +57,17 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 }
 ```
 
-### Short form
+### Listed form
 
 ```json
 {
   "name": "Cadrega City",
   "position": 34,
-  "publisher": "Pennutoh",
-  "state": "MAIN",
+  "publisher": {
+    "name": "Pennutoh",
+    "id": 123,
+    "banned": false
+  },
   "video": "https://www.youtube.com/watch?v=cHEGAqOgddA"
 }
 ```
@@ -87,7 +92,6 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
   },
   "records": [],
   "requirement": 54,
-  "state": "MAIN",
   "verifier": {
     "banned": false,
     "id": 3,
