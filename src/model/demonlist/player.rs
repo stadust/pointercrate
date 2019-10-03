@@ -13,16 +13,13 @@ use crate::{
         nationality::Nationality,
         By, Model,
     },
-    schema::{nationalities, players, records},
+    schema::{players, records},
     Result,
 };
 use derive_more::Display;
 use diesel::{
-    expression::Expression,
-    pg::Pg,
-    query_source::joins::{Join, JoinOn, LeftOuter},
-    ExpressionMethods, NullableExpressionMethods, PgConnection, QueryResult, Queryable,
-    RunQueryDsl,
+    expression::Expression, pg::Pg, ExpressionMethods, PgConnection, QueryResult, Queryable,
+    RunQueryDsl, Table,
 };
 use log::trace;
 use serde_derive::Serialize;
@@ -76,6 +73,19 @@ pub struct RankedPlayer {
     pub nationality: Option<Nationality>,
 }
 
+table! {
+    use diesel::sql_types::*;
+    use crate::citext::CiText;
+
+    players_n (id) {
+        id -> Int4,
+        name -> CiText,
+        banned -> Bool,
+        iso_country_code -> Nullable<Varchar>,
+        nation -> Nullable<CiText>,
+    }
+}
+
 #[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
 #[display(fmt = "{}", inner)]
 pub struct Player {
@@ -94,8 +104,8 @@ impl Hash for FullPlayer {
 impl By<players::id, i32> for DatabasePlayer {}
 impl By<players::name, &CiStr> for DatabasePlayer {}
 
-impl By<players::id, i32> for Player {}
-impl By<players::name, &CiStr> for Player {}
+impl By<players_n::id, i32> for Player {}
+impl By<players_n::name, &CiStr> for Player {}
 
 impl DatabasePlayer {
     pub fn ban(&self, conn: &PgConnection) -> QueryResult<()> {
@@ -195,34 +205,15 @@ impl Model for DatabasePlayer {
 }
 
 impl Model for Player {
-    type From = JoinOn<
-        Join<players::table, nationalities::table, LeftOuter>,
-        diesel::dsl::Eq<
-            players::nationality,
-            diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
-        >,
-    >;
-    type Selection = (
-        players::id,
-        players::name,
-        players::banned,
-        diesel::expression::nullable::Nullable<nationalities::iso_country_code>,
-        diesel::expression::nullable::Nullable<nationalities::nation>,
-    );
+    type From = players_n::table;
+    type Selection = <players_n::table as Table>::AllColumns;
 
     fn from() -> Self::From {
-        Join::new(players::table, nationalities::table, LeftOuter)
-            .on(players::nationality.eq(nationalities::iso_country_code.nullable()))
+        players_n::table
     }
 
     fn selection() -> Self::Selection {
-        (
-            players::id,
-            players::name,
-            players::banned,
-            nationalities::iso_country_code.nullable(),
-            nationalities::nation.nullable(),
-        )
+        players_n::all_columns
     }
 }
 

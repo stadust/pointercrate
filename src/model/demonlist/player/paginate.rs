@@ -1,15 +1,14 @@
 use crate::{
-    citext::{CiString, CiText},
+    citext::{CiStr, CiString, CiText},
     context::RequestContext,
     model::{
-        demonlist::player::{players_with_score, Player, RankedPlayer},
+        demonlist::player::{players_n, players_with_score, Player, RankedPlayer},
         Model,
     },
     operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
-    schema::players,
     Result,
 };
-use diesel::{dsl::sql, ExpressionMethods, QueryDsl};
+use diesel::{dsl::sql, BoolExpressionMethods, ExpressionMethods, QueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -30,21 +29,26 @@ pub struct PlayerPagination {
 
 impl TablePaginator for PlayerPagination {
     type ColumnType = i32;
-    type PaginationColumn = players::id;
-    type Table = players::table;
+    type PaginationColumn = players_n::id;
+    type Table = players_n::table;
 
-    fn query(&self, _: RequestContext) -> PaginatorQuery<players::table> {
+    fn query(&self, _: RequestContext) -> PaginatorQuery<players_n::table> {
         let mut query = Player::boxed_all();
 
         filter!(query[
-            players::name = self.name,
-            players::banned = self.banned,
-            players::nationality = self.nation
+            players_n::name = self.name,
+            players_n::banned = self.banned
         ]);
 
-        // FIXME: once players have their views
-        //query
-        unimplemented!()
+        if let Some(ref nation) = self.nation {
+            query = query.filter(
+                players_n::iso_country_code
+                    .eq(nation)
+                    .or(players_n::nation.eq(Some(CiStr::from_str(nation)))), // okay?
+            );
+        }
+
+        query
     }
 }
 
@@ -58,13 +62,12 @@ impl Paginate<PlayerPagination> for Player {
 
         let mut query = pagination.query(ctx);
 
-        /*filter!(query[
-            players::id > pagination.after_id,
-            players::id < pagination.before_id
+        filter!(query[
+            players_n::id > pagination.after_id,
+            players_n::id < pagination.before_id
         ]);
 
-        pagination_result!(query, pagination, players::id, ctx.connection())*/
-        unimplemented!()
+        pagination_result!(query, pagination, players_n::id, ctx.connection())
     }
 }
 
@@ -76,7 +79,6 @@ pub struct RankingPagination {
     #[serde(rename = "after")]
     after_id: Option<i64>,
 
-    // FIXME: ???
     limit: Option<u8>,
 
     nation: Option<String>,
