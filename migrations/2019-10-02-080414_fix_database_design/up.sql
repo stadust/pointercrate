@@ -60,4 +60,4 @@ CREATE VIEW players_n AS  -- players with nationality
     INNER JOIN nationalities
     ON players.nationality = nationalities.iso_country_code;
 
-DROP VIEW IF EXISTS demon_publisher_verifier_join;
+DROP VIEW IF EXISTS demon_verifier_publisher_join;
