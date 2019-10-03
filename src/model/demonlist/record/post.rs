@@ -7,7 +7,7 @@ use crate::{
     model::{
         demonlist::{
             record::{DatabaseRecord, MinimalDemon},
-            Demon, EmbeddedPlayer, Submitter,
+            DatabasePlayer, Demon, Submitter,
         },
         Model,
     },
@@ -82,7 +82,7 @@ impl Post<Submission> for Option<Record> {
 
         connection.transaction(||{
             // Resolve player and demon name against the database
-            let player = EmbeddedPlayer::get(player.as_ref(),ctx)?;
+            let player = DatabasePlayer::get(player.as_ref(), ctx)?;
             let demon = Demon::get(demon.as_ref(), ctx)?;
 
             // Banned player can't have records on the list

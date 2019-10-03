@@ -1,7 +1,7 @@
 use crate::{
     error::PointercrateError,
     model::{
-        demonlist::{creator::Creators, player::EmbeddedPlayer, record::MinimalRecordP},
+        demonlist::{creator::Creators, player::DatabasePlayer, record::MinimalRecordP},
         Model,
     },
     operation::Get,
@@ -67,10 +67,10 @@ pub struct Demon {
     pub video: Option<String>,
 
     /// The player-ID of this [`Demon`]'s publisher
-    pub publisher: EmbeddedPlayer,
+    pub publisher: DatabasePlayer,
 
     /// The player-ID of this [`Demon`]'s verifier
-    pub verifier: EmbeddedPlayer,
+    pub verifier: DatabasePlayer,
 }
 
 table! {
@@ -96,7 +96,7 @@ pub struct MinimalDemonP {
     pub name: CiString,
     pub position: i16,
     pub video: Option<String>,
-    pub publisher: EmbeddedPlayer,
+    pub publisher: DatabasePlayer,
 }
 
 // doesn't need its own view
@@ -155,12 +155,12 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
             position: row.1,
             requirement: row.2,
             video: row.3,
-            publisher: EmbeddedPlayer {
+            publisher: DatabasePlayer {
                 id: row.4,
                 name: row.5,
                 banned: row.6,
             },
-            verifier: EmbeddedPlayer {
+            verifier: DatabasePlayer {
                 id: row.7,
                 name: row.8,
                 banned: row.9,
@@ -197,7 +197,7 @@ impl Queryable<<<MinimalDemonP as Model>::Selection as Expression>::SqlType, Pg>
             name: row.0,
             position: row.1,
             video: row.2,
-            publisher: EmbeddedPlayer {
+            publisher: DatabasePlayer {
                 id: row.3,
                 name: row.4,
                 banned: row.5,

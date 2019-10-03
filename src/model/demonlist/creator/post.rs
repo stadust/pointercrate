@@ -3,7 +3,7 @@ use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
     error::PointercrateError,
-    model::demonlist::{Demon, EmbeddedPlayer},
+    model::demonlist::{DatabasePlayer, Demon},
     operation::{Get, Post},
     schema::creators,
     Result,
@@ -37,7 +37,7 @@ impl<'a> Post<(&'a CiStr, &'a CiStr)> for Creator {
 
         connection.transaction(|| {
             let demon = Demon::get(demon, ctx)?;
-            let player = EmbeddedPlayer::get(player, ctx)?;
+            let player = DatabasePlayer::get(player, ctx)?;
 
             insert_into(creators::table)
                 .values(&NewCreator {

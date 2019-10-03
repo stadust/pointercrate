@@ -1,9 +1,9 @@
-use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
+use super::{DatabasePlayer, FullPlayer};
 use crate::{
     citext::CiString,
     context::RequestContext,
     error::PointercrateError,
-    model::{demonlist::player::ShortPlayer, nationality::Nationality, By},
+    model::{demonlist::player::Player, nationality::Nationality, By},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     schema::players,
     Result,
@@ -20,7 +20,7 @@ make_patch! {
     }
 }
 
-impl Patch<PatchPlayer> for ShortPlayer {
+impl Patch<PatchPlayer> for Player {
     fn patch(mut self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
         ctx.check_permissions(perms!(ListModerator or ListAdministrator))?;
         ctx.check_if_match(&self)?;
@@ -38,7 +38,7 @@ impl Patch<PatchPlayer> for ShortPlayer {
 
             if let Some(ref name) = patch.name {
                 if *name != self.inner.name {
-                    match EmbeddedPlayer::by(name.as_ref()).first(connection) {
+                    match DatabasePlayer::by(name.as_ref()).first(connection) {
                         Ok(player) => self.inner.merge(player, connection)?,
                         Err(Error::NotFound) => (),
                         Err(err) => return Err(PointercrateError::database(err)),
@@ -68,9 +68,9 @@ impl Patch<PatchPlayer> for ShortPlayer {
     }
 }
 
-impl Patch<PatchPlayer> for PlayerWithDemonsAndRecords {
+impl Patch<PatchPlayer> for FullPlayer {
     fn patch(self, patch: PatchPlayer, ctx: RequestContext) -> Result<Self> {
-        Ok(PlayerWithDemonsAndRecords {
+        Ok(FullPlayer {
             player: self.player.patch(patch, ctx)?,
             ..self
         })

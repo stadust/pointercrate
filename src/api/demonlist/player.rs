@@ -3,8 +3,7 @@ use crate::{
     error::PointercrateError,
     middleware::{auth::Token, cond::HttpResponseBuilderExt},
     model::demonlist::player::{
-        PatchPlayer, PlayerPagination, PlayerWithDemonsAndRecords, RankedPlayer, RankingPagination,
-        ShortPlayer,
+        FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
     },
     state::PointercrateState,
 };
@@ -25,7 +24,7 @@ pub fn paginate(req: &HttpRequest<PointercrateState>) -> PCResponder {
     pagination
         .into_future()
         .and_then(move |pagination: PlayerPagination| {
-            req.state().paginate::<Token, ShortPlayer, _>(
+            req.state().paginate::<Token, Player, _>(
                 &req,
                 pagination,
                 "/api/v1/players/".to_string(),
@@ -58,17 +57,12 @@ pub fn ranking(req: &HttpRequest<PointercrateState>) -> PCResponder {
         .responder()
 }
 
-get_handler!(
-    "/api/v1/players/[id]/",
-    i32,
-    "Player ID",
-    PlayerWithDemonsAndRecords
-);
+get_handler!("/api/v1/players/[id]/", i32, "Player ID", FullPlayer);
 
 patch_handler!(
     "/api/v1/players/[id]/",
     i32,
     "Player ID",
     PatchPlayer,
-    PlayerWithDemonsAndRecords
+    FullPlayer
 );

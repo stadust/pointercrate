@@ -2,7 +2,7 @@ use crate::{
     citext::CiString,
     error::PointercrateError,
     model::{
-        demonlist::{demon::MinimalDemon, player::EmbeddedPlayer},
+        demonlist::{demon::MinimalDemon, player::DatabasePlayer},
         By, Model,
     },
     schema::records,
@@ -132,7 +132,7 @@ pub struct FullRecord {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub player: EmbeddedPlayer,
+    pub player: DatabasePlayer,
     pub demon: MinimalDemon,
     pub submitter: Option<Submitter>,
 }
@@ -163,7 +163,7 @@ pub struct Record {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub player: EmbeddedPlayer,
+    pub player: DatabasePlayer,
     pub demon: MinimalDemon,
     pub submitter: Option<i32>,
 }
@@ -176,7 +176,7 @@ pub struct EmbeddedRecordPD {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub demon: MinimalDemon,
-    pub player: EmbeddedPlayer,
+    pub player: DatabasePlayer,
 }
 
 table! {
@@ -228,7 +228,7 @@ pub struct MinimalRecordP {
     pub progress: i16,
     pub video: Option<String>,
     pub status: RecordStatus,
-    pub player: EmbeddedPlayer,
+    pub player: DatabasePlayer,
 }
 
 impl Model for FullRecord {
@@ -267,7 +267,7 @@ impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> fo
             progress: row.1,
             video: row.2,
             status: row.3,
-            player: EmbeddedPlayer {
+            player: DatabasePlayer {
                 id: row.4,
                 name: row.5,
                 banned: row.6,
@@ -324,7 +324,7 @@ impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Re
             video: row.2,
             status: row.3,
             submitter: Some(row.4),
-            player: EmbeddedPlayer {
+            player: DatabasePlayer {
                 id: row.5,
                 name: row.6,
                 banned: row.7,
@@ -389,7 +389,7 @@ impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, 
             progress: row.1,
             status: row.2,
             video: row.3,
-            player: EmbeddedPlayer {
+            player: DatabasePlayer {
                 id: row.4,
                 name: row.5,
                 banned: row.6,
@@ -469,7 +469,7 @@ impl Queryable<<<MinimalRecordP as Model>::Selection as Expression>::SqlType, Pg
             video: row.2,
             status: row.3,
             // skip index 4, demon name
-            player: EmbeddedPlayer {
+            player: DatabasePlayer {
                 id: row.5,
                 name: row.6,
                 banned: row.7,

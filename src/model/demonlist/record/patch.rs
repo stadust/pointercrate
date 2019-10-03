@@ -6,7 +6,7 @@ use crate::{
     model::{
         demonlist::{
             demon::{Demon, MinimalDemon},
-            player::EmbeddedPlayer,
+            player::DatabasePlayer,
             record::{DatabaseRecord, FullRecord},
         },
         Model,
@@ -63,7 +63,7 @@ impl Patch<PatchRecord> for FullRecord {
                 position: demon.position,
             }
         };
-        let map2 = |name: &CiStr| EmbeddedPlayer::get(name, ctx);
+        let map2 = |name: &CiStr| DatabasePlayer::get(name, ctx);
 
         map_patch!(self, patch: map => demon);
         try_map_patch!(self, patch: map2 => player);

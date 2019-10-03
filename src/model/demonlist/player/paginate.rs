@@ -2,7 +2,7 @@ use crate::{
     citext::{CiString, CiText},
     context::RequestContext,
     model::{
-        demonlist::player::{players_with_score, RankedPlayer, ShortPlayer},
+        demonlist::player::{players_with_score, Player, RankedPlayer},
         Model,
     },
     operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
@@ -34,7 +34,7 @@ impl TablePaginator for PlayerPagination {
     type Table = players::table;
 
     fn query(&self, _: RequestContext) -> PaginatorQuery<players::table> {
-        let mut query = ShortPlayer::boxed_all();
+        let mut query = Player::boxed_all();
 
         filter!(query[
             players::name = self.name,
@@ -50,7 +50,7 @@ impl TablePaginator for PlayerPagination {
 
 delegate_to_table_paginator!(PlayerPagination);
 
-impl Paginate<PlayerPagination> for ShortPlayer {
+impl Paginate<PlayerPagination> for Player {
     fn load(pagination: &PlayerPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         ctx.check_permissions(
             perms!(ExtendedAccess or ListHelper or ListModerator or ListAdministrator),

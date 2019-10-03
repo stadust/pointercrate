@@ -1,10 +1,10 @@
-use super::{EmbeddedPlayer, PlayerWithDemonsAndRecords};
+use super::{DatabasePlayer, FullPlayer};
 use crate::{
     citext::CiStr,
     context::RequestContext,
     error::PointercrateError,
     model::{
-        demonlist::{creator::created_by, demon::MinimalDemon, player::ShortPlayer},
+        demonlist::{creator::created_by, demon::MinimalDemon, player::Player},
         By, Model,
     },
     operation::Get,
@@ -13,22 +13,22 @@ use crate::{
 };
 use diesel::{result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
 
-impl<'a> Get<&'a CiStr> for EmbeddedPlayer {
+impl<'a> Get<&'a CiStr> for DatabasePlayer {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {
         let name = CiStr::from_str(name.trim());
 
-        match EmbeddedPlayer::by(name).first(ctx.connection()) {
+        match DatabasePlayer::by(name).first(ctx.connection()) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
-                EmbeddedPlayer::insert(&name, ctx.connection()).map_err(PointercrateError::database),
+                DatabasePlayer::insert(&name, ctx.connection()).map_err(PointercrateError::database),
             Err(err) => Err(PointercrateError::database(err)),
         }
     }
 }
 
-impl Get<i32> for EmbeddedPlayer {
+impl Get<i32> for DatabasePlayer {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
-        match EmbeddedPlayer::by(id).first(ctx.connection()) {
+        match DatabasePlayer::by(id).first(ctx.connection()) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -40,9 +40,9 @@ impl Get<i32> for EmbeddedPlayer {
     }
 }
 
-impl Get<i32> for ShortPlayer {
+impl Get<i32> for Player {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
-        match ShortPlayer::by(id).first(ctx.connection()) {
+        match Player::by(id).first(ctx.connection()) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -54,15 +54,15 @@ impl Get<i32> for ShortPlayer {
     }
 }
 
-impl<T> Get<T> for PlayerWithDemonsAndRecords
+impl<T> Get<T> for FullPlayer
 where
-    ShortPlayer: Get<T>,
+    Player: Get<T>,
 {
     fn get(t: T, ctx: RequestContext) -> Result<Self> {
-        let player = ShortPlayer::get(t, ctx)?;
+        let player = Player::get(t, ctx)?;
         let pid = player.inner.id;
 
-        Ok(PlayerWithDemonsAndRecords {
+        Ok(FullPlayer {
             records: Get::get(pid, ctx)?,
             created: created_by(pid).load(ctx.connection())?,
             verified: MinimalDemon::all()

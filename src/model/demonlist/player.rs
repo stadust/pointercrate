@@ -50,7 +50,7 @@ table! {
 
 #[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display)]
 #[display(fmt = "{} (ID: {})", name, id)]
-pub struct EmbeddedPlayer {
+pub struct DatabasePlayer {
     pub id: i32,
     pub name: CiString,
     pub banned: bool,
@@ -76,25 +76,25 @@ pub struct RankedPlayer {
 
 #[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
 #[display(fmt = "{}", inner)]
-pub struct ShortPlayer {
+pub struct Player {
     #[serde(flatten)]
-    pub inner: EmbeddedPlayer,
+    pub inner: DatabasePlayer,
 
     pub nationality: Option<Nationality>,
 }
 
 #[derive(Debug, Serialize, Display)]
 #[display(fmt = "{}", player)]
-pub struct PlayerWithDemonsAndRecords {
+pub struct FullPlayer {
     #[serde(flatten)]
-    pub player: ShortPlayer,
+    pub player: Player,
     pub records: Vec<MinimalRecordD>,
     pub created: Vec<MinimalDemon>,
     pub verified: Vec<MinimalDemon>,
     pub published: Vec<MinimalDemon>,
 }
 
-impl Hash for PlayerWithDemonsAndRecords {
+impl Hash for FullPlayer {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.player.hash(state)
     }
@@ -106,19 +106,19 @@ struct NewPlayer<'a> {
     name: &'a CiStr,
 }
 
-impl By<players::id, i32> for EmbeddedPlayer {}
-impl By<players::name, &CiStr> for EmbeddedPlayer {}
+impl By<players::id, i32> for DatabasePlayer {}
+impl By<players::name, &CiStr> for DatabasePlayer {}
 
-impl By<players::id, i32> for ShortPlayer {}
-impl By<players::name, &CiStr> for ShortPlayer {}
+impl By<players::id, i32> for Player {}
+impl By<players::name, &CiStr> for Player {}
 
-impl EmbeddedPlayer {
-    pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<EmbeddedPlayer> {
+impl DatabasePlayer {
+    pub fn insert(name: &CiStr, conn: &PgConnection) -> QueryResult<DatabasePlayer> {
         info!("Creating new player with name {}", name);
 
         insert_into(players::table)
             .values(&NewPlayer { name })
-            .returning(EmbeddedPlayer::selection())
+            .returning(DatabasePlayer::selection())
             .get_result(conn)
     }
 
@@ -149,7 +149,7 @@ impl EmbeddedPlayer {
         Ok(())
     }
 
-    pub fn merge(&self, with: EmbeddedPlayer, conn: &PgConnection) -> Result<()> {
+    pub fn merge(&self, with: DatabasePlayer, conn: &PgConnection) -> Result<()> {
         // FIXME: I had a serious headache while writing this code and didn't really think much
         // while doing so. Maybe look over it again at some point If both `self` and `with`
         // are registered as the creator of a level, delete `with` as creator
@@ -205,7 +205,7 @@ impl EmbeddedPlayer {
     }
 }
 
-impl Model for EmbeddedPlayer {
+impl Model for DatabasePlayer {
     type From = players::table;
     type Selection = (players::id, players::name, players::banned);
 
@@ -218,7 +218,7 @@ impl Model for EmbeddedPlayer {
     }
 }
 
-impl Model for ShortPlayer {
+impl Model for Player {
     type From = JoinOn<
         Join<players::table, nationalities::table, LeftOuter>,
         diesel::dsl::Eq<
@@ -271,7 +271,7 @@ impl Model for RankedPlayer {
     }
 }
 
-impl Queryable<<<ShortPlayer as Model>::Selection as Expression>::SqlType, Pg> for ShortPlayer {
+impl Queryable<<<Player as Model>::Selection as Expression>::SqlType, Pg> for Player {
     type Row = (i32, CiString, bool, Option<String>, Option<CiString>);
 
     fn build(row: Self::Row) -> Self {
@@ -280,8 +280,8 @@ impl Queryable<<<ShortPlayer as Model>::Selection as Expression>::SqlType, Pg> f
             _ => None,
         };
 
-        ShortPlayer {
-            inner: EmbeddedPlayer {
+        Player {
+            inner: DatabasePlayer {
                 id: row.0,
                 name: row.1,
                 banned: row.2,
