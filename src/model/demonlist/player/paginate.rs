@@ -43,7 +43,7 @@ impl TablePaginator for PlayerPagination {
         if let Some(ref nation) = self.nation {
             query = query.filter(
                 players_n::iso_country_code
-                    .eq(nation)
+                    .eq(nation.to_uppercase())
                     .or(players_n::nation.eq(Some(CiStr::from_str(nation)))), // okay?
             );
         }
@@ -94,7 +94,11 @@ impl TablePaginator for RankingPagination {
         let mut query = RankedPlayer::boxed_all();
 
         if let Some(ref nation) = self.nation {
-            query = query.filter(players_with_score::iso_country_code.eq(nation));
+            query = query.filter(
+                players_with_score::iso_country_code
+                    .eq(nation.to_uppercase())
+                    .or(players_with_score::nation.eq(Some(CiStr::from_str(nation)))), // okay?
+            );
         }
 
         if let Some(ref like_name) = self.name_contains {
