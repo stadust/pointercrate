@@ -1,7 +1,6 @@
 use crate::{
     citext::CiString,
     context::RequestContext,
-    error::PointercrateError,
     model::{
         demonlist::{demon::demons_pv, Demon},
         Model,
@@ -9,7 +8,7 @@ use crate::{
     operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     Result,
 };
-use diesel::{QueryDsl, RunQueryDsl};
+use diesel::QueryDsl;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

@@ -2,12 +2,11 @@ use super::{Record, RecordStatus};
 use crate::{
     citext::CiString,
     context::RequestContext,
-    error::PointercrateError,
     model::{demonlist::record::records_pd, Model},
     operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     Result,
 };
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

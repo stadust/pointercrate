@@ -1,7 +1,6 @@
 use super::Submitter;
 use crate::{
     context::RequestContext,
-    model::Model,
     operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     schema::submitters,
     Result,
@@ -28,15 +27,16 @@ impl TablePaginator for SubmitterPagination {
     type Table = submitters::table;
 
     fn query(&self, _: RequestContext) -> PaginatorQuery<submitters::table> {
-        let mut query = Submitter::boxed_all();
+        let mut query = submitters::table
+            .select(submitters::all_columns)
+            .into_boxed();
 
         if let Some(banned) = self.banned {
             query = query.filter(submitters::banned.eq(banned));
         }
 
         // FIXME: figure it out
-        //query
-        unimplemented!()
+        query
     }
 }
 
@@ -46,9 +46,11 @@ impl Paginate<SubmitterPagination> for Submitter {
     fn load(pagination: &SubmitterPagination, ctx: RequestContext) -> Result<Vec<Self>> {
         ctx.check_permissions(perms!(ListAdministrator))?;
 
-        let mut query = pagination.query(ctx);
+        let mut query = pagination
+            .query(ctx)
+            .select((submitters::submitter_id, submitters::banned));
 
-        /*filter!(query[
+        filter!(query[
             submitters::submitter_id > pagination.after_id,
             submitters::submitter_id < pagination.before_id
         ]);
@@ -58,7 +60,7 @@ impl Paginate<SubmitterPagination> for Submitter {
             pagination,
             submitters::submitter_id,
             ctx.connection()
-        )*/
-        unimplemented!()
+        )
+        //unimplemented!()
     }
 }

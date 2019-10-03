@@ -1,13 +1,12 @@
 use super::{Permissions, User};
 use crate::{
     context::RequestContext,
-    error::PointercrateError,
     model::Model,
     operation::{Paginate, Paginator, PaginatorQuery, TablePaginator},
     schema::members,
     Result,
 };
-use diesel::{QueryDsl, RunQueryDsl};
+use diesel::QueryDsl;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

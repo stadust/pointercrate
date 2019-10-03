@@ -315,7 +315,8 @@ macro_rules! filter {
 
 macro_rules! pagination_result {
     ($query: expr, $pagination_data: expr, $before_column: ident, $after_column: ident, $db_column: path, $connection: expr) => {{
-        use diesel::ExpressionMethods;
+        use crate::error::PointercrateError;
+        use diesel::{ExpressionMethods, RunQueryDsl};
         if $pagination_data.$after_column.is_none() && $pagination_data.$before_column.is_some() {
             let mut members = $query
                 .order_by($db_column.desc())

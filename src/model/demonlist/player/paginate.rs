@@ -1,7 +1,6 @@
 use crate::{
     citext::{CiString, CiText},
     context::RequestContext,
-    error::PointercrateError,
     model::{
         demonlist::player::{players_with_score, RankedPlayer, ShortPlayer},
         Model,
@@ -10,7 +9,7 @@ use crate::{
     schema::players,
     Result,
 };
-use diesel::{dsl::sql, ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{dsl::sql, ExpressionMethods, QueryDsl};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
