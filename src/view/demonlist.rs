@@ -415,7 +415,13 @@ impl Page for Demonlist {
                                         (self.data.records.len())
                                         " records registered, out of which "
                                         (self.data.records.iter().filter(|record| record.progress == 100).count())
-                                        " are 100%"
+                                        @if self.data.records.iter().filter(|record| record.progress == 100).count() == 1 {
+                                            " is"
+                                        }
+                                        @else {
+                                            " are"
+                                        }
+                                        " 100%"
                                     }
                                 }
                             }
