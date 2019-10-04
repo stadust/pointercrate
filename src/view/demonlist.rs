@@ -112,7 +112,7 @@ impl Page for DemonlistOverview {
                                             }
                                             h3 style = "text-align: left" {
                                                 i {
-                                                    "by " (demon.publisher)
+                                                    "by " (demon.publisher.name)
                                                 }
                                             }
                                         }
@@ -120,7 +120,7 @@ impl Page for DemonlistOverview {
                                     @else {
                                         h2 {
                                             a href = {"/demonlist/" (demon.position)} {
-                                                "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                                "#" (demon.position) " - " (demon.name) " by " (demon.publisher.name)
                                             }
                                         }
                                     }
