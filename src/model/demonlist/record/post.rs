@@ -1,6 +1,6 @@
 use super::{Record, RecordStatus};
 use crate::{
-    citext::{CiStr, CiString},
+    citext::CiString,
     config::{EXTENDED_LIST_SIZE, LIST_SIZE},
     context::RequestContext,
     error::PointercrateError,
@@ -42,7 +42,7 @@ struct NewRecord<'a> {
     status: RecordStatus,
     player: i32,
     submitter: i32,
-    demon: &'a CiStr,
+    demon: i32,
 }
 
 impl Post<Submission> for Option<Record> {
@@ -113,10 +113,9 @@ impl Post<Submission> for Option<Record> {
             // (demon, player) combination exists. If a video exists, we also check if a record with
             // exactly that video exists. Note that in the second case, two records can be matched,
             // which is why we need the loop here
-            let demon_name: &CiStr = demon.name.as_ref();
             let same_demon_and_player = records::player
                 .eq(player.id)
-                .and(records::demon.eq(demon_name));
+                .and(records::demon.eq(demon.id));
 
             let records: Vec<DatabaseRecord> = if video.is_some() {
                 DatabaseRecord::all().filter(same_demon_and_player.or(records::video.eq(video.as_ref()))).get_results(connection)?
@@ -199,7 +198,7 @@ impl Post<Submission> for Option<Record> {
                 status,
                 player: player.id,
                 submitter: submitter.id,
-                demon: demon.name.as_ref(),
+                demon: demon.id,
             };
 
             let id = insert_into(records::table)
@@ -217,6 +216,7 @@ impl Post<Submission> for Option<Record> {
                 player,
                 submitter: Some(submitter.id),
                 demon: MinimalDemon {
+                    id: demon.id,
                     position: demon.position,
                     name: demon.name
                 }

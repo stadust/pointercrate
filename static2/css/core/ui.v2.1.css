@@ -380,6 +380,9 @@ form input[type="password"]:invalid {
   z-index: 10000;
 
   box-shadow: 0px 8px 10px #ccc, -10px 8px 15px #ccc, 10px 8px 15px #ccc;
+
+  animation-name: hide-in-a-bit;
+  animation-duration: 1s;
 }
 
 .dropdown-menu > input[type="text"] {

@@ -19,8 +19,8 @@ pub struct PostCreator {
 
 #[derive(Debug, Insertable)]
 #[table_name = "creators"]
-struct NewCreator<'a> {
-    demon: &'a CiStr,
+struct NewCreator {
+    demon: i32,
     creator: i32,
 }
 
@@ -41,7 +41,7 @@ impl<'a> Post<(&'a CiStr, &'a CiStr)> for Creator {
 
             insert_into(creators::table)
                 .values(&NewCreator {
-                    demon: demon.name.as_ref(),
+                    demon: demon.id,
                     creator: player.id,
                 })
                 .get_result(connection)

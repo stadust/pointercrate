@@ -1,6 +1,5 @@
 use super::{EmbeddedRecordPD, MinimalRecordD, MinimalRecordP, Record};
 use crate::{
-    citext::CiStr,
     context::RequestContext,
     error::PointercrateError,
     model::{
@@ -77,11 +76,8 @@ impl Get<i32> for Vec<MinimalRecordD> {
 
 impl<'a> Get<&'a Demon> for Vec<MinimalRecordP> {
     fn get(demon: &'a Demon, ctx: RequestContext) -> Result<Self> {
-        // type inference gets stuck w/o this
-        let demon_name: &'a CiStr = demon.name.as_ref();
-
         MinimalRecordP::all()
-            .filter(records_p::demon.eq(demon_name))
+            .filter(records_p::demon.eq(demon.id))
             .filter(records_p::status_.eq(RecordStatus::Approved))
             .order_by((records_p::progress.desc(), records_p::id))
             .load(ctx.connection())

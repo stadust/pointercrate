@@ -42,7 +42,7 @@ impl Get<i16> for Demon {
 
 impl Get<Demon> for FullDemon {
     fn get(demon: Demon, ctx: RequestContext) -> Result<Self> {
-        let creators = Creators::get(demon.name.as_ref(), ctx)?;
+        let creators = Creators::get(demon.id, ctx)?;
         let records = Vec::<MinimalRecordP>::get(&demon, ctx)?;
 
         Ok(FullDemon {

@@ -1,6 +1,5 @@
 pub use self::post::PostCreator;
 use crate::{
-    citext::{CiStr, CiString, CiText},
     model::demonlist::player::DatabasePlayer,
     schema::{creators, demons, players},
 };
@@ -18,24 +17,24 @@ pub struct Creators(pub Vec<DatabasePlayer>);
 #[derive(Debug, Queryable, Display, Hash)]
 #[display(fmt = "creator with id {} on demon {}", creator, demon)]
 pub struct Creator {
-    demon: CiString,
+    demon: i32,
     creator: i32,
 }
 
-type ByDemon<'a> = diesel::dsl::Eq<creators::demon, Bound<CiText, &'a CiStr>>;
-type WithDemon<'a> = diesel::dsl::Filter<
+type ByDemon = diesel::dsl::Eq<creators::demon, Bound<sql_types::Int4, i32>>;
+type WithDemon = diesel::dsl::Filter<
     diesel::dsl::Select<
         diesel::dsl::InnerJoin<creators::table, players::table>,
         (players::id, players::name, players::banned),
     >,
-    ByDemon<'a>,
+    ByDemon,
 >;
 
 type ByPlayer = diesel::dsl::Eq<creators::creator, Bound<sql_types::Int4, i32>>;
 type WithPlayer = diesel::dsl::Filter<
     diesel::dsl::Select<
         diesel::dsl::InnerJoin<creators::table, demons::table>,
-        (demons::position, demons::name),
+        (demons::id, demons::position, demons::name),
     >,
     ByPlayer,
 >;
@@ -43,11 +42,11 @@ type WithPlayer = diesel::dsl::Filter<
 pub fn created_by(player: i32) -> WithPlayer {
     creators::table
         .inner_join(demons::table)
-        .select((demons::position, demons::name))
+        .select((demons::id, demons::position, demons::name))
         .filter(creators::creator.eq(player))
 }
 
-pub fn creators_of(demon: &CiStr) -> WithDemon {
+pub fn creators_of(demon: i32) -> WithDemon {
     creators::table
         .inner_join(players::table)
         .select((players::id, players::name, players::banned))

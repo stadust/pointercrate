@@ -67,9 +67,10 @@ impl Post<PostDemon> for Demon {
 
             Demon::shift_down(new.position, connection)?;
 
-            insert_into(demons::table)
+            let id = insert_into(demons::table)
                 .values(&new)
-                .execute(connection)?;
+                .returning(demons::id)
+                .get_result(connection)?;
 
             let creators_hash: HashSet<CiString> = data.creators.into_iter().collect();
 
@@ -81,6 +82,7 @@ impl Post<PostDemon> for Demon {
             }
 
             Ok(Demon {
+                id,
                 name: data.name,
                 position: data.position,
                 requirement: data.requirement,

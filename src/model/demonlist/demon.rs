@@ -11,7 +11,7 @@ use crate::{
 use derive_more::Display;
 use diesel::{
     dsl::max, pg::Pg, Expression, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
-    Queryable, RunQueryDsl,
+    Queryable, RunQueryDsl, Table,
 };
 use joinery::Joinable;
 use log::{debug, warn};
@@ -35,6 +35,7 @@ table! {
     use diesel::sql_types::*;
 
     demons_pv (name) {
+        id -> Int4,
         name -> CiText,
         position -> Int2,
         requirement -> Int2,
@@ -52,6 +53,9 @@ table! {
 #[derive(Debug, Serialize, Hash, Display, Eq, PartialEq)]
 #[display(fmt = "{} (at {})", name, position)]
 pub struct Demon {
+    /// The [`Demon`]'s internal pointercrate ID
+    pub id: i32,
+
     /// The [`Demon`]'s Geometry Dash level name
     pub name: CiString,
 
@@ -78,9 +82,9 @@ table! {
     use diesel::sql_types::*;
 
     demons_p (name) {
+        id -> Int4,
         name -> CiText,
         position -> Int2,
-        requirement -> Int2,
         video -> Nullable<Varchar>,
         publisher_id -> Int4,
         publisher_name -> CiText,
@@ -93,6 +97,7 @@ table! {
 #[derive(Debug, Hash, Eq, PartialEq, Serialize, Display)]
 #[display(fmt = "{} (at {})", name, position)]
 pub struct MinimalDemonP {
+    pub id: i32,
     pub name: CiString,
     pub position: i16,
     pub video: Option<String>,
@@ -105,6 +110,7 @@ pub struct MinimalDemonP {
 #[derive(Debug, Hash, Serialize, Queryable, Display)]
 #[display(fmt = "{} (at {})", name, position)]
 pub struct MinimalDemon {
+    pub id: i32,
     pub position: i16,
     pub name: CiString,
 }
@@ -112,31 +118,21 @@ pub struct MinimalDemon {
 impl Model for Demon {
     #[allow(clippy::type_complexity)]
     type From = demons_pv::table;
-    type Selection = (
-        demons_pv::name,
-        demons_pv::position,
-        demons_pv::requirement,
-        demons_pv::video,
-        demons_pv::verifier_id,
-        demons_pv::verifier_name,
-        demons_pv::verifier_banned,
-        demons_pv::publisher_id,
-        demons_pv::publisher_name,
-        demons_pv::publisher_banned,
-    );
+    type Selection = <demons_pv::table as Table>::AllColumns;
 
     fn from() -> Self::From {
         demons_pv::table
     }
 
     fn selection() -> Self::Selection {
-        Self::Selection::default()
+        demons_pv::all_columns
     }
 }
 
 impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Demon {
     #[allow(clippy::type_complexity)]
     type Row = (
+        i32,
         CiString,
         i16,
         i16,
@@ -151,19 +147,20 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
 
     fn build(row: Self::Row) -> Self {
         Demon {
-            name: row.0,
-            position: row.1,
-            requirement: row.2,
-            video: row.3,
+            id: row.0,
+            name: row.1,
+            position: row.2,
+            requirement: row.3,
+            video: row.4,
             publisher: DatabasePlayer {
-                id: row.4,
-                name: row.5,
-                banned: row.6,
+                id: row.5,
+                name: row.6,
+                banned: row.7,
             },
             verifier: DatabasePlayer {
-                id: row.7,
-                name: row.8,
-                banned: row.9,
+                id: row.8,
+                name: row.9,
+                banned: row.10,
             },
         }
     }
@@ -171,36 +168,30 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
 
 impl Model for MinimalDemonP {
     type From = demons_p::table;
-    type Selection = (
-        demons_p::name,
-        demons_p::position,
-        demons_p::video,
-        demons_p::publisher_id,
-        demons_p::publisher_name,
-        demons_p::publisher_banned,
-    );
+    type Selection = <demons_p::table as Table>::AllColumns;
 
     fn from() -> Self::From {
         demons_p::table
     }
 
     fn selection() -> Self::Selection {
-        Self::Selection::default()
+        demons_p::all_columns
     }
 }
 
 impl Queryable<<<MinimalDemonP as Model>::Selection as Expression>::SqlType, Pg> for MinimalDemonP {
-    type Row = (CiString, i16, Option<String>, i32, CiString, bool);
+    type Row = (i32, CiString, i16, Option<String>, i32, CiString, bool);
 
     fn build(row: Self::Row) -> Self {
         MinimalDemonP {
-            name: row.0,
-            position: row.1,
-            video: row.2,
+            id: row.0,
+            name: row.1,
+            position: row.2,
+            video: row.3,
             publisher: DatabasePlayer {
-                id: row.3,
-                name: row.4,
-                banned: row.5,
+                id: row.4,
+                name: row.5,
+                banned: row.6,
             },
         }
     }
@@ -208,7 +199,7 @@ impl Queryable<<<MinimalDemonP as Model>::Selection as Expression>::SqlType, Pg>
 
 impl Model for MinimalDemon {
     type From = demons::table;
-    type Selection = (demons::position, demons::name);
+    type Selection = (demons::id, demons::position, demons::name);
 
     fn from() -> Self::From {
         demons::table
@@ -295,6 +286,8 @@ impl FullDemon {
         }
     }
 }
+
+impl By<demons_pv::id, i32> for Demon {}
 impl By<demons_pv::position, i16> for Demon {}
 impl By<demons_pv::name, &CiStr> for Demon {}
 

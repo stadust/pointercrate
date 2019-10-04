@@ -4,8 +4,8 @@ table! {
     use crate::bitstring::BitString;
 
     creators (demon, creator) {
-        demon -> Citext,
         creator -> Int4,
+        demon -> Int4,
     }
 }
 
@@ -14,13 +14,14 @@ table! {
     use crate::citext::Citext;
     use crate::bitstring::BitString;
 
-    demons (name) {
+    demons (id) {
         name -> Citext,
         position -> Int2,
         requirement -> Int2,
         video -> Nullable<Varchar>,
         verifier -> Int4,
         publisher -> Int4,
+        id -> Int4,
     }
 }
 
@@ -78,7 +79,7 @@ table! {
         status_ -> Record_status,
         player -> Int4,
         submitter -> Int4,
-        demon -> Citext,
+        demon -> Int4,
     }
 }
 
