@@ -237,7 +237,7 @@ $(document).ready(function() {
 
   progress.addValidator(
     valueMissing,
-    "Please specify the records's progress progress"
+    "Please specify the record's progress"
   );
   progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
   progress.addValidator(
@@ -245,7 +245,7 @@ $(document).ready(function() {
     "Record progress cannot be larger than 100%"
   );
   progress.addValidator(badInput, "Record progress must be a valid integer");
-  progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+  progress.addValidator(stepMismatch, "Record progress cannot be a decimal");
 
   video.addValidator(
     valueMissing,
