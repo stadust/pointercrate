@@ -385,7 +385,7 @@ impl Page for Demonlist {
                             @if self.data.demon.position <= *LIST_SIZE {
                                 span {
                                     b {
-                                        "Demonlist score (" (self.data.demon.requirement) "%)"
+                                        "Demonlist score (" (self.data.demon.requirement) "%): "
                                     }
                                     br;
                                     (format!("{:.2}", score_requirement))
@@ -968,7 +968,7 @@ fn submit_panel() -> Markup {
                 }
             }
             p {
-                "Note: Please do not submit nonsense, it only makes it harder for us all and will get you banned. Also note that the form rejects duplicate submission"
+                "Note: Please do not submit nonsense, it only makes it harder for us all and will get you banned. Also note that the form rejects duplicate submissions."
             }
             a.blue.hover.button.slightly-rounded.js-scroll data-destination = "submitter" data-reveal = "true" {
                 "Submit a record!"
