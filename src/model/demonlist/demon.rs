@@ -117,12 +117,12 @@ impl Model for Demon {
         demons_pv::position,
         demons_pv::requirement,
         demons_pv::video,
-        demons_pv::verifier_id,
-        demons_pv::verifier_name,
-        demons_pv::verifier_banned,
         demons_pv::publisher_id,
         demons_pv::publisher_name,
         demons_pv::publisher_banned,
+        demons_pv::verifier_id,
+        demons_pv::verifier_name,
+        demons_pv::verifier_banned,
     );
 
     fn from() -> Self::From {
