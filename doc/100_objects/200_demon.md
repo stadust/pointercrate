@@ -15,37 +15,40 @@ Note that although on the website the record requirement for demons on the exten
 
 When embedded into other objects (for example, as part of a [Record](/documentation/objects/#record)), only the following minimal representation of each demon is provided:
 
-| Field    | Type    | Description               |
-| -------- | ------- | ------------------------- |
-| name     | string  | The name of the demon     |
-| position | integer | The position of the demon |
+| Field    | Type    | Description                                                                               |
+| -------- | ------- | ----------------------------------------------------------------------------------------- |
+| name     | string  | The name of the demon                                                                     |
+| position | integer | The position of the demon                                                                 |
+| id       | integer | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
 
 ## Listed Form
 
 When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), only the following partial representation of each demon is provided:
 
-| Field     | Type    | Description                                      |
-| --------- | ------- | ------------------------------------------------ |
-| name      | string  | The name of the demon                            |
-| position  | integer | The position of the demon                        |
-| publisher | [Player](#player)  | The player that published this demon |
-| verifier | [Player](#player)  | The player that verified this demon |
-| video     | URL?    | The verification video                           |
+| Field     | Type              | Description                                                                               |
+| --------- | ----------------- | ----------------------------------------------------------------------------------------- |
+| name      | string            | The name of the demon                                                                     |
+| position  | integer           | The position of the demon                                                                 |
+| id        | integer           | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
+| publisher | [Player](#player) | The player that published this demon                                                      |
+| verifier  | [Player](#player) | The player that verified this demon                                                       |
+| video     | URL?              | The verification video                                                                    |
 
 ## Full Form
 
 The listed record objects do not contain the current demon embedded into the `demon` field.
 
-| Field       | Type                    | Description                                                             |
-| ----------- | ----------------------- | ----------------------------------------------------------------------- |
-| name        | string                  | The name of the demon                                                   |
-| position    | integer                 | The position of the demon                                               |
-| requirement | integer                 | The minimum percentage a record on this demon has to be, to be accepted |
-| video       | URL?                    | The verification video.                                                 |
-| verifier    | [Player](#player)       | The demon's verifier                                                    |
-| publisher   | [Player](#player)       | The demon's publisher                                                   |
-| creators    | List[[Player](#player)] | The demon's creators                                                    |
-| records     | List[[Record](#record)] | All approved records for this demon                                     |
+| Field       | Type                    | Description                                                                               |
+| ----------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| name        | string                  | The name of the demon                                                                     |
+| position    | integer                 | The position of the demon                                                                 |
+| id          | integer                 | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
+| requirement | integer                 | The minimum percentage a record on this demon has to be, to be accepted                   |
+| video       | URL?                    | The verification video.                                                                   |
+| verifier    | [Player](#player)       | The demon's verifier                                                                      |
+| publisher   | [Player](#player)       | The demon's publisher                                                                     |
+| creators    | List[[Player](#player)] | The demon's creators                                                                      |
+| records     | List[[Record](#record)] | All approved records for this demon                                                       |
 
 ## Example objects
 
@@ -54,7 +57,8 @@ The listed record objects do not contain the current demon embedded into the `de
 ```json
 {
   "name": "Cadrega City",
-  "position": 34
+  "position": 34,
+  "id": 1
 }
 ```
 
@@ -64,6 +68,7 @@ The listed record objects do not contain the current demon embedded into the `de
 {
   "name": "Cadrega City",
   "position": 34,
+  "id": 1,
   "publisher": {
     "name": "Pennutoh",
     "id": 123,
@@ -91,6 +96,7 @@ The listed record objects do not contain the current demon embedded into the `de
   ],
   "name": "Cadrega City",
   "position": 34,
+  "id": 1,
   "publisher": {
     "banned": false,
     "id": 2,

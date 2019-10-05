@@ -4,10 +4,10 @@
 
 Object representing some nation
 
-| Field  | Type    | Description                                      |
-| ------ | ------- | ------------------------------------------------ |
-|nation|string| The nation's name|
-| country_code|string| The nation's ISO country code. Always exactly 2 characters long
+| Field        | Type   | Description                                                     |
+| ------------ | ------ | --------------------------------------------------------------- |
+| nation       | string | The nation's name                                               |
+| country_code | string | The nation's ISO country code. Always exactly 2 characters long |
 
 ## Example objects
 
@@ -19,6 +19,5 @@ Object representing some nation
   "country_code": "DE"
 }
 ```
-
 
 </div>

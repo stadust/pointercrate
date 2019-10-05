@@ -14,7 +14,7 @@ Requests without `ExtendedAccess` permissions can only retrieve approved records
 
 ## Minimal Form
 
-The minimal (formerly called embedded form) form of record objects is returned if a record object is part of another object. 
+The minimal (formerly called embedded form) form of record objects is returned if a record object is part of another object.
 
 | Field    | Type                           | Description                                |
 | -------- | ------------------------------ | ------------------------------------------ |
@@ -32,30 +32,30 @@ Depending on the context the object is returned in, one (or both) of the followi
 
 ## Listed Form
 
-The listed form (formerly called short form) of record objects is returned by [`GET /records/`](/documentation/records/#get-records). 
+The listed form (formerly called short form) of record objects is returned by [`GET /records/`](/documentation/records/#get-records).
 
-| Field    | Type                           | Description                                |
-| -------- | ------------------------------ | ------------------------------------------ |
-| id       | integer                        | The record's id                            |
-| progress | integer                        | The progress achieved by the record holder |
-| status   | [RecordStatus](#record-status) | The record's status.                       |
-| video    | URL?                           | The record's video.                        |
-| player | [Player](#player) | The record holder                |
-| demon  | [Demon](#demon)   | The demon the record was made on |
-| submitter | integer | The internal ID of the submitter|
+| Field     | Type                           | Description                                |
+| --------- | ------------------------------ | ------------------------------------------ |
+| id        | integer                        | The record's id                            |
+| progress  | integer                        | The progress achieved by the record holder |
+| status    | [RecordStatus](#record-status) | The record's status.                       |
+| video     | URL?                           | The record's video.                        |
+| player    | [Player](#player)              | The record holder                          |
+| demon     | [Demon](#demon)                | The demon the record was made on           |
+| submitter | integer                        | The internal ID of the submitter           |
 
 ## Full Form
 
 The full (formerly called long form) form of record objects is returned by [`GET /records/{record_id}`](/documentation/records/#record-retrieval).
 
-| Field     | Type                           | Description                                             |
-| --------- | ------------------------------ | ------------------------------------------------------- |
-| id        | integer                        | The record's id                                         |
-| progress  | integer                        | The progress achieved by the record's holder            |
-| video     | URL?                           | The record's video.                                     |
-| status    | [RecordStatus](#record-status) | The record's status.                                    |
-| player    | [Player](#player)              | The record holder                                       |
-| demon     | [Demon](#demon)                | The demon the record was made on                        |
+| Field     | Type                           | Description                                                  |
+| --------- | ------------------------------ | ------------------------------------------------------------ |
+| id        | integer                        | The record's id                                              |
+| progress  | integer                        | The progress achieved by the record's holder                 |
+| video     | URL?                           | The record's video.                                          |
+| status    | [RecordStatus](#record-status) | The record's status.                                         |
+| player    | [Player](#player)              | The record holder                                            |
+| demon     | [Demon](#demon)                | The demon the record was made on                             |
 | submitter | [Submitter](#submitter)?       | The person that submitted the record, as an submitter object |
 
 ## Enum RecordStatus{id=record-status}
@@ -77,7 +77,7 @@ Here with an embedded demon object:
   "id": 1,
   "progress": 100,
   "demon": {
-    "name": "Cadrega City", 
+    "name": "Cadrega City",
     "position": 1
   },
   "status": "approved",
