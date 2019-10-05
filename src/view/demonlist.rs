@@ -385,7 +385,7 @@ impl Page for Demonlist {
                             @if self.data.demon.position <= *LIST_SIZE {
                                 span {
                                     b {
-                                        "Demonlist score (" (self.data.demon.requirement) "%)"
+                                        "Demonlist score (" (self.data.demon.requirement) "%): "
                                     }
                                     br;
                                     (format!("{:.2}", score_requirement))
@@ -412,10 +412,12 @@ impl Page for Demonlist {
                                 }
                                 @if !self.data.records.is_empty() {
                                     h4 {
+                                        @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
                                         (self.data.records.len())
                                         " records registered, out of which "
-                                        (self.data.records.iter().filter(|record| record.progress == 100).count())
-                                        " are 100%"
+                                        (records_registered_100_count)
+                                        @if records_registered_100_count == 1 { " is" } @else { " are" } 
+                                        " 100%"
                                     }
                                 }
                             }
@@ -962,7 +964,7 @@ fn submit_panel() -> Markup {
                 }
             }
             p {
-                "Note: Please do not submit nonsense, it only makes it harder for us all and will get you banned. Also note that the form rejects duplicate submission"
+                "Note: Please do not submit nonsense, it only makes it harder for us all and will get you banned. Also note that the form rejects duplicate submissions."
             }
             a.blue.hover.button.slightly-rounded.js-scroll data-destination = "submitter" data-reveal = "true" {
                 "Submit a record!"

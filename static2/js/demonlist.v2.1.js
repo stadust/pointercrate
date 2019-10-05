@@ -237,7 +237,7 @@ $(document).ready(function() {
 
   progress.addValidator(
     valueMissing,
-    "Please specify the records's progress progress"
+    "Please specify the record's progress"
   );
   progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
   progress.addValidator(
