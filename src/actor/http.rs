@@ -168,14 +168,7 @@ impl Handler<GetDemon> for HttpActor {
             .upgrade_all::<PartialLevel<_, Option<Creator>>>()
             .upgrade_all::<Level<_, _>>();
 
-        let result = future.clone_cached().map(|cache_entry| {
-            cache_entry.map(|demons| {
-                demons
-                    .into_iter()
-                    .max_by(|x, y| x.base.difficulty.cmp(&y.base.difficulty))
-                    .unwrap()
-            })
-        });
+        let cached_clone = future.clone_cached();
 
         ctx.spawn(
             future
@@ -184,6 +177,16 @@ impl Handler<GetDemon> for HttpActor {
                 .into_actor(self),
         );
 
-        result.ok()
+        match cached_clone.ok()? {
+            CacheEntry::Missing => Some(CacheEntry::Missing),
+            CacheEntry::DeducedAbsent => Some(CacheEntry::DeducedAbsent),
+            CacheEntry::MarkedAbsent(meta) => Some(CacheEntry::MarkedAbsent(meta)),
+            CacheEntry::Cached(demons, meta) =>
+                demons
+                    .into_iter()
+                    .filter(|demon| demon.base.name == msg.0)
+                    .max_by(|x, y| x.base.difficulty.cmp(&y.base.difficulty))
+                    .map(|demon| CacheEntry::Cached(demon, meta)),
+        }
     }
 }
