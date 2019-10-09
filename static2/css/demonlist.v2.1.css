@@ -51,7 +51,6 @@ tr:nth-child(even) {
   #rules,
   #discord {
     order: -1;
-    width: 100%;
   }
 
   #discord {
