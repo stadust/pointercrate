@@ -302,10 +302,14 @@ $(document).ready(function() {
     );
   });
 
-  var loadUsersButton = document.getElementById("load-users");
+  let usersLoaded = false;
 
-  loadUsersButton.addEventListener("click", () => {
-    loadUsersButton.style.display = "none";
+  TABBED_PANES["account-tabber"].addSwitchListener("2", () => {
+    if (usersLoaded) {
+      return;
+    }
+
+    usersLoaded = true;
 
     new Paginator(
       document.getElementById("user-pagination"),

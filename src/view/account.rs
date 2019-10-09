@@ -57,7 +57,7 @@ impl Page for AccountPage {
     fn body(&self, req: &HttpRequest<PointercrateState>) -> Markup {
         html! {
             span#chicken-salad-red-fish style = "display:none" {(self.user.generate_csrf_token())}
-            div.tabbed {
+            div.tabbed#account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
                     div.tab.tab-active.button.white.hover.no-shadow data-tab-id="1" {
                         b {
@@ -186,16 +186,13 @@ impl AccountPage {
                         p {
                             "A list of all user accounts on pointercrate"
                         }
-                        div#user-pagination style="display:none"{
+                        div#user-pagination {
                             p.info-red.output#load-users-error {}
                             ul.selection-list#user-list {}
                             div.flex {
                                 div.button.blue.hover.slightly-round.prev style="margin-right: 20px" { "Previous"}
                                 div.button.blue.hover.slightly-round.next {"Next"} // *clap* next *clap* user
                             }
-                        }
-                        a.blue.hover.button.slightly-round#load-users {
-                            "Load"
                         }
                     }
                 }
