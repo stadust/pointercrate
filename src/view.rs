@@ -71,7 +71,6 @@ pub trait Page {
                     link rel = "stylesheet" href = "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
                     link rel = "stylesheet" href = "https://fonts.googleapis.com/css?family=Montserrat|Montserrat:light,bold";
 
-                    link rel = "stylesheet" href = {(STATIC) "css/core/layout.v2.css"};
                     link rel = "stylesheet" href = {(STATIC) "css/core/icon.v2.css"};
                     link rel = "stylesheet" href = {(STATIC) "css/core/nav.v2.css"};
                     link rel = "stylesheet" href = {(STATIC) "css/core/ui.v2.1.css"};

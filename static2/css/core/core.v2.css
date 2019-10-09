@@ -21,25 +21,23 @@
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   }
 
+  /* center using margin */
   .m-center {
+    max-width: 1024px;
     margin-left: calc(50% - 1024px / 2) !important;
     margin-right: calc(50% - 1024px / 2) !important;
+  }
+
+  /* center using padding */
+  .center {
+    max-width: 1024px;
+    padding-left: calc(50% - 1024px / 2);
+    padding-right: calc(50% - 1024px / 2);
   }
 }
 
 .clickable {
   cursor: pointer;
-}
-
-.m-center-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.center {
-  max-width: 1024px;
-  padding-left: calc(50% - 1024px / 2);
-  padding-right: calc(50% - 1024px / 2);
 }
 
 .see-through {
