@@ -53,6 +53,22 @@ impl<'a> Page for Documentation<'a> {
                     (PreEscaped(self.toc))
                 }
             }
+            (PreEscaped(r#"
+                <script>
+                // you know, this might be the most ugly solution to a problem I have ever thought of
+                $(document).ready(function() {
+                  $("h1").append(
+                    '<a class="fa fa-link fa-3 link-anchor" aria-hidden="true" title="Permanent link to this topic"></a>'
+                  );
+                  $("h1").prepend(
+                    '<i class="fa fa-link fa-3 link-anchor" style="visibility:hidden" aria-hidden="true"></i>'
+                  );
+                  $(".link-anchor").each((idx, elem) =>
+                    $(elem).attr("href", '#' + $(elem).parent()[0].id)
+                  );
+                })
+                </script>
+            "#))
         }
     }
 
@@ -93,20 +109,6 @@ impl<'a> Page for Documentation<'a> {
     "url": "https://pointercrate.com/documentation/account/",
     "dateCreated": "2017-04-08"
   }
-</script>
-<script>
-// you know, this might be the most ugly solution to a problem I have ever thought of
-$(document).ready(function() {
-  $("h1").append(
-    '<a class="fa fa-link fa-3 link-anchor" aria-hidden="true" title="Permanent link to this topic"></a>'
-  );
-  $("h1").prepend(
-    '<i class="fa fa-link fa-3 link-anchor" style="visibility:hidden" aria-hidden="true"></i>'
-  );
-  $(".link-anchor").each((idx, elem) =>
-    $(elem).attr("href", '#' + $(elem).parent()[0].id)
-  );
-})
 </script>
             "#))
         }]

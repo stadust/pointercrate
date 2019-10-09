@@ -78,11 +78,6 @@
     flex-shrink: 0;
   }
 
-  /*.information-banner.left .information,
-  .information-banner.left .information * {
-    text-align: left !important;
-  }*/
-
   .information-banner.right .information,
   .information-banner.right .information * {
     text-align: right !important;

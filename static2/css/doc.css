@@ -36,11 +36,6 @@ h1:hover > .link-anchor {
   color: #111116;
 }
 
-code {
-  white-space: pre;
-  font-size: 110%;
-}
-
 .verb {
   padding: 3px 5px;
 }
@@ -64,6 +59,8 @@ th {
 }
 
 code {
+  white-space: pre-wrap;
+  font-size: 110%;
   background: #eee;
   border: 1px solid #ddd;
   border-radius: 3px;
