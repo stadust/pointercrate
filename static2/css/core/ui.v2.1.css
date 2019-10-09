@@ -580,3 +580,16 @@ ul.selection-list li {
   text-align: left;
   cursor: pointer;
 }
+
+/* Tab panel stuff */
+.tab-content:not(.tab-content-active) {
+  display: none;
+}
+
+.tab {
+  cursor: pointer;
+}
+
+.tab-active {
+  color: #0881c6;
+}

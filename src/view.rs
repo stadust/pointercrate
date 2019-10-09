@@ -76,7 +76,6 @@ pub trait Page {
                     link rel = "stylesheet" href = {(STATIC) "css/core/ui.v2.1.css"};
                     link rel = "stylesheet" href = {(STATIC) "css/core/core.v2.css"};
                     link rel = "stylesheet" href = {(STATIC) "css/main.v2.1.css"};
-                    link rel = "stylesheet" href = {(STATIC) "css/core/tab.css"};
 
                     @for sheet in self.stylesheets() {
                         link rel = "stylesheet" href = {(STATIC) (sheet)};
