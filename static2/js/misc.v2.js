@@ -102,12 +102,19 @@ $(window).on("load resize", function() {
     var arrow = collapse.find(".arrow");
 
     arrow.parent().click(function() {
-      if (collapse.hasClass("active")) {
-        content.slideUp(250);
-        collapse.removeClass("active");
-      } else {
-        content.slideDown(250);
-        collapse.addClass("active");
+      if (!collapse.hasClass("js-sliding")) {
+        collapse.addClass("js-sliding");
+        if (collapse.hasClass("active")) {
+          content.slideUp(250, () => {
+            collapse.removeClass("active");
+            collapse.removeClass("js-sliding");
+          });
+        } else {
+          content.slideDown(250, () => {
+            collapse.addClass("active");
+            collapse.removeClass("js-sliding");
+          });
+        }
       }
     });
   });
