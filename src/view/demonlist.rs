@@ -416,7 +416,7 @@ impl Page for Demonlist {
                                         (self.data.records.len())
                                         " records registered, out of which "
                                         (records_registered_100_count)
-                                        @if records_registered_100_count == 1 { " is" } @else { " are" } 
+                                        @if records_registered_100_count == 1 { " is" } @else { " are" }
                                         " 100%"
                                     }
                                 }
@@ -877,8 +877,8 @@ fn team_panel(admins: &[User], mods: &[User], helpers: &[User]) -> Markup {
 
 fn rules_panel() -> Markup {
     html! {
-        did#rules.panel.fade.flex.js-scroll-anim.js-collapse data-anim = "fade" style = "flex-direction: column" {
-            h2.underlined.pad {
+        div#rules.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
+            h2.underlined.pad.clickable {
                 "Rules:"
                 span.arrow.hover {}
             }

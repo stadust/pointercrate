@@ -47,6 +47,10 @@ tr:nth-child(even) {
   font-weight: normal;
 }
 
+#rules {
+  flex-grow: 1;
+}
+
 @media (max-width: 1023px) {
   #rules,
   #discord {
