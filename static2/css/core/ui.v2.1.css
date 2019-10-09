@@ -169,6 +169,9 @@ a {
   position: relative;
 
   background: white;
+
+  flex-grow: 1;
+  overflow: hidden;
 }
 
 /* Roman list */
