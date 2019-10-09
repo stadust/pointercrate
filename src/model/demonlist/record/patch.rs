@@ -26,6 +26,7 @@ make_patch! {
         status: RecordStatus,
         player: CiString,
         demon: CiString,
+        notes: Option<String>,
     }
 }
 
@@ -68,7 +69,7 @@ impl Patch<PatchRecord> for FullRecord {
 
         map_patch!(self, patch: map => demon);
         try_map_patch!(self, patch: map2 => player);
-        patch!(self, patch: progress, video, status);
+        patch!(self, patch: progress, video, status, notes);
 
         connection.transaction(move || {
             // If there is a record that would validate the unique (status_, demon, player),
@@ -122,6 +123,7 @@ impl Patch<PatchRecord> for FullRecord {
                     records::status_.eq(&self.status),
                     records::player.eq(&self.player.id),
                     records::demon.eq(&self.demon.id),
+                    records::notes.eq(&self.notes),
                 ))
                 .execute(connection)?;
 

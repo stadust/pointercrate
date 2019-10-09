@@ -80,6 +80,7 @@ table! {
         player -> Int4,
         submitter -> Int4,
         demon -> Int4,
+        notes -> Nullable<Text>,
     }
 }
 

@@ -46,7 +46,7 @@ The listed form (formerly called short form) of record objects is returned by [`
 
 ## Full Form
 
-The full (formerly called long form) form of record objects is returned by [`GET /records/{record_id}`](/documentation/records/#record-retrieval).
+The full (formerly called long form) form of record objects is returned by [`GET /records/{record_id}`](/documentation/records/#record-retrieval). The `notes` field is always `null` if you do not have at least `ListHelper` permissions.
 
 | Field     | Type                           | Description                                                  |
 | --------- | ------------------------------ | ------------------------------------------------------------ |
@@ -54,6 +54,7 @@ The full (formerly called long form) form of record objects is returned by [`GET
 | progress  | integer                        | The progress achieved by the record's holder                 |
 | video     | URL?                           | The record's video.                                          |
 | status    | [RecordStatus](#record-status) | The record's status.                                         |
+| notes     | string?                        | Notes on the record                                          |
 | player    | [Player](#player)              | The record holder                                            |
 | demon     | [Demon](#demon)                | The demon the record was made on                             |
 | submitter | [Submitter](#submitter)?       | The person that submitted the record, as an submitter object |

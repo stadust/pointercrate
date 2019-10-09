@@ -29,6 +29,7 @@ impl Get<i32> for FullRecord {
 
         if !ctx.is_list_mod() {
             record.submitter = None;
+            record.notes = None;
         }
 
         if record.status != RecordStatus::Approved {

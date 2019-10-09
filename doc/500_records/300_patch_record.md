@@ -15,7 +15,7 @@ Modifies a given record.
 
 | Header        | Expected Value                                                                             | Optional |
 | ------------- | ------------------------------------------------------------------------------------------ | -------- |
-| Content-Type  | `application/json`                                                             | false    |
+| Content-Type  | `application/json`                                                                         | false    |
 | Authorization | [Pointercrate access token](/documentation/#access-tokens)                                 | false    |
 | If-Match      | Conditional request header. Needs to be set to the current etag value of the record object | false    |
 
@@ -26,6 +26,7 @@ Modifies a given record.
 | status   | [RecordStatus](#record-status) | Set to update the record's status                                                 | true     |
 | player   | string                         | Set to update the record holder. Needs to be the name of the player               | true     |
 | demon    | string                         | Set to update the demon the record was made on. Needs to be the name of the demon | true     |
+| notes    | string                         | Set to update the record's notes                                                  | true     |
 
 ### Response: `200 OK`
 
@@ -70,7 +71,8 @@ Content-Type: application/json
 If-Match: VV4v4HlCVToXCSqxdpaV3IQGRLw=
 
 {
-    "status": "approved"
+    "status": "approved",
+    "notes": "Record made on approved low-detail copyable"
 }
 ```
 

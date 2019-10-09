@@ -187,6 +187,7 @@ CREATE VIEW records_pd AS  -- records with player and demon
     ON records.player = players.id
     INNER JOIN demons
     ON demons.id = records.demon;
+
 CREATE VIEW records_pds AS  -- records with player, demon and submitter
     SELECT records_pd.id, records_pd.progress, records_pd.video, records_pd.status_,
            records_pd.player_id, records_pd.player_name, records_pd.player_banned,

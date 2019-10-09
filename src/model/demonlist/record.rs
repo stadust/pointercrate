@@ -90,6 +90,7 @@ pub struct DatabaseRecord {
     player_id: i32,
     submitter_id: i32,
     demon_id: i32,
+    notes: Option<String>,
 }
 
 impl Model for DatabaseRecord {
@@ -115,6 +116,7 @@ table! {
         progress -> Int2,
         video -> Nullable<Varchar>,
         status_ -> Record_status,
+        notes -> Nullable<Text>,
         player_id -> Int4,
         player_name -> CiText,
         player_banned -> Bool,
@@ -136,6 +138,7 @@ pub struct FullRecord {
     pub player: DatabasePlayer,
     pub demon: MinimalDemon,
     pub submitter: Option<Submitter>,
+    pub notes: Option<String>,
 }
 
 table! {
@@ -255,6 +258,7 @@ impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> fo
         i16,
         Option<String>,
         RecordStatus,
+        Option<String>,
         i32,
         CiString,
         bool,
@@ -271,19 +275,20 @@ impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> fo
             progress: row.1,
             video: row.2,
             status: row.3,
+            notes: row.4,
             player: DatabasePlayer {
-                id: row.4,
-                name: row.5,
-                banned: row.6,
+                id: row.5,
+                name: row.6,
+                banned: row.7,
             },
             demon: MinimalDemon {
-                id: row.7,
-                position: row.9,
-                name: row.8,
+                id: row.8,
+                position: row.10,
+                name: row.9,
             },
             submitter: Some(Submitter {
-                id: row.10,
-                banned: row.11,
+                id: row.11,
+                banned: row.12,
             }),
         }
     }
