@@ -50,11 +50,11 @@ impl Patch<PatchDemon> for Demon {
 
             // alright, diesel::update(self) errors out for some reason
             diesel::update(demons::table)
-                .filter(demons::name.eq(&self.name))
+                .filter(demons::id.eq(self.id))
                 .set((
                     demons::name.eq(&self.name),
                     demons::video.eq(&self.video),
-                    demons::requirement.eq(&self.requirement),
+                    /* demons::requirement.eq(&self.requirement), */
                     demons::verifier.eq(&self.verifier.id),
                     demons::publisher.eq(&self.publisher.id),
                 ))
