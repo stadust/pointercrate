@@ -66,8 +66,8 @@ CREATE OR REPLACE FUNCTION audit_demon_modification() RETURNS trigger AS $demon_
             publisher_change = OLD.publisher;
         END IF;
 
-        INSERT INTO demon_modifications (userid, demon, name, position, requirement, video, verifier, publisher)
-            (SELECT id, NEW.id, name_change, position_change, requirement_change, video_change, verifier_change, publisher_change
+        INSERT INTO demon_modifications (userid, name, position, requirement, video, verifier, publisher, id)
+            (SELECT id, name_change, position_change, requirement_change, video_change, verifier_change, publisher_change, NEW.id
             FROM active_user LIMIT 1);
 
         RETURN NEW;

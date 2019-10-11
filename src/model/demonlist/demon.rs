@@ -323,7 +323,7 @@ impl Demon {
         // complains. I actually dont know why, its DEFERRABLE INITIALLY IMMEDIATE (whatever the
         // fuck that means, it made it work in the python version)
         diesel::update(demons::table)
-            .filter(demons::name.eq(&self.name))
+            .filter(demons::id.eq(self.id))
             .set(demons::position.eq(-1))
             .execute(connection)?;
 
@@ -354,7 +354,7 @@ impl Demon {
         debug!("Performing actual move to position {}", to);
 
         diesel::update(demons::table)
-            .filter(demons::name.eq(&self.name))
+            .filter(demons::id.eq(self.id))
             .set(demons::position.eq(to))
             .execute(connection)?;
 
