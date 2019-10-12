@@ -38,6 +38,7 @@ fn main() {
         for li in process_directory(&dir, name) {
             print!("{}", li);
         }
+
         if name != "index" {
             print!("</ol></li>");
         }
@@ -47,6 +48,10 @@ fn main() {
         for md in sorted_dir_entries(&dir.path(), |_| true) {
             command.arg(md.path());
         }
+
+        // Prevent pandoc from trying to explicitly set html-table column width on tables with lots
+        // of column. Our CSS handles it.
+        command.arg("--columns=1000000");
 
         let output = command.stdout(file).output().unwrap();
 
