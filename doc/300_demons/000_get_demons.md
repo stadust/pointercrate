@@ -16,7 +16,7 @@ Allows to retrieve a potentionally filtered version of the demonlist.
 
 ### Filtering:
 
-The result can be filtered by any of the following fields: `name`, `position`, `requirement`. To filter by verifier, publisher or creator, please use
+The result can be filtered by any of the following fields: `name`, `position`, `requirement`, `verifier.id` (via `verifier_id`), `publisher.id` (via `publisher_id`), `verifier.name` (via `verifier_name`), `publisher.name` (via `publisher.name`). To filter creator, please use
 [`GET /players/player_id/`](/documentation/players/#get-player) and inspect the relevant fields of the [Player](/documentation/objects/#player) object.
 
 Pagination is done via the `position` field.

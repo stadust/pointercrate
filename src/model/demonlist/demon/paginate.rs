@@ -25,6 +25,12 @@ pub struct DemonPagination {
 
     requirement: Option<i16>,
 
+    verifier_id: Option<i32>,
+    publisher_id: Option<i32>,
+
+    verifier_name: Option<CiString>,
+    publisher_name: Option<CiString>,
+
     #[serde(rename = "requirement__gt")]
     requirement_gt: Option<i16>,
 
@@ -44,7 +50,11 @@ impl TablePaginator for DemonPagination {
             demons_pv::name = self.name,
             demons_pv::requirement = self.requirement,
             demons_pv::requirement < self.requirement_lt,
-            demons_pv::requirement > self.requirement_gt
+            demons_pv::requirement > self.requirement_gt,
+            demons_pv::verifier_id = self.verifier_id,
+            demons_pv::publisher_id = self.publisher_id,
+            demons_pv::verifier_name = self.verifier_name,
+            demons_pv::publisher_name = self.publisher_name
         ]);
 
         query
