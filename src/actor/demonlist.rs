@@ -44,7 +44,7 @@ impl Handler<GetDemonlistOverview> for DatabaseActor {
             .order_by(crate::model::demonlist::demon::demons_p::position)
             .load(connection)?;
         let nations = Nationality::all()
-            .order_by(crate::schema::nationalities::iso_country_code)
+            .order_by(crate::schema::nationalities::nation)
             .load(connection)?;
 
         Ok(DemonlistOverview {
