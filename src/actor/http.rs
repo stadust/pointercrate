@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::{actor::database::DeleteMessage, model::demonlist::record::Record};
 use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Message, Recipient};
 use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
@@ -18,10 +19,8 @@ use log::{debug, error, info, warn};
 use reqwest::r#async::Client;
 use tokio::{
     self,
-    prelude::future::{result, Either, Future},
+    prelude::future::{err, ok, result, Either, Future},
 };
-
-use crate::{actor::database::DeleteMessage, model::demonlist::record::Record};
 
 /// Actor for whatever the fuck just happens to need to be done and isn't database access
 #[allow(missing_debug_implementations)]
@@ -91,17 +90,40 @@ impl HttpActor {
             url
         );
 
+        let url_clone = url.to_owned();
+        let client = self.http_client.clone();
+
         self.http_client
             .head(url)
             .send()
             .map_err(|error| error!("INTERNAL SERVER ERROR: HEAD request failed: {:?}", error))
-            .and_then(|response| {
+            .and_then(move |response| {
                 let status = response.status().as_u16();
 
-                if 200 <= status && status < 400 {
-                    Ok(())
-                } else {
-                    Err(())
+                match status {
+                    200..=399 => Either::B(ok(())),
+                    403 | 405 => {
+                        info!("Received 403 or 405, trying again with a GET requests instead");
+
+                        Either::A(
+                            client
+                                .get(&url_clone)
+                                .send()
+                                .map_err(|error| {
+                                    error!("INTERNAL SERVER ERROR: GET request failed {:?}", error)
+                                })
+                                .and_then(|response| {
+                                    let status = response.status().as_u16();
+
+                                    if 200 <= status && status < 400 {
+                                        Ok(())
+                                    } else {
+                                        Err(())
+                                    }
+                                }),
+                        )
+                    },
+                    _ => Either::B(err(())),
                 }
             })
     }
