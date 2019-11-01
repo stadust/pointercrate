@@ -146,7 +146,7 @@ impl Page for DemonlistOverview {
         vec![
             html! {
             (PreEscaped(r#"
-                <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+                <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet">
                 <script type="application/ld+json">
                 {{
                     "@context": "http://schema.org",

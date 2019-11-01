@@ -15,7 +15,7 @@ class StatsViewer {
       var span = document.createElement("span");
 
       span.className =
-        "em em-flag-" + player.nationality.country_code.toLowerCase();
+        "flag-icon flag-icon-" + player.nationality.country_code.toLowerCase();
 
       li.appendChild(span);
       li.appendChild(document.createTextNode(" "));
@@ -151,7 +151,7 @@ class StatsViewer {
         } else {
           this._name.html(
             json.name +
-              "&nbsp;<span class = 'em em-flag-" +
+              "&nbsp;<span class = 'flag-icon flag-icon-" +
               json.nationality.country_code.toLowerCase() +
               "' title = '" +
               json.nationality.nation +
