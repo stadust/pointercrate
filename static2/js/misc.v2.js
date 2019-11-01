@@ -143,4 +143,9 @@ $(window).on("load resize", function() {
 
     elem.attr(attr, value);
   });
+
+  // Fix for the dropdown in the stats viewer
+  // FIXME: really bad hotfix
+  $(".dropdown-menu input[type='text']").focus(() => $(".dropdown-menu .menu").fadeTo(300, 0.95));
+  $(".dropdown-menu input[type='text']").focusout(() => $(".dropdown-menu .menu").fadeOut(300));
 });
