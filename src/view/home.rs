@@ -167,7 +167,7 @@ impl Page for Homepage {
                                 }
                             }
                             p {
-                                "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathmatics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the Demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. In the long run, I'm probably searching for someone who wants to take over pointercrate."
+                                "Now onto some more serious topics: As some of you might know, I took up a second undergrad course (mathematics) in october, meaning my university schedule became much more demanding, leaving me nearly no time to work on pointercrate. Development on discord bots related to pointercrate and the Demonlist has already been taken over by GunnerBones, and with pointercrate becoming open source, I'm hoping to find more people will to work on it. "
                             }
                         }
                         div.tab-content data-tab-id ="100" {
