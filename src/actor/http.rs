@@ -206,7 +206,7 @@ impl Handler<GetDemon> for HttpActor {
             CacheEntry::Cached(demons, meta) =>
                 demons
                     .into_iter()
-                    .filter(|demon| demon.base.name == msg.0)
+                    .filter(|demon| demon.base.name.to_lowercase() == msg.0.to_lowercase())
                     .max_by(|x, y| x.base.difficulty.cmp(&y.base.difficulty))
                     .map(|demon| CacheEntry::Cached(demon, meta)),
         }
