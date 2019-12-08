@@ -137,7 +137,7 @@ $(window).on("load resize", function() {
     var attr = elem.data("property");
     var value = elem.data("property-value");
 
-    elem.css(attr, value);
+    if (elem.css(attr) != value) elem.css(attr, value);
   });
 
   $(".js-delay-attr").each((i, elem) => {
@@ -145,7 +145,7 @@ $(window).on("load resize", function() {
     var attr = elem.data("attr");
     var value = elem.data("attr-value");
 
-    elem.attr(attr, value);
+    if (elem.attr(attr) != value) elem.attr(attr, value);
   });
 
   // Fix for the dropdown in the stats viewer
