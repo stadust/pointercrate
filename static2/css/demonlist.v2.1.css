@@ -125,11 +125,7 @@ tr:nth-child(even) {
   margin: 5px 10px;
 }
 
-#statsviewer ul {
-  overflow: auto;
-}
-
-#statsviewer li i {
+#stats-viewer-pagination li i {
   padding-left: 5px;
 
   color: #444;

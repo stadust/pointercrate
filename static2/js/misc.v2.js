@@ -5,7 +5,11 @@ function forall(selector, callback) {
 $(window).on("load resize", function() {
   function forceRatio(element, wRatio, hRatio) {
     var target = $(element);
-    target.height((target.width() * hRatio) / wRatio);
+    var width = target.width();
+    var calculatedHeight = (width * hRatio) / wRatio;
+    if (Math.abs(target.height() - calculatedHeight) > 20) {
+      target.height((target.width() * hRatio) / wRatio);
+    }
   }
 
   // back to top things
@@ -146,6 +150,10 @@ $(window).on("load resize", function() {
 
   // Fix for the dropdown in the stats viewer
   // FIXME: really bad hotfix
-  $(".dropdown-menu input[type='text']").focus(() => $(".dropdown-menu .menu").fadeTo(300, 0.95));
-  $(".dropdown-menu input[type='text']").focusout(() => $(".dropdown-menu .menu").fadeOut(300));
+  $(".dropdown-menu input[type='text']").focus(() =>
+    $(".dropdown-menu .menu").fadeTo(300, 0.95)
+  );
+  $(".dropdown-menu input[type='text']").focusout(() =>
+    $(".dropdown-menu .menu").fadeOut(300)
+  );
 });

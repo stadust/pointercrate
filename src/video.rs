@@ -172,15 +172,31 @@ pub fn validate(url: &str) -> Result<String> {
     }
 }
 
-pub fn embed(video: &str) -> String {
-    // Videos need to be welformed once we get here!
+pub fn embed(video: &String) -> Option<String> {
+    // Video URLs need to be wellformed once we get here!
     let url = Url::parse(video).unwrap();
-    let video_id = url
-        .query_pairs()
-        .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
-        .unwrap();
 
-    format!("https://www.youtube.com/embed/{}", video_id)
+    match url.domain()? {
+        "www.youtube.com" => {
+            let video_id =
+                url.query_pairs()
+                    .find_map(|(key, value)| if key == "v" { Some(value) } else { None })?;
+
+            Some(format!("https://www.youtube.com/embed/{}", video_id))
+        },
+        "www.twitch.tv" => {
+            // per validation always of the form 'https://www.twitch.tv/videos/[video id]/'
+            let mut url_segment = url.path_segments()?;
+            url_segment.next()?;
+            let video_id = url_segment.next()?;
+
+            Some(format!(
+                "https://player.twitch.tv/?video={}&autoplay=false",
+                video_id
+            ))
+        },
+        _ => None,
+    }
 }
 
 pub fn thumbnail(video: &str) -> String {

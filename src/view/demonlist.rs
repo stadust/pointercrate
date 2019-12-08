@@ -308,8 +308,8 @@ impl Page for Demonlist {
                                 }
                             }
                         }
-                        @if let Some(ref video) = self.data.demon.video {
-                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" data-attr = "src" data-attr-value = (video::embed(video)) {"Verification Video"}
+                        @if let Some(ref embedded_video) = self.data.demon.video.as_ref().and_then(video::embed) {
+                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" allowfullscreen="" data-attr = "src" data-attr-value = (embedded_video) {"Verification Video"}
                         }
                         div.underlined.pad.flex.wrap#level-info {
                             @match self.server_level {
