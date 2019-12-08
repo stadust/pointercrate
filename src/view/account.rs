@@ -180,20 +180,9 @@ impl AccountPage {
                         }
                     }
                     div.panel.fade {
-                        h2.underlined.pad {
-                            "User list"
-                        }
-                        p {
-                            "A list of all user accounts on pointercrate"
-                        }
-                        div#user-pagination data-endpoint = "/users/"{
-                            p.info-red.output#load-users-error {}
-                            ul.selection-list#user-list {}
-                            div.flex {
-                                div.button.blue.hover.slightly-round.prev style="margin-right: 20px" { "Previous"}
-                                div.button.blue.hover.slightly-round.next {"Next"} // *clap* next *clap* user
-                            }
-                        }
+                        h2.underlined.pad { "User list" }
+                        p { "A list of all user accounts on pointercrate" }
+                        (super::paginator("user-pagination", "/users/"))
                     }
                 }
             }

@@ -598,7 +598,7 @@ fn dropdown(
             }
 
             div.see-through.fade.dropdown#(section.id) {
-                div.search.js-search.seperated {
+                div.search.js-search.seperated style = "margin: 10px" {
                     input placeholder = "Filter..." type = "text" {}
                 }
                 p style = "margin: 10px" {
@@ -716,19 +716,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                 }
             }
             div.flex#stats-viewer-cont {
-                div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column" data-endpoint="/players/ranking/"{
-                    div.search.js-search.seperated style = "margin-bottom: 0px"{  // TODO: remove js-search class?
-                        input#pagination-filter placeholder = "Enter to search..." type = "text" style = "height: 1em";
-                    }
-                    p.info-red.output style = "margin: 10px 10px 0px"{}
-                    div style="position:relative; margin: 0px 10px; min-height: 400px; flex-grow:1" {
-                        ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
-                    }
-                    div.flex style = "font-variant: small-caps; font-weight: bolder"{
-                        div.button.small.prev { "Previous" }
-                        div.button.small.next { "Next" }
-                    }
-                }
+                (super::filtered_paginator("stats-viewer-pagination", "/players/ranking/"))
                 div {
                     p#error-output style = "text-align: center" {
                         "Click on a player's name on the left to get started!"

@@ -314,7 +314,6 @@ form input[type="password"]:invalid {
 /* Search UI Element */
 
 .search {
-  margin: 10px;
   padding: 0px 4px;
 
   border: 1px solid #999;
@@ -571,6 +570,7 @@ form .output {
 }
 
 ul.selection-list {
+  overflow-y: scroll;
   border: 1px solid #999;
   font-size: 80%;
   margin: 10px 0px;
