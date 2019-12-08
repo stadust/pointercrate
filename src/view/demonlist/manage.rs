@@ -13,21 +13,30 @@ impl AccountPage {
                         div.flex {
                             (paginator("record-pagination", "/records/"))
                             div {
-                                p#error-output style = "text-align: center" {
+                                p.viewer-welcome style = "text-align: center" {
                                     "Click on a record on the left to get started!"
                                 }
-                                div#record-data style = "display:none" {
+                                div.viewer-content style = "display:none" {
                                     div.flex.col {
                                         h3 style = "font-size:1.4em; overflow: hidden" { "Record #" i#record-id{}}
 
-                                        iframe."ratio-16-9"#verification style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
+                                        iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
+                                        div.stats-container.flex.space  {
+                                            span{
+                                                b {
+                                                    "Video Link:"
+                                                }
+                                                br;
+                                                a.link#record-video-link target = "_blank" {}
+                                            }
+                                        }
                                         div.stats-container.flex.space {
                                             span {
                                                 b {
                                                     "Demon:"
                                                 }
                                                 br;
-                                                span#demon {}
+                                                span#record-demon {}
                                             }
                                             span {
                                                 b {
@@ -50,14 +59,14 @@ impl AccountPage {
                                                     "Progress:"
                                                 }
                                                 br;
-                                                span#progress {}
+                                                span#record-progress {}
                                             }
                                             span {
                                                 b {
-                                                    "Submitter"
+                                                    "Submitter ID:"
                                                 }
                                                 br;
-                                                span#submitter {}
+                                                span#record-submitter {}
                                             }
                                         }
                                     }

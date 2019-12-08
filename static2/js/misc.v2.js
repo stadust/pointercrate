@@ -2,16 +2,17 @@ function forall(selector, callback) {
   $(selector).each((i, elem) => callback(i, $(elem)));
 }
 
-$(window).on("load resize", function() {
-  function forceRatio(element, wRatio, hRatio) {
-    var target = $(element);
-    var width = target.width();
-    var calculatedHeight = (width * hRatio) / wRatio;
-    if (Math.abs(target.height() - calculatedHeight) > 20) {
-      target.height((target.width() * hRatio) / wRatio);
-    }
+function forceRatio(element, wRatio, hRatio) {
+  console.log("Forcing ratio of " + element);
+  var target = $(element);
+  var width = target.width();
+  var calculatedHeight = (width * hRatio) / wRatio;
+  if (Math.abs(target.height() - calculatedHeight) > 20) {
+    target.height((target.width() * hRatio) / wRatio);
   }
+}
 
+$(window).on("load resize", function() {
   // back to top things
 
   var scrollers = $(".js-scroll");
@@ -127,9 +128,11 @@ $(window).on("load resize", function() {
 
   $(".ratio-16-9").each(function() {
     forceRatio(this, 16, 9);
+    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 16, 9);
   });
   $(".ratio-4-3").each(function() {
     forceRatio(this, 4, 3);
+    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 4, 3);
   });
 
   $(".js-delay-css").each((i, elem) => {

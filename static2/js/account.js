@@ -144,16 +144,7 @@ function setupInvalidateToken() {
   });
 }
 
-$(document).ready(function() {
-  var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
-  var csrfToken = csrfTokenSpan.innerHTML;
-
-  csrfTokenSpan.remove();
-
-  setupGetAccessToken();
-  setupEditAccount();
-  setupInvalidateToken();
-
+function setupDeleteUser(csrfToken) {
   var deleteUserButton = document.getElementById("delete-user");
 
   deleteUserButton.addEventListener(
@@ -162,7 +153,7 @@ $(document).ready(function() {
       makeRequest(
         "DELETE",
         "/users/" + window.currentUser.id + "/",
-        editForm.errorOutput,
+        window.patchUserPermissionsForm.errorOutput,
         () => editForm.setSuccess("Successfully deleted user!"),
         {},
         {
@@ -173,102 +164,13 @@ $(document).ready(function() {
     },
     false
   );
+}
 
+function setupPatchUserPermissionsForm(csrfToken) {
   var htmlEditForm = document.getElementById("patch-permissions");
-  var editForm = new Form(htmlEditForm);
+  window.patchUserPermissionsForm = new Form(htmlEditForm);
 
-  var extended = editForm.input("perm-extended");
-  var list_helper = editForm.input("perm-list-helper");
-  var list_mod = editForm.input("perm-list-mod");
-  var list_admin = editForm.input("perm-list-admin");
-  var mod = editForm.input("perm-mod");
-  var admin = editForm.input("perm-admin");
-
-  var text = document.getElementById("text");
-
-  var userByIdForm = new Form(document.getElementById("find-id-form"));
-  var userByNameForm = new Form(document.getElementById("find-name-form"));
-
-  var userId = userByIdForm.input("find-id");
-  var userName = userByNameForm.input("find-name");
-
-  userId.addValidator(valueMissing, "User ID required");
-  userName.addValidators({
-    "Username required": valueMissing,
-    "Username is at least 3 characters long": tooShort
-  });
-
-  function requestUserForEdit(userId, errorCodes) {
-    makeRequest(
-      "GET",
-      "/users/" + userId + "/",
-      editForm.errorOutput,
-      data => {
-        window.currentUser = data.responseJSON.data;
-        window.currentUser.etag = data.getResponseHeader("ETag");
-
-        if (window.currentUser.name == window.username) {
-          editForm.setError(
-            "This is your own account. You cannot modify your own account using this interface!"
-          );
-        }
-
-        if (window.currentUser.display_name) {
-          text.innerHTML =
-            "<b>Username: </b>" +
-            window.currentUser.name +
-            " (" +
-            window.currentUser.display_name +
-            ")" +
-            "&nbsp;&nbsp;&nbsp;&nbsp;<b>User ID: </b>" +
-            window.currentUser.id;
-        } else {
-          text.innerHTML =
-            "<b>Username: </b>" +
-            window.currentUser.name +
-            "&nbsp;&nbsp;&nbsp;&nbsp;<b>User ID: </b>" +
-            window.currentUser.id;
-        }
-
-        let bitmask = window.currentUser.permissions;
-
-        extended.value = (bitmask & 0x1) == 0x1;
-        list_helper.value = (bitmask & 0x2) == 0x2;
-        list_mod.value = (bitmask & 0x4) == 0x4;
-        list_admin.value = (bitmask & 0x8) == 0x8;
-        mod.value = (bitmask & 0x2000) == 0x2000;
-        admin.value = (bitmask & 0x4000) == 0x4000;
-
-        htmlEditForm.style.display = "block";
-      },
-      errorCodes
-    );
-  }
-
-  userByIdForm.onSubmit(function(event) {
-    requestUserForEdit(userId.value, {
-      40401: message => userId.setError(message)
-    });
-  });
-
-  userByNameForm.onSubmit(function(event) {
-    makeRequest(
-      "GET",
-      "/users/?name=" + userName.value,
-      userByNameForm.errorOutput,
-      data => {
-        let json = data.responseJSON;
-
-        if (!json || json.length == 0) {
-          userName.setError("No user with that name found!");
-        } else {
-          requestUserForEdit(json[0].id, data =>
-            userByNameForm.setError(data.responseJSON.message)
-          );
-        }
-      }
-    );
-  });
+  var editForm = window.patchUserPermissionsForm;
 
   editForm.onSubmit(function(event) {
     makeRequest(
@@ -292,45 +194,158 @@ $(document).ready(function() {
       },
       {
         permissions:
-          extended.value * 0x1 +
-          list_helper.value * 0x2 +
-          list_mod.value * 0x4 +
-          list_admin.value * 0x8 +
-          mod.value * 0x2000 +
-          admin.value * 0x4000
+          editForm.input("perm-extended").value * 0x1 +
+          editForm.input("perm-list-helper").value * 0x2 +
+          editForm.input("perm-list-mod").value * 0x4 +
+          editForm.input("perm-list-admin").value * 0x8 +
+          editForm.input("perm-mod").value * 0x2000 +
+          editForm.input("perm-admin").value * 0x4000
       }
     );
   });
+}
 
-  let usersLoaded = false;
+function setupUserByIdForm() {
+  var userByIdForm = new Form(document.getElementById("find-id-form"));
+  var userId = userByIdForm.input("find-id");
+
+  userId.addValidator(valueMissing, "User ID required");
+  userByIdForm.onSubmit(function(event) {
+    makeRequest(
+      "GET",
+      "/users/" + userId.value + "/",
+      userByIdForm.errorOutput,
+      response => window.userPaginator.onReceive(response),
+      {
+        40401: message => userId.setError(message)
+      }
+    );
+  });
+}
+
+function setupUserByNameForm() {
+  var userByNameForm = new Form(document.getElementById("find-name-form"));
+  var userName = userByNameForm.input("find-name");
+
+  userName.addValidators({
+    "Username required": valueMissing,
+    "Username is at least 3 characters long": tooShort
+  });
+
+  userByNameForm.onSubmit(function(event) {
+    makeRequest(
+      "GET",
+      "/users/?name=" + userName.value,
+      userByNameForm.errorOutput,
+      data => {
+        let json = data.responseJSON;
+
+        if (!json || json.length == 0) {
+          userName.setError("No user with that name found!");
+        } else {
+          makeRequest(
+            "GET",
+            "/users/" + json[0].id + "/",
+            userByNameForm.errorOutput,
+            response => window.userPaginator.onReceive(response)
+          );
+        }
+      }
+    );
+  });
+}
+
+$(document).ready(function() {
+  var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
+  var csrfToken = csrfTokenSpan.innerHTML;
+
+  csrfTokenSpan.remove();
+
+  setupGetAccessToken();
+  setupEditAccount();
+  setupInvalidateToken();
+  setupDeleteUser(csrfToken);
+  setupPatchUserPermissionsForm(csrfToken);
+  setupUserByIdForm();
+  setupUserByNameForm();
 
   TABBED_PANES["account-tabber"].addSwitchListener("2", () => {
-    if (usersLoaded) {
-      return;
+    if (window.userPaginator === undefined) {
+      window.userPaginator = new UserPaginator();
+      window.userPaginator.initialize();
     }
-
-    usersLoaded = true;
-
-    new Paginator("user-pagination", { limit: 5 }, user => {
-      var li = document.createElement("li");
-      var b = document.createElement("b");
-      var i = document.createElement("i");
-
-      b.appendChild(document.createTextNode(user.name));
-      i.appendChild(
-        document.createTextNode(
-          "Display name: " + (user.display_name || "None")
-        )
-      );
-
-      li.appendChild(b);
-      li.appendChild(document.createTextNode(" (ID: " + user.id + ")"));
-      li.appendChild(document.createElement("br"));
-      li.appendChild(i);
-
-      li.addEventListener("click", () => requestUserForEdit(user.id), false);
-
-      return li;
-    }).initialize();
   });
 });
+
+function generateUser(userData) {
+  var li = document.createElement("li");
+  var b = document.createElement("b");
+  var i = document.createElement("i");
+
+  li.dataset.id = userData.id;
+
+  b.appendChild(document.createTextNode(userData.name));
+  i.appendChild(
+    document.createTextNode(
+      "Display name: " + (userData.display_name || "None")
+    )
+  );
+
+  li.appendChild(b);
+  li.appendChild(document.createTextNode(" (ID: " + userData.id + ")"));
+  li.appendChild(document.createElement("br"));
+  li.appendChild(i);
+
+  return li;
+}
+
+class UserPaginator extends Paginator {
+  constructor() {
+    super("user-pagination", { limit: 5 }, generateUser);
+  }
+
+  onReceive(response) {
+    let editForm = window.patchUserPermissionsForm;
+
+    window.currentUser = response.responseJSON.data;
+    window.currentUser.etag = response.getResponseHeader("ETag");
+
+    editForm.setError(null);
+
+    if (window.currentUser.name == window.username) {
+      editForm.setError(
+        "This is your own account. You cannot modify your own account using this interface!"
+      );
+    }
+
+    var text = document.getElementById("text"); // TODO: What ever the fuck was I thinking when I named this
+
+    if (window.window.currentUser.display_name) {
+      text.innerHTML =
+        "<b>Username: </b>" +
+        window.currentUser.name +
+        " (" +
+        window.currentUser.display_name +
+        ")" +
+        "&nbsp;&nbsp;&nbsp;&nbsp;<b>User ID: </b>" +
+        window.currentUser.id;
+    } else {
+      text.innerHTML =
+        "<b>Username: </b>" +
+        window.currentUser.name +
+        "&nbsp;&nbsp;&nbsp;&nbsp;<b>User ID: </b>" +
+        window.currentUser.id;
+    }
+
+    let bitmask = window.currentUser.permissions;
+
+    editForm.input("perm-extended").value = (bitmask & 0x1) == 0x1;
+    editForm.input("perm-list-helper").value = (bitmask & 0x2) == 0x2;
+    editForm.input("perm-list-mod").value = (bitmask & 0x4) == 0x4;
+    editForm.input("perm-list-admin").value = (bitmask & 0x8) == 0x8;
+    editForm.input("perm-mod").value = (bitmask & 0x2000) == 0x2000;
+    editForm.input("perm-admin").value = (bitmask & 0x4000) == 0x4000;
+
+    editForm.html.style.display = "block";
+  }
+}

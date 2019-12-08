@@ -47,7 +47,41 @@ class Paginator {
     this.prev.addEventListener("click", this.prevHandler, false);
   }
 
-  onSelect(event) {}
+  /**
+   * Realizes a callback for when a user selects a list item.
+   *
+   * The default implementation takes the value of the `data-id` attribute of the selected item,
+   * concatenates it to the pagination request URL,
+   * makes a request to that URL and calls `onReceive` with the result
+   *
+   * @param {*} selected The selected list item
+   * @memberof Paginator
+   */
+  onSelect(selected) {
+    makeRequest(
+      "GET",
+      this.endpoint + selected.dataset.id + "/",
+      this.errorOutput,
+      response => this.onReceive(response),
+      this.selectionErrorCodes()
+    );
+  }
+
+  /**
+   * Realizes a callback for when the request made in onSelect is successful
+   *
+   * @param {*} response
+   * @memberof Paginator
+   */
+  onReceive(response) {}
+
+  paginationErrorCodes() {
+    return {};
+  }
+
+  selectionErrorCodes() {
+    return {};
+  }
 
   /**
    * Initializes this Paginator by making the request using the query data specified in the constructor.
@@ -72,7 +106,7 @@ class Paginator {
 
     for (var result of data.responseJSON) {
       let item = this.itemConstructor(result);
-      item.addEventListener("click", e => this.onSelect(e));
+      item.addEventListener("click", e => this.onSelect(e.currentTarget));
       this.list.appendChild(item);
     }
   }
@@ -86,7 +120,9 @@ class Paginator {
    * @memberof Paginator
    */
   updateQueryData(key, value) {
-    this.queryData[key] = value;
+    if (value === undefined) delete this.queryData[key];
+    else this.queryData[key] = value;
+
     this.currentLink = this.endpoint + "?" + $.param(this.queryData);
     this.refresh();
   }
@@ -113,7 +149,8 @@ class Paginator {
       "GET",
       this.currentLink,
       this.errorOutput,
-      this.handleResponse.bind(this)
+      this.handleResponse.bind(this),
+      this.paginationErrorCodes()
     );
   }
 
@@ -123,7 +160,8 @@ class Paginator {
         "GET",
         this.links.prev,
         this.errorOutput,
-        this.handleResponse.bind(this)
+        this.handleResponse.bind(this),
+        this.paginationErrorCodes()
       );
     }
   }
@@ -134,7 +172,8 @@ class Paginator {
         "GET",
         this.links.next,
         this.errorOutput,
-        this.handleResponse.bind(this)
+        this.handleResponse.bind(this),
+        this.paginationErrorCodes()
       );
     }
   }
@@ -303,6 +342,7 @@ class Input {
 
 class Form {
   constructor(form) {
+    this.html = form;
     this.inputs = [];
     this.submitHandler = undefined;
     this.invalidHandler = undefined;
@@ -344,15 +384,23 @@ class Form {
   setError(message) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
-    this.errorOutput.innerHTML = message;
-    this.errorOutput.style.display = "block";
+    if (message === null || message === undefined) {
+      this.errorOutput.style.display = "none";
+    } else {
+      this.errorOutput.innerHTML = message;
+      this.errorOutput.style.display = "block";
+    }
   }
 
   setSuccess(message) {
     if (this.errorOutput) this.errorOutput.style.display = "none";
 
-    this.successOutput.innerHTML = message;
-    this.successOutput.style.display = "block";
+    if (message === null || message === undefined) {
+      this.successOutput.style.display = "none";
+    } else {
+      this.successOutput.innerHTML = message;
+      this.successOutput.style.display = "block";
+    }
   }
 
   onSubmit(handler) {
@@ -431,6 +479,17 @@ function parsePagination(linkHeader) {
   return links;
 }
 
+/**
+ * Makes a request
+ *
+ * @param {String} method The HTTP method to use for this request
+ * @param {String} endpoint The endpoint to make the request to
+ * @param {HTMLElement} errorOutput Some HTML element to write error messages into
+ * @param {*} onSuccess A callback to call with the received JSON data, if the request succeeds
+ * @param {*} [errorCodes={}]
+ * @param {*} [headers={}]
+ * @param {*} [data={}]
+ */
 function makeRequest(
   method,
   endpoint,

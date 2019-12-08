@@ -720,7 +720,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
             div.flex#stats-viewer-cont {
                 (super::filtered_paginator("stats-viewer-pagination", "/players/ranking/"))
                 div {
-                    p#error-output style = "text-align: center" {
+                    p#error-output style = "text-align: center; margin: 10px 0 0 0" {
                         "Click on a player's name on the left to get started!"
                     }
                     div#stats-data style = "display:none" {

@@ -74,52 +74,47 @@ class StatsViewer extends FilteredPaginator {
     }
   }
 
-  onSelect(event) {
-    let selected = $(event.currentTarget);
+  onSelect(selected) {
+    makeRequest(
+      "GET",
+      "/players/" + selected.dataset.id + "/",
+      this.errorOutput,
+      jsonData => {
+        this.onReceive(jsonData);
 
-    $.ajax({
-      method: "GET",
-      url: "/api/v1/players/" + selected.data("id") + "/",
-      dataType: "json",
-      error: data => {
-        this._content.hide(100);
-
-        if (data.responseJSON) this._error.text(data.responseJSON.message);
-        else this._error.text("Something went wrong!");
-
-        this._error.show(100);
-      },
-      success: data => {
-        let json = data.data;
-
-        if (json.nationality == null) {
-          this._name.text(json.name);
-        } else {
-          this._name.html(
-            json.name +
-              "&nbsp;<span class = 'flag-icon flag-icon-" +
-              json.nationality.country_code.toLowerCase() +
-              "' title = '" +
-              json.nationality.nation +
-              "'></span>"
-          );
-        }
-
-        this._current.text(selected.find(".player-name").text());
-        this._rank.text(selected.data("rank"));
-        this._score.text(selected.find("i").text());
-
-        this.setFields(
-          json.created,
-          json.published,
-          json.verified,
-          json.records
-        );
-
-        this._error.hide(100);
-        this._content.show(100);
+        this._rank.text(selected.dataset.rank);
+        this._score.text(selected.getElementsByTagName("i")[0].innerHTML);
       }
-    });
+    );
+  }
+
+  onReceive(response) {
+    var playerData = response.responseJSON.data;
+
+    if (playerData.nationality == null) {
+      this._name.text(playerData.name);
+    } else {
+      this._name.html(
+        playerData.name +
+          "&nbsp;<span class = 'flag-icon flag-icon-" +
+          playerData.nationality.country_code.toLowerCase() +
+          "' title = '" +
+          playerData.nationality.nation +
+          "'></span>"
+      );
+    }
+
+    this._current.text(playerData.name);
+
+    this.setFields(
+      playerData.created,
+      playerData.published,
+      playerData.verified,
+      playerData.records
+    );
+
+    this._error.hide(100);
+    this._content.show(100);
   }
 
   setFields(created, published, verified, records) {
