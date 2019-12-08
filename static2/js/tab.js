@@ -1,22 +1,41 @@
 class TabbedPane {
+  /**
+   * Creates an instance of TabbedPane.
+   *
+   * @param {HTMLElement} htmlElement
+   *
+   * @memberof TabbedPane
+   */
   constructor(htmlElement) {
-    var tabs = htmlElement.querySelectorAll(".tab-selection .tab");
-
+    // TODO: figure out what the .tab-display class is used for and if we can remove it
     this.tabs = {};
     this.panes = {};
     this.listeners = {};
 
-    for (var tab of tabs) {
-      let id = tab.dataset.tabId;
-      let pane = htmlElement.querySelector(
-        ".tab-display .tab-content[data-tab-id='" + id + "']"
-      );
+    for (var tab of htmlElement.querySelectorAll(".tab-selection .tab")) {
+      // We first need to check if this tab really is for this TabbedPane, or for another tabbed pane nested within this one:
+      let parent = tab.parentNode;
+      while (!parent.classList.contains("tabbed")) parent = parent.parentNode;
+      if (parent !== htmlElement) continue;
 
-      this.panes[id] = pane;
+      let id = tab.dataset.tabId;
+
       this.tabs[id] = tab;
 
       tab.addEventListener("click", () => this.selectPane(id));
     }
+    for (var pane of htmlElement.querySelectorAll(
+      ".tab-display .tab-content"
+    )) {
+      let parent = pane.parentNode;
+      while (!parent.classList.contains("tabbed")) parent = parent.parentNode;
+      if (parent !== htmlElement) continue;
+
+      this.panes[pane.dataset.tabId] = pane;
+    }
+
+    console.log(this.tabs);
+    console.log(this.panes);
   }
 
   selectPane(id) {
