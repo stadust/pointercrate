@@ -139,8 +139,8 @@ class Form {
           }
         } else if (this.invalidHandler != undefined) {
           this.invalidHandler();
-        successOutput.text("Record successfully submitted");
-        successOutput.slideDown(100);
+          successOutput.text("Record successfully submitted");
+          successOutput.slideDown(100);
         }
       },
       false
@@ -191,13 +191,22 @@ class Form {
 
 class Paginator {
   constructor(htmlContainer, endpoint, queryData, itemConstructor) {
+    // Next and previous buttons
     this.next = htmlContainer.getElementsByClassName("next")[0];
     this.prev = htmlContainer.getElementsByClassName("prev")[0];
 
+    // The link for the request that was made to display the current data (required for refreshing)
+    this.currentLink = endpoint + "?" + $.param(queryData);
+
+    // The (parsed) values of the HTTP 'Links' header, telling us how what requests to make then next or prev is clicked
     this.links = undefined;
+    // The callback that constructs list entries for us
     this.itemConstructor = itemConstructor;
 
+    // The list displaying the results of the request
     this.list = htmlContainer.getElementsByClassName("selection-list")[0];
+
+    // Some HTML element where we will display errors messages
     this.errorOutput = htmlContainer.getElementsByClassName("output")[0];
 
     this.nextHandler = this.onNextClick.bind(this);
@@ -209,7 +218,7 @@ class Paginator {
 
     makeRequest(
       "GET",
-      endpoint + "?" + $.param(queryData),
+      this.currentLink,
       this.errorOutput,
       this.handleResponse.bind(this)
     );
@@ -231,6 +240,15 @@ class Paginator {
     for (var user of data.responseJSON) {
       this.list.appendChild(this.itemConstructor(user));
     }
+  }
+
+  refresh() {
+    makeRequest(
+      "GET",
+      this.currentLink,
+      this.errorOutput,
+      this.handleResponse.bind(this)
+    );
   }
 
   onPreviousClick() {
