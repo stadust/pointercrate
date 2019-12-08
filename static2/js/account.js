@@ -311,30 +311,26 @@ $(document).ready(function() {
 
     usersLoaded = true;
 
-    new Paginator(
-      document.getElementById("user-pagination"),
-      { limit: 5 },
-      user => {
-        var li = document.createElement("li");
-        var b = document.createElement("b");
-        var i = document.createElement("i");
+    new Paginator("user-pagination", { limit: 5 }, user => {
+      var li = document.createElement("li");
+      var b = document.createElement("b");
+      var i = document.createElement("i");
 
-        b.appendChild(document.createTextNode(user.name));
-        i.appendChild(
-          document.createTextNode(
-            "Display name: " + (user.display_name || "None")
-          )
-        );
+      b.appendChild(document.createTextNode(user.name));
+      i.appendChild(
+        document.createTextNode(
+          "Display name: " + (user.display_name || "None")
+        )
+      );
 
-        li.appendChild(b);
-        li.appendChild(document.createTextNode(" (ID: " + user.id + ")"));
-        li.appendChild(document.createElement("br"));
-        li.appendChild(i);
+      li.appendChild(b);
+      li.appendChild(document.createTextNode(" (ID: " + user.id + ")"));
+      li.appendChild(document.createElement("br"));
+      li.appendChild(i);
 
-        li.addEventListener("click", () => requestUserForEdit(user.id), false);
+      li.addEventListener("click", () => requestUserForEdit(user.id), false);
 
-        return li;
-      }
-    ).initialize();
+      return li;
+    }).initialize();
   });
 });

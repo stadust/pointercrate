@@ -1,22 +1,22 @@
 class Paginator {
   /**
-   * Creates an instance of Paginator. Retrieves its endpoint from the `data-endpoint` data attribute of `htmlContainer`.
+   * Creates an instance of Paginator. Retrieves its endpoint from the `data-endpoint` data attribute of `html`.
    *
-   * @param {HTMLElement} htmlContainer The DOM element of this paginator
+   * @param {String} elementId The Id of the DOM element of this paginator
    * @param {Object} queryData The initial query data to use
    * @param {*} itemConstructor Callback used to construct the list items of this Paginator
    * @memberof Paginator
    */
-  constructor(htmlContainer, queryData, itemConstructor) {
-    this.html = htmlContainer;
+  constructor(elementId, queryData, itemConstructor) {
+    this.html = document.getElementById(elementId);
 
     // Next and previous buttons
-    this.next = htmlContainer.getElementsByClassName("next")[0];
-    this.prev = htmlContainer.getElementsByClassName("prev")[0];
+    this.next = this.html.getElementsByClassName("next")[0];
+    this.prev = this.html.getElementsByClassName("prev")[0];
 
     // The endpoint which will be paginated. By storing this, we assume that the 'Links' header never redirects
     // us to a different endpoint (this is the case with the pointercrate API)
-    this.endpoint = htmlContainer.dataset.endpoint;
+    this.endpoint = this.html.dataset.endpoint;
     // The link for the request that was made to display the current data (required for refreshing)
     this.currentLink = this.endpoint + "?" + $.param(queryData);
     // The query data for the first request. Pagination may only update the 'before' and 'after' parameter,
@@ -31,16 +31,16 @@ class Paginator {
     this.itemConstructor = itemConstructor;
 
     // The list displaying the results of the request
-    this.list = htmlContainer.getElementsByClassName("selection-list")[0];
+    this.list = this.html.getElementsByClassName("selection-list")[0];
 
     // Some HTML element where we will display errors messages
-    this.errorOutput = htmlContainer.getElementsByClassName("output")[0];
+    this.errorOutput = this.html.getElementsByClassName("output")[0];
 
     this.nextHandler = this.onNextClick.bind(this);
     this.prevHandler = this.onPreviousClick.bind(this);
 
-    if (htmlContainer.style.display === "none") {
-      htmlContainer.style.display = "block";
+    if (this.html.style.display === "none") {
+      this.html.style.display = "block";
     }
 
     this.next.addEventListener("click", this.nextHandler, false);
@@ -160,7 +160,7 @@ class FilteredPaginator extends Paginator {
    * @memberof FilteredPaginator
    */
   constructor(paginatorID, itemConstructor, filterParam) {
-    super(document.getElementById(paginatorID), {}, itemConstructor);
+    super(paginatorID, {}, itemConstructor);
 
     let filterInput = this.html.getElementsByTagName("input")[0];
 
