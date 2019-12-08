@@ -195,10 +195,16 @@ class Paginator {
     this.next = htmlContainer.getElementsByClassName("next")[0];
     this.prev = htmlContainer.getElementsByClassName("prev")[0];
 
-    // The endpoint which will be paginated. By storing this, we assume that the 'Links' header never redirects us to a different endpoint (this is the case with the pointercrate API)
+    // The endpoint which will be paginated. By storing this, we assume that the 'Links' header never redirects
+    // us to a different endpoint (this is the case with the pointercrate API)
     this.endpoint = endpoint;
     // The link for the request that was made to display the current data (required for refreshing)
     this.currentLink = endpoint + "?" + $.param(queryData);
+    // The query data for the first request. Pagination may only update the 'before' and 'after' parameter,
+    // meaning everything else will always stay the same.
+    // Storing this means we won't have to parse the query data of the links from the 'Links' header, and allows
+    // us to easily update some parameters later on
+    this.queryData = queryData;
 
     // The (parsed) values of the HTTP 'Links' header, telling us how what requests to make then next or prev is clicked
     this.links = undefined;
@@ -244,7 +250,14 @@ class Paginator {
     }
   }
 
+  updateQueryData(key, value) {
+    this.queryData[key] = value;
+    this.currentLink = endpoint + "?" + $.param(this.queryData);
+    this.refresh();
+  }
+
   setQueryData(queryData) {
+    this.queryData = queryData;
     this.currentLink = endpoint + "?" + $.param(queryData);
     this.refresh();
   }
