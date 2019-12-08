@@ -195,6 +195,8 @@ class Paginator {
     this.next = htmlContainer.getElementsByClassName("next")[0];
     this.prev = htmlContainer.getElementsByClassName("prev")[0];
 
+    // The endpoint which will be paginated. By storing this, we assume that the 'Links' header never redirects us to a different endpoint (this is the case with the pointercrate API)
+    this.endpoint = endpoint;
     // The link for the request that was made to display the current data (required for refreshing)
     this.currentLink = endpoint + "?" + $.param(queryData);
 
@@ -240,6 +242,11 @@ class Paginator {
     for (var user of data.responseJSON) {
       this.list.appendChild(this.itemConstructor(user));
     }
+  }
+
+  setQueryData(queryData) {
+    this.currentLink = endpoint + "?" + $.param(queryData);
+    this.refresh();
   }
 
   refresh() {
