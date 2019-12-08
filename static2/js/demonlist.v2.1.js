@@ -1,36 +1,36 @@
-class StatsViewer {
-  generatePlayer(player) {
-    var li = document.createElement("li");
-    var b = document.createElement("b");
-    var i = document.createElement("i");
+function generatePlayer(player) {
+  var li = document.createElement("li");
+  var b = document.createElement("b");
+  var i = document.createElement("i");
 
-    li.className = "white hover";
-    li.dataset.id = player.id;
-    li.dataset.rank = player.rank;
+  li.className = "white hover";
+  li.dataset.id = player.id;
+  li.dataset.rank = player.rank;
 
-    b.appendChild(document.createTextNode("#" + player.rank + " "));
-    i.appendChild(document.createTextNode(player.score.toFixed(2)));
+  b.appendChild(document.createTextNode("#" + player.rank + " "));
+  i.appendChild(document.createTextNode(player.score.toFixed(2)));
 
-    if (player.nationality) {
-      var span = document.createElement("span");
+  if (player.nationality) {
+    var span = document.createElement("span");
 
-      span.className =
-        "flag-icon flag-icon-" + player.nationality.country_code.toLowerCase();
+    span.className =
+      "flag-icon flag-icon-" + player.nationality.country_code.toLowerCase();
 
-      li.appendChild(span);
-      li.appendChild(document.createTextNode(" "));
-    }
-
-    li.appendChild(b);
-    li.appendChild(document.createTextNode(player.name));
-    li.appendChild(i);
-
-    li.addEventListener("click", e => this.updateView(e));
-
-    return li;
+    li.appendChild(span);
+    li.appendChild(document.createTextNode(" "));
   }
 
+  li.appendChild(b);
+  li.appendChild(document.createTextNode(player.name));
+  li.appendChild(i);
+
+  return li;
+}
+
+class StatsViewer extends FilteredPaginator {
   constructor() {
+    super("stats-viewer-pagination", generatePlayer, "name_contains");
+
     this.domElement = $("#statsviewer");
     this._name = this.domElement.find("#player-name");
     this._created = this.domElement.find("#created");
@@ -46,86 +46,35 @@ class StatsViewer {
     this._error = this.domElement.find("#error-output");
     this._progress = this.domElement.find("#progress");
     this._content = this.domElement.find("#stats-data");
-    this._nation = undefined;
-    this._nationName = "International";
 
-    this.paginator = undefined;
-
-    var filterInput = document.getElementById("pagination-filter");
-    var pagination = document.getElementById("stats-viewer-pagination");
-
-    var setPaginator = () => {
-      if (this.paginator) {
-        this.paginator.stop();
-      }
-
-      let data = {}
-
-      if (this._nation) {
-        data.nation = this._nation;
-      }
-
-      if (filterInput.value) {
-        data.name_contains = filterInput.value;
-      }
-
-      this.paginator = new Paginator(
-        pagination,
-        "/players/ranking/",
-        data,
-        this.generatePlayer.bind(this)
-      );
-    };
+    let nationName = "International";
 
     document
       .getElementById("show-stats-viewer")
-      .addEventListener("click", () => setPaginator());
-
-    filterInput.addEventListener("keypress", event => {
-      if (event.keyCode == 13) {
-        setPaginator();
-      }
-    });
-
-    filterInput.addEventListener("change", () => setPaginator());
-
-    var timeout = undefined;
-
-    filterInput.addEventListener("input", () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-
-      timeout = setTimeout(() => setPaginator(), 1000);
-    });
+      .addEventListener("click", () => this.initialize());
 
     var nationFilter = document.getElementById("nation-filter");
     nationFilter.value = "International"; // in case some browser randomly decide to store text field values
 
     nationFilter.addEventListener("focus", () => {
-        console.log("Focus on nation filter");
-        this._nationName = nationFilter.value;
-        nationFilter.value = '';
-        nationFilter.dispatchEvent(new Event('change'));
+      nationName = nationFilter.value;
+      nationFilter.value = "";
+      nationFilter.dispatchEvent(new Event("change"));
     });
 
     nationFilter.addEventListener("focusout", () => {
-        console.log("Focus of nation filter lost!");
-        nationFilter.value = this._nationName;
+      nationFilter.value = nationName;
     });
 
-    for(let li of nationFilter.parentNode.getElementsByTagName('li')) {
-        li.addEventListener('click', () => {
-            console.log("Selected nation " + li.dataset.name);
-            this._nationName = li.dataset.name;
-            this._nation = li.dataset.code;
-            nationFilter.value = this._nationName;
-            setPaginator();
-        });
+    for (let li of nationFilter.parentNode.getElementsByTagName("li")) {
+      li.addEventListener("click", () => {
+        nationFilter.value = li.dataset.name;
+        this.updateQueryData("nation", li.dataset.code);
+      });
     }
   }
 
-  updateView(event) {
+  onSelect(event) {
     let selected = $(event.currentTarget);
 
     $.ajax({
@@ -235,10 +184,7 @@ $(document).ready(function() {
     "Due to Geometry Dash's limitations I know that no player has such a long name"
   );
 
-  progress.addValidator(
-    valueMissing,
-    "Please specify the record's progress"
-  );
+  progress.addValidator(valueMissing, "Please specify the record's progress");
   progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
   progress.addValidator(
     rangeOverflow,

@@ -79,7 +79,7 @@ impl Page for DemonlistOverview {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/demonlist.v2.1.js", "js/form.js"]
+        vec!["js/form.js", "js/demonlist.v2.1.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -249,7 +249,7 @@ impl Page for Demonlist {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/demonlist.v2.1.js", "js/form.js"]
+        vec!["js/form.js", "js/demonlist.v2.1.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -716,8 +716,8 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                 }
             }
             div.flex#stats-viewer-cont {
-                div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column"{
-                    div.search.js-search.seperated style = "margin-bottom: 0px"{
+                div.flex.no-stretch#stats-viewer-pagination style="flex-direction: column" data-endpoint="/players/ranking/"{
+                    div.search.js-search.seperated style = "margin-bottom: 0px"{  // TODO: remove js-search class?
                         input#pagination-filter placeholder = "Enter to search..." type = "text" style = "height: 1em";
                     }
                     p.info-red.output style = "margin: 10px 10px 0px"{}
@@ -726,7 +726,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                     }
                     div.flex style = "font-variant: small-caps; font-weight: bolder"{
                         div.button.small.prev { "Previous" }
-                        div.button.small.next {"Next"}
+                        div.button.small.next { "Next" }
                     }
                 }
                 div {

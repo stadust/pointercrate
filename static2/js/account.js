@@ -313,7 +313,6 @@ $(document).ready(function() {
 
     new Paginator(
       document.getElementById("user-pagination"),
-      "/users/",
       { limit: 5 },
       user => {
         var li = document.createElement("li");
@@ -336,6 +335,6 @@ $(document).ready(function() {
 
         return li;
       }
-    );
+    ).initialize();
   });
 });

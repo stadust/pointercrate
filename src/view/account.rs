@@ -186,7 +186,7 @@ impl AccountPage {
                         p {
                             "A list of all user accounts on pointercrate"
                         }
-                        div#user-pagination {
+                        div#user-pagination data-endpoint = "/users/"{
                             p.info-red.output#load-users-error {}
                             ul.selection-list#user-list {}
                             div.flex {
