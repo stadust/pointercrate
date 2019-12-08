@@ -198,7 +198,7 @@ pub fn paginator(id: &str, endpoint: &str) -> Markup {
     html! {
         div.flex.col.no-stretch#(id) data-endpoint = (endpoint) {
             p.info-red.output {}
-            div style="min-height: 200px; position:relative; flex-grow:1" {
+            div style="min-height: 300px; position:relative; flex-grow:1" {
                 ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
             }
             div.flex style = "font-variant: small-caps; font-weight: bolder"{

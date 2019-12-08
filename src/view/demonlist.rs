@@ -23,6 +23,8 @@ use joinery::Joinable;
 use maud::{html, Markup, PreEscaped};
 use tokio::prelude::{Future, IntoFuture};
 
+mod manage;
+
 struct ListSection {
     name: &'static str,
     description: &'static str,

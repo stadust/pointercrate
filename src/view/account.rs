@@ -47,7 +47,7 @@ impl Page for AccountPage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/account.js", "js/form.js"]
+        vec!["js/form.js", "js/account.js", "js/dlmanage.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -75,11 +75,21 @@ impl Page for AccountPage {
                             i class = "fa fa-users fa-2x" aria-hidden="true" {}
                         }
                     }
+                    @if self.user.has_any(&perms!(ListHelper or ListModerator or ListAdministrator)) {
+                        div.tab.button.white.hover.no-shadow data-tab-id="3" {
+                            b {
+                                "Records"
+                            }
+                            (PreEscaped("&nbsp;"))
+                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                        }
+                    }
                 }
 
                 div.tab-display {
                     (self.profile_page())
                     (self.user_page())
+                    (self.record_page())
                 }
             }
         }

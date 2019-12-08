@@ -92,10 +92,7 @@ class StatsViewer extends FilteredPaginator {
       success: data => {
         let json = data.data;
 
-        console.log(json);
-
         if (json.nationality == null) {
-          console.log("no nation :(");
           this._name.text(json.name);
         } else {
           this._name.html(
@@ -168,7 +165,6 @@ class StatsViewer extends FilteredPaginator {
 
 $(document).ready(function() {
   window.statsViewer = new StatsViewer();
-
   var submissionForm = new Form(document.getElementById("submission-form"));
 
   var demon = submissionForm.input("id_demon");
