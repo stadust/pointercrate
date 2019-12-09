@@ -74,8 +74,27 @@ impl AccountPage {
                             }
                         }
                     }
+                    div.panel.fade {
+                        h1.underlined.pad {
+                            "Manage Record"
+                        }
+                        p {
+                            "Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by submission, player, etc.. Clicking the 'All Demons' field at the top allows to filter by demon."
+                        }
+                        p {
+                            b { "Note: " }
+                            "If a player is banned, they cannot have accepted/submitted records on the list, and all records they potentially once had are marked as rejected"
+                        }
+                        p {
+                            b { "Note: " }
+                            "Banning a submitter will delete all their submissions that still have the status 'Submitted'. Records submitted by them that were already accepted/rejected will not be affected"
+                        }
+                    }
+
                 }
-                div.right {}
+                div.right {
+
+                }
             }
         }
     }

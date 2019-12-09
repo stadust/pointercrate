@@ -86,12 +86,13 @@ class Paginator {
   /**
    * Initializes this Paginator by making the request using the query data specified in the constructor.
    *
-   * Calling any other method on this before calling initialize is considered an error
+   * Calling any other method on this before calling initialize is considered an error.
+   * Calling this more than once has no additional effect.
    *
    * @memberof Paginator
    */
   initialize() {
-    this.refresh();
+    if (this.links === undefined) this.refresh();
   }
 
   handleResponse(data) {
