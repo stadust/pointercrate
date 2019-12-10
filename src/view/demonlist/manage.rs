@@ -114,6 +114,32 @@ impl AccountPage {
                             li.white.hover.underlined data-value = "All" {"All"}
                         }, ["Approved", "Submitted", "Rejected"].into_iter().map(|s| html!(li.white.hover data-value = (s) {(s)}))))
                     }
+                    div.panel.fade {
+                        h2.underlined.pad {
+                            "Filter by player"
+                        }
+                        p {
+                            "Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Right now the only way to reset this filter is to reload the page. Sorry!"
+                        }
+                        form.flex.col.underlined.pad#record-filter-by-player-id-form novalidate = "" {
+                            p.info-red.output {}
+                            span.form-input#record-player-id {
+                                label for = "id" {"Player ID:"}
+                                input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
+                                p.error {}
+                            }
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+                        }
+                        form.flex.col#record-filter-by-player-name-form novalidate = "" {
+                            p.info-red.output {}
+                            span.form-input#record-player-name {
+                                label for = "name" {"Username:"}
+                                input required = "" type = "text" name = "name";
+                                p.error {}
+                            }
+                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by name";
+                        }
+                    }
                 }
             }
         }

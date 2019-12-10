@@ -119,6 +119,49 @@ $(document).ready(function() {
     if (window.recordManager === undefined) {
       window.recordManager = new RecordManager();
       window.recordManager.initialize();
+
+      setupRecordFilterPlayerIdForm();
+      setupRecordFilterPlayerNameForm();
     }
   });
 });
+
+function setupRecordFilterPlayerIdForm() {
+  var recordFilterPlayerIdForm = new Form(
+    document.getElementById("record-filter-by-player-id-form")
+  );
+  var playerId = recordFilterPlayerIdForm.input("record-player-id");
+
+  playerId.addValidator(valueMissing, "Player ID required");
+  recordFilterPlayerIdForm.onSubmit(function(event) {
+    window.recordManager.updateQueryData("player", playerId.value);
+  });
+}
+
+function setupRecordFilterPlayerNameForm() {
+  var recordFilterPlayerNameForm = new Form(
+    document.getElementById("record-filter-by-player-name-form")
+  );
+  var playerName = recordFilterPlayerNameForm.input("record-player-name");
+
+  playerName.addValidators({
+    "Player name required": valueMissing
+  });
+
+  recordFilterPlayerNameForm.onSubmit(function(event) {
+    makeRequest(
+      "GET",
+      "/players/?name=" + playerName.value,
+      recordFilterPlayerNameForm.errorOutput,
+      data => {
+        let json = data.responseJSON;
+
+        if (!json || json.length == 0) {
+          playerName.setError("No user with that name found!");
+        } else {
+          window.recordManager.updateQueryData("player", json[0].id);
+        }
+      }
+    );
+  });
+}
