@@ -63,7 +63,7 @@ class TabbedPane {
   }
 }
 
-TABBED_PANES = {};
+var TABBED_PANES = {};
 
 $(document).ready(function() {
   for (var tabbedPane of document.getElementsByClassName("tabbed")) {

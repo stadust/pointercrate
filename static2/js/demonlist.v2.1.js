@@ -59,26 +59,6 @@ class StatsViewer extends FilteredPaginator {
     this.dropdown.addEventListener(li =>
       this.updateQueryData("nation", li.dataset.code)
     );
-
-    /*var nationFilter = this.html[0].querySelector(".dropdown-menu input");
-    nationFilter.value = "International"; // in case some browser randomly decide to store text field values
-
-    nationFilter.addEventListener("focus", () => {
-      nationName = nationFilter.value;
-      nationFilter.value = "";
-      nationFilter.dispatchEvent(new Event("change"));
-    });
-
-    nationFilter.addEventListener("focusout", () => {
-      nationFilter.value = nationName;
-    });
-
-    for (let li of nationFilter.parentNode.getElementsByTagName("li")) {
-      li.addEventListener("click", () => {
-        nationFilter.value = li.dataset.name;
-        this.updateQueryData("nation", li.dataset.code);
-      });
-    }*/
   }
 
   onSelect(selected) {
