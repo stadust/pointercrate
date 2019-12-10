@@ -157,7 +157,7 @@ function setupRecordFilterPlayerNameForm() {
         let json = data.responseJSON;
 
         if (!json || json.length == 0) {
-          playerName.setError("No user with that name found!");
+          playerName.setError("No player with that name found!");
         } else {
           window.recordManager.updateQueryData("player", json[0].id);
         }

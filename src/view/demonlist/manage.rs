@@ -133,7 +133,7 @@ impl AccountPage {
                         form.flex.col#record-filter-by-player-name-form novalidate = "" {
                             p.info-red.output {}
                             span.form-input#record-player-name {
-                                label for = "name" {"Username:"}
+                                label for = "name" {"Player name:"}
                                 input required = "" type = "text" name = "name";
                                 p.error {}
                             }
