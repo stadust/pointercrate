@@ -1,3 +1,48 @@
+class Dropdown {
+  /**
+   * Creates an instance of Dropdown.
+   * @param {HTMLElement} html
+   * @memberof Dropdown
+   */
+  constructor(html) {
+    this.html = html;
+    this.input = this.html.getElementsByTagName("input")[0];
+    this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
+    this.listeners = [];
+
+    this.input.value = this.input.dataset.default; // in case some browser randomly decide to store text field values
+
+    // temporarily store selection while we clear the text field when the dropdown is opened
+    var value = this.html.dataset.default;
+
+    this.input.addEventListener("focus", () => {
+      value = this.input.value;
+      this.input.value = "";
+      this.input.dispatchEvent(new Event("change"));
+      this.menu.fadeTo(300, 0.95);
+    });
+
+    this.input.addEventListener("focusout", () => {
+      this.menu.fadeOut(300);
+      this.input.value = value;
+    });
+
+    for (let li of this.html.getElementsByTagName("li")) {
+      li.addEventListener("click", () => {
+        this.input.value = li.dataset.value;
+
+        for (let listener of this.listeners) {
+          listener(li);
+        }
+      });
+    }
+  }
+
+  addEventListener(listener) {
+    this.listeners.push(listener);
+  }
+}
+
 class Paginator {
   /**
    * Creates an instance of Paginator. Retrieves its endpoint from the `data-endpoint` data attribute of `html`.

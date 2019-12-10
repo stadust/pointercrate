@@ -74,6 +74,17 @@ class RecordManager extends Paginator {
     this._status = document.getElementById("record-status");
     this._progress = document.getElementById("record-progress");
     this._submitter = document.getElementById("record-submitter");
+    this._notes = document.getElementById("record-notes");
+
+    this.dropdown = new Dropdown(
+      document
+        .getElementById("status-filter-panel")
+        .getElementsByClassName("dropdown-menu")[0]
+    );
+    this.dropdown.addEventListener(li => {
+      if (li.innerHTML === "All") this.updateQueryData("status", undefined);
+      else this.updateQueryData("status", li.innerHTML);
+    });
   }
 
   onReceive(response) {
@@ -96,6 +107,7 @@ class RecordManager extends Paginator {
     this._status.innerHTML = recordData.status;
     this._progress.innerHTML = recordData.progress;
     this._submitter.innerHTML = recordData.submitter.id;
+    this._notes.innerHTML = recordData.notes;
 
     $(this._welcome).hide(100);
     $(this._content).show(100);

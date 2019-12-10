@@ -31,21 +31,21 @@ class StatsViewer extends FilteredPaginator {
   constructor() {
     super("stats-viewer-pagination", generatePlayer, "name_contains");
 
-    this.domElement = $("#statsviewer");
-    this._name = this.domElement.find("#player-name");
-    this._created = this.domElement.find("#created");
-    this._beaten = this.domElement.find("#beaten");
-    this._verified = this.domElement.find("#verified");
-    this._published = this.domElement.find("#published");
-    this._hardest = this.domElement.find("#hardest");
-    this._score = this.domElement.find("#score");
-    this._rank = this.domElement.find("#rank");
-    this._amountBeaten = this.domElement.find("#amount-beaten");
-    this._amountLegacy = this.domElement.find("#amount-legacy");
-    this._current = this.domElement.find("#name");
-    this._error = this.domElement.find("#error-output");
-    this._progress = this.domElement.find("#progress");
-    this._content = this.domElement.find("#stats-data");
+    this.html = $("#statsviewer");
+    this._name = this.html.find("#player-name");
+    this._created = this.html.find("#created");
+    this._beaten = this.html.find("#beaten");
+    this._verified = this.html.find("#verified");
+    this._published = this.html.find("#published");
+    this._hardest = this.html.find("#hardest");
+    this._score = this.html.find("#score");
+    this._rank = this.html.find("#rank");
+    this._amountBeaten = this.html.find("#amount-beaten");
+    this._amountLegacy = this.html.find("#amount-legacy");
+    this._current = this.html.find("#name");
+    this._error = this.html.find("#error-output");
+    this._progress = this.html.find("#progress");
+    this._content = this.html.find("#stats-data");
 
     let nationName = "International";
 
@@ -53,7 +53,14 @@ class StatsViewer extends FilteredPaginator {
       .getElementById("show-stats-viewer")
       .addEventListener("click", () => this.initialize());
 
-    var nationFilter = document.getElementById("nation-filter");
+    this.dropdown = new Dropdown(
+      this.html[0].getElementsByClassName("dropdown-menu")[0]
+    );
+    this.dropdown.addEventListener(li =>
+      this.updateQueryData("nation", li.dataset.code)
+    );
+
+    /*var nationFilter = this.html[0].querySelector(".dropdown-menu input");
     nationFilter.value = "International"; // in case some browser randomly decide to store text field values
 
     nationFilter.addEventListener("focus", () => {
@@ -71,7 +78,7 @@ class StatsViewer extends FilteredPaginator {
         nationFilter.value = li.dataset.name;
         this.updateQueryData("nation", li.dataset.code);
       });
-    }
+    }*/
   }
 
   onSelect(selected) {

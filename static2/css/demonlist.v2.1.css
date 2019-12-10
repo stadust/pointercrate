@@ -82,6 +82,11 @@ tr:nth-child(even) {
   }
 }
 
+#statsviewer .dropdown-menu ul {
+  font-size: 0.55em;
+  font-weight: normal;
+}
+
 .dropdown {
   background: white;
   text-align: center;

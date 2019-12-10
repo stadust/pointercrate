@@ -1,4 +1,4 @@
-use crate::view::{account::AccountPage, paginator};
+use crate::view::{account::AccountPage, dropdown, paginator};
 use maud::{html, Markup};
 
 impl AccountPage {
@@ -8,7 +8,7 @@ impl AccountPage {
                 div.left {
                     div.panel.fade#record-manager {
                         h2.underlined.pad {
-                            "Record Manager"
+                            "Record Manager (Alpha)"
                         }
                         div.flex {
                             (paginator("record-pagination", "/records/"))
@@ -69,6 +69,16 @@ impl AccountPage {
                                                 span#record-submitter {}
                                             }
                                         }
+
+                                        div.stats-container.flex.space {
+                                            span {
+                                                b {
+                                                    "Notes:"
+                                                }
+                                                br;
+                                                span#record-notes {}
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -93,7 +103,17 @@ impl AccountPage {
 
                 }
                 div.right {
-
+                    div.panel.fade#status-filter-panel style = "overflow: visible" {
+                        h2.underlined.pad {
+                            "Filter"
+                        }
+                        p {
+                            "Filter by record status"
+                        }
+                        (dropdown("All", html! {
+                            li.white.hover.underlined data-value = "All" {"All"}
+                        }, ["Approved", "Submitted", "Rejected"].into_iter().map(|s| html!(li.white.hover data-value = (s) {(s)}))))
+                    }
                 }
             }
         }
