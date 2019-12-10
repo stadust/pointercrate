@@ -264,16 +264,17 @@ $(document).ready(function() {
   setupGetAccessToken();
   setupEditAccount();
   setupInvalidateToken();
-  setupDeleteUser(csrfToken);
-  setupPatchUserPermissionsForm(csrfToken);
-  setupUserByIdForm();
-  setupUserByNameForm();
 
   TABBED_PANES["account-tabber"].addSwitchListener("2", () => {
     if (window.userPaginator === undefined) {
       window.userPaginator = new UserPaginator();
       window.userPaginator.initialize();
     }
+
+    setupDeleteUser(csrfToken);
+    setupPatchUserPermissionsForm(csrfToken);
+    setupUserByIdForm();
+    setupUserByNameForm();
   });
 });
 

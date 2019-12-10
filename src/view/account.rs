@@ -88,8 +88,12 @@ impl Page for AccountPage {
 
                 div.tab-display {
                     (self.profile_page())
-                    (self.user_page())
-                    (self.record_page())
+                    @if self.user.has_any(&perms!(Administrator)) {
+                        (self.user_page())
+                    }
+                    @if self.user.has_any(&perms!(ListHelper or ListModerator or ListAdministrator)) {
+                        (self.record_page())
+                    }
                 }
             }
         }
