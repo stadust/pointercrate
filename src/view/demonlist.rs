@@ -325,7 +325,7 @@ impl Page for Demonlist {
                                         "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
                                     }
                                 },
-                                Some(CacheEntry::DeducedAbsent) | Some(CacheEntry::MarkedAbsent(_)) => {
+                                Some(CacheEntry::MarkedAbsent(_)) => {
                                     p.info-red {
                                         "This demon has not been found on the Geometry Dash servers. Its name was most likely misspelled when entered into the database. Please contact a list moderator to fix this."
                                     }

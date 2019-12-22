@@ -5,7 +5,7 @@ use actix::{fut::WrapFuture, Actor, Addr, AsyncContext, Context, Handler, Messag
 use gdcf::{
     api::request::level::{LevelRequestType, LevelsRequest, SearchFilters},
     cache::CacheEntry,
-    future::CloneCached,
+    future::CloneablePeekFuture,
     Gdcf,
 };
 use gdcf_diesel::{Cache, Entry};
@@ -146,13 +146,13 @@ impl Handler<LevelById> for HttpActor {
     fn handle(&mut self, LevelById(id): LevelById, ctx: &mut Self::Context) -> Self::Result {
         let future = self
             .gdcf
-            .level(id)
+            .level(id, false)
             .map_err(|err| error!("GDCF database access failed: {:?}", err))
             .ok()?
             .upgrade::<Level<Option<NewgroundsSong>, _>>()
             .upgrade::<Level<_, Option<Creator>>>();
 
-        let cached = future.clone_cached();
+        let cached = future.clone_peek();
 
         ctx.spawn(
             future
@@ -184,13 +184,14 @@ impl Handler<GetDemon> for HttpActor {
                     .search(msg.0.clone())
                     .with_rating(LevelRating::Demon(DemonRating::Hard))
                     .filter(SearchFilters::default().rated()),
+                false,
             )
             .map_err(|err| error!("GDCF database access failed: {:?}", err))
             .ok()?
             .upgrade_all::<PartialLevel<_, Option<Creator>>>()
             .upgrade_all::<Level<_, _>>();
 
-        let cached_clone = future.clone_cached();
+        let cached_clone = future.clone_peek();
 
         ctx.spawn(
             future
@@ -201,7 +202,6 @@ impl Handler<GetDemon> for HttpActor {
 
         match cached_clone.ok()? {
             CacheEntry::Missing => Some(CacheEntry::Missing),
-            CacheEntry::DeducedAbsent => Some(CacheEntry::DeducedAbsent),
             CacheEntry::MarkedAbsent(meta) => Some(CacheEntry::MarkedAbsent(meta)),
             CacheEntry::Cached(demons, meta) =>
                 demons

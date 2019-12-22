@@ -182,8 +182,6 @@ fn main() {
                                         None => HttpResponse::InternalServerError().finish(),
                                         Some(CacheEntry::Missing) =>
                                             HttpResponse::Accepted().finish(),
-                                        Some(CacheEntry::DeducedAbsent) =>
-                                            HttpResponse::NotFound().finish(),
                                         Some(CacheEntry::MarkedAbsent(meta)) =>
                                             HttpResponse::NotFound()
                                                 .header("X-CACHED-AT", meta.cached_at().to_string())
