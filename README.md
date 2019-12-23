@@ -1,10 +1,28 @@
 # Pointercrate
 
-As of march 2nd 2019 this is the official repository for pointercrate. It contains all the backend (Rust) and frontend (JavaScript/CSS and html templating in form of rust macros) code that runs pointercrate.
+As of march 2nd 2019 this is the official repository for pointercrate. It contains all the backend (Rust), database (SQL) and frontend (JavaScript/CSS and html templating in form of rust macros) code that runs pointercrate.
 
-## Disclaimer:
+## Running pointercrate copies
 
-While I'm generally OK (in fact, its pretty awesome) with people running their own copies of this code on their own servers (note: running the code. I'm not OK with people copying the content from pointercrate), doing so is **completely unsupported** from my side. I will deliberately _not_ give out instructions for setting up a pointercrate clone. If you have enough knowledge to be capable to run a server, I fully believe in you to be able to figure out how to get it running yourself. 
+### Prereqs
+
+- PostgreSQL (database used by pointercrate)
+- pandoc     (to build the markdown documentation)
+
+### Configuration
+
+Pointercrate is mainly configured via optional environment variables. It will attempt to load them from an `.env` file. These are:
+
+- `DATABASE_URL`: The URL to the postgres database to connect to
+- `GDCF_URL`: The URL to the postgres database for GDCF to connect to
+- `PORT`: The port to run on (defaults to `8088`)
+- `DOCUMENTATION`: The directory with the compiled documentation html files (defaults to `env!("OUT_DIR")`)
+
+Additionally, you'll need a `.secret` file containing the secret to sign access tokens with.
+
+### Disclaimer:
+
+While I'm generally OK (in fact, its pretty awesome) with people running their own copies of this code on their own servers (note: running the code. I'm not OK with people copying the content from pointercrate), doing so is **completely unsupported** from my side beyond these instructions. If you have enough knowledge to be capable to run a server, I fully believe in you to be able to figure out how to get it running from these. 
 
 Furthermore, if you _do_ run a pointercrate copy, I do ask you to remove all references to pointercrate from it and state somewhere that you are not associated with pointercrate in any way or form. I'd appreciate some credit, but it's not required.
 
