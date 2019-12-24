@@ -5,7 +5,7 @@ use crate::{
     error::PointercrateError,
     model::{
         demonlist::{creator::created_by, demon::MinimalDemon, player::Player},
-        By, Model,
+        Model,
     },
     operation::Get,
     schema::{demons, players},
@@ -24,7 +24,7 @@ impl<'a> Get<&'a CiStr> for DatabasePlayer {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {
         let name = CiStr::from_str(name.trim());
 
-        match DatabasePlayer::by(name).first(ctx.connection()) {
+        match DatabasePlayer::by_name(name).first(ctx.connection()) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) => {
                 info!("Creating new player with name {}", name);
@@ -42,7 +42,7 @@ impl<'a> Get<&'a CiStr> for DatabasePlayer {
 
 impl Get<i32> for DatabasePlayer {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
-        match DatabasePlayer::by(id).first(ctx.connection()) {
+        match DatabasePlayer::find(&id).first(ctx.connection()) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -56,7 +56,7 @@ impl Get<i32> for DatabasePlayer {
 
 impl Get<i32> for Player {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
-        match Player::by(id).first(ctx.connection()) {
+        match Player::find(&id).first(ctx.connection()) {
             Ok(player) => Ok(player),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -74,7 +74,7 @@ where
 {
     fn get(t: T, ctx: RequestContext) -> Result<Self> {
         let player = Player::get(t, ctx)?;
-        let pid = player.inner.id;
+        let pid = player.id;
 
         Ok(FullPlayer {
             records: Get::get(pid, ctx)?,

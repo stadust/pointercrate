@@ -1,3 +1,4 @@
+pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
 use crate::{
     model::{demonlist::record::EmbeddedRecordPD, Model},
     schema::submitters,
@@ -8,17 +9,15 @@ use diesel::{
 };
 use ipnetwork::IpNetwork;
 use serde_derive::Serialize;
+use std::hash::{Hash, Hasher};
 
 mod get;
 mod paginate;
 mod patch;
 
-pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
-use crate::model::By;
-use std::hash::{Hash, Hasher};
-
-#[derive(Debug, Serialize, Hash, Display, Copy, Clone)]
+#[derive(Debug, Serialize, Hash, Display, Copy, Clone, Identifiable)]
 #[display(fmt = "{} (Banned: {})", id, banned)]
+#[table_name = "submitters"]
 pub struct Submitter {
     pub id: i32,
     pub banned: bool,
@@ -56,9 +55,6 @@ struct NewSubmitter<'a> {
     ip: &'a IpNetwork,
 }
 
-impl By<submitters::ip_address, &IpNetwork> for Submitter {}
-impl By<submitters::submitter_id, i32> for Submitter {}
-
 impl Submitter {
     pub fn insert(ip: &IpNetwork, conn: &PgConnection) -> QueryResult<Submitter> {
         let new = NewSubmitter { ip };
@@ -71,14 +67,13 @@ impl Submitter {
 }
 
 impl Model for Submitter {
-    type From = submitters::table;
     type Selection = (submitters::submitter_id, submitters::banned);
 
-    fn from() -> Self::From {
-        submitters::table
-    }
-
     fn selection() -> Self::Selection {
-        Self::Selection::default()
+        (submitters::submitter_id, submitters::banned)
     }
+}
+
+impl Submitter {
+    by!(by_ip, submitters::ip_address, &IpNetwork);
 }

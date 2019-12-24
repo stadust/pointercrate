@@ -11,7 +11,7 @@ use crate::{
             record::{MinimalRecordD, RecordStatus},
         },
         nationality::Nationality,
-        By, Model,
+        Model,
     },
     schema::{players, records},
     Result,
@@ -29,8 +29,9 @@ mod get;
 mod paginate;
 mod patch;
 
-#[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display)]
+#[derive(Queryable, Debug, Hash, Eq, PartialEq, Serialize, Display, Identifiable)]
 #[display(fmt = "{} (ID: {})", name, id)]
+#[table_name = "players"]
 pub struct DatabasePlayer {
     pub id: i32,
     pub name: CiString,
@@ -63,8 +64,9 @@ table! {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Display)]
+#[derive(Debug, PartialEq, Serialize, Display, Identifiable)]
 #[display(fmt = "{} (ID: {}) at rank {} with score {}", name, id, rank, score)]
+#[table_name = "players_with_score"]
 pub struct RankedPlayer {
     pub id: i32,
     pub name: CiString,
@@ -86,11 +88,13 @@ table! {
     }
 }
 
-#[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
-#[display(fmt = "{}", inner)]
+#[derive(Debug, Eq, Hash, PartialEq, Serialize, Display, Identifiable)]
+#[display(fmt = "{} (ID: {})", name, id)]
+#[table_name = "players_n"]
 pub struct Player {
-    #[serde(flatten)]
-    pub inner: DatabasePlayer,
+    pub id: i32,
+    pub name: CiString,
+    pub banned: bool,
 
     pub nationality: Option<Nationality>,
 }
@@ -101,13 +105,15 @@ impl Hash for FullPlayer {
     }
 }
 
-impl By<players::id, i32> for DatabasePlayer {}
-impl By<players::name, &CiStr> for DatabasePlayer {}
-
-impl By<players_n::id, i32> for Player {}
-impl By<players_n::name, &CiStr> for Player {}
-
 impl DatabasePlayer {
+    by!(by_name, players::name, &CiStr);
+}
+
+impl Player {
+    by!(by_name, players_n::name, &CiStr);
+}
+
+impl Player {
     pub fn ban(&self, conn: &PgConnection) -> QueryResult<()> {
         // delete all submissions
         diesel::delete(records::table)
@@ -192,12 +198,7 @@ impl DatabasePlayer {
 }
 
 impl Model for DatabasePlayer {
-    type From = players::table;
     type Selection = (players::id, players::name, players::banned);
-
-    fn from() -> Self::From {
-        players::table
-    }
 
     fn selection() -> Self::Selection {
         Self::Selection::default()
@@ -205,12 +206,7 @@ impl Model for DatabasePlayer {
 }
 
 impl Model for Player {
-    type From = players_n::table;
     type Selection = <players_n::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        players_n::table
-    }
 
     fn selection() -> Self::Selection {
         players_n::all_columns
@@ -218,7 +214,6 @@ impl Model for Player {
 }
 
 impl Model for RankedPlayer {
-    type From = players_with_score::table;
     type Selection = (
         players_with_score::id,
         players_with_score::name,
@@ -229,16 +224,12 @@ impl Model for RankedPlayer {
         players_with_score::nation,
     );
 
-    fn from() -> Self::From {
-        players_with_score::table
-    }
-
     fn selection() -> Self::Selection {
         Self::Selection::default()
     }
 }
 
-impl Queryable<<<Player as Model>::Selection as Expression>::SqlType, Pg> for Player {
+impl Queryable<<<players_n::table as Table>::AllColumns as Expression>::SqlType, Pg> for Player {
     type Row = (i32, CiString, bool, Option<String>, Option<CiString>);
 
     fn build(row: Self::Row) -> Self {
@@ -248,17 +239,17 @@ impl Queryable<<<Player as Model>::Selection as Expression>::SqlType, Pg> for Pl
         };
 
         Player {
-            inner: DatabasePlayer {
-                id: row.0,
-                name: row.1,
-                banned: row.2,
-            },
+            id: row.0,
+            name: row.1,
+            banned: row.2,
             nationality,
         }
     }
 }
 
-impl Queryable<<<RankedPlayer as Model>::Selection as Expression>::SqlType, Pg> for RankedPlayer {
+impl Queryable<<<players_with_score::table as Table>::AllColumns as Expression>::SqlType, Pg>
+    for RankedPlayer
+{
     type Row = (
         i32,
         CiString,

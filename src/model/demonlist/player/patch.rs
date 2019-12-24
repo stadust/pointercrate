@@ -3,7 +3,7 @@ use crate::{
     citext::CiString,
     context::RequestContext,
     error::PointercrateError,
-    model::{demonlist::player::Player, nationality::Nationality, By},
+    model::{demonlist::player::Player, nationality::Nationality},
     operation::{deserialize_non_optional, deserialize_optional, Get, Patch},
     schema::players,
     Result,
@@ -31,15 +31,15 @@ impl Patch<PatchPlayer> for Player {
 
         connection.transaction(|| {
             if let Some(true) = patch.banned {
-                if !self.inner.banned {
-                    self.inner.ban(connection)?;
+                if !self.banned {
+                    self.ban(connection)?;
                 }
             }
 
             if let Some(ref name) = patch.name {
-                if *name != self.inner.name {
-                    match DatabasePlayer::by(name.as_ref()).first(connection) {
-                        Ok(player) => self.inner.merge(player, connection)?,
+                if *name != self.name {
+                    match DatabasePlayer::by_name(name.as_ref()).first(connection) {
+                        Ok(player) => self.merge(player, connection)?,
                         Err(Error::NotFound) => (),
                         Err(err) => return Err(PointercrateError::database(err)),
                     }
@@ -52,14 +52,15 @@ impl Patch<PatchPlayer> for Player {
                     .transpose()?;
             }
 
-            patch!(self.inner, patch: name, banned);
+            patch!(self, patch: name, banned);
 
             diesel::update(players::table)
-                .filter(players::id.eq(&self.inner.id))
+                .filter(players::id.eq(&self.id))
                 .set((
-                    players::banned.eq(&self.inner.banned),
-                    players::name.eq(&self.inner.name),
-                    players::nationality.eq(&self.nationality.as_ref().map(|n| &n.country_code)),
+                    players::banned.eq(&self.banned),
+                    players::name.eq(&self.name),
+                    players::nationality
+                        .eq(&self.nationality.as_ref().map(|n| &n.iso_country_code)),
                 ))
                 .execute(connection)?;
 

@@ -2,56 +2,42 @@ use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
     error::PointercrateError,
-    model::{By, Model},
+    model::Model,
     operation::Get,
     schema::nationalities,
     Result,
 };
 use derive_more::Constructor;
-use diesel::{result::Error, RunQueryDsl};
+use diesel::{result::Error, RunQueryDsl, Table};
 use serde_derive::Serialize;
 
-#[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
+#[derive(Queryable, Debug, PartialEq, Eq, Serialize, Hash, Constructor, Identifiable)]
+#[table_name = "nationalities"]
+#[primary_key(iso_country_code)]
 pub struct Nationality {
-    pub country_code: String,
+    pub iso_country_code: String,
     pub nation: CiString,
 }
 
-/// The difference between 'A', as unicode codepoint (65), and '🇦', as unicode codepoint (127462)
-const MAGIC: u32 = 127397;
+impl Model for Nationality {
+    type Selection = <nationalities::table as Table>::AllColumns;
 
-impl Nationality {
-    pub fn to_emoji(&self) -> String {
-        self.country_code
-            .chars()
-            .map(|c| std::char::from_u32((c as u32) + MAGIC).unwrap())
-            .collect()
+    fn selection() -> Self::Selection {
+        nationalities::all_columns
     }
 }
 
-impl By<nationalities::nation, &CiStr> for Nationality {}
-impl By<nationalities::iso_country_code, &String> for Nationality {}
-
-impl Model for Nationality {
-    type From = nationalities::table;
-    type Selection = (nationalities::iso_country_code, nationalities::nation);
-
-    fn from() -> Self::From {
-        nationalities::table
-    }
-
-    fn selection() -> Self::Selection {
-        Self::Selection::default()
-    }
+impl Nationality {
+    by!(by_nation_name, nationalities::nation, &CiStr);
 }
 
 impl Get<&str> for Nationality {
     fn get(id: &str, ctx: RequestContext) -> Result<Self> {
         let connection = ctx.connection();
 
-        match Nationality::by(&id.to_uppercase())
+        match Nationality::find(&id.to_uppercase())
             .first(connection)
-            .or_else(|_| Nationality::by(CiStr::from_str(id)).first(connection))
+            .or_else(|_| Nationality::by_nation_name(CiStr::from_str(id)).first(connection))
         {
             Ok(nationality) => Ok(nationality),
             Err(Error::NotFound) =>

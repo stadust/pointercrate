@@ -1,9 +1,9 @@
 use super::User;
 use crate::{
-    context::RequestContext, error::PointercrateError, model::Model, operation::Post,
-    ratelimit::RatelimitScope, schema::members, Result,
+    context::RequestContext, error::PointercrateError, operation::Post, ratelimit::RatelimitScope,
+    schema::members, Result,
 };
-use diesel::{insert_into, result::Error, Connection, RunQueryDsl};
+use diesel::{insert_into, result::Error, Connection, RunQueryDsl, Table};
 use log::info;
 use serde_derive::Deserialize;
 
@@ -48,7 +48,7 @@ impl Post<Registration> for User {
 
                     insert_into(members::table)
                         .values(&new)
-                        .returning(User::selection())
+                        .returning(crate::schema::members::table::all_columns())
                         .get_result(connection)
                         .map_err(PointercrateError::database)
                 },

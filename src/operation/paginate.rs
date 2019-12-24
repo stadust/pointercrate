@@ -1,4 +1,4 @@
-use crate::{context::RequestContext, model::Model, Result};
+use crate::{context::RequestContext, Result};
 use diesel::{
     dsl::{max, min},
     expression::{AsExpression, NonAggregate},
@@ -279,7 +279,7 @@ macro_rules! delegate_to_table_paginator {
     };
 }
 
-pub trait Paginate<P: Paginator>: Model + Sized {
+pub trait Paginate<P: Paginator>: Sized {
     fn load(paginator: &P, ctx: RequestContext) -> Result<Vec<Self>>;
 }
 

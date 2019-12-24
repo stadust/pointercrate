@@ -3,10 +3,7 @@ use crate::{
     citext::CiStr,
     context::RequestContext,
     error::PointercrateError,
-    model::{
-        demonlist::{creator::Creators, record::MinimalRecordP},
-        By,
-    },
+    model::demonlist::{creator::Creators, record::MinimalRecordP},
     operation::Get,
     Result,
 };
@@ -14,7 +11,7 @@ use diesel::{result::Error, RunQueryDsl};
 
 impl<'a> Get<&'a CiStr> for Demon {
     fn get(name: &'a CiStr, ctx: RequestContext) -> Result<Self> {
-        match Demon::by(name).first(ctx.connection()) {
+        match Demon::by_name(name).first(ctx.connection()) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -28,7 +25,7 @@ impl<'a> Get<&'a CiStr> for Demon {
 
 impl Get<i16> for Demon {
     fn get(position: i16, ctx: RequestContext) -> Result<Self> {
-        match Demon::by(position).first(ctx.connection()) {
+        match Demon::by_position(position).first(ctx.connection()) {
             Ok(demon) => Ok(demon),
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {

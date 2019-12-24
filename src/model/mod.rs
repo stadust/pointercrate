@@ -16,6 +16,18 @@
 //! Only the `Database` representation always exists. The others are occasionally not necessary
 //! distinct from each other
 
+macro_rules! by {
+    ($method_name: ident, $column: path, $rust_type: ty) => {
+        fn $method_name(
+            value: $rust_type,
+        ) -> diesel::dsl::Filter<crate::model::All<Self>, diesel::dsl::Eq<$column, $rust_type>> {
+            use diesel::{ExpressionMethods, QueryDsl};
+
+            Self::all().filter($column.eq(value))
+        }
+    };
+}
+
 #[macro_use]
 pub mod user;
 pub mod demonlist;
@@ -24,26 +36,29 @@ pub mod nationality;
 pub use self::user::User;
 
 use diesel::{
-    dsl::{Eq, Filter, Select},
-    expression::{AsExpression, Expression},
+    associations::HasTable,
+    dsl::{Find, Select},
+    expression::Expression,
     helper_types::IntoBoxed,
     pg::Pg,
-    query_dsl::{boxed_dsl::BoxedDsl, filter_dsl::FilterDsl, select_dsl::SelectDsl},
-    ExpressionMethods,
+    query_dsl::{boxed_dsl::BoxedDsl, filter_dsl::FindDsl, select_dsl::SelectDsl},
+    Identifiable,
 };
 
-pub type All<M> = Select<<M as Model>::From, <M as Model>::Selection>;
+type All<T> = Select<<T as HasTable>::Table, <T as Model>::Selection>;
 
-pub trait Model {
-    type From: SelectDsl<Self::Selection>;
+pub trait Model: HasTable
+where
+    Self::Table: SelectDsl<Self::Selection>,
+{
     type Selection: Expression;
 
-    fn from() -> Self::From;
-
+    // Sadly, we cannot solved this via `Self::Selection::default()` because some of our tables
+    // (records_pds) use so many columns that the resulting tuple doesn't implement Default anymore
     fn selection() -> Self::Selection;
 
-    fn all() -> Select<Self::From, Self::Selection> {
-        SelectDsl::select(Self::from(), Self::selection())
+    fn all() -> All<Self> {
+        SelectDsl::select(Self::table(), Self::selection())
     }
 
     fn boxed_all() -> IntoBoxed<'static, All<Self>, Pg>
@@ -52,17 +67,14 @@ pub trait Model {
     {
         Self::all().internal_into_boxed()
     }
-}
 
-trait By<T, U>: Model
-where
-    T: Default + ExpressionMethods,
-    U: AsExpression<T::SqlType>,
-{
-    fn by(u: U) -> Filter<All<Self>, Eq<T, U>>
+    fn find<'ident>(
+        id: <&'ident Self as Identifiable>::Id,
+    ) -> Find<All<Self>, <&'ident Self as Identifiable>::Id>
     where
-        All<Self>: FilterDsl<Eq<T, U>>,
+        &'ident Self: Identifiable, // + FindDsl<Self::Id>,
+        All<Self>: FindDsl<<&'ident Self as Identifiable>::Id>,
     {
-        Self::all().filter(T::default().eq(u))
+        FindDsl::find(Self::all(), id)
     }
 }

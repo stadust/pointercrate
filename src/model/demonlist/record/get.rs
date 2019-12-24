@@ -8,7 +8,7 @@ use crate::{
             record::{records_d, records_p, records_pd, FullRecord, RecordStatus},
             submitter::Submitter,
         },
-        By, Model,
+        Model,
     },
     operation::Get,
     Result,
@@ -17,7 +17,7 @@ use diesel::{result::Error, ExpressionMethods, QueryDsl, RunQueryDsl};
 
 impl Get<i32> for FullRecord {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
-        let mut record: FullRecord = match FullRecord::by(id).first(ctx.connection()) {
+        let mut record: FullRecord = match FullRecord::find(&id).first(ctx.connection()) {
             Ok(record) => record,
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {
@@ -42,7 +42,7 @@ impl Get<i32> for FullRecord {
 
 impl Get<i32> for Record {
     fn get(id: i32, ctx: RequestContext) -> Result<Self> {
-        let mut record: Record = match Record::by(id).first(ctx.connection()) {
+        let mut record: Record = match Record::find(&id).first(ctx.connection()) {
             Ok(record) => record,
             Err(Error::NotFound) =>
                 Err(PointercrateError::ModelNotFound {

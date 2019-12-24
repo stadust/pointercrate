@@ -704,10 +704,10 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                         }
                     },
                     nations.iter().map(|nation| html! {
-                        li.white.hover data-code = {(nation.country_code)} data-value = {(nation.nation)} {
-                            span class = {"flag-icon flag-icon-" (nation.country_code.to_lowercase())} {}
+                        li.white.hover data-code = {(nation.iso_country_code)} data-value = {(nation.nation)} {
+                            span class = {"flag-icon flag-icon-" (nation.iso_country_code.to_lowercase())} {}
                             (PreEscaped("&nbsp;"))
-                            b {(nation.country_code)}
+                            b {(nation.iso_country_code)}
                             br;
                             span style = "font-size: 90%; font-style: italic" {(nation.nation)}
                         }

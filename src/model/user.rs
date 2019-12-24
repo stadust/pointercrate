@@ -1,14 +1,22 @@
-use super::{All, Model};
+pub use self::{
+    paginate::UserPagination,
+    patch::{PatchMe, PatchUser},
+    post::Registration,
+};
 use crate::{
     bitstring::Bits,
     config::SECRET,
     error::PointercrateError,
     middleware::auth::{CSRFClaims, Claims},
+    model::{All, Model},
     permissions::{Permissions, PermissionsSet},
     schema::members,
     Result,
 };
-use diesel::{expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods};
+use diesel::{
+    expression::bound::Bound, query_dsl::QueryDsl, sql_types, ExpressionMethods, Identifiable,
+    Table,
+};
 use log::{debug, warn};
 use serde::{ser::SerializeMap, Serialize, Serializer};
 use std::{
@@ -21,12 +29,6 @@ mod get;
 mod paginate;
 mod patch;
 mod post;
-
-pub use self::{
-    paginate::UserPagination,
-    patch::{PatchMe, PatchUser},
-    post::Registration,
-};
 
 /// Model representing a user in the database
 #[derive(Queryable, Debug, Identifiable)]
@@ -51,6 +53,14 @@ pub struct User {
 
     /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
+}
+
+impl Model for User {
+    type Selection = <members::table as Table>::AllColumns;
+
+    fn selection() -> Self::Selection {
+        members::all_columns
+    }
 }
 
 impl PartialEq for User {
@@ -90,26 +100,6 @@ impl Serialize for User {
         map.serialize_entry("display_name", &self.display_name)?;
         map.serialize_entry("youtube_channel", &self.youtube_channel)?;
         map.end()
-    }
-}
-
-impl Model for User {
-    type From = members::table;
-    type Selection = (
-        members::member_id,
-        members::name,
-        members::password_hash,
-        members::permissions,
-        members::display_name,
-        members::youtube_channel,
-    );
-
-    fn from() -> Self::From {
-        members::table
-    }
-
-    fn selection() -> Self::Selection {
-        Self::Selection::default()
     }
 }
 

@@ -1,4 +1,7 @@
+pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
 use crate::{
+    citext::{CiStr, CiString},
+    context::RequestContext,
     error::PointercrateError,
     model::{
         demonlist::{creator::Creators, player::DatabasePlayer, record::MinimalRecordP},
@@ -10,8 +13,10 @@ use crate::{
 };
 use derive_more::Display;
 use diesel::{
-    dsl::max, pg::Pg, Expression, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
-    Queryable, RunQueryDsl, Table,
+    dsl::{max, Select},
+    pg::Pg,
+    Expression, ExpressionMethods, PgConnection, QueryDsl, QueryResult, Queryable, RunQueryDsl,
+    Table,
 };
 use joinery::Joinable;
 use log::{debug, info, warn};
@@ -22,13 +27,6 @@ mod get;
 mod paginate;
 mod patch;
 mod post;
-
-pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
-use crate::{
-    citext::{CiStr, CiString},
-    context::RequestContext,
-    model::By,
-};
 
 table! {
     use crate::citext::CiText;
@@ -50,8 +48,9 @@ table! {
 }
 
 /// Struct modelling a demon. These objects are returned from the paginating `/demons/` endpoint
-#[derive(Debug, Serialize, Hash, Display, Eq, PartialEq)]
+#[derive(Debug, Serialize, Hash, Display, Eq, PartialEq, Identifiable)]
 #[display(fmt = "{} (at {})", name, position)]
+#[table_name = "demons_pv"]
 pub struct Demon {
     /// The [`Demon`]'s internal pointercrate ID
     pub id: i32,
@@ -94,8 +93,9 @@ table! {
 
 /// Temporary solution. In the future this will become `ListedDemon` and contain
 /// id, name, position, video and publisher name of all demons that have a non-null position
-#[derive(Debug, Hash, Eq, PartialEq, Serialize, Display)]
+#[derive(Debug, Hash, Eq, PartialEq, Serialize, Display, Identifiable)]
 #[display(fmt = "{} (at {})", name, position)]
+#[table_name = "demons_p"]
 pub struct MinimalDemonP {
     pub id: i32,
     pub name: CiString,
@@ -115,21 +115,22 @@ pub struct MinimalDemon {
     pub name: CiString,
 }
 
-impl Model for Demon {
-    #[allow(clippy::type_complexity)]
-    type From = demons_pv::table;
-    type Selection = <demons_pv::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        demons_pv::table
+// Since we dont have a custom view for this, we can't derive Identifiable
+impl MinimalDemon {
+    pub fn all() -> Select<demons::table, (demons::id, demons::position, demons::name)> {
+        demons::table.select((demons::id, demons::position, demons::name))
     }
+}
+
+impl Model for Demon {
+    type Selection = <demons_pv::table as Table>::AllColumns;
 
     fn selection() -> Self::Selection {
         demons_pv::all_columns
     }
 }
 
-impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Demon {
+impl Queryable<<<demons_pv::table as Table>::AllColumns as Expression>::SqlType, Pg> for Demon {
     #[allow(clippy::type_complexity)]
     type Row = (
         i32,
@@ -167,19 +168,16 @@ impl Queryable<<<Demon as Model>::Selection as Expression>::SqlType, Pg> for Dem
 }
 
 impl Model for MinimalDemonP {
-    type From = demons_p::table;
     type Selection = <demons_p::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        demons_p::table
-    }
 
     fn selection() -> Self::Selection {
         demons_p::all_columns
     }
 }
 
-impl Queryable<<<MinimalDemonP as Model>::Selection as Expression>::SqlType, Pg> for MinimalDemonP {
+impl Queryable<<<demons_p::table as Table>::AllColumns as Expression>::SqlType, Pg>
+    for MinimalDemonP
+{
     type Row = (i32, CiString, i16, Option<String>, i32, CiString, bool);
 
     fn build(row: Self::Row) -> Self {
@@ -194,19 +192,6 @@ impl Queryable<<<MinimalDemonP as Model>::Selection as Expression>::SqlType, Pg>
                 banned: row.6,
             },
         }
-    }
-}
-
-impl Model for MinimalDemon {
-    type From = demons::table;
-    type Selection = (demons::id, demons::position, demons::name);
-
-    fn from() -> Self::From {
-        demons::table
-    }
-
-    fn selection() -> Self::Selection {
-        Self::Selection::default()
     }
 }
 
@@ -287,11 +272,12 @@ impl FullDemon {
     }
 }
 
-impl By<demons_pv::id, i32> for Demon {}
-impl By<demons_pv::position, i16> for Demon {}
-impl By<demons_pv::name, &CiStr> for Demon {}
-
 impl Demon {
+    by!(by_position, demons_pv::position, i16);
+
+    // TODO: remove this
+    by!(by_name, demons_pv::name, &CiStr);
+
     /// Increments the position of all demons with positions equal to or greater than the given one,
     /// by one.
     pub fn shift_down(starting_at: i16, connection: &PgConnection) -> QueryResult<()> {

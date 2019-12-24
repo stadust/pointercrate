@@ -1,10 +1,7 @@
 use crate::{
     citext::CiString,
     error::PointercrateError,
-    model::{
-        demonlist::{demon::MinimalDemon, player::DatabasePlayer},
-        By, Model,
-    },
+    model::demonlist::{demon::MinimalDemon, player::DatabasePlayer},
     schema::records,
 };
 use derive_more::Display;
@@ -20,7 +17,7 @@ mod patch;
 mod post;
 
 pub use self::{paginate::RecordPagination, patch::PatchRecord, post::Submission};
-use crate::model::demonlist::Submitter;
+use crate::model::{demonlist::Submitter, Model};
 
 #[derive(Debug, AsExpression, Eq, PartialEq, Clone, Copy, Hash, DbEnum)]
 #[DieselType = "Record_status"]
@@ -80,8 +77,9 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-#[derive(Debug, Queryable, Display, Hash)]
+#[derive(Debug, Queryable, Display, Hash, Identifiable)]
 #[display(fmt = "{} {}% on {} (ID: {})", player_id, progress, demon_id, id)]
+#[table_name = "records"]
 pub struct DatabaseRecord {
     id: i32,
     progress: i16,
@@ -94,12 +92,7 @@ pub struct DatabaseRecord {
 }
 
 impl Model for DatabaseRecord {
-    type From = records::table;
     type Selection = <records::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        records::table
-    }
 
     fn selection() -> Self::Selection {
         records::all_columns
@@ -128,8 +121,9 @@ table! {
     }
 }
 
-#[derive(Debug, Serialize, Hash, Display)]
+#[derive(Debug, Serialize, Hash, Display, Identifiable)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
+#[table_name = "records_pds"]
 pub struct FullRecord {
     pub id: i32,
     pub progress: i16,
@@ -161,8 +155,9 @@ table! {
     }
 }
 
-#[derive(Debug, Serialize, Hash, Display)]
+#[derive(Debug, Serialize, Hash, Display, Identifiable)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
+#[table_name = "records_pd"]
 pub struct Record {
     pub id: i32,
     pub progress: i16,
@@ -173,8 +168,9 @@ pub struct Record {
     pub submitter: Option<i32>,
 }
 
-#[derive(Debug, Hash, Serialize, Display)]
+#[derive(Debug, Hash, Serialize, Display, Identifiable)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
+#[table_name = "records_pd"]
 pub struct EmbeddedRecordPD {
     pub id: i32,
     pub progress: i16,
@@ -201,8 +197,9 @@ table! {
     }
 }
 
-#[derive(Debug, Hash, Serialize, Display)]
+#[derive(Debug, Hash, Serialize, Display, Identifiable)]
 #[display(fmt = "{}% on {} (ID: {})", progress, demon, id)]
+#[table_name = "records_d"]
 pub struct MinimalRecordD {
     pub id: i32,
     pub progress: i16,
@@ -227,8 +224,9 @@ table! {
         player_banned -> Bool,
     }
 }
-#[derive(Debug, Hash, Serialize, Display)]
+#[derive(Debug, Hash, Serialize, Display, Identifiable)]
 #[display(fmt = "{} - {}% (ID: {})", player, progress, id)]
+#[table_name = "records_p"]
 pub struct MinimalRecordP {
     pub id: i32,
     pub progress: i16,
@@ -238,21 +236,16 @@ pub struct MinimalRecordP {
 }
 
 impl Model for FullRecord {
-    type From = records_pds::table;
     type Selection = <records_pds::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        records_pds::table
-    }
 
     fn selection() -> Self::Selection {
         records_pds::all_columns
     }
 }
 
-impl By<records_pds::id, i32> for FullRecord {}
-
-impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> for FullRecord {
+impl Queryable<<<records_pds::table as Table>::AllColumns as Expression>::SqlType, Pg>
+    for FullRecord
+{
     type Row = (
         i32,
         i16,
@@ -295,19 +288,12 @@ impl Queryable<<<FullRecord as Model>::Selection as Expression>::SqlType, Pg> fo
 }
 
 impl Model for Record {
-    type From = records_pd::table;
     type Selection = <records_pd::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        records_pd::table
-    }
 
     fn selection() -> Self::Selection {
         records_pd::all_columns
     }
 }
-
-impl By<records_pd::id, i32> for Record {}
 
 impl Queryable<<<Record as Model>::Selection as Expression>::SqlType, Pg> for Record {
     type Row = (
@@ -358,7 +344,6 @@ impl Record {
 }
 
 impl Model for EmbeddedRecordPD {
-    type From = records_pd::table;
     type Selection = (
         records_pd::id,
         records_pd::progress,
@@ -371,10 +356,6 @@ impl Model for EmbeddedRecordPD {
         records_pd::demon_name,
         records_pd::position,
     );
-
-    fn from() -> Self::From {
-        records_pd::table
-    }
 
     fn selection() -> Self::Selection {
         Self::Selection::default()
@@ -418,12 +399,7 @@ impl Queryable<<<EmbeddedRecordPD as Model>::Selection as Expression>::SqlType, 
 }
 
 impl Model for MinimalRecordD {
-    type From = records_d::table;
     type Selection = <records_d::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        records_d::table
-    }
 
     fn selection() -> Self::Selection {
         records_d::all_columns
@@ -461,12 +437,7 @@ impl Queryable<<<MinimalRecordD as Model>::Selection as Expression>::SqlType, Pg
 }
 
 impl Model for MinimalRecordP {
-    type From = records_p::table;
     type Selection = <records_p::table as Table>::AllColumns;
-
-    fn from() -> Self::From {
-        records_p::table
-    }
 
     fn selection() -> Self::Selection {
         records_p::all_columns
