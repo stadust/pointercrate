@@ -214,15 +214,7 @@ impl Model for Player {
 }
 
 impl Model for RankedPlayer {
-    type Selection = (
-        players_with_score::id,
-        players_with_score::name,
-        players_with_score::rank,
-        players_with_score::score,
-        players_with_score::index,
-        players_with_score::iso_country_code,
-        players_with_score::nation,
-    );
+    type Selection = <players_with_score::table as Table>::AllColumns;
 
     fn selection() -> Self::Selection {
         Self::Selection::default()

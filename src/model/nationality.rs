@@ -15,6 +15,7 @@ use serde_derive::Serialize;
 #[table_name = "nationalities"]
 #[primary_key(iso_country_code)]
 pub struct Nationality {
+    #[serde(rename = "country_code")]
     pub iso_country_code: String,
     pub nation: CiString,
 }
