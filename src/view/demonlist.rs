@@ -714,13 +714,13 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                     })
                 ))
             }
-            div.flex#stats-viewer-cont {
+            div.flex.viewer {
                 (super::filtered_paginator("stats-viewer-pagination", "/players/ranking/"))
-                div {
-                    p#error-output style = "text-align: center; margin: 10px 0 0 0" {
-                        "Click on a player's name on the left to get started!"
-                    }
-                    div#stats-data style = "display:none" {
+                p.viewer-welcome {
+                    "Click on a player's name on the left to get started!"
+                }
+                div.viewer-content {
+                    div {
                         div.flex.col {
                             h3#player-name style = "font-size:1.4em; overflow: hidden" {}
                             div.stats-container.flex.space {

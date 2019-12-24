@@ -196,7 +196,7 @@ pub fn footer(req: &HttpRequest<PointercrateState>) -> Markup {
 
 pub fn paginator(id: &str, endpoint: &str) -> Markup {
     html! {
-        div.flex.col.no-stretch#(id) data-endpoint = (endpoint) {
+        div.flex.col.no-stretch.paginator#(id) data-endpoint = (endpoint) {
             p.info-red.output {}
             div style="min-height: 300px; position:relative; flex-grow:1" {
                 ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
@@ -211,7 +211,7 @@ pub fn paginator(id: &str, endpoint: &str) -> Markup {
 
 pub fn filtered_paginator(id: &str, endpoint: &str) -> Markup {
     html! {
-        div.flex.col.no-stretch#(id) style="margin: 10px" data-endpoint=(endpoint) {
+        div.flex.col.no-stretch.paginator#(id) style="margin: 10px" data-endpoint=(endpoint) {
             div.search.seperated {
                 input placeholder = "Enter to search..." type = "text" style = "height: 1em";
             }

@@ -10,13 +10,13 @@ impl AccountPage {
                         h2.underlined.pad {
                             "Record Manager (Alpha)"
                         }
-                        div.flex {
+                        div.flex.viewer {
                             (paginator("record-pagination", "/records/"))
-                            div {
-                                p.viewer-welcome style = "text-align: center" {
-                                    "Click on a record on the left to get started!"
-                                }
-                                div.viewer-content style = "display:none" {
+                            p.viewer-welcome {
+                                "Click on a record on the left to get started!"
+                            }
+                            div.viewer-content {
+                                div {
                                     div.flex.col {
                                         h3 style = "font-size:1.4em; overflow: hidden" { "Record #" i#record-id{}}
 

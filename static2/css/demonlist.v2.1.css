@@ -76,10 +76,6 @@ tr:nth-child(even) {
   .video-link {
     display: none;
   }
-
-  #stats-viewer-cont {
-    flex-wrap: wrap;
-  }
 }
 
 #statsviewer .dropdown-menu ul {
@@ -108,8 +104,12 @@ tr:nth-child(even) {
   font-weight: 600;
 }
 
-/* Stats viewer styles */
+#level-info span {
+  margin: 5px 10px;
+}
 
+/* Stats viewer styles */
+/*
 @media (min-width: 768px) {
   #stats-viewer-pagination {
     max-width: 40%;
@@ -124,11 +124,7 @@ tr:nth-child(even) {
   #stats-right {
     max-width: 100%;
   }
-}
-
-#level-info span {
-  margin: 5px 10px;
-}
+}*/
 
 #stats-viewer-pagination li i {
   padding-left: 5px;
@@ -138,7 +134,7 @@ tr:nth-child(even) {
   font-size: 70%;
   font-variant: small-caps;
 }
-
+/*
 .stats-container {
   margin: 5px 0%;
   flex-wrap: wrap;
@@ -154,7 +150,7 @@ tr:nth-child(even) {
 
 .stats-container :not(b) {
   font-size: 90%;
-}
+}*/
 
 /* Submission form styles */
 

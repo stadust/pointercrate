@@ -43,11 +43,9 @@ class StatsViewer extends FilteredPaginator {
     this._amountBeaten = this.html.find("#amount-beaten");
     this._amountLegacy = this.html.find("#amount-legacy");
     this._current = this.html.find("#name");
-    this._error = this.html.find("#error-output");
+    this._welcome = this.html.find(".viewer-welcome");
     this._progress = this.html.find("#progress");
-    this._content = this.html.find("#stats-data");
-
-    let nationName = "International";
+    this._content = this.html.find(".viewer-content");
 
     document
       .getElementById("show-stats-viewer")
@@ -100,7 +98,7 @@ class StatsViewer extends FilteredPaginator {
       playerData.records
     );
 
-    this._error.hide(100);
+    this._welcome.hide(100);
     this._content.show(100);
   }
 

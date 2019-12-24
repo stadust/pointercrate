@@ -354,6 +354,62 @@ form input[type="password"]:invalid {
   border-right: 1px solid #888;
 }
 
+/*
+ * Stats Viewer like Panels:
+ * + .viewer is the element that contains the paginator and the content
+ * + .viewer-content is the element that contains the content of the viewer, displayed to the right of the paginator
+ */
+
+/* Hidden until first element in paginator is selected */
+.viewer .viewer-content {
+  display: none;
+}
+
+.viewer .viewer-welcome {
+  text-align: center;
+  margin: 10px 0 0 0;
+}
+
+@media (min-width: 768px) {
+  .viewer .paginator {
+    max-width: 35%;
+  }
+
+  .viewer .viewer-content,
+  .viewer .viewer-welcome {
+    max-width: 65%;
+  }
+}
+
+@media (max-width: 767px) {
+  .viewer .viewer-content,
+  .viewer .viewer-welcome,
+  .viewer .paginator {
+    max-width: 100%;
+  }
+
+  .viewer {
+    flex-wrap: wrap;
+  }
+}
+
+.stats-container {
+  margin: 5px 0%;
+  flex-wrap: wrap;
+}
+
+.stats-container > * {
+  margin: 5px 1%;
+}
+
+.stats-container b {
+  font-size: 110%;
+}
+
+.stats-container :not(b) {
+  font-size: 90%;
+}
+
 /* Dropdown selection menu thingy styles */
 
 .dropdown-menu {
