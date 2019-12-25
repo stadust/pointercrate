@@ -1,4 +1,8 @@
-pub use self::{paginate::DemonPagination, patch::PatchDemon, post::PostDemon};
+pub use self::{
+    paginate::{DemonIdPagination, DemonPagination},
+    patch::PatchDemon,
+    post::PostDemon,
+};
 use crate::{
     citext::{CiStr, CiString},
     context::RequestContext,
@@ -274,6 +278,8 @@ impl FullDemon {
 
 impl Demon {
     by!(by_position, demons_pv::position, i16);
+
+    by!(by_id, demons_pv::id, i32);
 
     // TODO: remove this
     by!(by_name, demons_pv::name, &CiStr);

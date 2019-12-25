@@ -72,7 +72,7 @@ where
         id: <&'ident Self as Identifiable>::Id,
     ) -> Find<All<Self>, <&'ident Self as Identifiable>::Id>
     where
-        &'ident Self: Identifiable, // + FindDsl<Self::Id>,
+        &'ident Self: Identifiable,
         All<Self>: FindDsl<<&'ident Self as Identifiable>::Id>,
     {
         FindDsl::find(Self::all(), id)

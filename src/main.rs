@@ -142,6 +142,31 @@ fn main() {
                 r.route().f(allowed!(GET))
             })
             .scope("/api/v1", |api_scope| {
+                api_scope.nested("/demons", |demon_scope| {
+                    demon_scope
+                        .resource("/", |r| {
+                            r.get().f(wrap(api::demonlist::demon::v2::paginate));
+                            r.post().f(wrap(api::demonlist::demon::post));
+                            r.route().f(allowed!(GET, POST))
+                        })
+                        .resource("/{id}/", |r| {
+                            r.get().f(wrap(api::demonlist::demon::v2::get));
+                            r.method(Method::PATCH)
+                                .f(wrap(api::demonlist::demon::v2::patch));
+                            r.route().f(allowed!(GET, PATCH))
+                        })
+                        .resource("/{id}/creators/", |r| {
+                            r.post().f(wrap(api::demonlist::demon::v2::post_creator));
+                            r.route().f(allowed!(POST))
+                        })
+                        .resource("/{id}/creators/{player_id}/", |r| {
+                            r.delete()
+                                .f(wrap(api::demonlist::demon::v2::delete_creator));
+                            r.route().f(allowed!(DELETE))
+                        })
+                })
+            })
+            .scope("/api/v1", |api_scope| {
                 api_scope
                     .resource("/list_information", |r| {
                         r.get().f(api::demonlist::misc::list_information);
@@ -198,22 +223,23 @@ fn main() {
                     .nested("/demons", |demon_scope| {
                         demon_scope
                             .resource("/", |r| {
-                                r.get().f(wrap(api::demonlist::demon::paginate));
+                                r.get().f(wrap(api::demonlist::demon::v1::paginate));
                                 r.post().f(wrap(api::demonlist::demon::post));
                                 r.route().f(allowed!(GET, POST))
                             })
                             .resource("/{position}/", |r| {
-                                r.get().f(wrap(api::demonlist::demon::get));
+                                r.get().f(wrap(api::demonlist::demon::v1::get));
                                 r.method(Method::PATCH)
-                                    .f(wrap(api::demonlist::demon::patch));
+                                    .f(wrap(api::demonlist::demon::v1::patch));
                                 r.route().f(allowed!(GET, PATCH))
                             })
                             .resource("/{position}/creators/", |r| {
-                                r.post().f(wrap(api::demonlist::demon::post_creator));
+                                r.post().f(wrap(api::demonlist::demon::v1::post_creator));
                                 r.route().f(allowed!(POST))
                             })
                             .resource("/{position}/creators/{player_id}/", |r| {
-                                r.delete().f(wrap(api::demonlist::demon::delete_creator));
+                                r.delete()
+                                    .f(wrap(api::demonlist::demon::v1::delete_creator));
                                 r.route().f(allowed!(DELETE))
                             })
                     })

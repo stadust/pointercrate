@@ -29,7 +29,6 @@ where
 pub type PaginatorQuery<'a, T> =
     BoxedSelectStatement<'a, <<T as Table>::AllColumns as Expression>::SqlType, T, Pg>;
 
-// Seriously, fuck diesel
 pub trait TablePaginator: Serialize
 where
     <Self::PaginationColumn as Expression>::SqlType: NotNull + SqlOrd,

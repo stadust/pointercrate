@@ -26,3 +26,16 @@ impl Get<(i16, i32)> for Creator {
             .map_err(PointercrateError::database)
     }
 }
+
+impl Get<(i32, i32)> for Creator {
+    fn get((demon_id, player_id): (i32, i32), ctx: RequestContext) -> Result<Self> {
+        let demon = Demon::get(demon_id, ctx)?;
+
+        creators::table
+            .select((creators::demon, creators::creator))
+            .filter(creators::demon.eq(demon.id))
+            .filter(creators::creator.eq(&player_id))
+            .get_result(ctx.connection())
+            .map_err(PointercrateError::database)
+    }
+}

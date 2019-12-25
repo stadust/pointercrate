@@ -23,6 +23,10 @@ impl<'a> Get<&'a CiStr> for Demon {
     }
 }
 
+// Now obviously, depending on the differently sized integer types here is very fragile.
+// Once /api/v1/ is deprecated and removed, it wont be necessary anymore (or we could use strong
+// types)
+
 impl Get<i16> for Demon {
     fn get(position: i16, ctx: RequestContext) -> Result<Self> {
         match Demon::by_position(position).first(ctx.connection()) {
@@ -31,6 +35,21 @@ impl Get<i16> for Demon {
                 Err(PointercrateError::ModelNotFound {
                     model: "Demon",
                     identified_by: position.to_string(),
+                }),
+            Err(err) => Err(PointercrateError::database(err)),
+        }
+    }
+}
+
+impl Get<i32> for Demon {
+    fn get(id: i32, ctx: RequestContext) -> Result<Self> {
+        // FIXME: figure out why Demon::find doesn't work
+        match Demon::by_id(id).first(ctx.connection()) {
+            Ok(demon) => Ok(demon),
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "Demon",
+                    identified_by: id.to_string(),
                 }),
             Err(err) => Err(PointercrateError::database(err)),
         }

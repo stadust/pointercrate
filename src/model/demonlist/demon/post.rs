@@ -75,10 +75,7 @@ impl Post<PostDemon> for Demon {
             let creators_hash: HashSet<CiString> = data.creators.into_iter().collect();
 
             for creator in creators_hash {
-                Creator::create_from(
-                    (data.name.as_ref(), creator.as_ref()),
-                    RequestContext::Internal(connection),
-                )?;
+                Creator::create_from((id, creator), RequestContext::Internal(connection))?;
             }
 
             Ok(Demon {
