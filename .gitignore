@@ -1,6 +1,6 @@
 /*
-!/src
-!/Cargo.toml
+!/src_old
+!/Cargo.toml.old
 !/rustfmt.toml
 !/diesel.toml
 !/migrations
