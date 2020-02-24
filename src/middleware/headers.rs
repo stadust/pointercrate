@@ -11,24 +11,32 @@ use bitflags::_core::num::ParseIntError;
 use derive_more::Display;
 use futures::future::{err, ok, Either, Ready};
 use log::{debug, info, warn};
+use mime::Mime;
 use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,
     future::Future,
     hash::{Hash, Hasher},
     pin::Pin,
+    str::FromStr,
     task::{Context, Poll},
 };
 
 #[derive(Debug, Copy, Clone)]
-pub struct Precondition;
-pub struct PreconditionMiddleware<S>(S);
+pub struct Headers;
+pub struct HeadersPrecondition<S>(S);
 
 #[derive(Debug, Display)]
 #[display(fmt = "'object hash equal to any of {:?}'", _0)]
 pub struct IfMatch(Vec<u64>);
 
-impl<S> Transform<S> for Precondition
+#[derive(Debug)]
+pub struct Accept(pub Vec<Mime>);
+
+#[derive(Debug)]
+pub struct ContentType(pub Option<Mime>);
+
+impl<S> Transform<S> for Headers
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse<Body>, Error = Error>,
     S::Future: 'static,
@@ -38,14 +46,14 @@ where
     type InitError = ();
     type Request = ServiceRequest;
     type Response = ServiceResponse<Body>;
-    type Transform = PreconditionMiddleware<S>;
+    type Transform = HeadersPrecondition<S>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(PreconditionMiddleware(service))
+        ok(HeadersPrecondition(service))
     }
 }
 
-impl<S> Service for PreconditionMiddleware<S>
+impl<S> Service for HeadersPrecondition<S>
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse<Body>, Error = Error>,
     S::Future: 'static,
@@ -60,14 +68,10 @@ where
     }
 
     fn call(&mut self, req: Self::Request) -> Self::Future {
-        let (if_match, if_none_match) = match process_if_match(&req) {
-            Ok(if_match) => if_match,
-            Err(pc_error) => return Either::Left(err(pc_error.into())),
+        let if_none_match = match process_headers(&req) {
+            Ok(if_none_match) => if_none_match,
+            Err(pc_err) => return Either::Left(err(pc_err.into())),
         };
-
-        if let Some(if_match) = if_match {
-            req.extensions_mut().insert(if_match);
-        }
 
         let inner = self.0.call(req);
 
@@ -97,41 +101,71 @@ where
 }
 
 /// Returns parsed `If-Match` header values and unprocessed `If-None-Match` header values
-fn process_if_match(request: &ServiceRequest) -> Result<(Option<IfMatch>, Option<Vec<u64>>), PointercrateError> {
+///
+/// Returns the `If-None-Match` values.
+fn process_headers(request: &ServiceRequest) -> Result<Option<Vec<u64>>, PointercrateError> {
     // We only need the values for this header _after_ the request completes since they are only
     // relevant for comparison with ETag values, but we also want to abort early if they are malformed,
     // which is why we simply retrieve them once here.
-    let if_none_match = header!(request, "If-None-Match").map(parse_header_value).transpose()?;
-    let if_match = header!(request, "If-Match").map(parse_header_value).transpose()?.map(IfMatch);
+    let if_none_match = parse_list_of_header_values(request, "If-None-Match")?;
+    let if_match = parse_list_of_header_values(request, "If-Match")?;
+    let accepts = parse_list_of_header_values(request, "Accept")?;
+    let content_type = header!(request, "Content-Type")
+        .map(|value| {
+            value
+                .parse::<Mime>()
+                .map_err(|_| PointercrateError::InvalidHeaderValue { header: "Content-Type" })
+        })
+        .transpose()?;
 
     // PATCH requires `If-Match`, always. Actually checking if they match is up to the
     // actual endpoint though!
     let method = request.method();
 
-    if method == Method::PATCH || method == Method::DELETE || method == Method::GET {
+    if method == Method::PATCH || method == Method::DELETE {
         if if_match.is_none() {
             warn!("PATCH or DELETE request without If-Match header");
         } else {
             debug!("If-Match values are {:?}", if_match);
         }
+    }
+    if method == Method::GET {
         if if_none_match.is_none() {
             info!("GET without If-None-Match header")
         }
     }
 
-    Ok((if_match, if_none_match))
+    let mut extensions = request.extensions_mut();
+
+    if let Some(if_match) = if_match {
+        extensions.insert(IfMatch(if_match));
+    }
+
+    extensions.insert(Accept(accepts.unwrap_or(Vec::new())));
+    extensions.insert(ContentType(content_type));
+
+    Ok(if_none_match)
 }
 
-fn parse_header_value(value: &str) -> Result<Vec<u64>, PointercrateError> {
+fn parse_list_of_header_values<T: FromStr>(request: &ServiceRequest, header: &'static str) -> Result<Option<Vec<T>>, PointercrateError>
+where
+    T::Err: std::error::Error,
+{
+    let value = match header!(request, header) {
+        None => return Ok(None),
+        Some(value) => value,
+    };
+
     value
         .split(',')
         .map(|value| value.parse())
-        .collect::<Result<Vec<u64>, _>>()
+        .collect::<Result<_, _>>()
         .map_err(|error| {
-            warn!("Malformed 'If-Match' header value: {}", error);
+            warn!("Malformed '{}' header value in {}: {}", header, value, error);
 
-            PointercrateError::InvalidHeaderValue { header: "If-Match" }
+            PointercrateError::InvalidHeaderValue { header }
         })
+        .map(Some)
 }
 impl IfMatch {
     pub fn met(&self, etag: u64) -> bool {
