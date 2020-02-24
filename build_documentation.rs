@@ -30,10 +30,7 @@ fn main() {
             if let Some(r) = title_name.get_mut(0..1) {
                 r.make_ascii_uppercase()
             }
-            print!(
-                "<li><a href='/documentation/{}'>{}</a><ol>",
-                name, title_name
-            );
+            print!("<li><a href='/documentation/{}'>{}</a><ol>", name, title_name);
         }
         for li in process_directory(&dir, name) {
             print!("{}", li);
@@ -63,11 +60,7 @@ fn main() {
 }
 
 fn sorted_dir_entries<F: FnMut(&DirEntry) -> bool, P: AsRef<Path>>(path: P, f: F) -> Vec<DirEntry> {
-    let mut entries = read_dir(path)
-        .unwrap()
-        .filter_map(|r| r.ok())
-        .filter(f)
-        .collect::<Vec<_>>();
+    let mut entries = read_dir(path).unwrap().filter_map(|r| r.ok()).filter(f).collect::<Vec<_>>();
 
     entries.sort_by_key(|entry| entry.path());
 
@@ -86,10 +79,8 @@ fn find_title<P: AsRef<Path>>(md_file: P) -> (String, String) {
 
             return match &headline[length - 1..] {
                 "}" => {
-                    let id_index_start =
-                        headline.rfind('=').expect("Malformed header: Missing '='") + 1;
-                    let headline_index_end =
-                        headline.rfind('{').expect("Malformed header: Missing '{'");
+                    let id_index_start = headline.rfind('=').expect("Malformed header: Missing '='") + 1;
+                    let headline_index_end = headline.rfind('{').expect("Malformed header: Missing '{'");
 
                     (
                         String::from(&headline[id_index_start..length - 1]),
@@ -108,11 +99,6 @@ fn process_directory(entry: &DirEntry, name: &str) -> Vec<String> {
     sorted_dir_entries(entry.path(), |_| true)
         .into_iter()
         .map(|entry| find_title(entry.path()))
-        .map(|(id, title)| {
-            format!(
-                "<li><a href = '/documentation/{}#{}'>{}</a></li>",
-                name, id, title
-            )
-        })
+        .map(|(id, title)| format!("<li><a href = '/documentation/{}#{}'>{}</a></li>", name, id, title))
         .collect()
 }
