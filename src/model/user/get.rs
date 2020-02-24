@@ -1,12 +1,24 @@
 use crate::{model::user::User, permissions::Permissions, Result};
 use sqlx::PgConnection;
 
-struct FetchedUser {
+pub(super) struct FetchedUser {
     member_id: i32,
     name: String,
     permissions: i32, // FIXME(sqlx) once custom types are supported
     display_name: Option<String>,
     youtube_channel: Option<String>,
+}
+
+impl Into<User> for FetchedUser {
+    fn into(self) -> User {
+        User {
+            id: self.member_id,
+            name: self.name,
+            permissions: Permissions::from_bits_truncate(self.permissions as u16),
+            display_name: self.display_name,
+            youtube_channel: self.youtube_channel,
+        }
+    }
 }
 
 impl User {
@@ -19,13 +31,7 @@ impl User {
         .fetch_one(connection)
         .await?;
 
-        Ok(User {
-            id,
-            name: row.name,
-            permissions: Permissions::from_bits_truncate(row.permissions as u16),
-            display_name: row.display_name,
-            youtube_channel: row.youtube_channel,
-        })
+        Ok(row.into())
     }
 
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<User> {
@@ -37,12 +43,6 @@ impl User {
         .fetch_one(connection)
         .await?;
 
-        Ok(User {
-            id: row.member_id,
-            name: row.name,
-            permissions: Permissions::from_bits_truncate(row.permissions as u16),
-            display_name: row.display_name,
-            youtube_channel: row.youtube_channel,
-        })
+        Ok(row.into())
     }
 }

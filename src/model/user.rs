@@ -5,6 +5,7 @@
 //! * Modifying other people's accounts (assign permissions, change offensive names, etc)
 //! * Querying account information
 
+pub use self::paginate::UserPagination;
 use crate::{
     error::PointercrateError,
     permissions::{Permissions, PermissionsSet},
@@ -22,6 +23,7 @@ use std::{
 mod auth;
 mod delete;
 mod get;
+mod paginate;
 mod patch;
 /*mod delete;
 mod paginate;

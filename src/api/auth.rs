@@ -1,3 +1,5 @@
+//! Handlers for all endpoints under the `/api/v1/auth` prefix
+
 use crate::{
     middleware::headers::{HttpRequestExt, HttpResponseBuilderExt},
     model::user::{AuthenticatedUser, PatchMe, Registration},
@@ -11,7 +13,7 @@ use actix_web::{
 use actix_web_codegen::{delete, get, patch, post};
 use serde_json::json;
 
-#[post("/auth/register/")]
+#[post("/register/")]
 pub async fn register(body: Json<Registration>, state: Data<PointercrateState>) -> Result<HttpResponse> {
     let mut connection = state.connection().await?;
     let user = AuthenticatedUser::register(body.into_inner(), &mut connection).await?;
@@ -21,7 +23,7 @@ pub async fn register(body: Json<Registration>, state: Data<PointercrateState>) 
         .json_with_etag(user.inner()))
 }
 
-#[post("/auth/")]
+#[post("/")]
 pub async fn login(request: HttpRequest, state: Data<PointercrateState>) -> Result<HttpResponse> {
     let mut connection = state.connection().await?;
     let authorization = request.extensions_mut().remove().unwrap();
@@ -34,7 +36,7 @@ pub async fn login(request: HttpRequest, state: Data<PointercrateState>) -> Resu
     }}))
 }
 
-#[post("/auth/invalidate/")]
+#[post("/invalidate/")]
 pub async fn invalidate(request: HttpRequest, state: Data<PointercrateState>) -> Result<HttpResponse> {
     let mut connection = state.connection().await?;
     let authorization = request.extensions_mut().remove().unwrap();
@@ -44,7 +46,7 @@ pub async fn invalidate(request: HttpRequest, state: Data<PointercrateState>) ->
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[get("/auth/me/")]
+#[get("/me/")]
 pub async fn get_me(request: HttpRequest, state: Data<PointercrateState>) -> Result<HttpResponse> {
     let mut connection = state.connection().await?;
     let authorization = request.extensions_mut().remove().unwrap();
@@ -54,7 +56,7 @@ pub async fn get_me(request: HttpRequest, state: Data<PointercrateState>) -> Res
     Ok(HttpResponse::Ok().json_with_etag(user.inner()))
 }
 
-#[patch("/auth/me/")]
+#[patch("/me/")]
 pub async fn patch_me(request: HttpRequest, state: Data<PointercrateState>, patch: Json<PatchMe>) -> Result<HttpResponse> {
     let mut connection = state.transaction().await?;
     let authorization = request.extensions_mut().remove().unwrap();
@@ -71,7 +73,7 @@ pub async fn patch_me(request: HttpRequest, state: Data<PointercrateState>, patc
     Ok(HttpResponse::Ok().json_with_etag(updated_user.inner()))
 }
 
-#[delete("/auth/me/")]
+#[delete("/me/")]
 pub async fn delete_me(request: HttpRequest, state: Data<PointercrateState>) -> Result<HttpResponse> {
     let mut connection = state.transaction().await?;
     let authorization = request.extensions_mut().remove().unwrap();
