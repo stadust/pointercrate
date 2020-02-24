@@ -1,5 +1,10 @@
-use crate::{config, documentation, ratelimit::Ratelimits};
-use sqlx::{pool::Builder, PgConnection, Pool};
+use crate::{config, documentation, model::user::User, ratelimit::Ratelimits, Result};
+use log::trace;
+use sqlx::{
+    pool::{Builder, PoolConnection},
+    Connection, PgConnection, Pool,
+};
+use sqlx_core::Transaction;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 #[derive(Clone)]
@@ -34,5 +39,14 @@ impl PointercrateState {
             secret: Arc::new(config::secret()),
             ratelimits: Ratelimits::initialize(),
         }
+    }
+
+    /// Gets a connection from the connection pool
+    pub async fn connection(&self) -> Result<PoolConnection<PgConnection>> {
+        Ok(self.connection_pool.acquire().await?)
+    }
+
+    pub async fn transaction(&self) -> Result<Transaction<PoolConnection<PgConnection>>> {
+        Ok(self.connection_pool.begin().await?)
     }
 }

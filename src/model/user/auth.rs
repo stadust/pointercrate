@@ -5,6 +5,7 @@
 //! * Deletion of own account
 //! * Modification of own account
 
+pub use self::get::Authorization;
 use crate::{error::PointercrateError, model::user::User, Result};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};

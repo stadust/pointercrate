@@ -1,6 +1,6 @@
 //! Module containing middleware for dealing with HTTP preconditions
 
-use crate::error::PointercrateError;
+use crate::{error::PointercrateError, model::user::Authorization};
 use actix_web::{
     body::Body,
     dev::{HttpResponseBuilder, Service, ServiceRequest, ServiceResponse, Transform},
@@ -143,6 +143,7 @@ fn process_headers(request: &ServiceRequest) -> Result<Option<Vec<u64>>, Pointer
 
     extensions.insert(Accept(accepts.unwrap_or(Vec::new())));
     extensions.insert(ContentType(content_type));
+    extensions.insert(process_authorization_header(request)?);
 
     Ok(if_none_match)
 }
@@ -167,6 +168,100 @@ where
         })
         .map(Some)
 }
+
+fn process_authorization_header(request: &ServiceRequest) -> Result<Authorization, PointercrateError> {
+    if let Some(auth) = header!(request, "Authorization") {
+        let parts = auth.split(' ').collect::<Vec<_>>();
+
+        match &parts[..] {
+            ["Basic", basic_auth] => {
+                let decoded = base64::decode(basic_auth)
+                    .map_err(|_| ())
+                    .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))
+                    .map_err(|_| {
+                        warn!("Malformed 'Authorization' header");
+
+                        PointercrateError::InvalidHeaderValue { header: "Authorization" }
+                    })?;
+
+                if let [username, password] = &decoded.split(':').collect::<Vec<_>>()[..] {
+                    debug!("Found basic authorization!");
+
+                    Ok(Authorization::Basic {
+                        username: username.to_string(),
+                        password: password.to_string(),
+                    })
+                } else {
+                    warn!("Malformed 'Authorization' header");
+
+                    Err(PointercrateError::InvalidHeaderValue { header: "Authorization" })
+                }
+            },
+            ["Bearer", token] => {
+                debug!("Found token (Bearer) authorization");
+
+                Ok(Authorization::Token {
+                    access_token: token.to_string(),
+                    csrf_token: None,
+                })
+            },
+            _ => {
+                warn!("Malformed 'Authorization' header");
+
+                Err(PointercrateError::InvalidHeaderValue { header: "Authorization" })
+            },
+        }
+    } else {
+        debug!("Found no authorization header, testing for cookie based authorization!");
+
+        if let Some(token_cookie) = request.cookie("access_token") {
+            debug!("Found 'access_token' cookie");
+
+            let token = token_cookie.value();
+
+            if request.method() == Method::GET {
+                debug!("GET request, the cookie is enough");
+
+                Ok(Authorization::Token {
+                    access_token: token.to_string(),
+                    csrf_token: None,
+                })
+            } else {
+                debug!("Non-GET request, testing X-CSRF-TOKEN header");
+                // if we're doing cookie based authorization, there needs to be a X-CSRF-TOKEN
+                // header set, unless we're in GET requests, in which case everything is fine
+                // :tm:
+
+                match header!(request, "X-CSRF-TOKEN") {
+                    Some(csrf_token) =>
+                        Ok(Authorization::Token {
+                            access_token: token.to_string(),
+                            csrf_token: Some(csrf_token.to_string()),
+                        }),
+                    None => {
+                        warn!(
+                            "Cookie based authentication was used, but no CSRF-token was provided. This is either because the requested \
+                             endpoint does not required authorization (likely) or an CSRF attack (unlikely)"
+                        );
+                        // Here's the thing: We cannot simply abort the request here, as this
+                        // could be a POST request that doesn't
+                        // require authentication. The browser would
+                        // send the cookie along anyway, but there'd be no csrf token (because
+                        // why would there be, the request doesn't
+                        // request auth). We therefore act as if not
+                        // even the cookie was set
+                        Ok(Authorization::Unauthorized)
+                    },
+                }
+            }
+        } else {
+            debug!("No cookie found, we're unauthorized!");
+
+            Ok(Authorization::Unauthorized)
+        }
+    }
+}
+
 impl IfMatch {
     pub fn met(&self, etag: u64) -> bool {
         self.0.contains(&etag)
