@@ -10,7 +10,7 @@ use crate::{
     permissions::{Permissions, PermissionsSet},
     Result,
 };
-pub use auth::{AuthenticatedUser, Authorization};
+pub use auth::{AuthenticatedUser, Authorization, PatchMe, Registration};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use serde::{Deserialize, Serialize, Serializer};

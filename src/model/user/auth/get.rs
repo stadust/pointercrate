@@ -2,7 +2,7 @@ use crate::{
     cistring::CiStr,
     error::PointercrateError,
     model::user::{
-        auth::{AuthenticatedUser, Claims},
+        auth::{patch::PatchMe, AuthenticatedUser, Claims},
         User,
     },
     permissions::Permissions,
@@ -34,7 +34,28 @@ pub enum Authorization {
 }
 
 impl AuthenticatedUser {
-    /// Prepares this connection such that all audit log entires generated while using it are
+    pub async fn invalidate_all_tokens(authorization: Authorization, connection: &mut PgConnection) -> Result<()> {
+        let mut user = Self::basic_auth(&authorization, connection).await?;
+
+        if let Authorization::Basic { password, .. } = authorization {
+            let patch = PatchMe {
+                password: Some(password),
+                display_name: None,
+                youtube_channel: None,
+            };
+
+            warn!("Invalidating all access tokens for user {}", user.inner());
+
+            user.apply_patch(patch, connection).await?;
+
+            Ok(())
+        } else {
+            // actually unreachable
+            Err(PointercrateError::Unauthorized)
+        }
+    }
+
+    /// Prepares this connection such that all audit log entries generated while using it are
     /// attributed to
     async fn audit_connection(&self, connection: &mut PgConnection) -> Result<()> {
         trace!(

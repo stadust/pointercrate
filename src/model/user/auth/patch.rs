@@ -12,13 +12,13 @@ use std::fmt::Debug;
 #[derive(Deserialize)]
 pub struct PatchMe {
     #[serde(default, deserialize_with = "non_nullable")]
-    password: Option<String>,
+    pub(super) password: Option<String>,
 
     #[serde(default, deserialize_with = "nullable")]
-    display_name: Option<Option<String>>,
+    pub(super) display_name: Option<Option<String>>,
 
     #[serde(default, deserialize_with = "nullable")]
-    youtube_channel: Option<Option<String>>,
+    pub(super) youtube_channel: Option<Option<String>>,
 }
 
 // manual debug impl to ensure that the password field is never printed anywhere

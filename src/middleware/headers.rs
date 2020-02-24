@@ -5,7 +5,7 @@ use actix_web::{
     body::Body,
     dev::{HttpResponseBuilder, Service, ServiceRequest, ServiceResponse, Transform},
     http::Method,
-    Error, HttpMessage, HttpResponse,
+    Error, HttpMessage, HttpRequest, HttpResponse,
 };
 use bitflags::_core::num::ParseIntError;
 use derive_more::Display;
@@ -282,5 +282,29 @@ impl HttpResponseBuilderExt for HttpResponseBuilder {
 
     fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse {
         self.etag(&obj).json(serde_json::json!({ "data": obj }))
+    }
+}
+
+pub trait HttpRequestExt {
+    fn validate_etag<H: Hash>(&self, h: &H) -> Result<(), PointercrateError>;
+}
+
+impl HttpRequestExt for HttpRequest {
+    fn validate_etag<H: Hash>(&self, h: &H) -> Result<(), PointercrateError> {
+        let extensions = self.extensions();
+
+        let if_match: &IfMatch = match extensions.get() {
+            None => return Err(PointercrateError::PreconditionRequired),
+            Some(if_match) => if_match,
+        };
+
+        let mut hasher = DefaultHasher::new();
+        h.hash(&mut hasher);
+
+        if if_match.met(hasher.finish()) {
+            Ok(())
+        } else {
+            Err(PointercrateError::PreconditionFailed)
+        }
     }
 }

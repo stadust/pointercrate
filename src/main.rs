@@ -6,6 +6,7 @@ use std::net::SocketAddr;
 
 #[macro_use]
 mod util;
+mod api;
 mod cistring;
 mod config;
 mod documentation;
@@ -25,6 +26,9 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().expect("Failed to initialize .env file!");
 
     let application_state = PointercrateState::initialize().await;
+
+    // TODO: error handler
+    // TODO: json config
 
     HttpServer::new(move || App::new().wrap(IpResolve).app_data(application_state.clone()))
         .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?

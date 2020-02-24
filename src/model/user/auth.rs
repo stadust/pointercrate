@@ -5,11 +5,13 @@
 //! * Deletion of own account
 //! * Modification of own account
 
-pub use self::get::Authorization;
+pub use self::{get::Authorization, patch::PatchMe, post::Registration};
 use crate::{error::PointercrateError, model::user::User, Result};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use serde::{Deserialize, Serialize};
+use sqlx::PgConnection;
+use std::hash::{Hash, Hasher};
 
 mod delete;
 mod get;
@@ -34,6 +36,10 @@ pub struct CSRFClaims {
 }
 
 impl AuthenticatedUser {
+    pub fn inner(&self) -> &User {
+        &self.user
+    }
+
     pub fn validate_password(password: &str) -> Result<()> {
         if password.len() < 10 {
             return Err(PointercrateError::InvalidPassword)
