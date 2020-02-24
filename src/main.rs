@@ -1,6 +1,6 @@
 // TODO: set up lint denys
 
-use crate::{error::PointercrateError, state::PointercrateState};
+use crate::{error::PointercrateError, middleware::ip::IpResolve, state::PointercrateState};
 use actix_web::{App, HttpServer};
 use std::net::SocketAddr;
 
@@ -10,6 +10,7 @@ mod cistring;
 mod config;
 mod documentation;
 mod error;
+mod middleware;
 mod model;
 mod permissions;
 mod ratelimit;
@@ -25,12 +26,12 @@ async fn main() -> std::io::Result<()> {
 
     let application_state = PointercrateState::initialize().await;
 
-    // HttpServer::new(move || App::new().app_data(application_state.clone()))
-    // .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?
-    // .run()
-    // .await
+    HttpServer::new(move || App::new().wrap(IpResolve).app_data(application_state.clone()))
+        .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?
+        .run()
+        .await?;
 
-    let mut connection = application_state.connection_pool.acquire().await.unwrap();
+    /*let mut connection = application_state.connection_pool.acquire().await.unwrap();
 
     struct Test {
         notes: Option<String>,
@@ -42,7 +43,7 @@ async fn main() -> std::io::Result<()> {
         .unwrap()
         .notes;
 
-    println!("{:?}", notes);
+    println!("{:?}", notes);*/
 
     Ok(())
 }
