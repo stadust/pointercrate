@@ -55,25 +55,6 @@ impl AuthenticatedUser {
         }
     }
 
-    /// Prepares this connection such that all audit log entries generated while using it are
-    /// attributed to
-    async fn audit_connection(&self, connection: &mut PgConnection) -> Result<()> {
-        trace!(
-            "Creating connection of which usage will be attributed to user {} in audit logs",
-            self.user.id
-        );
-
-        sqlx::query!("CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)")
-            .execute(connection)
-            .await?;
-        sqlx::query!("DELETE FROM active_user").execute(connection).await?;
-        sqlx::query!("INSERT INTO active_user (id) VALUES ($1)", self.user.id)
-            .execute(connection)
-            .await?;
-
-        Ok(())
-    }
-
     pub async fn basic_auth(auth: &Authorization, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform basic authentication");
 
@@ -82,11 +63,7 @@ impl AuthenticatedUser {
         if let Authorization::Basic { username, password } = auth {
             debug!("Trying to authorize user {}", username);
 
-            let user = Self::by_name(username, connection).await?.verify_password(password)?;
-
-            user.audit_connection(connection).await?;
-
-            Ok(user)
+            Self::by_name(username, connection).await?.verify_password(password)
         } else {
             warn!("No basic authentication found");
 
@@ -116,8 +93,6 @@ impl AuthenticatedUser {
             if let Some(ref csrf_token) = csrf_token {
                 user.validate_csrf_token(csrf_token, application_secret)?
             }
-
-            user.audit_connection(connection).await?;
 
             Ok(user)
         } else {

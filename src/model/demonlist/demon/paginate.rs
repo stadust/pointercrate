@@ -16,11 +16,11 @@ use sqlx::{row::Row, PgConnection};
 pub struct DemonIdPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "before")]
-    before_id: Option<i32>,
+    pub before_id: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "after")]
-    after_id: Option<i32>,
+    pub after_id: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     limit: Option<u8>,
@@ -115,11 +115,11 @@ impl DemonIdPagination {
 pub struct DemonPositionPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "before")]
-    before_position: Option<i32>,
+    pub before_position: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "after")]
-    after_position: Option<i32>,
+    pub after_position: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     limit: Option<u8>,

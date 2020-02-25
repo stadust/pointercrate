@@ -1,4 +1,9 @@
-pub use self::get::{published_by, verified_by};
+pub use self::{
+    get::{published_by, verified_by},
+    paginate::{DemonIdPagination, DemonPositionPagination},
+    patch::PatchDemon,
+    post::PostDemon,
+};
 use crate::{
     cistring::CiString,
     error::PointercrateError,

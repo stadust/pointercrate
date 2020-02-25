@@ -1,5 +1,6 @@
 use crate::{
-    middleware::headers::{HttpRequestExt, HttpResponseBuilderExt},
+    extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
+    middleware::headers::HttpResponseBuilderExt,
     model::{
         demonlist::{
             record::{FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission},
@@ -9,7 +10,7 @@ use crate::{
     },
     permissions::Permissions,
     ratelimit::RatelimitScope,
-    state::PointercrateState,
+    state::{audit_connection, PointercrateState},
     Result,
 };
 use actix_web::{
@@ -19,19 +20,16 @@ use actix_web::{
 use actix_web_codegen::{delete, get, patch, post};
 
 #[get("/")]
-pub async fn paginate(
-    request: HttpRequest, state: Data<PointercrateState>, mut pagination: Query<RecordPagination>,
-) -> Result<HttpResponse> {
+pub async fn paginate(user: Result<TokenAuth>, state: PointercrateState, mut pagination: Query<RecordPagination>) -> Result<HttpResponse> {
     let mut connection = state.connection().await?;
 
     // Non authenticated access and access by users without ExtendedAccess perms cannot see non-approved
     // records
-    let can_see_all_records =
-        if let Ok(user) = AuthenticatedUser::token_auth(request.extensions_mut().remove().unwrap(), &state.secret, &mut connection).await {
-            user.inner().extended_list_access()
-        } else {
-            false
-        };
+    let can_see_all_records = if let Ok(TokenAuth(user)) = user {
+        user.inner().extended_list_access()
+    } else {
+        false
+    };
 
     if !can_see_all_records {
         match pagination.0.status {
@@ -45,34 +43,29 @@ pub async fn paginate(
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut connection).await?;
 
-    pagination_response!(records, pagination, min_id, max_id, before_id, after_id)
+    pagination_response!(records, pagination, min_id, max_id, before_id, after_id, id)
 }
 
 #[post("/")]
-pub async fn submit(request: HttpRequest, submission: Json<Submission>, state: Data<PointercrateState>) -> Result<HttpResponse> {
+pub async fn submit(Ip(ip): Ip, user: Result<TokenAuth>, submission: Json<Submission>, state: PointercrateState) -> Result<HttpResponse> {
     let mut connection = state.transaction().await?;
 
-    // NOTE: don't abort is authentication fails! We might not need it!
+    // NOTE: don't abort if authentication fails! We might not need it!
     // This prevents invalid auth data in cookies to interfere with record submission
-    let mut user = AuthenticatedUser::token_auth(request.extensions_mut().remove().unwrap(), &state.secret, &mut connection).await;
+
+    let shall_ratelimit = user.as_ref().map(|user| !user.0.inner().list_team_member()).unwrap_or(true);
 
     // only members of the list team can directly add approved records, or add records without video
     if submission.status != RecordStatus::Submitted || submission.video.is_none() {
-        // rewrap the object to prevent borrowing errors. FIXME(ugly)
-        let user_ = user?; // do abort if it fails here!
-        user_.inner().require_permissions(Permissions::ListHelper)?;
-        user = Ok(user_)
-    }
+        // do abort if it fails here!
+        let user = user?.0;
 
-    let ip = request.extensions_mut().remove().unwrap();
+        user.inner().require_permissions(Permissions::ListHelper)?;
+        audit_connection(&mut connection, user.inner()).await?; // might as well
+    }
 
     let submitter = Submitter::by_ip_or_create(ip, &mut connection).await?;
     let record = FullRecord::create_from(submitter, submission.into_inner(), &mut connection).await?;
-
-    let shall_ratelimit = match user {
-        Ok(user) => !user.inner().list_team_member(),
-        _ => true,
-    };
 
     // FIXME: this is ugly.
     // At this point the new record is already in the database. However, if we
@@ -91,13 +84,12 @@ pub async fn submit(request: HttpRequest, submission: Json<Submission>, state: D
 }
 
 #[get("/{record_id}/")]
-pub async fn get(request: HttpRequest, state: Data<PointercrateState>, record_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn get(user: Result<TokenAuth>, state: PointercrateState, record_id: Path<i32>) -> Result<HttpResponse> {
     let mut connection = state.connection().await?;
     let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
     if record.status != RecordStatus::Approved {
-        let user = AuthenticatedUser::token_auth(request.extensions_mut().remove().unwrap(), &state.secret, &mut connection).await?;
-        user.inner().require_permissions(Permissions::ExtendedAccess)?;
+        user?.0.inner().require_permissions(Permissions::ExtendedAccess)?;
     }
 
     Ok(HttpResponse::Ok().json_with_etag(record))
@@ -105,17 +97,16 @@ pub async fn get(request: HttpRequest, state: Data<PointercrateState>, record_id
 
 #[patch("/{record_id}/")]
 pub async fn patch(
-    request: HttpRequest, state: Data<PointercrateState>, record_id: Path<i32>, data: Json<PatchRecord>,
+    TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>, data: Json<PatchRecord>,
 ) -> Result<HttpResponse> {
     let mut connection = state.transaction().await?;
 
-    let user = AuthenticatedUser::token_auth(request.extensions_mut().remove().unwrap(), &state.secret, &mut connection).await?;
     user.inner().require_permissions(Permissions::ListHelper)?;
 
     // FIXME: prevent lost updates by using SELECT ... FOR UPDATE
     let mut record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
-    request.validate_etag(&record)?;
+    if_match.require_etag_match(&record)?;
 
     record = record.apply_patch(data.into_inner(), &mut connection).await?;
 
@@ -125,16 +116,15 @@ pub async fn patch(
 }
 
 #[delete("/{record_id}/")]
-pub async fn delete(request: HttpRequest, state: Data<PointercrateState>, record_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn delete(TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>) -> Result<HttpResponse> {
     let mut connection = state.transaction().await?;
 
-    let user = AuthenticatedUser::token_auth(request.extensions_mut().remove().unwrap(), &state.secret, &mut connection).await?;
     user.inner().require_permissions(Permissions::ListAdministrator)?;
 
     // FIXME: prevent lost updates by using SELECT ... FOR UPDATE
     let mut record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
-    request.validate_etag(&record)?;
+    if_match.require_etag_match(&record)?;
 
     record.delete(&mut connection).await?;
 

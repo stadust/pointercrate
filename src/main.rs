@@ -1,11 +1,6 @@
 // TODO: set up lint denys
 
-use crate::{
-    error::PointercrateError,
-    middleware::{headers::Headers, ip::IpResolve},
-    model::user::UserPagination,
-    state::PointercrateState,
-};
+use crate::{error::PointercrateError, middleware::headers::Headers, model::user::UserPagination, state::PointercrateState};
 use actix_web::{web::scope, App, HttpServer};
 use std::net::SocketAddr;
 
@@ -16,6 +11,7 @@ mod cistring;
 mod config;
 mod documentation;
 mod error;
+mod extractor;
 mod middleware;
 mod model;
 mod permissions;
@@ -38,29 +34,25 @@ async fn main() -> std::io::Result<()> {
     // TODO: logging
 
     HttpServer::new(move || {
-        App::new()
-            .wrap(IpResolve)
-            .wrap(Headers)
-            .app_data(application_state.clone())
-            .service(
-                scope("/api/v1")
-                    .service(
-                        scope("/auth")
-                            .service(api::auth::register)
-                            .service(api::auth::delete_me)
-                            .service(api::auth::get_me)
-                            .service(api::auth::invalidate)
-                            .service(api::auth::login)
-                            .service(api::auth::patch_me),
-                    )
-                    .service(
-                        scope("/users")
-                            .service(api::user::paginate)
-                            .service(api::user::get)
-                            .service(api::user::delete)
-                            .service(api::user::patch),
-                    ),
-            )
+        App::new().wrap(Headers).app_data(application_state.clone()).service(
+            scope("/api/v1")
+                .service(
+                    scope("/auth")
+                        .service(api::auth::register)
+                        .service(api::auth::delete_me)
+                        .service(api::auth::get_me)
+                        .service(api::auth::invalidate)
+                        .service(api::auth::login)
+                        .service(api::auth::patch_me),
+                )
+                .service(
+                    scope("/users")
+                        .service(api::user::paginate)
+                        .service(api::user::get)
+                        .service(api::user::delete)
+                        .service(api::user::patch),
+                ),
+        )
     })
     .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?
     .run()

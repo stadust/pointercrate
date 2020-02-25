@@ -4,7 +4,7 @@ use actix_web::HttpResponse;
 use serde::{de::Error, Deserialize, Deserializer};
 
 macro_rules! pagination_response {
-    ($objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $after_field:ident, $before_field:ident) => {{
+    ($objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
         $pagination.$after_field = Some($min_id - 1);
         $pagination.$before_field = None;
 
@@ -22,7 +22,7 @@ macro_rules! pagination_response {
         ));
 
         if !$objects.is_empty() {
-            if $objects.first().unwrap().id != $min_id {
+            if $objects.first().unwrap().$($id_field)* != $min_id {
                 $pagination.$before_field = Some($min_id);
                 $pagination.$after_field = None;
 
@@ -31,7 +31,7 @@ macro_rules! pagination_response {
                     serde_urlencoded::to_string(&$pagination.0).unwrap()
                 ));
             }
-            if $objects.last().unwrap().id != $max_id {
+            if $objects.last().unwrap().$($id_field)* != $max_id {
                 $pagination.$after_field = Some($max_id);
                 $pagination.$before_field = None;
 
@@ -44,6 +44,20 @@ macro_rules! pagination_response {
 
         Ok(HttpResponse::Ok().header("Links", rel).json($objects))
     }};
+}
+
+macro_rules! header {
+    ($req:expr, $header:expr) => {
+        match $req.headers().get($header) {
+            Some(value) =>
+                Some(
+                    value
+                        .to_str()
+                        .map_err(|_| PointercrateError::InvalidHeaderValue { header: $header })?,
+                ),
+            None => None,
+        }
+    };
 }
 
 #[allow(clippy::option_option)]

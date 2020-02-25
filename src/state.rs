@@ -1,4 +1,9 @@
-use crate::{config, documentation, model::user::User, ratelimit::Ratelimits, Result};
+use crate::{
+    config, documentation,
+    model::user::{AuthenticatedUser, User},
+    ratelimit::Ratelimits,
+    Result,
+};
 use log::trace;
 use sqlx::{
     pool::{Builder, PoolConnection},
@@ -49,4 +54,41 @@ impl PointercrateState {
     pub async fn transaction(&self) -> Result<Transaction<PoolConnection<PgConnection>>> {
         Ok(self.connection_pool.begin().await?)
     }
+
+    /// Prepares this connection such that all audit log entries generated while using it are
+    /// attributed to the givne authenticated user
+    pub async fn audited_connection(&self, user: &AuthenticatedUser) -> Result<PoolConnection<PgConnection>> {
+        let mut connection = self.connection().await?;
+
+        audit_connection(&mut connection, user.inner()).await?;
+
+        Ok(connection)
+    }
+
+    /// Prepares this transaction connection such that all audit log entries generated while using
+    /// it are attributed to the givne authenticated user
+    pub async fn audited_transaction(&self, user: &AuthenticatedUser) -> Result<Transaction<PoolConnection<PgConnection>>> {
+        let mut connection = self.transaction().await?;
+
+        audit_connection(&mut connection, user.inner()).await?;
+
+        Ok(connection)
+    }
+}
+
+pub async fn audit_connection(connection: &mut PgConnection, user: &User) -> Result<()> {
+    trace!(
+        "Creating connection of which usage will be attributed to user {} in audit logs",
+        user.id
+    );
+
+    sqlx::query!("CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)")
+        .execute(connection)
+        .await?;
+    sqlx::query!("DELETE FROM active_user").execute(connection).await?;
+    sqlx::query!("INSERT INTO active_user (id) VALUES ($1)", user.id)
+        .execute(connection)
+        .await?;
+
+    Ok(())
 }
