@@ -39,6 +39,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(application_state.clone())
             .service(
                 scope("/api/v1")
+                    .service(api::demonlist::misc::list_information)
                     .service(
                         scope("/auth")
                             .service(api::auth::register)
