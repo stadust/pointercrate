@@ -45,4 +45,18 @@ impl User {
 
         Ok(row.into())
     }
+
+    /// Gets all users that have the given permission bits all set
+    pub async fn by_permission(permissions: Permissions, connection: &mut PgConnection) -> Result<User> {
+        let row = sqlx::query_as!(
+            FetchedUser,
+            "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE permissions & \
+             CAST($1::INTEGER AS BIT(16)) = CAST($1::INTEGER AS BIT(16))",
+            permissions.bits() as i32
+        )
+        .fetch_one(connection)
+        .await?;
+
+        Ok(row.into())
+    }
 }

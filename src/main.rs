@@ -35,6 +35,7 @@ async fn main() -> std::io::Result<()> {
     // TODO: error handler
     // TODO: json config
     // TODO: 404 and 405 handling
+    // TODO: logging
 
     HttpServer::new(move || {
         App::new()
