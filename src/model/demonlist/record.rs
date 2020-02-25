@@ -1,13 +1,20 @@
-pub use self::get::{approved_records_by, approved_records_on, submitted_by};
+pub use self::{
+    get::{approved_records_by, approved_records_on, submitted_by},
+    paginate::RecordPagination,
+    patch::PatchRecord,
+    post::Submission,
+};
 use crate::{
     cistring::CiString,
     error::PointercrateError,
     model::demonlist::{demon::MinimalDemon, player::DatabasePlayer, submitter::Submitter},
     ratelimit::RatelimitScope::RecordSubmission,
+    Result,
 };
 use derive_more::Display;
 use log::Record;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use sqlx::PgConnection;
 use std::{
     fmt::{Display, Formatter},
     str::FromStr,
@@ -15,7 +22,7 @@ use std::{
 
 mod delete;
 mod get;
-// mod paginate;
+mod paginate;
 mod patch;
 mod post;
 
@@ -45,7 +52,7 @@ impl Display for RecordStatus {
 impl FromStr for RecordStatus {
     type Err = PointercrateError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match &s.to_lowercase()[..] {
             "submitted" => Ok(RecordStatus::Submitted),
             "approved" => Ok(RecordStatus::Approved),
@@ -129,4 +136,16 @@ pub struct MinimalRecordP {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub player: DatabasePlayer,
+}
+
+impl FullRecord {
+    /// Gets the maximal and minimal submitter id currently in use
+    ///
+    /// The returned tuple is of the form (max, min)
+    pub async fn extremal_record_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
+        let row = sqlx::query!("SELECT MAX(id) AS max_id, MIN(id) AS min_id FROM records")
+            .fetch_one(connection)
+            .await?; // FIXME: crashes on empty table
+        Ok((row.max_id, row.min_id))
+    }
 }

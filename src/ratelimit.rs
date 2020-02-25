@@ -1,3 +1,4 @@
+use crate::{error::PointercrateError, Result};
 use derive_more::Display;
 use nonzero_ext::nonzero;
 use ratelimit_meter::{DirectRateLimiter, KeyedRateLimiter, NonConformance};
@@ -55,7 +56,7 @@ impl Ratelimits {
         }
     }
 
-    pub fn check(&self, scope: RatelimitScope, ip: IpAddr) -> Result<(), Duration> {
+    pub fn check(&self, scope: RatelimitScope, ip: IpAddr) -> Result<()> {
         let now = Instant::now();
 
         match scope {
@@ -66,6 +67,11 @@ impl Ratelimits {
             RatelimitScope::SoftRegistration => self.soft_registrations.clone().check_at(ip, now),
             RatelimitScope::Login => self.login_attempts.clone().check_at(ip, now),
         }
-        .map_err(|too_early| too_early.earliest_possible() - now) // TODO: add jitter
+        .map_err(|too_early| {
+            PointercrateError::Ratelimited {
+                scope,
+                remaining: too_early.earliest_possible() - now,
+            }
+        }) // TODO: add jitter
     }
 }

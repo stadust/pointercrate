@@ -5,5 +5,5 @@ SELECT records.id, progress, records.video::text, status_::text AS status, recor
 FROM records
 INNER JOIN players ON records.player = players.id
 INNER JOIN demons ON records.demon = demons.id
-LEFT OUTER JOIN submitters ON records.submitter = submitters.submitter_id
+INNER JOIN submitters ON records.submitter = submitters.submitter_id
 WHERE records.id = $1
