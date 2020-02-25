@@ -2,7 +2,7 @@ use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
     model::{
-        demonlist::player::{DatabasePlayer, Player},
+        demonlist::player::{DatabasePlayer, FullPlayer, Player},
         nationality::Nationality,
     },
     util::{non_nullable, nullable},
@@ -22,6 +22,15 @@ pub struct PatchPlayer {
 
     #[serde(default, deserialize_with = "nullable")]
     nationality: Option<Option<CiString>>,
+}
+
+impl FullPlayer {
+    pub async fn apply_patch(self, patch: PatchPlayer, connection: &mut PgConnection) -> Result<Self> {
+        Ok(FullPlayer {
+            player: self.player.apply_patch(patch, connection).await?,
+            ..self
+        })
+    }
 }
 
 impl Player {

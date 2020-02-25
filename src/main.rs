@@ -1,7 +1,12 @@
 // TODO: set up lint denys
 
 use crate::{error::PointercrateError, middleware::headers::Headers, model::user::UserPagination, state::PointercrateState};
-use actix_web::{web::scope, App, HttpServer};
+use actix_web::{middleware::Logger, web::scope, App, HttpServer};
+use api::{
+    auth,
+    demonlist::{demon, misc, player, record, submitter},
+    user,
+};
 use std::net::SocketAddr;
 
 #[macro_use]
@@ -31,64 +36,72 @@ async fn main() -> std::io::Result<()> {
     // TODO: error handler
     // TODO: json config
     // TODO: 404 and 405 handling
-    // TODO: logging
 
     HttpServer::new(move || {
         App::new()
             .wrap(Headers)
+            .wrap(Logger::default())
             .app_data(application_state.clone())
             .service(
                 scope("/api/v1")
-                    .service(api::demonlist::misc::list_information)
+                    .service(misc::list_information)
                     .service(
                         scope("/auth")
-                            .service(api::auth::register)
-                            .service(api::auth::delete_me)
-                            .service(api::auth::get_me)
-                            .service(api::auth::invalidate)
-                            .service(api::auth::login)
-                            .service(api::auth::patch_me),
+                            .service(auth::register)
+                            .service(auth::delete_me)
+                            .service(auth::get_me)
+                            .service(auth::invalidate)
+                            .service(auth::login)
+                            .service(auth::patch_me),
                     )
                     .service(
                         scope("/users")
-                            .service(api::user::paginate)
-                            .service(api::user::get)
-                            .service(api::user::delete)
-                            .service(api::user::patch),
+                            .service(user::paginate)
+                            .service(user::get)
+                            .service(user::delete)
+                            .service(user::patch),
                     )
                     .service(
                         scope("/submitters")
-                            .service(api::demonlist::submitter::get)
-                            .service(api::demonlist::submitter::paginate)
-                            .service(api::demonlist::submitter::patch),
+                            .service(submitter::get)
+                            .service(submitter::paginate)
+                            .service(submitter::patch),
                     )
                     .service(
                         scope("/demons")
-                            .service(api::demonlist::demon::v1::get)
-                            .service(api::demonlist::demon::v1::paginate)
-                            .service(api::demonlist::demon::v1::patch)
-                            .service(api::demonlist::demon::v1::delete_creator)
-                            .service(api::demonlist::demon::v1::post_creator)
-                            .service(api::demonlist::demon::post),
+                            .service(demon::v1::get)
+                            .service(demon::v1::paginate)
+                            .service(demon::v1::patch)
+                            .service(demon::v1::delete_creator)
+                            .service(demon::v1::post_creator)
+                            .service(demon::post),
                     )
                     .service(
                         scope("/records")
-                            .service(api::demonlist::record::delete)
-                            .service(api::demonlist::record::get)
-                            .service(api::demonlist::record::paginate)
-                            .service(api::demonlist::record::patch)
-                            .service(api::demonlist::record::submit),
+                            .service(record::delete)
+                            .service(record::get)
+                            .service(record::paginate)
+                            .service(record::patch)
+                            .service(record::submit),
+                    )
+                    .service(
+                        scope("/players")
+                            .service(player::patch)
+                            .service(player::paginate)
+                            .service(player::get)
+                            .service(player::ranking),
                     ),
             )
             .service(
                 scope("/api/v2").service(
                     scope("/demons")
-                        .service(api::demonlist::demon::v2::get)
-                        .service(api::demonlist::demon::v2::paginate)
-                        .service(api::demonlist::demon::v2::patch)
-                        .service(api::demonlist::demon::v2::delete_creator)
-                        .service(api::demonlist::demon::v2::post_creator)
-                        .service(api::demonlist::demon::post),
+                        .service(demon::v2::paginate_listed)
+                        .service(demon::v2::get)
+                        .service(demon::v2::paginate)
+                        .service(demon::v2::patch)
+                        .service(demon::v2::delete_creator)
+                        .service(demon::v2::post_creator)
+                        .service(demon::post),
                 ),
             )
     })

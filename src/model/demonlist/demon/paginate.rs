@@ -164,7 +164,7 @@ impl DemonPositionPagination {
         }
 
         // FIXME(sqlx) once CITEXT is supported
-        let mut stream = sqlx::query(include_str!("../../../../sql/paginate_demons_by_id.sql"))
+        let mut stream = sqlx::query(include_str!("../../../../sql/paginate_demons_by_position.sql"))
             .bind(self.before_position)
             .bind(self.after_position)
             .bind(&self.name)

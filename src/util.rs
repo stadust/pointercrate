@@ -22,8 +22,11 @@ macro_rules! pagination_response {
         ));
 
         if !$objects.is_empty() {
-            if $objects.first().unwrap().$($id_field)* != $min_id {
-                $pagination.$before_field = Some($min_id);
+            let first = $objects.first().unwrap().$($id_field)*;
+            let last = $objects.last().unwrap().$($id_field)*;
+
+            if first != $min_id {
+                $pagination.$before_field = Some(first);
                 $pagination.$after_field = None;
 
                 rel.push_str(&format!(
@@ -31,8 +34,8 @@ macro_rules! pagination_response {
                     serde_urlencoded::to_string(&$pagination.0).unwrap()
                 ));
             }
-            if $objects.last().unwrap().$($id_field)* != $max_id {
-                $pagination.$after_field = Some($max_id);
+            if last != $max_id {
+                $pagination.$after_field = Some(last);
                 $pagination.$before_field = None;
 
                 rel.push_str(&format!(
