@@ -4,7 +4,7 @@ use serde::Serialize;
 use std::hash::{Hash, Hasher};
 
 mod get;
-// mod paginate;
+mod paginate;
 mod patch;
 
 #[derive(Debug, Serialize, Hash, Display, Copy, Clone)]
