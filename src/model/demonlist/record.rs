@@ -17,7 +17,7 @@ mod delete;
 mod get;
 // mod paginate;
 mod patch;
-// mod post;
+mod post;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
 pub enum RecordStatus {

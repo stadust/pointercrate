@@ -37,7 +37,7 @@ impl Submitter {
     pub async fn extremal_submitter_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
         let row = sqlx::query!("SELECT MAX(submitter_id) AS max_id, MIN(submitter_id) AS min_id FROM submitters")
             .fetch_one(connection)
-            .await?;
+            .await?; // FIXME: crashes on empty table
         Ok((row.max_id, row.min_id))
     }
 }

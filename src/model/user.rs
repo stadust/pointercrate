@@ -102,7 +102,7 @@ impl User {
     pub async fn extremal_member_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
         let row = sqlx::query!("SELECT MAX(member_id) AS max_id, MIN(member_id) AS min_id FROM members")
             .fetch_one(connection)
-            .await?;
+            .await?; // FIXME: crashes on empty table
         Ok((row.max_id, row.min_id))
     }
 }
