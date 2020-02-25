@@ -5,6 +5,7 @@ use crate::{
         demon::{Demon, MinimalDemon},
         player::DatabasePlayer,
     },
+    util::non_nullable,
     Result,
 };
 use futures::stream::StreamExt;
@@ -13,27 +14,38 @@ use sqlx::{row::Row, PgConnection};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DemonIdPagination {
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "before")]
     before_id: Option<i32>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "after")]
     after_id: Option<i32>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     limit: Option<u8>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     requirement: Option<i16>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     verifier_id: Option<i32>,
+    #[serde(default, deserialize_with = "non_nullable")]
     publisher_id: Option<i32>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     verifier_name: Option<CiString>,
+    #[serde(default, deserialize_with = "non_nullable")]
     publisher_name: Option<CiString>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__gt")]
     requirement_gt: Option<i16>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__lt")]
     requirement_lt: Option<i16>,
 }
@@ -52,30 +64,20 @@ impl DemonIdPagination {
             }
         }
 
-        let mut sql_query = "SELECT demons.id AS demon_id, demons.name::text AS demon_name, demons.position, demons.requirement, \
-                             demons.video::text,
-               verifiers.id AS verifier_id, verifiers.name::text AS verifier_name, verifiers.banned AS verifier_banned,
-               publishers.id AS publisher_id, publishers.name::text AS publisher_name, publishers.banned AS publisher_banned
-        FROM demons
-        INNER JOIN players AS verifiers ON verifiers.id=demons.verifier
-        INNER JOIN players AS publishers ON publishers.id=demons.publisher
-        WHERE "
-            .to_string();
-
-        let query = filter!(sql_query[
-            demons.name = self.name,
-            demons.requirement = self.requirement,
-            demons.requirement < self.requirement_lt,
-            demons.requirement > self.requirement_gt,
-            verifiers.id = self.verifier_id,
-            publishers.id = self.publisher_id,
-            verifiers.name = self.verifier_name,
-            publishers.name = self.publisher_name,
-            demons.id > self.after_id,
-            demons.id < self.before_id
-        ] limit self.limit);
-
-        let mut stream = query.fetch(connection);
+        // FIXME(sqlx) once CITEXT is supported
+        let mut stream = sqlx::query(include_str!("../../../../sql/paginate_demons_by_id.sql"))
+            .bind(self.before_id)
+            .bind(self.after_id)
+            .bind(&self.name)
+            .bind(self.requirement)
+            .bind(self.requirement_lt)
+            .bind(self.requirement_gt)
+            .bind(self.verifier_id)
+            .bind(&self.verifier_name)
+            .bind(self.publisher_id)
+            .bind(&self.publisher_name)
+            .bind(self.limit.unwrap_or(50) as i32)
+            .fetch(connection);
 
         let mut demons = Vec::new();
 
@@ -111,27 +113,38 @@ impl DemonIdPagination {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DemonPositionPagination {
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "before")]
-    before_position: Option<i16>,
+    before_position: Option<i32>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "after")]
-    after_position: Option<i16>,
+    after_position: Option<i32>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     limit: Option<u8>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     requirement: Option<i16>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     verifier_id: Option<i32>,
+    #[serde(default, deserialize_with = "non_nullable")]
     publisher_id: Option<i32>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     verifier_name: Option<CiString>,
+    #[serde(default, deserialize_with = "non_nullable")]
     publisher_name: Option<CiString>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__gt")]
     requirement_gt: Option<i16>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__lt")]
     requirement_lt: Option<i16>,
 }
@@ -150,30 +163,20 @@ impl DemonPositionPagination {
             }
         }
 
-        let mut sql_query = "SELECT demons.id AS demon_id, demons.name::text AS demon_name, demons.position, demons.requirement, \
-                             demons.video::text, verifiers.id AS verifier_id, verifiers.name::text AS verifier_name, verifiers.banned AS \
-                             verifier_banned,publishers.id AS publisher_id, publishers.name::text AS publisher_name, publishers.banned AS \
-                             publisher_banned
-        FROM demons
-        INNER JOIN players AS verifiers ON verifiers.id=demons.verifier
-        INNER JOIN players AS publishers ON publishers.id=demons.publisher
-        WHERE "
-            .to_string();
-
-        let query = filter!(sql_query[
-            demons.name = self.name,
-            demons.requirement = self.requirement,
-            demons.requirement < self.requirement_lt,
-            demons.requirement > self.requirement_gt,
-            verifiers.id = self.verifier_id,
-            publishers.id = self.publisher_id,
-            verifiers.name = self.verifier_name,
-            publishers.name = self.publisher_name,
-            demons.position > self.after_position,
-            demons.position < self.before_position
-        ] limit self.limit);
-
-        let mut stream = query.fetch(connection);
+        // FIXME(sqlx) once CITEXT is supported
+        let mut stream = sqlx::query(include_str!("../../../../sql/paginate_demons_by_id.sql"))
+            .bind(self.before_position)
+            .bind(self.after_position)
+            .bind(&self.name)
+            .bind(self.requirement)
+            .bind(self.requirement_lt)
+            .bind(self.requirement_gt)
+            .bind(self.verifier_id)
+            .bind(&self.verifier_name)
+            .bind(self.publisher_id)
+            .bind(&self.publisher_name)
+            .bind(self.limit.unwrap_or(50) as i32)
+            .fetch(connection);
 
         let mut demons = Vec::new();
 

@@ -16,5 +16,5 @@ WHERE (record_id < $1 OR $1 IS NULL)
   AND (demon_name = $10 OR $10 IS NULL)
   AND (demon_id = $11 OR $11 IS NULL)
   AND (video = $12 OR (video IS NULL AND $13) OR ($12 IS NULL  AND NOT $13))
-LIMIT $14
 ORDER BY id ASC
+LIMIT $14
