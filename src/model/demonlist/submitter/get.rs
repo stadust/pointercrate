@@ -1,7 +1,7 @@
 use super::{FullSubmitter, Submitter};
-use crate::{error::PointercrateError, Result};
+use crate::{error::PointercrateError, model::demonlist::record::submitted_by, Result};
 use sqlx::PgConnection;
-use std::net::IpAddr;
+use std::{net::IpAddr, sync::mpsc::TrySendError::Full};
 
 impl Submitter {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Submitter> {
@@ -39,20 +39,17 @@ impl Submitter {
             },
         }
     }
-}
 
-/*
-impl<T> Get<T> for FullSubmitter
-where
-    Submitter: Get<T>,
-{
-    fn get(t: T, ctx: RequestContext) -> Result<Self> {
-        let submitter = Submitter::get(t, ctx)?;
-
+    pub async fn upgrade(self, connection: &mut PgConnection) -> Result<FullSubmitter> {
         Ok(FullSubmitter {
-            records: Get::get(&submitter, ctx)?,
-            submitter,
+            records: submitted_by(&self, connection).await?,
+            submitter: self,
         })
     }
 }
-*/
+
+impl FullSubmitter {
+    pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<FullSubmitter> {
+        Submitter::by_id(id, connection).await?.upgrade(connection).await
+    }
+}

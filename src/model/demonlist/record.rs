@@ -1,4 +1,4 @@
-pub use self::get::{approved_records_by, approved_records_on};
+pub use self::get::{approved_records_by, approved_records_on, submitted_by};
 use crate::{
     cistring::CiString,
     error::PointercrateError,

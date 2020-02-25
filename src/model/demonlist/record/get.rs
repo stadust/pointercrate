@@ -4,7 +4,7 @@ use crate::{
     model::demonlist::{
         demon::MinimalDemon,
         player::DatabasePlayer,
-        record::{FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
+        record::{FullRecord, MinimalRecordD, MinimalRecordP, MinimalRecordPD, RecordStatus},
         submitter::Submitter,
     },
     Result,
@@ -71,7 +71,17 @@ impl FullRecord {
 }
 
 pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalRecordD>> {
-    let mut stream = sqlx::query!(
+    struct Fetched {
+        id: i32,
+        progress: i16,
+        video: Option<String>,
+        demon_id: i32,
+        name: String,
+        position: i16,
+    }
+
+    let mut stream = sqlx::query_as!(
+        Fetched,
         "SELECT records.id, progress, records.video::text, demons.id AS demon_id, demons.name::text, demons.position FROM records INNER \
          JOIN demons ON records.demon = demons.id WHERE status_ = 'APPROVED' AND records.player = $1",
         player.id
@@ -86,7 +96,7 @@ pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgCon
         records.push(MinimalRecordD {
             id: row.id,
             progress: row.progress,
-            video: if row.video.is_empty() { None } else { Some(row.video) },
+            video: row.video,
             status: RecordStatus::Approved,
             demon: MinimalDemon {
                 id: row.demon_id,
@@ -100,7 +110,17 @@ pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgCon
 }
 
 pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnection) -> Result<Vec<MinimalRecordP>> {
-    let mut stream = sqlx::query!(
+    struct Fetched {
+        id: i32,
+        progress: i16,
+        video: Option<String>,
+        player_id: i32,
+        name: String,
+        banned: bool,
+    }
+
+    let mut stream = sqlx::query_as!(
+        Fetched,
         "SELECT records.id, progress, video::text, players.id AS player_id, players.name::text, players.banned FROM records INNER JOIN \
          players ON records.player = players.id WHERE status_ = 'APPROVED' AND records.demon = $1",
         demon.id
@@ -115,12 +135,60 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
         records.push(MinimalRecordP {
             id: row.id,
             progress: row.progress,
-            video: if row.video.is_empty() { None } else { Some(row.video) },
+            video: row.video,
             status: RecordStatus::Approved,
             player: DatabasePlayer {
                 id: row.player_id,
                 name: CiString(row.name),
                 banned: row.banned,
+            },
+        })
+    }
+
+    Ok(records)
+}
+
+pub async fn submitted_by(submitter: &Submitter, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>> {
+    struct Fetched {
+        id: i32,
+        progress: i16,
+        video: Option<String>,
+        player_id: i32,
+        player_name: String,
+        banned: bool,
+        demon_id: i32,
+        demon_name: String,
+        position: i16,
+    }
+
+    let mut stream = sqlx::query_as!(
+        Fetched,
+        "SELECT records.id, progress, records.video::text, players.id AS player_id, players.name::text as player_name, players.banned, \
+         demons.id AS demon_id, demons.name::text as demon_name, demons.position FROM records INNER JOIN players ON records.player = \
+         players.id INNER JOIN demons ON demons.id = records.demon WHERE records.submitter = $1",
+        submitter.id
+    )
+    .fetch(connection);
+
+    let mut records = Vec::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        records.push(MinimalRecordPD {
+            id: row.id,
+            progress: row.progress,
+            video: row.video,
+            status: RecordStatus::Approved,
+            player: DatabasePlayer {
+                id: row.player_id,
+                name: CiString(row.player_name),
+                banned: row.banned,
+            },
+            demon: MinimalDemon {
+                id: row.demon_id,
+                position: row.position,
+                name: CiString(row.demon_name),
             },
         })
     }
