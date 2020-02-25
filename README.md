@@ -13,13 +13,19 @@ As of march 2nd 2019 this is the official repository for pointercrate. It contai
 
 Pointercrate is mainly configured via optional environment variables. It will attempt to load them from an `.env` file. These are:
 
-- `DATABASE_URL`: The URL to the postgres database to connect to
+- `DATABASE_URL`: The URL to the postgres database to connect to, including authentication
 - `GDCF_URL`: The URL to the postgres database for GDCF to connect to
 - `PORT`: The port to run on (defaults to `8088`)
 - `DOCUMENTATION`: The directory with the compiled documentation html files (defaults to `env!("OUT_DIR")`)
 
 Additionally, you'll need a `.secret` file containing the secret to sign access tokens with.
 
+### Getting it running
+
+Even though pointercrate no longer uses diesel as it's database driver, it still uses diesel's migration system. To get a database instance running, run `diesel migration run`. 
+
+Since pointercrate uses `sqlx`, compilation requires you to be running a postgres database with the pointercrate schema. This is because `sqlx` validates all SQL queries at compile time (syntactically _and_ semantically) by sending them over to a locally running postgres server.
+ 
 ### Disclaimer:
 
 While I'm generally OK (in fact, its pretty awesome) with people running their own copies of this code on their own servers (note: running the code. I'm not OK with people copying the content from pointercrate), doing so is **completely unsupported** from my side beyond these instructions. If you have enough knowledge to be capable to run a server, I fully believe in you to be able to figure out how to get it running from these. 

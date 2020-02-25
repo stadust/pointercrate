@@ -10,6 +10,7 @@ use serde::Serialize;
 use std::hash::{Hash, Hasher};
 
 mod get;
+mod paginate;
 mod patch;
 
 #[derive(Debug, Hash, Eq, PartialEq, Serialize, Display, Clone)]
