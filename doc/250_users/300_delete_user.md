@@ -27,6 +27,7 @@ _Nothing_
 | Status code | Error code | Description                                                                              |
 | ----------- | ---------- | ----------------------------------------------------------------------------------------|
 |403|40302| Attempt to delete your own account through this endpoint|
+
 ### Example request:
 
 ```json

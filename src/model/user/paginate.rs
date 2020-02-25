@@ -6,11 +6,11 @@ use crate::{
     Result,
 };
 use futures::StreamExt;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
 use sqlx_core::postgres::PgRow;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct UserPagination {
     #[serde(rename = "before", default, deserialize_with = "non_nullable")]
     pub before_id: Option<i32>,

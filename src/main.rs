@@ -36,55 +36,34 @@ async fn main() -> std::io::Result<()> {
     // TODO: json config
     // TODO: 404 and 405 handling
 
-    /*    HttpServer::new(move || {
+    HttpServer::new(move || {
         App::new()
             .wrap(IpResolve)
             .wrap(Headers)
             .app_data(application_state.clone())
             .service(
-                scope("/api/v1").service(
-                    scope("/auth")
-                        .service(api::auth::register)
-                        .service(api::auth::delete_me)
-                        .service(api::auth::get_me)
-                        .service(api::auth::invalidate)
-                        .service(api::auth::login)
-                        .service(api::auth::patch_me),
-                ),
+                scope("/api/v1")
+                    .service(
+                        scope("/auth")
+                            .service(api::auth::register)
+                            .service(api::auth::delete_me)
+                            .service(api::auth::get_me)
+                            .service(api::auth::invalidate)
+                            .service(api::auth::login)
+                            .service(api::auth::patch_me),
+                    )
+                    .service(
+                        scope("/users")
+                            .service(api::user::paginate)
+                            .service(api::user::get)
+                            .service(api::user::delete)
+                            .service(api::user::patch),
+                    ),
             )
     })
     .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?
     .run()
-    .await?;*/
-
-    let mut connection = application_state.connection().await.unwrap();
-
-    let pagination = UserPagination {
-        before_id: None,
-        after_id: None,
-        limit: None,
-        name: None,
-        display_name: Some(None),
-        has_permissions: None,
-    };
-
-    let page = pagination.page(&mut connection).await.unwrap();
-
-    println!("{:?}", page);
-
-    /*let mut connection = application_state.connection_pool.acquire().await.unwrap();
-
-    struct Test {
-        notes: Option<String>,
-    }
-
-    let notes = sqlx::query_as!(Test, "select notes from records where id = 5290")
-        .fetch_one(&mut connection)
-        .await
-        .unwrap()
-        .notes;
-
-    println!("{:?}", notes);*/
+    .await?;
 
     Ok(())
 }

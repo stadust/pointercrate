@@ -5,16 +5,20 @@
 //! * Modifying other people's accounts (assign permissions, change offensive names, etc)
 //! * Querying account information
 
-pub use self::paginate::UserPagination;
+pub use self::{
+    auth::{AuthenticatedUser, Authorization, PatchMe, Registration},
+    paginate::UserPagination,
+    patch::PatchUser,
+};
 use crate::{
     error::PointercrateError,
     permissions::{Permissions, PermissionsSet},
     Result,
 };
-pub use auth::{AuthenticatedUser, Authorization, PatchMe, Registration};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use serde::{Deserialize, Serialize, Serializer};
+use sqlx::PgConnection;
 use std::{
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
@@ -25,10 +29,6 @@ mod delete;
 mod get;
 mod paginate;
 mod patch;
-/*mod delete;
-mod paginate;
-mod patch;
-mod post;*/
 
 // TODO: impl the nationality stuff already in the database
 /// Model representing a user in the database
@@ -69,6 +69,14 @@ impl Display for User {
 }
 
 impl User {
+    pub fn require_permissions(&self, perm: Permissions) -> Result<()> {
+        if !self.permissions.implied().contains(perm) {
+            return Err(PointercrateError::MissingPermissions { required: perm })
+        }
+
+        Ok(())
+    }
+
     pub fn validate_name(name: &str) -> Result<()> {
         if name.len() < 3 || name != name.trim() {
             return Err(PointercrateError::InvalidUsername)
@@ -90,5 +98,19 @@ impl User {
 
     pub fn extended_list_access(&self) -> bool {
         self.permissions.implied().contains(Permissions::ExtendedAccess)
+    }
+
+    pub async fn max_member_id(connection: &mut PgConnection) -> Result<i32> {
+        Ok(sqlx::query!("SELECT MAX(member_id) AS max_id FROM members")
+            .fetch_one(connection)
+            .await?
+            .max_id)
+    }
+
+    pub async fn min_member_id(connection: &mut PgConnection) -> Result<i32> {
+        Ok(sqlx::query!("SELECT MIN(member_id) AS min_id FROM members")
+            .fetch_one(connection)
+            .await?
+            .min_id)
     }
 }

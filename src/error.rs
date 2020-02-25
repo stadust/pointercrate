@@ -2,7 +2,7 @@
 
 use crate::{
     model::demonlist::{demon::MinimalDemon, record::RecordStatus},
-    permissions::PermissionsSet,
+    permissions::Permissions,
     ratelimit::RatelimitScope,
 };
 use actix_web::{
@@ -71,12 +71,13 @@ pub enum PointercrateError {
     ///
     /// Error Code `40301`
     #[display(
-        fmt = "You do not have the pointercrate permissions to perform this request. Required are: {}",
+        fmt = "You do not have the pointercrate permissions to perform this request. Required is: {}, which isn't contained in any of \
+               your permissions",
         required
     )]
     MissingPermissions {
         /// The permissions required to perform the request
-        required: PermissionsSet,
+        required: Permissions,
     },
 
     /// `403 FORBIDDEN` error returned when a user attempts to delete his own account via the admin

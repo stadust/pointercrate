@@ -1,5 +1,6 @@
 //! Some utils for pagination and patch
 
+use actix_web::HttpResponse;
 use serde::{de::Error, Deserialize, Deserializer};
 
 #[allow(clippy::option_option)]
