@@ -3,6 +3,49 @@
 use actix_web::HttpResponse;
 use serde::{de::Error, Deserialize, Deserializer};
 
+macro_rules! pagination_response {
+    ($objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $after_field:ident, $before_field:ident) => {{
+        $pagination.$after_field = Some($min_id - 1);
+        $pagination.$before_field = None;
+
+        let mut rel = format!(
+            "</api/v1/users/?{}>; rel=first",
+            serde_urlencoded::to_string(&$pagination.0).unwrap()
+        );
+
+        $pagination.$after_field = None;
+        $pagination.$before_field = Some($max_id + 1);
+
+        rel.push_str(&format!(
+            ",</api/v1/users/?{}>; rel=last",
+            serde_urlencoded::to_string(&$pagination.0).unwrap()
+        ));
+
+        if !$objects.is_empty() {
+            if $objects.first().unwrap().id != $min_id {
+                $pagination.$before_field = Some($min_id);
+                $pagination.$after_field = None;
+
+                rel.push_str(&format!(
+                    ",</api/v1/users/?{}>; rel=prev",
+                    serde_urlencoded::to_string(&$pagination.0).unwrap()
+                ));
+            }
+            if $objects.last().unwrap().id != $max_id {
+                $pagination.$after_field = Some($max_id);
+                $pagination.$before_field = None;
+
+                rel.push_str(&format!(
+                    ",</api/v1/users/?{}>; rel=next",
+                    serde_urlencoded::to_string(&$pagination.0).unwrap()
+                ));
+            }
+        }
+
+        Ok(HttpResponse::Ok().header("Links", rel).json($objects))
+    }};
+}
+
 #[allow(clippy::option_option)]
 pub fn nullable<'de, T, D>(deserializer: D) -> std::result::Result<Option<Option<T>>, D::Error>
 where

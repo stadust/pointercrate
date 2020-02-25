@@ -22,47 +22,9 @@ pub async fn paginate(request: HttpRequest, state: Data<PointercrateState>, mut 
 
     let users = pagination.page(&mut connection).await?;
 
-    let min_id = User::min_member_id(&mut connection).await?;
-    let max_id = User::max_member_id(&mut connection).await?;
+    let (max_id, min_id) = User::extremal_member_ids(&mut connection).await?;
 
-    pagination.after_id = Some(min_id - 1);
-    pagination.before_id = None;
-
-    let mut rel = format!(
-        "</api/v1/users/?{}>; rel=first",
-        serde_urlencoded::to_string(&pagination.0).unwrap()
-    );
-
-    pagination.after_id = None;
-    pagination.before_id = Some(max_id + 1);
-
-    rel.push_str(&format!(
-        ",</api/v1/users/?{}>; rel=last",
-        serde_urlencoded::to_string(&pagination.0).unwrap()
-    ));
-
-    if !users.is_empty() {
-        if users.first().unwrap().id != min_id {
-            pagination.before_id = Some(min_id);
-            pagination.after_id = None;
-
-            rel.push_str(&format!(
-                ",</api/v1/users/?{}>; rel=prev",
-                serde_urlencoded::to_string(&pagination.0).unwrap()
-            ));
-        }
-        if users.last().unwrap().id != max_id {
-            pagination.after_id = Some(max_id);
-            pagination.before_id = None;
-
-            rel.push_str(&format!(
-                ",</api/v1/users/?{}>; rel=next",
-                serde_urlencoded::to_string(&pagination.0).unwrap()
-            ));
-        }
-    }
-
-    Ok(HttpResponse::Ok().header("Links", rel).json(users))
+    pagination_response!(users, pagination, min_id, max_id, before_id, after_id)
 }
 
 #[get("/{user_id}/")]

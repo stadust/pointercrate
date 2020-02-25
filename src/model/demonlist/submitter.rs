@@ -1,6 +1,8 @@
-use crate::model::demonlist::record::MinimalRecordPD;
+pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
+use crate::{model::demonlist::record::MinimalRecordPD, Result};
 use derive_more::Display;
 use serde::Serialize;
+use sqlx::PgConnection;
 use std::hash::{Hash, Hasher};
 
 mod get;
@@ -25,5 +27,17 @@ pub struct FullSubmitter {
 impl Hash for FullSubmitter {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.submitter.hash(state)
+    }
+}
+
+impl Submitter {
+    /// Gets the maximal and minimal submitter id currently in use
+    ///
+    /// The returned tuple is of the form (max, min)
+    pub async fn extremal_submitter_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
+        let row = sqlx::query!("SELECT MAX(submitter_id) AS max_id, MIN(submitter_id) AS min_id FROM submitters")
+            .fetch_one(connection)
+            .await?;
+        Ok((row.max_id, row.min_id))
     }
 }

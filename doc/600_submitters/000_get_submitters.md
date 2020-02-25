@@ -14,7 +14,7 @@ on the additional request and response fields headers.
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
-Access to this endpoint requires at least `LIST_ADMIN` permissions.
+Access to this endpoint requires at least `ListAdministrator` permissions.
 </div>
 
 ### Filtering:

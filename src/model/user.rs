@@ -10,11 +10,7 @@ pub use self::{
     paginate::UserPagination,
     patch::PatchUser,
 };
-use crate::{
-    error::PointercrateError,
-    permissions::{Permissions, PermissionsSet},
-    Result,
-};
+use crate::{error::PointercrateError, permissions::Permissions, Result};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use serde::{Deserialize, Serialize, Serializer};
@@ -100,17 +96,13 @@ impl User {
         self.permissions.implied().contains(Permissions::ExtendedAccess)
     }
 
-    pub async fn max_member_id(connection: &mut PgConnection) -> Result<i32> {
-        Ok(sqlx::query!("SELECT MAX(member_id) AS max_id FROM members")
+    /// Gets the maximal and minimal member id currently in use
+    ///
+    /// The returned tuple is of the form (max, min)
+    pub async fn extremal_member_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
+        let row = sqlx::query!("SELECT MAX(member_id) AS max_id, MIN(member_id) AS min_id FROM members")
             .fetch_one(connection)
-            .await?
-            .max_id)
-    }
-
-    pub async fn min_member_id(connection: &mut PgConnection) -> Result<i32> {
-        Ok(sqlx::query!("SELECT MIN(member_id) AS min_id FROM members")
-            .fetch_one(connection)
-            .await?
-            .min_id)
+            .await?;
+        Ok((row.max_id, row.min_id))
     }
 }
