@@ -206,20 +206,14 @@ impl Demon {
             .map_err(|err| err.into())
     }
 
-    pub async fn max_id(connection: &mut PgConnection) -> Result<i32> {
-        sqlx::query!("SELECT MAX(id) as max_id FROM demons")
+    /// Gets the maximal and minimal submitter id currently in use
+    ///
+    /// The returned tuple is of the form (max, min)
+    pub async fn extremal_demon_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
+        let row = sqlx::query!("SELECT MAX(id) AS max_id, MIN(id) AS min_id FROM demons")
             .fetch_one(connection)
-            .await
-            .map(|row| row.max_id)
-            .map_err(|err| err.into())
-    }
-
-    pub async fn min_id(connection: &mut PgConnection) -> Result<i32> {
-        sqlx::query!("SELECT MIN(id) as min_id FROM demons")
-            .fetch_one(connection)
-            .await
-            .map(|row| row.min_id)
-            .map_err(|err| err.into())
+            .await?; // FIXME: crashes on empty table
+        Ok((row.max_id, row.min_id))
     }
 
     pub fn score(&self, progress: i16) -> f64 {

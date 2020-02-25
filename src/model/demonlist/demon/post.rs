@@ -3,7 +3,7 @@ use crate::{
     error::PointercrateError,
     model::demonlist::{
         creator::Creator,
-        demon::{Demon, MinimalDemon},
+        demon::{Demon, FullDemon, MinimalDemon},
         player::DatabasePlayer,
     },
     Result,
@@ -23,9 +23,9 @@ pub struct PostDemon {
     video: Option<String>,
 }
 
-impl Demon {
+impl FullDemon {
     /// Must be run within a transaction!
-    pub async fn create_from(data: PostDemon, connection: &mut PgConnection) -> Result<Demon> {
+    pub async fn create_from(data: PostDemon, connection: &mut PgConnection) -> Result<FullDemon> {
         info!("Creating new demon from {:?}", data);
 
         Demon::validate_requirement(data.requirement)?;
@@ -68,12 +68,19 @@ impl Demon {
             verifier,
         };
 
+        let mut creators = Vec::new();
+
         for creator in data.creators {
             let player = DatabasePlayer::by_name_or_create(creator.as_ref(), connection).await?;
-
             Creator::insert(&demon.base, &player, connection).await?;
+
+            creators.push(player);
         }
 
-        Ok(demon)
+        Ok(FullDemon {
+            demon,
+            creators,
+            records: Vec::new(),
+        })
     }
 }

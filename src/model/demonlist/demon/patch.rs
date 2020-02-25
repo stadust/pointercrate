@@ -9,6 +9,7 @@ use crate::{
 use log::{debug, info, warn};
 use serde::{de::Error as _, Deserialize, Deserializer};
 use sqlx::PgConnection;
+use std::sync::mpsc::TrySendError::Full;
 
 #[derive(Deserialize, Debug)]
 pub struct PatchDemon {
@@ -31,9 +32,18 @@ pub struct PatchDemon {
     pub publisher: Option<CiString>,
 }
 
+impl FullDemon {
+    pub async fn apply_patch(mut self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
+        Ok(FullDemon {
+            demon: self.demon.apply_patch(patch, connection).await?,
+            ..self
+        })
+    }
+}
+
 impl Demon {
     /// Must run inside a transaction!
-    pub async fn patch_with(mut self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
+    pub async fn apply_patch(mut self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
         // duplicate names are OK nowadays
 
         if let Some(position) = patch.position {

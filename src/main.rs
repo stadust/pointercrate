@@ -34,25 +34,62 @@ async fn main() -> std::io::Result<()> {
     // TODO: logging
 
     HttpServer::new(move || {
-        App::new().wrap(Headers).app_data(application_state.clone()).service(
-            scope("/api/v1")
-                .service(
-                    scope("/auth")
-                        .service(api::auth::register)
-                        .service(api::auth::delete_me)
-                        .service(api::auth::get_me)
-                        .service(api::auth::invalidate)
-                        .service(api::auth::login)
-                        .service(api::auth::patch_me),
-                )
-                .service(
-                    scope("/users")
-                        .service(api::user::paginate)
-                        .service(api::user::get)
-                        .service(api::user::delete)
-                        .service(api::user::patch),
+        App::new()
+            .wrap(Headers)
+            .app_data(application_state.clone())
+            .service(
+                scope("/api/v1")
+                    .service(
+                        scope("/auth")
+                            .service(api::auth::register)
+                            .service(api::auth::delete_me)
+                            .service(api::auth::get_me)
+                            .service(api::auth::invalidate)
+                            .service(api::auth::login)
+                            .service(api::auth::patch_me),
+                    )
+                    .service(
+                        scope("/users")
+                            .service(api::user::paginate)
+                            .service(api::user::get)
+                            .service(api::user::delete)
+                            .service(api::user::patch),
+                    )
+                    .service(
+                        scope("/submitters")
+                            .service(api::demonlist::submitter::get)
+                            .service(api::demonlist::submitter::paginate)
+                            .service(api::demonlist::submitter::patch),
+                    )
+                    .service(
+                        scope("/demons")
+                            .service(api::demonlist::demon::v1::get)
+                            .service(api::demonlist::demon::v1::paginate)
+                            .service(api::demonlist::demon::v1::patch)
+                            .service(api::demonlist::demon::v1::delete_creator)
+                            .service(api::demonlist::demon::v1::post_creator)
+                            .service(api::demonlist::demon::post),
+                    )
+                    .service(
+                        scope("/records")
+                            .service(api::demonlist::record::delete)
+                            .service(api::demonlist::record::get)
+                            .service(api::demonlist::record::paginate)
+                            .service(api::demonlist::record::patch)
+                            .service(api::demonlist::record::submit),
+                    ),
+            )
+            .service(
+                scope("/api/v2").service(
+                    scope("/demons")
+                        .service(api::demonlist::demon::v2::get)
+                        .service(api::demonlist::demon::v2::paginate)
+                        .service(api::demonlist::demon::v2::patch)
+                        .service(api::demonlist::demon::v2::delete_creator)
+                        .service(api::demonlist::demon::v2::post_creator)
+                        .service(api::demonlist::demon::post),
                 ),
-        )
+            )
     })
     .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?
     .run()
