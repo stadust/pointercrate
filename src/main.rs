@@ -122,8 +122,8 @@ async fn main() -> std::io::Result<()> {
                         scope("/players")
                             .service(player::patch)
                             .service(player::paginate)
-                            .service(player::get)
-                            .service(player::ranking),
+                            .service(player::ranking)
+                            .service(player::get),
                     ),
             )
             .service(

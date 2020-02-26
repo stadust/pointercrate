@@ -10,14 +10,14 @@ use crate::{
     ApiResult,
 };
 use actix_web::{
-    web::{Json, Path},
+    web::{Json, Path, Query},
     HttpResponse,
 };
 use actix_web_codegen::{get, patch};
 
 #[get("/")]
 pub async fn paginate(
-    TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Json<PlayerPagination>,
+    TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Query<PlayerPagination>,
 ) -> ApiResult<HttpResponse> {
     user.inner().require_permissions(Permissions::ExtendedAccess)?;
     let mut connection = state.connection().await?;
@@ -29,7 +29,7 @@ pub async fn paginate(
 }
 
 #[get("/ranking/")]
-pub async fn ranking(state: PointercrateState, mut pagination: Json<RankingPagination>) -> ApiResult<HttpResponse> {
+pub async fn ranking(state: PointercrateState, mut pagination: Query<RankingPagination>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     let demons = pagination.page(&mut connection).await?;
