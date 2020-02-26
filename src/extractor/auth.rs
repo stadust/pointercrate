@@ -1,9 +1,10 @@
 //! FromRequest implementations that perform authorization
 
 use crate::{
-    error::PointercrateError,
+    error::{JsonError, PointercrateError},
     model::user::{AuthenticatedUser, Authorization},
     state::PointercrateState,
+    util::header,
 };
 use actix_web::{
     dev::{Payload, PayloadStream},
@@ -24,7 +25,7 @@ pub struct BasicAuth(pub AuthenticatedUser);
 
 impl FromRequest for TokenAuth {
     type Config = ();
-    type Error = PointercrateError;
+    type Error = JsonError;
     type Future = Either<Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>, Ready<Result<Self, Self::Error>>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut Payload<PayloadStream>) -> Self::Future {
@@ -33,12 +34,12 @@ impl FromRequest for TokenAuth {
         if state.secret.is_empty() {
             error!("No application secret set-up, rejecting all authentication token authentications");
 
-            return Either::Right(err(PointercrateError::Unauthorized))
+            return Either::Right(err(PointercrateError::Unauthorized.into()))
         }
 
         let auth = match process_authorization_header(&req) {
             Ok(auth) => auth,
-            Err(error) => return Either::Right(err(error)),
+            Err(error) => return Either::Right(err(error.into())),
         };
 
         Either::Left(Box::pin(async move {
@@ -53,7 +54,7 @@ impl FromRequest for TokenAuth {
 
 impl FromRequest for BasicAuth {
     type Config = ();
-    type Error = PointercrateError;
+    type Error = JsonError;
     type Future = Either<Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>, Ready<Result<Self, Self::Error>>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut Payload<PayloadStream>) -> Self::Future {
@@ -61,7 +62,7 @@ impl FromRequest for BasicAuth {
 
         let auth = match process_authorization_header(&req) {
             Ok(auth) => auth,
-            Err(error) => return Either::Right(err(error)),
+            Err(error) => return Either::Right(err(error.into())),
         };
 
         Either::Left(Box::pin(async move {
@@ -74,16 +75,16 @@ impl FromRequest for BasicAuth {
 
 impl FromRequest for Authorization {
     type Config = ();
-    type Error = PointercrateError;
+    type Error = JsonError;
     type Future = Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
-        ready(process_authorization_header(req))
+        ready(process_authorization_header(req).map_err(JsonError))
     }
 }
 
 fn process_authorization_header(request: &HttpRequest) -> Result<Authorization, PointercrateError> {
-    if let Some(auth) = header!(request, "Authorization") {
+    if let Some(auth) = header(request.headers(), "Authorization")? {
         let parts = auth.split(' ').collect::<Vec<_>>();
 
         match &parts[..] {
@@ -145,7 +146,7 @@ fn process_authorization_header(request: &HttpRequest) -> Result<Authorization, 
                 // header set, unless we're in GET requests, in which case everything is fine
                 // :tm:
 
-                match header!(request, "X-CSRF-TOKEN") {
+                match header(request.headers(), "X-CSRF-TOKEN")? {
                     Some(csrf_token) =>
                         Ok(Authorization::Token {
                             access_token: token.to_string(),

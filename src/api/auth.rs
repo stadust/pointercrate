@@ -5,10 +5,10 @@ use crate::{
         auth::{BasicAuth, TokenAuth},
         if_match::IfMatch,
     },
-    middleware::headers::HttpResponseBuilderExt,
     model::user::{AuthenticatedUser, Authorization, PatchMe, Registration},
     state::PointercrateState,
-    Result,
+    util::HttpResponseBuilderExt,
+    ApiResult,
 };
 use actix_web::{
     web::{Data, Json},
@@ -18,7 +18,7 @@ use actix_web_codegen::{delete, get, patch, post};
 use serde_json::json;
 
 #[post("/register/")]
-pub async fn register(body: Json<Registration>, state: PointercrateState) -> Result<HttpResponse> {
+pub async fn register(body: Json<Registration>, state: PointercrateState) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
     let user = AuthenticatedUser::register(body.into_inner(), &mut connection).await?;
 
@@ -28,7 +28,7 @@ pub async fn register(body: Json<Registration>, state: PointercrateState) -> Res
 }
 
 #[post("/")]
-pub async fn login(user: BasicAuth, state: PointercrateState) -> Result<HttpResponse> {
+pub async fn login(user: BasicAuth, state: PointercrateState) -> ApiResult<HttpResponse> {
     Ok(HttpResponse::Ok().etag(user.0.inner()).json(json! {{
         "data": user.0.inner(),
         "token": user.0.generate_token(&state.secret)
@@ -36,14 +36,14 @@ pub async fn login(user: BasicAuth, state: PointercrateState) -> Result<HttpResp
 }
 
 #[post("/invalidate/")]
-pub async fn invalidate(authorization: Authorization, state: PointercrateState) -> Result<HttpResponse> {
+pub async fn invalidate(authorization: Authorization, state: PointercrateState) -> ApiResult<HttpResponse> {
     AuthenticatedUser::invalidate_all_tokens(authorization, &mut *state.connection().await?).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
 
 #[get("/me/")]
-pub async fn get_me(user: TokenAuth) -> Result<HttpResponse> {
+pub async fn get_me(user: TokenAuth) -> ApiResult<HttpResponse> {
     Ok(HttpResponse::Ok().json_with_etag(user.0.inner()))
 }
 
@@ -51,7 +51,7 @@ pub async fn get_me(user: TokenAuth) -> Result<HttpResponse> {
 #[patch("/me/")]
 pub async fn patch_me(
     if_match: IfMatch, BasicAuth(user): BasicAuth, state: PointercrateState, patch: Json<PatchMe>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user).await?;
 
     if_match.require_etag_match(user.inner())?;
@@ -65,7 +65,7 @@ pub async fn patch_me(
 
 // FIXME: Prevent "Lost Update" by using SELECT ... FOR UPDATE
 #[delete("/me/")]
-pub async fn delete_me(if_match: IfMatch, BasicAuth(user): BasicAuth, state: PointercrateState) -> Result<HttpResponse> {
+pub async fn delete_me(if_match: IfMatch, BasicAuth(user): BasicAuth, state: PointercrateState) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user).await?;
 
     if_match.require_etag_match(user.inner())?;

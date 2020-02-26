@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, Result};
+use crate::error::{JsonError, PointercrateError};
 use actix_web::{
     dev::{Payload, PayloadStream},
     error::PayloadError,
@@ -16,8 +16,8 @@ pub struct Ip(pub IpAddr);
 
 impl FromRequest for Ip {
     type Config = ();
-    type Error = PointercrateError;
-    type Future = Ready<Result<Ip>>;
+    type Error = JsonError;
+    type Future = Ready<Result<Ip, JsonError>>;
 
     fn from_request(request: &HttpRequest, _payload: &mut Payload<PayloadStream>) -> Self::Future {
         if let Some(sockaddr) = request.peer_addr() {
@@ -28,11 +28,11 @@ impl FromRequest for Ip {
                         ready(
                             value
                                 .to_str()
-                                .map_err(|_| PointercrateError::InvalidHeaderValue { header: "X-FORWARDED-FOR" })
+                                .map_err(|_| PointercrateError::InvalidHeaderValue { header: "X-FORWARDED-FOR" }.into())
                                 .and_then(|forwarded_for| {
                                     forwarded_for
                                         .parse()
-                                        .map_err(|_| PointercrateError::InvalidHeaderValue { header: "X-FORWARDED-FOR" })
+                                        .map_err(|_| PointercrateError::InvalidHeaderValue { header: "X-FORWARDED-FOR" }.into())
                                 })
                                 .map(Ip),
                         ),

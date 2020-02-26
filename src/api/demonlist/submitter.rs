@@ -1,13 +1,13 @@
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    middleware::headers::HttpResponseBuilderExt,
     model::{
         demonlist::submitter::{FullSubmitter, PatchSubmitter, Submitter, SubmitterPagination},
         user::AuthenticatedUser,
     },
     permissions::Permissions,
     state::PointercrateState,
-    Result,
+    util::HttpResponseBuilderExt,
+    ApiResult,
 };
 use actix_web::{
     web::{Data, Json, Path, Query},
@@ -18,7 +18,7 @@ use actix_web_codegen::{get, patch};
 #[get("/")]
 pub async fn paginate(
     TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Query<SubmitterPagination>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     user.inner().require_permissions(Permissions::ListAdministrator)?;
@@ -31,7 +31,7 @@ pub async fn paginate(
 }
 
 #[get("/{submitter_id}/")]
-pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     user.inner().require_permissions(Permissions::ListModerator)?;
@@ -44,7 +44,7 @@ pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter
 #[patch("/{submitter_id}/")]
 pub async fn patch(
     if_match: IfMatch, TokenAuth(user): TokenAuth, state: PointercrateState, submitter_id: Path<i32>, patch: Json<PatchSubmitter>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     user.inner().require_permissions(Permissions::ListModerator)?;

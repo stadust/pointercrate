@@ -1,9 +1,18 @@
 #![feature(proc_macro_hygiene)]
 // TODO: set up lint denys
 
-use crate::{error::PointercrateError, middleware::headers::Headers, model::user::UserPagination, state::PointercrateState};
+use crate::{
+    error::{HtmlError, JsonError, PointercrateError},
+    middleware::etag::Etag,
+    model::user::UserPagination,
+    state::PointercrateState,
+};
 use actix_files::Files;
-use actix_web::{middleware::Logger, web::scope, App, HttpServer};
+use actix_web::{
+    middleware::Logger,
+    web::{scope, JsonConfig, PathConfig, QueryConfig},
+    App, HttpServer,
+};
 use api::{
     auth,
     demonlist::{demon, misc, player, record, submitter},
@@ -30,6 +39,9 @@ mod view;
 
 pub type Result<T> = std::result::Result<T, PointercrateError>;
 
+pub type ApiResult<T> = std::result::Result<T, JsonError>;
+pub type ViewResult<T> = std::result::Result<T, HtmlError>;
+
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
@@ -37,13 +49,21 @@ async fn main() -> std::io::Result<()> {
 
     let application_state = PointercrateState::initialize().await;
 
-    // TODO: error handler
-    // TODO: json config
     // TODO: 404 and 405 handling
 
     HttpServer::new(move || {
+        let json_config =
+            JsonConfig::default().error_handler(|error, request| PointercrateError::from(error).dynamic(request.headers()).into());
+        let path_config =
+            PathConfig::default().error_handler(|error, request| PointercrateError::from(error).dynamic(request.headers()).into());
+        let query_config =
+            QueryConfig::default().error_handler(|error, request| PointercrateError::from(error).dynamic(request.headers()).into());
+
         App::new()
-            .wrap(Headers)
+            .app_data(json_config)
+            .app_data(path_config)
+            .app_data(query_config)
+            .wrap(Etag)
             .wrap(Logger::default())
             .app_data(application_state.clone())
             .service(Files::new("/static2", "./static2").use_etag(true))

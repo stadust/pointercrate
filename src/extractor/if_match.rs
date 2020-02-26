@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, Result};
+use crate::error::{JsonError, PointercrateError};
 use actix_web::{
     dev::{Payload, PayloadStream},
     error::PayloadError,
@@ -20,7 +20,7 @@ use std::{
 pub struct IfMatch(Vec<u64>);
 
 impl IfMatch {
-    pub fn require_etag_match<H: Hash>(&self, h: &H) -> Result<()> {
+    pub fn require_etag_match<H: Hash>(&self, h: &H) -> Result<(), PointercrateError> {
         let mut hasher = DefaultHasher::new();
         h.hash(&mut hasher);
 
@@ -34,17 +34,17 @@ impl IfMatch {
 
 impl FromRequest for IfMatch {
     type Config = ();
-    type Error = PointercrateError;
-    type Future = Ready<Result<Self>>;
+    type Error = JsonError;
+    type Future = Ready<Result<Self, JsonError>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut Payload<PayloadStream>) -> Self::Future {
         let header = match req.headers().get("If-Match") {
             Some(value) =>
                 match value.to_str() {
                     Ok(value) => value,
-                    Err(_) => return err(PointercrateError::InvalidHeaderValue { header: "If-Match" }),
+                    Err(_) => return err(PointercrateError::InvalidHeaderValue { header: "If-Match" }.into()),
                 },
-            None => return err(PointercrateError::PreconditionRequired),
+            None => return err(PointercrateError::PreconditionRequired.into()),
         };
 
         ready(
@@ -54,8 +54,9 @@ impl FromRequest for IfMatch {
                     hash.parse()
                         .map_err(|_| PointercrateError::InvalidHeaderValue { header: "If-Match" })
                 })
-                .collect::<Result<_>>()
-                .map(IfMatch),
+                .collect::<Result<_, _>>()
+                .map(IfMatch)
+                .map_err(JsonError),
         )
     }
 }

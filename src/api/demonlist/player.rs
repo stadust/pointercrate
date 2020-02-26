@@ -1,13 +1,13 @@
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    middleware::headers::HttpResponseBuilderExt,
     model::demonlist::{
         player::{FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination},
         record::FullRecord,
     },
     permissions::Permissions,
     state::PointercrateState,
-    Result,
+    util::HttpResponseBuilderExt,
+    ApiResult,
 };
 use actix_web::{
     web::{Json, Path},
@@ -18,7 +18,7 @@ use actix_web_codegen::{get, patch};
 #[get("/")]
 pub async fn paginate(
     TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Json<PlayerPagination>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     user.inner().require_permissions(Permissions::ExtendedAccess)?;
     let mut connection = state.connection().await?;
 
@@ -29,7 +29,7 @@ pub async fn paginate(
 }
 
 #[get("/ranking/")]
-pub async fn ranking(state: PointercrateState, mut pagination: Json<RankingPagination>) -> Result<HttpResponse> {
+pub async fn ranking(state: PointercrateState, mut pagination: Json<RankingPagination>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     let demons = pagination.page(&mut connection).await?;
@@ -39,7 +39,7 @@ pub async fn ranking(state: PointercrateState, mut pagination: Json<RankingPagin
 }
 
 #[get("/{player_id}/")]
-pub async fn get(state: PointercrateState, path: Path<i32>) -> Result<HttpResponse> {
+pub async fn get(state: PointercrateState, path: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     let player = Player::by_id(path.into_inner(), &mut connection)
@@ -53,7 +53,7 @@ pub async fn get(state: PointercrateState, path: Path<i32>) -> Result<HttpRespon
 #[patch("/{player_id}/")]
 pub async fn patch(
     TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, data: Json<PatchPlayer>, path: Path<i32>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     user.inner().require_permissions(Permissions::ListModerator)?;
 
     let mut connection = state.audited_transaction(&user).await?;

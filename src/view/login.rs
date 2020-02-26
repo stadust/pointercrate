@@ -1,8 +1,9 @@
 use super::Page;
 use crate::{
+    error::{HtmlError, JsonError},
     extractor::auth::{BasicAuth, TokenAuth},
     state::PointercrateState,
-    Result,
+    ApiResult, Result, ViewResult,
 };
 use actix_web::{cookie::SameSite, http::Cookie, HttpRequest, HttpResponse, Responder};
 use actix_web_codegen::{get, post};
@@ -13,7 +14,7 @@ use maud::{html, Markup};
 pub struct LoginPage;
 
 #[get("/login/")]
-pub fn index(user: Result<TokenAuth>) -> HttpResponse {
+pub fn index(user: ApiResult<TokenAuth>) -> HttpResponse {
     match user {
         Ok(user) => HttpResponse::Found().header("Location", "/account/").finish(),
         _ =>
@@ -26,7 +27,14 @@ pub fn index(user: Result<TokenAuth>) -> HttpResponse {
 /// Alternate login handler for the web interface. Unlike the one in the api, it doesn't return your
 /// token, but puts it into a secure, http-only cookie
 #[post("/login/")]
-pub fn post(BasicAuth(user): BasicAuth, state: PointercrateState) -> HttpResponse {
+pub async fn post(auth: ApiResult<BasicAuth>, state: PointercrateState) -> ViewResult<HttpResponse> {
+    // we have to explicitly take the Result here and transform it into a ViewResult so that we get a
+    // Html error page >.>
+    let user = match auth {
+        Ok(BasicAuth(user)) => user,
+        Err(JsonError(error)) => return Err(HtmlError(error)),
+    };
+
     info!("POST /login/");
 
     let mut cookie = Cookie::build("access_token", user.generate_token(&state.secret))
@@ -40,7 +48,7 @@ pub fn post(BasicAuth(user): BasicAuth, state: PointercrateState) -> HttpRespons
         cookie = cookie.secure(true)
     }
 
-    HttpResponse::NoContent().cookie(cookie.finish()).finish()
+    Ok(HttpResponse::NoContent().cookie(cookie.finish()).finish())
 }
 
 impl Page for LoginPage {

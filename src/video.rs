@@ -18,7 +18,11 @@ const YOUTUBE_CHANNEL_FORMAT: &str =
     "'youtube.com/channel/{channel_id}' or'youtube.com/c/{custom_channel_id}/' or'youtube.com/user/{username}/";
 
 pub fn validate_channel(url: &str) -> Result<String> {
-    let url = Url::parse(url).map_err(|_| PointercrateError::bad_request("Malformed channel URL"))?;
+    let url = Url::parse(url).map_err(|_| {
+        PointercrateError::BadRequest {
+            message: "Malformed channel URL".to_owned(),
+        }
+    })?;
 
     if !SCHEMES.contains(&url.scheme()) {
         return Err(PointercrateError::InvalidUrlScheme)
@@ -52,7 +56,11 @@ pub fn validate_channel(url: &str) -> Result<String> {
 }
 
 pub fn validate(url: &str) -> Result<String> {
-    let url = Url::parse(url).map_err(|_| PointercrateError::bad_request("Malformed video URL"))?;
+    let url = Url::parse(url).map_err(|_| {
+        PointercrateError::BadRequest {
+            message: "Malformed video URL".to_owned(),
+        }
+    })?;
 
     if !SCHEMES.contains(&url.scheme()) {
         return Err(PointercrateError::InvalidUrlScheme)

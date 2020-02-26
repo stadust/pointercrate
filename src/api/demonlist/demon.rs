@@ -1,16 +1,16 @@
 use crate::{
     extractor::auth::TokenAuth,
-    middleware::headers::HttpResponseBuilderExt,
     model::demonlist::demon::{FullDemon, PostDemon},
     permissions::Permissions,
     state::PointercrateState,
-    Result,
+    util::HttpResponseBuilderExt,
+    ApiResult,
 };
 use actix_web::{web::Json, HttpResponse};
 use actix_web_codegen::post;
 
 #[post("/")]
-pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Json<PostDemon>) -> Result<HttpResponse> {
+pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Json<PostDemon>) -> ApiResult<HttpResponse> {
     user.inner().require_permissions(Permissions::ListModerator)?;
 
     let mut connection = state.audited_transaction(&user).await?;
@@ -24,7 +24,6 @@ pub mod v1 {
     use crate::{
         cistring::CiString,
         extractor::{auth::TokenAuth, if_match::IfMatch},
-        middleware::headers::HttpResponseBuilderExt,
         model::{
             demonlist::{
                 creator::{Creator, PostCreator},
@@ -35,7 +34,8 @@ pub mod v1 {
         },
         permissions::Permissions,
         state::PointercrateState,
-        Result,
+        util::HttpResponseBuilderExt,
+        ApiResult,
     };
     use actix_web::{
         web::{Data, Json, Path, Query},
@@ -44,7 +44,7 @@ pub mod v1 {
     use actix_web_codegen::{delete, get, patch, post};
 
     #[get("/")]
-    pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> Result<HttpResponse> {
+    pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
         let demons = pagination.page(&mut connection).await?;
@@ -54,7 +54,7 @@ pub mod v1 {
     }
 
     #[get("/{position}/")]
-    pub async fn get(state: PointercrateState, position: Path<i16>) -> Result<HttpResponse> {
+    pub async fn get(state: PointercrateState, position: Path<i16>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
         let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
@@ -65,7 +65,7 @@ pub mod v1 {
     #[patch("/{position}/")]
     pub async fn patch(
         TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, patch: Json<PatchDemon>, position: Path<i16>,
-    ) -> Result<HttpResponse> {
+    ) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
@@ -83,7 +83,7 @@ pub mod v1 {
     #[post("/{position}/creators/")]
     pub async fn post_creator(
         TokenAuth(user): TokenAuth, state: PointercrateState, position: Path<i16>, creator: Json<PostCreator>,
-    ) -> Result<HttpResponse> {
+    ) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
@@ -102,7 +102,7 @@ pub mod v1 {
     }
 
     #[delete("/{position}/creators/{player_id}/")]
-    pub async fn delete_creator(TokenAuth(user): TokenAuth, state: PointercrateState, path: Path<(i16, i32)>) -> Result<HttpResponse> {
+    pub async fn delete_creator(TokenAuth(user): TokenAuth, state: PointercrateState, path: Path<(i16, i32)>) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
@@ -125,7 +125,6 @@ pub mod v2 {
     use crate::{
         cistring::CiString,
         extractor::{auth::TokenAuth, if_match::IfMatch},
-        middleware::headers::HttpResponseBuilderExt,
         model::{
             demonlist::{
                 creator::{Creator, PostCreator},
@@ -136,7 +135,8 @@ pub mod v2 {
         },
         permissions::Permissions,
         state::PointercrateState,
-        Result,
+        util::HttpResponseBuilderExt,
+        ApiResult,
     };
     use actix_web::{
         web::{Data, Json, Path, Query},
@@ -145,7 +145,7 @@ pub mod v2 {
     use actix_web_codegen::{delete, get, patch, post};
 
     #[get("/")]
-    pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonIdPagination>) -> Result<HttpResponse> {
+    pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonIdPagination>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
         let demons = pagination.page(&mut connection).await?;
@@ -156,7 +156,7 @@ pub mod v2 {
 
     // Same as /api/v1/demons/
     #[get("/listed/")]
-    pub async fn paginate_listed(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> Result<HttpResponse> {
+    pub async fn paginate_listed(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
         let demons = pagination.page(&mut connection).await?;
@@ -166,7 +166,7 @@ pub mod v2 {
     }
 
     #[get("/{demon_id}/")]
-    pub async fn get(state: PointercrateState, id: Path<i32>) -> Result<HttpResponse> {
+    pub async fn get(state: PointercrateState, id: Path<i32>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
         let demon = FullDemon::by_id(id.into_inner(), &mut connection).await?;
@@ -177,7 +177,7 @@ pub mod v2 {
     #[patch("/{demon_id}/")]
     pub async fn patch(
         TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, patch: Json<PatchDemon>, id: Path<i32>,
-    ) -> Result<HttpResponse> {
+    ) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
@@ -195,7 +195,7 @@ pub mod v2 {
     #[post("/{demon_id}/creators/")]
     pub async fn post_creator(
         TokenAuth(user): TokenAuth, state: PointercrateState, id: Path<i32>, creator: Json<PostCreator>,
-    ) -> Result<HttpResponse> {
+    ) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
@@ -214,7 +214,7 @@ pub mod v2 {
     }
 
     #[delete("/{demon_id}/creators/{player_id}/")]
-    pub async fn delete_creator(TokenAuth(user): TokenAuth, state: PointercrateState, path: Path<(i32, i32)>) -> Result<HttpResponse> {
+    pub async fn delete_creator(TokenAuth(user): TokenAuth, state: PointercrateState, path: Path<(i32, i32)>) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;

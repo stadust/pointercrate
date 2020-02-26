@@ -1,7 +1,7 @@
 use super::Page;
 use crate::{
     compat, config,
-    error::PointercrateError,
+    error::{HtmlError, PointercrateError},
     model::{
         demonlist::demon::{Demon, FullDemon},
         nationality::Nationality,
@@ -9,7 +9,7 @@ use crate::{
     },
     permissions::Permissions,
     state::PointercrateState,
-    video, Result,
+    video, Result, ViewResult,
 };
 use actix_web::{web::Path, FromRequest, HttpRequest, HttpResponse, Responder};
 use actix_web_codegen::get;
@@ -100,7 +100,7 @@ impl DemonlistOverview {
 }
 
 #[get("/demonlist/")]
-pub async fn index(state: PointercrateState) -> Result<HttpResponse> {
+pub async fn index(state: PointercrateState) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     Ok(HttpResponse::Ok()
@@ -236,7 +236,7 @@ pub struct Demonlist {
 }
 
 #[get("/demonlist/{position}/")]
-pub async fn demon_page(state: PointercrateState, position: Path<i16>) -> Result<HttpResponse> {
+pub async fn demon_page(state: PointercrateState, position: Path<i16>) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
     let overview = DemonlistOverview::load(&mut connection).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;

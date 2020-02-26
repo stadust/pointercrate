@@ -1,6 +1,6 @@
 use crate::{
+    error::PointercrateError,
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
-    middleware::headers::HttpResponseBuilderExt,
     model::{
         demonlist::{
             record::{FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission},
@@ -11,7 +11,8 @@ use crate::{
     permissions::Permissions,
     ratelimit::RatelimitScope,
     state::{audit_connection, PointercrateState},
-    Result,
+    util::HttpResponseBuilderExt,
+    ApiResult,
 };
 use actix_web::{
     web::{Data, Json, Path, Query},
@@ -20,7 +21,9 @@ use actix_web::{
 use actix_web_codegen::{delete, get, patch, post};
 
 #[get("/")]
-pub async fn paginate(user: Result<TokenAuth>, state: PointercrateState, mut pagination: Query<RecordPagination>) -> Result<HttpResponse> {
+pub async fn paginate(
+    user: ApiResult<TokenAuth>, state: PointercrateState, mut pagination: Query<RecordPagination>,
+) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     // Non authenticated access and access by users without ExtendedAccess perms cannot see non-approved
@@ -47,7 +50,9 @@ pub async fn paginate(user: Result<TokenAuth>, state: PointercrateState, mut pag
 }
 
 #[post("/")]
-pub async fn submit(Ip(ip): Ip, user: Result<TokenAuth>, submission: Json<Submission>, state: PointercrateState) -> Result<HttpResponse> {
+pub async fn submit(
+    Ip(ip): Ip, user: ApiResult<TokenAuth>, submission: Json<Submission>, state: PointercrateState,
+) -> ApiResult<HttpResponse> {
     let mut connection = state.transaction().await?;
 
     // NOTE: don't abort if authentication fails! We might not need it!
@@ -84,7 +89,7 @@ pub async fn submit(Ip(ip): Ip, user: Result<TokenAuth>, submission: Json<Submis
 }
 
 #[get("/{record_id}/")]
-pub async fn get(user: Result<TokenAuth>, state: PointercrateState, record_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn get(user: ApiResult<TokenAuth>, state: PointercrateState, record_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
     let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
@@ -98,7 +103,7 @@ pub async fn get(user: Result<TokenAuth>, state: PointercrateState, record_id: P
 #[patch("/{record_id}/")]
 pub async fn patch(
     TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>, data: Json<PatchRecord>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     let mut connection = state.transaction().await?;
 
     user.inner().require_permissions(Permissions::ListHelper)?;
@@ -116,7 +121,9 @@ pub async fn patch(
 }
 
 #[delete("/{record_id}/")]
-pub async fn delete(TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn delete(
+    TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>,
+) -> ApiResult<HttpResponse> {
     let mut connection = state.transaction().await?;
 
     user.inner().require_permissions(Permissions::ListAdministrator)?;

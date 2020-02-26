@@ -4,11 +4,15 @@ use crate::{
     model::demonlist::{demon::MinimalDemon, record::RecordStatus},
     permissions::Permissions,
     ratelimit::RatelimitScope,
+    util::preferred_mime_type,
+    view::{error::ErrorPage, Page},
 };
 use actix_web::{
-    error::JsonPayloadError,
-    http::{Method, StatusCode},
-    HttpResponse, ResponseError,
+    body::Body,
+    dev::RequestHead,
+    error::{JsonPayloadError, PathError, QueryPayloadError},
+    http::{HeaderMap, Method, StatusCode},
+    HttpRequest, HttpResponse, ResponseError,
 };
 use derive_more::Display;
 use log::error;
@@ -20,9 +24,25 @@ use serde_json::json;
 use sqlx::Error;
 use std::time::Duration;
 
+// TODO: proper name
+#[derive(Display, Debug)]
+pub enum DynamicError {
+    Json(JsonError),
+    Html(HtmlError),
+}
+
+/// PointercrateError wrapper whose [`ResponseError`] impl generates a JSON response
+#[derive(Display, Debug)]
+pub struct HtmlError(pub PointercrateError);
+
+/// PointercrateError wrapper whose [`ResponseError`] impl generates a HTML response
+#[derive(Display, Debug, Serialize)]
+#[serde(transparent)]
+pub struct JsonError(pub PointercrateError);
+
 impl std::error::Error for PointercrateError {}
 
-#[derive(Debug, Display, Serialize)]
+#[derive(Debug, Display, Serialize, Clone)]
 #[serde(untagged)]
 pub enum PointercrateError {
     /// Generic `400 BAD REQUEST` error
@@ -43,7 +63,7 @@ pub enum PointercrateError {
     /// `400 BAD REQUEST' error returned when a header value was malformed
     ///
     /// Error Code `40002`
-    #[display(fmt = "The value for the header {} could not be processed", header)]
+    #[display(fmt = "The value for the header '{}' could not be processed", header)]
     InvalidHeaderValue {
         /// The name of the malformed header
         header: &'static str,
@@ -387,6 +407,17 @@ pub enum PointercrateError {
     /// Error Code `50005`
     #[display(fmt = "Failed to retrieve connection to the database. The server might be temporarily overloaded.")]
     DatabaseConnectionError,
+
+    /// An error occured outside of pointercrate's application code (maybe during actix request
+    /// handling or similar) and the error wasn't explicitly mapped to one of the other variants
+    #[display(fmt = "{}", message)]
+    Other {
+        #[serde(skip)]
+        status: StatusCode,
+
+        #[serde(skip)]
+        message: String,
+    },
 }
 
 fn serialize_method<S>(methods: &[Method], serializer: S) -> Result<S::Ok, S::Error>
@@ -401,30 +432,6 @@ where
 }
 
 impl PointercrateError {
-    pub fn database<E: std::error::Error>(error: E) -> PointercrateError {
-        error!("Error while accessing database: {0}\t\tDebug output: {0:?}", error);
-
-        PointercrateError::DatabaseError
-    }
-
-    pub fn internal<E: std::error::Error>(error: E) -> PointercrateError {
-        error!("Internal server error: {0}!\t\tDebug output: {0:?}", error);
-
-        PointercrateError::InternalServerError
-    }
-
-    pub fn invalid_state(message: &'static str) -> PointercrateError {
-        error!("Internal server error: {}!", message);
-
-        PointercrateError::InvalidInternalStateError { cause: message }
-    }
-
-    pub fn bad_request(message: &str) -> PointercrateError {
-        PointercrateError::BadRequest {
-            message: message.to_string(),
-        }
-    }
-
     pub fn error_code(&self) -> u16 {
         match self {
             PointercrateError::GenericBadRequest => 40000,
@@ -486,30 +493,110 @@ impl PointercrateError {
             PointercrateError::Ambiguous => 50002,
             PointercrateError::DatabaseError => 50003,
             PointercrateError::DatabaseConnectionError => 50005,
+
+            PointercrateError::Other { status, .. } => status.as_u16() * 100,
         }
     }
-}
 
-impl ResponseError for PointercrateError {
-    fn status_code(&self) -> StatusCode {
+    pub fn status_code(&self) -> StatusCode {
         let error_code = self.error_code();
         let status_code = error_code / 100;
 
         StatusCode::from_u16(status_code).unwrap()
     }
 
+    pub fn dynamic(self, request: &HeaderMap) -> DynamicError {
+        let preferred = match preferred_mime_type(request) {
+            Ok(pref) => pref,
+            Err(error) => {
+                // So being here means that the Accept header failed to parse.
+                // We are going to assume that browsers set the headers correctly and that this an
+                // API request. We therefore send out a json response.
+
+                return DynamicError::Json(JsonError(self))
+            },
+        };
+
+        match (preferred.type_(), preferred.subtype()) {
+            (mime::TEXT, mime::HTML) => DynamicError::Html(HtmlError(self)),
+            (mime::APPLICATION, mime::JSON) => DynamicError::Json(JsonError(self)),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<Error> for JsonError {
+    fn from(error: Error) -> Self {
+        JsonError::from(PointercrateError::from(error))
+    }
+}
+
+impl From<Error> for HtmlError {
+    fn from(error: Error) -> Self {
+        HtmlError::from(PointercrateError::from(error))
+    }
+}
+
+impl From<PointercrateError> for JsonError {
+    fn from(error: PointercrateError) -> Self {
+        JsonError(error)
+    }
+}
+
+impl From<PointercrateError> for HtmlError {
+    fn from(error: PointercrateError) -> Self {
+        HtmlError(error)
+    }
+}
+
+impl ResponseError for DynamicError {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            DynamicError::Json(inner) => inner.status_code(),
+            DynamicError::Html(inner) => inner.status_code(),
+        }
+    }
+
+    fn error_response(&self) -> HttpResponse {
+        match self {
+            DynamicError::Json(inner) => inner.error_response(),
+            DynamicError::Html(inner) => inner.error_response(),
+        }
+    }
+}
+
+impl ResponseError for JsonError {
+    fn status_code(&self) -> StatusCode {
+        self.0.status_code()
+    }
+
     fn error_response(&self) -> HttpResponse {
         let mut response = HttpResponse::build(self.status_code());
 
-        if let PointercrateError::MethodNotAllowed { allowed_methods } = self {
-            // response.header("Allow", allowed_methods.join(",")); TODO: reimpl
+        if let PointercrateError::MethodNotAllowed { allowed_methods } = &self.0 {
+            response.header("Allow", allowed_methods.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(","));
         }
 
         response.json(json!({
-            "code": self.error_code(),
-            "message": self.to_string(),
+            "code": self.0.error_code(),
+            "message": self.0.to_string(),
             "data": self
         }))
+    }
+}
+
+impl ResponseError for HtmlError {
+    fn status_code(&self) -> StatusCode {
+        self.0.status_code()
+    }
+
+    fn error_response(&self) -> HttpResponse {
+        let html = ErrorPage::new(&self.0).render();
+
+        HttpResponse::Ok()
+            .content_type("text/html; charset=utf-8")
+            .status(self.status_code())
+            .body(html.0)
     }
 }
 
@@ -525,6 +612,28 @@ impl From<JsonPayloadError> for PointercrateError {
             JsonPayloadError::Deserialize(inner) =>
                 PointercrateError::BadRequest {
                     message: inner.to_string(),
+                },
+        }
+    }
+}
+
+impl From<PathError> for PointercrateError {
+    fn from(path_error: PathError) -> Self {
+        match path_error {
+            PathError::Deserialize(error) =>
+                PointercrateError::BadRequest {
+                    message: error.to_string(),
+                },
+        }
+    }
+}
+
+impl From<QueryPayloadError> for PointercrateError {
+    fn from(query_error: QueryPayloadError) -> Self {
+        match query_error {
+            QueryPayloadError::Deserialize(error) =>
+                PointercrateError::BadRequest {
+                    message: error.to_string(),
                 },
         }
     }
@@ -558,7 +667,11 @@ impl From<Error> for PointercrateError {
                 PointercrateError::InternalServerError
             },
             Error::FoundMoreThanOne => PointercrateError::Ambiguous,
-            _ => PointercrateError::database(error),
+            _ => {
+                error!("Database error: {:?}", error);
+
+                PointercrateError::DatabaseError
+            },
         }
     }
 }

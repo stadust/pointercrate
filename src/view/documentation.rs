@@ -1,5 +1,5 @@
 use super::Page;
-use crate::{error::PointercrateError, state::PointercrateState, Result};
+use crate::{error::PointercrateError, state::PointercrateState, Result, ViewResult};
 use actix_web::{web::Path, HttpRequest, HttpResponse};
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped, Render};
@@ -28,14 +28,14 @@ impl<'a> Documentation<'a> {
 
 // actix complains if these aren't async, although they don't not have to be
 #[get("/documentation/")]
-pub async fn index(state: PointercrateState) -> Result<HttpResponse> {
+pub async fn index(state: PointercrateState) -> ViewResult<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(Documentation::new(&state, "index")?.render().0))
 }
 
 #[get("/documentation/{topic}/")]
-pub async fn topic(state: PointercrateState, topic: Path<String>) -> Result<HttpResponse> {
+pub async fn topic(state: PointercrateState, topic: Path<String>) -> ViewResult<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(Documentation::new(&state, &topic.into_inner())?.render().0))

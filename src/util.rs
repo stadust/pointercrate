@@ -1,7 +1,19 @@
 //! Some utils for pagination and patch
 
-use actix_web::HttpResponse;
-use serde::{de::Error, Deserialize, Deserializer};
+use crate::error::PointercrateError;
+use actix_web::{
+    dev::{HttpResponseBuilder, RequestHead, ServiceRequest},
+    http::HeaderMap,
+    HttpRequest, HttpResponse,
+};
+use log::warn;
+use mime::Mime;
+use serde::{de::Error, Deserialize, Deserializer, Serialize};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+    str::FromStr,
+};
 
 macro_rules! pagination_response {
     ($objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
@@ -49,6 +61,66 @@ macro_rules! pagination_response {
     }};
 }
 
+pub fn header<'a>(request: &'a HeaderMap, header: &'static str) -> Result<Option<&'a str>, PointercrateError> {
+    match request.get(header) {
+        Some(value) =>
+            value
+                .to_str()
+                .map_err(|_| PointercrateError::InvalidHeaderValue { header })
+                .map(Some),
+        None => Ok(None),
+    }
+}
+
+pub fn parse_list_of_header_values<T: FromStr>(request: &HeaderMap, header_: &'static str) -> Result<Vec<T>, PointercrateError>
+where
+    T::Err: std::error::Error,
+{
+    let value = match header(request, header_)? {
+        Some(value) => value,
+        None => return Ok(Vec::new()),
+    };
+
+    value
+        .split(',')
+        .map(|value| value.parse())
+        .collect::<Result<_, _>>()
+        .map_err(|error| {
+            warn!("Malformed '{}' header value in {}: {}", header_, value, error);
+
+            PointercrateError::InvalidHeaderValue { header: header_ }
+        })
+}
+
+pub fn preferred_mime_type(req: &HeaderMap) -> Result<Mime, PointercrateError> {
+    let accepted: Vec<Mime> = parse_list_of_header_values(req, "Accept")?;
+
+    let (preference, mime_type) = accepted
+        .into_iter()
+        .filter(|mime| {
+            match (mime.type_(), mime.subtype()) {
+                (mime::TEXT, mime::HTML) | (mime::APPLICATION, mime::JSON) => true,
+                _ => false,
+            }
+        })
+        .map(|mime| {
+            (
+                mime.get_param("q")
+                    .map(|q| q.as_str().parse::<f32>().unwrap_or(-1.0))
+                    .unwrap_or(1.0),
+                mime,
+            )
+        })
+        .max_by_key(|(q, _)| (q * 100.0) as i32)  // cannot compare floats dammit
+        .unwrap_or((1.0, mime::TEXT_HTML));
+
+    if preference < 0.0 || preference > 1.0 {
+        Err(PointercrateError::InvalidHeaderValue { header: "Accept" })
+    } else {
+        Ok(mime_type)
+    }
+}
+/*
 macro_rules! header {
     ($req:expr, $header:expr) => {
         match $req.headers().get($header) {
@@ -61,7 +133,7 @@ macro_rules! header {
             None => None,
         }
     };
-}
+}*/
 
 #[allow(clippy::option_option)]
 pub fn nullable<'de, T, D>(deserializer: D) -> std::result::Result<Option<Option<T>>, D::Error>
@@ -83,45 +155,19 @@ where
     }
 }
 
-macro_rules! __op {
-    ($table:ident:: $column:ident = $value:expr) => {
-        $table::$column.eq($value)
-    };
-    ($table:ident:: $column:ident < $value:expr) => {
-        $table::$column.lt($value)
-    };
-    ($table:ident:: $column:ident > $value:expr) => {
-        $table::$column.gt($value)
-    };
-    ($table:ident:: $column:ident <= $value:expr) => {
-        $table::$column.le($value)
-    };
-    ($table:ident:: $column:ident >= $value:expr) => {
-        $table::$column.ge($value)
-    };
+pub trait HttpResponseBuilderExt {
+    fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self;
+    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse;
 }
 
-macro_rules! filter {
-    ($query: ident[$($table: ident . $column: ident $op: tt $value: expr),+] limit $limit: expr) => {{
-        let mut conditions = Vec::new();
-        let mut counter = 1;
-        let mut values = Vec::new();
-        $(
-            if let Some(ref value) = $value {
-                conditions.push(concat!(stringify!($table), ".", stringify!($column), stringify!($op), " $").to_string() + &counter.to_string());
-                counter += 1;
-                values.push(value.to_string());
-            }
-        )+
-        $query += &conditions.join(" AND ");
-        $query += &format!("LIMIT ${}", counter);
+impl HttpResponseBuilderExt for HttpResponseBuilder {
+    fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self {
+        let mut hasher = DefaultHasher::new();
+        obj.hash(&mut hasher);
+        self.header("ETag", hasher.finish().to_string())
+    }
 
-        let mut query = sqlx::query(&$query);
-
-        for value in values {
-            query = query.bind(value);
-        }
-
-        query.bind($limit.unwrap_or(50).to_string())
-    }};
+    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse {
+        self.etag(&obj).json(serde_json::json!({ "data": obj }))
+    }
 }

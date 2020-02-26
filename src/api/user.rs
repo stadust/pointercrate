@@ -2,11 +2,11 @@
 
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    middleware::headers::HttpResponseBuilderExt,
     model::user::{AuthenticatedUser, PatchUser, User, UserPagination},
     permissions::Permissions,
     state::PointercrateState,
-    Result,
+    util::HttpResponseBuilderExt,
+    ApiResult,
 };
 use actix_web::{
     web::{Data, Json, Path, Query},
@@ -15,7 +15,7 @@ use actix_web::{
 use actix_web_codegen::{delete, get, patch};
 
 #[get("/")]
-pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination: Query<UserPagination>) -> Result<HttpResponse> {
+pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination: Query<UserPagination>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     user.0.inner().require_permissions(Permissions::Administrator)?;
@@ -28,7 +28,7 @@ pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination:
 }
 
 #[get("/{user_id}/")]
-pub async fn get(user: TokenAuth, state: PointercrateState, user_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn get(user: TokenAuth, state: PointercrateState, user_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     user.0.inner().require_permissions(Permissions::Moderator)?;
@@ -41,7 +41,7 @@ pub async fn get(user: TokenAuth, state: PointercrateState, user_id: Path<i32>) 
 #[patch("/{user_id}/")]
 pub async fn patch(
     if_match: IfMatch, user: TokenAuth, state: PointercrateState, user_id: Path<i32>, data: Json<PatchUser>,
-) -> Result<HttpResponse> {
+) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user.0).await?;
 
     if data.permissions.is_some() {
@@ -63,7 +63,7 @@ pub async fn patch(
 }
 
 #[delete("/{user_id}/")]
-pub async fn delete(if_match: IfMatch, user: TokenAuth, state: PointercrateState, user_id: Path<i32>) -> Result<HttpResponse> {
+pub async fn delete(if_match: IfMatch, user: TokenAuth, state: PointercrateState, user_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user.0).await?;
 
     user.0.inner().require_permissions(Permissions::Administrator)?;

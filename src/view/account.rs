@@ -1,5 +1,5 @@
 use super::Page;
-use crate::{extractor::auth::TokenAuth, model::user::User, permissions::Permissions, state::PointercrateState, Result};
+use crate::{extractor::auth::TokenAuth, model::user::User, permissions::Permissions, state::PointercrateState, ApiResult, Result};
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use actix_web_codegen::get;
 use log::info;
@@ -16,7 +16,7 @@ pub struct AccountPage {
 }
 
 #[get("/account/")]
-pub fn index(user: Result<TokenAuth>, state: PointercrateState) -> HttpResponse {
+pub fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> HttpResponse {
     match user {
         Ok(TokenAuth(user)) => {
             let csrf_token = user.generate_csrf_token(&state.secret);

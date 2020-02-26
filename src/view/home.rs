@@ -1,5 +1,5 @@
 use super::Page;
-use crate::{model::user::User, permissions::Permissions, state::PointercrateState, Result};
+use crate::{model::user::User, permissions::Permissions, state::PointercrateState, Result, ViewResult};
 use actix_web::{HttpRequest, HttpResponse, Responder};
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};
@@ -11,7 +11,7 @@ struct Homepage {
 }
 
 #[get("/")]
-pub async fn index(state: PointercrateState) -> Result<HttpResponse> {
+pub async fn index(state: PointercrateState) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     let demonlist_team = User::by_permission(Permissions::ListAdministrator, &mut connection).await?;
