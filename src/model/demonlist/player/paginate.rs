@@ -100,9 +100,9 @@ pub struct RankingPagination {
 impl RankingPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>> {
         let mut stream = sqlx::query(
-            "SELECT id, name::TEXT, banned, rank, score, index, nation::TEXT, iso_country_code::TEXT FROM players_with_score WHERE (index \
-             < $1 OR $1 IS NULL) AND (index > $2 OR $2 IS NULL) AND (STRPOS(name, $3) > 0 OR $3 is NULL) AND (nation = $4 OR \
-             iso_country_code = $4 OR (nationality IS NULL AND $5) OR ($4 IS NULL AND NOT $5)) ORDER BY id LIMIT $6",
+            "SELECT id, name::TEXT, rank, score, index, nation::TEXT, iso_country_code::TEXT FROM players_with_score WHERE (index < $1 OR \
+             $1 IS NULL) AND (index > $2 OR $2 IS NULL) AND (STRPOS(name, $3) > 0 OR $3 is NULL) AND (nation = $4 OR iso_country_code = \
+             $4 OR (nation IS NULL AND $5) OR ($4 IS NULL AND NOT $5)) ORDER BY rank LIMIT $6",
         )
         .bind(self.before_index)
         .bind(self.after_index)
