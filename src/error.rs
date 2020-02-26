@@ -149,10 +149,10 @@ pub enum PointercrateError {
     ///
     /// Error Code `40500`
     #[display(fmt = "The method is not allowed for the requested URL.")]
-    MethodNotAllowed {
-        #[serde(serialize_with = "serialize_method")]
-        allowed_methods: Vec<Method>,
-    },
+    MethodNotAllowed, /* {
+                          #[serde(serialize_with = "serialize_method")]
+                          allowed_methods: Vec<Method>,
+                      }*/
 
     /// `409 CONFLICT`. This variant is returned if a `DELETE` or `PATCH` request is being handled,
     /// but the database transaction the operation is being performed in get rolled back due to a
@@ -573,9 +573,10 @@ impl ResponseError for JsonError {
     fn error_response(&self) -> HttpResponse {
         let mut response = HttpResponse::build(self.status_code());
 
-        if let PointercrateError::MethodNotAllowed { allowed_methods } = &self.0 {
+        // FIXME: reimplement I guess
+        /*if let PointercrateError::MethodNotAllowed { allowed_methods } = &self.0 {
             response.header("Allow", allowed_methods.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(","));
-        }
+        }*/
 
         response.json(json!({
             "code": self.0.error_code(),

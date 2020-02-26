@@ -9,8 +9,8 @@ use crate::{
 };
 use actix_files::Files;
 use actix_web::{
-    middleware::Logger,
-    web::{scope, JsonConfig, PathConfig, QueryConfig},
+    middleware::{Logger, NormalizePath},
+    web::{route, scope, JsonConfig, PathConfig, QueryConfig},
     App, HttpServer,
 };
 use api::{
@@ -65,6 +65,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(query_config)
             .wrap(Etag)
             .wrap(Logger::default())
+            .wrap(NormalizePath::default())
             .app_data(application_state.clone())
             .service(Files::new("/static2", "./static2").use_etag(true))
             .service(view::home::index)
@@ -137,6 +138,7 @@ async fn main() -> std::io::Result<()> {
                         .service(demon::post),
                 ),
             )
+            .default_service(route().to(api::handle_404_or_405))
     })
     .bind(SocketAddr::from(([127, 0, 0, 1], config::port())))?
     .run()
