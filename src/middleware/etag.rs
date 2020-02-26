@@ -34,12 +34,6 @@ pub struct EtagMiddleware<S>(S);
 #[display(fmt = "'object hash equal to any of {:?}'", _0)]
 pub struct IfMatch(Vec<u64>);
 
-#[derive(Debug)]
-pub struct Accept(pub Vec<Mime>);
-
-#[derive(Debug)]
-pub struct ContentType(pub Option<Mime>);
-
 impl<S> Transform<S> for Etag
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse<Body>, Error = Error>,
@@ -63,7 +57,7 @@ where
     S::Future: 'static,
 {
     type Error = Error;
-    type Future = Either<Ready<Result<Self::Response, Self::Error>>, Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>>;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
     type Request = ServiceRequest;
     type Response = ServiceResponse<Body>;
 
@@ -72,85 +66,56 @@ where
     }
 
     fn call(&mut self, req: Self::Request) -> Self::Future {
-        let if_none_match = match process_headers(&req) {
-            Ok(if_none_match) => if_none_match,
-            Err(pc_err) => {
-                let response = pc_err.dynamic(req.headers()).error_response();
-
-                return Either::Left(ok(req.into_response(response)))
-            },
-        };
-
         let inner = self.0.call(req);
 
-        Either::Right(Box::pin(async move {
+        Box::pin(async move {
             let response = inner.await?;
+            let req = response.request();
+
+            let if_none_match = header(req.headers(), "If-None-Match")
+                .ok()
+                .flatten()
+                .unwrap_or("")
+                .split(',')
+                .collect::<Vec<_>>();
+            let if_match = header(req.headers(), "If-Match")
+                .ok()
+                .flatten()
+                .unwrap_or("")
+                .split(',')
+                .collect::<Vec<_>>();
+
+            // PATCH requires `If-Match`, always. Actually checking if they match is up to the
+            // actual endpoint though!
+            let request_method = req.method();
+
+            if request_method == Method::PATCH || request_method == Method::DELETE {
+                if if_match.is_empty() {
+                    warn!("PATCH or DELETE request without If-Match header");
+                } else {
+                    debug!("If-Match values are {:?}", if_match);
+                }
+            }
+            if request_method == Method::GET {
+                if if_none_match.is_empty() {
+                    info!("GET without If-None-Match header")
+                }
+            }
 
             if response.status() == StatusCode::OK {
                 // we'll just assume that we always set the value correctly
                 if let Ok(Some(etag)) = header(response.headers(), "ETag") {
-                    // While we ourselves always generate valid integers as etags, actix's Files service does not!
-                    if let Ok(etag) = etag.parse() {
-                        let if_match = response.request().extensions_mut().remove::<IfMatch>();
-                        let request_method = response.request().method();
+                    if request_method == Method::PATCH && if_match.contains(&etag) {
+                        return Ok(response.into_response(HttpResponse::NotModified().finish()))
+                    }
 
-                        if let Some(if_match) = if_match {
-                            if request_method == Method::PATCH && if_match.met(etag) {
-                                return Ok(response.into_response(HttpResponse::NotModified().finish()))
-                            }
-                        }
-                        if !if_none_match.is_empty() {
-                            if request_method == Method::GET && if_none_match.contains(&etag) {
-                                return Ok(response.into_response(HttpResponse::NotModified().finish()))
-                            }
-                        }
+                    if request_method == Method::GET && if_none_match.contains(&etag) {
+                        return Ok(response.into_response(HttpResponse::NotModified().finish()))
                     }
                 }
             }
 
             Ok(response)
-        }))
-    }
-}
-
-/// Returns parsed `If-Match` header values and unprocessed `If-None-Match` header values
-///
-/// Returns the `If-None-Match` values.
-fn process_headers(request: &ServiceRequest) -> Result<Vec<u64>, PointercrateError> {
-    // We only need the values for this header _after_ the request completes since they are only
-    // relevant for comparison with ETag values, but we also want to abort early if they are malformed,
-    // which is why we simply retrieve them once here.
-    let if_none_match = parse_list_of_header_values(request.headers(), "If-None-Match")?;
-    let if_match = parse_list_of_header_values(request.headers(), "If-Match")?;
-
-    // PATCH requires `If-Match`, always. Actually checking if they match is up to the
-    // actual endpoint though!
-    let method = request.method();
-
-    if method == Method::PATCH || method == Method::DELETE {
-        if if_match.is_empty() {
-            warn!("PATCH or DELETE request without If-Match header");
-        } else {
-            debug!("If-Match values are {:?}", if_match);
-        }
-    }
-    if method == Method::GET {
-        if if_none_match.is_empty() {
-            info!("GET without If-None-Match header")
-        }
-    }
-
-    let mut extensions = request.extensions_mut();
-
-    if !if_match.is_empty() {
-        extensions.insert(IfMatch(if_match));
-    }
-
-    Ok(if_none_match)
-}
-
-impl IfMatch {
-    pub fn met(&self, etag: u64) -> bool {
-        self.0.contains(&etag)
+        })
     }
 }
