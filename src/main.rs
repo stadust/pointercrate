@@ -1,6 +1,8 @@
+#![feature(proc_macro_hygiene)]
 // TODO: set up lint denys
 
 use crate::{error::PointercrateError, middleware::headers::Headers, model::user::UserPagination, state::PointercrateState};
+use actix_files::Files;
 use actix_web::{middleware::Logger, web::scope, App, HttpServer};
 use api::{
     auth,
@@ -13,6 +15,7 @@ use std::net::SocketAddr;
 mod util;
 mod api;
 mod cistring;
+mod compat;
 mod config;
 mod documentation;
 mod error;
@@ -23,6 +26,7 @@ mod permissions;
 mod ratelimit;
 mod state;
 mod video;
+mod view;
 
 pub type Result<T> = std::result::Result<T, PointercrateError>;
 
@@ -42,6 +46,15 @@ async fn main() -> std::io::Result<()> {
             .wrap(Headers)
             .wrap(Logger::default())
             .app_data(application_state.clone())
+            .service(Files::new("/static2", "./static2").use_etag(true))
+            .service(view::home::index)
+            .service(view::login::index)
+            .service(view::login::post)
+            .service(view::demonlist::demon_page)
+            .service(view::demonlist::index)
+            .service(view::account::index)
+            .service(view::documentation::index)
+            .service(view::documentation::topic)
             .service(
                 scope("/api/v1")
                     .service(misc::list_information)

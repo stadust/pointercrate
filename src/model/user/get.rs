@@ -1,4 +1,5 @@
 use crate::{model::user::User, permissions::Permissions, Result};
+use futures::StreamExt;
 use sqlx::PgConnection;
 
 pub(super) struct FetchedUser {
@@ -47,16 +48,21 @@ impl User {
     }
 
     /// Gets all users that have the given permission bits all set
-    pub async fn by_permission(permissions: Permissions, connection: &mut PgConnection) -> Result<User> {
-        let row = sqlx::query_as!(
+    pub async fn by_permission(permissions: Permissions, connection: &mut PgConnection) -> Result<Vec<User>> {
+        let mut stream = sqlx::query_as!(
             FetchedUser,
             "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE permissions & \
              CAST($1::INTEGER AS BIT(16)) = CAST($1::INTEGER AS BIT(16))",
             permissions.bits() as i32
         )
-        .fetch_one(connection)
-        .await?;
+        .fetch(connection);
 
-        Ok(row.into())
+        let mut users = Vec::new();
+
+        while let Some(row) = stream.next().await {
+            users.push(row?.into())
+        }
+
+        Ok(users)
     }
 }

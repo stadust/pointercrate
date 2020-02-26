@@ -36,6 +36,10 @@ pub struct CSRFClaims {
 }
 
 impl AuthenticatedUser {
+    pub fn into_inner(self) -> User {
+        self.user
+    }
+
     pub fn inner(&self) -> &User {
         &self.user
     }

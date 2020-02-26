@@ -79,18 +79,20 @@ where
             let response = inner.await?;
 
             if let Some(etag) = header!(response, "ETag") {
-                let etag = etag.parse().unwrap(); // we always generate valid integers
-                let if_match = response.request().extensions_mut().remove::<IfMatch>();
-                let request_method = response.request().method();
+                // While we ourselves always generate valid integers as etags, actix's Files service does not!
+                if let Ok(etag) = etag.parse() {
+                    let if_match = response.request().extensions_mut().remove::<IfMatch>();
+                    let request_method = response.request().method();
 
-                if let Some(if_match) = if_match {
-                    if request_method == Method::PATCH && if_match.met(etag) {
-                        return Ok(response.into_response(HttpResponse::NotModified().finish()))
+                    if let Some(if_match) = if_match {
+                        if request_method == Method::PATCH && if_match.met(etag) {
+                            return Ok(response.into_response(HttpResponse::NotModified().finish()))
+                        }
                     }
-                }
-                if let Some(if_none_match) = if_none_match {
-                    if request_method == Method::GET && if_none_match.contains(&etag) {
-                        return Ok(response.into_response(HttpResponse::NotModified().finish()))
+                    if let Some(if_none_match) = if_none_match {
+                        if request_method == Method::GET && if_none_match.contains(&etag) {
+                            return Ok(response.into_response(HttpResponse::NotModified().finish()))
+                        }
                     }
                 }
             }

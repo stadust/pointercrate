@@ -65,8 +65,12 @@ impl Display for User {
 }
 
 impl User {
+    pub fn has_permission(&self, perm: Permissions) -> bool {
+        self.permissions.implied().contains(perm)
+    }
+
     pub fn require_permissions(&self, perm: Permissions) -> Result<()> {
-        if !self.permissions.implied().contains(perm) {
+        if !self.has_permission(perm) {
             return Err(PointercrateError::MissingPermissions { required: perm })
         }
 

@@ -5,7 +5,7 @@ pub use self::{
     post::PostDemon,
 };
 use crate::{
-    cistring::CiString,
+    cistring::{CiStr, CiString},
     error::PointercrateError,
     model::demonlist::{player::DatabasePlayer, record::MinimalRecordP},
     Result,
@@ -40,7 +40,7 @@ pub struct Demon {
     /// This [`Demon`]'s verifier
     pub verifier: DatabasePlayer,
 }
-
+/*
 /// Temporary solution. In the future this will become `ListedDemon` and contain
 /// id, name, position, video and publisher name of all demons that have a non-null position
 #[derive(Debug, Hash, Eq, PartialEq, Serialize, Display)]
@@ -51,7 +51,7 @@ pub struct MinimalDemonP {
     pub video: Option<String>,
     pub publisher: DatabasePlayer,
 }
-
+*/
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
 #[derive(Debug, Hash, Serialize, Display, PartialEq, Eq, Clone)]
 #[display(fmt = "{} (at {})", name, position)]
@@ -104,6 +104,14 @@ impl MinimalDemon {
 }
 
 impl FullDemon {
+    pub fn position(&self) -> i16 {
+        self.demon.base.position
+    }
+
+    pub fn name(&self) -> &CiStr {
+        self.demon.base.name.as_ref()
+    }
+
     pub fn headline(&self) -> String {
         let publisher = &self.demon.publisher.name;
         let verifier = &self.demon.verifier.name;

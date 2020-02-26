@@ -4,6 +4,9 @@ use crate::{
     ratelimit::Ratelimits,
     Result,
 };
+use gdcf::Gdcf;
+use gdcf_diesel::Cache;
+use gdrs::BoomlingsClient;
 use log::trace;
 use sqlx::{
     pool::{Builder, PoolConnection},
@@ -19,6 +22,8 @@ pub struct PointercrateState {
     pub secret: Arc<Vec<u8>>,
     pub connection_pool: Pool<PgConnection>,
     pub ratelimits: Ratelimits,
+
+    pub gdcf: Gdcf<BoomlingsClient, Cache>,
 }
 
 impl PointercrateState {
@@ -37,12 +42,20 @@ impl PointercrateState {
             .await
             .expect("Failed to connect to pointercrate database");
 
+        let gdcf_url = std::env::var("GDCF_DATABASE_URL").expect("GDCF_DATABASE_URL is not set");
+
+        let cache = Cache::postgres(gdcf_url).expect("GDCF database connection failed");
+        let client = BoomlingsClient::new();
+
+        cache.initialize().unwrap();
+
         PointercrateState {
             documentation_toc,
             documentation_topics,
             connection_pool,
             secret: Arc::new(config::secret()),
             ratelimits: Ratelimits::initialize(),
+            gdcf: Gdcf::new(client, cache),
         }
     }
 
