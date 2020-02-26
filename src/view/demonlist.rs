@@ -83,8 +83,7 @@ impl DemonlistOverview {
         let demon_overview = sqlx::query_as!(
             OverviewDemon,
             "SELECT position, demons.name::TEXT, video::TEXT, players.name::TEXT as publisher FROM demons INNER JOIN players ON \
-             demons.publisher = players.id WHERE position <= $1 AND position IS NOT NULL",
-            config::list_size()
+             demons.publisher = players.id WHERE position IS NOT NULL ORDER BY position"
         )
         .fetch_all(connection)
         .await?;
