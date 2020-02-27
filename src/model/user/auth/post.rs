@@ -69,7 +69,7 @@ impl AuthenticatedUser {
 
 #[cfg(test)]
 mod tests {
-    use crate::model::user::{AuthenticatedUser, Authorization, Registration};
+    use crate::model::user::{AuthenticatedUser, Registration};
 
     #[actix_rt::test]
     async fn test_successful_registration() {
@@ -84,22 +84,5 @@ mod tests {
 
         assert!(result.is_ok(), "{:?}", result.err().unwrap());
         assert_eq!(result.unwrap().into_inner().name, "stadust");
-    }
-
-    #[actix_rt::test]
-    async fn test_successful_basic_auth() {
-        let mut connection = crate::test::test_setup().await;
-
-        let result = AuthenticatedUser::basic_auth(
-            &Authorization::Basic {
-                username: "stadust_existing".to_owned(),
-                password: "password1234567890".to_string(),
-            },
-            &mut connection,
-        )
-        .await;
-
-        assert!(result.is_ok(), "{:?}", result.err().unwrap());
-        assert_eq!(result.unwrap().inner().name, "stadust_existing");
     }
 }

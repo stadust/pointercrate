@@ -7,7 +7,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-#[derive(Debug, Display, Clone, Copy)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq)]
 pub enum RatelimitScope {
     #[display(fmt = "You're submitting too many records too fast!")]
     RecordSubmission,

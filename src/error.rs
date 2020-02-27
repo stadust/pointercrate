@@ -40,7 +40,7 @@ pub struct JsonError(pub PointercrateError);
 
 impl std::error::Error for PointercrateError {}
 
-#[derive(Debug, Display, Serialize, Clone)]
+#[derive(Debug, Display, Serialize, Clone, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum PointercrateError {
     /// Generic `400 BAD REQUEST` error
