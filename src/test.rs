@@ -4,7 +4,7 @@ use sqlx::{Connect, PgConnection};
 /// pc_test, password: test), starts a transaction in a new connection and inserts some dummy data
 /// into it, which can be used by tests
 pub async fn test_setup() -> PgConnection {
-    env_logger::try_init();
+    let _ = env_logger::try_init();
 
     let mut connection = PgConnection::connect("postgres://pc_test:test@localhost/pointercrate_test")
         .await
@@ -54,7 +54,8 @@ pub async fn test_setup() -> PgConnection {
          '$2b$12$4lKrHzdA39hJj0IcGeWCMucV2dOlh26sp.H/PFAYNItgN08.TKUki')"
     )
     .execute(&mut connection)
-    .await;
+    .await
+    .unwrap();
 
     connection
 }

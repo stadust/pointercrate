@@ -34,7 +34,7 @@ pub enum Authorization {
 
 impl AuthenticatedUser {
     pub async fn invalidate_all_tokens(authorization: Authorization, connection: &mut PgConnection) -> Result<()> {
-        let mut user = Self::basic_auth(&authorization, connection).await?;
+        let user = Self::basic_auth(&authorization, connection).await?;
 
         if let Authorization::Basic { password, .. } = authorization {
             let patch = PatchMe {

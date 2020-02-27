@@ -511,6 +511,11 @@ impl PointercrateError {
                 // We are going to assume that browsers set the headers correctly and that this an
                 // API request. We therefore send out a json response.
 
+                error!(
+                    "Malformed 'Accept' header while trying to determine what format to use for error response. Defaulting to JSON. {}",
+                    error
+                );
+
                 return DynamicError::Json(JsonError(self))
             },
         };

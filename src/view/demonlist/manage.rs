@@ -112,7 +112,7 @@ impl AccountPage {
                         }
                         (dropdown("All", html! {
                             li.white.hover.underlined data-value = "All" {"All"}
-                        }, ["Approved", "Submitted", "Rejected"].into_iter().map(|s| html!(li.white.hover data-value = (s) {(s)}))))
+                        }, ["Approved", "Submitted", "Rejected"].iter().map(|s| html!(li.white.hover data-value = (s) {(s)}))))
                     }
                     div.panel.fade {
                         h2.underlined.pad {

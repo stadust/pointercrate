@@ -1,5 +1,5 @@
 #![feature(proc_macro_hygiene)]
-// TODO: set up lint denys
+#![allow(non_upper_case_globals)]
 #![deny(unused_imports)]
 
 use crate::{

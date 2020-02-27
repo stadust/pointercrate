@@ -129,7 +129,7 @@ pub async fn delete(
     user.inner().require_permissions(Permissions::ListAdministrator)?;
 
     // FIXME: prevent lost updates by using SELECT ... FOR UPDATE
-    let mut record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
+    let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
     if_match.require_etag_match(&record)?;
 

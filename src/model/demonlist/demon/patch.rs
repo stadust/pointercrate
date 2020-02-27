@@ -32,7 +32,7 @@ pub struct PatchDemon {
 }
 
 impl FullDemon {
-    pub async fn apply_patch(mut self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
+    pub async fn apply_patch(self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
         Ok(FullDemon {
             demon: self.demon.apply_patch(patch, connection).await?,
             ..self

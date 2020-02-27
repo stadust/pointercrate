@@ -10,31 +10,22 @@ bitflags! {
     ///
     /// Consult the [pointercrate API documentation](https://pointercrate.com/documentation#permissions) for more details
     pub struct Permissions: u16 {
-        #[allow(non_upper_case_globals)]
         const ExtendedAccess = 0b0000_0000_0000_0001;
 
-        #[allow(non_upper_case_globals)]
         const ListHelper = 0b0000_0000_0000_0010;
 
-        #[allow(non_upper_case_globals)]
         const ListModerator = 0b0000_0000_0000_0100;
 
-        #[allow(non_upper_case_globals)]
         const ListAdministrator = 0b0000_0000_0000_1000;
 
-        #[allow(non_upper_case_globals)]
         const LeaderboardModerator = 0b0000_0000_0001_0000;
 
-        #[allow(non_upper_case_globals)]
         const LeaderboardAdministrator = 0b0000_0000_0010_0000;
 
-        #[allow(non_upper_case_globals)]
         const Moderator = 0b0010_0000_0000_0000;
 
-        #[allow(non_upper_case_globals)]
         const Administrator = 0b0100_0000_0000_0000;
 
-        #[allow(non_upper_case_globals)]
         const ItIsImpossibleToGainThisPermission = 0b1000_0000_0000_0000;
     }
 }

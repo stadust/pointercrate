@@ -52,6 +52,10 @@ impl Player {
             }
         }
 
+        if let Some(name) = patch.name {
+            self.base.set_name(name.as_ref(), connection).await?;
+        }
+
         Ok(self)
     }
 

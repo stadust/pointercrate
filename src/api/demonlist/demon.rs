@@ -65,7 +65,7 @@ pub mod v1 {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
-        let mut demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
+        let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
 
         // FIXME(lost updates)
 
@@ -173,7 +173,7 @@ pub mod v2 {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
         let mut connection = state.audited_transaction(&user).await?;
-        let mut demon = FullDemon::by_id(id.into_inner(), &mut connection).await?;
+        let demon = FullDemon::by_id(id.into_inner(), &mut connection).await?;
 
         // FIXME(lost updates)
 

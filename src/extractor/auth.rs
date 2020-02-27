@@ -73,7 +73,7 @@ impl FromRequest for Authorization {
     type Error = JsonError;
     type Future = Ready<Result<Self, Self::Error>>;
 
-    fn from_request(req: &HttpRequest, payload: &mut Payload<PayloadStream>) -> Self::Future {
+    fn from_request(req: &HttpRequest, _payload: &mut Payload<PayloadStream>) -> Self::Future {
         ready(process_authorization_header(req).map_err(JsonError))
     }
 }
