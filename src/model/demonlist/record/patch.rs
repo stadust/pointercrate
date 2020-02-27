@@ -177,7 +177,7 @@ impl FullRecord {
         let requirement = demon.requirement(connection).await?;
 
         if self.progress < requirement {
-            return Err(PointercrateError::InvalidProgress { requirement })?
+            return Err(PointercrateError::InvalidProgress { requirement })
         }
 
         self.handle_potential_duplicate(&self.player.clone(), &demon, self.status, connection)// FIXME: proper borrowing
@@ -232,7 +232,7 @@ impl FullRecord {
         let requirement = self.demon.requirement(connection).await?;
 
         if progress > 100 || progress < requirement {
-            return Err(PointercrateError::InvalidProgress { requirement })?
+            return Err(PointercrateError::InvalidProgress { requirement })
         }
 
         if self.status == RecordStatus::Approved {

@@ -97,8 +97,8 @@ fn process_authorization_header(request: &HttpRequest) -> Result<Authorization, 
                     debug!("Found basic authorization!");
 
                     Ok(Authorization::Basic {
-                        username: username.to_string(),
-                        password: password.to_string(),
+                        username: (*username).to_string(),
+                        password: (*password).to_string(),
                     })
                 } else {
                     warn!("Malformed 'Authorization' header");
@@ -110,7 +110,7 @@ fn process_authorization_header(request: &HttpRequest) -> Result<Authorization, 
                 debug!("Found token (Bearer) authorization");
 
                 Ok(Authorization::Token {
-                    access_token: token.to_string(),
+                    access_token: (*token).to_string(),
                     csrf_token: None,
                 })
             },

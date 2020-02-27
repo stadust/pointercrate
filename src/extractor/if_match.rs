@@ -44,7 +44,7 @@ impl FromRequest for IfMatch {
 
         ready(
             header
-                .split(",")
+                .split(',')
                 .map(|hash| {
                     hash.parse()
                         .map_err(|_| PointercrateError::InvalidHeaderValue { header: "If-Match" })

@@ -7,13 +7,24 @@ use sqlx::{
     types::HasSqlType,
     Postgres,
 };
-use std::{borrow::Borrow, cmp::Ordering, ops::Deref};
+use std::{
+    borrow::Borrow,
+    cmp::Ordering,
+    hash::{Hash, Hasher},
+    ops::Deref,
+};
 
 // FIXME: probably replace with https://docs.rs/unicase/2.6.0/unicase/struct.UniCase.html after we confirm how exactly postgres CITEXT type works internally
 
-#[derive(Clone, Debug, Hash, Serialize, Deserialize, Display)]
+#[derive(Clone, Debug, Serialize, Deserialize, Display)]
 #[serde(transparent)]
 pub struct CiString(pub String);
+
+impl Hash for CiString {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.to_lowercase().hash(state)
+    }
+}
 
 impl From<String> for CiString {
     fn from(string: String) -> Self {
@@ -39,9 +50,15 @@ impl Decode<Postgres> for CiString {
     }
 }
 
-#[derive(Debug, Hash, Display)]
+#[derive(Debug, Display)]
 #[repr(transparent)]
 pub struct CiStr(str);
+
+impl Hash for CiStr {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.to_lowercase().hash(state)
+    }
+}
 
 impl Serialize for CiStr {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {

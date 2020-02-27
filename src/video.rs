@@ -149,7 +149,7 @@ pub fn validate(url: &str) -> Result<String> {
     }
 }
 
-pub fn embed(video: &String) -> Option<String> {
+pub fn embed(video: &str) -> Option<String> {
     // Video URLs need to be wellformed once we get here!
     let url = Url::parse(video).unwrap();
 

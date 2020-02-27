@@ -37,7 +37,7 @@ impl FromRequest for Ip {
                                 "Request from local machine, but no 'X-FORWARDED-FOR' header is set. Allowing, since this is a debug build"
                             );
 
-                            ok(Ip(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)).into()))
+                            ok(Ip(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1))))
                         } else {
                             error!(
                                 "Request from local machine, but no 'X-FORWARDED-FOR' header is set. Since this is a release build, this \
@@ -48,7 +48,7 @@ impl FromRequest for Ip {
                         },
                 }
             } else {
-                ok(Ip(sockaddr.ip().into()))
+                ok(Ip(sockaddr.ip()))
             }
         } else {
             warn!("Remote address for request to {} not retrievable, aborting!", request.uri());

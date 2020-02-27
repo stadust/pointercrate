@@ -13,9 +13,11 @@ pub struct PatchUser {
     pub display_name: Option<Option<String>>,
 
     #[serde(default, deserialize_with = "nullable")]
+    #[allow(clippy::option_option)]
     pub youtube_channel: Option<Option<String>>,
 
     #[serde(default, deserialize_with = "non_nullable")]
+    #[allow(clippy::option_option)]
     pub permissions: Option<Permissions>,
 }
 

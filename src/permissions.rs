@@ -94,8 +94,8 @@ impl Permissions {
 
     /// Gets a [`Permissions`] object additionally containing all the permissions implied by the
     /// permissions stored in this object.
-    pub fn implied(&self) -> Permissions {
-        let mut perms = *self;
+    pub fn implied(self) -> Permissions {
+        let mut perms = self;
 
         // pseudo dynamic programming
         if perms.contains(Permissions::Administrator) {

@@ -313,7 +313,7 @@ impl Page for Demonlist {
                                     div.tooltip {
                                         "more"
                                         div.tooltiptext.fade {
-                                            (self.data.creators.iter().map(|player| player.name.to_string()).collect::<Vec<_>>().join(", ").to_string())
+                                            (self.data.creators.iter().map(|player| player.name.to_string()).collect::<Vec<_>>().join(", "))
                                         }
                                     }
                                     ", " (self.data.short_headline())
@@ -332,8 +332,10 @@ impl Page for Demonlist {
                                 }
                             }
                         }
-                        @if let Some(ref embedded_video) = self.data.demon.video.as_ref().and_then(video::embed) {
-                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" allowfullscreen="" data-attr = "src_old" data-attr-value = (embedded_video) {"Verification Video"}
+                        @if let Some(ref video) = self.data.demon.video {
+                            @if let Some(embedded_video) = video::embed(video) {
+                                iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" allowfullscreen="" data-attr = "src_old" data-attr-value = (embedded_video) {"Verification Video"}
+                            }
                         }
                         div.underlined.pad.flex.wrap#level-info {
                             @match self.server_level {

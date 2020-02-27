@@ -26,7 +26,7 @@ mod patch;
 
 // TODO: impl the nationality stuff already in the database
 /// Model representing a user in the database
-#[derive(Debug, Serialize, Hash, Eq)]
+#[derive(Debug, Serialize, Hash, Eq, PartialEq)]
 pub struct User {
     /// The [`User`]'s unique ID. This is used to identify users and cannot be changed.
     pub id: i32,
@@ -45,12 +45,6 @@ pub struct User {
 
     /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
-}
-
-impl PartialEq for User {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
-    }
 }
 
 impl Display for User {
