@@ -157,7 +157,7 @@ where
 
 pub trait HttpResponseBuilderExt {
     fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self;
-    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse;
+    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: &H) -> HttpResponse;
 }
 
 impl HttpResponseBuilderExt for HttpResponseBuilder {
@@ -167,7 +167,7 @@ impl HttpResponseBuilderExt for HttpResponseBuilder {
         self.header("ETag", hasher.finish().to_string())
     }
 
-    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: H) -> HttpResponse {
-        self.etag(&obj).json(serde_json::json!({ "data": obj }))
+    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: &H) -> HttpResponse {
+        self.etag(obj).json(serde_json::json!({ "data": obj }))
     }
 }

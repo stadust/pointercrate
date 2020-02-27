@@ -35,7 +35,7 @@ pub async fn get(user: TokenAuth, state: PointercrateState, user_id: Path<i32>) 
 
     let gotten_user = User::by_id(user_id.into_inner(), &mut connection).await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(gotten_user))
+    Ok(HttpResponse::Ok().json_with_etag(&gotten_user))
 }
 
 #[patch("/{user_id}/")]
@@ -59,7 +59,7 @@ pub async fn patch(
 
     connection.commit().await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(gotten_user))
+    Ok(HttpResponse::Ok().json_with_etag(&gotten_user))
 }
 
 #[delete("/{user_id}/")]

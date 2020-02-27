@@ -47,7 +47,7 @@ pub async fn get(state: PointercrateState, path: Path<i32>) -> ApiResult<HttpRes
         .upgrade(&mut connection)
         .await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(player))
+    Ok(HttpResponse::Ok().json_with_etag(&player))
 }
 
 #[patch("/{player_id}/")]
@@ -67,5 +67,5 @@ pub async fn patch(
 
     let player = player.apply_patch(data.into_inner(), &mut connection).await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(player))
+    Ok(HttpResponse::Ok().json_with_etag(&player))
 }

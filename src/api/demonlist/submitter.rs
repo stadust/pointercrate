@@ -38,7 +38,7 @@ pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter
 
     let submitter = FullSubmitter::by_id(submitter_id.into_inner(), &mut connection).await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(submitter))
+    Ok(HttpResponse::Ok().json_with_etag(&submitter))
 }
 
 #[patch("/{submitter_id}/")]
@@ -55,5 +55,5 @@ pub async fn patch(
 
     let submitter = submitter.apply_patch(patch.into_inner(), &mut connection).await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(submitter))
+    Ok(HttpResponse::Ok().json_with_etag(&submitter))
 }

@@ -17,7 +17,7 @@ pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Js
 
     let demon = FullDemon::create_from(data.into_inner(), &mut connection).await?;
 
-    Ok(HttpResponse::Created().json_with_etag(demon))
+    Ok(HttpResponse::Created().json_with_etag(&demon))
 }
 
 pub mod v1 {
@@ -59,7 +59,7 @@ pub mod v1 {
 
         let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
 
-        Ok(HttpResponse::Ok().json_with_etag(demon))
+        Ok(HttpResponse::Ok().json_with_etag(&demon))
     }
 
     #[patch("/{position}/")]
@@ -77,7 +77,7 @@ pub mod v1 {
 
         let demon = demon.apply_patch(patch.into_inner(), &mut connection).await?;
 
-        Ok(HttpResponse::Ok().json_with_etag(demon))
+        Ok(HttpResponse::Ok().json_with_etag(&demon))
     }
 
     #[post("/{position}/creators/")]
@@ -171,7 +171,7 @@ pub mod v2 {
 
         let demon = FullDemon::by_id(id.into_inner(), &mut connection).await?;
 
-        Ok(HttpResponse::Ok().json_with_etag(demon))
+        Ok(HttpResponse::Ok().json_with_etag(&demon))
     }
 
     #[patch("/{demon_id}/")]
@@ -189,7 +189,7 @@ pub mod v2 {
 
         let demon = demon.apply_patch(patch.into_inner(), &mut connection).await?;
 
-        Ok(HttpResponse::Ok().json_with_etag(demon))
+        Ok(HttpResponse::Ok().json_with_etag(&demon))
     }
 
     #[post("/{demon_id}/creators/")]

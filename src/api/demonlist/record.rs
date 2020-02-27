@@ -83,9 +83,16 @@ pub async fn submit(
 
     connection.commit().await?;
 
-    Ok(HttpResponse::Created()
+    let response = HttpResponse::Created()
         .header("Location", format!("/api/v1/records/{}/", record.id))
-        .json_with_etag(record))
+        .json_with_etag(&record);
+
+    // spawn background task to validate record
+    if record.status == RecordStatus::Submitted {
+        actix_rt::spawn(record.validate(state));
+    }
+
+    Ok(response)
 }
 
 #[get("/{record_id}/")]
@@ -97,7 +104,7 @@ pub async fn get(user: ApiResult<TokenAuth>, state: PointercrateState, record_id
         user?.0.inner().require_permissions(Permissions::ExtendedAccess)?;
     }
 
-    Ok(HttpResponse::Ok().json_with_etag(record))
+    Ok(HttpResponse::Ok().json_with_etag(&record))
 }
 
 #[patch("/{record_id}/")]
@@ -117,7 +124,7 @@ pub async fn patch(
 
     connection.commit().await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(record))
+    Ok(HttpResponse::Ok().json_with_etag(&record))
 }
 
 #[delete("/{record_id}/")]
