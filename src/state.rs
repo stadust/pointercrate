@@ -8,6 +8,7 @@ use gdcf::Gdcf;
 use gdcf_diesel::Cache;
 use gdrs::BoomlingsClient;
 use log::trace;
+use reqwest::Client;
 use sqlx::{
     pool::{Builder, PoolConnection},
     Connection, PgConnection, Pool,
@@ -22,6 +23,9 @@ pub struct PointercrateState {
     pub secret: Arc<Vec<u8>>,
     pub connection_pool: Pool<PgConnection>,
     pub ratelimits: Ratelimits,
+
+    pub http_client: Client,
+    pub webhook_url: Option<Arc<String>>,
 
     pub gdcf: Gdcf<BoomlingsClient, Cache>,
 }
@@ -55,6 +59,8 @@ impl PointercrateState {
             connection_pool,
             secret: Arc::new(config::secret()),
             ratelimits: Ratelimits::initialize(),
+            http_client: Client::builder().build().expect("Failed to create reqwest client"),
+            webhook_url: std::env::var("DISCORD_WEBHOOK").ok().map(Arc::new),
             gdcf: Gdcf::new(client, cache),
         }
     }
