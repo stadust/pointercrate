@@ -37,6 +37,9 @@ mod state;
 mod video;
 mod view;
 
+#[cfg(test)]
+mod test;
+
 pub type Result<T> = std::result::Result<T, PointercrateError>;
 
 pub type ApiResult<T> = std::result::Result<T, JsonError>;

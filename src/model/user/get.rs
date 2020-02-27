@@ -1,6 +1,6 @@
-use crate::{model::user::User, permissions::Permissions, Result};
+use crate::{error::PointercrateError, model::user::User, permissions::Permissions, Result};
 use futures::StreamExt;
-use sqlx::PgConnection;
+use sqlx::{Error, PgConnection};
 
 pub(super) struct FetchedUser {
     member_id: i32,
@@ -30,9 +30,17 @@ impl User {
             id
         )
         .fetch_one(connection)
-        .await?;
+        .await;
 
-        Ok(row.into())
+        match row {
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "User",
+                    identified_by: id.to_string(),
+                }),
+            Err(err) => Err(err.into()),
+            Ok(row) => Ok(row.into()),
+        }
     }
 
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<User> {
@@ -42,9 +50,17 @@ impl User {
             name.to_string() // FIXME(sqlx)
         )
         .fetch_one(connection)
-        .await?;
+        .await;
 
-        Ok(row.into())
+        match row {
+            Err(Error::NotFound) =>
+                Err(PointercrateError::ModelNotFound {
+                    model: "User",
+                    identified_by: name.to_string(),
+                }),
+            Err(err) => Err(err.into()),
+            Ok(row) => Ok(row.into()),
+        }
     }
 
     /// Gets all users that have the given permission bits all set
