@@ -122,7 +122,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
     let mut stream = sqlx::query_as!(
         Fetched,
         "SELECT records.id, progress, video::text, players.id AS player_id, players.name::text, players.banned FROM records INNER JOIN \
-         players ON records.player = players.id WHERE status_ = 'APPROVED' AND records.demon = $1",
+         players ON records.player = players.id WHERE status_ = 'APPROVED' AND records.demon = $1 ORDER BY progress DESC",
         demon.id
     )
     .fetch(connection);
