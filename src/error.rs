@@ -8,11 +8,9 @@ use crate::{
     view::{error::ErrorPage, Page},
 };
 use actix_web::{
-    body::Body,
-    dev::RequestHead,
     error::{JsonPayloadError, PathError, QueryPayloadError},
     http::{HeaderMap, Method, StatusCode},
-    HttpRequest, HttpResponse, ResponseError,
+    HttpResponse, ResponseError,
 };
 use derive_more::Display;
 use log::error;

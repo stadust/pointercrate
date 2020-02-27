@@ -1,9 +1,6 @@
 use bitflags::bitflags;
-use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
-use std::{
-    collections::HashSet,
-    fmt::{Display, Formatter},
-};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::{Display, Formatter};
 
 bitflags! {
     /// Permissions bitmask used for authorisation.

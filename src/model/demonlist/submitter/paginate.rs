@@ -1,12 +1,8 @@
 use super::Submitter;
-use crate::{
-    error::PointercrateError,
-    util::{non_nullable, nullable},
-    Result,
-};
+use crate::{error::PointercrateError, util::non_nullable, Result};
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgRow, PgConnection, Row};
+use sqlx::{PgConnection, Row};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct SubmitterPagination {

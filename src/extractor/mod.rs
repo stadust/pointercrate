@@ -3,14 +3,9 @@
 use crate::state::PointercrateState;
 use actix_web::{
     dev::{Payload, PayloadStream},
-    error::PayloadError,
-    web::Bytes,
-    Error, FromRequest, HttpRequest,
+    FromRequest, HttpRequest,
 };
-use futures::{
-    future::{ok, Ready},
-    Stream,
-};
+use futures::future::{ok, Ready};
 
 pub mod auth;
 pub mod if_match;

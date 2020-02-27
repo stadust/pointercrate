@@ -1,17 +1,14 @@
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    model::{
-        demonlist::submitter::{FullSubmitter, PatchSubmitter, Submitter, SubmitterPagination},
-        user::AuthenticatedUser,
-    },
+    model::demonlist::submitter::{FullSubmitter, PatchSubmitter, Submitter, SubmitterPagination},
     permissions::Permissions,
     state::PointercrateState,
     util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{
-    web::{Data, Json, Path, Query},
-    HttpRequest, HttpResponse,
+    web::{Json, Path, Query},
+    HttpResponse,
 };
 use actix_web_codegen::{get, patch};
 

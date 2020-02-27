@@ -5,7 +5,7 @@ use sqlx::{
     encode::Encode,
     postgres::PgTypeInfo,
     types::HasSqlType,
-    Database, Postgres,
+    Postgres,
 };
 use std::{borrow::Borrow, cmp::Ordering, ops::Deref};
 

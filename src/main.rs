@@ -1,10 +1,10 @@
 #![feature(proc_macro_hygiene)]
 // TODO: set up lint denys
+#![deny(unused_imports)]
 
 use crate::{
     error::{HtmlError, JsonError, PointercrateError},
     middleware::etag::Etag,
-    model::user::UserPagination,
     state::PointercrateState,
 };
 use actix_files::Files;

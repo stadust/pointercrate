@@ -12,7 +12,6 @@ use crate::{
 use log::info;
 use serde::Deserialize;
 use sqlx::PgConnection;
-use std::process::exit;
 
 #[derive(Debug, Deserialize)]
 pub struct PatchRecord {

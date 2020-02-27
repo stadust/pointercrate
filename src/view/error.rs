@@ -1,6 +1,5 @@
 use super::Page;
-use crate::{error::PointercrateError, state::PointercrateState};
-use actix_web::{HttpRequest, ResponseError};
+use crate::error::PointercrateError;
 use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]

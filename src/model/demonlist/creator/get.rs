@@ -4,7 +4,7 @@ use crate::{
     model::demonlist::{creator::Creator, demon::MinimalDemon, player::DatabasePlayer},
     Result,
 };
-use futures::{stream::StreamExt, Stream};
+use futures::stream::StreamExt;
 use sqlx::PgConnection;
 
 impl Creator {

@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, model::demonlist::record::FullRecord, Result};
+use crate::{model::demonlist::record::FullRecord, Result};
 use log::info;
 use sqlx::PgConnection;
 

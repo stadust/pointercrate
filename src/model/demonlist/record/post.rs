@@ -8,7 +8,7 @@ use crate::{
         record::{FullRecord, RecordStatus},
         submitter::Submitter,
     },
-    ratelimit::{PreparedRatelimits, RatelimitScope, Ratelimits},
+    ratelimit::{PreparedRatelimits, RatelimitScope},
     Result,
 };
 use derive_more::Display;

@@ -1,5 +1,5 @@
 use super::Creator;
-use crate::{error::PointercrateError, Result};
+use crate::Result;
 use log::info;
 use sqlx::PgConnection;
 

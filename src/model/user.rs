@@ -11,13 +11,11 @@ pub use self::{
     patch::PatchUser,
 };
 use crate::{error::PointercrateError, permissions::Permissions, Result};
-use jsonwebtoken::{DecodingKey, EncodingKey};
-use log::{debug, warn};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::Serialize;
 use sqlx::PgConnection;
 use std::{
     fmt::{Display, Formatter},
-    hash::{Hash, Hasher},
+    hash::Hash,
 };
 
 mod auth;

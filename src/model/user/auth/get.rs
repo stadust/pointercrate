@@ -1,5 +1,4 @@
 use crate::{
-    cistring::CiStr,
     error::PointercrateError,
     model::user::{
         auth::{patch::PatchMe, AuthenticatedUser, Claims},
@@ -8,7 +7,7 @@ use crate::{
     permissions::Permissions,
     Result,
 };
-use log::{debug, info, trace, warn};
+use log::{debug, info, warn};
 use sqlx::PgConnection;
 
 struct FetchedUser {

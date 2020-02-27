@@ -1,6 +1,5 @@
 use crate::{
     cistring::CiString,
-    error::PointercrateError,
     model::demonlist::{
         creator::Creator,
         demon::{Demon, FullDemon, MinimalDemon},

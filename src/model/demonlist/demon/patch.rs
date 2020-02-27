@@ -1,15 +1,14 @@
 use super::{Demon, FullDemon};
 use crate::{
-    cistring::{CiStr, CiString},
+    cistring::CiString,
     error::PointercrateError,
     model::demonlist::{demon::MinimalDemon, player::DatabasePlayer},
     util::{non_nullable, nullable},
     Result,
 };
 use log::{debug, info, warn};
-use serde::{de::Error as _, Deserialize, Deserializer};
+use serde::Deserialize;
 use sqlx::PgConnection;
-use std::sync::mpsc::TrySendError::Full;
 
 #[derive(Deserialize, Debug)]
 pub struct PatchDemon {

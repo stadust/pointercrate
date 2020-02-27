@@ -1,9 +1,6 @@
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    model::demonlist::{
-        player::{FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination},
-        record::FullRecord,
-    },
+    model::demonlist::player::{PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination},
     permissions::Permissions,
     state::PointercrateState,
     util::HttpResponseBuilderExt,

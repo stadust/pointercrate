@@ -3,9 +3,9 @@ use crate::{
     error::{HtmlError, JsonError},
     extractor::auth::{BasicAuth, TokenAuth},
     state::PointercrateState,
-    ApiResult, Result, ViewResult,
+    ApiResult, ViewResult,
 };
-use actix_web::{cookie::SameSite, http::Cookie, HttpRequest, HttpResponse, Responder};
+use actix_web::{cookie::SameSite, http::Cookie, HttpResponse};
 use actix_web_codegen::{get, post};
 use log::info;
 use maud::{html, Markup};

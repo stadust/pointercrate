@@ -1,14 +1,9 @@
 use crate::error::{JsonError, PointercrateError};
 use actix_web::{
     dev::{Payload, PayloadStream},
-    error::PayloadError,
-    web::Bytes,
-    Error, FromRequest, HttpRequest,
+    FromRequest, HttpRequest,
 };
-use futures::{
-    future::{err, ok, ready, Ready},
-    Stream,
-};
+use futures::future::{err, ok, ready, Ready};
 use log::{error, warn};
 use std::net::{IpAddr, Ipv4Addr};
 

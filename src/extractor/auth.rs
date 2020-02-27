@@ -8,17 +8,12 @@ use crate::{
 };
 use actix_web::{
     dev::{Payload, PayloadStream},
-    error::PayloadError,
     http::Method,
-    web::Bytes,
-    Error, FromRequest, HttpMessage, HttpRequest,
+    FromRequest, HttpMessage, HttpRequest,
 };
-use futures::{
-    future::{err, ready, Either, Ready},
-    Stream,
-};
+use futures::future::{err, ready, Either, Ready};
 use log::{debug, error, warn};
-use std::{future::Future, pin::Pin, sync::Arc};
+use std::{future::Future, pin::Pin};
 
 pub struct TokenAuth(pub AuthenticatedUser);
 pub struct BasicAuth(pub AuthenticatedUser);

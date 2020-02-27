@@ -1,6 +1,5 @@
 //! Module for dealing with gdcf in compat mode, since that crate still uses futures 0.1
 
-use futures::{compat::Future01CompatExt, FutureExt};
 use gdcf::{
     api::request::{LevelRequestType, LevelsRequest, SearchFilters},
     cache::CacheEntry,
@@ -13,7 +12,7 @@ use gdcf_model::{
     user::Creator,
 };
 use gdrs::BoomlingsClient;
-use log::{error, info};
+use log::error;
 
 pub fn gd_demon_by_name(
     gdcf: &Gdcf<BoomlingsClient, Cache>, name: &str,

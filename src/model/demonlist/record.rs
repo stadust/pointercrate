@@ -5,16 +5,13 @@ pub use self::{
     post::Submission,
 };
 use crate::{
-    cistring::CiString,
     error::PointercrateError,
     model::demonlist::{demon::MinimalDemon, player::DatabasePlayer, submitter::Submitter},
-    ratelimit::RatelimitScope::RecordSubmission,
     state::PointercrateState,
     Result,
 };
 use derive_more::Display;
 use log::{debug, error, info, warn};
-use reqwest::Client;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
 use sqlx::PgConnection;

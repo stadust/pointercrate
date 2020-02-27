@@ -22,15 +22,11 @@ pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Js
 
 pub mod v1 {
     use crate::{
-        cistring::CiString,
         extractor::{auth::TokenAuth, if_match::IfMatch},
-        model::{
-            demonlist::{
-                creator::{Creator, PostCreator},
-                demon::{Demon, DemonPositionPagination, FullDemon, MinimalDemon, PatchDemon},
-                player::DatabasePlayer,
-            },
-            user::AuthenticatedUser,
+        model::demonlist::{
+            creator::{Creator, PostCreator},
+            demon::{Demon, DemonPositionPagination, FullDemon, PatchDemon},
+            player::DatabasePlayer,
         },
         permissions::Permissions,
         state::PointercrateState,
@@ -38,8 +34,8 @@ pub mod v1 {
         ApiResult,
     };
     use actix_web::{
-        web::{Data, Json, Path, Query},
-        HttpRequest, HttpResponse,
+        web::{Json, Path, Query},
+        HttpResponse,
     };
     use actix_web_codegen::{delete, get, patch, post};
 
@@ -123,15 +119,11 @@ pub mod v1 {
 
 pub mod v2 {
     use crate::{
-        cistring::CiString,
         extractor::{auth::TokenAuth, if_match::IfMatch},
-        model::{
-            demonlist::{
-                creator::{Creator, PostCreator},
-                demon::{Demon, DemonIdPagination, DemonPositionPagination, FullDemon, MinimalDemon, PatchDemon},
-                player::DatabasePlayer,
-            },
-            user::AuthenticatedUser,
+        model::demonlist::{
+            creator::{Creator, PostCreator},
+            demon::{Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon},
+            player::DatabasePlayer,
         },
         permissions::Permissions,
         state::PointercrateState,
@@ -139,8 +131,8 @@ pub mod v2 {
         ApiResult,
     };
     use actix_web::{
-        web::{Data, Json, Path, Query},
-        HttpRequest, HttpResponse,
+        web::{Json, Path, Query},
+        HttpResponse,
     };
     use actix_web_codegen::{delete, get, patch, post};
 

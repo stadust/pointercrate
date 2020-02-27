@@ -10,8 +10,6 @@ use crate::{error::PointercrateError, model::user::User, Result};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use serde::{Deserialize, Serialize};
-use sqlx::PgConnection;
-use std::hash::{Hash, Hasher};
 
 mod delete;
 mod get;

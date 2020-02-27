@@ -1,8 +1,8 @@
 use super::Page;
 use crate::{error::PointercrateError, state::PointercrateState, Result, ViewResult};
-use actix_web::{web::Path, HttpRequest, HttpResponse};
+use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, PreEscaped};
 
 #[derive(Debug)]
 pub struct Documentation<'a> {

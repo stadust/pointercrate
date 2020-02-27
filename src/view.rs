@@ -1,8 +1,7 @@
 #![allow(unused_variables)]
 // currently, all the request parameters are unused, but they will be required in the future
 
-use crate::{config, state::PointercrateState};
-use actix_web::HttpRequest;
+use crate::config;
 use maud::{html, Markup, PreEscaped, DOCTYPE};
 
 pub mod account;

@@ -2,15 +2,15 @@
 
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    model::user::{AuthenticatedUser, PatchUser, User, UserPagination},
+    model::user::{PatchUser, User, UserPagination},
     permissions::Permissions,
     state::PointercrateState,
     util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{
-    web::{Data, Json, Path, Query},
-    HttpRequest, HttpResponse,
+    web::{Json, Path, Query},
+    HttpResponse,
 };
 use actix_web_codegen::{delete, get, patch};
 

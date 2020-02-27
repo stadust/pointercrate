@@ -1,13 +1,11 @@
 use crate::{
-    error::PointercrateError,
     model::user::{auth::AuthenticatedUser, patch::PatchUser},
     util::{non_nullable, nullable},
     Result,
 };
-use bitflags::_core::fmt::{Error, Formatter};
 use serde::Deserialize;
 use sqlx::PgConnection;
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
 
 #[derive(Deserialize)]
 pub struct PatchMe {

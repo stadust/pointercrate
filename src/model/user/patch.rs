@@ -1,6 +1,5 @@
 use super::{Permissions, User};
 use crate::{
-    error::PointercrateError,
     util::{non_nullable, nullable},
     Result,
 };

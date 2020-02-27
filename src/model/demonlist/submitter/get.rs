@@ -1,12 +1,11 @@
 use super::{FullSubmitter, Submitter};
 use crate::{
-    error::PointercrateError,
     model::demonlist::record::submitted_by,
-    ratelimit::{PreparedRatelimits, RatelimitScope, Ratelimits},
+    ratelimit::{PreparedRatelimits, RatelimitScope},
     Result,
 };
 use sqlx::PgConnection;
-use std::{net::IpAddr, sync::mpsc::TrySendError::Full};
+use std::net::IpAddr;
 
 impl Submitter {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Submitter> {

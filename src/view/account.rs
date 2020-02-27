@@ -1,8 +1,7 @@
 use super::Page;
-use crate::{extractor::auth::TokenAuth, model::user::User, permissions::Permissions, state::PointercrateState, ApiResult, Result};
-use actix_web::{HttpRequest, HttpResponse, Responder};
+use crate::{extractor::auth::TokenAuth, model::user::User, permissions::Permissions, state::PointercrateState, ApiResult};
+use actix_web::HttpResponse;
 use actix_web_codegen::get;
-use log::info;
 use maud::{html, Markup, PreEscaped};
 use std::{
     collections::hash_map::DefaultHasher,

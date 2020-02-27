@@ -4,7 +4,7 @@ use crate::{
     model::demonlist::{
         demon::MinimalDemon,
         player::DatabasePlayer,
-        record::{FullRecord, MinimalRecordPD, RecordStatus},
+        record::{MinimalRecordPD, RecordStatus},
     },
     util::{non_nullable, nullable},
     Result,

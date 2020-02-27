@@ -11,7 +11,7 @@ use crate::{
     Result,
 };
 use derive_more::Display;
-use log::{debug, info, warn};
+use log::{debug, info};
 use serde::Serialize;
 use sqlx::PgConnection;
 use std::hash::{Hash, Hasher};

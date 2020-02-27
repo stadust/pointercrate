@@ -1,6 +1,6 @@
 use crate::{
     error::PointercrateError,
-    model::user::{get::FetchedUser, User},
+    model::user::User,
     permissions::Permissions,
     util::{non_nullable, nullable},
     Result,

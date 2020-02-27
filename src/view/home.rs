@@ -1,6 +1,6 @@
 use super::Page;
-use crate::{model::user::User, permissions::Permissions, state::PointercrateState, Result, ViewResult};
-use actix_web::{HttpRequest, HttpResponse, Responder};
+use crate::{model::user::User, permissions::Permissions, state::PointercrateState, ViewResult};
+use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};
 

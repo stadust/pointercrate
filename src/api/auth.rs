@@ -12,10 +12,7 @@ use crate::{
     util::HttpResponseBuilderExt,
     ApiResult,
 };
-use actix_web::{
-    web::{Data, Json},
-    HttpRequest, HttpResponse, Responder,
-};
+use actix_web::{web::Json, HttpResponse};
 use actix_web_codegen::{delete, get, patch, post};
 use serde_json::json;
 

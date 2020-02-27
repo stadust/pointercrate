@@ -1,5 +1,5 @@
 use crate::error::PointercrateError;
-use actix_web::{http::Method, middleware::NormalizePath, HttpRequest, HttpResponse, ResponseError};
+use actix_web::{http::Method, HttpRequest, HttpResponse, ResponseError};
 
 pub mod auth;
 pub mod demonlist;

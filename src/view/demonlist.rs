@@ -1,7 +1,6 @@
 use super::Page;
 use crate::{
     compat, config,
-    error::{HtmlError, PointercrateError},
     model::{
         demonlist::demon::{Demon, FullDemon},
         nationality::Nationality,
@@ -11,7 +10,7 @@ use crate::{
     state::PointercrateState,
     video, Result, ViewResult,
 };
-use actix_web::{web::Path, FromRequest, HttpRequest, HttpResponse, Responder};
+use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use gdcf::cache::CacheEntry;
 use gdcf_model::{

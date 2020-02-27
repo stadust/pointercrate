@@ -11,7 +11,7 @@ use log::trace;
 use reqwest::Client;
 use sqlx::{
     pool::{Builder, PoolConnection},
-    Connection, PgConnection, Pool,
+    PgConnection, Pool,
 };
 use sqlx_core::Transaction;
 use std::{collections::HashMap, sync::Arc, time::Duration};

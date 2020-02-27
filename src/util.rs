@@ -1,11 +1,7 @@
 //! Some utils for pagination and patch
 
 use crate::error::PointercrateError;
-use actix_web::{
-    dev::{HttpResponseBuilder, RequestHead, ServiceRequest},
-    http::HeaderMap,
-    HttpRequest, HttpResponse,
-};
+use actix_web::{dev::HttpResponseBuilder, http::HeaderMap, HttpResponse};
 use log::warn;
 use mime::Mime;
 use serde::{de::Error, Deserialize, Deserializer, Serialize};

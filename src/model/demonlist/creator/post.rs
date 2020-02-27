@@ -5,9 +5,8 @@ use crate::{
     model::demonlist::{demon::MinimalDemon, player::DatabasePlayer},
     Result,
 };
-use log::info;
 use serde::Deserialize;
-use sqlx::{Error, PgConnection};
+use sqlx::PgConnection;
 
 #[derive(Debug, Deserialize)]
 pub struct PostCreator {

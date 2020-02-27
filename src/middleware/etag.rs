@@ -1,28 +1,18 @@
 //! Module containing middleware for dealing with HTTP preconditions
 
-use crate::{
-    error::PointercrateError,
-    model::user::Authorization,
-    util::{header, parse_list_of_header_values},
-};
+use crate::util::header;
 use actix_web::{
     body::Body,
-    dev::{HttpResponseBuilder, Service, ServiceRequest, ServiceResponse, Transform},
+    dev::{Service, ServiceRequest, ServiceResponse, Transform},
     http::{Method, StatusCode},
-    Error, HttpMessage, HttpRequest, HttpResponse, ResponseError,
+    Error, HttpResponse,
 };
-use bitflags::_core::num::ParseIntError;
 use derive_more::Display;
-use futures::future::{err, ok, Either, Ready};
+use futures::future::{ok, Ready};
 use log::{debug, info, warn};
-use mime::Mime;
-use serde::Serialize;
 use std::{
-    collections::hash_map::DefaultHasher,
     future::Future,
-    hash::{Hash, Hasher},
     pin::Pin,
-    str::FromStr,
     task::{Context, Poll},
 };
 

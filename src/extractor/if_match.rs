@@ -1,15 +1,10 @@
 use crate::error::{JsonError, PointercrateError};
 use actix_web::{
     dev::{Payload, PayloadStream},
-    error::PayloadError,
-    web::Bytes,
-    Error, FromRequest, HttpRequest,
+    FromRequest, HttpRequest,
 };
 use derive_more::Display;
-use futures::{
-    future::{err, ready, Ready},
-    Stream,
-};
+use futures::future::{err, ready, Ready};
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},

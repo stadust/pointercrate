@@ -1,22 +1,17 @@
 use crate::{
-    error::PointercrateError,
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
-    model::{
-        demonlist::{
-            record::{FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission},
-            submitter::Submitter,
-        },
-        user::AuthenticatedUser,
+    model::demonlist::{
+        record::{FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission},
+        submitter::Submitter,
     },
     permissions::Permissions,
-    ratelimit::RatelimitScope,
     state::{audit_connection, PointercrateState},
     util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{
-    web::{Data, Json, Path, Query},
-    HttpRequest, HttpResponse,
+    web::{Json, Path, Query},
+    HttpResponse,
 };
 use actix_web_codegen::{delete, get, patch, post};
 
