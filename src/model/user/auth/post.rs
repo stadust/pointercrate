@@ -69,7 +69,10 @@ impl AuthenticatedUser {
 
 #[cfg(test)]
 mod tests {
-    use crate::model::user::{AuthenticatedUser, Registration};
+    use crate::{
+        error::PointercrateError,
+        model::user::{AuthenticatedUser, Registration},
+    };
 
     #[actix_rt::test]
     async fn test_successful_registration() {
@@ -84,5 +87,20 @@ mod tests {
 
         assert!(result.is_ok(), "{:?}", result.err().unwrap());
         assert_eq!(result.unwrap().into_inner().name, "stadust");
+    }
+
+    #[actix_rt::test]
+    async fn test_failed_registration_existing_user() {
+        let mut connection = crate::test::test_setup().await;
+
+        let registration = Registration {
+            name: "stadust_existing".to_owned(),
+            password: "password1234567890".to_owned(),
+        };
+
+        let result = AuthenticatedUser::register(registration, &mut connection, None).await;
+
+        assert!(result.is_err(), "{:?}", result.ok().unwrap().inner());
+        assert_eq!(result.err().unwrap(), PointercrateError::NameTaken);
     }
 }
