@@ -10,7 +10,7 @@ use log::{debug, info, warn};
 use serde::Deserialize;
 use sqlx::PgConnection;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct PatchDemon {
     #[serde(default, deserialize_with = "non_nullable")]
     pub name: Option<CiString>,
@@ -32,9 +32,17 @@ pub struct PatchDemon {
 }
 
 impl FullDemon {
-    pub async fn apply_patch(self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
+    pub async fn apply_patch(mut self, patch: PatchDemon, connection: &mut PgConnection) -> Result<Self> {
+        let changes_requirement = patch.requirement.is_some();
+
+        let updated_demon = self.demon.apply_patch(patch, connection).await?;
+
+        if changes_requirement {
+            self.records.retain(|record| record.progress >= updated_demon.requirement);
+        }
+
         Ok(FullDemon {
-            demon: self.demon.apply_patch(patch, connection).await?,
+            demon: updated_demon,
             ..self
         })
     }
@@ -107,6 +115,10 @@ impl Demon {
         if requirement < 0 || requirement > 100 {
             return Err(PointercrateError::InvalidRequirement)
         }
+
+        sqlx::query!("DELETE FROM records WHERE demon = $1 AND progress < $2", self.base.id, requirement)
+            .execute(connection)
+            .await?;
 
         sqlx::query!("UPDATE demons SET requirement = $1 WHERE id = $2", requirement, self.base.id)
             .execute(connection)
@@ -216,5 +228,59 @@ impl MinimalDemon {
         self.position = to;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::model::demonlist::demon::{Demon, FullDemon, PatchDemon};
+
+    #[actix_rt::test]
+    async fn test_change_record_requirement() {
+        let mut connection = crate::test::test_setup().await;
+
+        let patch = PatchDemon {
+            requirement: Some(10),
+            ..Default::default()
+        };
+
+        let demon = Demon::by_position(1, &mut connection).await.unwrap();
+
+        let demon = demon.apply_patch(patch, &mut connection).await;
+
+        assert!(demon.is_ok(), "{:?}", demon.unwrap_err());
+
+        let demon = demon.unwrap();
+
+        assert_eq!(demon.requirement, 10);
+
+        let demon_reloaded = Demon::by_position(1, &mut connection).await.unwrap();
+
+        assert_eq!(demon, demon_reloaded);
+    }
+
+    #[actix_rt::test]
+    async fn test_change_record_requirement_with_drop_records() {
+        let mut connection = crate::test::test_setup().await;
+
+        let patch = PatchDemon {
+            requirement: Some(100),
+            ..Default::default()
+        };
+
+        let demon = FullDemon::by_position(1, &mut connection).await.unwrap();
+        let demon = demon.apply_patch(patch, &mut connection).await;
+
+        assert!(demon.is_ok(), "{:?}", demon.unwrap_err());
+
+        let demon = demon.unwrap();
+
+        for record in &demon.records {
+            assert_eq!(record.progress, 100);
+        }
+
+        let demon_reloaded = FullDemon::by_position(1, &mut connection).await.unwrap();
+
+        assert_eq!(demon, demon_reloaded);
     }
 }
