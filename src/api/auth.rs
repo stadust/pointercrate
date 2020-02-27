@@ -4,8 +4,10 @@ use crate::{
     extractor::{
         auth::{BasicAuth, TokenAuth},
         if_match::IfMatch,
+        ip::Ip,
     },
     model::user::{AuthenticatedUser, Authorization, PatchMe, Registration},
+    ratelimit::RatelimitScope,
     state::PointercrateState,
     util::HttpResponseBuilderExt,
     ApiResult,
@@ -18,9 +20,9 @@ use actix_web_codegen::{delete, get, patch, post};
 use serde_json::json;
 
 #[post("/register/")]
-pub async fn register(body: Json<Registration>, state: PointercrateState) -> ApiResult<HttpResponse> {
+pub async fn register(Ip(ip): Ip, body: Json<Registration>, state: PointercrateState) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
-    let user = AuthenticatedUser::register(body.into_inner(), &mut connection).await?;
+    let user = AuthenticatedUser::register(body.into_inner(), &mut connection, Some(state.ratelimits.prepare(ip))).await?;
 
     Ok(HttpResponse::Created()
         .header("Location", "/api/v1/auth/me/")
@@ -28,7 +30,9 @@ pub async fn register(body: Json<Registration>, state: PointercrateState) -> Api
 }
 
 #[post("/")]
-pub async fn login(user: BasicAuth, state: PointercrateState) -> ApiResult<HttpResponse> {
+pub async fn login(Ip(ip): Ip, user: BasicAuth, state: PointercrateState) -> ApiResult<HttpResponse> {
+    state.ratelimits.check(RatelimitScope::Login, ip)?;
+
     Ok(HttpResponse::Ok().etag(user.0.inner()).json(json! {{
         "data": user.0.inner(),
         "token": user.0.generate_token(&state.secret)

@@ -1,5 +1,11 @@
 use super::AuthenticatedUser;
-use crate::{error::PointercrateError, model::user::User, permissions::Permissions, Result};
+use crate::{
+    error::PointercrateError,
+    model::user::User,
+    permissions::Permissions,
+    ratelimit::{PreparedRatelimits, RatelimitScope},
+    Result,
+};
 use log::{info, trace};
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -11,11 +17,17 @@ pub struct Registration {
 }
 
 impl AuthenticatedUser {
-    pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
+    pub async fn register(
+        registration: Registration, connection: &mut PgConnection, ratelimits: Option<PreparedRatelimits<'_>>,
+    ) -> Result<AuthenticatedUser> {
         info!("Attempting registration of new user under name {}", registration.name);
 
         Self::validate_password(&registration.password)?;
         User::validate_name(&registration.name)?;
+
+        if let Some(ratelimits) = ratelimits {
+            ratelimits.check(RatelimitScope::SoftRegistration)?;
+        }
 
         trace!("Registration request is formally correct");
 
@@ -34,6 +46,10 @@ impl AuthenticatedUser {
                 .member_id;
 
                 info!("Newly registered user with name {} has been assigned ID {}", registration.name, id);
+
+                if let Some(ratelimits) = ratelimits {
+                    ratelimits.check(RatelimitScope::Registration)?;
+                }
 
                 Ok(AuthenticatedUser {
                     user: User {
@@ -64,7 +80,7 @@ mod tests {
             password: "password1234567890".to_owned(),
         };
 
-        let result = AuthenticatedUser::register(registration, &mut connection).await;
+        let result = AuthenticatedUser::register(registration, &mut connection, None).await;
 
         assert!(result.is_ok(), "{:?}", result.err().unwrap());
         assert_eq!(result.unwrap().into_inner().name, "stadust");

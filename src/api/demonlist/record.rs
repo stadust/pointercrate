@@ -69,17 +69,15 @@ pub async fn submit(
         audit_connection(&mut connection, user.inner()).await?; // might as well
     }
 
-    let submitter = Submitter::by_ip_or_create(ip, &mut connection).await?;
-    let record = FullRecord::create_from(submitter, submission.into_inner(), &mut connection).await?;
+    let ratelimiter = state.ratelimits.prepare(ip);
 
-    // FIXME: this is ugly.
-    // At this point the new record is already in the database. However, if we
-    // return here, the Transaction object gets dropped, which causes the transaction to be rolled back,
-    // so the record addition is reverted
-    if shall_ratelimit {
-        state.ratelimits.check(RatelimitScope::RecordSubmission, ip)?;
-        state.ratelimits.check(RatelimitScope::RecordSubmissionGlobal, ip)?;
-    }
+    let submitter = Submitter::by_ip_or_create(ip, &mut connection, Some(ratelimiter)).await?;
+
+    let record = if shall_ratelimit {
+        FullRecord::create_from(submitter, submission.into_inner(), &mut connection, Some(ratelimiter)).await?
+    } else {
+        FullRecord::create_from(submitter, submission.into_inner(), &mut connection, None).await?
+    };
 
     connection.commit().await?;
 

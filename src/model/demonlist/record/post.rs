@@ -8,6 +8,7 @@ use crate::{
         record::{FullRecord, RecordStatus},
         submitter::Submitter,
     },
+    ratelimit::{PreparedRatelimits, RatelimitScope, Ratelimits},
     Result,
 };
 use derive_more::Display;
@@ -29,7 +30,9 @@ pub struct Submission {
 }
 
 impl FullRecord {
-    pub async fn create_from(submitter: Submitter, submission: Submission, connection: &mut PgConnection) -> Result<FullRecord> {
+    pub async fn create_from(
+        submitter: Submitter, submission: Submission, connection: &mut PgConnection, ratelimits: Option<PreparedRatelimits<'_>>,
+    ) -> Result<FullRecord> {
         info!("Processing record addition '{}' by {}", submission, submitter);
 
         // Banned submitters cannot submit records
@@ -104,6 +107,13 @@ impl FullRecord {
                 existing: row.id,
                 status: RecordStatus::from_str(&row.status_)?,
             })
+        }
+
+        // Check ratelimits before any change is made to the database so that the transaction rollback is
+        // easier.
+        if let Some(ratelimits) = ratelimits {
+            ratelimits.check(RatelimitScope::RecordSubmissionGlobal)?;
+            ratelimits.check(RatelimitScope::RecordSubmission)?;
         }
 
         sqlx::query!(

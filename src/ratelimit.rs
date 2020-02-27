@@ -38,6 +38,18 @@ pub struct Ratelimits {
     login_attempts: KeyedRateLimiter<IpAddr>,
 }
 
+#[derive(Copy, Clone)]
+pub struct PreparedRatelimits<'a> {
+    ratelimits: &'a Ratelimits,
+    ip: IpAddr,
+}
+
+impl PreparedRatelimits<'_> {
+    pub fn check(&self, scope: RatelimitScope) -> Result<()> {
+        self.ratelimits.check(scope, self.ip)
+    }
+}
+
 impl Ratelimits {
     pub fn initialize() -> Self {
         Ratelimits {
@@ -54,6 +66,10 @@ impl Ratelimits {
             // 3 per 30 minutes
             login_attempts: KeyedRateLimiter::new(nonzero!(3u32), Duration::from_secs(1800)),
         }
+    }
+
+    pub fn prepare(&self, ip: IpAddr) -> PreparedRatelimits {
+        PreparedRatelimits { ratelimits: self, ip }
     }
 
     pub fn check(&self, scope: RatelimitScope, ip: IpAddr) -> Result<()> {
