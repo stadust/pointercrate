@@ -29,7 +29,7 @@ function setupGetAccessToken() {
   loginForm.onSubmit(function(event) {
     makeRequest(
       "POST",
-      "/auth/",
+      "/api/v1/auth/",
       htmlLoginForm.getElementsByClassName("output")[0],
       function(data) {
         loginPassword.value = "";
@@ -80,7 +80,7 @@ function setupEditAccount() {
 
     makeRequest(
       "PATCH",
-      "/auth/me/",
+      "/api/v1/auth/me/",
       editForm.errorOutput,
       () => window.location.reload(),
       {
@@ -132,7 +132,7 @@ function setupInvalidateToken() {
   invalidateForm.onSubmit(function(event) {
     makeRequest(
       "POST",
-      "/auth/invalidate/",
+      "/api/v1/auth/invalidate/",
       invalidateForm.errorOutput,
       () => window.location.reload(),
       { 40100: () => loginPassword.setError("Invalid credentials") },
@@ -152,7 +152,7 @@ function setupDeleteUser(csrfToken) {
     function(event) {
       makeRequest(
         "DELETE",
-        "/users/" + window.currentUser.id + "/",
+        "/api/v1/users/" + window.currentUser.id + "/",
         window.patchUserPermissionsForm.errorOutput,
         () => editForm.setSuccess("Successfully deleted user!"),
         {},
@@ -175,7 +175,7 @@ function setupPatchUserPermissionsForm(csrfToken) {
   editForm.onSubmit(function(event) {
     makeRequest(
       "PATCH",
-      "/users/" + window.currentUser.id + "/",
+      "/api/v1/users/" + window.currentUser.id + "/",
       editForm.errorOutput,
       data => {
         if (data.status == 200) {
@@ -213,7 +213,7 @@ function setupUserByIdForm() {
   userByIdForm.onSubmit(function(event) {
     makeRequest(
       "GET",
-      "/users/" + userId.value + "/",
+      "/api/v1/users/" + userId.value + "/",
       userByIdForm.errorOutput,
       response => window.userPaginator.onReceive(response),
       {
@@ -235,7 +235,7 @@ function setupUserByNameForm() {
   userByNameForm.onSubmit(function(event) {
     makeRequest(
       "GET",
-      "/users/?name=" + userName.value,
+      "/api/v1/users/?name=" + userName.value,
       userByNameForm.errorOutput,
       data => {
         let json = data.responseJSON;
@@ -245,7 +245,7 @@ function setupUserByNameForm() {
         } else {
           makeRequest(
             "GET",
-            "/users/" + json[0].id + "/",
+            "/api/v1/users/" + json[0].id + "/",
             userByNameForm.errorOutput,
             response => window.userPaginator.onReceive(response)
           );

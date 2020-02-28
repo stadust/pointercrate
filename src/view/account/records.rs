@@ -1,14 +1,17 @@
-use crate::view::{dropdown, paginator};
+use crate::view::{demonlist::OverviewDemon, dropdown, paginator};
 use maud::{html, Markup};
 
-fn record_manager() -> Markup {
+fn record_manager(demons: &[OverviewDemon]) -> Markup {
     html! {
     div.panel.fade#record-manager {
         h2.underlined.pad {
-            "Record Manager (Alpha)"
+            "Record Manager (Alpha) - "
+            (dropdown("All", html! {
+                li.white.hover.underlined data-value = "All" {"All"}
+            }, demons.into_iter().map(|demon| html!(li.white.hover data-value = (demon.id) data-display = (demon.name) {"#"(demon.position) " - " (demon.name)}))))
         }
         div.flex.viewer {
-            (paginator("record-pagination", "/records/"))
+            (paginator("record-pagination", "/api/v1/records/"))
             p.viewer-welcome {
                 "Click on a record on the left to get started!"
             }
@@ -168,11 +171,11 @@ fn player_selector() -> Markup {
     }
 }
 
-pub(super) fn page() -> Markup {
+pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "3" {
             div.left {
-                (record_manager())
+                (record_manager(demons))
                 (manager_help())
             }
             div.right {

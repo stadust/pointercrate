@@ -127,7 +127,7 @@ pub fn footer() -> Markup {
     let first_legacy = config::extended_list_size() + 1;
 
     html! {
-        div.footer.center.fade {
+        div.footer.center {
             span.overline.pad style="text-align:center" {
                 "© Copyright 2017-2019 pointercrate.com"
                 br;

@@ -29,7 +29,7 @@ class Dropdown {
 
     for (let li of this.html.getElementsByTagName("li")) {
       li.addEventListener("click", () => {
-        this.input.value = li.dataset.value;
+        this.input.value = li.dataset.display || li.dataset.value;
 
         for (let listener of this.listeners) {
           listener(li);
@@ -519,7 +519,7 @@ function parsePagination(linkHeader) {
     for (var link of linkHeader.split(",")) {
       var s = link.split(";");
 
-      links[s[1].substring(5)] = s[0].substring(8, s[0].length - 1);
+      links[s[1].substring(5)] = s[0].substring(1, s[0].length - 1);
     }
   }
   return links;
@@ -529,7 +529,7 @@ function parsePagination(linkHeader) {
  * Makes a request
  *
  * @param {String} method The HTTP method to use for this request
- * @param {String} endpoint The endpoint to make the request to
+ * @param {String} endpoint The endpoint to make the request to. The method _does not_ prefix this with the api version!
  * @param {HTMLElement} errorOutput Some HTML element to write error messages into
  * @param {*} onSuccess A callback to call with the received JSON data, if the request succeeds
  * @param {*} [errorCodes={}]
@@ -551,7 +551,7 @@ function makeRequest(
 
   $.ajax({
     method: method,
-    url: "/api/v1" + endpoint,
+    url: endpoint,
     contentType: "application/json",
     data: JSON.stringify(data),
     headers: headers,

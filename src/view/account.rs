@@ -1,5 +1,12 @@
 use super::Page;
-use crate::{extractor::auth::TokenAuth, model::user::User, permissions::Permissions, state::PointercrateState, ApiResult};
+use crate::{
+    extractor::auth::TokenAuth,
+    model::user::User,
+    permissions::Permissions,
+    state::PointercrateState,
+    view::demonlist::{overview_demons, OverviewDemon},
+    ApiResult, ViewResult,
+};
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};
@@ -16,18 +23,27 @@ mod users;
 pub struct AccountPage {
     user: User,
     csrf_token: String,
+    demons: Vec<OverviewDemon>,
 }
 
 #[get("/account/")]
-pub fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> HttpResponse {
-    match user {
+pub async fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> ViewResult<HttpResponse> {
+    Ok(match user {
         Ok(TokenAuth(user)) => {
             let csrf_token = user.generate_csrf_token(&state.secret);
+
+            let demons = if user.inner().has_permission(Permissions::ListHelper) {
+                let mut connection = state.connection().await?;
+                overview_demons(&mut connection).await?
+            } else {
+                Vec::new()
+            };
 
             HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
                 AccountPage {
                     user: user.into_inner(),
                     csrf_token,
+                    demons,
                 }
                 .render()
                 .0,
@@ -37,7 +53,7 @@ pub fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> HttpRespon
             actix_web::HttpResponse::Found()
                 .header(actix_web::http::header::LOCATION, "/login/")
                 .finish(),
-    }
+    })
 }
 
 impl Page for AccountPage {
@@ -95,7 +111,7 @@ impl Page for AccountPage {
                         (users::page())
                     }
                     @if self.user.has_permission(Permissions::ListHelper) {
-                        (records::page())
+                        (records::page(&self.demons))
                     }
                 }
             }

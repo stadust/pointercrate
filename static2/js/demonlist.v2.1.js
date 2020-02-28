@@ -62,7 +62,7 @@ class StatsViewer extends FilteredPaginator {
   onSelect(selected) {
     makeRequest(
       "GET",
-      "/players/" + selected.dataset.id + "/",
+      "/api/v1/players/" + selected.dataset.id + "/",
       this.errorOutput,
       jsonData => {
         this.onReceive(jsonData);

@@ -157,6 +157,8 @@
 
   background: #171921;
   color: #ddd;
+
+  box-shadow: 0px -1px 10px 6px #171921;
 }
 
 .footer .flex {
@@ -171,10 +173,6 @@
 
 .footer .link {
   color: #f77e39;
-}
-
-.footer.fade {
-  box-shadow: 0px -1px 10px 6px #171921;
 }
 
 .footer h2 {

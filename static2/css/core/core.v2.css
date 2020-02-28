@@ -14,6 +14,7 @@
 
 .fade {
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+  border: 1px lightgray dashed;
 }
 
 @media (min-width: 1024px) {
@@ -123,6 +124,36 @@
 .orange.active {
   background-color: #ba5b2c;
   color: #ddd;
+}
+
+.red {
+  background: #ff003c;
+  color: white;
+}
+
+.red.hover:not(.disabled):not([disabled]):hover,
+.red.active {
+  background: #ff2457;
+}
+
+.red.hover:not(.disabled):not([disabled]):active,
+.red.active {
+  background: #f21347;
+}
+
+.green {
+  background: #73ce2e;
+  color: white;
+}
+
+.green.hover:not(.disabled):not([disabled]):hover,
+.green.active {
+  background: #7dcc41;
+}
+
+.green.hover:not(.disabled):not([disabled]):active,
+.green.active {
+  background: #5ba324;
 }
 
 /* size modifying styles */

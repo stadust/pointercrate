@@ -1,8 +1,10 @@
-pub use self::{demon_page::page, overview::index};
+pub use self::{
+    demon_page::page,
+    overview::{index, overview_demons, OverviewDemon},
+};
 use crate::{
     config,
     model::{demonlist::demon::Demon, nationality::Nationality},
-    view::demonlist::overview::OverviewDemon,
 };
 use maud::{html, Markup, PreEscaped};
 
@@ -41,8 +43,6 @@ static LEGACY_SECTION: ListSection = ListSection {
     id: "legacy",
     numbered: false,
 };
-
-fn construct_demonlist_page(center_content: &[Markup], sidebar_content: &[Markup]) {}
 
 fn dropdowns(all_demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < config::list_size() as usize {
@@ -216,7 +216,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                 ))
             }
             div.flex.viewer {
-                (super::filtered_paginator("stats-viewer-pagination", "/players/ranking/"))
+                (super::filtered_paginator("stats-viewer-pagination", "/api/v1/players/ranking/"))
                 p.viewer-welcome {
                     "Click on a player's name on the left to get started!"
                 }

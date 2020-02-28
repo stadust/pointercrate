@@ -85,7 +85,7 @@ pub(super) fn page() -> Markup {
                 div.panel.fade {
                     h2.underlined.pad { "User list" }
                     p { "A list of all user accounts on pointercrate" }
-                    (paginator("user-pagination", "/users/"))
+                    (paginator("user-pagination", "/api/v1/users/"))
                 }
             }
         }

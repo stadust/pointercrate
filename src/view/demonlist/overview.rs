@@ -14,6 +14,7 @@ use sqlx::PgConnection;
 
 #[derive(Debug)]
 pub struct OverviewDemon {
+    pub id: i32,
     pub position: i16,
     pub name: String,
     pub publisher: String,
@@ -27,6 +28,16 @@ pub struct DemonlistOverview {
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
     pub nations: Vec<Nationality>,
+}
+
+pub async fn overview_demons(connection: &mut PgConnection) -> Result<Vec<OverviewDemon>> {
+    Ok(sqlx::query_as!(
+        OverviewDemon,
+        "SELECT demons.id, position, demons.name::TEXT, video::TEXT, players.name::TEXT as publisher FROM demons INNER JOIN players ON \
+         demons.publisher = players.id WHERE position IS NOT NULL ORDER BY position"
+    )
+    .fetch_all(connection)
+    .await?)
 }
 
 impl DemonlistOverview {
@@ -87,13 +98,7 @@ impl DemonlistOverview {
         let helpers = User::by_permission(Permissions::ListHelper, connection).await?;
 
         let nations = Nationality::all(connection).await?;
-        let demon_overview = sqlx::query_as!(
-            OverviewDemon,
-            "SELECT position, demons.name::TEXT, video::TEXT, players.name::TEXT as publisher FROM demons INNER JOIN players ON \
-             demons.publisher = players.id WHERE position IS NOT NULL ORDER BY position"
-        )
-        .fetch_all(connection)
-        .await?;
+        let demon_overview = overview_demons(connection).await?;
 
         Ok(DemonlistOverview {
             admins,

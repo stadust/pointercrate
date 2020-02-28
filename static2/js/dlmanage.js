@@ -16,6 +16,9 @@ function generateRecord(record) {
     case "submitted":
       li.style.backgroundColor = "rgba(255, 255, 161, .3)";
       break;
+    case "under consideration":
+      li.style.backgroundColor = "rgba(142, 230, 230, .3)";
+      break;
     default:
       break;
   }
@@ -81,6 +84,13 @@ class RecordManager extends Paginator {
         .getElementById("status-filter-panel")
         .getElementsByClassName("dropdown-menu")[0]
     );
+
+    new Dropdown(
+      manager.getElementsByClassName("dropdown-menu")[0]
+    ).addEventListener(li => {
+      if (li.innerHTML === "All") this.updateQueryData("demon_id", undefined);
+      else this.updateQueryData("demon_id", li.dataset.value);
+    });
     this.dropdown.addEventListener(li => {
       if (li.innerHTML === "All") this.updateQueryData("status", undefined);
       else this.updateQueryData("status", li.innerHTML);
@@ -151,7 +161,7 @@ function setupRecordFilterPlayerNameForm() {
   recordFilterPlayerNameForm.onSubmit(function(event) {
     makeRequest(
       "GET",
-      "/players/?name=" + playerName.value,
+      "/api/v1/players/?name=" + playerName.value,
       recordFilterPlayerNameForm.errorOutput,
       data => {
         let json = data.responseJSON;
