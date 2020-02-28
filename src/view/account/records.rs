@@ -106,6 +106,22 @@ fn manager_help() -> Markup {
 }
 
 fn status_selector() -> Markup {
+    // FIXME: no vec
+    let dropdown_items = vec![
+        html! {
+            li.white.hover data-value = "approved" {"Approved"}
+        },
+        html! {
+            li.white.hover data-value = "submitted" {"Submitted"}
+        },
+        html! {
+            li.white.hover data-value = "rejected" {"Rejected"}
+        },
+        html! {
+            li.white.hover data-value = "under consideration" {"Under Consideration"}
+        },
+    ];
+
     html! {
         div.panel.fade#status-filter-panel style = "overflow: visible" {
             h2.underlined.pad {
@@ -116,12 +132,12 @@ fn status_selector() -> Markup {
             }
             (dropdown("All", html! {
                 li.white.hover.underlined data-value = "All" {"All"}
-            }, ["Approved", "Submitted", "Rejected"].iter().map(|s| html!(li.white.hover data-value = (s) {(s)}))))
+            }, dropdown_items.into_iter()))
         }
     }
 }
 
-fn player_filter() -> Markup {
+fn player_selector() -> Markup {
     html! {
         div.panel.fade {
             h2.underlined.pad {
@@ -160,7 +176,8 @@ pub(super) fn page() -> Markup {
                 (manager_help())
             }
             div.right {
-                (player_filter())
+                (status_selector())
+                (player_selector())
             }
         }
     }
