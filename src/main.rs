@@ -74,7 +74,7 @@ async fn main() -> std::io::Result<()> {
             .service(view::home::index)
             .service(view::login::index)
             .service(view::login::post)
-            .service(view::demonlist::demon_page)
+            .service(view::demonlist::page)
             .service(view::demonlist::index)
             .service(view::account::index)
             .service(view::documentation::index)

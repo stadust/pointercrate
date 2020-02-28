@@ -14,7 +14,6 @@ use sqlx::{Error, PgConnection};
 
 // Required until https://github.com/launchbadge/sqlx/pull/108 is merged
 struct FetchedRecord {
-    id: i32,
     progress: i16,
     video: Option<String>,
     status: String,
