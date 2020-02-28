@@ -24,7 +24,16 @@ pub async fn paginate(
 
     let (max_id, min_id) = Submitter::extremal_submitter_ids(&mut connection).await?;
 
-    pagination_response!(submitters, pagination, min_id, max_id, before_id, after_id, id)
+    pagination_response!(
+        "/api/v1/submitters/",
+        submitters,
+        pagination,
+        min_id,
+        max_id,
+        before_id,
+        after_id,
+        id
+    )
 }
 
 #[get("/{submitter_id}/")]

@@ -46,7 +46,16 @@ pub mod v1 {
         let demons = pagination.page(&mut connection).await?;
         let max_position = Demon::max_position(&mut connection).await?;
 
-        pagination_response!(demons, pagination, 1, max_position, before_position, after_position, base.position)
+        pagination_response!(
+            "/api/v1/demons/",
+            demons,
+            pagination,
+            1,
+            max_position,
+            before_position,
+            after_position,
+            base.position
+        )
     }
 
     #[get("/{position}/")]
@@ -143,7 +152,7 @@ pub mod v2 {
         let demons = pagination.page(&mut connection).await?;
         let (min_id, max_id) = Demon::extremal_demon_ids(&mut connection).await?;
 
-        pagination_response!(demons, pagination, min_id, max_id, before_id, after_id, base.id)
+        pagination_response!("/api/v2/demons/", demons, pagination, min_id, max_id, before_id, after_id, base.id)
     }
 
     // Same as /api/v1/demons/
@@ -154,7 +163,16 @@ pub mod v2 {
         let demons = pagination.page(&mut connection).await?;
         let max_position = Demon::max_position(&mut connection).await?;
 
-        pagination_response!(demons, pagination, 1, max_position, before_position, after_position, base.position)
+        pagination_response!(
+            "/api/v2/demons/listed/",
+            demons,
+            pagination,
+            1,
+            max_position,
+            before_position,
+            after_position,
+            base.position
+        )
     }
 
     #[get("/{demon_id}/")]

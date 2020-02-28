@@ -45,7 +45,7 @@ pub async fn paginate(
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut connection).await?;
 
-    pagination_response!(records, pagination, min_id, max_id, before_id, after_id, id)
+    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, before_id, after_id, id)
 }
 
 #[post("/")]

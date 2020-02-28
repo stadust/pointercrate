@@ -12,21 +12,21 @@ use std::{
 };
 
 macro_rules! pagination_response {
-    ($objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
+    ($endpoint: expr, $objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
         $pagination.$after_field = Some($min_id - 1);
         $pagination.$before_field = None;
 
         let mut rel = format!(
-            "</api/v1/users/?{}>; rel=first",
-            serde_urlencoded::to_string(&$pagination.0).unwrap()
+            "<{}?{}>; rel=first",
+            $endpoint, serde_urlencoded::to_string(&$pagination.0).unwrap()
         );
 
         $pagination.$after_field = None;
         $pagination.$before_field = Some($max_id + 1);
 
         rel.push_str(&format!(
-            ",</api/v1/users/?{}>; rel=last",
-            serde_urlencoded::to_string(&$pagination.0).unwrap()
+            ",<{}?{}>; rel=last",
+            $endpoint, serde_urlencoded::to_string(&$pagination.0).unwrap()
         ));
 
         if !$objects.is_empty() {
@@ -38,8 +38,8 @@ macro_rules! pagination_response {
                 $pagination.$after_field = None;
 
                 rel.push_str(&format!(
-                    ",</api/v1/users/?{}>; rel=prev",
-                    serde_urlencoded::to_string(&$pagination.0).unwrap()
+                    ",<{}?{}>; rel=prev",
+                    $endpoint, serde_urlencoded::to_string(&$pagination.0).unwrap()
                 ));
             }
             if last != $max_id {
@@ -47,8 +47,8 @@ macro_rules! pagination_response {
                 $pagination.$before_field = None;
 
                 rel.push_str(&format!(
-                    ",</api/v1/users/?{}>; rel=next",
-                    serde_urlencoded::to_string(&$pagination.0).unwrap()
+                    ",<{}?{}>; rel=next",
+                    $endpoint, serde_urlencoded::to_string(&$pagination.0).unwrap()
                 ));
             }
         }

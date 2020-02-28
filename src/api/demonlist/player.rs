@@ -22,7 +22,7 @@ pub async fn paginate(
     let demons = pagination.page(&mut connection).await?;
     let (min_id, max_id) = Player::extremal_player_ids(&mut connection).await?;
 
-    pagination_response!(demons, pagination, min_id, max_id, before_id, after_id, base.id)
+    pagination_response!("/api/v1/players/", demons, pagination, min_id, max_id, before_id, after_id, base.id)
 }
 
 #[get("/ranking/")]
@@ -32,7 +32,16 @@ pub async fn ranking(state: PointercrateState, mut pagination: Query<RankingPagi
     let demons = pagination.page(&mut connection).await?;
     let max_index = RankedPlayer::max_index(&mut connection).await?;
 
-    pagination_response!(demons, pagination, 1, max_index, before_index, after_index, index)
+    pagination_response!(
+        "/api/v1/players/ranking/",
+        demons,
+        pagination,
+        1,
+        max_index,
+        before_index,
+        after_index,
+        index
+    )
 }
 
 #[get("/{player_id}/")]

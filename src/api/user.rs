@@ -24,7 +24,7 @@ pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination:
 
     let (max_id, min_id) = User::extremal_member_ids(&mut connection).await?;
 
-    pagination_response!(users, pagination, min_id, max_id, before_id, after_id, id)
+    pagination_response!("/api/v1/users/", users, pagination, min_id, max_id, before_id, after_id, id)
 }
 
 #[get("/{user_id}/")]
