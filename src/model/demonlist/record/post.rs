@@ -5,7 +5,7 @@ use crate::{
     model::demonlist::{
         demon::MinimalDemon,
         player::DatabasePlayer,
-        record::{FullRecord, RecordStatus},
+        record::{note::Note, FullRecord, RecordStatus},
         submitter::Submitter,
     },
     ratelimit::{PreparedRatelimits, RatelimitScope},
@@ -15,7 +15,6 @@ use derive_more::Display;
 use log::{debug, info};
 use serde::Deserialize;
 use sqlx::{PgConnection, Row};
-use std::str::FromStr;
 
 #[derive(Deserialize, Debug, Display)]
 #[display(fmt = "{}% on {} by {} [status: {}]", progress, demon, player, status)]
@@ -27,6 +26,10 @@ pub struct Submission {
     pub video: Option<String>,
     #[serde(default)]
     pub status: RecordStatus,
+
+    /// An initial, submitter provided note for the demon.
+    #[serde(default)]
+    pub note: Option<String>,
 }
 
 impl FullRecord {
@@ -40,6 +43,7 @@ impl FullRecord {
             return Err(PointercrateError::BannedFromSubmissions)
         }
 
+        // validate video
         let video = match submission.video {
             Some(ref video) => Some(crate::video::validate(video)?),
             None => None,
@@ -75,10 +79,8 @@ impl FullRecord {
 
         debug!("Submission is valid, checking for duplicates!");
 
-        // Search for existing records. If no video is provided, we check if a record with the same
-        // (demon, player) combination exists. If a video exists, we also check if a record with
-        // exactly that video exists. Note that in the second case, two records can be matched,
-        // which is why we need the loop here
+        // Search for existing records. If a video exists, we also check if a record with
+        // exactly that video exists.
 
         if let Some(ref video) = submission.video {
             if let Some(row) = sqlx::query!("SELECT id, status_::text FROM records WHERE video = $1", video.to_string())
@@ -87,25 +89,25 @@ impl FullRecord {
             {
                 return Err(PointercrateError::SubmissionExists {
                     existing: row.id,
-                    status: RecordStatus::from_str(&row.status_)?,
+                    status: RecordStatus::from_sql(&row.status_),
                 })
             }
         }
 
-        if let Some(row) = sqlx::query!(
-            "SELECT id, status_::text FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR status_='SUBMITTED' AND \
-             progress >= $3 OR status_ = CAST($4::TEXT AS record_status) AND progress >= $3) LIMIT 1",
+        let existing = sqlx::query!(
+            "SELECT id, status_::text FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR status_ = \
+             'UNDER_CONSIDERATION' OR (status_ = 'APPROVED' AND progress >= $3)) LIMIT 1",
             demon.id,
             player.id,
-            submission.progress,
-            submission.status.to_string()
+            submission.progress
         )
         .fetch_optional(connection)
-        .await?
-        {
+        .await?;
+
+        if let Some(row) = existing {
             return Err(PointercrateError::SubmissionExists {
                 existing: row.id,
-                status: RecordStatus::from_str(&row.status_)?,
+                status: RecordStatus::from_sql(&row.status_),
             })
         }
 
@@ -116,21 +118,12 @@ impl FullRecord {
             ratelimits.check(RatelimitScope::RecordSubmission)?;
         }
 
-        sqlx::query!(
-            "DELETE FROM records WHERE status_ = CAST($1::TEXT as record_status) AND progress < $2",
-            submission.status.to_string(),
-            submission.progress
-        )
-        .execute(connection)
-        .await?; // TOdO: handle notes (once the new system is in-place)
-
         let id = sqlx::query(
-            "INSERT INTO records (progress, video, status_, player, submitter, demon) VALUES ($1, $2::TEXT, CAST($3::TEXT AS \
-             record_status), $4, $5,$6) RETURNING id",
+            "INSERT INTO records (progress, video, status_, player, submitter, demon) VALUES ($1, $2::TEXT, 'SUBMITTED', $4, $5,$6) \
+             RETURNING id",
         )
         .bind(submission.progress)
         .bind(&video)
-        .bind(submission.status.to_string())
         .bind(player.id)
         .bind(submitter.id)
         .bind(demon.id)
@@ -138,7 +131,7 @@ impl FullRecord {
         .await?
         .get("id");
 
-        Ok(FullRecord {
+        let mut record = FullRecord {
             id,
             progress: submission.progress,
             video,
@@ -146,7 +139,35 @@ impl FullRecord {
             player,
             demon,
             submitter: Some(submitter),
-            notes: None,
-        })
+            notes: Vec::new(),
+        };
+
+        // Dealing with different status and upholding their invariant is complicated, we should not
+        // duplicate that code!
+        if submission.status != RecordStatus::Submitted {
+            record.set_status(submission.status, connection).await?;
+        }
+
+        if let Some(note) = submission.note {
+            let note_id = sqlx::query!(
+                "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
+                record.id,
+                note
+            )
+            .fetch_one(connection)
+            .await?
+            .id;
+
+            record.notes.push(Note {
+                id: note_id,
+                record: id,
+                content: note,
+                transferred: false,
+                author: None,
+                editors: Vec::new(),
+            })
+        }
+
+        Ok(record)
     }
 }

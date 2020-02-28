@@ -4,14 +4,13 @@ use crate::{
     model::demonlist::{
         demon::MinimalDemon,
         player::DatabasePlayer,
-        record::{FullRecord, MinimalRecordD, MinimalRecordP, MinimalRecordPD, RecordStatus},
+        record::{note::notes_on, FullRecord, MinimalRecordD, MinimalRecordP, MinimalRecordPD, RecordStatus},
         submitter::Submitter,
     },
     Result,
 };
 use futures::stream::StreamExt;
 use sqlx::{Error, PgConnection};
-use std::str::FromStr;
 
 // Required until https://github.com/launchbadge/sqlx/pull/108 is merged
 struct FetchedRecord {
@@ -19,7 +18,6 @@ struct FetchedRecord {
     progress: i16,
     video: Option<String>,
     status: String,
-    notes: Option<String>,
     player_id: i32,
     player_name: String,
     player_banned: bool,
@@ -42,7 +40,7 @@ impl FullRecord {
                     id,
                     progress: row.progress,
                     video: row.video,
-                    status: RecordStatus::from_str(&row.status)?,
+                    status: RecordStatus::from_sql(&row.status),
                     player: DatabasePlayer {
                         id: row.player_id,
                         name: CiString(row.player_name),
@@ -57,7 +55,7 @@ impl FullRecord {
                         id: row.submitter_id,
                         banned: row.submitter_banned,
                     }),
-                    notes: row.notes,
+                    notes: notes_on(id, connection).await?,
                 }),
 
             Err(Error::NotFound) =>

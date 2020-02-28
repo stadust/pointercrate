@@ -21,12 +21,6 @@ pub struct PatchUser {
     pub permissions: Option<Permissions>,
 }
 
-impl PatchUser {
-    pub fn permissions_required(&self) -> Permissions {
-        unimplemented!()
-    }
-}
-
 impl User {
     /// Must run inside a transaction
     pub async fn apply_patch(mut self, patch: PatchUser, connection: &mut PgConnection) -> Result<Self> {

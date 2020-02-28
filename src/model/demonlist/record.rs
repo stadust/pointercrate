@@ -1,3 +1,26 @@
+//! Module containing all code relating to records on the demonlist
+//!
+//! Each record can have one of four statuses, 'approved', 'rejected', 'under consideration' or
+//! 'submitted'. We will call a record of some player on some demon a (player, demon)-record.
+//! We call a (player, demon)-record R _unique_ iff all other records by that player on the demon
+//! have a different status than R. We call it _globally unique_ if R is the only record, regardless
+//! of state, of player on demon.
+//!
+//! * 'approved' means that the record shows up on the demonlist and that further submissions for
+//!   this (player, demon) pair are only allowed with a different video and higher progress. An
+//!   approved record is unique. Whenever a record becomes 'accepted', all 'submitted' or 'under
+//!   consideration' records with lower progress are removed.
+//! * 'rejected' means that the record doesn't show up on the demonlist and that further submissions
+//!   with that (player, demon) pair or that video will not be permitted. A rejected record is
+//!   globally unique
+//! * 'submitted' means that the record has been submitted. No further restrictions apply, meaning
+//!   further submissions for this (demon, player) tuple are allowed. However as soon as one record
+//!   for some (player, demon) tuple transitions from 'submitted' to ' approved' or 'rejected'. A
+//!   submitted record is NOT unique
+//! * 'under consideration' means essentially the same as 'submitted', only that all further
+//!   submissions for this (demon, player) tuple are disallowed. Note that this does not mean that
+//!   the 'under consideration' status makes. A record under consideration IS NOT UNIQUE!
+
 pub use self::{
     get::{approved_records_by, approved_records_on, submitted_by},
     paginate::RecordPagination,
@@ -5,8 +28,7 @@ pub use self::{
     post::Submission,
 };
 use crate::{
-    error::PointercrateError,
-    model::demonlist::{demon::MinimalDemon, player::DatabasePlayer, submitter::Submitter},
+    model::demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
     state::PointercrateState,
     Result,
 };
@@ -17,11 +39,12 @@ use serde_json::json;
 use sqlx::PgConnection;
 use std::{
     fmt::{Display, Formatter},
-    str::FromStr,
+    hash::{Hash, Hasher},
 };
 
 mod delete;
 mod get;
+pub mod note;
 mod paginate;
 mod patch;
 mod post;
@@ -31,6 +54,28 @@ pub enum RecordStatus {
     Submitted,
     Approved,
     Rejected,
+    UnderConsideration,
+}
+
+impl RecordStatus {
+    fn to_sql(&self) -> &str {
+        match self {
+            RecordStatus::Submitted => "SUBMITTED",
+            RecordStatus::Approved => "APPROVED",
+            RecordStatus::Rejected => "REJECTED",
+            RecordStatus::UnderConsideration => "UNDER_CONSIDERATION",
+        }
+    }
+
+    fn from_sql(sql: &str) -> Self {
+        match sql {
+            "SUBMITTED" => RecordStatus::Submitted,
+            "APPROVED" => RecordStatus::Approved,
+            "REJECTED" => RecordStatus::Rejected,
+            "UNDER_CONSIDERATION" => RecordStatus::UnderConsideration,
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl Default for RecordStatus {
@@ -45,22 +90,7 @@ impl Display for RecordStatus {
             RecordStatus::Submitted => write!(f, "submitted"),
             RecordStatus::Approved => write!(f, "approved"),
             RecordStatus::Rejected => write!(f, "rejected"),
-        }
-    }
-}
-
-impl FromStr for RecordStatus {
-    type Err = PointercrateError;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        match &s.to_lowercase()[..] {
-            "submitted" => Ok(RecordStatus::Submitted),
-            "approved" => Ok(RecordStatus::Approved),
-            "rejected" => Ok(RecordStatus::Rejected),
-            _ =>
-                Err(PointercrateError::InvalidInternalStateError {
-                    cause: "Encountered a record state other than 'approved', 'submitted' or 'rejected'",
-                }),
+            RecordStatus::UnderConsideration => write!(f, "under consideration"),
         }
     }
 }
@@ -94,7 +124,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-#[derive(Debug, Serialize, Hash, Display)]
+#[derive(Debug, Serialize, Display)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct FullRecord {
     pub id: i32,
@@ -104,7 +134,19 @@ pub struct FullRecord {
     pub player: DatabasePlayer,
     pub demon: MinimalDemon,
     pub submitter: Option<Submitter>,
-    pub notes: Option<String>,
+    pub notes: Vec<Note>,
+}
+
+impl Hash for FullRecord {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+        self.progress.hash(state);
+        self.video.hash(state);
+        self.status.hash(state);
+        self.player.id.hash(state);
+        self.demon.id.hash(state)
+        // submitter cannot be patch, notes have different endpoints -> no hash
+    }
 }
 
 #[derive(Debug, Hash, Serialize, Display)]

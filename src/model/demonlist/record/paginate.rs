@@ -12,7 +12,6 @@ use crate::{
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
-use std::str::FromStr;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RecordPagination {
@@ -102,7 +101,7 @@ impl RecordPagination {
                 id: row.get("id"),
                 progress: row.get("progress"),
                 video: row.get("video"),
-                status: RecordStatus::from_str(&row.get::<String, _>("status"))?,
+                status: RecordStatus::from_sql(&row.get::<String, _>("status")),
                 player: DatabasePlayer {
                     id: row.get("player_id"),
                     name: CiString(row.get("player_name")),

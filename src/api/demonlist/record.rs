@@ -1,7 +1,11 @@
 use crate::{
+    error::PointercrateError,
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
     model::demonlist::{
-        record::{FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission},
+        record::{
+            note::{NewNote, Note, PatchNote},
+            FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission,
+        },
         submitter::Submitter,
     },
     permissions::Permissions,
@@ -104,7 +108,7 @@ pub async fn get(user: ApiResult<TokenAuth>, state: PointercrateState, record_id
 pub async fn patch(
     TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>, data: Json<PatchRecord>,
 ) -> ApiResult<HttpResponse> {
-    let mut connection = state.transaction().await?;
+    let mut connection = state.audited_transaction(&user).await?;
 
     user.inner().require_permissions(Permissions::ListHelper)?;
 
@@ -124,9 +128,9 @@ pub async fn patch(
 pub async fn delete(
     TokenAuth(user): TokenAuth, if_match: IfMatch, state: PointercrateState, record_id: Path<i32>,
 ) -> ApiResult<HttpResponse> {
-    let mut connection = state.transaction().await?;
+    let mut connection = state.audited_transaction(&user).await?;
 
-    user.inner().require_permissions(Permissions::ListAdministrator)?;
+    user.inner().require_permissions(Permissions::ListModerator)?;
 
     // FIXME: prevent lost updates by using SELECT ... FOR UPDATE
     let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
@@ -136,6 +140,82 @@ pub async fn delete(
     record.delete(&mut connection).await?;
 
     connection.commit().await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[post("/{record_id}/notes/")]
+pub async fn add_note(
+    TokenAuth(user): TokenAuth, data: Json<NewNote>, record_id: Path<i32>, state: PointercrateState,
+) -> ApiResult<HttpResponse> {
+    let mut connection = state.audited_connection(&user).await?;
+
+    user.inner().require_permissions(Permissions::ListHelper)?;
+
+    let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
+    let mut note = Note::create_on(&record, data.into_inner(), &mut connection).await?;
+
+    note.author = Some(user.into_inner().name);
+
+    Ok(HttpResponse::Created()
+        .header("Location", format!("/api/v1/records/{}/notes/{}/", record.id, note.id))
+        .json_with_etag(&note))
+}
+
+#[patch("/{record_id}/notes/{note_id}/")]
+pub async fn patch_note(
+    TokenAuth(user): TokenAuth, data: Json<PatchNote>, ids: Path<(i32, i32)>, state: PointercrateState,
+) -> ApiResult<HttpResponse> {
+    let mut connection = state.audited_transaction(&user).await?;
+
+    let (record_id, note_id) = ids.into_inner();
+
+    let mut note = Note::by_id(note_id, &mut connection).await?;
+
+    // Generally you can only modify your own notes
+    if note.author.as_ref() != Some(&user.inner().name) {
+        user.inner().require_permissions(Permissions::ListAdministrator)?;
+    } else {
+        user.inner().require_permissions(Permissions::ListHelper)?;
+    }
+
+    if note.record != record_id {
+        return Err(PointercrateError::ModelNotFound {
+            model: "Note",
+            identified_by: format!("{} on record {}", note_id, record_id),
+        }
+        .into())
+    }
+
+    let note = note.apply_patch(data.into_inner(), &mut connection).await?;
+
+    Ok(HttpResponse::Ok().json_with_etag(&note))
+}
+
+#[delete("/{record_id}/notes/{note_id}/")]
+pub async fn delete_note(TokenAuth(user): TokenAuth, ids: Path<(i32, i32)>, state: PointercrateState) -> ApiResult<HttpResponse> {
+    let mut connection = state.audited_transaction(&user).await?;
+
+    let (record_id, note_id) = ids.into_inner();
+
+    let mut note = Note::by_id(note_id, &mut connection).await?;
+
+    // Generally you can only delete your own notes
+    if note.author.as_ref() != Some(&user.inner().name) {
+        user.inner().require_permissions(Permissions::ListAdministrator)?;
+    } else {
+        user.inner().require_permissions(Permissions::ListHelper)?;
+    }
+
+    if note.record != record_id {
+        return Err(PointercrateError::ModelNotFound {
+            model: "Note",
+            identified_by: format!("{} on record {}", note_id, record_id),
+        }
+        .into())
+    }
+
+    note.delete(&mut connection).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }

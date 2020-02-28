@@ -32,22 +32,11 @@ pub struct PatchRecord {
 
     #[serde(default, deserialize_with = "non_nullable")]
     demon_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "nullable")]
-    notes: Option<Option<String>>,
 }
 
 impl FullRecord {
     /// Must be called inside a transaction
     pub async fn apply_patch(mut self, data: PatchRecord, connection: &mut PgConnection) -> Result<Self> {
-        // Do notes first so that notes copied during further modifications don't get overriden!
-        if let Some(notes) = data.notes {
-            match notes {
-                None => self.delete_notes(connection).await?,
-                Some(notes) => self.set_notes(notes, connection).await?,
-            }
-        }
-
         if let Some(progress) = data.progress {
             self.set_progress(progress, connection).await?;
         }
@@ -81,73 +70,94 @@ impl FullRecord {
         Ok(self)
     }
 
-    /// Function for handling the case where after updating the record with `record_id` it would
-    /// violate the UNIQUE (player, demon, status) constraint.
-    ///
-    /// This can happen when the player, demon or status is updated. This function assumes that 2
-    /// out of `player`, `demon` and `status` match the values of the given record, with the
-    /// non-matching one set to what the record should be updated to.
-    /// If a record with the given (player, demon, status) combo exists, it is deleted. If it has
-    /// higher progress than the given record, the given record will have its progress and video
-    /// set to that of the deleted record. Notes are merged, as always.
-    ///
-    /// This method does not set any of the (player, demon, status) fields.
-    async fn handle_potential_duplicate(
-        &mut self, player: &DatabasePlayer, demon: &MinimalDemon, status: RecordStatus, connection: &mut PgConnection,
-    ) -> Result<()> {
-        struct Existing {
-            progress: i16,
-            video: Option<String>,
-            notes: Option<String>,
-        }
+    /// Prepared turning `self` into a (player, demon)-record (either player or demon will be
+    /// changed)
+    async fn ensure_invariants(&mut self, player: i32, demon: i32, connection: &mut PgConnection) -> Result<()> {
+        match self.status {
+            RecordStatus::Rejected => {
+                // The record needs to be globally unique, so delete all (player, demon) records
 
-        let existing = sqlx::query_as!(
-            Existing,
-            "DELETE FROM records WHERE player = $1 AND demon = $2 AND status_ = cast($3::text as record_status) RETURNING progress, \
-             video::text, notes", /* FIXME(sqlx) once custom enums are
-                                   * supported */
-            player.id,
-            demon.id,
-            status.to_string()
-        )
-        .fetch_optional(connection)
-        .await?;
+                let notes_transferred = sqlx::query!(
+                    "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND \
+                     records.player = $3",
+                    self.id,
+                    self.demon.id,
+                    player
+                )
+                .execute(connection)
+                .await?;
 
-        if let Some(row) = existing {
-            info!(
-                "Updating the record {} to be ({},{},{}) caused a duplicate, which had progress {}",
-                self, player, demon, status, row.progress
-            );
+                let records_deleted = sqlx::query!("DELETE FROM records WHERE player = $1 AND demon = $2", player, self.demon.id)
+                    .execute(connection)
+                    .await?;
 
-            if row.progress > self.progress {
-                // FIXME(sqlx) Option types
-                match row.video {
-                    None =>
-                        sqlx::query!(
-                            "UPDATE records SET progress = $1, video = NULL WHERE id = $2",
-                            row.progress,
-                            self.id
-                        )
+                info!(
+                    "Turning {} into a ({}, {})-record caused the transfer of {} notes and the deletion of {} records!",
+                    self, player, demon, notes_transferred, records_deleted
+                );
+            },
+            RecordStatus::Approved => {
+                // In this case we have to do multiple things:
+                // * delete all (player, demon)-records that are 'rejected' (at most one) TODO: maybe reconsider?
+                // * if a (player, demon)-record exists that is 'approved' and has higher progress than this one, we
+                //   override our progress and video with the values of that record
+                // * delete all (player, demon)-records that are 'submitted' with a progress (potentially as
+                //   determined above) less than or equal to that of this record
+
+                struct _Existing {
+                    progress: i16,
+                    video: Option<String>,
+                }
+
+                let row = sqlx::query_as!(
+                    _Existing,
+                    "SELECT progress, video::TEXT FROM records WHERE status_ = 'APPROVED' AND demon = $1 AND player = $2 AND progress > $3",
+                    self.demon.id,
+                    player,
+                    self.progress
+                )
+                .fetch_optional(connection)
+                .await?;
+
+                if let Some(row) = row {
+                    sqlx::query("UPDATE records SET video = $1::TEXT, progress = $2 WHERE id = $3")
+                        .bind(&row.video)
+                        .bind(row.progress)
+                        .bind(self.id)
                         .execute(connection)
-                        .await?,
-                    Some(ref video) =>
-                        sqlx::query!(
-                            "UPDATE records SET progress = $1, video = $2::text WHERE id = $3",
-                            row.progress,
-                            video.to_string(),
-                            self.id
-                        )
-                        .execute(connection)
-                        .await?,
-                };
+                        .await?;
 
-                self.video = row.video;
-                self.progress = row.progress;
-            }
+                    self.progress = row.progress;
+                    self.video = row.video;
+                }
 
-            if let Some(additional_notes) = row.notes {
-                self.append_notes(additional_notes, connection).await?;
-            }
+                let notes_transferred = sqlx::query!(
+                    "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND \
+                     records.player = $3 AND (records.status_ = 'REJECTED' OR records.progress <= $4)",
+                    self.id,
+                    self.demon.id,
+                    player,
+                    self.progress
+                )
+                .execute(connection)
+                .await?;
+
+                let records_deleted = sqlx::query!(
+                    "DELETE FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR progress <= $3)",
+                    self.demon.id,
+                    player,
+                    self.progress
+                )
+                .execute(connection)
+                .await?;
+
+                info!(
+                    "Turning {} into a ({}, {})-record caused the transfer of {} notes and the deletion of {} records!",
+                    self, player, demon, notes_transferred, records_deleted
+                );
+            },
+            // Nothing needed to be done here!
+            RecordStatus::Submitted | RecordStatus::UnderConsideration => {},
         }
 
         Ok(())
@@ -180,8 +190,7 @@ impl FullRecord {
             return Err(PointercrateError::InvalidProgress { requirement })
         }
 
-        self.handle_potential_duplicate(&self.player.clone(), &demon, self.status, connection)// FIXME: proper borrowing
-            .await?;
+        self.ensure_invariants(self.player.id, self.demon.id, connection).await?;
 
         sqlx::query!("UPDATE records SET demon = $1 WHERE id = $2", demon.id, self.id)
             .execute(connection)
@@ -192,9 +201,12 @@ impl FullRecord {
         Ok(())
     }
 
+    /// Changes the holder of this record
+    ///
+    /// If the new player has a record that would stand in conflict with this one, this records
+    /// takes precedence and overrides the existing one.
     pub async fn set_player(&mut self, player: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
-        self.handle_potential_duplicate(&player, &self.demon.clone(), self.status, connection) // FIXME: proper borrowing
-            .await?;
+        self.ensure_invariants(player.id, self.demon.id, connection).await?;
 
         sqlx::query!("UPDATE records SET player = $1 WHERE id = $2", player.id, self.id)
             .execute(connection)
@@ -205,15 +217,77 @@ impl FullRecord {
         Ok(())
     }
 
+    /// Updates this record's status
     pub async fn set_status(&mut self, status: RecordStatus, connection: &mut PgConnection) -> Result<()> {
-        self.handle_potential_duplicate(&self.player.clone(), &self.demon.clone(), status, connection) // FIXME: proper borrowing
-            .await?;
+        // To uphold the invariants outlined in the module documentation, we need to do some preparations.
+        // What preparation has to be done, depends on what the current and new status are.
+        match (self.status, status) {
+            (_, RecordStatus::Rejected) => {
+                // if we move a (demon, player)-record to 'rejected', we delete all records for this tuple in other
+                // states, to ensure the record will be globally unique after this
+                sqlx::query!(
+                    "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.player = $2 AND \
+                     records.demon = $3",
+                    self.id,
+                    self.player.id,
+                    self.demon.id
+                )
+                .execute(connection)
+                .await?;
+
+                sqlx::query!(
+                    "DELETE FROM records WHERE id <> $1 AND player = $2 AND demon = $3",
+                    self.id,
+                    self.player.id,
+                    self.demon.id
+                )
+                .execute(connection)
+                .await?;
+            },
+
+            // Nothing needed here, approved records are unique while submitted and records under consideration are not
+            (RecordStatus::Approved, _) => (),
+
+            // Nothing needed here, a 'rejected' record is globally unique
+            (RecordStatus::Rejected, _) => (),
+
+            (RecordStatus::Submitted, RecordStatus::Approved) | (RecordStatus::UnderConsideration, RecordStatus::Approved) => {
+                // Since a rejected record is globally unique, we know no other (player,
+                // demon)-record is 'rejected'. We also know that the submission has at least as
+                // much progress as an 'accepted' (player, demon)-record. We can therefore just
+                // delete all other records with less or equal progress to the current one
+
+                sqlx::query!(
+                    "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.player = $2 AND \
+                     records.demon = $3 AND progress <= $4",
+                    self.id,
+                    self.player.id,
+                    self.demon.id,
+                    self.progress
+                )
+                .execute(connection)
+                .await?;
+
+                sqlx::query!(
+                    "DELETE FROM records WHERE id <> $1 AND records.player = $2 AND records.demon = $3 AND progress <= $4",
+                    self.id,
+                    self.player.id,
+                    self.demon.id,
+                    self.progress
+                )
+                .execute(connection)
+                .await?;
+            },
+
+            // the other cases just convert back and forth between 'submitted' and 'under consideration', which doesn't change anything
+            _ => (),
+        }
 
         sqlx::query!(
             "UPDATE records SET status_ = cast($1::text as record_status) WHERE id = $2", /* FIXME(sqlx) ridiculous query
                                                                                            * format to trick sqlx into working
                                                                                            * with custom types */
-            status.to_string(),
+            status.to_sql().to_string(),
             self.id
         )
         .execute(connection)
@@ -227,7 +301,7 @@ impl FullRecord {
     /// Updates this record's progress
     ///
     /// If this record is approved, all submissions with lower progress of the same (player,
-    /// demon)-tuple are deleted.
+    /// demon)-tuple are deleted and have their notes transferred to this record.
     pub async fn set_progress(&mut self, progress: i16, connection: &mut PgConnection) -> Result<()> {
         let requirement = self.demon.requirement(connection).await?;
 
@@ -236,36 +310,30 @@ impl FullRecord {
         }
 
         if self.status == RecordStatus::Approved {
-            struct Note {
-                notes: Option<String>,
-            }
+            // Transfer over all notes from the records deleted below
+            sqlx::query!(
+                "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND player = $2 AND demon = $3 \
+                 AND progress < $4 AND status_='SUBMITTED'",
+                self.id,
+                self.player.id,
+                self.demon.id,
+                progress
+            )
+            .execute(connection)
+            .await?;
 
-            let notes_to_transfer = sqlx::query_as!(
-                Note,
-                "DELETE FROM records WHERE player = $1 AND demon = $2 AND status_='SUBMITTED' RETURNING notes",
+            let deleted = sqlx::query!(
+                "DELETE FROM records WHERE player = $1 AND demon = $2 AND status_='SUBMITTED'",
                 self.player.id,
                 self.demon.id
             )
-            .fetch_all(connection)
+            .execute(connection)
             .await?;
 
             info!(
                 "Changing progress of record {} from {} to {} caused the deletion of {} submissions",
-                self,
-                self.progress,
-                progress,
-                notes_to_transfer.len()
+                self, self.progress, progress, deleted
             );
-
-            self.append_notes(
-                notes_to_transfer
-                    .into_iter()
-                    .filter_map(|row| row.notes)
-                    .collect::<Vec<_>>()
-                    .join("\n"),
-                connection,
-            )
-            .await?;
         }
 
         sqlx::query!("UPDATE records SET progress = $1 WHERE id = $2", progress, self.id)
@@ -276,136 +344,4 @@ impl FullRecord {
 
         Ok(())
     }
-
-    pub async fn delete_notes(&mut self, connection: &mut PgConnection) -> Result<()> {
-        sqlx::query!("UPDATE records SET notes = NULL WHERE id = $1", self.id)
-            .execute(connection)
-            .await?;
-
-        self.notes = None;
-
-        Ok(())
-    }
-
-    pub async fn set_notes(&mut self, notes: String, connection: &mut PgConnection) -> Result<()> {
-        sqlx::query!("UPDATE records SET notes = $2 WHERE id = $1", self.id, notes)
-            .execute(connection)
-            .await?;
-
-        self.notes = Some(notes);
-
-        Ok(())
-    }
-
-    pub async fn append_notes(&mut self, to_append: String, connection: &mut PgConnection) -> Result<()> {
-        match self.notes {
-            None => self.set_notes(to_append, connection).await?,
-            Some(ref mut existing) => {
-                sqlx::query!("UPDATE records SET notes = notes || $2 WHERE id = $1", self.id, to_append)
-                    .execute(connection)
-                    .await?;
-
-                existing.push_str(&to_append)
-            },
-        }
-
-        Ok(())
-    }
 }
-// impl Patch<PatchRecord> for FullRecord {
-// fn patch(mut self, mut patch: PatchRecord, ctx: RequestContext) -> Result<Self> {
-// ctx.check_permissions(perms!(ListHelper or ListModerator or ListAdministrator))?;
-// ctx.check_if_match(&self)?;
-//
-// FIXME: This needs to do the whole "locate duplicate, compare, delete" dance
-//
-// let connection = ctx.connection();
-//
-// info!("Patching record {} with {}", self, patch);
-//
-// validate_nullable!(patch: Record::validate_video[video]);
-//
-// let demon = Demon::get(
-// match patch.demon {
-// None => self.demon.name.as_ref(),
-// Some(ref demon) => demon.as_ref(),
-// },
-// ctx,
-// )?;
-// let progress = patch.progress.unwrap_or(self.progress);
-//
-// if progress > 100 || progress < demon.requirement {
-// return Err(PointercrateError::InvalidProgress {
-// requirement: demon.requirement,
-// })?
-// }
-//
-// let map = move |_| {
-// MinimalDemon {
-// id: demon.id,
-// name: demon.name,
-// position: demon.position,
-// }
-// };
-// let map2 = |name: &CiStr| DatabasePlayer::get(name, ctx);
-//
-// map_patch!(self, patch: map => demon);
-// try_map_patch!(self, patch: map2 => player);
-// patch!(self, patch: progress, video, status, notes);
-//
-// connection.transaction(move || {
-// If there is a record that would validate the unique (status_, demon, player),
-// with higher progress than this one, this query would find it
-// let max_progress: Option<i16> = records::table
-// .select(records::all_columns)
-// .filter(records::player.eq(&self.player.id))
-// .filter(records::demon.eq(&self.demon.id))
-// .filter(records::status_.eq(&self.status))
-// .filter(records::id.ne(&self.id))
-// .select(diesel::dsl::max(records::progress))
-// .get_result::<Option<i16>>(connection)?;
-//
-// if let Some(max_progress) = max_progress {
-// if max_progress > self.progress {
-// We simply make `self` the same as that record, causing it to later get
-// deleted
-// let record = DatabaseRecord::all()
-// .filter(records::player.eq(&self.player.id))
-// .filter(records::demon.eq(&self.demon.id))
-// .filter(records::status_.eq(&self.status))
-// .filter(records::progress.eq(&max_progress))
-// .get_result::<DatabaseRecord>(connection)?;
-//
-// self.video = record.video;
-// self.progress = record.progress;
-// }
-// }
-//
-// By now, our record is for sure the one with the highest progress - all others can be
-// deleted
-// diesel::delete(
-// records::table
-// .filter(records::player.eq(self.player.id))
-// .filter(records::demon.eq(self.demon.id))
-// .filter(records::status_.eq(RecordStatus::Approved).or(records::status_.eq(self.status)))
-// .filter(records::progress.le(self.progress))
-// .filter(records::id.ne(self.id)),
-// )
-// .execute(connection)?;
-//
-// diesel::update(records::table)
-// .filter(records::id.eq(&self.id))
-// .set((
-// records::progress.eq(&self.progress),
-// records::video.eq(&self.video),
-// records::status_.eq(&self.status),
-// records::player.eq(&self.player.id),
-// records::demon.eq(&self.demon.id),
-// records::notes.eq(&self.notes),
-// ))
-// .execute(connection)?;
-//
-// Ok(self)
-// })
-// }
-// }
