@@ -1,7 +1,7 @@
 pub use self::{demon_page::page, overview::index};
 use crate::{
     config,
-    model::{demonlist::demon::Demon, nationality::Nationality, user::User},
+    model::{demonlist::demon::Demon, nationality::Nationality},
     view::demonlist::overview::OverviewDemon,
 };
 use maud::{html, Markup, PreEscaped};

@@ -58,13 +58,14 @@ pub enum RecordStatus {
 }
 
 impl RecordStatus {
-    fn to_sql(&self) -> &str {
+    fn to_sql(&self) -> String {
         match self {
             RecordStatus::Submitted => "SUBMITTED",
             RecordStatus::Approved => "APPROVED",
             RecordStatus::Rejected => "REJECTED",
             RecordStatus::UnderConsideration => "UNDER_CONSIDERATION",
         }
+        .to_owned()
     }
 
     fn from_sql(sql: &str) -> Self {

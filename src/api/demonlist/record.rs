@@ -170,7 +170,7 @@ pub async fn patch_note(
 
     let (record_id, note_id) = ids.into_inner();
 
-    let mut note = Note::by_id(note_id, &mut connection).await?;
+    let note = Note::by_id(note_id, &mut connection).await?;
 
     // Generally you can only modify your own notes
     if note.author.as_ref() != Some(&user.inner().name) {
@@ -198,7 +198,7 @@ pub async fn delete_note(TokenAuth(user): TokenAuth, ids: Path<(i32, i32)>, stat
 
     let (record_id, note_id) = ids.into_inner();
 
-    let mut note = Note::by_id(note_id, &mut connection).await?;
+    let note = Note::by_id(note_id, &mut connection).await?;
 
     // Generally you can only delete your own notes
     if note.author.as_ref() != Some(&user.inner().name) {

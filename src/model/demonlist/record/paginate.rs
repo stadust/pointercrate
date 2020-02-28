@@ -84,7 +84,7 @@ impl RecordPagination {
             .bind(self.demon_position)
             .bind(self.demon_position_lt)
             .bind(self.demon_position_gt)
-            .bind(self.status.map(|s| s.to_string()))
+            .bind(self.status.map(|s| s.to_sql()))
             .bind(&self.demon)
             .bind(self.demon_id)
             .bind(&self.video)
