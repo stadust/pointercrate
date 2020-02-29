@@ -56,7 +56,7 @@ impl DemonlistOverview {
         };
 
         html! {
-            div.panel.fade.js-scroll-anim#editors data-anim = "fade" {
+            section.panel.fade.js-scroll-anim#editors data-anim = "fade" {
                 div.underlined {
                     h2 {
                         "List Editors:"
@@ -148,7 +148,7 @@ impl Page for DemonlistOverview {
                     (super::stats_viewer(&self.nations))
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {
-                            div.panel.fade style="overflow:hidden" {
+                            section.panel.fade style="overflow:hidden" {
                                 div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
                                     @if let Some(ref video) = demon.video {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {

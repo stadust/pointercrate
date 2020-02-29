@@ -49,7 +49,7 @@ impl Demonlist {
         let score_requirement = self.data.demon.score(self.data.demon.requirement);
 
         html! {
-            div.panel.fade.js-scroll-anim data-anim = "fade" {
+            section.panel.fade.js-scroll-anim data-anim = "fade" {
                 div.underlined {
                     h1 style = "overflow: hidden"{
                         @if self.data.demon.base.position != 1 {
@@ -185,7 +185,7 @@ impl Demonlist {
 
         html! {
             @if !self.data.records.is_empty() || position <= config::extended_list_size() {
-                div.records.panel.fade.js-scroll-anim data-anim = "fade" {
+                section.records.panel.fade.js-scroll-anim data-anim = "fade" {
                     div.underlined.pad {
                         h2 {
                             "Records"

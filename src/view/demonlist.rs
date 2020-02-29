@@ -128,7 +128,7 @@ fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&De
 
 fn submission_panel() -> Markup {
     html! {
-        div.panel.fade.closable#submitter style = "display: none" {
+        section.panel.fade.closable#submitter style = "display: none" {
             span.plus.cross.hover {}
             div.flex {
                 form#submission-form novalidate = "" {
@@ -190,7 +190,7 @@ fn submission_panel() -> Markup {
 
 fn stats_viewer(nations: &[Nationality]) -> Markup {
     html! {
-        div.panel.fade.closable#statsviewer style = "display:none" {
+        section.panel.fade.closable#statsviewer style = "display:none" {
             span.plus.cross.hover {}
             h2.underlined.pad {
                 "Stats Viewer"
@@ -314,7 +314,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
 
 fn rules_panel() -> Markup {
     html! {
-        div#rules.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
+        section#rules.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
             h2.underlined.pad.clickable {
                 "Rules:"
                 span.arrow.hover {}
@@ -394,7 +394,7 @@ fn rules_panel() -> Markup {
 
 fn submit_panel() -> Markup {
     html! {
-        div#submit.panel.fade.js-scroll-anim data-anim = "fade" {
+        section#submit.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
                     "Submit Records:"
@@ -412,7 +412,7 @@ fn submit_panel() -> Markup {
 
 fn stats_viewer_panel() -> Markup {
     html! {
-        div#stats.panel.fade.js-scroll-anim data-anim = "fade" {
+        section#stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
                     "Stats Viewer"
@@ -430,7 +430,7 @@ fn stats_viewer_panel() -> Markup {
 
 fn discord_panel() -> Markup {
     html! {
-        div.panel.fade.js-scroll-anim#discord data-anim = "fade" {
+        section.panel.fade.js-scroll-anim#discord data-anim = "fade" {
             iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src_old" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
                 "Join the official Demonlist discord server, where you can get in touch with the demonlist team!"
