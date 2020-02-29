@@ -106,8 +106,10 @@ class RecordManager extends Paginator {
     this._video_link.href = recordData.video;
     this._video_link.innerHTML = recordData.video;
     this._id.innerHTML = recordData.id;
-    this._demon.innerHTML = recordData.demon.name;
-    this._holder.innerHTML = recordData.player.name;
+    this._demon.innerHTML =
+      recordData.demon.name + " (" + recordData.demon.id + ")";
+    this._holder.innerHTML =
+      recordData.player.name + " (" + recordData.player.id + ")";
     this._status.innerHTML = recordData.status;
     this._progress.innerHTML = recordData.progress;
     this._submitter.innerHTML = recordData.submitter.id;

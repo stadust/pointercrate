@@ -49,6 +49,7 @@ pub struct RecordPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     pub status: Option<RecordStatus>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
     player: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
@@ -89,6 +90,7 @@ impl RecordPagination {
             .bind(self.demon_id)
             .bind(&self.video)
             .bind(self.video == Some(None))
+            .bind(self.player)
             .bind(self.limit.unwrap_or(50) as i32)
             .fetch(connection);
 
