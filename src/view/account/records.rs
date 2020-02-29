@@ -3,80 +3,82 @@ use maud::{html, Markup};
 
 fn record_manager(demons: &[OverviewDemon]) -> Markup {
     html! {
-    div.panel.fade#record-manager {
-        h2.underlined.pad {
-            "Record Manager (Alpha) - "
-            (dropdown("All", html! {
-                li.white.hover.underlined data-value = "All" {"All"}
-            }, demons.into_iter().map(|demon| html!(li.white.hover data-value = (demon.id) data-display = (demon.name) {"#"(demon.position) " - " (demon.name)}))))
-        }
-        div.flex.viewer {
-            (paginator("record-pagination", "/api/v1/records/"))
-            p.viewer-welcome {
-                "Click on a record on the left to get started!"
+        div.panel.fade#record-manager {
+            h2.underlined.pad {
+                "Record Manager - "
+                (dropdown("All", html! {
+                    li.white.hover.underlined data-value = "All Demons"
+                     {"All Demons"}
+                }, demons.into_iter().map(|demon| html!(li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}))))
             }
-            div.viewer-content {
-                div {
-                    div.flex.col {
-                        h3 style = "font-size:1.4em; overflow: hidden" { "Record #" i#record-id{}}
+            div.flex.viewer {
+                (paginator("record-pagination", "/api/v1/records/"))
+                p.viewer-welcome {
+                    "Click on a record on the left to get started!"
+                }
+                div.viewer-content {
+                    div {
+                        div.flex.col {
+                            h3 style = "font-size:1.4em; overflow: hidden" { "Record #" i#record-id{}}
 
-                        iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
-                        div.stats-container.flex.space  {
-                            span{
-                                b {
-                                    "Video Link:"
+                            iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
+                            div.stats-container.flex.space  {
+                                span{
+                                    b {
+                                        "Video Link:"
+                                    }
+                                    br;
+                                    a.link#record-video-link target = "_blank" {}
                                 }
-                                br;
-                                a.link#record-video-link target = "_blank" {}
                             }
-                        }
-                        div.stats-container.flex.space {
-                            span {
-                                b {
-                                    "Demon:"
+                            div.stats-container.flex.space {
+                                span {
+                                    b {
+                                        "Demon:"
+                                    }
+                                    br;
+                                    span#record-demon {}
                                 }
-                                br;
-                                span#record-demon {}
-                            }
-                            span {
-                                b {
-                                    "Record Holder:"
+                                span {
+                                    b {
+                                        "Record Holder:"
+                                    }
+                                    br;
+                                    span#record-holder {}
                                 }
-                                br;
-                                span#record-holder {}
-                            }
-                            span {
-                                b {
-                                    "Record status:"
+                                span {
+                                    b {
+                                        "Record status:"
+                                    }
+                                    br;
+                                    span#record-status {}
                                 }
-                                br;
-                                span#record-status {}
                             }
-                        }
-                        div.stats-container.flex.space {
-                            span {
-                                b {
-                                    "Progress:"
+                            div.stats-container.flex.space {
+                                span {
+                                    b {
+                                        "Progress:"
+                                    }
+                                    br;
+                                    span#record-progress {}
                                 }
-                                br;
-                                span#record-progress {}
-                            }
-                            span {
-                                b {
-                                    "Submitter ID:"
+                                span {
+                                    b {
+                                        "Submitter ID:"
+                                    }
+                                    br;
+                                    span#record-submitter {}
                                 }
-                                br;
-                                span#record-submitter {}
                             }
-                        }
 
-                        div.stats-container.flex.space {
-                            span {
-                                b {
-                                    "Notes:"
+                            div.stats-container.flex.space {
+                                span {
+                                    b {
+                                        "Notes:"
+                                    }
+                                    br;
+                                    span#record-notes {}
                                 }
-                                br;
-                                span#record-notes {}
                             }
                         }
                     }
@@ -84,21 +86,41 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
             }
         }
     }
-    }
 }
 
 fn manager_help() -> Markup {
     html! {
         div.panel.fade {
             h1.underlined.pad {
-                "Manage Record"
+                "Manage Records"
             }
             p {
-                "Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by submission, player, etc.. Clicking the 'All Demons' field at the top allows to filter by demon."
+                "Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by status, player, etc.. Clicking the 'All Demons' field at the top allows to filter by demon."
+            }
+            p {
+                "There are four possible record states a record can be in: " i { "'rejected', 'approved', 'submitted'" } " and " i { "'under consideration'" } ". For simplicity of explanation we will assume that 'Bob' is a player and 'Cataclysm' is a demon he has a record on."
+                ul {
+                    li {
+                        b{"Rejected: "} "If the record is 'rejected', it means that Bob has no other record in other states on Cataclysm and no submissions for Bob on Cataclysm are possible. Conversely, this means if Bob has a record on Catalysm that's not rejected, we immediately know that no rejected record for Bob on Cataclysm exists. "
+                        br;
+                        "Rejecting any record of Bob's on Cataclysm will delete all other record's of Bob on Cataclysm to ensure the above uniqueness"
+                    }
+                    li {
+                        b{"Approved: "} "If the record is 'approved', it means that no submissions with less progress than the 'approved' record exist or are permitted."
+                        br;
+                        "Changing a record to 'approved' will delete all submissions for Bob on Cataclysm with less progress"
+                    }
+                    li {
+                        b {"Submitted: "} "If the record is 'submitted', no further constraints on uniqueness are in place. This means that multiple submissions for Bob on Cataclysm are possible, as long as they provide different video links. However, due to the above, all duplicates are deleted as soon as one of the submissions is accepted or rejected"
+                    }
+                    li {
+                        b {"Under Consideration: "} "If the record is 'under consideration' it is conceptually still a submission. The only difference is, that no more submissions for Bob on Cataclysm are allowed now."
+                    }
+                }
             }
             p {
                 b { "Note: " }
-                "If a player is banned, they cannot have accepted/submitted records on the list, and all records they potentially once had are marked as rejected"
+                "If a player is banned, they cannot have accepted/submitted records on the list. All records marked as 'submitted' are deleted, all others are changed to 'rejected'"
             }
             p {
                 b { "Note: " }

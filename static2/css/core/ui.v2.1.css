@@ -438,6 +438,12 @@ form input[type="password"]:invalid {
   box-shadow: 0px 8px 10px #ccc, -10px 8px 15px #ccc, 10px 8px 15px #ccc;
 }
 
+h1 .dropdown-menu ul,
+h2 .dropdown-menu ul {
+  font-size: 0.55em;
+  font-weight: normal;
+}
+
 .dropdown-menu > input[type="text"] {
   border: none;
   border-bottom: 1px dotted #555;

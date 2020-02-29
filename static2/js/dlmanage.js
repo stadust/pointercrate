@@ -1,7 +1,6 @@
 function generateRecord(record) {
   var li = document.createElement("li");
   var recordId = document.createElement("b");
-  var submitter = document.createElement("i");
 
   li.className = "white hover";
   li.dataset.id = record.id;
@@ -25,10 +24,6 @@ function generateRecord(record) {
 
   recordId.appendChild(document.createTextNode("Record #" + record.id));
 
-  submitter.appendChild(
-    document.createTextNode("Submitter ID: " + record.submitter)
-  );
-
   li.appendChild(recordId);
   li.appendChild(document.createElement("br"));
   li.appendChild(
@@ -39,7 +34,6 @@ function generateRecord(record) {
     document.createTextNode(record.progress + "% on " + record.demon.name)
   );
   li.appendChild(document.createElement("br"));
-  li.appendChild(submitter);
 
   return li;
 }
