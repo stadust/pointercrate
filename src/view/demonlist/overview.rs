@@ -143,7 +143,7 @@ impl Page for DemonlistOverview {
             (dropdowns)
 
             div.flex.m-center.container {
-                div.left {
+                main.left {
                     (super::submission_panel())
                     (super::stats_viewer(&self.nations))
                     @for demon in &self.demon_overview {
@@ -180,7 +180,7 @@ impl Page for DemonlistOverview {
                     }
                 }
 
-                div.right {
+                aside.right {
                     (self.team_panel())
                     (super::rules_panel())
                     (super::submit_panel())

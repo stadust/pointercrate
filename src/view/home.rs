@@ -104,7 +104,7 @@ impl Page for Homepage {
                     }
                 }
             }
-            div.center.information-stripe {
+            aside.center.information-stripe {
                 div.flex style="flex-wrap: wrap; align-items: center" {
                     span { "Over 13 000 daily visitors!" }
                     span { "Over 150 ranked demons!" }
@@ -126,7 +126,7 @@ impl Page for Homepage {
                     }
                 }
             }
-            div.center.information-stripe {
+            aside.center.information-stripe {
                 div.flex style="flex-wrap: wrap; align-items: center" {
                     span { "Written in Rust!" }
                     span { "Actively Maintained!" }
@@ -219,14 +219,14 @@ impl Page for Homepage {
                             }
                         }
                     }
-                    div.tab-selection style="padding: 20px 0px; text-align: center"{
+                    aside.tab-selection style="padding: 20px 0px; text-align: center"{
                         h3.tab.tab-active data-tab-id="99" style="padding: 10px; text-align:left" { "2019-03-02" }
                         h3.tab data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
                         h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
                     }
                 }
             }
-            div.center.information-stripe {
+            aside.center.information-stripe {
                 div.flex style="flex-wrap: wrap; align-items: center" {
                     span { "On average updated once a year!" }
                     span { "I redo the homepage every time!" }

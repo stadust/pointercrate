@@ -7,11 +7,12 @@ use crate::{
     middleware::etag::Etag,
     state::PointercrateState,
 };
-use actix_files::Files;
+use actix_files::{Files, NamedFile};
 use actix_web::{
     middleware::{Logger, NormalizePath},
+    web,
     web::{route, scope, JsonConfig, PathConfig, QueryConfig},
-    App, HttpServer,
+    App, HttpRequest, HttpServer,
 };
 use api::{
     auth,
@@ -71,6 +72,10 @@ async fn main() -> std::io::Result<()> {
             .wrap(NormalizePath::default())
             .app_data(application_state.clone())
             .service(Files::new("/static2", "./static2").use_etag(true))
+            .route(
+                "/robots.txt",
+                web::get().to(|req: HttpRequest| NamedFile::open("robots.txt").unwrap().into_response(&req).unwrap()),
+            )
             .service(view::home::index)
             .service(view::login::index)
             .service(view::login::post)

@@ -260,6 +260,7 @@ impl Demonlist {
         }
     }
 }
+
 impl Page for Demonlist {
     fn title(&self) -> String {
         format!(
@@ -293,14 +294,14 @@ impl Page for Demonlist {
             (dropdowns)
 
             div.flex.m-center.container {
-                div.left {
+                main.left {
                     (super::submission_panel())
                     (super::stats_viewer(&self.overview.nations))
                     (self.demon_panel())
                     (super::rules_panel())
                     (self.records_panel())
                 }
-                div.right {
+                aside.right {
                     (self.overview.team_panel())
                     (super::submit_panel())
                     (super::stats_viewer_panel())
