@@ -20,7 +20,7 @@ pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination:
 
     user.0.inner().require_permissions(Permissions::Administrator)?;
 
-    let users = pagination.page(&mut connection).await?;
+    let mut users = pagination.page(&mut connection).await?;
 
     let (max_id, min_id) = User::extremal_member_ids(&mut connection).await?;
 

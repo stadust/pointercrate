@@ -24,7 +24,7 @@ pub struct RecordPagination {
     pub after_id: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    limit: Option<u8>,
+    pub limit: Option<u8>,
 
     progress: Option<i16>,
 
@@ -63,6 +63,14 @@ pub struct RecordPagination {
 }
 
 impl RecordPagination {
+    /// Retries the page of records matching the pagination data in here
+    ///
+    /// Note that this method returns _one more record than requested_. This is used as a quick and
+    /// dirty way to determine if further pages exist: If the additional record was returned, more
+    /// pages obviously exist. This additional object is the last in the returned vector.
+    ///
+    /// Additionally, if _before_ is set, but not _after_, the page is returned in reverse order
+    /// (the additional object stays the last)
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>> {
         if let Some(limit) = self.limit {
             if limit < 1 || limit > 100 {
@@ -76,7 +84,17 @@ impl RecordPagination {
             }
         }
 
-        let mut stream = sqlx::query_as(include_str!("../../../../sql/paginate_records.sql"))
+        let limit = self.limit.unwrap_or(50) as i32;
+
+        let order = if self.after_id.is_none() && self.before_id.is_some() {
+            "DESC"
+        } else {
+            "ASC"
+        };
+
+        let query = format!(include_str!("../../../../sql/paginate_records.sql"), order);
+
+        let mut stream = sqlx::query_as(&query)
             .bind(self.before_id)
             .bind(self.after_id)
             .bind(self.progress)
@@ -91,7 +109,7 @@ impl RecordPagination {
             .bind(&self.video)
             .bind(self.video == Some(None))
             .bind(self.player)
-            .bind(self.limit.unwrap_or(50) as i32)
+            .bind(limit + 1)
             .fetch(connection);
 
         let mut records = Vec::new();

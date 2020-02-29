@@ -41,7 +41,7 @@ pub async fn paginate(
         }
     }
 
-    let records = pagination.page(&mut connection).await?;
+    let mut records = pagination.page(&mut connection).await?;
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut connection).await?;
 

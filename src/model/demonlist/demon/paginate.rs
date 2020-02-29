@@ -23,7 +23,7 @@ pub struct DemonIdPagination {
     pub after_id: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    limit: Option<u8>,
+    pub limit: Option<u8>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
@@ -64,8 +64,16 @@ impl DemonIdPagination {
             }
         }
 
+        let order = if self.after_id.is_none() && self.before_id.is_some() {
+            "DESC"
+        } else {
+            "ASC"
+        };
+
+        let query = format!(include_str!("../../../../sql/paginate_demons_by_id.sql"), order);
+
         // FIXME(sqlx) once CITEXT is supported
-        let mut stream = sqlx::query(include_str!("../../../../sql/paginate_demons_by_id.sql"))
+        let mut stream = sqlx::query(&query)
             .bind(self.before_id)
             .bind(self.after_id)
             .bind(&self.name)
@@ -76,7 +84,7 @@ impl DemonIdPagination {
             .bind(&self.verifier_name)
             .bind(self.publisher_id)
             .bind(&self.publisher_name)
-            .bind(self.limit.unwrap_or(50) as i32)
+            .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
         let mut demons = Vec::new();
@@ -122,7 +130,7 @@ pub struct DemonPositionPagination {
     pub after_position: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    limit: Option<u8>,
+    pub limit: Option<u8>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
@@ -163,8 +171,16 @@ impl DemonPositionPagination {
             }
         }
 
+        let order = if self.after_position.is_none() && self.before_position.is_some() {
+            "DESC"
+        } else {
+            "ASC"
+        };
+
+        let query = format!(include_str!("../../../../sql/paginate_demons_by_position.sql"), order);
+
         // FIXME(sqlx) once CITEXT is supported
-        let mut stream = sqlx::query(include_str!("../../../../sql/paginate_demons_by_position.sql"))
+        let mut stream = sqlx::query(&query)
             .bind(self.before_position)
             .bind(self.after_position)
             .bind(&self.name)

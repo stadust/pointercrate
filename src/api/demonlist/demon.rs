@@ -43,7 +43,7 @@ pub mod v1 {
     pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
-        let demons = pagination.page(&mut connection).await?;
+        let mut demons = pagination.page(&mut connection).await?;
         let max_position = Demon::max_position(&mut connection).await?;
 
         pagination_response!(
@@ -149,7 +149,7 @@ pub mod v2 {
     pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonIdPagination>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
-        let demons = pagination.page(&mut connection).await?;
+        let mut demons = pagination.page(&mut connection).await?;
         let (min_id, max_id) = Demon::extremal_demon_ids(&mut connection).await?;
 
         pagination_response!("/api/v2/demons/", demons, pagination, min_id, max_id, before_id, after_id, base.id)
@@ -160,7 +160,7 @@ pub mod v2 {
     pub async fn paginate_listed(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> ApiResult<HttpResponse> {
         let mut connection = state.connection().await?;
 
-        let demons = pagination.page(&mut connection).await?;
+        let mut demons = pagination.page(&mut connection).await?;
         let max_position = Demon::max_position(&mut connection).await?;
 
         pagination_response!(

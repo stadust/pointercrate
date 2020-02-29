@@ -15,5 +15,5 @@ WHERE (demons.position < $1 OR $1 IS NULL)
   AND (publishers.id = $9 OR $9 IS NULL)
   AND (publishers.name = $10 OR $10 IS NULL)
   AND demons.position IS NOT NULL
-ORDER BY demons.position ASC
+ORDER BY demons.position {}
 LIMIT $11

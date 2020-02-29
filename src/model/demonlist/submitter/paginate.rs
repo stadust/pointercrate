@@ -33,15 +33,20 @@ impl SubmitterPagination {
             }
         }
 
-        let mut stream = sqlx::query(
-            "SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) \
-             AND (banned = $3 OR $3 IS NULL) LIMIT $4 ORDER BY submitter_id ASC",
-        )
-        .bind(self.before_id)
-        .bind(self.after_id)
-        .bind(self.banned)
-        .bind(self.limit.unwrap_or(50) as i32)
-        .fetch(connection);
+        let query = if self.before_id.is_some() && self.after_id.is_none() {
+            "SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND \
+             (banned = $3 OR $3 IS NULL) LIMIT $4 ORDER BY submitter_id DESC"
+        } else {
+            "SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND \
+             (banned = $3 OR $3 IS NULL) LIMIT $4 ORDER BY submitter_id ASC"
+        };
+
+        let mut stream = sqlx::query(query)
+            .bind(self.before_id)
+            .bind(self.after_id)
+            .bind(self.banned)
+            .bind(self.limit.unwrap_or(50) as i32 + 1)
+            .fetch(connection);
 
         let mut submitters = Vec::new();
 

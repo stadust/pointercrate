@@ -20,7 +20,7 @@ pub async fn paginate(
 
     user.inner().require_permissions(Permissions::ListAdministrator)?;
 
-    let submitters = pagination.page(&mut connection).await?;
+    let mut submitters = pagination.page(&mut connection).await?;
 
     let (max_id, min_id) = Submitter::extremal_submitter_ids(&mut connection).await?;
 
