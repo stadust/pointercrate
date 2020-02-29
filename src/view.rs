@@ -79,7 +79,6 @@ pub trait Page {
                 }
                 body style={"background-image: url(" (STATIC) "images/squares3.png)"}{
                     (nav_bar())
-                    div {}
                     (self.body())
                     (footer())
                 }
@@ -90,34 +89,37 @@ pub trait Page {
 
 pub fn nav_bar() -> Markup {
     html! {
-        div.nav.center.collapse.underlined.see-through {
-            div.nav-icon {
-                a href = "/" {
-                    img src = {(STATIC) "images/pointercrate2.png"} style="height:15px";
+        header {
+            nav.center.collapse.underlined.see-through {
+                div.nav-icon {
+                    a href = "/" {
+                        img src = {(STATIC) "images/pointercrate2.png"} style="height:15px";
+                    }
+                }
+                div.nav-group-right.nav-group {
+                    a.nav-item.hover.white href = "/documentation/" {
+                        span style ="display:flex; flex-direction:column;" {
+                            span style ="font-size: 50%" {"REST API"}
+                            span {"Documentation"}
+                        }
+                    }
+                    a.nav-item.hover.white href = "/demonlist/" title = "Geometry Dash Demonlist" {
+                        span style ="display:flex; flex-direction:column;" {
+                            span style ="font-size: 50%" {"Geometry Dash"}
+                            span {"DEMONLIST"}
+                        }
+                    }
+                    div.nav-item.collapse-button {
+                        div.hamburger.hover {
+                            input type="checkbox"{}
+                            span{}
+                            span{}
+                            span{}
+                        }
+                    }
                 }
             }
-            div.nav-group-right.nav-group {
-                a.nav-item.hover.white href = "/documentation/" {
-                    span style ="display:flex; flex-direction:column;" {
-                        span style ="font-size: 50%" {"REST API"}
-                        span {"Documentation"}
-                    }
-                }
-                a.nav-item.hover.white href = "/demonlist/" title = "Geometry Dash Demonlist" {
-                    span style ="display:flex; flex-direction:column;" {
-                        span style ="font-size: 50%" {"Geometry Dash"}
-                        span {"DEMONLIST"}
-                    }
-                }
-                div.nav-item.collapse-button {
-                    div.hamburger.hover {
-                        input type="checkbox"{}
-                        span{}
-                        span{}
-                        span{}
-                    }
-                }
-            }
+            div {} // artificial spacing
         }
     }
 }

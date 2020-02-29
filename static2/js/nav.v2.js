@@ -74,7 +74,7 @@ $(document).ready(function() {
     );
   }
 
-  $(".nav.collapse").each((index, element) => {
+  $("header nav.collapse").each((index, element) => {
     NavigationBar.allNavigationBars.push(new NavigationBar(element));
   });
 });
