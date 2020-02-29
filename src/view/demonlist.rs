@@ -61,7 +61,7 @@ fn dropdowns(all_demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
     };
 
     html! {
-        div.flex.wrap.m-center.fade#lists style="text-align: center;" {
+        nav.flex.wrap.m-center.fade#lists style="text-align: center;" {
             // The drop down for the main list:
             (dropdown(&MAIN_SECTION, main, current))
             // The drop down for the extended list:
