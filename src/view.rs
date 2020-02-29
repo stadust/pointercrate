@@ -127,7 +127,7 @@ pub fn footer() -> Markup {
     let first_legacy = config::extended_list_size() + 1;
 
     html! {
-        div.footer.center {
+        footer.center {
             span.overline.pad style="text-align:center" {
                 "© Copyright 2017-2019 pointercrate.com"
                 br;
@@ -136,7 +136,7 @@ pub fn footer() -> Markup {
                 "pointercrate.com and the Demonlist are in no way affiliated with RobTopGamesAB ®"
             }
             div.flex.no-stretch {
-                div {
+                nav {
                     h2 { "pointercrate:" }
                     a.link.js-scroll {
                         "Back to top"
@@ -158,7 +158,7 @@ pub fn footer() -> Markup {
                     h2 { "Terms of Use:" }
                     "All content on pointercrate.com is provided free of charge. However, you may not redistribute, in any way, any original content found here without the creator's explicit permission."
                 }
-                div {
+                nav {
                     h2 {
                         "Demonlist:"
                     }
