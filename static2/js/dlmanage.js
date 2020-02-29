@@ -82,7 +82,8 @@ class RecordManager extends Paginator {
     new Dropdown(
       manager.getElementsByClassName("dropdown-menu")[0]
     ).addEventListener(li => {
-      if (li.innerHTML === "All") this.updateQueryData("demon_id", undefined);
+      if (li.innerHTML === "All Demons")
+        this.updateQueryData("demon_id", undefined);
       else this.updateQueryData("demon_id", li.dataset.value);
     });
     this.dropdown.addEventListener(li => {
