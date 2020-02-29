@@ -119,7 +119,7 @@ impl FullRecord {
         }
 
         let id = sqlx::query(
-            "INSERT INTO records (progress, video, status_, player, submitter, demon) VALUES ($1, $2::TEXT, 'SUBMITTED', $4, $5,$6) \
+            "INSERT INTO records (progress, video, status_, player, submitter, demon) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4,$5) \
              RETURNING id",
         )
         .bind(submission.progress)

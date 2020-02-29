@@ -181,6 +181,17 @@ fn submission_panel() -> Markup {
                         input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
                         p.error {}
                     }
+                    h3 {
+                        "Notes or comments: "
+                    }
+                    p {
+                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission."
+
+                    }
+                    span.form-input.flex.col#submit-note {
+                        input type = "text" name = "note"  ;
+                        p.error {}
+                    }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
             }

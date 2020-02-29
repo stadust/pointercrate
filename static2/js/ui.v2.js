@@ -79,7 +79,7 @@ class Search {
     this.registerHandlers();
 
     if (this.input.val()) {
-        this.updateResults(this.input.val().toLowerCase());
+      this.updateResults(this.input.val().toLowerCase());
     }
   }
 
@@ -136,15 +136,16 @@ $(document).ready(function() {
   // close all dropdowns if clicked outside of dropdown
 
   $(document).click(() => {
-    if (!$(event.target).parents('#lists').length) {
-      if (DropDown.currentlyShown) { // don't try to hide undefined
+    if (!$(event.target).parents("#lists").length) {
+      if (DropDown.currentlyShown) {
+        // don't try to hide undefined
         DropDown.hideDropDown(DropDown.currentlyShown);
         // remove active class to remove highlight
         $(".js-toggle.active").removeClass("active");
       }
     }
   });
-  
+
   // toggle button event handling
 
   var toggleGroups = {};
