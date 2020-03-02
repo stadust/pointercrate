@@ -19,8 +19,8 @@ CREATE TABLE record_notes_additions (
 
 CREATE TABLE record_notes_modifications (
     id INTEGER NOT NULL, -- which note was changed?
-    record INTEGER NOT NULL, -- can only happen internally
-    content TEXT NOT NULL
+    record INTEGER NULL,
+    content TEXT NULL
 ) INHERITS (audit_log2);
 
 CREATE TABLE record_notes_deletions (
@@ -34,7 +34,7 @@ CREATE FUNCTION audit_record_notes_addition() RETURNS trigger AS $record_notes_a
     END;
 $record_notes_add_trigger$ LANGUAGE plpgsql;
 
-CREATE FUNCTION audit_record_notes_modification() RETURNS trigger AS $record_notes_modification_trigger$
+CREATE OR REPLACE FUNCTION audit_record_notes_modification() RETURNS trigger AS $record_notes_modification_trigger$
     DECLARE
         record_change INTEGER;
         content_change TEXT;
@@ -48,7 +48,7 @@ CREATE FUNCTION audit_record_notes_modification() RETURNS trigger AS $record_not
         END IF;
 
         INSERT INTO record_notes_modifications (userid, id, record, content)
-            (SELECT id, NEW.id, record_change, content_change FROM active_user LIMIT 1);
+            (SELECT id, OLD.id, record_change, content_change FROM active_user LIMIT 1);
 
         RETURN NEW;
     END;
