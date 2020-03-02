@@ -53,8 +53,6 @@ async fn main() -> std::io::Result<()> {
 
     let application_state = PointercrateState::initialize().await;
 
-    // TODO: 404 and 405 handling
-
     HttpServer::new(move || {
         let json_config =
             JsonConfig::default().error_handler(|error, request| PointercrateError::from(error).dynamic(request.headers()).into());
