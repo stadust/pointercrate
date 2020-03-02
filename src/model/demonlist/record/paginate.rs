@@ -13,7 +13,7 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct RecordPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "before")]

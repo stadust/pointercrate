@@ -32,9 +32,10 @@ pub async fn test_setup() -> PgConnection {
     .fetch_all(&mut connection)
     .await
     .unwrap();
-    sqlx::query!(
+    let ids = sqlx::query!(
         "INSERT INTO records (progress, status_, player, submitter, demon) VALUES (100, 'SUBMITTED', $1, $5, $6), (90, 'APPROVED', $1, \
-         $5, $6), (80, 'REJECTED', $2, $5, $6), (90, 'APPROVED', $3, $5, $7), (100, 'APPROVED', $4, $5, $7), (100, 'APPROVED', $4, $5, $8)",
+         $5, $6), (80, 'REJECTED', $2, $5, $6), (90, 'APPROVED', $3, $5, $7), (100, 'APPROVED', $4, $5, $7), (100, 'APPROVED', $4, $5, \
+         $8) RETURNING id",
         ids[0].id,
         ids[1].id,
         ids[4].id,
@@ -43,6 +44,14 @@ pub async fn test_setup() -> PgConnection {
         demon_ids[0].id,
         demon_ids[1].id,
         demon_ids[2].id
+    )
+    .fetch_all(&mut connection)
+    .await
+    .unwrap();
+
+    sqlx::query!(
+        "INSERT INTO record_notes (record, content) VALUES ($1, 'This is a test')",
+        ids[2].id
     )
     .execute(&mut connection)
     .await

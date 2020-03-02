@@ -116,6 +116,7 @@ impl Demon {
             return Err(PointercrateError::InvalidRequirement)
         }
 
+        // Delete associated notes
         sqlx::query!("DELETE FROM records WHERE demon = $1 AND progress < $2", self.base.id, requirement)
             .execute(connection)
             .await?;
@@ -233,7 +234,13 @@ impl MinimalDemon {
 
 #[cfg(test)]
 mod tests {
-    use crate::model::demonlist::demon::{Demon, FullDemon, PatchDemon};
+    use crate::{
+        cistring::{CiStr, CiString},
+        model::demonlist::{
+            demon::{Demon, FullDemon, PatchDemon},
+            player::DatabasePlayer,
+        },
+    };
 
     #[actix_rt::test]
     async fn test_change_record_requirement() {
@@ -253,6 +260,32 @@ mod tests {
         let demon = demon.unwrap();
 
         assert_eq!(demon.requirement, 10);
+
+        let demon_reloaded = Demon::by_position(1, &mut connection).await.unwrap();
+
+        assert_eq!(demon, demon_reloaded);
+    }
+
+    #[actix_rt::test]
+    async fn test_change_record_verifier() {
+        let mut connection = crate::test::test_setup().await;
+
+        let player = DatabasePlayer::by_name(CiStr::from_str("Aquatias"), &mut connection).await.unwrap();
+
+        let patch = PatchDemon {
+            verifier: Some(CiString("Aquatias".to_string())),
+            ..Default::default()
+        };
+
+        let demon = Demon::by_position(1, &mut connection).await.unwrap();
+
+        let demon = demon.apply_patch(patch, &mut connection).await;
+
+        assert!(demon.is_ok(), "{:?}", demon.unwrap_err());
+
+        let demon = demon.unwrap();
+
+        assert_eq!(demon.verifier, player);
 
         let demon_reloaded = Demon::by_position(1, &mut connection).await.unwrap();
 
