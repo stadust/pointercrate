@@ -6,11 +6,7 @@ impl FullRecord {
     pub async fn delete(self, connection: &mut PgConnection) -> Result<()> {
         info!("Deleting record {}", self);
 
-        /*sqlx::query!("DELETE FROM record_notes WHERE record = $1", self.id)
-            .execute(connection)
-            .await?;
-
-        info!("Deleted associated notes!");*/
+        // Associated notes get deleted due to the ON DELETE CASCADE on record_notes.record
 
         sqlx::query!("DELETE FROM records WHERE id = $1", self.id)
             .execute(connection)
