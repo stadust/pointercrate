@@ -1,0 +1,51 @@
+[package]
+name = "pointercrate"
+version = "0.1.0"
+edition = "2018"
+build = "build_documentation.rs"
+
+[dependencies]
+sqlx = { version = "0.2", default-features = false, features = [ "runtime-tokio", "macros", "postgres" ] }
+actix-web = "2.0.0"
+maud = "0.21.0"
+reqwest = "0.10.3"
+actix-files = "0.2.1"
+log = "0.4.8"
+serde = "1.0.104"
+mime = "0.3.16"
+actix-web-codegen = "0.2.1"
+serde_json = "1.0.48"
+bitflags = "1.2.1"
+derive_more = "0.99.3"
+futures = "0.3.4"
+jsonwebtoken = "7.0.1"
+base64 = "0.11.0"
+sqlx-core = {version = "0.2.5", default-features = false, features = ["runtime-tokio", "postgres"]}
+lazy_static = "1.4.0"
+nonzero_ext = "0.2.0"
+ratelimit_meter = "5.0.0"
+url = "2.1.1"
+actix-rt = "1.0.0"
+serde_urlencoded = "0.6.1"
+bcrypt = "0.6.1"
+env_logger = "0.7.1"
+dotenv = "0.15.0"
+
+[dependencies.gdcf]
+git = "https://github.com/stadust/gdcf"
+
+[dependencies.gdcf_model]
+git = "https://github.com/stadust/gdcf"
+features = ["serde_support"]
+
+[dependencies.gdcf_parse]
+git = "https://github.com/stadust/gdcf"
+features = ["parallel"]
+
+[dependencies.gdcf_diesel]
+git = "https://github.com/stadust/gdcf"
+default-features = false
+features = ["pg"]
+
+[dependencies.gdrs]
+git = "https://github.com/stadust/gdcf"
