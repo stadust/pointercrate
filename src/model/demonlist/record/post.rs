@@ -135,7 +135,7 @@ impl FullRecord {
             id,
             progress: submission.progress,
             video,
-            status: submission.status,
+            status: RecordStatus::Submitted,
             player,
             demon,
             submitter: Some(submitter),
