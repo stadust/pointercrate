@@ -242,7 +242,8 @@ impl Demonlist {
                                                  a href = (video) target = "_blank"{
                                                     (record.player.name)
                                                  }
-                                            } else {
+                                            }
+                                            @else {
                                                 (record.player.name)
                                             }
                                         }
