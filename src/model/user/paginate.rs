@@ -45,7 +45,15 @@ impl UserPagination {
             }
         }
 
-        let mut stream = sqlx::query_as(include_str!("../../../sql/paginate_users.sql"))
+        let order = if self.after_id.is_none() && self.before_id.is_some() {
+            "DESC"
+        } else {
+            "ASC"
+        };
+
+        let query = format!(include_str!("../../../sql/paginate_users.sql"), order);
+
+        let mut stream = sqlx::query_as(&query)
             .bind(self.before_id)
             .bind(self.after_id)
             .bind(self.name.as_ref())
