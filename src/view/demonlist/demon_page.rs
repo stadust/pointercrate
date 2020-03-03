@@ -321,7 +321,7 @@ impl Page for Demonlist {
     fn head(&self) -> Vec<Markup> {
         vec![
             html! {
-                (PreEscaped(format!(r#"
+                (PreEscaped(format!(r##"
                     <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet">
                     <script type="application/ld+json">
                     {{
@@ -353,12 +353,12 @@ impl Page for Demonlist {
                                 }}
                             ]
                         }},
-                        "name": "\#{0} - {1}",
-                        "description": "{2}",
+                        "name": "#{0} - {1}",
+                        "description": {2},
                         "url": "https://pointercrate.com/demonlist/{0}/"
                     }}
                     </script>
-                "#, self.data.position(), self.data.name(), self.description())))
+                "##, self.data.position(), self.data.name(), self.description())))
             },
             html! {
                 (PreEscaped(format!("

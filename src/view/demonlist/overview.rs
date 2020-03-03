@@ -198,32 +198,34 @@ impl Page for DemonlistOverview {
             (PreEscaped(r#"
                 <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet">
                 <script type="application/ld+json">
-                {{
+                {
                     "@context": "http://schema.org",
                     "@type": "WebPage",
-                    "breadcrumb": {{
+                    "breadcrumb": {
                         "@type": "BreadcrumbList",
-                        "itemListElement": [{{
+                        "itemListElement": [
+                            {
                                 "@type": "ListItem",
                                 "position": 1,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/",
                                     "name": "pointercrate"
-                                }}
-                            }},{{
+                                }
+                            },
+                            {
                                 "@type": "ListItem",
                                 "position": 2,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/demonlist/",
                                     "name": "demonlist"
-                                }}
-                            }}
+                                }
+                            }
                         ]
-                    }},
+                    },
                     "name": "Geometry Dash Demonlist",
                     "description": "The official pointercrate Demonlist!",
                     "url": "https://pointercrate.com/demonlist/"
-                }}
+                }
                 </script>
             "#))
             },

@@ -43,7 +43,7 @@ pub trait Page {
 
                     meta name ="viewport" content="initial-scale=1, maximum-scale=1";
                     meta name="author" content = "stadust";
-                    meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,game,top";
+                    meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,game,top,level,levels,player,players,geometry dash";
                     meta name="description" content = (self.description());
                     meta http-equiv="Content-Type" content = "text/html; charset=utf-8";
                     meta http-equiv="Content-Style-Type" content="text/css";
