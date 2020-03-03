@@ -1,12 +1,5 @@
 use derive_more::Display;
 use serde::{Deserialize, Serialize, Serializer};
-use sqlx::{
-    decode::{Decode, DecodeError},
-    encode::Encode,
-    postgres::PgTypeInfo,
-    types::HasSqlType,
-    Postgres,
-};
 use std::{
     borrow::Borrow,
     cmp::Ordering,
@@ -20,6 +13,12 @@ use std::{
 #[serde(transparent)]
 pub struct CiString(pub String);
 
+impl CiString {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
 impl Hash for CiString {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.to_lowercase().hash(state)
@@ -29,24 +28,6 @@ impl Hash for CiString {
 impl From<String> for CiString {
     fn from(string: String) -> Self {
         CiString(string)
-    }
-}
-
-impl HasSqlType<CiString> for Postgres {
-    fn type_info() -> Self::TypeInfo {
-        PgTypeInfo::with_oid(16679)
-    }
-}
-
-impl Encode<Postgres> for CiString {
-    fn encode(&self, buf: &mut Vec<u8>) {
-        self.0.encode(buf)
-    }
-}
-
-impl Decode<Postgres> for CiString {
-    fn decode(raw: &[u8]) -> Result<Self, DecodeError> {
-        String::decode(raw).map(CiString)
     }
 }
 
