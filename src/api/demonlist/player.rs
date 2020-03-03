@@ -73,5 +73,7 @@ pub async fn patch(
 
     let player = player.apply_patch(data.into_inner(), &mut connection).await?;
 
+    connection.commit().await?;
+
     Ok(HttpResponse::Ok().json_with_etag(&player))
 }

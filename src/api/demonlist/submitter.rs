@@ -16,9 +16,9 @@ use actix_web_codegen::{get, patch};
 pub async fn paginate(
     TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Query<SubmitterPagination>,
 ) -> ApiResult<HttpResponse> {
-    let mut connection = state.connection().await?;
-
     user.inner().require_permissions(Permissions::ListAdministrator)?;
+
+    let mut connection = state.connection().await?;
 
     let mut submitters = pagination.page(&mut connection).await?;
 
@@ -38,9 +38,9 @@ pub async fn paginate(
 
 #[get("/{submitter_id}/")]
 pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter_id: Path<i32>) -> ApiResult<HttpResponse> {
-    let mut connection = state.connection().await?;
-
     user.inner().require_permissions(Permissions::ListModerator)?;
+
+    let mut connection = state.connection().await?;
 
     let submitter = FullSubmitter::by_id(submitter_id.into_inner(), &mut connection).await?;
 
@@ -51,15 +51,17 @@ pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter
 pub async fn patch(
     if_match: IfMatch, TokenAuth(user): TokenAuth, state: PointercrateState, submitter_id: Path<i32>, patch: Json<PatchSubmitter>,
 ) -> ApiResult<HttpResponse> {
-    let mut connection = state.connection().await?;
-
     user.inner().require_permissions(Permissions::ListModerator)?;
+
+    let mut connection = state.audited_transaction(&user).await?;
 
     let submitter = FullSubmitter::by_id(submitter_id.into_inner(), &mut connection).await?;
 
     if_match.require_etag_match(&submitter)?;
 
     let submitter = submitter.apply_patch(patch.into_inner(), &mut connection).await?;
+
+    connection.commit().await?;
 
     Ok(HttpResponse::Ok().json_with_etag(&submitter))
 }

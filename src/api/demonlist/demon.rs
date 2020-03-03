@@ -17,6 +17,8 @@ pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Js
 
     let demon = FullDemon::create_from(data.into_inner(), &mut connection).await?;
 
+    connection.commit().await?;
+
     Ok(HttpResponse::Created().json_with_etag(&demon))
 }
 
@@ -82,6 +84,8 @@ pub mod v1 {
 
         let demon = demon.apply_patch(patch.into_inner(), &mut connection).await?;
 
+        connection.commit().await?;
+
         Ok(HttpResponse::Ok().json_with_etag(&demon))
     }
 
@@ -91,7 +95,7 @@ pub mod v1 {
     ) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
-        let mut connection = state.audited_transaction(&user).await?;
+        let mut connection = state.audited_connection(&user).await?;
 
         let demon = Demon::by_position(position.into_inner(), &mut connection).await?;
         let player = DatabasePlayer::by_name_or_create(creator.creator.as_ref(), &mut connection).await?;
@@ -110,7 +114,7 @@ pub mod v1 {
     pub async fn delete_creator(TokenAuth(user): TokenAuth, state: PointercrateState, path: Path<(i16, i32)>) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
-        let mut connection = state.audited_transaction(&user).await?;
+        let mut connection = state.audited_connection(&user).await?;
 
         let (position, player_id) = path.into_inner();
 
@@ -199,6 +203,8 @@ pub mod v2 {
 
         let demon = demon.apply_patch(patch.into_inner(), &mut connection).await?;
 
+        connection.commit().await?;
+
         Ok(HttpResponse::Ok().json_with_etag(&demon))
     }
 
@@ -208,7 +214,7 @@ pub mod v2 {
     ) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
-        let mut connection = state.audited_transaction(&user).await?;
+        let mut connection = state.audited_connection(&user).await?;
 
         let demon = Demon::by_id(id.into_inner(), &mut connection).await?;
         let player = DatabasePlayer::by_name_or_create(creator.creator.as_ref(), &mut connection).await?;
@@ -227,7 +233,7 @@ pub mod v2 {
     pub async fn delete_creator(TokenAuth(user): TokenAuth, state: PointercrateState, path: Path<(i32, i32)>) -> ApiResult<HttpResponse> {
         user.inner().require_permissions(Permissions::ListModerator)?;
 
-        let mut connection = state.audited_transaction(&user).await?;
+        let mut connection = state.audited_connection(&user).await?;
 
         let (id, player_id) = path.into_inner();
 

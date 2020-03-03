@@ -189,6 +189,8 @@ pub async fn patch_note(
 
     let note = note.apply_patch(data.into_inner(), &mut connection).await?;
 
+    connection.commit().await?;
+
     Ok(HttpResponse::Ok().json_with_etag(&note))
 }
 
@@ -216,6 +218,8 @@ pub async fn delete_note(TokenAuth(user): TokenAuth, ids: Path<(i32, i32)>, stat
     }
 
     note.delete(&mut connection).await?;
+
+    connection.commit().await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
