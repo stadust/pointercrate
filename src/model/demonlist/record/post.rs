@@ -82,7 +82,7 @@ impl FullRecord {
         // Search for existing records. If a video exists, we also check if a record with
         // exactly that video exists.
 
-        if let Some(ref video) = submission.video {
+        if let Some(ref video) = video {
             if let Some(row) = sqlx::query!("SELECT id, status_::text FROM records WHERE video = $1", video.to_string())
                 .fetch_optional(connection) // FIXME(sqlx)
                 .await?

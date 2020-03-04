@@ -174,7 +174,7 @@ pub fn embed(video: &str) -> Option<String> {
 }
 
 pub fn thumbnail(video: &str) -> String {
-    // Videos need to be welformed once we get here!
+    // Videos need to be well formed once we get here!
     let url = Url::parse(video).unwrap();
     let video_id = url
         .query_pairs()
