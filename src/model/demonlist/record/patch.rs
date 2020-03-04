@@ -174,6 +174,8 @@ impl FullRecord {
     }
 
     pub async fn set_video(&mut self, video: String, connection: &mut PgConnection) -> Result<()> {
+        let video = crate::video::validate(&video)?;
+
         sqlx::query!("UPDATE records SET video = $1::text WHERE id = $2", video, self.id)
             .execute(connection)
             .await?;
