@@ -60,7 +60,7 @@ impl UserPagination {
             .bind(self.display_name.as_ref())
             .bind(self.display_name == Some(None))
             .bind(self.has_permissions.map(|p| p.bits() as i32))
-            .bind(self.limit.unwrap_or(50) as i32)
+            .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
         let mut users = Vec::new();
