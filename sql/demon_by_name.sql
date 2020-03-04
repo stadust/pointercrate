@@ -4,4 +4,4 @@ SELECT demons.id AS demon_id, demons.name::text AS demon_name, demons.position, 
 FROM demons
 INNER JOIN players AS verifiers ON verifiers.id=demons.verifier
 INNER JOIN players AS publishers ON publishers.id=demons.publisher
-WHERE demons.name::text=$1
+WHERE demons.name=$1::CITEXT

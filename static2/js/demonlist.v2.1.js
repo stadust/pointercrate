@@ -109,6 +109,8 @@ class StatsViewer extends FilteredPaginator {
 
     let beaten = records.filter(record => record.progress == 100);
 
+    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+
     let legacy = beaten.filter(
       record => record.demon.position > window.extended_list_length
     ).length;
