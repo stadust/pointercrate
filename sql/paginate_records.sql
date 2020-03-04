@@ -14,7 +14,7 @@ WHERE (records.id < $1 OR $1 IS NULL)
   AND (position > $8 OR $8 IS NULL)
   AND (status_ = CAST($9::TEXT AS record_status) OR $9 IS NULL)
   AND (demons.name = $10::CITEXT OR $10 IS NULL)
-  AND (demons.id = $11::CITEXT OR $11 IS NULL)
+  AND (demons.id = $11 OR $11 IS NULL)
   AND (records.video = $12 OR (records.video IS NULL AND $13) OR ($12 IS NULL AND NOT $13))
   AND (players.id = $14 OR $14 IS NULL)
 ORDER BY id {}
