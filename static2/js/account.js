@@ -146,6 +146,7 @@ function setupInvalidateToken() {
 
 function setupDeleteUser(csrfToken) {
   var deleteUserButton = document.getElementById("delete-user");
+  var editForm = window.patchUserPermissionsForm;
 
   deleteUserButton.addEventListener(
     "click",
