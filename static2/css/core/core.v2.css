@@ -1,13 +1,5 @@
 /* Basic css classes that can be applied to various components to make them look fancy*/
 
-.slightly-round {
-  border-radius: 4px;
-}
-
-.round {
-  border-radius: 25px;
-}
-
 .bordered {
   border: 1px solid #ddd;
 }

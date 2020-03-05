@@ -193,12 +193,14 @@ textarea {
   border: 1px solid #ddd;
   padding: 5px;
   box-sizing: border-box;
+  resize: none;
 }
 
 input[type="text"],
 input[type="number"],
 input[type="url"],
-input[type="password"] {
+input[type="password"]
+textarea {
   border: 1px solid #ddd;
   min-width: 0; /* Firefox and Egde need this */
 
@@ -217,14 +219,16 @@ input[type="password"] {
 form input[type="text"]:valid,
 form input[type="number"]:valid,
 form input[type="url"]:valid,
-form input[type="password"]:valid {
+form input[type="password"]:valid
+textarea:valid {
   border-bottom: 1px solid lime;
 }
 
 form input[type="text"]:invalid,
 form input[type="number"]:invalid,
 form input[type="url"]:invalid,
-form input[type="password"]:invalid {
+form input[type="password"]:invalid
+textarea:invalid {
   border-bottom: 1px solid coral;
 }
 
@@ -594,7 +598,6 @@ h2 .dropdown-menu ul {
 .info-green {
   background: #ddffdd;
   border: 1px solid #a8ff93;
-  border-radius: 10px;
   padding: 5px 15px;
   color: #074d07;
   margin: 25px 0px;
@@ -607,7 +610,6 @@ h2 .dropdown-menu ul {
 .info-yellow {
   background: #fffadd;
   border: 1px solid #e0e37b;
-  border-radius: 10px;
   padding: 5px 15px;
   color: #4d4707;
   margin: 25px 0px;
@@ -616,7 +618,6 @@ h2 .dropdown-menu ul {
 .info-red {
   background: #fdd;
   border: 1px solid #ff9393;
-  border-radius: 10px;
   padding: 5px 15px;
   color: #4d0707;
   margin: 25px 0px;

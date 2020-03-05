@@ -89,7 +89,7 @@ pub(super) fn page(user: &User) -> Markup {
                             input type = "password" name ="auth-password" minlength = "10" required = "";
                             p.error {}
                         }
-                        input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Submit edit";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit edit";
                     }
                 }
             }
@@ -111,13 +111,13 @@ pub(super) fn page(user: &User) -> Markup {
                             input required = "" type = "password" name = "password" minlength = "10";
                             p.error {}
                         }
-                        input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Log in";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                     }
                     div.overlined.pad#token-area style = "display: none" {
                         b {"Your access token is:"}
                         textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                     }
-                    a.blue.hover.button.slightly-round#get-token {
+                    a.blue.hover.button#get-token {
                         "Get access token"
                     }
                 }
@@ -128,7 +128,7 @@ pub(super) fn page(user: &User) -> Markup {
                     p {
                         "Edit some of the stuff displayed on your profile! You can change your display name and youtube channel link! You can also change your password here"
                     }
-                    a.blue.hover.button.slightly-round.js-scroll data-destination = "edit" data-reveal = "true" {
+                    a.blue.hover.button.js-scroll data-destination = "edit" data-reveal = "true" {
                         "Edit"
                     }
                 }
@@ -149,9 +149,9 @@ pub(super) fn page(user: &User) -> Markup {
                             input required = "" type = "password" name = "password" minlength = "10";
                             p.error {}
                         }
-                        input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Invalidate";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Invalidate";
                     }
-                    a.blue.hover.button.slightly-round#invalidate-token {
+                    a.blue.hover.button#invalidate-token {
                         "Invalidate all access tokens"
                     }
                 }

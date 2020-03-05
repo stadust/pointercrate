@@ -49,8 +49,8 @@ pub(super) fn page() -> Markup {
                             span.checkmark {}
                         }
                         div.flex.no-stretch {
-                            input.button.blue.hover.slightly-round#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
-                            input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
+                            input.button.blue.hover#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
                         }
                     }
                 }
@@ -70,7 +70,7 @@ pub(super) fn page() -> Markup {
                             input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                             p.error {}
                         }
-                        input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
                     }
                     form.flex.col#find-name-form novalidate = "" {
                         p.info-red.output {}
@@ -79,7 +79,7 @@ pub(super) fn page() -> Markup {
                             input required = "" type = "text" name = "name" minlength = "3";
                             p.error {}
                         }
-                        input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by name";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by name";
                     }
                 }
                 div.panel.fade {

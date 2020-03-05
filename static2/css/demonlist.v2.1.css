@@ -149,9 +149,9 @@ tr:nth-child(even) {
 
 /* Submission form styles */
 
-#submitter input:not([type="submit"]):not([type="checkbox"]) {
+/*#submitter input:not([type="submit"]):not([type="checkbox"]) {
   width: 98%;
-}
+}*/
 
 #submission-form h3 {
   margin: 20px 0px 10px 0px;

@@ -280,7 +280,7 @@ class FilteredPaginator extends Paginator {
 class Input {
   constructor(span) {
     this.span = span;
-    this.input = span.getElementsByTagName("input")[0];
+    this.input = span.getElementsByTagName("input")[0] || span.getElementsByTagName("textarea")[0];
     this.error = span.getElementsByTagName("p")[0];
     this.clearOnInvalid = false;
     this.validators = [];

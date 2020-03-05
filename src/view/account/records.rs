@@ -178,7 +178,7 @@ fn player_selector() -> Markup {
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
                 }
-                input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
             }
             form.flex.col#record-filter-by-player-name-form novalidate = "" {
                 p.info-red.output {}
@@ -187,7 +187,7 @@ fn player_selector() -> Markup {
                     input required = "" type = "text" name = "name";
                     p.error {}
                 }
-                input.button.blue.hover.slightly-round type = "submit" style = "margin: 15px auto 0px;" value="Find by name";
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by name";
             }
         }
     }

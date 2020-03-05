@@ -189,7 +189,7 @@ fn submission_panel() -> Markup {
 
                     }
                     span.form-input.flex.col#submit-note {
-                        input type = "text" name = "note"  ;
+                        textarea name = "note" placeholder = "Your dreams and hopes for this records... or something like that" {}
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
@@ -414,7 +414,7 @@ fn submit_panel() -> Markup {
             p {
                 "Note: Please do not submit nonsense, it only makes it harder for us all and will get you banned. Also note that the form rejects duplicate submissions."
             }
-            a.blue.hover.button.slightly-rounded.js-scroll data-destination = "submitter" data-reveal = "true" {
+            a.blue.hover.button.js-scroll data-destination = "submitter" data-reveal = "true" {
                 "Submit a record!"
             }
         }
@@ -432,7 +432,7 @@ fn stats_viewer_panel() -> Markup {
             p {
                 "Get a detailed overview of who completed the most, created the most demons or beat the hardest demons! There is even a leaderboard to compare yourself to the very best!"
             }
-            a.blue.hover.button.slightly-rounded.js-scroll#show-stats-viewer data-destination = "statsviewer" data-reveal = "true" {
+            a.blue.hover.button.js-scroll#show-stats-viewer data-destination = "statsviewer" data-reveal = "true" {
                 "Open the stats viewer!"
             }
         }
