@@ -14,7 +14,7 @@ use crate::{
 };
 use sqlx::{Error, PgConnection};
 
-// Reequired until https://github.com/launchbadge/sqlx/pull/108 is merged
+// Required until https://github.com/launchbadge/sqlx/pull/108 is merged
 struct FetchedPlayer {
     id: i32,
     name: String,
@@ -80,6 +80,8 @@ impl Player {
 
 impl DatabasePlayer {
     pub async fn by_name(name: &CiStr, connection: &mut PgConnection) -> Result<DatabasePlayer> {
+        let name = CiStr::from_str(name.trim());
+
         let result = sqlx::query!(
             "SELECT id, name::text, banned FROM players WHERE name = cast($1::text as citext)",
             name.to_string()
@@ -125,6 +127,8 @@ impl DatabasePlayer {
     }
 
     pub async fn by_name_or_create(name: &CiStr, connection: &mut PgConnection) -> Result<DatabasePlayer> {
+        let name = CiStr::from_str(name.trim());
+
         match Self::by_name(name, connection).await {
             Err(PointercrateError::ModelNotFound { .. }) => {
                 let id = sqlx::query!("INSERT INTO players (name) VALUES ($1::text) RETURNING id", name.to_string())
