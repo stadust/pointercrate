@@ -27,7 +27,7 @@ pub struct DatabasePlayer {
     pub banned: bool,
 }
 
-#[derive(Debug, Serialize, Display)]
+#[derive(Debug, Serialize, Display, PartialEq, Eq)]
 #[display(fmt = "{}", player)]
 pub struct FullPlayer {
     #[serde(flatten)]

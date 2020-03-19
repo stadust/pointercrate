@@ -50,7 +50,7 @@ pub struct RecordPagination {
     pub status: Option<RecordStatus>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    player: Option<i32>,
+    pub player: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     demon: Option<CiString>,

@@ -15,7 +15,7 @@ use log::info;
 use serde::Deserialize;
 use sqlx::PgConnection;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 pub struct PatchPlayer {
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
@@ -42,6 +42,9 @@ impl FullPlayer {
         if let Some(banned) = patch.banned {
             if banned && !self.player.base.banned {
                 self.player.base.ban(connection).await?;
+
+                // self.records only contains approved records!
+                self.records.clear();
             } else if !banned && self.player.base.banned {
                 self.player.base.unban(connection).await?;
             }
@@ -55,15 +58,21 @@ impl FullPlayer {
     }
 
     pub async fn set_name(&mut self, name: CiString, connection: &mut PgConnection) -> Result<()> {
-        if name == self.player.base.name {
-            return Ok(())
-        }
+        let name = CiString(name.trim().to_string());
 
-        // try to see if a player with new name already exists
-        match DatabasePlayer::by_name(name.as_ref(), connection).await {
-            Ok(existing) => self.merge(existing, connection).await?,
-            Err(PointercrateError::ModelNotFound { .. }) => (),
-            Err(err) => return Err(err),
+        // Nothing to be done
+        if name.eq_sensitive(self.player.base.name.as_ref()) {
+            return Ok(())
+        } else if name != self.player.base.name {
+            // If they are equal case sensitively, we're only doing a cosmetic rename, which won't
+            // even require a merge
+
+            // try to see if a player with new name already exists
+            match DatabasePlayer::by_name(name.as_ref(), connection).await {
+                Ok(existing) => self.merge(existing, connection).await?,
+                Err(PointercrateError::ModelNotFound { .. }) => (),
+                Err(err) => return Err(err),
+            }
         }
 
         sqlx::query!(
@@ -83,6 +92,7 @@ impl FullPlayer {
     ///
     /// Note that this method **does not** rename `Self`
     pub async fn merge(&mut self, with: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
+        info!("Merging player {} with player {}", self, with);
         // First, delete duplicate creator entries
 
         let deleted = sqlx::query!(
@@ -190,9 +200,12 @@ impl DatabasePlayer {
 
     pub async fn ban(&mut self, connection: &mut PgConnection) -> Result<()> {
         // Delete all submissions for this player
-        let deleted = sqlx::query!("DELETE FROM records WHERE player = $1 AND status_ = 'SUBMITTED'", self.id)
-            .execute(connection)
-            .await?;
+        let deleted = sqlx::query!(
+            "DELETE FROM records WHERE player = $1 AND (status_ = 'SUBMITTED' OR status_ = 'UNDER_CONSIDERATION')",
+            self.id
+        )
+        .execute(connection)
+        .await?;
 
         info!("Deleted {} submissions while banning {}", deleted, self);
 
@@ -215,5 +228,87 @@ impl DatabasePlayer {
         self.banned = true;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        cistring::{CiStr, CiString},
+        model::demonlist::{
+            player::{DatabasePlayer, PatchPlayer, Player},
+            record::{RecordPagination, RecordStatus},
+        },
+    };
+
+    #[actix_rt::test]
+    async fn test_cosmetic_rename() {
+        let mut connection = crate::test::test_setup().await;
+        let player_id = DatabasePlayer::by_name(CiStr::from_str("stardust1971"), &mut connection)
+            .await
+            .unwrap()
+            .id;
+        let player = Player::by_id(player_id, &mut connection).await.unwrap();
+        let mut player = player.upgrade(&mut connection).await.unwrap();
+        let player_before = Player::by_id(player_id, &mut connection).await.unwrap();
+        let mut player_before = player_before.upgrade(&mut connection).await.unwrap();
+
+        let patch = PatchPlayer {
+            name: Some(CiString("STARDUST1971".to_owned())),
+            ..Default::default()
+        };
+
+        let player_after = player.apply_patch(patch, &mut connection).await;
+
+        assert!(player_after.is_ok(), "{:?}", player_after.unwrap_err());
+        assert_eq!(player_after.unwrap(), player_before);
+    }
+
+    #[actix_rt::test]
+    async fn test_ban_player() {
+        let mut connection = crate::test::test_setup().await;
+        let player_id = DatabasePlayer::by_name(CiStr::from_str("stardust1971"), &mut connection)
+            .await
+            .unwrap()
+            .id;
+        let player = Player::by_id(player_id, &mut connection).await.unwrap();
+        let mut player = player.upgrade(&mut connection).await.unwrap();
+
+        // using pagination here is okay, cause the test database doesn't contain more than 50 records for a
+        // single player
+        let mut pagination = RecordPagination::default();
+        pagination.player = Some(player_id);
+        let records_before = pagination.page(&mut connection).await.unwrap();
+
+        let patch = PatchPlayer {
+            banned: Some(true),
+            ..Default::default()
+        };
+
+        let patched_player = player.apply_patch(patch, &mut connection).await;
+
+        assert!(patched_player.is_ok(), "{:?}", patched_player.unwrap_err());
+
+        let patched_player = patched_player.unwrap();
+
+        // Test data had the player with 3 records, one of them submitted
+        // the submission should have been deleted, the other
+        assert!(patched_player.records.is_empty(), "{:?}", patched_player);
+
+        // see if database and model are consistent
+        let player = Player::by_id(player_id, &mut connection).await.unwrap();
+        let mut player = player.upgrade(&mut connection).await.unwrap();
+
+        assert_eq!(player, patched_player);
+
+        // Check if all records where properly updated
+        let records_after = pagination.page(&mut connection).await.unwrap();
+
+        assert_eq!(records_after.len(), 2);
+
+        // all records must be rejected
+        for record in records_after {
+            assert_eq!(record.status, RecordStatus::Rejected);
+        }
     }
 }

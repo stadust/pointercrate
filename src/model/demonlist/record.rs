@@ -146,8 +146,9 @@ impl Hash for FullRecord {
         self.video.hash(state);
         self.status.hash(state);
         self.player.id.hash(state);
-        self.demon.id.hash(state)
-        // submitter cannot be patch, notes have different endpoints -> no hash
+        self.demon.id.hash(state);
+        self.notes.hash(state)
+        // submitter cannot be patched -> no hash
     }
 }
 
@@ -162,7 +163,7 @@ pub struct MinimalRecordPD {
     pub player: DatabasePlayer,
 }
 
-#[derive(Debug, Hash, Serialize, Display)]
+#[derive(Debug, Hash, Serialize, Display, PartialEq, Eq)]
 #[display(fmt = "{}% on {} (ID: {})", progress, demon, id)]
 pub struct MinimalRecordD {
     pub id: i32,

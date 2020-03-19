@@ -10,7 +10,7 @@ pub async fn test_setup() -> PgConnection {
         .await
         .unwrap();
     sqlx::query!("BEGIN TRANSACTION").execute(&mut connection).await.unwrap();
-    let ids = sqlx::query!(
+    let player_ids = sqlx::query!(
         "INSERT INTO players (name) VALUES ('stardust1971'), ('Aquatias'), ('Mullsy'), ('Samifying'), ('Aeon Air'), ('Aaron Ari') \
          RETURNING id",
     )
@@ -25,21 +25,21 @@ pub async fn test_setup() -> PgConnection {
     let demon_ids = sqlx::query!(
         "INSERT INTO demons (name, position, requirement, verifier, publisher) VALUES ('abstract interpretation', 1, 52, $1, $1), \
          ('Trichotomy', 2, 84, $1, $1), ('terminal void', 3, 35, $2,$2), ('taraturusus', 4, 90, $3, $3) RETURNING id",
-        ids[0].id,
-        ids[1].id,
-        ids[2].id
+        player_ids[0].id,
+        player_ids[1].id,
+        player_ids[2].id
     )
     .fetch_all(&mut connection)
     .await
     .unwrap();
-    let ids = sqlx::query!(
+    let record_ids = sqlx::query!(
         "INSERT INTO records (progress, status_, player, submitter, demon) VALUES (100, 'SUBMITTED', $1, $5, $6), (90, 'APPROVED', $1, \
          $5, $6), (80, 'REJECTED', $2, $5, $6), (90, 'APPROVED', $3, $5, $7), (100, 'APPROVED', $4, $5, $7), (100, 'APPROVED', $4, $5, \
-         $8) RETURNING id",
-        ids[0].id,
-        ids[1].id,
-        ids[4].id,
-        ids[5].id,
+         $8), (100, 'APPROVED', $1, $5, $7) RETURNING id",
+        player_ids[0].id,
+        player_ids[1].id,
+        player_ids[4].id,
+        player_ids[5].id,
         submitter_id,
         demon_ids[0].id,
         demon_ids[1].id,
@@ -51,7 +51,7 @@ pub async fn test_setup() -> PgConnection {
 
     sqlx::query!(
         "INSERT INTO record_notes (record, content) VALUES ($1, 'This is a test')",
-        ids[2].id
+        record_ids[2].id
     )
     .execute(&mut connection)
     .await

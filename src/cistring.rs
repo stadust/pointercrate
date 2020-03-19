@@ -17,6 +17,10 @@ impl CiString {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    pub fn eq_sensitive(&self, other: &CiStr) -> bool {
+        self.0 == other.0
+    }
 }
 
 impl Hash for CiString {
