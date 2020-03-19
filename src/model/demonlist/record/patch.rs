@@ -9,7 +9,7 @@ use crate::{
     util::{non_nullable, nullable},
     Result,
 };
-use log::info;
+use log::{info, warn};
 use serde::Deserialize;
 use sqlx::PgConnection;
 
@@ -75,6 +75,12 @@ impl FullRecord {
     /// Prepared turning `self` into a (player, demon)-record (either player or demon will be
     /// changed)
     async fn ensure_invariants(&mut self, player: i32, demon: i32, connection: &mut PgConnection) -> Result<()> {
+        if self.player.id == player && self.demon.id == demon {
+            warn!("Record::ensure_invariants was called, but the given player and demon ids match those we already have. Doing nothing.");
+
+            return Ok(())
+        }
+
         match self.status {
             RecordStatus::Rejected => {
                 // The record needs to be globally unique, so delete all (player, demon) records
