@@ -114,7 +114,18 @@ class RecordManager extends Paginator {
     this._status.innerHTML = recordData.status;
     this._progress.innerHTML = recordData.progress;
     this._submitter.innerHTML = recordData.submitter.id;
-    this._notes.innerHTML = recordData.notes;
+
+    // clear notes
+    while (this._notes.firstChild) {
+      this._notes.removeChild(this._notes.firstChild);
+    }
+
+    for (let note of recordData.notes) {
+      let noteElement = document.createElement("i");
+      noteElement.innerHTML = note.content;
+      this._notes.appendChild(noteElement);
+      this._notes.appendChild(document.createElement("br"))
+    }
 
     $(this._welcome).hide(100);
     $(this._content).show(100);
