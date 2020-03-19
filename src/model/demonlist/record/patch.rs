@@ -37,6 +37,8 @@ pub struct PatchRecord {
 impl FullRecord {
     /// Must be called inside a transaction
     pub async fn apply_patch(mut self, data: PatchRecord, connection: &mut PgConnection) -> Result<Self> {
+        info!("Applying patch {:?} for record {}", data, self);
+
         if let Some(progress) = data.progress {
             self.set_progress(progress, connection).await?;
         }
@@ -81,13 +83,13 @@ impl FullRecord {
                     "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND \
                      records.player = $3",
                     self.id,
-                    self.demon.id,
+                    demon,
                     player
                 )
                 .execute(connection)
                 .await?;
 
-                let records_deleted = sqlx::query!("DELETE FROM records WHERE player = $1 AND demon = $2", player, self.demon.id)
+                let records_deleted = sqlx::query!("DELETE FROM records WHERE player = $1 AND demon = $2", player, demon)
                     .execute(connection)
                     .await?;
 
@@ -112,7 +114,7 @@ impl FullRecord {
                 let row = sqlx::query_as!(
                     _Existing,
                     "SELECT progress, video::TEXT FROM records WHERE status_ = 'APPROVED' AND demon = $1 AND player = $2 AND progress > $3",
-                    self.demon.id,
+                    demon,
                     player,
                     self.progress
                 )
@@ -135,7 +137,7 @@ impl FullRecord {
                     "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND \
                      records.player = $3 AND (records.status_ = 'REJECTED' OR records.progress <= $4)",
                     self.id,
-                    self.demon.id,
+                    demon,
                     player,
                     self.progress
                 )
@@ -144,7 +146,7 @@ impl FullRecord {
 
                 let records_deleted = sqlx::query!(
                     "DELETE FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR progress <= $3)",
-                    self.demon.id,
+                    demon,
                     player,
                     self.progress
                 )
@@ -208,6 +210,8 @@ impl FullRecord {
     /// If the new player has a record that would stand in conflict with this one, this records
     /// takes precedence and overrides the existing one.
     pub async fn set_player(&mut self, player: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
+        info!("Setting player of record {} to {}", self, player);
+
         self.ensure_invariants(player.id, self.demon.id, connection).await?;
 
         sqlx::query!("UPDATE records SET player = $1 WHERE id = $2", player.id, self.id)
