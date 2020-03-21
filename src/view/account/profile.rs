@@ -65,7 +65,7 @@ pub(super) fn page(user: &User) -> Markup {
                     form.flex.col#edit-form novalidate = "" {
                         p.info-red.output {}
                         span.form-input#edit-display-name {
-                            label for = "display_name" {"New display name:"}
+                            label for = "username" {"New display name:"}
                             input type = "text" name = "username" value = (user.display_name.as_ref().map(AsRef::as_ref).unwrap_or(""));
                             p.error {}
                         }
