@@ -8,18 +8,27 @@ use crate::{
 };
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
+use chrono::NaiveDateTime;
 use gdcf::cache::CacheEntry;
 use gdcf_model::{
     level::{data::LevelInformationSource, Level, Password},
     user::Creator,
 };
+use log::error;
 use maud::{html, Markup, PreEscaped};
+
+#[derive(Debug)]
+pub struct DemonMovement {
+    from_position: i16,
+    at: NaiveDateTime,
+}
 
 #[derive(Debug)]
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: FullDemon,
     server_level: Option<CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>>,
+    movements: Vec<DemonMovement>,
 }
 
 #[get("/demonlist/{position}/")]
@@ -29,11 +38,44 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
     let gd_demon = compat::gd_demon_by_name(&state.gdcf, &demon.demon.base.name);
 
+    let mut movements: Vec<DemonMovement> = sqlx::query_as!(
+        DemonMovement,
+        "SELECT position AS from_position, time AS at FROM demon_modifications WHERE position IS NOT NULL AND id = $1 AND position > 0 \
+         ORDER BY time",
+        demon.demon.base.id
+    )
+    .fetch_all(&mut connection)
+    .await?;
+
+    let addition = sqlx::query!("SELECT time FROM demon_additions WHERE id = $1", demon.demon.base.id)
+        .fetch_optional(&mut connection)
+        .await?;
+
+    match addition {
+        Some(time) =>
+            match movements.first() {
+                Some(movement) =>
+                    movements.insert(0, DemonMovement {
+                        at: time.time,
+                        from_position: movement.from_position,
+                    }),
+                None =>
+                    movements.push(DemonMovement {
+                        at: time.time,
+                        from_position: demon.demon.base.position,
+                    }),
+            },
+        None => error!("No addition logged for demon {}!", demon),
+    }
+
+    dbg!(&movements);
+
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
         Demonlist {
             overview,
             data: demon,
             server_level: gd_demon.ok(),
+            movements,
         }
         .render()
         .0,
@@ -297,6 +339,34 @@ impl Page for Demonlist {
     fn body(&self) -> Markup {
         let dropdowns = super::dropdowns(&self.overview.demon_overview, Some(&self.data.demon));
 
+        let mut labels = Vec::new();
+
+        let year_only = self.movements.len() > 30;
+        let mut last_label = None;
+
+        for movement in &self.movements {
+            let would_be_label = if year_only {
+                movement.at.date().format("%Y").to_string()
+            } else {
+                movement.at.date().format("%b %y").to_string()
+            };
+
+            dbg!(&labels);
+            dbg!(&would_be_label);
+
+            match last_label {
+                Some(ref label) if &would_be_label == label => labels.push(String::new()),
+                _ => {
+                    last_label = Some(would_be_label.clone());
+                    if labels.is_empty() {
+                        labels.push(format!("Added ({})", would_be_label))
+                    } else {
+                        labels.push(would_be_label)
+                    }
+                },
+            }
+        }
+
         html! {
             (dropdowns)
 
@@ -305,8 +375,23 @@ impl Page for Demonlist {
                     (super::submission_panel())
                     (super::stats_viewer(&self.overview.nations))
                     (self.demon_panel())
+                    div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
+                        h2.underlined.pad {
+                            "Position History"
+                            span.arrow.hover {}
+                        }
+                        div.ct-chart.ct-perfect-fourth.js-collapse-content#position-chart style="display:none" {}
+                    }
                     (super::rules_panel())
                     (self.records_panel())
+                    (PreEscaped(format!("
+                        <script>
+                        window.positionChartLabels = ['{}', 'Now'];
+                        window.positionChartData = [{},{}];
+                        </script>",
+                        labels.join("','"),
+                        self.movements.iter().map(|movement| movement.from_position.to_string()).collect::<Vec<_>>().join(","), self.data.demon.base.position
+                    ))) // FIXME: bad
                 }
                 aside.right {
                     (self.overview.team_panel())
@@ -367,6 +452,10 @@ impl Page for Demonlist {
                         window.extended_list_length = {1}
                     </script>", config::list_size(), config::extended_list_size()
                 )))
+            },
+            html! {
+                   (PreEscaped("<link rel='stylesheet' href='//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css'>
+                    <script src='//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js'></script>"))
             },
         ]
     }

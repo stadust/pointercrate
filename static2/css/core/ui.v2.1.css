@@ -174,6 +174,15 @@ a {
   overflow: hidden;
 }
 
+.closable {
+  transition: opacity 1s;
+}
+
+.closable.initial-hidden {
+  display: none;
+  opacity: 0;
+}
+
 /* Roman list */
 
 ul.roman {
@@ -199,8 +208,7 @@ textarea {
 input[type="text"],
 input[type="number"],
 input[type="url"],
-input[type="password"]
-textarea {
+input[type="password"] textarea {
   border: 1px solid #ddd;
   min-width: 0; /* Firefox and Egde need this */
 
@@ -219,16 +227,14 @@ textarea {
 form input[type="text"]:valid,
 form input[type="number"]:valid,
 form input[type="url"]:valid,
-form input[type="password"]:valid
-textarea:valid {
+form input[type="password"]:valid textarea:valid {
   border-bottom: 1px solid lime;
 }
 
 form input[type="text"]:invalid,
 form input[type="number"]:invalid,
 form input[type="url"]:invalid,
-form input[type="password"]:invalid
-textarea:invalid {
+form input[type="password"]:invalid textarea:invalid {
   border-bottom: 1px solid coral;
 }
 
