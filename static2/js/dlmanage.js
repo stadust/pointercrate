@@ -60,6 +60,8 @@ class RecordManager extends Paginator {
 
     var manager = document.getElementById("record-manager");
 
+    this.currentRecord = null;
+
     this._welcome = manager.getElementsByClassName("viewer-welcome")[0];
     this._content = manager.getElementsByClassName("viewer-content")[0];
 
@@ -94,7 +96,7 @@ class RecordManager extends Paginator {
   }
 
   onReceive(response) {
-    var recordData = response.responseJSON.data;
+    var recordData = (this.currentRecord = response.responseJSON.data);
 
     var embeddedVideo = embedVideo(recordData.video);
 
@@ -116,29 +118,23 @@ class RecordManager extends Paginator {
     this._progress.innerHTML = recordData.progress;
     this._submitter.innerHTML = recordData.submitter.id;
 
-    if (!recordData.notes.length)
-      // TODO: maybe via CSS transform?
-      $(this._notes).hide(100);
-
     // clear notes
     while (this._notes.firstChild) {
       this._notes.removeChild(this._notes.firstChild);
     }
 
     for (let note of recordData.notes) {
-      this._notes.appendChild(createNoteHtml(recordData.id, note, this._tok));
+      this._notes.appendChild(createNoteHtml(note, this._tok));
     }
 
-    if (recordData.notes.length) {
-      $(this._notes).show(100); // TODO: maybe via CSS transform?
-    }
+    $(this._notes.parentElement).show(100); // TODO: maybe via CSS transform?
 
     $(this._welcome).hide(100);
     $(this._content).show(100);
   }
 }
 
-function createNoteHtml(recordId, note, csrfToken) {
+function createNoteHtml(note, csrfToken) {
   let noteDiv = document.createElement("div");
 
   noteDiv.classList.add("white");
@@ -161,7 +157,11 @@ function createNoteHtml(recordId, note, csrfToken) {
 
       makeRequest(
         "DELETE",
-        "/api/v1/records/" + recordId + "/notes/" + note.id + "/",
+        "/api/v1/records/" +
+          window.recordManager.currentRecord.id +
+          "/notes/" +
+          note.id +
+          "/",
         null,
         () => {
           // node suicide
@@ -207,6 +207,37 @@ function createNoteHtml(recordId, note, csrfToken) {
   noteDiv.appendChild(furtherInfo);
 
   return noteDiv;
+}
+
+function setupAddNote(csrfToken) {
+  let adder = document.getElementById("add-record-note");
+  let output = adder.getElementsByClassName("output")[0];
+  let textArea = adder.getElementsByTagName("textarea")[0];
+  let add = adder.getElementsByClassName("button")[0];
+
+  add.addEventListener("click", () => {
+    makeRequest(
+      "POST",
+      "/api/v1/records/" + window.recordManager.currentRecord.id + "/notes/",
+      output,
+      noteResponse => {
+        let newNote = createNoteHtml(noteResponse.responseJSON.data, csrfToken);
+        window.recordManager._notes.appendChild(newNote);
+
+        $(adder).hide(100);
+        textArea.value = "";
+      },
+      {},
+      { "X-CSRF-TOKEN": csrfToken },
+      { content: textArea.value }
+    );
+  });
+
+  document
+    .getElementById("add-record-note-open")
+    .addEventListener("click", () => {
+      $(adder).show(100);
+    });
 }
 
 function setupRecordFilterPlayerIdForm() {

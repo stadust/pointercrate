@@ -223,13 +223,32 @@ fn player_selector() -> Markup {
     }
 }
 
+fn note_adder() -> Markup {
+    html! {
+        div.panel.fade.closable#add-record-note style = "display: none" {
+            span.plus.cross.hover {}
+            div.button.blue.hover.small style = "width: 100px; margin-bottom: 10px"{
+                "Add"
+            }
+            p.info-red.output {}
+            textarea style = "width: 100%" placeholder = "Add note here. Click 'Add' above when done!"{}
+        }
+    }
+}
+
 pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "3" {
             div.left {
                 (record_editor())
                 (record_manager(demons))
-                div.panel.fade#record-notes style = "display:none"{} // populated by javascript when a record is clicked
+                (note_adder())
+                div.panel.fade#record-notes-container style = "display:none" {
+                    div#record-notes {} // populated by javascript when a record is clicked
+                    div.white.hover.clickable#add-record-note-open {
+                        b {"Add Note"}
+                    }
+                }
                 (manager_help())
             }
             div.right {
