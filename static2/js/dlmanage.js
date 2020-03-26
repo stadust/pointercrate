@@ -145,7 +145,9 @@ function createNoteHtml(recordId, note, csrfToken) {
   noteDiv.classList.add("hover");
 
   // only add option to delete notes if you're list admin (and yes, server sided validation is also in place. I am just too lazy to write permission error handling)
-  let isAdmin = (window.permissions & 0x8) == 0x8;
+  let isAdmin =
+    (window.permissions & 0x8) == 0x8 || window.username == note.author;
+
   if (isAdmin) {
     var closeX = document.createElement("span");
     closeX.classList.add("hover");
