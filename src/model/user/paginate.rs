@@ -7,8 +7,7 @@ use crate::{
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
-use sqlx::{PgConnection, Row};
-use sqlx_core::postgres::PgRow;
+use sqlx::{postgres::PgRow, PgConnection, Row};
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct UserPagination {
