@@ -144,12 +144,32 @@ function createNoteHtml(recordId, note, csrfToken) {
   noteDiv.classList.add("white");
   noteDiv.classList.add("hover");
 
-  let closeX = document.createElement("span");
-  closeX.classList.add("hover");
-  closeX.classList.add("plus");
-  closeX.classList.add("cross");
+  // only add option to delete notes if you're list admin (and yes, server sided validation is also in place. I am just too lazy to write permission error handling)
+  let isAdmin = (window.permissions & 0x8) == 0x8;
+  if (isAdmin) {
+    var closeX = document.createElement("span");
+    closeX.classList.add("hover");
+    closeX.classList.add("plus");
+    closeX.classList.add("cross");
 
-  closeX.style.transform = "scale(0.75)";
+    closeX.style.transform = "scale(0.75)";
+
+    closeX.addEventListener("click", () => {
+      confirm("This action will irrevocably delete this note. Proceed?");
+
+      makeRequest(
+        "DELETE",
+        "/api/v1/records/" + recordId + "/notes/" + note.id + "/",
+        null,
+        () => {
+          // node suicide
+          noteDiv.parentElement.removeChild(noteDiv);
+        },
+        {},
+        { "X-CSRF-TOKEN": csrfToken }
+      );
+    });
+  }
 
   let b = document.createElement("b");
   b.innerHTML = "Record Note #" + note.id;
@@ -179,26 +199,10 @@ function createNoteHtml(recordId, note, csrfToken) {
     furtherInfo.innerHTML += "This not was not originally left on this record.";
   }
 
-  noteDiv.appendChild(closeX);
+  if (isAdmin) noteDiv.appendChild(closeX);
   noteDiv.appendChild(b);
   noteDiv.appendChild(i);
   noteDiv.appendChild(furtherInfo);
-
-  closeX.addEventListener("click", () => {
-    confirm("This action will irrevocably delete this note. Proceed?");
-
-    makeRequest(
-      "DELETE",
-      "/api/v1/records/" + recordId + "/notes/" + note.id + "/",
-      null,
-      () => {
-        // node suicide
-        noteDiv.parentElement.removeChild(noteDiv);
-      },
-      {},
-      { "X-CSRF-TOKEN": csrfToken }
-    );
-  });
 
   return noteDiv;
 }

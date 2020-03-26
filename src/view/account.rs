@@ -124,7 +124,7 @@ impl Page for AccountPage {
 
         vec![html! {
             (PreEscaped(
-                format!("<script>window.username='{}'; window.etag='{}';</script>", self.user.name, hasher.finish().to_string())
+                format!("<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script>", self.user.name, hasher.finish().to_string(), self.user.permissions.bits())
             ))
         }]
     }
