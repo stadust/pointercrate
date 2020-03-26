@@ -3,7 +3,7 @@ use maud::{html, Markup};
 
 fn record_editor() -> Markup {
     html! {
-        div.panel.fade.closable#edit style = "display: none" {
+        div.panel.fade.closable#edit-record style = "display: none" {
             span.plus.cross.hover {}
             h2.underlined.pad {
                 "Edit Record #"
@@ -108,16 +108,6 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                                     }
                                     br;
                                     span#record-submitter {}
-                                }
-                            }
-
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Notes:"
-                                    }
-                                    br;
-                                    span#record-notes {}
                                 }
                             }
                         }
@@ -237,7 +227,9 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "3" {
             div.left {
+                (record_editor())
                 (record_manager(demons))
+                div.panel.fade#record-notes style = "display:none"{} // populated by javascript when a record is clicked
                 (manager_help())
             }
             div.right {

@@ -33,7 +33,7 @@ use crate::{
     Result,
 };
 use derive_more::Display;
-use log::{debug, error, info, warn};
+use log::{debug, error, warn};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
 use sqlx::PgConnection;
@@ -210,8 +210,6 @@ impl FullRecord {
         match state.http_client.head(video).send().await {
             Ok(response) => {
                 let status = response.status().as_u16();
-
-                info!("Record valid!");
 
                 if status == 401 || status == 403 || status == 405 {
                     // Some websites (billibilli) respond unfavorably to HEAD requests. Retry with

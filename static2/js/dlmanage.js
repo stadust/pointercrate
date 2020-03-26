@@ -55,7 +55,7 @@ function embedVideo(video) {
 }
 
 class RecordManager extends Paginator {
-  constructor() {
+  constructor(tok) {
     super("record-pagination", {}, generateRecord);
 
     var manager = document.getElementById("record-manager");
@@ -72,6 +72,7 @@ class RecordManager extends Paginator {
     this._progress = document.getElementById("record-progress");
     this._submitter = document.getElementById("record-submitter");
     this._notes = document.getElementById("record-notes");
+    this._tok = tok; // FIXME: bad
 
     this.dropdown = new Dropdown(
       document
@@ -115,16 +116,21 @@ class RecordManager extends Paginator {
     this._progress.innerHTML = recordData.progress;
     this._submitter.innerHTML = recordData.submitter.id;
 
+    if (!recordData.notes.length)
+      // TODO: maybe via CSS transform?
+      $(this._notes).hide(100);
+
     // clear notes
     while (this._notes.firstChild) {
       this._notes.removeChild(this._notes.firstChild);
     }
 
     for (let note of recordData.notes) {
-      let noteElement = document.createElement("i");
-      noteElement.innerHTML = note.content;
-      this._notes.appendChild(noteElement);
-      this._notes.appendChild(document.createElement("br"))
+      this._notes.appendChild(createNoteHtml(recordData.id, note, this._tok));
+    }
+
+    if (recordData.notes.length) {
+      $(this._notes).show(100); // TODO: maybe via CSS transform?
     }
 
     $(this._welcome).hide(100);
@@ -132,17 +138,70 @@ class RecordManager extends Paginator {
   }
 }
 
-$(document).ready(function() {
-  TABBED_PANES["account-tabber"].addSwitchListener("3", () => {
-    if (window.recordManager === undefined) {
-      window.recordManager = new RecordManager();
-      window.recordManager.initialize();
+function createNoteHtml(recordId, note, csrfToken) {
+  let noteDiv = document.createElement("div");
 
-      setupRecordFilterPlayerIdForm();
-      setupRecordFilterPlayerNameForm();
-    }
+  noteDiv.classList.add("white");
+  noteDiv.classList.add("hover");
+
+  let closeX = document.createElement("span");
+  closeX.classList.add("hover");
+  closeX.classList.add("plus");
+  closeX.classList.add("cross");
+
+  closeX.style.transform = "scale(0.75)";
+
+  let b = document.createElement("b");
+  b.innerHTML = "Record Note #" + note.id;
+
+  let i = document.createElement("i");
+  i.innerHTML = note.content;
+
+  let furtherInfo = document.createElement("i");
+  furtherInfo.style.fontSize = "80%";
+  furtherInfo.style.textAlign = "right";
+
+  if (note.author === null) {
+    furtherInfo.innerHTML =
+      "This note was left as a comment by the submitter. ";
+  } else {
+    furtherInfo.innerHTML = "This note was left by " + note.author + ". ";
+  }
+
+  if (note.editors.length) {
+    furtherInfo.innerHTML +=
+      "This note was subsequently modified by: " +
+      note.editors.join(", ") +
+      ". ";
+  }
+
+  if (note.transferred) {
+    furtherInfo.innerHTML += "This not was not originally left on this record.";
+  }
+
+  noteDiv.appendChild(closeX);
+  noteDiv.appendChild(b);
+  noteDiv.appendChild(i);
+  noteDiv.appendChild(furtherInfo);
+
+  closeX.addEventListener("click", () => {
+    confirm("This action will irrevocably delete this note. Proceed?");
+
+    makeRequest(
+      "DELETE",
+      "/api/v1/records/" + recordId + "/notes/" + note.id + "/",
+      null,
+      () => {
+        // node suicide
+        noteDiv.parentElement.removeChild(noteDiv);
+      },
+      {},
+      { "X-CSRF-TOKEN": csrfToken }
+    );
   });
-});
+
+  return noteDiv;
+}
 
 function setupRecordFilterPlayerIdForm() {
   var recordFilterPlayerIdForm = new Form(

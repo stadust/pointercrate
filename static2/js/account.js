@@ -277,6 +277,16 @@ $(document).ready(function() {
     setupUserByIdForm();
     setupUserByNameForm();
   });
+
+  TABBED_PANES["account-tabber"].addSwitchListener("3", () => {
+    if (window.recordManager === undefined) {
+      window.recordManager = new RecordManager(csrfToken);
+      window.recordManager.initialize();
+
+      setupRecordFilterPlayerIdForm();
+      setupRecordFilterPlayerNameForm();
+    }
+  });
 });
 
 function generateUser(userData) {
