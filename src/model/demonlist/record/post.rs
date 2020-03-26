@@ -149,23 +149,25 @@ impl FullRecord {
         }
 
         if let Some(note) = submission.note {
-            let note_id = sqlx::query!(
-                "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
-                record.id,
-                note
-            )
-            .fetch_one(connection)
-            .await?
-            .id;
+            if !note.trim().is_empty() {
+                let note_id = sqlx::query!(
+                    "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
+                    record.id,
+                    note
+                )
+                .fetch_one(connection)
+                .await?
+                .id;
 
-            record.notes.push(Note {
-                id: note_id,
-                record: id,
-                content: note,
-                transferred: false,
-                author: None,
-                editors: Vec::new(),
-            })
+                record.notes.push(Note {
+                    id: note_id,
+                    record: id,
+                    content: note,
+                    transferred: false,
+                    author: None,
+                    editors: Vec::new(),
+                })
+            }
         }
 
         Ok(record)

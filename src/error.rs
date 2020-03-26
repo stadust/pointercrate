@@ -360,6 +360,12 @@ pub enum PointercrateError {
     #[display(fmt = "Your request contains mutually exclusive fields. Please restrict yourself to one of them")]
     MutuallyExclusive,
 
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42230`
+    #[display(fmt = "Notes mustn't be empty!")]
+    NoteEmpty,
+
     /// `428 PRECONDITION REQUIRED`
     ///
     /// Error Code `42800`
@@ -481,6 +487,7 @@ impl PointercrateError {
             PointercrateError::AfterSmallerBefore => 42227,
             PointercrateError::DemonNameNotUnique { .. } => 42228,
             PointercrateError::MutuallyExclusive => 42229,
+            PointercrateError::NoteEmpty => 42230,
 
             PointercrateError::PreconditionRequired => 42800,
 
