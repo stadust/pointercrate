@@ -3,7 +3,7 @@ use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use serde_json::json;
 
-#[get("/list_information")]
+#[get("/list_information/")]
 pub fn list_information() -> HttpResponse {
     HttpResponse::Ok().json(json! {
         {
