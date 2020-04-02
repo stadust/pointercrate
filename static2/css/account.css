@@ -41,7 +41,7 @@ form {
   flex-direction: column;
 }
 
-#record-notes-container > div:last-child {
-  padding: 20px;
-  border-top: 1px lightgray dashed;
+#record-notes-container > div:first-child {
+  padding: 15px;
+  border-bottom: 1px lightgray dashed;
 }

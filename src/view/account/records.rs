@@ -244,10 +244,10 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
                 (record_manager(demons))
                 (note_adder())
                 div.panel.fade#record-notes-container style = "display:none" {
-                    div#record-notes {} // populated by javascript when a record is clicked
                     div.white.hover.clickable#add-record-note-open {
                         b {"Add Note"}
                     }
+                    div#record-notes {} // populated by javascript when a record is clicked
                 }
                 (manager_help())
             }
