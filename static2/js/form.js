@@ -396,7 +396,7 @@ class Input {
     }
   }
 }
-
+// TODO: automatic serialization of these. Call submit handler with serialized form!
 class Form {
   constructor(form) {
     this.html = form;

@@ -9,31 +9,52 @@ fn record_editor() -> Markup {
                 "Edit Record #"
                 span#edit-record-id {}
                 " - "
+                div.dropdown-menu.js-search#edit-record-status {
+                    input type="text" style = "color: #444446; font-weight: bold;";
+                    div.menu {
+                        ul {
+                            li.white.hover data-value="approved" {"Approved"}
+                            li.white.hover data-value="rejected" {"Rejected"}
+                            li.white.hover data-value="under consideration" {"Under Consideration"}
+                            li.white.hover data-value="submitted" {"Submitted"}
+                        }
+                    }
+                }
             }
             form.flex.col#edit-record-form novalidate = "" {
                 p.info-red.output {}
-                span.form-input#edit-record-demon {
-                    label for = "record_demon" {"ID of the demon the record is on:"}
-                    input type = "number" name = "record_demon" value = "";
+                p.info-green.output {}
+                span.form-input#edit-record-demon-id {
+                    label for = "record_demon" {"ID of the demon the record should be on:"}
+                    input type = "number" name = "demon_id" value = "";
+                    p.error {}
+                }
+                span.form-input#edit-record-demon-name {
+                    label for = "record_demon" {"Name of the demon the record should be on:"}
+                    input type = "text" name = "demon" value = "";
                     p.error {}
                 }
                 span.form-input#edit-record-player {
-                    label for = "record_player" {"ID of the player of the record:"}
-                    input type = "number" name = "record_player" value = "";
+                    label for = "record_player" {"Name of the player of the record:"}
+                    input type = "text" name = "player" value = "";
                     p.error {}
                 }
                 span.form-input#edit-record-progress {
                     label for = "record_progress" {"Progress made in the record:"}
-                    input type = "number" name = "record_progress" min = "0" max = "100" value = "";
+                    input type = "number" name = "progress" min = "0" max = "100" value = "";
                     p.error {}
                 }
                 span.form-input#edit-record-video {
                     label for = "record_video" {"Video proof of legitimacy"}
-                    input type = "url" name = "record_video";
+                    input type = "url" name = "video";
                     p.error {}
                 }
+                p{
+                    b {"Important: "}
+                    "Not all fields have to be filled out! Leaving a field empty leaves that value unchanged! The fields 'demon id' and 'demon name' are mutually exclusive"
+                }
                 p {
-                    "All modifications to the record will only be saved upon clicking the button below. Selecting a different record, or leaving this page, will discard all unsaved modifications"
+                    "All modifications to the record will only be saved upon clicking the button below. Selecting a different record, or leaving the staff area, will discard all unsaved modifications. Navigating to a different tab above is fine. Selecting a different record below instead targets the newly selected record for modification!"
                 }
                 input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Save edit(s)";
             }
@@ -110,6 +131,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                                     span#record-submitter {}
                                 }
                             }
+                            div.button.blue.hover.js-scroll data-destination = "edit-record" data-reveal = "true" style = "margin: 15px auto 0px;" {"Edit Record"};
                         }
                     }
                 }

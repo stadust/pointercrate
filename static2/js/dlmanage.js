@@ -61,6 +61,7 @@ class RecordManager extends Paginator {
     var manager = document.getElementById("record-manager");
 
     this.currentRecord = null;
+    this.currentRecordEtag = null;
 
     this._welcome = manager.getElementsByClassName("viewer-welcome")[0];
     this._content = manager.getElementsByClassName("viewer-content")[0];
@@ -96,7 +97,12 @@ class RecordManager extends Paginator {
   }
 
   onReceive(response) {
+    if (response.status == 204) {
+      return;
+    }
+
     var recordData = (this.currentRecord = response.responseJSON.data);
+    this.currentRecordEtag = response.getResponseHeader("ETag");
 
     var embeddedVideo = embedVideo(recordData.video);
 
@@ -126,6 +132,12 @@ class RecordManager extends Paginator {
     for (let note of recordData.notes) {
       this._notes.appendChild(createNoteHtml(note, this._tok));
     }
+
+    var recordId = document.getElementById("edit-record-id");
+    recordId.innerHTML = recordData.id;
+    document
+      .getElementById("edit-record-status")
+      .getElementsByTagName("input")[0].value = recordData.status;
 
     $(this._notes.parentElement).show(100); // TODO: maybe via CSS transform?
 
@@ -277,5 +289,85 @@ function setupRecordFilterPlayerNameForm() {
         }
       }
     );
+  });
+}
+
+function setupEditRecordForm(csrfToken) {
+  var changedStatus = null;
+  new Dropdown(document.getElementById("edit-record-status")).addEventListener(
+    selected => {
+      changedStatus = selected.dataset.value;
+    }
+  );
+
+  var editForm = new Form(document.getElementById("edit-record-form"));
+
+  var demonId = editForm.input("edit-record-demon-id");
+  var demonName = editForm.input("edit-record-demon-name");
+  var player = editForm.input("edit-record-player");
+  var progress = editForm.input("edit-record-progress");
+  var video = editForm.input("edit-record-video");
+
+  progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
+  progress.addValidator(
+    rangeOverflow,
+    "Record progress cannot be larger than 100%"
+  );
+  progress.addValidator(badInput, "Record progress must be a valid integer");
+  progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+
+  video.addValidator(typeMismatch, "Please enter a valid URL");
+
+  editForm.onSubmit(function(event) {
+    let data = {};
+
+    if (demonId.value) {
+      data["demon_id"] = parseInt(demonId.value);
+    }
+    if (demonName.value) {
+      data["demon"] = demonName.value;
+    }
+    if (player.value) {
+      data["player"] = player.value;
+    }
+    if (video.value) {
+      data["video"] = video.value;
+    }
+    if (progress.value) {
+      data["progress"] = parseInt(progress.value);
+    }
+    if (
+      changedStatus &&
+      changedStatus != window.recordManager.currentRecord.status
+    ) {
+      data["status"] = changedStatus;
+    }
+
+    $.ajax({
+      method: "PATCH",
+      url: "/api/v1/records/" + window.recordManager.currentRecord.id + "/",
+      contentType: "application/json",
+      dataType: "json",
+      headers: {
+        "X-CSRF-TOKEN": csrfToken,
+        "If-Match": window.recordManager.currentRecordEtag
+      },
+      data: JSON.stringify(data),
+      error: data => editForm.setError(data.responseJSON.message),
+      success: (shit, shit2, response) => {
+        // directly refresh the record manager :pog:
+        window.recordManager.refresh();
+        window.recordManager.onReceive(response);
+        editForm.setSuccess(
+          "Record successfully edited! You may now close this panel"
+        );
+
+        demonId.value = null;
+        demonName.value = null;
+        progress.value = null;
+        player.value = null;
+        video.value = null;
+      }
+    });
   });
 }

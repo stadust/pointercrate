@@ -286,6 +286,7 @@ $(document).ready(function() {
       setupRecordFilterPlayerIdForm();
       setupRecordFilterPlayerNameForm();
       setupAddNote(csrfToken);
+      setupEditRecordForm(csrfToken);
     }
   });
 });
