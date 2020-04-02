@@ -131,7 +131,10 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                                     span#record-submitter {}
                                 }
                             }
-                            div.button.blue.hover.js-scroll data-destination = "edit-record" data-reveal = "true" style = "margin: 15px auto 0px;" {"Edit Record"};
+                            div.flex.no-stretch style = "margin: 15px 10px 0px; justify-content: space-evenly" {
+                                span.button.blue.hover.js-scroll data-destination = "edit-record" data-reveal = "true" {"Edit Record"};
+                                span.button.red.hover#record-delete {"Delete Record"};
+                            }
                         }
                     }
                 }

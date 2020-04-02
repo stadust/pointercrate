@@ -165,23 +165,23 @@ function createNoteHtml(note, csrfToken) {
     closeX.style.transform = "scale(0.75)";
 
     closeX.addEventListener("click", () => {
-      confirm("This action will irrevocably delete this note. Proceed?");
-
-      makeRequest(
-        "DELETE",
-        "/api/v1/records/" +
-          window.recordManager.currentRecord.id +
-          "/notes/" +
-          note.id +
-          "/",
-        null,
-        () => {
-          // node suicide
-          noteDiv.parentElement.removeChild(noteDiv);
-        },
-        {},
-        { "X-CSRF-TOKEN": csrfToken }
-      );
+      if (confirm("This action will irrevocably delete this note. Proceed?")) {
+        makeRequest(
+          "DELETE",
+          "/api/v1/records/" +
+            window.recordManager.currentRecord.id +
+            "/notes/" +
+            note.id +
+            "/",
+          null,
+          () => {
+            // node suicide
+            noteDiv.parentElement.removeChild(noteDiv);
+          },
+          {},
+          { "X-CSRF-TOKEN": csrfToken }
+        );
+      }
     });
   }
 
@@ -299,6 +299,31 @@ function setupEditRecordForm(csrfToken) {
       changedStatus = selected.dataset.value;
     }
   );
+
+  document.getElementById("record-delete").addEventListener("click", () => {
+    if (
+      confirm(
+        "Are you sure? This will irrevocably delete this record and all notes made on it!"
+      )
+    ) {
+      makeRequest(
+        "DELETE",
+        "/api/v1/records/" + window.recordManager.currentRecord.id + "/",
+        null,
+        () => {
+          $(window.recordManager._content).hide(100);
+          $(window.recordManager._notes.parentElement).hide(100);
+          $(window.recordManager._welcome).show(100);
+          window.recordManager.refresh();
+        },
+        {},
+        {
+          "X-CSRF-TOKEN": csrfToken,
+          "If-Match": window.recordManager.currentRecordEtag
+        }
+      );
+    }
+  });
 
   var editForm = new Form(document.getElementById("edit-record-form"));
 
