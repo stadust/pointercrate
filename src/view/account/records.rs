@@ -45,7 +45,7 @@ fn record_editor() -> Markup {
                     p.error {}
                 }
                 span.form-input#edit-record-video {
-                    label for = "record_video" {"Video proof of legitimacy"}
+                    label for = "record_video" {"Video proof of legitimacy:"}
                     input type = "url" name = "video";
                     p.error {}
                 }
