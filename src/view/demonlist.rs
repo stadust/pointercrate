@@ -426,7 +426,7 @@ fn stats_viewer_panel() -> Markup {
         section#stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "Stats Viewer"
+                    "Stats Viewer:"
                 }
             }
             p {
