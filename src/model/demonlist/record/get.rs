@@ -79,8 +79,9 @@ pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgCon
 
     let mut stream = sqlx::query_as!(
         Fetched,
-        "SELECT records.id, progress, records.video::text, demons.id AS demon_id, demons.name::text, demons.position FROM records INNER \
-         JOIN demons ON records.demon = demons.id WHERE status_ = 'APPROVED' AND records.player = $1",
+        "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, demons.id AS demon_id, \
+         demons.name::text, demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id \
+         = $1 WHERE status_ = 'APPROVED' AND records.player = $1",
         player.id
     )
     .fetch(connection);
@@ -118,8 +119,9 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
 
     let mut stream = sqlx::query_as!(
         Fetched,
-        "SELECT records.id, progress, video::text, players.id AS player_id, players.name::text, players.banned FROM records INNER JOIN \
-         players ON records.player = players.id WHERE status_ = 'APPROVED' AND records.demon = $1 ORDER BY progress DESC",
+        "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, \
+         players.name::text, players.banned FROM records INNER JOIN players ON records.player = players.id WHERE status_ = 'APPROVED' AND \
+         records.demon = $1 ORDER BY progress DESC",
         demon.id
     )
     .fetch(connection);
@@ -158,6 +160,7 @@ pub async fn submitted_by(submitter: &Submitter, connection: &mut PgConnection) 
         position: i16,
     }
 
+    // internal, no need to check for link_ban
     let mut stream = sqlx::query_as!(
         Fetched,
         "SELECT records.id, progress, records.video::text, players.id AS player_id, players.name::text as player_name, players.banned, \

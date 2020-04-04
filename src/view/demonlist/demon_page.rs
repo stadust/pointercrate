@@ -29,6 +29,7 @@ pub struct Demonlist {
     data: FullDemon,
     server_level: Option<CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>>,
     movements: Vec<DemonMovement>,
+    link_banned: bool,
 }
 
 #[get("/demonlist/{position}/")]
@@ -37,6 +38,10 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
     let overview = DemonlistOverview::load(&mut connection).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
     let gd_demon = compat::gd_demon_by_name(&state.gdcf, &demon.demon.base.name);
+    let link_banned = sqlx::query!("SELECT link_banned FROM players WHERE id = $1", demon.demon.verifier.id)
+        .fetch_one(&mut connection)
+        .await?
+        .link_banned;
 
     let mut movements: Vec<DemonMovement> = sqlx::query_as!(
         DemonMovement,
@@ -76,6 +81,7 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
             data: demon,
             server_level: gd_demon.ok(),
             movements,
+            link_banned,
         }
         .render()
         .0,
@@ -131,9 +137,16 @@ impl Demonlist {
                         }
                     }
                 }
-                @if let Some(ref video) = self.data.demon.video {
-                    @if let Some(embedded_video) = video::embed(video) {
-                        iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" allowfullscreen="" data-attr = "src" data-attr-value = (embedded_video) {"Verification Video"}
+                @if self.link_banned {
+                    p {
+                        "Due to the questionable nature of the verifier's youtube content, embedding of their videos has been disabled"
+                    }
+                }
+                @else {
+                    @if let Some(ref video) = self.data.demon.video {
+                        @if let Some(embedded_video) = video::embed(video) {
+                            iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" allowfullscreen="" data-attr = "src" data-attr-value = (embedded_video) {"Verification Video"}
+                        }
                     }
                 }
                 div.underlined.pad.flex.wrap#level-info {

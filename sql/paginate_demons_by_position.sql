@@ -1,4 +1,4 @@
-SELECT demons.id AS demon_id, demons.name::text AS demon_name, demons.position, demons.requirement, demons.video::text,
+SELECT demons.id AS demon_id, demons.name::text AS demon_name, demons.position, demons.requirement, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END,
        verifiers.id AS verifier_id, verifiers.name::text AS verifier_name, verifiers.banned AS verifier_banned,
        publishers.id AS publisher_id, publishers.name::text AS publisher_name, publishers.banned AS publisher_banned
 FROM demons

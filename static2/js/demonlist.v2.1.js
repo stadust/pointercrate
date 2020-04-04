@@ -268,12 +268,18 @@ function formatRecords(records) {
 }
 
 function formatRecord(record) {
-  let link =
-    '<a target=blank href = "' +
-    record.video +
-    '">' +
-    record.demon.name +
-    "</a>";
+  var link = null;
+
+  if (record.video) {
+    link =
+      '<a target=blank href = "' +
+      record.video +
+      '">' +
+      record.demon.name +
+      "</a>";
+  } else {
+    link = record.demon.name;
+  }
   let demon = record.demon;
 
   if (demon.position <= window.list_length) {
