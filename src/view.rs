@@ -131,7 +131,7 @@ pub fn footer() -> Markup {
     html! {
         footer.center {
             span.overline.pad style="text-align:center" {
-                "© Copyright 2017-2019 pointercrate.com"
+                "© Copyright 2017-2020 pointercrate.com"
                 br;
                 "All rights reserved"
                 br;
@@ -158,7 +158,7 @@ pub fn footer() -> Markup {
                 }
                 div {
                     h2 { "Terms of Use:" }
-                    "All content on pointercrate.com is provided free of charge. However, you may not redistribute, in any way, any original content found here without the creator's explicit permission."
+                    "All content on pointercrate.com is provided free of charge. However, you may not redistribute, in any way, any original content found here without the creator's explicit permission. All content is provided without any guarantees."
                 }
                 nav {
                     h2 {
