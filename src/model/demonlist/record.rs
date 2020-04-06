@@ -294,7 +294,6 @@ impl FullRecord {
                     "footer": {
                         "text": format!("This record has been submitted by submitter #{}", self.submitter.map(|s|s.id).unwrap_or(1))
                     },
-                    "color": ((158_f32 * progress) as u32) << 16 + ((224_f32 * progress) as u32) << 8,
                     "author": {
                         "name": format!("{} (ID: {})", self.player.name, self.player.id),
                         "url": self.video
