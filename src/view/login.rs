@@ -1,13 +1,16 @@
 use super::Page;
 use crate::{
-    error::{HtmlError, JsonError},
-    extractor::auth::{BasicAuth, TokenAuth},
+    extractor::{
+        auth::{BasicAuth, TokenAuth},
+        ip::Ip,
+    },
+    model::user::{AuthenticatedUser, Registration},
+    ratelimit::RatelimitScope,
     state::PointercrateState,
-    ApiResult, ViewResult,
+    ApiResult,
 };
-use actix_web::{cookie::SameSite, http::Cookie, HttpResponse};
+use actix_web::{cookie::SameSite, http::Cookie, web::Json, HttpResponse};
 use actix_web_codegen::{get, post};
-use log::info;
 use maud::{html, Markup};
 
 #[derive(Debug, Copy, Clone)]
@@ -27,15 +30,12 @@ pub fn index(user: ApiResult<TokenAuth>) -> HttpResponse {
 /// Alternate login handler for the web interface. Unlike the one in the api, it doesn't return your
 /// token, but puts it into a secure, http-only cookie
 #[post("/login/")]
-pub async fn post(auth: ApiResult<BasicAuth>, state: PointercrateState) -> ViewResult<HttpResponse> {
+pub async fn post(Ip(ip): Ip, auth: ApiResult<BasicAuth>, state: PointercrateState) -> ApiResult<HttpResponse> {
+    state.ratelimits.check(RatelimitScope::Login, ip)?;
+
     // we have to explicitly take the Result here and transform it into a ViewResult so that we get a
     // Html error page >.>
-    let user = match auth {
-        Ok(BasicAuth(user)) => user,
-        Err(JsonError(error)) => return Err(HtmlError(error)),
-    };
-
-    info!("POST /login/");
+    let BasicAuth(user) = auth?;
 
     let mut cookie = Cookie::build("access_token", user.generate_token(&state.secret))
         .http_only(true)
@@ -51,6 +51,27 @@ pub async fn post(auth: ApiResult<BasicAuth>, state: PointercrateState) -> ViewR
     Ok(HttpResponse::NoContent().cookie(cookie.finish()).finish())
 }
 
+/// Alternate register handler for the web interface. Unlike the one in the api, it doesn't return
+/// your token, but puts it into a secure, http-only cookie
+#[post("/register/")]
+pub async fn register(Ip(ip): Ip, body: Json<Registration>, state: PointercrateState) -> ApiResult<HttpResponse> {
+    let mut connection = state.connection().await?;
+    let user = AuthenticatedUser::register(body.into_inner(), &mut connection, Some(state.ratelimits.prepare(ip))).await?;
+
+    let mut cookie = Cookie::build("access_token", user.generate_token(&state.secret))
+        .http_only(true)
+        .same_site(SameSite::Strict)
+        .path("/");
+
+    // allow cookies of HTTP if we're in a debug build, because I don't have a ssl cert for
+    // 127.0.0.1 on my laptop smh
+    if !cfg!(debug_assertions) {
+        cookie = cookie.secure(true)
+    }
+
+    Ok(HttpResponse::Created().cookie(cookie.finish()).finish())
+}
+
 impl Page for LoginPage {
     fn title(&self) -> String {
         "Pointercrate - Login".to_string()
@@ -61,7 +82,7 @@ impl Page for LoginPage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/login.js", "js/form.js"]
+        vec!["js/login.js", "js/modules/form.mjs"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {

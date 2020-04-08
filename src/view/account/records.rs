@@ -68,7 +68,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
             h2.underlined.pad {
                 "Record Manager - "
                 (dropdown("All", html! {
-                    li.white.hover.underlined data-value = "All Demons"
+                    li.white.hover.underlined data-value = "All"
                      {"All Demons"}
                 }, demons.into_iter().map(|demon| html!(li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}))))
             }

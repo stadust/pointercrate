@@ -282,8 +282,6 @@ impl FullRecord {
     }
 
     fn webhook_embed(&self) -> serde_json::Value {
-        let progress = f32::from(self.progress) / 100f32;
-
         let mut payload = json!({
             "content": format!("**New record submitted! ID: {}**", self.id),
             "embeds": [

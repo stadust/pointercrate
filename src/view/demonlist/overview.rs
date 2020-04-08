@@ -130,7 +130,7 @@ impl Page for DemonlistOverview {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/form.js", "js/demonlist.v2.1.js"]
+        vec!["js/modules/form.mjs", "js/modules/demonlist.mjs", "js/demonlist.v2.2.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {

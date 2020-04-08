@@ -154,7 +154,7 @@ fn submission_panel() -> Markup {
                         "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs!"
                     }
                     span.form-input.flex.col#id_player {
-                        input type = "text" name = "demon" required="" placeholder="e. g. 'Slypp, 'KrmaL'" maxlength="50" ;
+                        input type = "text" name = "player" required="" placeholder="e. g. 'Slypp, 'KrmaL'" maxlength="50" ;
                         p.error {}
                     }
                     h3 {
@@ -207,7 +207,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                 "Stats Viewer"
                 (super::dropdown("International",
                     html! {
-                        li.white.hover.underlined data-value = "International" {
+                        li.white.hover.underlined data-value = "International" data-display = "International" {
                             span.em.em-world_map {}
                             (PreEscaped("&nbsp;"))
                             b {"WORLD"}
@@ -216,7 +216,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
                         }
                     },
                     nations.iter().map(|nation| html! {
-                        li.white.hover data-code = {(nation.iso_country_code)} data-value = {(nation.nation)} {
+                        li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
                             span class = {"flag-icon flag-icon-" (nation.iso_country_code.to_lowercase())} {}
                             (PreEscaped("&nbsp;"))
                             b {(nation.iso_country_code)}

@@ -66,7 +66,13 @@ impl Page for AccountPage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/form.js", "js/account.js", "js/dlmanage.js"]
+        vec![
+            "js/modules/form.mjs",
+            "js/modules/tab.mjs",
+            "js/account/profile.js",
+            "js/account/users.js",
+            "js/staff.js",
+        ]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
@@ -76,7 +82,7 @@ impl Page for AccountPage {
     fn body(&self) -> Markup {
         html! {
             span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
-            div.tabbed#account-tabber {
+            div.tab-display#account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
                     div.tab.tab-active.button.white.hover.no-shadow data-tab-id="1" {
                         b {
@@ -105,14 +111,12 @@ impl Page for AccountPage {
                     }
                 }
 
-                div.tab-display {
-                    (profile::page(&self.user))
-                    @if self.user.has_permission(Permissions::Administrator) {
-                        (users::page())
-                    }
-                    @if self.user.has_permission(Permissions::ListHelper) {
-                        (records::page(&self.demons))
-                    }
+                (profile::page(&self.user))
+                @if self.user.has_permission(Permissions::Administrator) {
+                    (users::page())
+                }
+                @if self.user.has_permission(Permissions::ListHelper) {
+                    (records::page(&self.demons))
                 }
             }
         }

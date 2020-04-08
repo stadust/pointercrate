@@ -1,4 +1,7 @@
-class Dropdown {
+/**
+ * Class for those dropdown selectors we use throughout the website
+ */
+export class Dropdown {
   /**
    * Creates an instance of Dropdown.
    * @param {HTMLElement} html
@@ -10,10 +13,19 @@ class Dropdown {
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
     this.listeners = [];
 
-    this.input.value = this.input.dataset.default; // in case some browser randomly decide to store text field values
+    this.values = {};
 
-    // temporarily store selection while we clear the text field when the dropdown is opened
-    var value = this.html.dataset.default;
+    for (let li of this.html.querySelectorAll("ul li")) {
+      li.addEventListener("click", () => this.select(li.dataset.value));
+
+      this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
+    }
+
+    this.selected = this.input.dataset.default;
+    this.input.value = this.values[this.selected]; // in case some browser randomly decide to store text field values
+
+    // temporarily variable to store selection while we clear the text field when the dropdown is opened
+    var value;
 
     this.input.addEventListener("focus", () => {
       value = this.input.value;
@@ -26,15 +38,16 @@ class Dropdown {
       this.menu.fadeOut(300);
       this.input.value = value;
     });
+  }
 
-    for (let li of this.html.getElementsByTagName("li")) {
-      li.addEventListener("click", () => {
-        this.input.value = li.dataset.display || li.dataset.value;
+  select(entry) {
+    if (entry in this.values) {
+      this.selected = entry;
+      this.input.value = this.values[entry];
 
-        for (let listener of this.listeners) {
-          listener(li);
-        }
-      });
+      for (let listener of this.listeners) {
+        listener(entry);
+      }
     }
   }
 
@@ -43,7 +56,7 @@ class Dropdown {
   }
 }
 
-class Paginator {
+export class Paginator {
   /**
    * Creates an instance of Paginator. Retrieves its endpoint from the `data-endpoint` data attribute of `html`.
    *
@@ -58,6 +71,9 @@ class Paginator {
     // Next and previous buttons
     this.next = this.html.getElementsByClassName("next")[0];
     this.prev = this.html.getElementsByClassName("prev")[0];
+
+    // The li that was last clicked and thus counts as "selected"
+    this.currentlySelected = null;
 
     // The endpoint which will be paginated. By storing this, we assume that the 'Links' header never redirects
     // us to a different endpoint (this is the case with the pointercrate API)
@@ -93,6 +109,19 @@ class Paginator {
   }
 
   /**
+   * Programmatically selects an object with the given id
+   *
+   * The selected object does not have to be currently visible in the paginator. On success, `onReceive` is called. Returns a promise without a registered error handler (meaning the error message will not automatically get displayed in the paginator)
+   *
+   * @param id The ID of the object to select
+   *
+   * @returns A promise
+   */
+  selectArbitrary(id) {
+    return get(this.endpoint + id + "/").then(this.onReceive.bind(this));
+  }
+
+  /**
    * Realizes a callback for when a user selects a list item.
    *
    * The default implementation takes the value of the `data-id` attribute of the selected item,
@@ -103,12 +132,9 @@ class Paginator {
    * @memberof Paginator
    */
   onSelect(selected) {
-    makeRequest(
-      "GET",
-      this.endpoint + selected.dataset.id + "/",
-      this.errorOutput,
-      response => this.onReceive(response),
-      this.selectionErrorCodes()
+    this.currentlySelected = selected;
+    this.selectArbitrary(selected.dataset.id).catch(
+      displayError(this.errorOutput)
     );
   }
 
@@ -119,14 +145,6 @@ class Paginator {
    * @memberof Paginator
    */
   onReceive(response) {}
-
-  paginationErrorCodes() {
-    return {};
-  }
-
-  selectionErrorCodes() {
-    return {};
-  }
 
   /**
    * Initializes this Paginator by making the request using the query data specified in the constructor.
@@ -140,8 +158,8 @@ class Paginator {
     if (this.links === undefined) this.refresh();
   }
 
-  handleResponse(data) {
-    this.links = parsePagination(data.getResponseHeader("Links"));
+  handleResponse(response) {
+    this.links = parsePagination(response.headers["links"]);
     this.list.scrollTop = 0;
 
     // Clear the current list.
@@ -150,7 +168,7 @@ class Paginator {
       this.list.removeChild(this.list.lastChild);
     }
 
-    for (var result of data.responseJSON) {
+    for (var result of response.data) {
       let item = this.itemConstructor(result);
       item.addEventListener("click", e => this.onSelect(e.currentTarget));
       this.list.appendChild(item);
@@ -191,36 +209,24 @@ class Paginator {
    * @memberof Paginator
    */
   refresh() {
-    makeRequest(
-      "GET",
-      this.currentLink,
-      this.errorOutput,
-      this.handleResponse.bind(this),
-      this.paginationErrorCodes()
-    );
+    get(this.currentLink)
+      .then(this.handleResponse.bind(this))
+      .catch(displayError(this.errorOutput));
   }
 
   onPreviousClick() {
     if (this.links.prev) {
-      makeRequest(
-        "GET",
-        this.links.prev,
-        this.errorOutput,
-        this.handleResponse.bind(this),
-        this.paginationErrorCodes()
-      );
+      get(this.links.prev)
+        .then(this.handleResponse.bind(this))
+        .catch(displayError(this.errorOutput));
     }
   }
 
   onNextClick() {
     if (this.links.next) {
-      makeRequest(
-        "GET",
-        this.links.next,
-        this.errorOutput,
-        this.handleResponse.bind(this),
-        this.paginationErrorCodes()
-      );
+      get(this.links.next)
+        .then(this.handleResponse.bind(this))
+        .catch(displayError(this.errorOutput));
     }
   }
 
@@ -230,12 +236,24 @@ class Paginator {
   }
 }
 
+function parsePagination(linkHeader) {
+  var links = {};
+  if (linkHeader) {
+    for (var link of linkHeader.split(",")) {
+      var s = link.split(";");
+
+      links[s[1].substring(5)] = s[0].substring(1, s[0].length - 1);
+    }
+  }
+  return links;
+}
+
 /**
  * A Wrapper around a paginator that includes a search/filter bar at the top
  *
  * @class FilteredPaginator
  */
-class FilteredPaginator extends Paginator {
+export class FilteredPaginator extends Paginator {
   /**
    * Creates an instance of FilteredPaginator.
    *
@@ -286,7 +304,7 @@ class FilteredPaginator extends Paginator {
   }
 }
 
-class Input {
+export class Input {
   constructor(span) {
     this.span = span;
     this.input =
@@ -345,6 +363,7 @@ class Input {
     );
   }
 
+  // TODO: maybe just make this a normal `set` property lol
   setClearOnInvalid(clear) {
     this.clearOnInvalid = clear;
   }
@@ -381,11 +400,30 @@ class Input {
     return this.input.validity;
   }
 
-  get value() {
-    if (this.input.type == "checkbox") {
-      return this.input.checked;
+  get name() {
+    return this.input.name;
+  }
+
+  get type() {
+    if (this.input.tagName == "textarea") {
+      return "text";
     }
-    return this.input.value;
+    return this.input.type;
+  }
+
+  get value() {
+    // extend this switch to other input types as required.
+    switch (this.type) {
+      case "checkbox":
+        return this.input.checked;
+      case "number":
+        if (this.input.value === "" || this.input.value === null) return null;
+        return parseInt(this.input.value);
+      case "text": // also handles the text area case
+      default:
+        if (this.input.value === "" || this.input.value === null) return null;
+        return this.input.value;
+    }
   }
 
   set value(value) {
@@ -396,8 +434,8 @@ class Input {
     }
   }
 }
-// TODO: automatic serialization of these. Call submit handler with serialized form!
-class Form {
+
+export class Form {
   constructor(form) {
     this.html = form;
     this.inputs = [];
@@ -405,6 +443,7 @@ class Form {
     this.invalidHandler = undefined;
     this.errorOutput = form.getElementsByClassName("output")[0];
     this.successOutput = form.getElementsByClassName("output")[1];
+    this._clearOnSubmit = false;
 
     for (var input of form.getElementsByClassName("form-input")) {
       this.inputs.push(new Input(input));
@@ -420,22 +459,42 @@ class Form {
 
         var isValid = true;
 
-        for (var input of this.inputs) {
+        for (let input of this.inputs) {
           isValid &= input.validate(event);
         }
 
         if (isValid) {
-          if (this.submitHandler != undefined) {
+          if (this.submitHandler !== undefined) {
             this.submitHandler(event);
+
+            if (this._clearOnSubmit) {
+              for (let input of this.inputs) {
+                input.value = "";
+              }
+            }
           }
-        } else if (this.invalidHandler != undefined) {
+        } else if (this.invalidHandler !== undefined) {
           this.invalidHandler();
-          successOutput.text("Record successfully submitted");
-          successOutput.slideDown(100);
         }
       },
       false
     );
+  }
+
+  setClearOnSubmit(clear) {
+    this._clearOnSubmit = clear;
+  }
+
+  serialize() {
+    let data = {};
+
+    for (let input of this.inputs) {
+      if (input.value !== null) {
+        data[input.name] = input.value;
+      }
+    }
+
+    return data;
   }
 
   setError(message) {
@@ -488,107 +547,151 @@ class Form {
   }
 }
 
-function badInput(input) {
+export function badInput(input) {
   return !input.validity.badInput;
 }
 
-function patternMismatch(input) {
+export function patternMismatch(input) {
   return !input.validity.patternMismatch;
 }
 
-function rangeOverflow(input) {
+export function rangeOverflow(input) {
   return !input.validity.rangeOverflow;
 }
 
-function rangeUnderflow(input) {
+export function rangeUnderflow(input) {
   return !input.validity.rangeUnderflow;
 }
 
-function stepMismatch(input) {
+export function stepMismatch(input) {
   return !input.validity.stepMismatch;
 }
 
-function tooLong(input) {
+export function tooLong(input) {
   return !input.validity.tooLong;
 }
 
-function tooShort(input) {
+export function tooShort(input) {
   return !input.validity.tooShort;
 }
 
-function typeMismatch(input) {
+export function typeMismatch(input) {
   return !input.validity.typeMismatch;
 }
 
-function valueMissing(input) {
+export function valueMissing(input) {
   return !input.validity.valueMissing;
 }
 
-function parsePagination(linkHeader) {
-  var links = {};
-  if (linkHeader) {
-    for (var link of linkHeader.split(",")) {
-      var s = link.split(";");
-
-      links[s[1].substring(5)] = s[0].substring(1, s[0].length - 1);
-    }
-  }
-  return links;
+/**
+ * Standard error handler for a promise returned by `get`, `post`, `del` or `patch` which displays the error message in an html element.
+ *
+ * @param errorOutput The HTML element whose `innerHtml` property should be set to the error message
+ */
+export function displayError(errorOutput) {
+  return function(response) {
+    errorOutput.innerHTML = response.data.message;
+    errorOutput.style.display = "block";
+    throw new Error(response.data.message);
+  };
 }
 
 /**
- * Makes a request
+ * Makes a GET request to the given endpoint
  *
- * @param {String} method The HTTP method to use for this request
- * @param {String} endpoint The endpoint to make the request to. The method _does not_ prefix this with the api version!
- * @param {HTMLElement} errorOutput Some HTML element to write error messages into
- * @param {*} onSuccess A callback to call with the received JSON data, if the request succeeds
- * @param {*} [errorCodes={}]
- * @param {*} [headers={}]
- * @param {*} [data={}]
+ * @param endpoint The endpoint to make the GET request to
+ * @param headers The headers to
+ *
+ * @returns A promise that resolves to the server response along with server headers both on success and error.
  */
-function makeRequest(
-  method,
-  endpoint,
-  errorOutput,
-  onSuccess,
-  errorCodes = {},
-  headers = {},
-  data = {}
-) {
-  if (errorOutput) errorOutput.style.display = "";
+export function get(endpoint, headers = {}) {
+  return mkReq("GET", endpoint, headers);
+}
 
+export function post(endpoint, headers = {}, data = {}) {
+  return mkReq("POST", endpoint, headers, data);
+}
+
+export function del(endpoint, headers = {}) {
+  return mkReq("DELETE", endpoint, headers);
+}
+
+export function patch(endpoint, headers, data) {
+  return mkReq("PATCH", endpoint, headers, data);
+}
+
+const SEVERE_ERROR = {
+  message:
+    "Severe internal server error: The error response could not be processed. This is most likely due to an internal panic in the request handler and might require a restart! Please report this immediately!",
+  code: 50000,
+  data: null
+};
+
+const UNEXPECTED_REDIRECT = {
+  message:
+    "Unexpected redirect. This is a front-end error, most likely caused by a missing trailing slash",
+  code: 50000,
+  data: null
+};
+
+function mkReq(method, endpoint, headers = {}, data = null) {
+  headers["Content-Type"] = "application/json";
   headers["Accept"] = "application/json";
 
-  $.ajax({
-    method: method,
-    url: endpoint,
-    contentType: "application/json",
-    data: JSON.stringify(data),
-    headers: headers,
-    error: function(data, code, errorThrown) {
-      if (!data.responseJSON) {
-        errorOutput.innerHTML =
-          "Server unexpectedly returned " + code + " (" + errorThrown + ")";
-        errorOutput.style.display = "block";
-      } else {
-        var error = data.responseJSON;
+  return new Promise(function(resolve, reject) {
+    let xhr = new XMLHttpRequest();
 
-        if (error.code in errorCodes) {
-          errorCodes[error.code](error.message, error.data);
-        } else {
-          console.warn(
-            "The server returned an error of code " +
-              error.code +
-              ", which this form is not setup to handle correctly. Handling as generic error"
-          );
-          errorOutput.innerHTML = error.message;
-          errorOutput.style.display = "block";
+    xhr.open(method, endpoint);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({
+          data: xhr.status == 200 ? JSON.parse(xhr.responseText) : null,
+          headers: parseHeaders(xhr),
+          status: xhr.status
+        });
+      } else if (xhr.status < 400) {
+        reject({
+          data: UNEXPECTED_REDIRECT,
+          headers: parseHeaders(xhr),
+          status: xhr.status
+        });
+      } else {
+        try {
+          var jsonError = JSON.parse(xhr.responseText);
+        } catch (e) {
+          return reject({
+            data: SEVERE_ERROR,
+            headers: parseHeaders(xhr),
+            status: xhr.status
+          });
         }
+        reject({
+          data: jsonError,
+          headers: parseHeaders(xhr),
+          status: xhr.status
+        });
       }
-    },
-    success: function(crap, crap2, data) {
-      onSuccess(data);
+    };
+
+    for (let header of Object.keys(headers)) {
+      xhr.setRequestHeader(header, headers[header]);
     }
+
+    if (data) {
+      data = JSON.stringify(data);
+    }
+
+    xhr.send(data);
   });
+}
+
+function parseHeaders(xhr) {
+  return xhr
+    .getAllResponseHeaders()
+    .split("\r\n")
+    .reduce((result, current) => {
+      let [name, value] = current.split(": ");
+      result[name] = value;
+      return result;
+    }, {});
 }

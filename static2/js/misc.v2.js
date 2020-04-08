@@ -3,7 +3,6 @@ function forall(selector, callback) {
 }
 
 function forceRatio(element, wRatio, hRatio) {
-  console.log("Forcing ratio of " + element);
   var target = $(element);
   var width = target.width();
   var calculatedHeight = (width * hRatio) / wRatio;

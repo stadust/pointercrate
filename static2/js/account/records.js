@@ -1,3 +1,25 @@
+"use strict";
+
+import {
+  Paginator,
+  post,
+  patch,
+  del,
+  get,
+  displayError,
+  valueMissing,
+  Form,
+  Dropdown,
+  badInput,
+  rangeUnderflow,
+  rangeOverflow,
+  stepMismatch,
+  typeMismatch
+} from "../modules/form.mjs";
+
+let recordManager;
+let recordEditor;
+
 function generateRecord(record) {
   var li = document.createElement("li");
   var recordId = document.createElement("b");
@@ -85,14 +107,13 @@ class RecordManager extends Paginator {
 
     new Dropdown(
       manager.getElementsByClassName("dropdown-menu")[0]
-    ).addEventListener(li => {
-      if (li.innerHTML === "All Demons")
-        this.updateQueryData("demon_id", undefined);
-      else this.updateQueryData("demon_id", li.dataset.value);
+    ).addEventListener(selected => {
+      if (selected === "All") this.updateQueryData("demon_id", undefined);
+      else this.updateQueryData("demon_id", selected);
     });
-    this.dropdown.addEventListener(li => {
-      if (li.innerHTML === "All") this.updateQueryData("status", undefined);
-      else this.updateQueryData("status", li.innerHTML);
+    this.dropdown.addEventListener(selected => {
+      if (selected === "All") this.updateQueryData("status", undefined);
+      else this.updateQueryData("status", selected);
     });
   }
 
@@ -101,8 +122,8 @@ class RecordManager extends Paginator {
       return;
     }
 
-    var recordData = (this.currentRecord = response.responseJSON.data);
-    this.currentRecordEtag = response.getResponseHeader("ETag");
+    var recordData = (this.currentRecord = response.data.data);
+    this.currentRecordEtag = response.headers["etag"];
 
     var embeddedVideo = embedVideo(recordData.video);
 
@@ -133,11 +154,7 @@ class RecordManager extends Paginator {
       this._notes.appendChild(createNoteHtml(note, this._tok));
     }
 
-    var recordId = document.getElementById("edit-record-id");
-    recordId.innerHTML = recordData.id;
-    document
-      .getElementById("edit-record-status")
-      .getElementsByTagName("input")[0].value = recordData.status;
+    recordEditor.selectRecord(recordData);
 
     $(this._notes.parentElement).show(100); // TODO: maybe via CSS transform?
 
@@ -166,21 +183,14 @@ function createNoteHtml(note, csrfToken) {
 
     closeX.addEventListener("click", () => {
       if (confirm("This action will irrevocably delete this note. Proceed?")) {
-        makeRequest(
-          "DELETE",
+        del(
           "/api/v1/records/" +
-            window.recordManager.currentRecord.id +
+            recordManager.currentRecord.id +
             "/notes/" +
             note.id +
             "/",
-          null,
-          () => {
-            // node suicide
-            noteDiv.parentElement.removeChild(noteDiv);
-          },
-          {},
           { "X-CSRF-TOKEN": csrfToken }
-        );
+        ).then(() => noteDiv.parentElement.removeChild(noteDiv));
       }
     });
   }
@@ -228,21 +238,19 @@ function setupAddNote(csrfToken) {
   let add = adder.getElementsByClassName("button")[0];
 
   add.addEventListener("click", () => {
-    makeRequest(
-      "POST",
-      "/api/v1/records/" + window.recordManager.currentRecord.id + "/notes/",
-      output,
-      noteResponse => {
-        let newNote = createNoteHtml(noteResponse.responseJSON.data, csrfToken);
-        window.recordManager._notes.appendChild(newNote);
+    post(
+      "/api/v1/records/" + recordManager.currentRecord.id + "/notes/",
+      { "X-CSRF-TOKEN": csrfToken },
+      { content: textArea.value }
+    )
+      .then(noteResponse => {
+        let newNote = createNoteHtml(noteResponse.data.data, csrfToken);
+        recordManager._notes.appendChild(newNote);
 
         $(adder).hide(100);
         textArea.value = "";
-      },
-      {},
-      { "X-CSRF-TOKEN": csrfToken },
-      { content: textArea.value }
-    );
+      })
+      .catch(displayError(output));
   });
 
   document
@@ -275,30 +283,80 @@ function setupRecordFilterPlayerNameForm() {
   });
 
   recordFilterPlayerNameForm.onSubmit(function(event) {
-    makeRequest(
-      "GET",
-      "/api/v1/players/?name=" + playerName.value,
-      recordFilterPlayerNameForm.errorOutput,
-      data => {
-        let json = data.responseJSON;
+    get("/api/v1/players/?name=" + playerName.value)
+      .then(response => {
+        let json = response.data;
 
         if (!json || json.length == 0) {
           playerName.setError("No player with that name found!");
         } else {
-          window.recordManager.updateQueryData("player", json[0].id);
+          recordManager.updateQueryData("player", json[0].id);
         }
-      }
-    );
+      })
+      .catch(displayError(recordFilterPlayerNameForm.errorOutput));
   });
 }
 
+class RecordEditor extends Form {
+  constructor(csrfToken) {
+    super(document.getElementById("edit-record-form"));
+
+    this.recordId = document.getElementById("edit-record-id");
+
+    this.statusDropdown = new Dropdown(
+      document.getElementById("edit-record-status")
+    );
+
+    var progress = this.input("edit-record-progress");
+    var video = this.input("edit-record-video");
+
+    progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
+    progress.addValidator(
+      rangeOverflow,
+      "Record progress cannot be larger than 100%"
+    );
+    progress.addValidator(badInput, "Record progress must be a valid integer");
+    progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+
+    video.addValidator(typeMismatch, "Please enter a valid URL");
+
+    this.setClearOnSubmit(true);
+    this.onSubmit(function(event) {
+      let data = this.serialize();
+
+      if (this.statusDropdown.selected != recordManager.currentRecord.status) {
+        data["status"] = this.statusDropdown.selected;
+      }
+
+      patch(
+        "/api/v1/records/" + recordManager.currentRecord.id + "/",
+        {
+          "X-CSRF-TOKEN": csrfToken,
+          "If-Match": recordManager.currentRecordEtag
+        },
+        data
+      )
+        .then(response => {
+          // directly refresh the record manager :pog:
+          recordManager.refresh();
+          recordManager.onReceive(response);
+
+          this.setSuccess(
+            "Record successfully edited! You may now close this panel"
+          );
+        })
+        .catch(displayError(this.errorOutput));
+    });
+  }
+
+  selectRecord(record) {
+    this.recordId.innerText = record.id;
+    this.statusDropdown.select(record.status);
+  }
+}
+
 function setupEditRecordForm(csrfToken) {
-  var changedStatus = null;
-  new Dropdown(document.getElementById("edit-record-status")).addEventListener(
-    selected => {
-      changedStatus = selected.dataset.value;
-    }
-  );
+  recordEditor = new RecordEditor(csrfToken);
 
   document.getElementById("record-delete").addEventListener("click", () => {
     if (
@@ -306,93 +364,25 @@ function setupEditRecordForm(csrfToken) {
         "Are you sure? This will irrevocably delete this record and all notes made on it!"
       )
     ) {
-      makeRequest(
-        "DELETE",
-        "/api/v1/records/" + window.recordManager.currentRecord.id + "/",
-        null,
-        () => {
-          $(window.recordManager._content).hide(100);
-          $(window.recordManager._notes.parentElement).hide(100);
-          $(window.recordManager._welcome).show(100);
-          window.recordManager.refresh();
-        },
-        {},
-        {
-          "X-CSRF-TOKEN": csrfToken,
-          "If-Match": window.recordManager.currentRecordEtag
-        }
-      );
-    }
-  });
-
-  var editForm = new Form(document.getElementById("edit-record-form"));
-
-  var demonId = editForm.input("edit-record-demon-id");
-  var demonName = editForm.input("edit-record-demon-name");
-  var player = editForm.input("edit-record-player");
-  var progress = editForm.input("edit-record-progress");
-  var video = editForm.input("edit-record-video");
-
-  progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
-  progress.addValidator(
-    rangeOverflow,
-    "Record progress cannot be larger than 100%"
-  );
-  progress.addValidator(badInput, "Record progress must be a valid integer");
-  progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
-
-  video.addValidator(typeMismatch, "Please enter a valid URL");
-
-  editForm.onSubmit(function(event) {
-    let data = {};
-
-    if (demonId.value) {
-      data["demon_id"] = parseInt(demonId.value);
-    }
-    if (demonName.value) {
-      data["demon"] = demonName.value;
-    }
-    if (player.value) {
-      data["player"] = player.value;
-    }
-    if (video.value) {
-      data["video"] = video.value;
-    }
-    if (progress.value) {
-      data["progress"] = parseInt(progress.value);
-    }
-    if (
-      changedStatus &&
-      changedStatus != window.recordManager.currentRecord.status
-    ) {
-      data["status"] = changedStatus;
-    }
-
-    $.ajax({
-      method: "PATCH",
-      url: "/api/v1/records/" + window.recordManager.currentRecord.id + "/",
-      contentType: "application/json",
-      dataType: "json",
-      headers: {
+      del("/api/v1/records/" + recordManager.currentRecord.id + "/", {
         "X-CSRF-TOKEN": csrfToken,
         "If-Match": window.recordManager.currentRecordEtag
-      },
-      data: JSON.stringify(data),
-      error: data => editForm.setError(data.responseJSON.message),
-      success: (shit, shit2, response) => {
-        // directly refresh the record manager :pog:
-        window.recordManager.refresh();
-        window.recordManager.onReceive(response);
-        editForm.setSuccess(
-          "Record successfully edited! You may now close this panel"
-        );
-
-        demonId.value = null;
-        demonName.value = null;
-        progress.value = null;
-        player.value = null;
-        video.value = null;
-      }
-    });
+      }).then(() => {
+        $(recordManager._content).hide(100);
+        $(recordManager._notes.parentElement).hide(100);
+        $(recordManager._welcome).show(100);
+        recordManager.refresh();
+      });
+    }
   });
+}
+
+export function initialize(csrfToken) {
+  setupRecordFilterPlayerIdForm();
+  setupRecordFilterPlayerNameForm();
+  setupAddNote(csrfToken);
+  setupEditRecordForm(csrfToken);
+
+  recordManager = new RecordManager(csrfToken);
+  recordManager.initialize();
 }

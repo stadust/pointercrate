@@ -1,11 +1,10 @@
-$(document).ready(function() {
-  var htmlLoginForm = document.getElementById("login-form");
-  var loginForm = new Form(htmlLoginForm);
+import { Form, valueMissing, tooShort, post } from "./modules/form.mjs";
+
+function initializeLoginForm() {
+  var loginForm = new Form(document.getElementById("login-form"));
 
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
-
-  var loginError = htmlLoginForm.getElementsByClassName("output")[0];
 
   loginUsername.addValidator(valueMissing, "Username required");
   loginUsername.addValidator(
@@ -21,38 +20,30 @@ $(document).ready(function() {
   );
 
   loginForm.onSubmit(function(event) {
-    loginError.style.display = "";
-
-    $.ajax({
-      method: "POST",
-      url: "/login/",
-      dataType: "json",
-      headers: {
-        Authorization:
-          "Basic " + btoa(loginUsername.value + ":" + loginPassword.value)
-      },
-      error: function(data) {
-        if (data.status == 401) {
+    post("/login/", {
+      Authorization:
+        "Basic " + btoa(loginUsername.value + ":" + loginPassword.value)
+    })
+      .then(response => {
+        window.location = "/account/";
+      })
+      .catch(response => {
+        console.log(response);
+        if (response.status === 401) {
           loginPassword.setError("Invalid credentials");
         } else {
-          loginError.innerHTML = data.responseJSON.message;
-          loginError.style.display = "block";
+          loginForm.setError(response.data.message);
         }
-      },
-      success: function() {
-        window.location = "/account";
-      }
-    });
+      });
   });
+}
 
-  var htmlRegisterForm = document.getElementById("register-form");
-  var registerForm = new Form(htmlRegisterForm);
+function intializeRegisterForm() {
+  var registerForm = new Form(document.getElementById("register-form"));
 
   var registerUsername = registerForm.input("register-username");
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
-
-  var registerError = htmlRegisterForm.getElementsByClassName("output")[0];
 
   registerUsername.addValidator(valueMissing, "Username required");
   registerUsername.addValidator(
@@ -77,42 +68,23 @@ $(document).ready(function() {
   );
 
   registerForm.onSubmit(function(event) {
-    registerError.style.display = "";
-
-    $.ajax({
-      method: "POST",
-      url: "/api/v1/auth/register/",
-      contentType: "application/json",
-      dataType: "json",
-      data: JSON.stringify({
-        name: registerUsername.value,
-        password: registerPassword.value
-      }),
-      statusCode: {
-        409: function() {
+    post("/register/", {}, registerForm.serialize())
+      .then(response => {
+        window.location = "/account/";
+      })
+      .catch(response => {
+        if (response.status === 409) {
           registerUsername.setError(
             "This username is already taken. Please choose another one"
           );
+        } else {
+          registerForm.setError(response.data.message);
         }
-      },
-      success: function() {
-        $.ajax({
-          method: "POST",
-          url: "/login/",
-          headers: {
-            Authorization:
-              "Basic " +
-              btoa(registerUsername.value + ":" + registerPassword.value)
-          },
-          error: function(data) {
-            registerError.innerHTML = data.responseJSON.message;
-            registerError.style.display = "block";
-          },
-          success: function() {
-            window.location = "/account/";
-          }
-        });
-      }
-    });
+      });
   });
+}
+
+$(document).ready(function() {
+  initializeLoginForm();
+  intializeRegisterForm();
 });
