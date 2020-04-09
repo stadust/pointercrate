@@ -18,7 +18,7 @@ use serde_json::json;
 
 #[post("/register/")]
 pub async fn register(Ip(ip): Ip, body: Json<Registration>, state: PointercrateState) -> ApiResult<HttpResponse> {
-    let mut connection = state.connection().await?;
+    let mut connection = state.transaction().await?;
     let user = AuthenticatedUser::register(body.into_inner(), &mut connection, Some(state.ratelimits.prepare(ip))).await?;
 
     Ok(HttpResponse::Created()
