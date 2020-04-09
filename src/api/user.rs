@@ -27,10 +27,14 @@ pub async fn paginate(
         return Err(JsonError(PointercrateError::Forbidden))
     }
 
-    pagination.any_permissions = match pagination.any_permissions {
-        Some(perms) => Some(perms | user.inner().permissions.assigns()),
-        None => Some(user.inner().permissions.assigns()),
-    };
+    if !user.inner().has_permission(Permissions::Moderator) {
+        // Pointercrate staff need to be able to see all users, not only those whose permissions they can
+        // assign
+        pagination.any_permissions = match pagination.any_permissions {
+            Some(perms) => Some(perms | user.inner().permissions.assigns()),
+            None => Some(user.inner().permissions.assigns()),
+        };
+    }
 
     let mut users = pagination.page(&mut connection).await?;
 
@@ -46,9 +50,9 @@ pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, user_id: 
     let gotten_user = User::by_id(user_id.into_inner(), &mut connection).await?;
 
     // We are only allowed to retrieve users who already have permissions we can set.
-    if !user.inner().permissions.contains(Permissions::Administrator)
-        && !(user.inner().permissions.contains(Permissions::ListAdministrator)
-            && (gotten_user.permissions.contains(Permissions::ListHelper) || gotten_user.permissions.contains(Permissions::ListModerator)))
+    // We're also using that ListModerator implies ListHelper
+    if !user.inner().has_permission(Permissions::Administrator)
+        && !(user.inner().has_permission(Permissions::ListAdministrator) && gotten_user.has_permission(Permissions::ListHelper))
     {
         return Err(JsonError(PointercrateError::ModelNotFound {
             model: "User",
@@ -76,9 +80,8 @@ pub async fn patch(
     // correct ETag, which means we previously retrieved this user successfully and passed the
     // permissions check at GET. However, on might guess the ETag. Or use an ETag value they got from
     // before they were demoted.
-    if !user.0.inner().permissions.contains(Permissions::Administrator)
-        && !(user.0.inner().permissions.contains(Permissions::ListAdministrator)
-            && (gotten_user.permissions.contains(Permissions::ListHelper) || gotten_user.permissions.contains(Permissions::ListModerator)))
+    if !user.0.inner().has_permission(Permissions::Administrator)
+        && !(user.0.inner().has_permission(Permissions::ListAdministrator) && gotten_user.has_permission(Permissions::ListHelper))
     {
         return Err(JsonError(PointercrateError::ModelNotFound {
             model: "User",
