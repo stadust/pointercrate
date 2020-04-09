@@ -128,8 +128,8 @@ impl Page for LoginPage {
                         form.flex.col.grow#register-form novalidate = "" {
                             p.info-red.output {}
                             span.form-input#register-username {
-                                label for = "username" {"Username:"}
-                                input required = "" type = "text" name = "username";
+                                label for = "name" {"Username:"}
+                                input required = "" type = "text" name = "name";
                                 p.error {}
                             }
                             span.form-input#register-password {
