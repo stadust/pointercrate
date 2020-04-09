@@ -214,9 +214,6 @@ textarea {
   min-width: 0; /* Firefox and Egde need this */
 
   padding: 0px 5px;
-  margin-left: 10px;
-  margin-right: 10px;
-  width: calc(100% - 20px);
 
   background: rgba(0, 0, 0, 0);
   box-sizing: border-box;
@@ -440,16 +437,13 @@ textarea:invalid {
   position: absolute;
   display: none;
 
-  width: calc(100% - 22px);
+  width: calc(100% - 2px);
   max-height: 400px;
   overflow-y: scroll;
 
   background: white;
 
   border: 1px solid #bbb;
-
-  margin-left: 10px;
-  margin-right: 10px;
 
   z-index: 100;
 
