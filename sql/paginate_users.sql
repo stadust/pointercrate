@@ -5,6 +5,7 @@ WHERE (member_id < $1 OR $1 IS NULL)
   AND (name = $3 OR $3 IS NULL)
   AND (display_name = $4 OR (display_name IS NULL AND $5) OR ($4 IS NULL AND NOT $5))
   AND (permissions & CAST($6::INTEGER AS BIT(16)) = CAST($6::INTEGER AS BIT(16)) OR $6 IS NULL)
+  AND (permissions & CAST($7::INTEGER AS BIT(16)) <> 0::BIT(16) OR $7 IS NULL)
 ORDER BY member_id {}
-LIMIT $7
+LIMIT $8
 -- This entire query works because every comparison with NULL not done via IS evaluated to NULL, and NULL is false-y

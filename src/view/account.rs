@@ -80,6 +80,8 @@ impl Page for AccountPage {
     }
 
     fn body(&self) -> Markup {
+        dbg!(self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator));
+        dbg!(&self.user);
         html! {
             span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
@@ -91,7 +93,7 @@ impl Page for AccountPage {
                         (PreEscaped("&nbsp;"))
                         i class = "fa fa-user fa-2x" aria-hidden="true" {}
                     }
-                    @if self.user.has_permission(Permissions::Administrator) {
+                    @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) {
                         div.tab.button.white.hover.no-shadow data-tab-id="2" {
                             b {
                                 "Users"
@@ -112,8 +114,8 @@ impl Page for AccountPage {
                 }
 
                 (profile::page(&self.user))
-                @if self.user.has_permission(Permissions::Administrator) {
-                    (users::page())
+                @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) {
+                    (users::page(self.user.has_permission(Permissions::Administrator)))
                 }
                 @if self.user.has_permission(Permissions::ListHelper) {
                     (records::page(&self.demons))

@@ -1,7 +1,7 @@
 use crate::view::paginator;
 use maud::{html, Markup};
 
-pub(super) fn page() -> Markup {
+pub(super) fn page(is_admin: bool) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "2" {
             div.left {
@@ -18,10 +18,19 @@ pub(super) fn page() -> Markup {
                         h3 {
                             "Permissions:"
                         }
-                        label.cb-container.form-input#perm-extended for = "extended" {
-                            i{"Extended access"}
-                            input type = "checkbox" name = "extended";
-                            span.checkmark {}
+                        @if is_admin {
+                            label.cb-container.form-input#perm-extended for = "extended"  {
+                                i{"Extended access"}
+                                input type = "checkbox" name = "extended";
+                                span.checkmark {}
+                            }
+                        }
+                        @else {
+                            label.cb-container.form-input#perm-extended for = "extended" style = "opacity: .3" {
+                                i{"Extended access"}
+                                input type = "checkbox" name = "extended" disabled = "";
+                                span.checkmark {}
+                            }
                         }
                         label.form-input.cb-container#perm-list-helper for = "helper" {
                             i {"List Helper"}
@@ -33,23 +42,53 @@ pub(super) fn page() -> Markup {
                             input type = "checkbox" name = "mod";
                             span.checkmark {}
                         }
-                        label.form-input.cb-container#perm-list-admin for = "admin" {
-                            i {"List Administrator"}
-                            input type = "checkbox" name = "admin";
-                            span.checkmark {}
+                        @if is_admin {
+                            label.form-input.cb-container#perm-list-admin for = "admin" {
+                                i {"List Administrator"}
+                                input type = "checkbox" name = "admin";
+                                span.checkmark {}
+                            }
                         }
-                        label.form-input.cb-container#perm-mod for = "mod2" {
-                            i {"Pointercrate Moderator"}
-                            input type = "checkbox" name = "mod2";
-                            span.checkmark {}
+                        @else {
+                            label.form-input.cb-container#perm-list-admin for = "admin" style = "opacity: .3"{
+                                i {"List Administrator"}
+                                input type = "checkbox" name = "admin" disabled = "";
+                                span.checkmark {}
+                            }
                         }
-                        label.form-input.cb-container#perm-admin for = "admin2" {
-                            i {"Pointercrate Administrator"}
-                            input type = "checkbox" name = "admin2";
-                            span.checkmark {}
+                        @if is_admin {
+                            label.form-input.cb-container#perm-mod for = "mod2" {
+                                i {"Moderator"}
+                                input type = "checkbox" name = "mod2";
+                                span.checkmark {}
+                            }
+                        }
+                        @else {
+                            label.form-input.cb-container#perm-mod for = "mod2" style = "opacity: .3"{
+                                i {"Moderator"}
+                                input type = "checkbox" name = "mod2" disabled = "";
+                                span.checkmark {}
+                            }
+                        }
+
+                        @if is_admin {
+                            label.form-input.cb-container#perm-admin for = "admin2" {
+                                i {"Administrator"}
+                                input type = "checkbox" name = "admin2";
+                                span.checkmark {}
+                            }
+                        }
+                        @else {
+                            label.form-input.cb-container#perm-admin for = "admin2" style = "opacity: .3"{
+                                i {"Administrator"}
+                                input type = "checkbox" name = "admin2" disabled = "";
+                                span.checkmark {}
+                            }
                         }
                         div.flex.no-stretch {
-                            input.button.blue.hover#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                            @if is_admin {
+                                input.button.blue.hover#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                            }
                             input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
                         }
                     }

@@ -126,6 +126,16 @@ impl Permissions {
     pub fn can_assign(self, permissions: Permissions) -> bool {
         self.assigns() & permissions == permissions
     }
+
+    /// Returns the most specific permission required to assign all permissions in this object
+    pub fn required_for_assignment(self) -> Permissions {
+        if self & (Permissions::ListHelper | Permissions::ListModerator) == self {
+            // only list helper and moderator perms,
+            Permissions::ListAdministrator
+        } else {
+            Permissions::Administrator
+        }
+    }
 }
 
 impl Serialize for Permissions {

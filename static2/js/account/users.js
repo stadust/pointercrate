@@ -49,14 +49,17 @@ function setupPatchUserPermissionsForm(csrfToken) {
 
   let deleteUserButton = document.getElementById("delete-user");
 
-  deleteUserButton.addEventListener("click", () => {
-    del("/api/v1/users/" + selectedUser.id + "/", {
-      "X-CSRF-TOKEN": csrfToken,
-      "If-Match": selectedUser.etag
-    })
-      .then(response => editForm.setSuccess("Successfully deleted user!"))
-      .catch(displayError(editForm.errorOutput));
-  });
+  if (deleteUserButton) {
+    // The button isn't generated server sided for people who don't have permissions to delete users (aka aren't pointercrate admins)
+    deleteUserButton.addEventListener("click", () => {
+      del("/api/v1/users/" + selectedUser.id + "/", {
+        "X-CSRF-TOKEN": csrfToken,
+        "If-Match": selectedUser.etag
+      })
+        .then(response => editForm.setSuccess("Successfully deleted user!"))
+        .catch(displayError(editForm.errorOutput));
+    });
+  }
 }
 
 function setupUserByIdForm() {

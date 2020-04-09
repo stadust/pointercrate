@@ -1,6 +1,7 @@
 //! Handlers for all endpoints under the `/api/v1/auth` prefix
 
 use crate::{
+    error::{JsonError, PointercrateError},
     extractor::{auth::TokenAuth, if_match::IfMatch},
     model::user::{PatchUser, User, UserPagination},
     permissions::Permissions,
@@ -15,10 +16,21 @@ use actix_web::{
 use actix_web_codegen::{delete, get, patch};
 
 #[get("/")]
-pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination: Query<UserPagination>) -> ApiResult<HttpResponse> {
+pub async fn paginate(
+    TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Query<UserPagination>,
+) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
-    user.0.inner().require_permissions(Permissions::Administrator)?;
+    // Rule of thumb: If you can assign permissions, you can see all users that currently have those
+    // permissions
+    if user.inner().permissions.assigns().is_empty() {
+        return Err(JsonError(PointercrateError::Forbidden))
+    }
+
+    pagination.any_permissions = match pagination.any_permissions {
+        Some(perms) => Some(perms | user.inner().permissions.assigns()),
+        None => Some(user.inner().permissions.assigns()),
+    };
 
     let mut users = pagination.page(&mut connection).await?;
 
@@ -28,12 +40,21 @@ pub async fn paginate(user: TokenAuth, state: PointercrateState, mut pagination:
 }
 
 #[get("/{user_id}/")]
-pub async fn get(user: TokenAuth, state: PointercrateState, user_id: Path<i32>) -> ApiResult<HttpResponse> {
+pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, user_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
-    user.0.inner().require_permissions(Permissions::Moderator)?;
-
     let gotten_user = User::by_id(user_id.into_inner(), &mut connection).await?;
+
+    // We are only allowed to retrieve users who already have permissions we can set.
+    if !user.inner().permissions.contains(Permissions::Administrator)
+        && !(user.inner().permissions.contains(Permissions::ListAdministrator)
+            && (gotten_user.permissions.contains(Permissions::ListHelper) || gotten_user.permissions.contains(Permissions::ListModerator)))
+    {
+        return Err(JsonError(PointercrateError::ModelNotFound {
+            model: "User",
+            identified_by: gotten_user.id.to_string(),
+        })) // don't leak internal information about database
+    }
 
     Ok(HttpResponse::Ok().json_with_etag(&gotten_user))
 }
@@ -44,14 +65,33 @@ pub async fn patch(
 ) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user.0).await?;
 
-    if data.permissions.is_some() {
-        user.0.inner().require_permissions(Permissions::Administrator)?;
-    } else {
+    if data.display_name.is_some() || data.youtube_channel.is_some() {
         user.0.inner().require_permissions(Permissions::Moderator)?;
     }
 
     // FIXME: Prevent "Lost Update" by using SELECT ... FOR UPDATE
     let gotten_user = User::by_id(user_id.into_inner(), &mut connection).await?;
+
+    // We probably don't have to check if we are even allowed to retrieve this user, since we require a
+    // correct ETag, which means we previously retrieved this user successfully and passed the
+    // permissions check at GET. However, on might guess the ETag. Or use an ETag value they got from
+    // before they were demoted.
+    if !user.0.inner().permissions.contains(Permissions::Administrator)
+        && !(user.0.inner().permissions.contains(Permissions::ListAdministrator)
+            && (gotten_user.permissions.contains(Permissions::ListHelper) || gotten_user.permissions.contains(Permissions::ListModerator)))
+    {
+        return Err(JsonError(PointercrateError::ModelNotFound {
+            model: "User",
+            identified_by: gotten_user.id.to_string(),
+        }))
+    }
+
+    if let Some(assign) = data.permissions {
+        // XOR here gets us the set of permissions that _changed_ which is what we really care about!
+        user.0
+            .inner()
+            .require_permissions((assign ^ gotten_user.permissions).required_for_assignment())?;
+    }
 
     if_match.require_etag_match(&gotten_user)?;
 

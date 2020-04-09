@@ -28,6 +28,9 @@ pub struct UserPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     pub has_permissions: Option<Permissions>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    pub any_permissions: Option<Permissions>,
 }
 
 impl UserPagination {
@@ -59,6 +62,7 @@ impl UserPagination {
             .bind(self.display_name.as_ref())
             .bind(self.display_name == Some(None))
             .bind(self.has_permissions.map(|p| p.bits() as i32))
+            .bind(self.any_permissions.map(|p| p.bits() as i32))
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
