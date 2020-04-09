@@ -130,10 +130,14 @@ pub async fn delete(
 ) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user).await?;
 
-    user.inner().require_permissions(Permissions::ListModerator)?;
-
     // FIXME: prevent lost updates by using SELECT ... FOR UPDATE
     let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
+
+    if record.status == RecordStatus::Submitted {
+        user.inner().require_permissions(Permissions::ListHelper)?;
+    } else {
+        user.inner().require_permissions(Permissions::ListModerator)?;
+    }
 
     if_match.require_etag_match(&record)?;
 
