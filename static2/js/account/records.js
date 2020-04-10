@@ -337,13 +337,17 @@ class RecordEditor extends Form {
         data
       )
         .then(response => {
-          // directly refresh the record manager :pog:
-          recordManager.refresh();
-          recordManager.onReceive(response);
+          if (response.status == 304) {
+            this.setSuccess("Nothing changed!");
+          } else {
+            // directly refresh the record manager :pog:
+            recordManager.refresh();
+            recordManager.onReceive(response);
 
-          this.setSuccess(
-            "Record successfully edited! You may now close this panel"
-          );
+            this.setSuccess(
+              "Record successfully edited! You may now close this panel"
+            );
+          }
         })
         .catch(displayError(this.errorOutput));
     });

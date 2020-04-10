@@ -465,6 +465,7 @@ export class Form {
 
         if (isValid) {
           if (this.submitHandler !== undefined) {
+            // todo: maybe just pass the result of .serialize here?
             this.submitHandler(event);
 
             if (this._clearOnSubmit) {
@@ -643,7 +644,7 @@ function mkReq(method, endpoint, headers = {}, data = null) {
 
     xhr.open(method, endpoint);
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
+      if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
         resolve({
           data: xhr.status != 204 ? JSON.parse(xhr.responseText) : null,
           headers: parseHeaders(xhr),
