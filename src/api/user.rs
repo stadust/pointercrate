@@ -90,10 +90,12 @@ pub async fn patch(
     }
 
     if let Some(assign) = data.permissions {
-        // XOR here gets us the set of permissions that _changed_ which is what we really care about!
-        user.0
-            .inner()
-            .require_permissions((assign ^ gotten_user.permissions).required_for_assignment())?;
+        if !user.0.inner().has_permission(Permissions::Administrator) {
+            // XOR here gets us the set of permissions that _changed_ which is what we really care about!
+            user.0
+                .inner()
+                .require_permissions((assign ^ gotten_user.permissions).required_for_assignment())?;
+        }
     }
 
     if_match.require_etag_match(&gotten_user)?;
