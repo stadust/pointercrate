@@ -646,7 +646,10 @@ function mkReq(method, endpoint, headers = {}, data = null) {
     xhr.onload = () => {
       if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
         resolve({
-          data: xhr.status != 204 ? JSON.parse(xhr.responseText) : null,
+          data:
+            xhr.status != 204 && xhr.status != 304
+              ? JSON.parse(xhr.responseText)
+              : null,
           headers: parseHeaders(xhr),
           status: xhr.status
         });
