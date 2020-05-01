@@ -93,9 +93,8 @@ function setupEditAccount() {
       .then(response => {
         if (response.status == 304) {
           editForm.setSuccess("Nothing changed!");
-        } else if (editPassword.value !== null) {
-          window.location.reload();
         }
+        window.location.reload();
       })
       .catch(response => {
         switch (response.data.code) {

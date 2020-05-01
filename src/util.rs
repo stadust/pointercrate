@@ -83,7 +83,7 @@ macro_rules! pagination_response {
                         $endpoint, serde_urlencoded::to_string(&$pagination.0).unwrap()
                     ));
                 }
-                (Some(before), Some(after)) => {
+                (Some(_before), Some(_after)) => {
                     // We interpret this as that all objects _up to 'before'_ are supposed to be paginated.
                     // This means we keep the 'before' value and handle the 'after' value just as above.
                     // tODO: implement

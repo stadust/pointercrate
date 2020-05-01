@@ -121,7 +121,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
         Fetched,
         "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, \
          players.name::text, players.banned FROM records INNER JOIN players ON records.player = players.id WHERE status_ = 'APPROVED' AND \
-         records.demon = $1 ORDER BY progress DESC",
+         records.demon = $1 ORDER BY progress, id DESC",
         demon.id
     )
     .fetch(connection);

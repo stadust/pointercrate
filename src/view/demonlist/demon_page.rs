@@ -57,19 +57,14 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
         .await?;
 
     match addition {
-        Some(time) =>
-            match movements.first() {
-                Some(movement) =>
-                    movements.insert(0, DemonMovement {
-                        at: time.time,
-                        from_position: movement.from_position,
-                    }),
-                None =>
-                    movements.push(DemonMovement {
-                        at: time.time,
-                        from_position: demon.demon.base.position,
-                    }),
-            },
+        Some(time) => {
+            let from_position = movements.first().map(|m| m.from_position).unwrap_or(demon.demon.base.position);
+
+            movements.insert(0, DemonMovement {
+                at: time.time,
+                from_position,
+            });
+        },
         None => error!("No addition logged for demon {}!", demon),
     }
 
