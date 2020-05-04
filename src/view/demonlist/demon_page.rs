@@ -447,7 +447,7 @@ impl Page for Demonlist {
                             ]
                         }},
                         "name": "#{0} - {1}",
-                        "description": {2},
+                        "description": "{2}",
                         "url": "https://pointercrate.com/demonlist/{0}/"
                     }}
                     </script>
