@@ -106,7 +106,7 @@ export class StatsViewer extends FilteredPaginator {
     var playerData = response.data.data;
 
     if (playerData.nationality == null) {
-      this._name.innerHtml = playerData.name;
+      this._name.textContent = playerData.name;
     } else {
       let flagClass =
         "flag-icon-" + playerData.nationality.country_code.toLowerCase();
