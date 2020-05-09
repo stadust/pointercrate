@@ -15,7 +15,7 @@ use gdcf_model::{
     user::Creator,
 };
 use log::error;
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup, PreEscaped, Render};
 
 #[derive(Debug)]
 pub struct DemonMovement {
@@ -430,7 +430,7 @@ impl Page for Demonlist {
                                         "name": "pointercrate"
                                     }}
                                 }},{{
-                                    "@type": "ListItem",
+                                    "@type": "ListItem",<
                                     "position": 2,
                                     "item": {{
                                         "@id": "https://pointercrate.com/demonlist/",
@@ -451,7 +451,7 @@ impl Page for Demonlist {
                         "url": "https://pointercrate.com/demonlist/{0}/"
                     }}
                     </script>
-                "##, self.data.position(), self.data.name(), self.description())))
+                "##, self.data.position(), self.data.name(), self.description().render().0)))
             },
             html! {
                 (PreEscaped(format!("
