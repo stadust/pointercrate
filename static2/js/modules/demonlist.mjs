@@ -226,7 +226,7 @@ function formatDemonsInto(element, demons) {
 
   if (demons.length) {
     for (var demon of demons) {
-      element.appendChild(formatDemon(demon, "/demonlist/" + demon.id + "/"));
+      element.appendChild(formatDemon(demon, "/demonlist/" + demon.position + "/"));
       element.appendChild(document.createTextNode(" - "));
     }
     element.removeChild(element.lastChild);
