@@ -171,7 +171,7 @@ fn submission_panel() -> Markup {
                         "Video: "
                     }
                     p {
-                        "A proof video of the legitimancy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream."
+                        "A proof video of the legitimacy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream."
                         br {}
 
                         i { "Note: " }
