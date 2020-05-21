@@ -225,11 +225,10 @@ impl Demon {
     }
 
     pub fn score(&self, progress: i16) -> f64 {
-        let base_score = if self.base.position <= 10 { 250f64 } else { 150f64 };
-        let beaten_score = base_score * f64::exp((1f64 - f64::from(self.base.position)) * (1f64 / 30f64).ln() / (-149f64));
+        let beaten_score = 150f64 * f64::exp((1f64 - f64::from(self.base.position)) * (1f64 / 30f64).ln() / (-149f64));
 
         if progress != 100 {
-            (beaten_score * (46f64.powf((progress - self.requirement) as f64 / (100f64 - self.requirement as f64)) + 4f64)) / 100f64
+            (beaten_score * (5f64.powf((progress - self.requirement) as f64 / (100f64 - self.requirement as f64)))) / 10f64
         } else {
             beaten_score
         }
