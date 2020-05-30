@@ -354,7 +354,7 @@ fn rules_panel() -> Markup {
                 }
                 li {
                     span {
-                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include, but aren't limited to, speedhacks, noclip, auto, nerfs, macros, fps bypass, etc."
+                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include, but aren't limited to, speedhacks, noclip, auto, nerfs, macros, etc."
                     }
                 }
                 li {
