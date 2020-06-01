@@ -66,7 +66,7 @@ pub async fn submit(
         let user = user?.0;
 
         user.inner().require_permissions(Permissions::ListHelper)?;
-        audit_connection(&mut connection, user.inner()).await?; // might as well
+        audit_connection(&mut connection, user.inner().id).await?; // might as well
     }
 
     let ratelimiter = state.ratelimits.prepare(ip);
