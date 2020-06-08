@@ -116,7 +116,8 @@ pub async fn patch(
     // FIXME: prevent lost updates by using SELECT ... FOR UPDATE
     let mut record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
-    if record.demon.position >= config::extended_list_size() {
+    if record.demon.position > config::extended_list_size() {
+        // only list mods can modify legacy records
         user.inner().require_permissions(Permissions::ListModerator)?;
     } else {
         user.inner().require_permissions(Permissions::ListHelper)?;
