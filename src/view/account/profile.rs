@@ -67,12 +67,12 @@ pub(super) fn page(user: &User) -> Markup {
                         p.info-green.output {}
                         span.form-input#edit-display-name {
                             label for = "username" {"New display name:"}
-                            input type = "text" name = "username" value = (user.display_name.as_ref().map(AsRef::as_ref).unwrap_or(""));
+                            input type = "text" name = "display_name" value = (user.display_name.as_ref().map(AsRef::as_ref).unwrap_or(""));
                             p.error {}
                         }
                         span.form-input#edit-yt-channel {
                             label for = "yt_channel" {"New YouTube channel:"}
-                            input type = "url" name = "yt_channel" value = (user.youtube_channel.as_ref().map(AsRef::as_ref).unwrap_or(""));
+                            input type = "url" name = "youtube_channel" value = (user.youtube_channel.as_ref().map(AsRef::as_ref).unwrap_or(""));
                             p.error {}
                         }
                         span.form-input#edit-password {
@@ -82,12 +82,12 @@ pub(super) fn page(user: &User) -> Markup {
                         }
                         span.form-input#edit-password-repeat {
                             label for = "password2" {"Repeat new password:"}
-                            input type = "password" name = "password2" minlength = "10";
+                            input type = "password"  minlength = "10";
                             p.error {}
                         }
                         span.overlined.underlined.pad.form-input#auth-password {
                             label for = "auth-password" {"Authenticate:"}
-                            input type = "password" name ="auth-password" minlength = "10" required = "";
+                            input type = "password" minlength = "10" required = "";
                             p.error {}
                         }
                         input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit edit";

@@ -170,7 +170,7 @@ export class Paginator {
 
     for (var result of response.data) {
       let item = this.itemConstructor(result);
-      item.addEventListener("click", e => this.onSelect(e.currentTarget));
+      item.addEventListener("click", (e) => this.onSelect(e.currentTarget));
       this.list.appendChild(item);
     }
   }
@@ -270,7 +270,7 @@ export class FilteredPaginator extends Paginator {
     filterInput.value = "";
 
     // Apply filter when enter is pressed
-    filterInput.addEventListener("keypress", event => {
+    filterInput.addEventListener("keypress", (event) => {
       if (event.keyCode == 13) {
         this.updateQueryData(filterParam, filterInput.value);
       }
@@ -281,7 +281,7 @@ export class FilteredPaginator extends Paginator {
       this.updateQueryData(filterParam, filterInput.value)
     );
 
-    filterInput.parentNode.addEventListener("click", event => {
+    filterInput.parentNode.addEventListener("click", (event) => {
       if (event.offsetX > filterInput.offsetWidth) {
         filterInput.value = "";
         this.updateQueryData(filterParam, "");
@@ -353,12 +353,12 @@ export class Input {
   addValidator(validator, msg) {
     this.validators.push({
       validator: validator,
-      message: msg
+      message: msg,
     });
   }
 
   addValidators(validators) {
-    Object.keys(validators).forEach(message =>
+    Object.keys(validators).forEach((message) =>
       this.addValidator(validators[message], message)
     );
   }
@@ -451,7 +451,7 @@ export class Form {
 
     form.addEventListener(
       "submit",
-      event => {
+      (event) => {
         event.preventDefault();
 
         if (this.errorOutput) this.errorOutput.style.display = "none";
@@ -490,7 +490,7 @@ export class Form {
     let data = {};
 
     for (let input of this.inputs) {
-      if (input.value !== null) {
+      if (input.name !== null && input.value !== null) {
         data[input.name] = input.value;
       }
     }
@@ -542,7 +542,7 @@ export class Form {
   }
 
   addValidators(validators) {
-    Object.keys(validators).forEach(input_id =>
+    Object.keys(validators).forEach((input_id) =>
       this.input(input_id).addValidators(validators[input_id])
     );
   }
@@ -590,7 +590,7 @@ export function valueMissing(input) {
  * @param errorOutput The HTML element whose `innerHtml` property should be set to the error message
  */
 export function displayError(errorOutput) {
-  return function(response) {
+  return function (response) {
     errorOutput.innerHTML = response.data.message;
     errorOutput.style.display = "block";
     throw new Error(response.data.message);
@@ -625,21 +625,21 @@ const SEVERE_ERROR = {
   message:
     "Severe internal server error: The error response could not be processed. This is most likely due to an internal panic in the request handler and might require a restart! Please report this immediately!",
   code: 50000,
-  data: null
+  data: null,
 };
 
 const UNEXPECTED_REDIRECT = {
   message:
     "Unexpected redirect. This is a front-end error, most likely caused by a missing trailing slash",
   code: 50000,
-  data: null
+  data: null,
 };
 
 function mkReq(method, endpoint, headers = {}, data = null) {
   headers["Content-Type"] = "application/json";
   headers["Accept"] = "application/json";
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();
 
     xhr.open(method, endpoint);
@@ -651,13 +651,13 @@ function mkReq(method, endpoint, headers = {}, data = null) {
               ? JSON.parse(xhr.responseText)
               : null,
           headers: parseHeaders(xhr),
-          status: xhr.status
+          status: xhr.status,
         });
       } else if (xhr.status < 400) {
         reject({
           data: UNEXPECTED_REDIRECT,
           headers: parseHeaders(xhr),
-          status: xhr.status
+          status: xhr.status,
         });
       } else {
         try {
@@ -666,13 +666,13 @@ function mkReq(method, endpoint, headers = {}, data = null) {
           return reject({
             data: SEVERE_ERROR,
             headers: parseHeaders(xhr),
-            status: xhr.status
+            status: xhr.status,
           });
         }
         reject({
           data: jsonError,
           headers: parseHeaders(xhr),
-          status: xhr.status
+          status: xhr.status,
         });
       }
     };
