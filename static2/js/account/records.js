@@ -14,7 +14,7 @@ import {
   rangeUnderflow,
   rangeOverflow,
   stepMismatch,
-  typeMismatch
+  typeMismatch,
 } from "../modules/form.mjs";
 
 let recordManager;
@@ -69,7 +69,7 @@ function embedVideo(video) {
     return "https://www.youtube.com/embed/" + video.substring(32);
   }
 
-  if (video.statsWith("https://www.twitch")) {
+  if (video.startsWith("https://www.twitch")) {
     return (
       "https://player.twitch.tv/?autoplay=false&video=" + video.substring(29)
     );
@@ -107,11 +107,11 @@ class RecordManager extends Paginator {
 
     new Dropdown(
       manager.getElementsByClassName("dropdown-menu")[0]
-    ).addEventListener(selected => {
+    ).addEventListener((selected) => {
       if (selected === "All") this.updateQueryData("demon_id", undefined);
       else this.updateQueryData("demon_id", selected);
     });
-    this.dropdown.addEventListener(selected => {
+    this.dropdown.addEventListener((selected) => {
       if (selected === "All") this.updateQueryData("status", undefined);
       else this.updateQueryData("status", selected);
     });
@@ -243,7 +243,7 @@ function setupAddNote(csrfToken) {
       { "X-CSRF-TOKEN": csrfToken },
       { content: textArea.value }
     )
-      .then(noteResponse => {
+      .then((noteResponse) => {
         let newNote = createNoteHtml(noteResponse.data.data, csrfToken);
         recordManager._notes.appendChild(newNote);
 
@@ -267,7 +267,7 @@ function setupRecordFilterPlayerIdForm() {
   var playerId = recordFilterPlayerIdForm.input("record-player-id");
 
   playerId.addValidator(valueMissing, "Player ID required");
-  recordFilterPlayerIdForm.onSubmit(function(event) {
+  recordFilterPlayerIdForm.onSubmit(function (event) {
     window.recordManager.updateQueryData("player", playerId.value);
   });
 }
@@ -279,12 +279,12 @@ function setupRecordFilterPlayerNameForm() {
   var playerName = recordFilterPlayerNameForm.input("record-player-name");
 
   playerName.addValidators({
-    "Player name required": valueMissing
+    "Player name required": valueMissing,
   });
 
-  recordFilterPlayerNameForm.onSubmit(function(event) {
+  recordFilterPlayerNameForm.onSubmit(function (event) {
     get("/api/v1/players/?name=" + playerName.value)
-      .then(response => {
+      .then((response) => {
         let json = response.data;
 
         if (!json || json.length == 0) {
@@ -321,7 +321,7 @@ class RecordEditor extends Form {
     video.addValidator(typeMismatch, "Please enter a valid URL");
 
     this.setClearOnSubmit(true);
-    this.onSubmit(function(event) {
+    this.onSubmit(function (event) {
       let data = this.serialize();
 
       if (this.statusDropdown.selected != recordManager.currentRecord.status) {
@@ -332,11 +332,11 @@ class RecordEditor extends Form {
         "/api/v1/records/" + recordManager.currentRecord.id + "/",
         {
           "X-CSRF-TOKEN": csrfToken,
-          "If-Match": recordManager.currentRecordEtag
+          "If-Match": recordManager.currentRecordEtag,
         },
         data
       )
-        .then(response => {
+        .then((response) => {
           if (response.status == 304) {
             this.setSuccess("Nothing changed!");
           } else {
@@ -370,7 +370,7 @@ function setupEditRecordForm(csrfToken) {
     ) {
       del("/api/v1/records/" + recordManager.currentRecord.id + "/", {
         "X-CSRF-TOKEN": csrfToken,
-        "If-Match": window.recordManager.currentRecordEtag
+        "If-Match": window.recordManager.currentRecordEtag,
       }).then(() => {
         $(recordManager._content).hide(100);
         $(recordManager._notes.parentElement).hide(100);
