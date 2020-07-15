@@ -71,7 +71,8 @@ function embedVideo(video) {
 
   if (video.startsWith("https://www.twitch")) {
     return (
-      "https://player.twitch.tv/?autoplay=false&video=" + video.substring(29)
+      "https://player.twitch.tv/?autoplay=false&parent=pointercrate.com&video=" +
+      video.substring(29)
     );
   }
 }
