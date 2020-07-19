@@ -27,16 +27,6 @@ fn record_editor() -> Markup {
                     input type = "text" name = "player" value = "";
                     p.error {}
                 }
-                span.form-input#edit-record-progress {
-                    label for = "progress" {"Progress made in the record:"}
-                    input type = "number" name = "progress" min = "0" max = "100" value = "";
-                    p.error {}
-                }
-                span.form-input#edit-record-video {
-                    label for = "record_video" {"Video proof of legitimacy:"}
-                    input type = "url" name = "video";
-                    p.error {}
-                }
                 p{
                     b {"Important: "}
                     "Not all fields have to be filled out! Leaving a field empty leaves that value unchanged! The fields 'demon id' and 'demon name' are mutually exclusive"

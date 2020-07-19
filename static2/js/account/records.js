@@ -453,19 +453,6 @@ class RecordEditor extends Form {
 
     this.recordId = document.getElementById("edit-record-id");
 
-    var progress = this.input("edit-record-progress");
-    var video = this.input("edit-record-video");
-
-    progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
-    progress.addValidator(
-      rangeOverflow,
-      "Record progress cannot be larger than 100%"
-    );
-    progress.addValidator(badInput, "Record progress must be a valid integer");
-    progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
-
-    video.addValidator(typeMismatch, "Please enter a valid URL");
-
     this.setClearOnSubmit(true);
     this.onSubmit(function (event) {
       let data = this.serialize();
