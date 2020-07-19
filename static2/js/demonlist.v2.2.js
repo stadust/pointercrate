@@ -1,9 +1,9 @@
 import {
   initializeRecordSubmitter,
-  StatsViewer
+  StatsViewer,
 } from "./modules/demonlist.mjs";
 
-$(document).ready(function() {
+$(document).ready(function () {
   initializePositionChart();
   initializeRecordSubmitter();
 
@@ -35,7 +35,7 @@ function initializePositionChart() {
       "#position-chart",
       {
         labels: window.positionChartLabels,
-        series: [window.positionChartData]
+        series: [window.positionChartData],
       },
       {
         lineSmooth: Chartist.Interpolation.step({ postpone: false }),
@@ -43,25 +43,25 @@ function initializePositionChart() {
           stretch: true,
           ticks: window.positionChartLabels,
           labelOffset: {
-            x: -20
+            x: -20,
           },
-          type: Chartist.StepAxis
+          type: Chartist.StepAxis,
         },
         axisY: {
           high: -lowestPosition,
           low: -highestPosition,
           ticks: ticks,
           type: Chartist.FixedScaleAxis,
-          labelInterpolationFnc: function(value) {
+          labelInterpolationFnc: function (value) {
             return -value;
-          }
-        }
+          },
+        },
       }
     );
 
-    chart.on("data", function(context) {
-      context.data.series = context.data.series.map(function(series) {
-        return series.map(function(value) {
+    chart.on("data", function (context) {
+      context.data.series = context.data.series.map(function (series) {
+        return series.map(function (value) {
           return -value;
         });
       });
@@ -69,7 +69,7 @@ function initializePositionChart() {
 
     let observer = new MutationObserver(() => chart.update());
     observer.observe(document.getElementById("position-chart").parentNode, {
-      attributes: true
+      attributes: true,
     });
   }
 }

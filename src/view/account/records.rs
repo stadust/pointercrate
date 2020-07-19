@@ -265,6 +265,7 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "3" {
             div.left {
+                (crate::view::demonlist::submission_panel())
                 (record_editor())
                 (record_manager(demons))
                 (note_adder())
@@ -279,6 +280,7 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
             div.right {
                 (status_selector())
                 (player_selector())
+                (crate::view::demonlist::submit_panel())
             }
         }
     }

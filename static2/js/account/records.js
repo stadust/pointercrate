@@ -16,6 +16,7 @@ import {
   stepMismatch,
   typeMismatch,
 } from "../modules/form.mjs";
+import { initializeRecordSubmitter } from "../modules/demonlist.mjs";
 
 let recordManager;
 let recordEditor;
@@ -387,6 +388,8 @@ export function initialize(csrfToken) {
   setupRecordFilterPlayerNameForm();
   setupAddNote(csrfToken);
   setupEditRecordForm(csrfToken);
+
+  initializeRecordSubmitter();
 
   recordManager = new RecordManager(csrfToken);
   recordManager.initialize();

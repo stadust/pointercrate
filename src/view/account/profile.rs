@@ -23,7 +23,6 @@ pub(super) fn page(user: &User) -> Markup {
                             b {
                                 i.fa.fa-pencil.clickable#display-name-pen aria-hidden = "true" {} " Display name: "
                             }
-
                             @match user.display_name {
                                 Some(ref dn) => (dn),
                                 None => "-"

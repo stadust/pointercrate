@@ -126,7 +126,7 @@ fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&De
     }
 }
 
-fn submission_panel() -> Markup {
+pub(super) fn submission_panel() -> Markup {
     html! {
         section.panel.fade.closable#submitter style = "display: none" {
             span.plus.cross.hover {}
@@ -403,7 +403,7 @@ fn rules_panel() -> Markup {
     }
 }
 
-fn submit_panel() -> Markup {
+pub(super) fn submit_panel() -> Markup {
     html! {
         section#submit.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
