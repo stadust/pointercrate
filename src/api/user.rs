@@ -111,10 +111,16 @@ pub async fn patch(
 pub async fn delete(if_match: IfMatch, user: TokenAuth, state: PointercrateState, user_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.audited_transaction(&user.0).await?;
 
+    let to_delete = user_id.into_inner();
+
+    if user.0.inner().id == to_delete {
+        return Err(PointercrateError::DeleteSelf.into())
+    }
+
     user.0.inner().require_permissions(Permissions::Administrator)?;
 
     // FIXME: Prevent "Lost Update" by using SELECT ... FOR UPDATE
-    let to_delete = User::by_id(user_id.into_inner(), &mut connection).await?;
+    let to_delete = User::by_id(to_delete, &mut connection).await?;
 
     if_match.require_etag_match(&to_delete)?;
 
