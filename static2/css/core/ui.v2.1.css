@@ -176,6 +176,7 @@ a {
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
   border: 1px lightgray dashed;
   padding: 10px;
+  max-width: 600px;
 }
 
 .dialog p {

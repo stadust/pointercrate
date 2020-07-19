@@ -130,7 +130,8 @@ impl Page for AccountPage {
 
         vec![html! {
             (PreEscaped(
-                format!("<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script>", self.user.name, hasher.finish().to_string(), self.user.permissions.bits())
+                format!(r#"
+                <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet"><script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script>"#, self.user.name, hasher.finish().to_string(), self.user.permissions.bits())
             ))
         }]
     }

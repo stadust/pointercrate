@@ -16,10 +16,13 @@ import {
   stepMismatch,
   typeMismatch,
 } from "../modules/form.mjs";
-import { initializeRecordSubmitter } from "../modules/demonlist.mjs";
+import {
+  initializeRecordSubmitter,
+  generatePlayer,
+} from "../modules/demonlist.mjs";
+import { FilteredPaginator } from "../modules/form.mjs";
 
 let recordManager;
-let recordEditor;
 
 function generateRecord(record) {
   var li = document.createElement("li");
@@ -149,6 +152,8 @@ class RecordManager extends Paginator {
 
     this.initProgressDialog();
     this.initVideoDialog();
+    new HolderDialog();
+    this.initDemonDialog();
   }
 
   initProgressDialog() {
@@ -236,6 +241,44 @@ class RecordManager extends Paginator {
         .catch(displayError(video.errorOutput));
     });
   }
+
+  initDemonDialog() {
+    var editDemonDialog = document.getElementById("record-demon-dialog");
+
+    document
+      .getElementById("record-demon-pen")
+      .addEventListener("click", () => {
+        $(editDemonDialog.parentElement).show();
+      });
+
+    new Dropdown(document.getElementById("edit-demon-record")).addEventListener(
+      (demonId) => {
+        patch(
+          "/api/v1/records/" + this.currentRecord.id + "/",
+          {
+            "X-CSRF-TOKEN": this._tok,
+            "If-Match": this.currentRecordEtag,
+          },
+          { demon_id: parseInt(demonId) }
+        )
+          .then((response) => {
+            if (response.status == 304) {
+              this.setSuccess("Nothing changed!");
+            } else {
+              this.refresh();
+              this.onReceive(response);
+              this.setSuccess("Record demon successfully edited!");
+            }
+            $(editDemonDialog.parentElement).hide();
+          })
+          .catch((response) => {
+            displayError(this.errorOutput)(response);
+            $(editDemonDialog.parentElement).hide();
+          });
+      }
+    );
+  }
+
   setError(message) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
@@ -304,12 +347,57 @@ class RecordManager extends Paginator {
       this._notes.appendChild(createNoteHtml(note, this._tok));
     }
 
-    recordEditor.selectRecord(recordData);
-
     $(this._notes.parentElement).show(100); // TODO: maybe via CSS transform?
 
     $(this._welcome).hide(100);
     $(this._content).show(100);
+  }
+}
+
+class HolderDialog extends FilteredPaginator {
+  constructor() {
+    super("record-holder-dialog-pagination", generatePlayer, "name_contains");
+
+    this.editHolderDialog = document.getElementById("record-holder-dialog");
+    this.editHolderForm = new Form(
+      this.editHolderDialog.getElementsByTagName("form")[0]
+    );
+    document
+      .getElementById("record-holder-pen")
+      .addEventListener("click", () => {
+        this.initialize();
+        $(this.editHolderDialog.parentElement).show();
+      });
+
+    this.editHolderForm.onSubmit(() =>
+      this.changeHolder(this.editHolderForm.input("record-holder-name-edit"))
+    );
+  }
+
+  changeHolder(newHolder) {
+    patch(
+      "/api/v1/records/" + recordManager.currentRecord.id + "/",
+      {
+        "X-CSRF-TOKEN": recordManager._tok,
+        "If-Match": recordManager.currentRecordEtag,
+      },
+      { player: newHolder }
+    )
+      .then((response) => {
+        if (response.status == 304) {
+          recordManager.setSuccess("Nothing changed!");
+        } else {
+          recordManager.onReceive(response);
+          recordManager.refresh();
+          recordManager.setSuccess("Record holder successfully edited!");
+        }
+        $(this.editHolderDialog.parentElement).hide();
+      })
+      .catch(displayError(this.editHolderForm.errorOutput));
+  }
+
+  onSelect(selected) {
+    this.changeHolder(selected.dataset.name);
   }
 }
 
@@ -447,49 +535,7 @@ function setupRecordFilterPlayerNameForm() {
   });
 }
 
-class RecordEditor extends Form {
-  constructor(csrfToken) {
-    super(document.getElementById("edit-record-form"));
-
-    this.recordId = document.getElementById("edit-record-id");
-
-    this.setClearOnSubmit(true);
-    this.onSubmit(function (event) {
-      let data = this.serialize();
-
-      patch(
-        "/api/v1/records/" + recordManager.currentRecord.id + "/",
-        {
-          "X-CSRF-TOKEN": csrfToken,
-          "If-Match": recordManager.currentRecordEtag,
-        },
-        data
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            // directly refresh the record manager :pog:
-            recordManager.refresh();
-            recordManager.onReceive(response);
-
-            this.setSuccess(
-              "Record successfully edited! You may now close this panel"
-            );
-          }
-        })
-        .catch(displayError(this.errorOutput));
-    });
-  }
-
-  selectRecord(record) {
-    this.recordId.innerText = record.id;
-  }
-}
-
 function setupEditRecordForm(csrfToken) {
-  recordEditor = new RecordEditor(csrfToken);
-
   document.getElementById("record-delete").addEventListener("click", () => {
     if (
       confirm(

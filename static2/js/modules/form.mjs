@@ -607,7 +607,6 @@ export function displayError(errorOutput, specialCodes = {}) {
         errorOutput.style.display = "block";
         errorOutput.innerHTML = response.data.message;
       }
-      throw new Error(response.data.message);
     } else {
       errorOutput.style.display = "block";
       errorOutput.innerHTML =

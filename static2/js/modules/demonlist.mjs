@@ -10,7 +10,7 @@ import {
   stepMismatch,
   rangeUnderflow,
   rangeOverflow,
-  tooLong
+  tooLong,
 } from "./form.mjs";
 
 export function initializeRecordSubmitter() {
@@ -46,12 +46,12 @@ export function initializeRecordSubmitter() {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
-  submissionForm.onSubmit(function(event) {
+  submissionForm.onSubmit(function (event) {
     post("/api/v1/records/", {}, submissionForm.serialize())
-      .then(response =>
+      .then((response) =>
         submissionForm.setSuccess("Record successfully submitted")
       )
-      .catch(response => submissionForm.setError(response.data.message)); // TODO: maybe specially handle some error codes
+      .catch((response) => submissionForm.setError(response.data.message)); // TODO: maybe specially handle some error codes
   });
 }
 
@@ -62,7 +62,11 @@ export class StatsViewer extends FilteredPaginator {
    * @param {HtmlElement} html The container element of this stats viewer instance
    */
   constructor(html) {
-    super("stats-viewer-pagination", generatePlayer, "name_contains");
+    super(
+      "stats-viewer-pagination",
+      generateStatsViewerPlayer,
+      "name_contains"
+    );
 
     this.html = html;
 
@@ -83,7 +87,7 @@ export class StatsViewer extends FilteredPaginator {
     this.dropdown = new Dropdown(
       html.getElementsByClassName("dropdown-menu")[0]
     );
-    this.dropdown.addEventListener(selected => {
+    this.dropdown.addEventListener((selected) => {
       if (selected == "International") {
         this.updateQueryData("nation", undefined);
       } else {
@@ -127,15 +131,15 @@ export class StatsViewer extends FilteredPaginator {
     formatDemonsInto(this._published, playerData.published);
     formatDemonsInto(this._verified, playerData.verified);
 
-    let beaten = playerData.records.filter(record => record.progress == 100);
+    let beaten = playerData.records.filter((record) => record.progress == 100);
 
     beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
 
     let legacy = beaten.filter(
-      record => record.demon.position > window.extended_list_length
+      (record) => record.demon.position > window.extended_list_length
     ).length;
     let extended = beaten.filter(
-      record =>
+      (record) =>
         record.demon.position > window.list_length &&
         record.demon.position <= window.extended_list_length
     ).length;
@@ -147,16 +151,16 @@ export class StatsViewer extends FilteredPaginator {
     this._amountLegacy.textContent = legacy;
 
     var hardest = playerData.verified
-      .concat(beaten.map(record => record.demon))
+      .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
         position: 34832834,
-        name: "None"
+        name: "None",
       });
 
     this._hardest.textContent = hardest.name || "None";
 
     var non100Records = playerData.records
-      .filter(record => record.progress != 100)
+      .filter((record) => record.progress != 100)
       .sort((r1, r2) => r1.progress - r2.progress);
 
     formatRecordsInto(this._progress, non100Records);
@@ -166,7 +170,36 @@ export class StatsViewer extends FilteredPaginator {
   }
 }
 
-function generatePlayer(player) {
+export function generatePlayer(player) {
+  var li = document.createElement("li");
+  var b = document.createElement("b");
+  var b2 = document.createElement("b");
+
+  li.className = "white hover";
+
+  li.dataset.name = player.name;
+  li.dataset.id = player.id;
+
+  b2.appendChild(document.createTextNode(player.id));
+
+  if (player.nationality) {
+    var span = document.createElement("span");
+
+    span.className =
+      "flag-icon flag-icon-" + player.nationality.country_code.toLowerCase();
+
+    li.appendChild(span);
+    li.appendChild(document.createTextNode(" "));
+  }
+
+  li.appendChild(b);
+  li.appendChild(document.createTextNode(player.name + " - "));
+  li.appendChild(b2);
+
+  return li;
+}
+
+function generateStatsViewerPlayer(player) {
   var li = document.createElement("li");
   var b = document.createElement("b");
   var i = document.createElement("i");
@@ -226,7 +259,9 @@ function formatDemonsInto(element, demons) {
 
   if (demons.length) {
     for (var demon of demons) {
-      element.appendChild(formatDemon(demon, "/demonlist/" + demon.position + "/"));
+      element.appendChild(
+        formatDemon(demon, "/demonlist/" + demon.position + "/")
+      );
       element.appendChild(document.createTextNode(" - "));
     }
     element.removeChild(element.lastChild);

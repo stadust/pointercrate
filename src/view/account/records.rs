@@ -1,45 +1,6 @@
 use crate::view::{demonlist::OverviewDemon, dropdown, paginator};
 use maud::{html, Markup};
 
-fn record_editor() -> Markup {
-    html! {
-        div.panel.fade.closable#edit-record style = "display: none" {
-            span.plus.cross.hover {}
-            h2.underlined.pad {
-                "Edit Record #"
-                span#edit-record-id {}
-            }
-            form.flex.col#edit-record-form novalidate = "" {
-                p.info-red.output {}
-                p.info-green.output {}
-                span.form-input#edit-record-demon-id {
-                    label for = "record_demon" {"ID of the demon the record should be on:"}
-                    input type = "number" name = "demon_id" value = "";
-                    p.error {}
-                }
-                span.form-input#edit-record-demon-name {
-                    label for = "record_demon" {"Name of the demon the record should be on:"}
-                    input type = "text" name = "demon" value = "";
-                    p.error {}
-                }
-                span.form-input#edit-record-player {
-                    label for = "record_player" {"Name of the player of the record:"}
-                    input type = "text" name = "player" value = "";
-                    p.error {}
-                }
-                p{
-                    b {"Important: "}
-                    "Not all fields have to be filled out! Leaving a field empty leaves that value unchanged! The fields 'demon id' and 'demon name' are mutually exclusive"
-                }
-                p {
-                    "All modifications to the record will only be saved upon clicking the button below. Selecting a different record, or leaving the staff area, will discard all unsaved modifications. Navigating to a different tab above is fine. Selecting a different record below instead targets the newly selected record for modification!"
-                }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Save edit(s)";
-            }
-        }
-    }
-}
-
 fn record_manager(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.panel.fade#record-manager {
@@ -97,7 +58,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                                 }
                                 span {
                                     b {
-                                        i.fa.fa-pencil.clickable#record-player-pen aria-hidden = "true" {} " Record Holder:"
+                                        i.fa.fa-pencil.clickable#record-holder-pen aria-hidden = "true" {} " Record Holder:"
                                     }
                                     br;
                                     span#record-holder {}
@@ -119,10 +80,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                                     span#record-submitter {}
                                 }
                             }
-                            div.flex.no-stretch style = "margin: 15px 10px 0px; justify-content: space-evenly" {
-                                span.button.blue.hover.js-scroll data-destination = "edit-record" data-reveal = "true" {"Edit Record"};
-                                span.button.red.hover#record-delete {"Delete Record"};
-                            }
+                            span.button.red.hover#record-delete style = "margin: 15px auto 0px" {"Delete Record"};
                         }
                     }
                 }
@@ -254,7 +212,6 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
         div.m-center.flex.tab-content.container data-tab-id = "3" {
             div.left {
                 (crate::view::demonlist::submission_panel())
-                (record_editor())
                 (record_manager(demons))
                 (note_adder())
                 div.panel.fade#record-notes-container style = "display:none" {
@@ -272,6 +229,8 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
             }
             (change_progress_dialog())
             (change_video_dialog())
+            (change_holder_dialog())
+            (change_demon_dialog(demons))
         }
     }
 }
@@ -322,6 +281,65 @@ fn change_video_dialog() -> Markup {
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                }
+            }
+        }
+    }
+}
+
+fn change_holder_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#record-holder-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change record holder:"
+                }
+                div.flex.viewer {
+                    (crate::view::filtered_paginator("record-holder-dialog-pagination", "/api/v1/players/"))
+                    div {
+                        p {
+                            "Change the player associated with this record. If the player you want to change this record to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
+                        }
+                        form.flex.col novalidate = "" {
+                            p.info-red.output {}
+                            p.info-green.output {}
+                            span.form-input#record-holder-name-edit {
+                                label for = "player" {"Player name:"}
+                                input name = "player" type="text" required = "";
+                                p.error {}
+                            }
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn change_demon_dialog(demons: &[OverviewDemon]) -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#record-demon-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change record demon:"
+                }
+                div.flex.col {
+                    p {
+                        "Change the demon associated with this record. Search up the demon this record should be associated with below. Then click it to modify the record"
+                    }
+                    div.dropdown-menu.js-search#edit-demon-record {
+                        input type="text" style = "color: #444446; font-weight: bold;";
+                        div.menu {
+                           ul {
+                                @for demon in demons {
+                                    li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
