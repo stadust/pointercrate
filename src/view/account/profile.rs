@@ -21,20 +21,22 @@ pub(super) fn page(user: &User) -> Markup {
                         }
                         span {
                             b {
-                                "Display name: "
+                                i.fa.fa-pencil.clickable#display-name-pen aria-hidden = "true" {} " Display name: "
                             }
+
                             @match user.display_name {
                                 Some(ref dn) => (dn),
                                 None => "-"
                             }
                             p {
-                                "If set, this name will be displayed instead of your username. Display names aren't unique."
+                                "If set, this name will be displayed instead of your username. Display names aren't unique and you cannot use your display name to login to your pointercrate account."
                             }
                         }
                         span {
                             b {
-                                "Youtube channel: "
+                                i.fa.fa-pencil.clickable#youtube-pen aria-hidden = "true" {} " YouTube channel: "
                             }
+
                             @match user.youtube_channel {
                                 Some(ref yc) => a.link href = (yc) {},
                                 None => "-"
@@ -53,44 +55,9 @@ pub(super) fn page(user: &User) -> Markup {
                             }
                         }
                     }
-                }
-                div.panel.fade.closable#edit style = "display: none" {
-                    span.plus.cross.hover {}
-                    h2.underlined.pad {
-                        "Edit profile"
-                    }
-                    p {
-                        "Modifying your account requires you to re-authenticate using your password. " i{"Changing"} " your password will log you out and redirect to the login page. It will further invalidate all access tokens to your account"
-                    }
-                    form.flex.col#edit-form novalidate = "" {
-                        p.info-red.output {}
-                        p.info-green.output {}
-                        span.form-input#edit-display-name {
-                            label for = "username" {"New display name:"}
-                            input type = "text" name = "display_name" value = (user.display_name.as_ref().map(AsRef::as_ref).unwrap_or(""));
-                            p.error {}
-                        }
-                        span.form-input#edit-yt-channel {
-                            label for = "yt_channel" {"New YouTube channel:"}
-                            input type = "url" name = "youtube_channel" value = (user.youtube_channel.as_ref().map(AsRef::as_ref).unwrap_or(""));
-                            p.error {}
-                        }
-                        span.form-input#edit-password {
-                            label for = "password" {"New password:"}
-                            input type = "password" name = "password" minlength = "10";
-                            p.error {}
-                        }
-                        span.form-input#edit-password-repeat {
-                            label for = "password2" {"Repeat new password:"}
-                            input type = "password"  minlength = "10";
-                            p.error {}
-                        }
-                        span.overlined.underlined.pad.form-input#auth-password {
-                            label for = "auth-password" {"Authenticate:"}
-                            input type = "password" minlength = "10" required = "";
-                            p.error {}
-                        }
-                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit edit";
+                    div.flex.no-stretch {
+                        input.button.red.hover#delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
+                        input.button.blue.hover#change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
                     }
                 }
             }
@@ -124,17 +91,6 @@ pub(super) fn page(user: &User) -> Markup {
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Edit profile"
-                    }
-                    p {
-                        "Edit some of the stuff displayed on your profile! You can change your display name and youtube channel link! You can also change your password here"
-                    }
-                    a.blue.hover.button.js-scroll data-destination = "edit" data-reveal = "true" {
-                        "Edit"
-                    }
-                }
-                div.panel.fade {
-                    h2.underlined.pad {
                         "Invalidate tokens"
                     }
                     p {
@@ -155,6 +111,134 @@ pub(super) fn page(user: &User) -> Markup {
                     a.blue.hover.button#invalidate-token {
                         "Invalidate all access tokens"
                     }
+                }
+            }
+        }
+        (edit_display_name_dialog())
+        (edit_youtube_link_dialog())
+        (change_password_dialog())
+        (delete_account_dialog())
+    }
+}
+
+fn edit_display_name_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#edit-dn-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Edit Display Name:"
+                }
+                p {
+                    "To make profile related edits, re-entering your password below is required."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#edit-dn {
+                        label for = "display_name" {"New display name:"}
+                        input type = "text" name = "display_name";
+                        p.error {}
+                    }
+                    span.overlined.pad.form-input#auth-dn {
+                        label {"Authenticate:"}
+                        input type = "password" minlength = "10" required = "";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                }
+            }
+        }
+    }
+}
+
+fn edit_youtube_link_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#edit-yt-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Edit YouTube Channel Link:"
+                }
+                p {
+                    "To make profile related edits, re-entering your password below is required."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#edit-yt {
+                        label for = "youtube_channel" {"New YouTube link:"}
+                        input type = "url" name = "youtube_channel";
+                        p.error {}
+                    }
+                    span.overlined.pad.form-input#auth-yt {
+                        label {"Authenticate:"}
+                        input type = "password" minlength = "10" required = "";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                }
+            }
+        }
+    }
+}
+
+fn change_password_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#edit-pw-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change Password:"
+                }
+                p {
+                    "To make profile related edits, re-entering your password below is required. " i{"Changing"} " your password will log you out and redirect to the login page. It will further invalidate all access tokens to your account"
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#edit-pw {
+                        label for = "password" {"New password:"}
+                        input type = "password" name = "password" minlength = "10";
+                        p.error {}
+                    }
+                    span.form-input#edit-pw-repeat {
+                        label for = "password2" {"Repeat new password:"}
+                        input type = "password"  minlength = "10";
+                        p.error {}
+                    }
+                    span.overlined.pad.form-input#auth-pw {
+                        label {"Authenticate:"}
+                        input type = "password" minlength = "10" required = "";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                }
+            }
+        }
+    }
+}
+
+fn delete_account_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#delete-acc-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Delete Account:"
+                }
+                p {
+                    "To delete your account, please enter your password below. Deletion of your account is irreversible!"
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#auth-delete {
+                        label {"Authenticate:"}
+                        input type = "password" minlength = "10" required = "";
+                        p.error {}
+                    }
+                    input.button.red.hover type = "submit" style = "margin: 15px auto 0px;" value="Delete";
                 }
             }
         }

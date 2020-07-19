@@ -588,12 +588,24 @@ export function valueMissing(input) {
  * Standard error handler for a promise returned by `get`, `post`, `del` or `patch` which displays the error message in an html element.
  *
  * @param errorOutput The HTML element whose `innerHtml` property should be set to the error message
+ * @param specialCodes Special error handlers for specific error codes. Special handlers should be keyed by pointercrate error code and take the error object as only argument
  */
-export function displayError(errorOutput) {
+export function displayError(errorOutput, specialCodes = {}) {
   return function (response) {
-    errorOutput.innerHTML = response.data.message;
-    errorOutput.style.display = "block";
-    throw new Error(response.data.message);
+    if (response) {
+      if (response.data.code in specialCodes) {
+        specialCodes[response.data.code](response.data);
+      } else {
+        errorOutput.style.display = "block";
+        errorOutput.innerHTML = response.data.message;
+      }
+      throw new Error(response.data.message);
+    } else {
+      errorOutput.style.display = "block";
+      errorOutput.innerHTML =
+        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!";
+      throw new Error("FrontendError");
+    }
   };
 }
 
@@ -647,7 +659,7 @@ function mkReq(method, endpoint, headers = {}, data = null) {
       if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
         resolve({
           data:
-            xhr.status != 204 && xhr.status != 304
+            xhr.status != 204 && xhr.status != 304 && xhr.responseText // sometimes 201 responses dont have any json body
               ? JSON.parse(xhr.responseText)
               : null,
           headers: parseHeaders(xhr),

@@ -156,6 +156,32 @@ a {
   flex-grow: 1;
 }
 
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1083458237;
+}
+
+.dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
+  border: 1px lightgray dashed;
+  padding: 10px;
+}
+
+.dialog p {
+  margin: 15px;
+}
+
 /* Panel styles */
 
 .panel {
@@ -247,11 +273,11 @@ textarea:invalid {
   text-align: left;
   font-style: italic;
 
-  margin: 2px 10px;
+  margin: 2px 10px !important;
 }
 
 .form-input .error {
-  font-size: 60%;
+  font-size: 60% !important;
   color: coral;
 }
 

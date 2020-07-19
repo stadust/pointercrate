@@ -6,8 +6,10 @@ import {
   tooShort,
   post,
   patch,
-  typeMismatch
+  typeMismatch,
 } from "../modules/form.mjs";
+import { displayError } from "../modules/form.mjs";
+import { del } from "../modules/form.mjs";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");
@@ -32,21 +34,21 @@ function setupGetAccessToken() {
   loginPassword.setClearOnInvalid(true);
   loginPassword.addValidators({
     "Password required": valueMissing,
-    "Password too short. It needs to be at least 10 characters long.": tooShort
+    "Password too short. It needs to be at least 10 characters long.": tooShort,
   });
 
-  loginForm.onSubmit(function(event) {
+  loginForm.onSubmit(function (event) {
     post("/api/v1/auth/", {
       Authorization:
-        "Basic " + btoa(window.username + ":" + loginPassword.value)
+        "Basic " + btoa(window.username + ":" + loginPassword.value),
     })
-      .then(response => {
+      .then((response) => {
         loginPassword.value = "";
         accessToken.innerHTML = response.data.token;
         htmlLoginForm.style.display = "none";
         accessTokenArea.style.display = "block";
       })
-      .catch(response => {
+      .catch((response) => {
         if (response.data.code == 40100) {
           loginPassword.setError("Invalid credentials");
         } else {
@@ -57,67 +59,164 @@ function setupGetAccessToken() {
 }
 
 function setupEditAccount() {
-  var editForm = new Form(document.getElementById("edit-form"));
-
-  var editYtChannel = editForm.input("edit-yt-channel");
-  var editPassword = editForm.input("edit-password");
-  var authPassword = editForm.input("auth-password");
-
-  editForm.addValidators({
-    "edit-yt-channel": {
-      "Please enter a valid URL": typeMismatch
-    },
-    "edit-password": {
-      "Password too short. It needs to be at least 10 characters long.": tooShort
-    },
-    "edit-password-repeat": {
-      "Password too short. It needs to be at least 10 characters long.": tooShort,
-      "Passwords don't match": rpp => rpp.value == editPassword.value
-    },
-    "auth-password": {
-      "Password required": valueMissing,
-      "Password too short. It needs to be at least 10 characters long.": tooShort
-    }
+  var editDisplayNameDialog = document.getElementById("edit-dn-dialog");
+  var editDisplayNameForm = new Form(
+    editDisplayNameDialog.getElementsByTagName("form")[0]
+  );
+  document.getElementById("display-name-pen").addEventListener("click", () => {
+    $(editDisplayNameDialog.parentElement).show();
   });
 
-  editForm.onSubmit(function(event) {
-    patch(
-      "/api/v1/auth/me/",
-      {
-        "If-Match": window.etag,
-        Authorization:
-          "Basic " + btoa(window.username + ":" + authPassword.value)
-      },
-      editForm.serialize()
-    )
-      .then(response => {
-        if (response.status == 304) {
-          editForm.setSuccess("Nothing changed!");
-        }
-        window.location.reload();
-      })
-      .catch(response => {
-        switch (response.data.code) {
-          case 40100:
-            authPassword.setError("Invalid credentials");
-            break;
-          case 41200:
-            editForm.setError(
+  var authPassword = editDisplayNameForm.input("auth-dn");
+
+  authPassword.addValidators({
+    "Password required": valueMissing,
+    "Password too short. It needs to be at least 10 characters long.": tooShort,
+  });
+
+  function editHandler(form, auth, handlers) {
+    return () => {
+      patch(
+        "/api/v1/auth/me/",
+        {
+          "If-Match": window.etag,
+          Authorization: "Basic " + btoa(window.username + ":" + auth.value),
+        },
+        form.serialize()
+      )
+        .then((response) => {
+          if (response.status == 304) {
+            form.setSuccess("Nothing changed!");
+          } else {
+            window.location.reload();
+          }
+        })
+        .catch(displayError(form.errorOutput, handlers));
+    };
+  }
+
+  editDisplayNameForm.onSubmit(
+    editHandler(editDisplayNameForm, authPassword, {
+      40100: () => authPassword.setError("Invalid credentials"),
+      41200: () =>
+        editDisplayNameForm.setError(
+          "Concurrent account access was made. Please reload the page"
+        ),
+      41800: () =>
+        editDisplayNameForm.setError(
+          "Concurrent account access was made. Please reload the page"
+        ),
+    })
+  );
+
+  var editYoutubeDialog = document.getElementById("edit-yt-dialog");
+  var editYoutubeForm = new Form(
+    editYoutubeDialog.getElementsByTagName("form")[0]
+  );
+  document.getElementById("youtube-pen").addEventListener("click", () => {
+    $(editYoutubeDialog.parentElement).show();
+  });
+
+  var ytAuth = editYoutubeForm.input("auth-yt");
+  var editYt = editYoutubeForm.input("edit-yt");
+
+  editYoutubeForm.addValidators({
+    "edit-yt": {
+      "Please enter a valid URL": typeMismatch,
+    },
+    "auth-yt": {
+      "Password required": valueMissing,
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+    },
+  });
+
+  editYoutubeForm.onSubmit(
+    editHandler(editYoutubeForm, ytAuth, {
+      40100: () => ytAuth.setError("Invalid credentials"),
+      41200: () =>
+        editYoutubeForm.setError(
+          "Concurrent account access was made. Please reload the page"
+        ),
+      41800: () =>
+        editYoutubeForm.setError(
+          "Concurrent account access was made. Please reload the page"
+        ),
+      42225: () => editYt.setError(response.data.message),
+    })
+  );
+
+  var changePasswordDialog = document.getElementById("edit-pw-dialog");
+  var changePasswordForm = new Form(
+    changePasswordDialog.getElementsByTagName("form")[0]
+  );
+  document.getElementById("change-password").addEventListener("click", () => {
+    $(changePasswordDialog.parentElement).show();
+  });
+
+  var pwAuth = changePasswordForm.input("auth-pw");
+  var editPw = changePasswordForm.input("edit-pw");
+  var editPwRepeat = changePasswordForm.input("edit-pw-repeat");
+
+  pwAuth.addValidators({
+    "Password required": valueMissing,
+    "Password too short. It needs to be at least 10 characters long.": tooShort,
+  });
+  editPw.addValidator(
+    tooShort,
+    "Password too short. It needs to be at least 10 characters long."
+  );
+  editPwRepeat.addValidators({
+    "Password too short. It needs to be at least 10 characters long.": tooShort,
+    "Passwords don't match": (rpp) => rpp.value == editPw.value,
+  });
+
+  changePasswordForm.onSubmit(
+    editHandler(changePasswordForm, pwAuth, {
+      40100: () => ytAuth.setError("Invalid credentials"),
+      41200: () =>
+        editYoutubeForm.setError(
+          "Concurrent account access was made. Please reload the page"
+        ),
+      41800: () =>
+        editYoutubeForm.setError(
+          "Concurrent account access was made. Please reload the page"
+        ),
+    })
+  );
+
+  var deleteAccountDialog = document.getElementById("delete-acc-dialog");
+  var deleteAccountForm = new Form(
+    deleteAccountDialog.getElementsByTagName("form")[0]
+  );
+  document.getElementById("delete-account").addEventListener("click", () => {
+    $(deleteAccountDialog.parentElement).show();
+  });
+
+  var deleteAuth = deleteAccountForm.input("auth-delete");
+  deleteAuth.addValidators({
+    "Password required": valueMissing,
+    "Password too short. It needs to be at least 10 characters long.": tooShort,
+  });
+
+  deleteAccountForm.onSubmit(() => {
+    del("/api/v1/auth/me/", {
+      "If-Match": window.etag,
+      Authorization: "Basic " + btoa(window.username + ":" + deleteAuth.value),
+    })
+      .then(() => window.location.reload())
+      .catch(
+        displayError(deleteAccountForm.errorOutput, {
+          40100: () => deleteAuth.setError("Invalid credentials"),
+          41200: () =>
+            deleteAccountForm.setError(
               "Concurrent account access was made. Please reload the page"
-            );
-            break;
-          case 41800:
-            editForm.setError(
+            ),
+          41800: () =>
+            deleteAccountForm.setError(
               "Concurrent account access was made. Please reload the page"
-            );
-            break;
-          case 42225:
-            editYtChannel.setError(response.data.message);
-            break;
-          default:
-            editForm.setError(response.data.message);
-        }
-      });
+            ),
+        })
+      );
   });
 }
 
@@ -141,17 +240,17 @@ function setupInvalidateToken() {
   invalidateForm.addValidators({
     "invalidate-auth-password": {
       "Password required": valueMissing,
-      "Password too short. It needs to be at least 10 characters long.": tooShort
-    }
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+    },
   });
 
-  invalidateForm.onSubmit(function(event) {
+  invalidateForm.onSubmit(function (event) {
     post("/api/v1/auth/invalidate/", {
       Authorization:
-        "Basic " + btoa(window.username + ":" + invalidatePassword.value)
+        "Basic " + btoa(window.username + ":" + invalidatePassword.value),
     })
-      .then(response => window.location.reload())
-      .catch(response => {
+      .then((response) => window.location.reload())
+      .catch((response) => {
         if (response.data.code == 40100) {
           loginPassword.setError("Invalid credentials");
         } else {
