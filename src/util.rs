@@ -15,7 +15,6 @@ macro_rules! pagination_response {
     ($endpoint: expr, $objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
         log::debug!("Received pagination request {:?}", $pagination);
 
-
         let mut rel = String::new();
 
         let limit = $pagination.limit.unwrap_or(50) as usize;

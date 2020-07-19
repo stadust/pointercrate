@@ -20,7 +20,7 @@ pub async fn paginate(
     let mut connection = state.connection().await?;
 
     let mut demons = pagination.page(&mut connection).await?;
-    let (min_id, max_id) = Player::extremal_player_ids(&mut connection).await?;
+    let (max_id, min_id) = Player::extremal_player_ids(&mut connection).await?;
 
     pagination_response!("/api/v1/players/", demons, pagination, min_id, max_id, before_id, after_id, base.id)
 }

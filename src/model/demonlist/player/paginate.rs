@@ -26,6 +26,10 @@ pub struct PlayerPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    name_contains: Option<CiString>,
+
     #[serde(default, deserialize_with = "non_nullable")]
     banned: Option<bool>,
 
@@ -48,10 +52,11 @@ impl PlayerPagination {
             .bind(self.before_id)
             .bind(self.after_id)
             .bind(self.name.as_ref().map(|s| s.as_str()))
+            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
             .bind(self.banned)
             .bind(&self.nation)
             .bind(self.nation == Some(None))
-            .bind(self.limit.unwrap_or(50) as i32)
+            .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
         let mut players = Vec::new();

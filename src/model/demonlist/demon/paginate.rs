@@ -191,7 +191,7 @@ impl DemonPositionPagination {
             .bind(self.verifier_name.as_ref().map(|s| s.as_str()))
             .bind(self.publisher_id)
             .bind(self.publisher_name.as_ref().map(|s| s.as_str()))
-            .bind(self.limit.unwrap_or(50) as i32)
+            .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
         let mut demons = Vec::new();
