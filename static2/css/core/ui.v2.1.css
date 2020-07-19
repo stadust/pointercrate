@@ -483,7 +483,7 @@ h2 .dropdown-menu ul {
 .dropdown-menu > input[type="text"] {
   border: none;
   border-bottom: 1px dotted #555;
-  max-width: 250px;
+  width: 100%;
   font-size: 1em;
 }
 

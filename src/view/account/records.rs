@@ -8,18 +8,6 @@ fn record_editor() -> Markup {
             h2.underlined.pad {
                 "Edit Record #"
                 span#edit-record-id {}
-                " - "
-                div.dropdown-menu.js-search#edit-record-status {
-                    input type="text" style = "color: #444446; font-weight: bold;";
-                    div.menu {
-                        ul {
-                            li.white.hover data-value="approved" {"Approved"}
-                            li.white.hover data-value="rejected" {"Rejected"}
-                            li.white.hover data-value="under consideration" {"Under Consideration"}
-                            li.white.hover data-value="submitted" {"Submitted"}
-                        }
-                    }
-                }
             }
             form.flex.col#edit-record-form novalidate = "" {
                 p.info-red.output {}
@@ -80,13 +68,30 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                 div.viewer-content {
                     div {
                         div.flex.col {
-                            h3 style = "font-size:1.4em; overflow: hidden" { "Record #" i#record-id{}}
+                            h3 style = "font-size:1.1em; margin-top: 10px" {
+                                "Record #"
+                                i#record-id {}
+                                " - "
+                                div.dropdown-menu.js-search#edit-record-status style = "max-width: 220px"{
+                                    input type="text" style = "color: #444446; font-weight: bold;";
+                                    div.menu {
+                                        ul {
+                                            li.white.hover data-value="approved" {"Approved"}
+                                            li.white.hover data-value="rejected" {"Rejected"}
+                                            li.white.hover data-value="under consideration" {"Under Consideration"}
+                                            li.white.hover data-value="submitted" {"Submitted"}
+                                        }
+                                    }
+                                }
+                            }
 
                             iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
+                            p.info-red.output style = "margin: 10px" {}
+                            p.info-green.output style = "margin: 10px" {}
                             div.stats-container.flex.space  {
                                 span{
                                     b {
-                                        "Video Link:"
+                                        i.fa.fa-pencil.clickable#record-video-pen aria-hidden = "true" {} " Video Link:"
                                     }
                                     br;
                                     a.link#record-video-link target = "_blank" {}
@@ -95,30 +100,23 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                             div.stats-container.flex.space {
                                 span {
                                     b {
-                                        "Demon:"
+                                        i.fa.fa-pencil.clickable#record-demon-pen aria-hidden = "true" {} " Demon:"
                                     }
                                     br;
                                     span#record-demon {}
                                 }
                                 span {
                                     b {
-                                        "Record Holder:"
+                                        i.fa.fa-pencil.clickable#record-player-pen aria-hidden = "true" {} " Record Holder:"
                                     }
                                     br;
                                     span#record-holder {}
-                                }
-                                span {
-                                    b {
-                                        "Record status:"
-                                    }
-                                    br;
-                                    span#record-status {}
                                 }
                             }
                             div.stats-container.flex.space {
                                 span {
                                     b {
-                                        "Progress:"
+                                        i.fa.fa-pencil.clickable#record-progress-pen aria-hidden = "true" {} " Progress:"
                                     }
                                     br;
                                     span#record-progress {}

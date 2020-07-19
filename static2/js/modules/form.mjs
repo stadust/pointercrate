@@ -454,8 +454,8 @@ export class Form {
       (event) => {
         event.preventDefault();
 
-        if (this.errorOutput) this.errorOutput.style.display = "none";
-        if (this.successOutput) this.successOutput.style.display = "none";
+        this.setError(null);
+        this.setSuccess(null);
 
         var isValid = true;
 
@@ -501,22 +501,26 @@ export class Form {
   setError(message) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
-    if (message === null || message === undefined) {
-      this.errorOutput.style.display = "none";
-    } else {
-      this.errorOutput.innerHTML = message;
-      this.errorOutput.style.display = "block";
+    if (this.errorOutput) {
+      if (message === null || message === undefined) {
+        this.errorOutput.style.display = "none";
+      } else {
+        this.errorOutput.innerHTML = message;
+        this.errorOutput.style.display = "block";
+      }
     }
   }
 
   setSuccess(message) {
     if (this.errorOutput) this.errorOutput.style.display = "none";
 
-    if (message === null || message === undefined) {
-      this.successOutput.style.display = "none";
-    } else {
-      this.successOutput.innerHTML = message;
-      this.successOutput.style.display = "block";
+    if (this.successOutput) {
+      if (message === null || message === undefined) {
+        this.successOutput.style.display = "none";
+      } else {
+        this.successOutput.innerHTML = message;
+        this.successOutput.style.display = "block";
+      }
     }
   }
 

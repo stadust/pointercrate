@@ -95,11 +95,14 @@ class RecordManager extends Paginator {
     this._id = document.getElementById("record-id");
     this._demon = document.getElementById("record-demon");
     this._holder = document.getElementById("record-holder");
-    this._status = document.getElementById("record-status");
     this._progress = document.getElementById("record-progress");
     this._submitter = document.getElementById("record-submitter");
     this._notes = document.getElementById("record-notes");
     this._tok = tok; // FIXME: bad
+
+    // Gotta start counting at '1', since '0' is the error output of the paginator
+    this.errorOutput = manager.getElementsByClassName("output")[1];
+    this.successOutput = manager.getElementsByClassName("output")[2];
 
     this.dropdown = new Dropdown(
       document
@@ -117,9 +120,64 @@ class RecordManager extends Paginator {
       if (selected === "All") this.updateQueryData("status", undefined);
       else this.updateQueryData("status", selected);
     });
+
+    this._status = new Dropdown(document.getElementById("edit-record-status"));
+    this._status.addEventListener((selected) => {
+      if (selected != this.currentRecord.status) {
+        patch(
+          "/api/v1/records/" + this.currentRecord.id + "/",
+          {
+            "X-CSRF-TOKEN": this._tok,
+            "If-Match": this.currentRecordEtag,
+          },
+          { status: selected }
+        )
+          .then((response) => {
+            if (response.status == 304) {
+              this.setSuccess("Nothing changed!");
+            } else {
+              // directly refresh the record manager :pog:
+              this.refresh();
+              this.onReceive(response);
+
+              this.setSuccess("Record status successfully edited!");
+            }
+          })
+          .catch(displayError(this.errorOutput));
+      }
+    });
+  }
+
+  setError(message) {
+    if (this.successOutput) this.successOutput.style.display = "none";
+
+    if (this.errorOutput) {
+      if (message === null || message === undefined) {
+        this.errorOutput.style.display = "none";
+      } else {
+        this.errorOutput.innerHTML = message;
+        this.errorOutput.style.display = "block";
+      }
+    }
+  }
+
+  setSuccess(message) {
+    if (this.errorOutput) this.errorOutput.style.display = "none";
+
+    if (this.successOutput) {
+      if (message === null || message === undefined) {
+        this.successOutput.style.display = "none";
+      } else {
+        this.successOutput.innerHTML = message;
+        this.successOutput.style.display = "block";
+      }
+    }
   }
 
   onReceive(response) {
+    this.setError(null);
+    this.setSuccess(null);
+
     if (response.status == 204) {
       return;
     }
@@ -143,7 +201,7 @@ class RecordManager extends Paginator {
       recordData.demon.name + " (" + recordData.demon.id + ")";
     this._holder.innerHTML =
       recordData.player.name + " (" + recordData.player.id + ")";
-    this._status.innerHTML = recordData.status;
+    this._status.select(recordData.status);
     this._progress.innerHTML = recordData.progress;
     this._submitter.innerHTML = recordData.submitter.id;
 
@@ -305,10 +363,6 @@ class RecordEditor extends Form {
 
     this.recordId = document.getElementById("edit-record-id");
 
-    this.statusDropdown = new Dropdown(
-      document.getElementById("edit-record-status")
-    );
-
     var progress = this.input("edit-record-progress");
     var video = this.input("edit-record-video");
 
@@ -325,10 +379,6 @@ class RecordEditor extends Form {
     this.setClearOnSubmit(true);
     this.onSubmit(function (event) {
       let data = this.serialize();
-
-      if (this.statusDropdown.selected != recordManager.currentRecord.status) {
-        data["status"] = this.statusDropdown.selected;
-      }
 
       patch(
         "/api/v1/records/" + recordManager.currentRecord.id + "/",
@@ -357,7 +407,6 @@ class RecordEditor extends Form {
 
   selectRecord(record) {
     this.recordId.innerText = record.id;
-    this.statusDropdown.select(record.status);
   }
 }
 
