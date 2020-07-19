@@ -194,6 +194,28 @@ fn player_selector() -> Markup {
     }
 }
 
+fn record_selector() -> Markup {
+    html! {
+        div.panel.fade {
+            h2.underlined.pad {
+                "Search record by ID"
+            }
+            p {
+                "Records can be uniquely identified by ID. Entering a record's ID below will select it on the left (provided the record exists)"
+            }
+            form.flex.col#record-search-by-record-id-form novalidate = "" {
+                p.info-red.output {}
+                span.form-input#record-record-id {
+                    label for = "id" {"Record ID:"}
+                    input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
+                    p.error {}
+                }
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+            }
+        }
+    }
+}
+
 fn note_adder() -> Markup {
     html! {
         div.panel.fade.closable#add-record-note style = "display: none" {
@@ -224,6 +246,7 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
             }
             div.right {
                 (status_selector())
+                (record_selector())
                 (player_selector())
                 (crate::view::demonlist::submit_panel())
             }

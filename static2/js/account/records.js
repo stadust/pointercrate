@@ -498,7 +498,7 @@ function setupAddNote(csrfToken) {
     });
 }
 
-function setupRecordFilterPlayerIdForm() {
+function setupRecordSearchRecordIdForm() {
   var recordFilterPlayerIdForm = new Form(
     document.getElementById("record-filter-by-player-id-form")
   );
@@ -507,6 +507,20 @@ function setupRecordFilterPlayerIdForm() {
   playerId.addValidator(valueMissing, "Player ID required");
   recordFilterPlayerIdForm.onSubmit(function (event) {
     window.recordManager.updateQueryData("player", playerId.value);
+  });
+}
+
+function setupRecordFilterPlayerIdForm() {
+  var recordFilterPlayerIdForm = new Form(
+    document.getElementById("record-search-by-record-id-form")
+  );
+  var recordId = recordFilterPlayerIdForm.input("record-record-id");
+
+  recordId.addValidator(valueMissing, "Record ID required");
+  recordFilterPlayerIdForm.onSubmit(function (event) {
+    recordManager
+      .selectArbitrary(parseInt(recordId.value))
+      .catch(displayError(recordFilterPlayerIdForm.errorOutput));
   });
 }
 
