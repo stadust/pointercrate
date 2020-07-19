@@ -57,11 +57,17 @@ pub async fn patch_me(
 
     if_match.require_etag_match(user.inner())?;
 
+    let changes_password = patch.changes_password();
+
     let updated_user = user.apply_patch(patch.into_inner(), &mut connection).await?;
 
     connection.commit().await?;
 
-    Ok(HttpResponse::Ok().json_with_etag(updated_user.inner()))
+    if changes_password {
+        Ok(HttpResponse::NoContent().finish())
+    } else {
+        Ok(HttpResponse::Ok().json_with_etag(updated_user.inner()))
+    }
 }
 
 // FIXME: Prevent "Lost Update" by using SELECT ... FOR UPDATE

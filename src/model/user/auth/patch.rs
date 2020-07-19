@@ -19,6 +19,12 @@ pub struct PatchMe {
     pub(super) youtube_channel: Option<Option<String>>,
 }
 
+impl PatchMe {
+    pub fn changes_password(&self) -> bool {
+        self.password.is_some()
+    }
+}
+
 // manual debug impl to ensure that the password field is never printed anywhere
 impl Debug for PatchMe {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
