@@ -62,7 +62,7 @@ function generateRecord(record) {
 }
 
 function embedVideo(video) {
-  if (video === undefined) return;
+  if (!video) return;
   // welcome to incredibly fragile string parsing with stadust
   // see pointercrate::video::embed for a proper implementation of this
 
@@ -146,8 +146,96 @@ class RecordManager extends Paginator {
           .catch(displayError(this.errorOutput));
       }
     });
+
+    this.initProgressDialog();
+    this.initVideoDialog();
   }
 
+  initProgressDialog() {
+    var editProgressDialog = document.getElementById("record-progress-dialog");
+    var editProgressForm = new Form(
+      editProgressDialog.getElementsByTagName("form")[0]
+    );
+    document
+      .getElementById("record-progress-pen")
+      .addEventListener("click", () => {
+        $(editProgressDialog.parentElement).show();
+      });
+
+    let progress = editProgressForm.input("record-progress-edit");
+
+    progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
+    progress.addValidator(
+      rangeOverflow,
+      "Record progress cannot be larger than 100%"
+    );
+    progress.addValidator(badInput, "Record progress must be a valid integer");
+    progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+
+    editProgressForm.onSubmit(() => {
+      patch(
+        "/api/v1/records/" + this.currentRecord.id + "/",
+        {
+          "X-CSRF-TOKEN": this._tok,
+          "If-Match": this.currentRecordEtag,
+        },
+        editProgressForm.serialize()
+      )
+        .then((response) => {
+          if (response.status == 304) {
+            this.setSuccess("Nothing changed!");
+          } else {
+            // directly refresh the record manager :pog:
+            this.refresh();
+            this.onReceive(response);
+            this.setSuccess("Record progress successfully edited!");
+          }
+          $(editProgressDialog.parentElement).hide();
+        })
+        .catch(
+          displayError(editProgressForm.errorOutput, {
+            42215: (response) => progress.setError(response.message),
+          })
+        );
+    });
+  }
+
+  initVideoDialog() {
+    var editVideoDialog = document.getElementById("record-video-dialog");
+    var editVideoForm = new Form(
+      editVideoDialog.getElementsByTagName("form")[0]
+    );
+    document
+      .getElementById("record-video-pen")
+      .addEventListener("click", () => {
+        $(editVideoDialog.parentElement).show();
+      });
+
+    let video = editVideoForm.input("record-video-edit");
+
+    video.addValidator(typeMismatch, "Please enter a valid URL");
+
+    editVideoForm.onSubmit(() => {
+      patch(
+        "/api/v1/records/" + this.currentRecord.id + "/",
+        {
+          "X-CSRF-TOKEN": this._tok,
+          "If-Match": this.currentRecordEtag,
+        },
+        editVideoForm.serialize()
+      )
+        .then((response) => {
+          if (response.status == 304) {
+            this.setSuccess("Nothing changed!");
+          } else {
+            this.onReceive(response);
+            this.setSuccess("Record video successfully edited!");
+          }
+          $(editVideoDialog.parentElement).hide();
+        })
+        .catch(displayError(video.errorOutput));
+    });
+  }
   setError(message) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
@@ -189,20 +277,22 @@ class RecordManager extends Paginator {
 
     if (embeddedVideo !== undefined) {
       this._video.style.display = "block";
+      this._video_link.style.display = "initial";
       this._video.src = embedVideo(recordData.video);
+      this._video_link.href = recordData.video;
+      this._video_link.innerHTML = recordData.video;
     } else {
       this._video.style.display = "none";
+      this._video_link.style.display = "none";
     }
 
-    this._video_link.href = recordData.video;
-    this._video_link.innerHTML = recordData.video;
     this._id.innerHTML = recordData.id;
     this._demon.innerHTML =
       recordData.demon.name + " (" + recordData.demon.id + ")";
     this._holder.innerHTML =
       recordData.player.name + " (" + recordData.player.id + ")";
     this._status.select(recordData.status);
-    this._progress.innerHTML = recordData.progress;
+    this._progress.innerHTML = recordData.progress + "%";
     this._submitter.innerHTML = recordData.submitter.id;
 
     // clear notes

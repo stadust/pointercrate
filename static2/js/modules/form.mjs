@@ -392,6 +392,10 @@ export class Input {
     return isValid;
   }
 
+  get required() {
+    return this.input.hasAttribute("required");
+  }
+
   get id() {
     return this.span.id;
   }
@@ -490,7 +494,7 @@ export class Form {
     let data = {};
 
     for (let input of this.inputs) {
-      if (input.name !== null && input.value !== null) {
+      if (input.name !== null && (input.value !== null || !input.required)) {
         data[input.name] = input.value;
       }
     }

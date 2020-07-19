@@ -28,7 +28,7 @@ fn record_editor() -> Markup {
                     p.error {}
                 }
                 span.form-input#edit-record-progress {
-                    label for = "record_progress" {"Progress made in the record:"}
+                    label for = "progress" {"Progress made in the record:"}
                     input type = "number" name = "progress" min = "0" max = "100" value = "";
                     p.error {}
                 }
@@ -279,6 +279,60 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
                 (status_selector())
                 (player_selector())
                 (crate::view::demonlist::submit_panel())
+            }
+            (change_progress_dialog())
+            (change_video_dialog())
+        }
+    }
+}
+
+fn change_progress_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#record-progress-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change record progress:"
+                }
+                p style = "max-width: 400px"{
+                    "Change the progress value of this record. Has to be between the demon's record requirement and 100 (inclusive)."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#record-progress-edit {
+                        label for = "progress" {"Progress:"}
+                        input name = "progress" type = "number" min = "0" max="100" required = "";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                }
+            }
+        }
+    }
+}
+
+fn change_video_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#record-video-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change video link:"
+                }
+                p style = "max-width: 400px"{
+                    "Change the video link for this record. Note that as a list mod, you can leave the text field empty to remove the video from this record."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#record-video-edit {
+                        label for = "video" {"Video link:"}
+                        input name = "video" type = "url";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                }
             }
         }
     }
