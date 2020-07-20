@@ -370,7 +370,9 @@ class HolderDialog extends FilteredPaginator {
       });
 
     this.editHolderForm.onSubmit(() =>
-      this.changeHolder(this.editHolderForm.input("record-holder-name-edit"))
+      this.changeHolder(
+        this.editHolderForm.input("record-holder-name-edit").value
+      )
     );
   }
 
