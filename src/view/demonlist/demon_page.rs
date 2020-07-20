@@ -68,8 +68,6 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
         None => error!("No addition logged for demon {}!", demon),
     }
 
-    dbg!(&movements);
-
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
         Demonlist {
             overview,
