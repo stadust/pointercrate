@@ -262,8 +262,13 @@ export class FilteredPaginator extends Paginator {
    * @param {String} filterParam Name of the API field that should be set for filtering the list
    * @memberof FilteredPaginator
    */
-  constructor(paginatorID, itemConstructor, filterParam) {
-    super(paginatorID, {}, itemConstructor);
+  constructor(
+    paginatorID,
+    itemConstructor,
+    filterParam,
+    initialQueryData = {}
+  ) {
+    super(paginatorID, initialQueryData, itemConstructor);
 
     let filterInput = this.html.getElementsByTagName("input")[0];
 

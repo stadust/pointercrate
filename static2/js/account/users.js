@@ -7,7 +7,7 @@ import {
   valueMissing,
   tooShort,
   get,
-  Paginator,
+  FilteredPaginator,
   Form,
 } from "../modules/form.mjs";
 
@@ -68,40 +68,14 @@ function setupUserByIdForm() {
 
   userId.addValidator(valueMissing, "User ID required");
 
-  userByIdForm.onSubmit(function (event) {
-    get("/api/v1/users/" + userId.value + "/")
-      .then((response) => userPaginator.onReceive(response))
-      .catch((response) => {
-        if (response.data.code == 40401) {
-          userId.setError(response.data.message);
-        } else {
-          userByIdForm.setError(response.data.message);
-        }
-      });
-  });
-}
-
-function setupUserByNameForm() {
-  var userByNameForm = new Form(document.getElementById("find-name-form"));
-  var userName = userByNameForm.input("find-name");
-
-  userName.addValidators({
-    "Username required": valueMissing,
-    "Username is at least 3 characters long": tooShort,
-  });
-
-  userByNameForm.onSubmit(function (event) {
-    get("/api/v1/users/?name=" + userName.value)
-      .then((response) => {
-        if (!response.data || response.data.length == 0) {
-          userName.setError("No user with that name found!");
-        } else {
-          get("/api/v1/users/" + response.data[0].id + "/").then((response) =>
-            userPaginator.onReceive(response)
-          );
-        }
-      })
-      .catch(displayError(userByNameForm.errorOutput));
+  userByIdForm.onSubmit(function () {
+    userPaginator.selectArbitrary(userId.value).catch((response) => {
+      if (response.data.code == 40401) {
+        userId.setError(response.data.message);
+      } else {
+        userByIdForm.setError(response.data.message);
+      }
+    });
   });
 }
 
@@ -127,9 +101,16 @@ function generateUser(userData) {
   return li;
 }
 
-class UserPaginator extends Paginator {
+class UserPaginator extends FilteredPaginator {
   constructor() {
-    super("user-pagination", { limit: 10 }, generateUser);
+    super("user-pagination", generateUser, "name_contains", { limit: 10 });
+
+    this._welcome = this.html.parentNode.getElementsByClassName(
+      "viewer-welcome"
+    )[0];
+    this._content = this.html.parentNode.getElementsByClassName(
+      "viewer-content"
+    )[0];
   }
 
   onReceive(response) {
@@ -144,29 +125,10 @@ class UserPaginator extends Paginator {
       );
     }
 
-    var text = document.getElementById("text"); // TODO: What ever the fuck was I thinking when I named this
-
-    while (text.lastChild) {
-      text.removeChild(text.lastChild);
-    }
-
-    let b = document.createElement("b");
-    b.innerText = "Username: ";
-
-    text.appendChild(b);
-    text.appendChild(document.createTextNode(selectedUser.name));
-
-    if (selectedUser.display_name) {
-      text.appendChild(
-        document.createTextNode(" (" + selectedUser.display_name + ")")
-      );
-    }
-
-    let b2 = document.createElement("b");
-    b2.innerText = " - User ID: ";
-
-    text.appendChild(b2);
-    text.appendChild(document.createTextNode(selectedUser.id));
+    document.getElementById("user-user-name").innerText = selectedUser.name;
+    document.getElementById("user-user-id").innerText = selectedUser.id;
+    document.getElementById("user-display-name").innerText =
+      selectedUser.display_name || "None";
 
     let bitmask = selectedUser.permissions;
 
@@ -178,13 +140,14 @@ class UserPaginator extends Paginator {
     editForm.input("perm-admin").value = (bitmask & 0x4000) == 0x4000;
 
     editForm.html.style.display = "block";
+    $(this._welcome).hide(100);
+    $(this._content).show(100);
   }
 }
 
 export function initialize(csrfToken) {
   setupPatchUserPermissionsForm(csrfToken);
   setupUserByIdForm();
-  setupUserByNameForm();
 
   userPaginator = new UserPaginator();
   userPaginator.initialize();

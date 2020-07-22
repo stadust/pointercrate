@@ -319,6 +319,9 @@ textarea:invalid {
   background-color: #eee;
   margin-top: 2px;
 }
+.stats-container .checkmark {
+  font-size: 111%;
+}
 
 /* On mouse-over, add a grey background color */
 .cb-container:hover input ~ .checkmark {
