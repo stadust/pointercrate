@@ -87,7 +87,7 @@ pub(super) fn page(is_admin: bool) -> Markup {
                         }
                         div.flex.no-stretch {
                             @if is_admin {
-                                input.button.blue.hover#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                                input.button.red.hover#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
                             }
                             input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
                         }
