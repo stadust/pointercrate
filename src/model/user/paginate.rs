@@ -23,6 +23,9 @@ pub struct UserPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     pub name: Option<String>,
 
+    #[serde(default, deserialize_with = "non_nullable")]
+    pub name_contains: Option<String>,
+
     #[serde(default, deserialize_with = "nullable")]
     pub display_name: Option<Option<String>>,
 
@@ -63,6 +66,7 @@ impl UserPagination {
             .bind(self.display_name == Some(None))
             .bind(self.has_permissions.map(|p| p.bits() as i32))
             .bind(self.any_permissions.map(|p| p.bits() as i32))
+            .bind(self.name_contains.as_ref())
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 

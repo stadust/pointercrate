@@ -8,7 +8,7 @@ import {
   tooShort,
   get,
   Paginator,
-  Form
+  Form,
 } from "../modules/form.mjs";
 
 let selectedUser;
@@ -17,12 +17,12 @@ let editForm;
 
 function setupPatchUserPermissionsForm(csrfToken) {
   editForm = new Form(document.getElementById("patch-permissions"));
-  editForm.onSubmit(function(event) {
+  editForm.onSubmit(function (event) {
     patch(
       "/api/v1/users/" + selectedUser.id + "/",
       {
         "X-CSRF-TOKEN": csrfToken,
-        "If-Match": selectedUser.etag
+        "If-Match": selectedUser.etag,
       },
       {
         permissions:
@@ -31,10 +31,10 @@ function setupPatchUserPermissionsForm(csrfToken) {
           editForm.input("perm-list-mod").value * 0x4 +
           editForm.input("perm-list-admin").value * 0x8 +
           editForm.input("perm-mod").value * 0x2000 +
-          editForm.input("perm-admin").value * 0x4000
+          editForm.input("perm-admin").value * 0x4000,
       }
     )
-      .then(response => {
+      .then((response) => {
         if (response.status == 200) {
           selectedUser = response.data.data;
           selectedUser.etag = response.headers["etag"];
@@ -54,9 +54,9 @@ function setupPatchUserPermissionsForm(csrfToken) {
     deleteUserButton.addEventListener("click", () => {
       del("/api/v1/users/" + selectedUser.id + "/", {
         "X-CSRF-TOKEN": csrfToken,
-        "If-Match": selectedUser.etag
+        "If-Match": selectedUser.etag,
       })
-        .then(response => editForm.setSuccess("Successfully deleted user!"))
+        .then((response) => editForm.setSuccess("Successfully deleted user!"))
         .catch(displayError(editForm.errorOutput));
     });
   }
@@ -68,10 +68,10 @@ function setupUserByIdForm() {
 
   userId.addValidator(valueMissing, "User ID required");
 
-  userByIdForm.onSubmit(function(event) {
+  userByIdForm.onSubmit(function (event) {
     get("/api/v1/users/" + userId.value + "/")
-      .then(response => userPaginator.onReceive(response))
-      .catch(response => {
+      .then((response) => userPaginator.onReceive(response))
+      .catch((response) => {
         if (response.data.code == 40401) {
           userId.setError(response.data.message);
         } else {
@@ -87,16 +87,16 @@ function setupUserByNameForm() {
 
   userName.addValidators({
     "Username required": valueMissing,
-    "Username is at least 3 characters long": tooShort
+    "Username is at least 3 characters long": tooShort,
   });
 
-  userByNameForm.onSubmit(function(event) {
+  userByNameForm.onSubmit(function (event) {
     get("/api/v1/users/?name=" + userName.value)
-      .then(response => {
+      .then((response) => {
         if (!response.data || response.data.length == 0) {
           userName.setError("No user with that name found!");
         } else {
-          get("/api/v1/users/" + response.data[0].id + "/").then(response =>
+          get("/api/v1/users/" + response.data[0].id + "/").then((response) =>
             userPaginator.onReceive(response)
           );
         }
