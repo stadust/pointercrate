@@ -15,8 +15,11 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+mod demons;
+mod players;
 mod profile;
 mod records;
+mod submitters;
 mod users;
 
 #[derive(Debug)]
@@ -111,6 +114,33 @@ impl Page for AccountPage {
                             i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
                         }
                     }
+                    @if self.user.has_permission(Permissions::ListModerator) {
+                        div.tab.button.white.hover.no-shadow data-tab-id="4" {
+                            b {
+                                "Players"
+                            }
+                            (PreEscaped("&nbsp;"))
+                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                        }
+                    }
+                    @if self.user.has_permission(Permissions::ListModerator) {
+                        div.tab.button.white.hover.no-shadow data-tab-id="5" {
+                            b {
+                                "Demons"
+                            }
+                            (PreEscaped("&nbsp;"))
+                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                        }
+                    }
+                    @if self.user.has_permission(Permissions::ListModerator) {
+                        div.tab.button.white.hover.no-shadow data-tab-id="6" {
+                            b {
+                                "Submitters"
+                            }
+                            (PreEscaped("&nbsp;"))
+                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                        }
+                    }
                 }
 
                 (profile::page(&self.user))
@@ -119,6 +149,11 @@ impl Page for AccountPage {
                 }
                 @if self.user.has_permission(Permissions::ListHelper) {
                     (records::page(&self.demons))
+                }
+                @if self.user.has_permission(Permissions::ListModerator) {
+                    (players::page())
+                    (demons::page())
+                    (submitters::page())
                 }
             }
         }

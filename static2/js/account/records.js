@@ -22,7 +22,7 @@ import {
 } from "../modules/demonlist.mjs";
 import { FilteredPaginator } from "../modules/form.mjs";
 
-let recordManager;
+export let recordManager;
 
 function generateRecord(record) {
   var li = document.createElement("li");
