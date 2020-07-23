@@ -93,7 +93,7 @@ impl Page for AccountPage {
                         b {
                             "Profile"
                         }
-                        (PreEscaped("&nbsp;"))
+                        (PreEscaped("&nbsp;&nbsp;"))
                         i class = "fa fa-user fa-2x" aria-hidden="true" {}
                     }
                     @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) {
@@ -101,7 +101,7 @@ impl Page for AccountPage {
                             b {
                                 "Users"
                             }
-                            (PreEscaped("&nbsp;"))
+                            (PreEscaped("&nbsp;&nbsp;"))
                             i class = "fa fa-users fa-2x" aria-hidden="true" {}
                         }
                     }
@@ -110,7 +110,7 @@ impl Page for AccountPage {
                             b {
                                 "Records"
                             }
-                            (PreEscaped("&nbsp;"))
+                            (PreEscaped("&nbsp;&nbsp;"))
                             i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
                         }
                     }
@@ -119,26 +119,22 @@ impl Page for AccountPage {
                             b {
                                 "Players"
                             }
-                            (PreEscaped("&nbsp;"))
-                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                            (PreEscaped("&nbsp;&nbsp;"))
+                            i class = "fa fa-beer fa-2x" aria-hidden="true" {}
                         }
-                    }
-                    @if self.user.has_permission(Permissions::ListModerator) {
                         div.tab.button.white.hover.no-shadow data-tab-id="5" {
                             b {
                                 "Demons"
                             }
-                            (PreEscaped("&nbsp;"))
-                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                            (PreEscaped("&nbsp;&nbsp;"))
+                            i class = "fa fa-bathtub fa-2x" aria-hidden="true" {}
                         }
-                    }
-                    @if self.user.has_permission(Permissions::ListModerator) {
                         div.tab.button.white.hover.no-shadow data-tab-id="6" {
                             b {
                                 "Submitters"
                             }
-                            (PreEscaped("&nbsp;"))
-                            i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
+                            (PreEscaped("&nbsp;&nbsp;"))
+                            i class = "fa fa-wheelchair-alt fa-2x" aria-hidden="true" {}
                         }
                     }
                 }

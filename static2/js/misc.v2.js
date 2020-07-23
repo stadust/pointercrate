@@ -41,7 +41,7 @@ $(window).on("load resize", function () {
 
     while (parent !== null) {
       if (parent.classList.contains("closable")) {
-        parent.addEventListener("click", () => $(parent).fadeOut(1000));
+        x.addEventListener("click", () => $(parent).fadeOut(1000));
         break;
       }
       parent = parent.parentNode;

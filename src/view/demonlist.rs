@@ -204,7 +204,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
         section.panel.fade.closable#statsviewer style = "display:none" {
             span.plus.cross.hover {}
             h2.underlined.pad {
-                "Stats Viewer"
+                "Stats Viewer "
                 (super::dropdown("International",
                     html! {
                         li.white.hover.underlined data-value = "International" data-display = "International" {

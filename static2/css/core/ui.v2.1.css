@@ -404,14 +404,19 @@ textarea:invalid {
  * + .viewer-content is the element that contains the content of the viewer, displayed to the right of the paginator
  */
 
+.viewer {
+  margin-top: 10px;
+}
+
 /* Hidden until first element in paginator is selected */
 .viewer .viewer-content {
   display: none;
+  margin-left: 10px;
 }
 
 .viewer .viewer-welcome {
   text-align: center;
-  margin: 10px 0 0 0;
+  margin-left: 10px;
 }
 
 @media (min-width: 768px) {
