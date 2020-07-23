@@ -39,7 +39,7 @@ $(window).on("load resize", function () {
   for (let x of document.querySelectorAll(".plus.cross")) {
     let parent = x.parentNode;
 
-    while (parent !== null) {
+    while (parent !== null && parent.classList !== null) {
       if (parent.classList.contains("closable")) {
         x.addEventListener("click", () => $(parent).fadeOut(1000));
         break;
