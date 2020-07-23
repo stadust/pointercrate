@@ -1,7 +1,3 @@
-function forall(selector, callback) {
-  $(selector).each((i, elem) => callback(i, $(elem)));
-}
-
 function forceRatio(element, wRatio, hRatio) {
   var target = $(element);
   var width = target.width();
@@ -40,17 +36,17 @@ $(window).on("load resize", function () {
 
   // Closable panels
 
-  forall(".plus.cross", (i, elem) => {
-    var parent = elem.parent();
+  for (let x of document.querySelectorAll(".plus.cross")) {
+    let parent = x.parentNode;
 
-    while (parent) {
-      if (parent.hasClass("closable")) {
-        elem.click(() => parent.fadeOut(1000));
+    while (parent !== null) {
+      if (parent.classList.contains("closable")) {
+        parent.addEventListener("click", () => $(parent).fadeOut(1000));
         break;
       }
-      parent = parent.parent();
+      parent = parent.parentNode;
     }
-  });
+  }
 
   // Animation stuff when scrolling
   var toAnimate = $(".js-scroll-anim");
