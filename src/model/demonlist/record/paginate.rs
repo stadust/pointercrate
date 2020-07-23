@@ -60,6 +60,9 @@ pub struct RecordPagination {
 
     #[serde(default, deserialize_with = "nullable")]
     video: Option<Option<String>>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    pub submitter: Option<i32>,
 }
 
 impl RecordPagination {
@@ -109,6 +112,7 @@ impl RecordPagination {
             .bind(&self.video)
             .bind(self.video == Some(None))
             .bind(self.player)
+            .bind(self.submitter)
             .bind(limit + 1)
             .fetch(connection);
 

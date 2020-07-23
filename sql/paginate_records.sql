@@ -17,5 +17,6 @@ WHERE (records.id < $1 OR $1 IS NULL)
   AND (demons.id = $11 OR $11 IS NULL)
   AND (records.video = $12 OR (records.video IS NULL AND $13) OR ($12 IS NULL AND NOT $13))
   AND (players.id = $14 OR $14 IS NULL)
+  AND (records.submitter = $15 OR $15 IS NULL)
 ORDER BY id {}
-LIMIT $15
+LIMIT $16

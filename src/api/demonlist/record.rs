@@ -1,6 +1,6 @@
 use crate::{
     config,
-    error::PointercrateError,
+    error::{JsonError, PointercrateError},
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
     model::demonlist::{
         record::{
@@ -26,20 +26,26 @@ pub async fn paginate(
 ) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
-    // Non authenticated access and access by users without ExtendedAccess perms cannot see non-approved
-    // records
-    let can_see_all_records = if let Ok(TokenAuth(user)) = user {
-        user.inner().extended_list_access()
-    } else {
-        false
-    };
+    // If the submitter or status fields are set (unless status is set to approved and submitter is
+    // unset, in which case, proceed), you need to be a list mod. If you aren't authenticated, we return
+    // a 401 UNAUTHORIZED, otherwise a 403 FORBIDDEN
 
-    if !can_see_all_records {
-        match pagination.0.status {
-            // empty response if we filter by a status != approved and we cant see those records
-            Some(status) if status != RecordStatus::Approved => return Ok(HttpResponse::Ok().json(Vec::<()>::new())),
-            _ => pagination.0.status = Some(RecordStatus::Approved),
+    if pagination.submitter.is_some() {
+        match user {
+            Ok(TokenAuth(ref user)) => user.inner().require_permissions(Permissions::ListModerator)?,
+            Err(error) => return Err(error),
         }
+    }
+
+    match user {
+        Ok(TokenAuth(user)) if user.inner().extended_list_access() => (),
+        Ok(TokenAuth(user)) => user.inner().require_permissions(Permissions::ExtendedAccess)?,
+        _ =>
+            match pagination.status {
+                None => pagination.status = Some(RecordStatus::Approved),
+                Some(status) if status != RecordStatus::Approved => return Err(JsonError(PointercrateError::Unauthorized)),
+                _ => (),
+            },
     }
 
     let mut records = pagination.page(&mut connection).await?;
