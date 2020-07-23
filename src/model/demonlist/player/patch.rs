@@ -248,9 +248,9 @@ mod tests {
             .unwrap()
             .id;
         let player = Player::by_id(player_id, &mut connection).await.unwrap();
-        let mut player = player.upgrade(&mut connection).await.unwrap();
+        let player = player.upgrade(&mut connection).await.unwrap();
         let player_before = Player::by_id(player_id, &mut connection).await.unwrap();
-        let mut player_before = player_before.upgrade(&mut connection).await.unwrap();
+        let player_before = player_before.upgrade(&mut connection).await.unwrap();
 
         let patch = PatchPlayer {
             name: Some(CiString("STARDUST1971".to_owned())),
@@ -296,7 +296,7 @@ mod tests {
 
         // see if database and model are consistent
         let player = Player::by_id(player_id, &mut connection).await.unwrap();
-        let mut player = player.upgrade(&mut connection).await.unwrap();
+        let player = player.upgrade(&mut connection).await.unwrap();
 
         assert_eq!(player, patched_player);
 

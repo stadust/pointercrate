@@ -1,7 +1,6 @@
-use super::{FullSubmitter, Submitter};
+use super::Submitter;
 use crate::{
     error::PointercrateError,
-    model::demonlist::record::submitted_by,
     ratelimit::{PreparedRatelimits, RatelimitScope},
     Result,
 };
@@ -57,18 +56,5 @@ impl Submitter {
                 Ok(Submitter { id, banned: false })
             },
         }
-    }
-
-    pub async fn upgrade(self, connection: &mut PgConnection) -> Result<FullSubmitter> {
-        Ok(FullSubmitter {
-            records: submitted_by(&self, connection).await?,
-            submitter: self,
-        })
-    }
-}
-
-impl FullSubmitter {
-    pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<FullSubmitter> {
-        Submitter::by_id(id, connection).await?.upgrade(connection).await
     }
 }

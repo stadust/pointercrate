@@ -35,7 +35,7 @@ Paginatable endpoints provide the `Links` header to simply access to the next, p
 The header is set to a comma-seperated
 list of links in the form `<[link]>; rel=[page]`, where page is one of `next`, `prev`, `first` or `last`.
 
-Note that the `next` and `prev` links are only provided if there actually is a next or previous page of results respectively. The `last` link is only provided if there actually is data to be returned. The `first` links is always provided, however it is simply the request you made stripped of the `before` and `after` values.
+Note that the `next` and `prev` links are only provided if there actually is a next or previous page of results respectively. The server always provides the `first` and `last` links.
 
 ## Filtering
 
@@ -49,6 +49,7 @@ There are two ways of filtering the result set:
 - **Filtering by equality**: The objects returned can be filtered by a specific field's value by specifying the field and a value in the query string, i.e. `/api/v1/players/?banned=true`
 - **Filtering by inequality**: The objects returned can be filtered by whether a field is smaller/greater than a specific value by specifying the field,
   suffixed with either `__lt` or `__gt`, and the value to check for inequality against in the query string, i.e. `/api/v1/records/?progress__gt=75`. Note that this doesn't work for all fields (since a lexicographical filtering on the record status hardly seems useful)
+- **Filtering by infix**: Some string-values fields support filtering objects where said string field contains a specific infix. This is done by suffixing the field's name with `_contains`.
 
 Multiple conditions can be combined, i.e. `/api/v1/records/?after=200&limit=10&status=APPROVED&progress__lt=100`. This request would return the first 10 approved records with a record ID greater than 200 and a progress less than 100.
 

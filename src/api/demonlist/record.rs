@@ -102,10 +102,23 @@ pub async fn submit(
 #[get("/{record_id}/")]
 pub async fn get(user: ApiResult<TokenAuth>, state: PointercrateState, record_id: Path<i32>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
-    let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
+    let mut record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
-    if record.status != RecordStatus::Approved {
-        user?.0.inner().require_permissions(Permissions::ExtendedAccess)?;
+    match user {
+        Ok(TokenAuth(user)) => {
+            if record.status != RecordStatus::Approved {
+                user.inner().require_permissions(Permissions::ExtendedAccess)?;
+            }
+            if !user.inner().has_permission(Permissions::ListHelper) {
+                record.notes.clear()
+            }
+        },
+        _ => {
+            if record.status != RecordStatus::Approved {
+                return Err(JsonError(PointercrateError::Unauthorized))
+            }
+            record.notes.clear()
+        },
     }
 
     Ok(HttpResponse::Ok().json_with_etag(&record))

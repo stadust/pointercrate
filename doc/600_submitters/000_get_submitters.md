@@ -19,7 +19,7 @@ Access to this endpoint requires at least `ListAdministrator` permissions.
 
 ### Filtering:
 
-The result can be filtered by any of the following fields: `submitter_id`, `banned`.
+The result can be filtered by any of the following fields: `banned`.
 
 Pagination is done via the `submitter_id` field.
 

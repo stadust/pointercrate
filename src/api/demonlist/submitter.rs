@@ -1,6 +1,6 @@
 use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    model::demonlist::submitter::{FullSubmitter, PatchSubmitter, Submitter, SubmitterPagination},
+    model::demonlist::submitter::{PatchSubmitter, Submitter, SubmitterPagination},
     permissions::Permissions,
     state::PointercrateState,
     util::HttpResponseBuilderExt,
@@ -42,7 +42,7 @@ pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, submitter
 
     let mut connection = state.connection().await?;
 
-    let submitter = FullSubmitter::by_id(submitter_id.into_inner(), &mut connection).await?;
+    let submitter = Submitter::by_id(submitter_id.into_inner(), &mut connection).await?;
 
     Ok(HttpResponse::Ok().json_with_etag(&submitter))
 }
@@ -55,7 +55,7 @@ pub async fn patch(
 
     let mut connection = state.audited_transaction(&user).await?;
 
-    let submitter = FullSubmitter::by_id(submitter_id.into_inner(), &mut connection).await?;
+    let submitter = Submitter::by_id(submitter_id.into_inner(), &mut connection).await?;
 
     if_match.require_etag_match(&submitter)?;
 

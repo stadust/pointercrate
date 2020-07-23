@@ -48,7 +48,6 @@ The listed record objects do not contain the current demon embedded into the `de
 | verifier    | [Player](#player)       | The demon's verifier                                                                      |
 | publisher   | [Player](#player)       | The demon's publisher                                                                     |
 | creators    | List[[Player](#player)] | The demon's creators                                                                      |
-| records     | List[[Record](#record)] | All approved records for this demon                                                       |
 
 ## Example objects
 
@@ -102,7 +101,6 @@ The listed record objects do not contain the current demon embedded into the `de
     "id": 2,
     "name": "Pennutoh"
   },
-  "records": [],
   "requirement": 54,
   "verifier": {
     "banned": false,

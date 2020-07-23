@@ -9,8 +9,8 @@ Each record on the list is represented by a `Record` object. The following invar
 - Every combination of `demon`, `player` and `status` values is unique
 - Every `video` value is in one of the formats listed [here](/documentation/#video), or `null`
 
-The object only contains the submitter information if the object has been requested with sufficient permissions.
-Requests without `ExtendedAccess` permissions can only retrieve approved records
+The object only contains the submitter information if the requestee has `ListModerator` permissions. The object only contains the notes if the requestee has `ListHelper` permissions.
+Requests without `ExtendedAccess` permissions can only retrieve approved records.
 
 ## Minimal Form
 
@@ -42,7 +42,6 @@ The listed form (formerly called short form) of record objects is returned by [`
 | video     | URL?                           | The record's video.                        |
 | player    | [Player](#player)              | The record holder                          |
 | demon     | [Demon](#demon)                | The demon the record was made on           |
-| submitter | integer                        | The internal ID of the submitter           |
 
 ## Full Form
 
@@ -54,7 +53,7 @@ The full (formerly called long form) form of record objects is returned by [`GET
 | progress  | integer                        | The progress achieved by the record's holder                 |
 | video     | URL?                           | The record's video.                                          |
 | status    | [RecordStatus](#record-status) | The record's status.                                         |
-| notes     | string?                        | Notes on the record                                          |
+| notes     | List[[RecordNote](#record-note)]?                        | Notes on the record                                          |
 | player    | [Player](#player)              | The record holder                                            |
 | demon     | [Demon](#demon)                | The demon the record was made on                             |
 | submitter | [Submitter](#submitter)?       | The person that submitted the record, as an submitter object |
@@ -66,6 +65,7 @@ The full (formerly called long form) form of record objects is returned by [`GET
 | `approved`  | The record has been approved and is displayed on the list |
 | `rejected`  | The record has been rejected                              |
 | `submitted` | The record has been submitted and is awaiting review      |
+| `under consideration`| The record is awaiting more thorough review      |
 
 ## Example objects
 
@@ -105,7 +105,8 @@ Here without an embedded submitter object
   "progress": 100,
   "status": "approved",
   "submitter": null,
-  "video": null
+  "video": null,
+  "notes":[]
 }
 ```
 

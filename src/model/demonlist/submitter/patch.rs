@@ -1,8 +1,4 @@
-use crate::{
-    model::demonlist::submitter::{FullSubmitter, Submitter},
-    util::non_nullable,
-    Result,
-};
+use crate::{model::demonlist::submitter::Submitter, util::non_nullable, Result};
 use log::info;
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -11,15 +7,6 @@ use sqlx::PgConnection;
 pub struct PatchSubmitter {
     #[serde(default, deserialize_with = "non_nullable")]
     banned: Option<bool>,
-}
-
-impl FullSubmitter {
-    pub async fn apply_patch(self, patch: PatchSubmitter, connection: &mut PgConnection) -> Result<Self> {
-        Ok(FullSubmitter {
-            submitter: self.submitter.apply_patch(patch, connection).await?,
-            records: self.records,
-        })
-    }
 }
 
 impl Submitter {

@@ -19,7 +19,7 @@ Allows the retrieval of a list of all pointercrate users (if you are pointercrat
 
 ### Filtering
 
-The result can be filtered by any of the following fields: `id`, `name`, `has_permissions`, `display_name`.
+The result can be filtered by any of the following fields: `id`, `name`, `has_permissions`, `display_name` or `name_contains` (which only matches against the actual username, not the display name).
 
 Pagination is done via the `id` field.
 
@@ -42,7 +42,7 @@ Pagination is done via the `id` field.
 ### Example request:
 
 ```json
-GET /api/v1/users/
+GET /api/v1/users/?name_contains=dust&has_permissions=1
 Accept: application/json
 Authorization: Bearer <omitted>
 ```

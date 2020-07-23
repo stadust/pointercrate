@@ -11,8 +11,6 @@ Object representing some nation
 
 ## Example objects
 
-### Short Form
-
 ```json
 {
   "nation": "Germany",
