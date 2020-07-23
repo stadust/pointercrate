@@ -83,8 +83,6 @@ impl Page for AccountPage {
     }
 
     fn body(&self) -> Markup {
-        dbg!(self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator));
-        dbg!(&self.user);
         html! {
             span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
@@ -123,18 +121,18 @@ impl Page for AccountPage {
                             i class = "fa fa-beer fa-2x" aria-hidden="true" {}
                         }
                         div.tab.button.white.hover.no-shadow data-tab-id="5" {
+                            i class = "fa fa-shower fa-2x" aria-hidden="true" {}
+                            (PreEscaped("&nbsp;&nbsp;"))
                             b {
                                 "Demons"
                             }
-                            (PreEscaped("&nbsp;&nbsp;"))
-                            i class = "fa fa-bathtub fa-2x" aria-hidden="true" {}
                         }
                         div.tab.button.white.hover.no-shadow data-tab-id="6" {
                             b {
                                 "Submitters"
                             }
                             (PreEscaped("&nbsp;&nbsp;"))
-                            i class = "fa fa-wheelchair-alt fa-2x" aria-hidden="true" {}
+                            i class = "fa fa-eye fa-2x" aria-hidden="true" {}
                         }
                     }
                 }
