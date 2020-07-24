@@ -1,12 +1,14 @@
 import { initialize as initProfile } from "./account/profile.js";
 import { initialize as initUsers } from "./account/users.js";
 import { initialize as initRecords } from "./account/records.js";
+import { initialize as initPlayers } from "./account/player.js";
 import { TabbedPane } from "./modules/tab.mjs";
 
 let usersInitialized = false;
 let recordsInitialized = false;
+let playersInitialized = false;
 
-$(document).ready(function() {
+$(document).ready(function () {
   var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
   var csrfToken = csrfTokenSpan.innerHTML;
 
@@ -33,5 +35,12 @@ $(document).ready(function() {
 
       recordsInitialized = true;
     }
+  });
+
+  accountTabber.addSwitchListener("4", () => {
+    if (!playersInitialized) {
+      initPlayers(csrfToken);
+    }
+    playersInitialized = true;
   });
 });

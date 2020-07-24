@@ -1,7 +1,7 @@
 use super::Page;
 use crate::{
     extractor::auth::TokenAuth,
-    model::user::User,
+    model::{nationality::Nationality, user::User},
     permissions::Permissions,
     state::PointercrateState,
     view::demonlist::{overview_demons, OverviewDemon},
@@ -27,6 +27,7 @@ pub struct AccountPage {
     user: User,
     csrf_token: String,
     demons: Vec<OverviewDemon>,
+    pub nations: Vec<Nationality>,
 }
 
 #[get("/account/")]
@@ -35,11 +36,18 @@ pub async fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> View
         Ok(TokenAuth(user)) => {
             let csrf_token = user.generate_csrf_token(&state.secret);
 
-            let demons = if user.inner().has_permission(Permissions::ListHelper) {
+            let (demons, nations) = if user.inner().has_permission(Permissions::ListHelper) {
                 let mut connection = state.connection().await?;
-                overview_demons(&mut connection).await?
+                (
+                    overview_demons(&mut connection).await?,
+                    if user.inner().has_permission(Permissions::ListModerator) {
+                        Nationality::all(&mut connection).await?
+                    } else {
+                        Vec::new()
+                    },
+                )
             } else {
-                Vec::new()
+                (Vec::new(), Vec::new())
             };
 
             HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
@@ -47,6 +55,7 @@ pub async fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> View
                     user: user.into_inner(),
                     csrf_token,
                     demons,
+                    nations,
                 }
                 .render()
                 .0,
@@ -145,7 +154,7 @@ impl Page for AccountPage {
                     (records::page(&self.demons))
                 }
                 @if self.user.has_permission(Permissions::ListModerator) {
-                    (players::page())
+                    (players::page(&self.nations))
                     (demons::page())
                     (submitters::page())
                 }

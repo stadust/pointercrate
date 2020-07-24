@@ -1,5 +1,4 @@
 import {
-  FilteredPaginator,
   Dropdown,
   get,
   Form,
@@ -12,6 +11,7 @@ import {
   rangeOverflow,
   tooLong,
 } from "./form.mjs";
+import { FilteredViewer } from "./form.mjs";
 
 export function initializeRecordSubmitter() {
   var submissionForm = new Form(document.getElementById("submission-form"));
@@ -55,7 +55,7 @@ export function initializeRecordSubmitter() {
   });
 }
 
-export class StatsViewer extends FilteredPaginator {
+export class StatsViewer extends FilteredViewer {
   /**
    * Constructs a new StatsViewer
    *
@@ -102,6 +102,8 @@ export class StatsViewer extends FilteredPaginator {
   }
 
   onReceive(response) {
+    super.onReceive(response);
+
     this._rank.innerHTML = this.currentlySelected.dataset.rank;
     this._score.innerHTML = this.currentlySelected.getElementsByTagName(
       "i"
@@ -164,9 +166,6 @@ export class StatsViewer extends FilteredPaginator {
       .sort((r1, r2) => r1.progress - r2.progress);
 
     formatRecordsInto(this._progress, non100Records);
-
-    $(this._welcome).hide(100);
-    $(this._content).show(100);
   }
 }
 

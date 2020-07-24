@@ -10,6 +10,7 @@ import {
   FilteredPaginator,
   Form,
 } from "../modules/form.mjs";
+import { FilteredViewer } from "../modules/form.mjs";
 
 let selectedUser;
 let userPaginator;
@@ -101,19 +102,14 @@ function generateUser(userData) {
   return li;
 }
 
-class UserPaginator extends FilteredPaginator {
+class UserPaginator extends FilteredViewer {
   constructor() {
     super("user-pagination", generateUser, "name_contains", { limit: 10 });
-
-    this._welcome = this.html.parentNode.getElementsByClassName(
-      "viewer-welcome"
-    )[0];
-    this._content = this.html.parentNode.getElementsByClassName(
-      "viewer-content"
-    )[0];
   }
 
   onReceive(response) {
+    super.onReceive(response);
+
     selectedUser = response.data.data;
     selectedUser.etag = response.headers["etag"];
 
@@ -140,8 +136,6 @@ class UserPaginator extends FilteredPaginator {
     editForm.input("perm-admin").value = (bitmask & 0x4000) == 0x4000;
 
     editForm.html.style.display = "block";
-    $(this._welcome).hide(100);
-    $(this._content).show(100);
   }
 }
 

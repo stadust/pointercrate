@@ -1,7 +1,6 @@
 "use strict";
 
 import {
-  Paginator,
   post,
   patch,
   del,
@@ -22,6 +21,7 @@ import {
   generateRecord,
 } from "../modules/demonlist.mjs";
 import { FilteredPaginator } from "../modules/form.mjs";
+import { Viewer } from "../modules/form.mjs";
 
 export let recordManager;
 
@@ -42,7 +42,7 @@ function embedVideo(video) {
   }
 }
 
-class RecordManager extends Paginator {
+class RecordManager extends Viewer {
   constructor(tok) {
     super("record-pagination", {}, generateRecord);
 
@@ -50,9 +50,6 @@ class RecordManager extends Paginator {
 
     this.currentRecord = null;
     this.currentRecordEtag = null;
-
-    this._welcome = manager.getElementsByClassName("viewer-welcome")[0];
-    this._content = manager.getElementsByClassName("viewer-content")[0];
 
     this._video = document.getElementById("record-video");
     this._video_link = document.getElementById("record-video-link");
@@ -63,10 +60,6 @@ class RecordManager extends Paginator {
     this._submitter = document.getElementById("record-submitter");
     this._notes = document.getElementById("record-notes");
     this._tok = tok; // FIXME: bad
-
-    // Gotta start counting at '1', since '0' is the error output of the paginator
-    this.errorOutput = manager.getElementsByClassName("output")[1];
-    this.successOutput = manager.getElementsByClassName("output")[2];
 
     this.dropdown = new Dropdown(
       document
@@ -240,33 +233,9 @@ class RecordManager extends Paginator {
     );
   }
 
-  setError(message) {
-    if (this.successOutput) this.successOutput.style.display = "none";
-
-    if (this.errorOutput) {
-      if (message === null || message === undefined) {
-        this.errorOutput.style.display = "none";
-      } else {
-        this.errorOutput.innerHTML = message;
-        this.errorOutput.style.display = "block";
-      }
-    }
-  }
-
-  setSuccess(message) {
-    if (this.errorOutput) this.errorOutput.style.display = "none";
-
-    if (this.successOutput) {
-      if (message === null || message === undefined) {
-        this.successOutput.style.display = "none";
-      } else {
-        this.successOutput.innerHTML = message;
-        this.successOutput.style.display = "block";
-      }
-    }
-  }
-
   onReceive(response) {
+    super.onReceive(response);
+
     this.setError(null);
     this.setSuccess(null);
 
@@ -309,9 +278,6 @@ class RecordManager extends Paginator {
     }
 
     $(this._notes.parentElement).show(100); // TODO: maybe via CSS transform?
-
-    $(this._welcome).hide(100);
-    $(this._content).show(100);
   }
 }
 
@@ -461,7 +427,7 @@ function setupAddNote(csrfToken) {
     });
 }
 
-function setupRecordSearchRecordIdForm() {
+function setupRecordFilterPlayerIdForm() {
   var recordFilterPlayerIdForm = new Form(
     document.getElementById("record-filter-by-player-id-form")
   );
@@ -473,17 +439,17 @@ function setupRecordSearchRecordIdForm() {
   });
 }
 
-function setupRecordFilterPlayerIdForm() {
-  var recordFilterPlayerIdForm = new Form(
+function setupRecordSearchRecordIdForm() {
+  var recordSearchByIdForm = new Form(
     document.getElementById("record-search-by-record-id-form")
   );
-  var recordId = recordFilterPlayerIdForm.input("record-record-id");
+  var recordId = recordSearchByIdForm.input("record-record-id");
 
   recordId.addValidator(valueMissing, "Record ID required");
-  recordFilterPlayerIdForm.onSubmit(function (event) {
+  recordSearchByIdForm.onSubmit(function (event) {
     recordManager
       .selectArbitrary(parseInt(recordId.value))
-      .catch(displayError(recordFilterPlayerIdForm.errorOutput));
+      .catch(displayError(recordSearchByIdForm.errorOutput));
   });
 }
 
@@ -537,6 +503,7 @@ export function initialize(csrfToken) {
   setupRecordFilterPlayerNameForm();
   setupAddNote(csrfToken);
   setupEditRecordForm(csrfToken);
+  setupRecordSearchRecordIdForm();
 
   initializeRecordSubmitter();
 

@@ -194,6 +194,8 @@ impl DatabasePlayer {
             .execute(connection)
             .await?;
 
+        self.banned = false;
+
         Ok(())
     }
 

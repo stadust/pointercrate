@@ -248,6 +248,66 @@ function parsePagination(linkHeader) {
   return links;
 }
 
+function findParentWithClass(element, clz) {
+  let parent = element;
+
+  while (parent !== null && parent.classList !== null) {
+    if (parent.classList.contains(clz)) {
+      return parent;
+    }
+    parent = parent.parentNode;
+  }
+}
+
+export class Viewer extends Paginator {
+  constructor(elementId, queryData, itemConstructor) {
+    super(elementId, queryData, itemConstructor);
+
+    this.viewer = findParentWithClass(this.html, "viewer");
+
+    this._welcome = this.viewer.getElementsByClassName("viewer-welcome")[0];
+    this._content = this.viewer.getElementsByClassName("viewer-content")[0];
+
+    // Gotta start counting at '1', since '0' is the error output of the paginator
+    this.errorOutput = this.viewer.getElementsByClassName("output")[1];
+    this.successOutput = this.viewer.getElementsByClassName("output")[2];
+  }
+
+  onReceive(response) {
+    this.setError(null);
+    this.setSuccess(null);
+
+    $(this._welcome).hide(100);
+    $(this._content).show(100);
+  }
+
+  setError(message) {
+    if (this.successOutput) this.successOutput.style.display = "none";
+
+    if (this.errorOutput) {
+      if (message === null || message === undefined) {
+        this.errorOutput.style.display = "none";
+      } else {
+        this.errorOutput.innerHTML = message;
+        this.errorOutput.style.display = "block";
+      }
+    }
+  }
+
+  setSuccess(message) {
+    if (this.errorOutput) this.errorOutput.style.display = "none";
+
+    if (this.successOutput) {
+      if (message === null || message === undefined) {
+        this.successOutput.style.display = "none";
+      } else {
+        this.successOutput.innerHTML = message;
+        this.successOutput.style.display = "block";
+      }
+    }
+  }
+}
+
 /**
  * A Wrapper around a paginator that includes a search/filter bar at the top
  *
@@ -306,6 +366,60 @@ export class FilteredPaginator extends Paginator {
         1000
       );
     });
+  }
+}
+
+export class FilteredViewer extends FilteredPaginator {
+  constructor(
+    paginatorID,
+    itemConstructor,
+    filterParam,
+    initialQueryData = {}
+  ) {
+    super(paginatorID, itemConstructor, filterParam, initialQueryData);
+
+    this.viewer = findParentWithClass(this.html, "viewer");
+
+    this._welcome = this.viewer.getElementsByClassName("viewer-welcome")[0];
+    this._content = this.viewer.getElementsByClassName("viewer-content")[0];
+
+    // Gotta start counting at '1', since '0' is the error output of the paginator
+    this.errorOutput = this.viewer.getElementsByClassName("output")[1];
+    this.successOutput = this.viewer.getElementsByClassName("output")[2];
+  }
+
+  onReceive(response) {
+    this.setError(null);
+    this.setSuccess(null);
+
+    $(this._welcome).hide(100);
+    $(this._content).show(100);
+  }
+
+  setError(message) {
+    if (this.successOutput) this.successOutput.style.display = "none";
+
+    if (this.errorOutput) {
+      if (message === null || message === undefined) {
+        this.errorOutput.style.display = "none";
+      } else {
+        this.errorOutput.innerHTML = message;
+        this.errorOutput.style.display = "block";
+      }
+    }
+  }
+
+  setSuccess(message) {
+    if (this.errorOutput) this.errorOutput.style.display = "none";
+
+    if (this.successOutput) {
+      if (message === null || message === undefined) {
+        this.successOutput.style.display = "none";
+      } else {
+        this.successOutput.innerHTML = message;
+        this.successOutput.style.display = "block";
+      }
+    }
   }
 }
 
