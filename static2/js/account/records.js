@@ -508,5 +508,5 @@ export function initialize(csrfToken) {
   initializeRecordSubmitter();
 
   recordManager = new RecordManager(csrfToken);
-  recordManager.initialize();
+  return recordManager.initialize();
 }

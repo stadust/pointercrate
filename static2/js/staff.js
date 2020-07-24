@@ -2,6 +2,10 @@ import { initialize as initProfile } from "./account/profile.js";
 import { initialize as initUsers } from "./account/users.js";
 import { initialize as initRecords, recordManager } from "./account/records.js";
 import { initialize as initPlayers } from "./account/player.js";
+import {
+  initialize as initSubmitters,
+  submitterManager,
+} from "./account/submitter.js";
 import { TabbedPane } from "./modules/tab.mjs";
 
 let usersInitialized = false;
@@ -39,5 +43,11 @@ $(document).ready(function () {
       initPlayers(csrfToken, accountTabber);
     }
     playersInitialized = true;
+  });
+
+  accountTabber.addSwitchListener("6", () => {
+    if (!submitterManager) {
+      initSubmitters(csrfToken, accountTabber);
+    }
   });
 });

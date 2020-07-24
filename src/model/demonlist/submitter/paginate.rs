@@ -35,10 +35,10 @@ impl SubmitterPagination {
 
         let query = if self.before_id.is_some() && self.after_id.is_none() {
             "SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND \
-             (banned = $3 OR $3 IS NULL) LIMIT $4 ORDER BY submitter_id DESC"
+             (banned = $3 OR $3 IS NULL) ORDER BY submitter_id DESC LIMIT $4 "
         } else {
             "SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND \
-             (banned = $3 OR $3 IS NULL) LIMIT $4 ORDER BY submitter_id ASC"
+             (banned = $3 OR $3 IS NULL) ORDER BY submitter_id ASC LIMIT $4 "
         };
 
         let mut stream = sqlx::query(query)

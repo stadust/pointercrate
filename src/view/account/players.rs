@@ -22,6 +22,9 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                     " - "
                                     i.fa.fa-pencil.clickable#player-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#player-player-name {}
                                 }
+                                p {
+                                    "Welcome to the player manager. Here you can ban or unban players. Banning a player will delete all records of theirs which are in the submitted or under consideration state. All approved records will instead be set to rejected."
+                                }
                                 p.info-red.output style = "margin: 10px" {}
                                 p.info-green.output style = "margin: 10px" {}
                                 div.stats-container.flex.space {
@@ -90,7 +93,7 @@ fn player_selector() -> Markup {
             }
             form.flex.col#player-search-by-player-id-form novalidate = "" {
                 p.info-red.output {}
-                span.form-input#player-player-id {
+                span.form-input#search-player-id {
                     label for = "id" {"Player ID:"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%";
                     p.error {}

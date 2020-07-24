@@ -155,7 +155,7 @@ export class Paginator {
    * @memberof Paginator
    */
   initialize() {
-    if (this.links === undefined) this.refresh();
+    if (this.links === undefined) return this.refresh();
   }
 
   handleResponse(response) {
@@ -209,7 +209,7 @@ export class Paginator {
    * @memberof Paginator
    */
   refresh() {
-    get(this.currentLink)
+    return get(this.currentLink)
       .then(this.handleResponse.bind(this))
       .catch(displayError(this.errorOutput));
   }
@@ -269,7 +269,7 @@ export class Viewer extends Paginator {
     this._content = this.viewer.getElementsByClassName("viewer-content")[0];
 
     // Gotta start counting at '1', since '0' is the error output of the paginator
-    this.errorOutput = this.viewer.getElementsByClassName("output")[1];
+    this.errorOutput2 = this.viewer.getElementsByClassName("output")[1];
     this.successOutput = this.viewer.getElementsByClassName("output")[2];
   }
 
@@ -284,18 +284,18 @@ export class Viewer extends Paginator {
   setError(message) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
-    if (this.errorOutput) {
+    if (this.errorOutput2) {
       if (message === null || message === undefined) {
-        this.errorOutput.style.display = "none";
+        this.errorOutput2.style.display = "none";
       } else {
-        this.errorOutput.innerHTML = message;
-        this.errorOutput.style.display = "block";
+        this.errorOutput2.innerHTML = message;
+        this.errorOutput2.style.display = "block";
       }
     }
   }
 
   setSuccess(message) {
-    if (this.errorOutput) this.errorOutput.style.display = "none";
+    if (this.errorOutput2) this.errorOutput2.style.display = "none";
 
     if (this.successOutput) {
       if (message === null || message === undefined) {
@@ -384,7 +384,7 @@ export class FilteredViewer extends FilteredPaginator {
     this._content = this.viewer.getElementsByClassName("viewer-content")[0];
 
     // Gotta start counting at '1', since '0' is the error output of the paginator
-    this.errorOutput = this.viewer.getElementsByClassName("output")[1];
+    this.errorOutput2 = this.viewer.getElementsByClassName("output")[1];
     this.successOutput = this.viewer.getElementsByClassName("output")[2];
   }
 
@@ -399,18 +399,18 @@ export class FilteredViewer extends FilteredPaginator {
   setError(message) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
-    if (this.errorOutput) {
+    if (this.errorOutput2) {
       if (message === null || message === undefined) {
-        this.errorOutput.style.display = "none";
+        this.errorOutput2.style.display = "none";
       } else {
-        this.errorOutput.innerHTML = message;
-        this.errorOutput.style.display = "block";
+        this.errorOutput2.innerHTML = message;
+        this.errorOutput2.style.display = "block";
       }
     }
   }
 
   setSuccess(message) {
-    if (this.errorOutput) this.errorOutput.style.display = "none";
+    if (this.errorOutput2) this.errorOutput2.style.display = "none";
 
     if (this.successOutput) {
       if (message === null || message === undefined) {
