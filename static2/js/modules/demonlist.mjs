@@ -13,6 +13,23 @@ import {
 } from "./form.mjs";
 import { FilteredViewer } from "./form.mjs";
 
+export function embedVideo(video) {
+  if (!video) return;
+  // welcome to incredibly fragile string parsing with stadust
+  // see pointercrate::video::embed for a proper implementation of this
+
+  if (video.startsWith("https://www.youtube")) {
+    return "https://www.youtube.com/embed/" + video.substring(32);
+  }
+
+  if (video.startsWith("https://www.twitch")) {
+    return (
+      "https://player.twitch.tv/?autoplay=false&parent=pointercrate.com&video=" +
+      video.substring(29)
+    );
+  }
+}
+
 export function initializeRecordSubmitter() {
   var submissionForm = new Form(document.getElementById("submission-form"));
 
@@ -200,6 +217,22 @@ export function generatePlayer(player) {
   li.appendChild(b);
   li.appendChild(document.createTextNode(player.name + " - "));
   li.appendChild(b2);
+
+  return li;
+}
+
+export function generateDemon(demon) {
+  let li = document.createElement("li");
+  let b = document.createElement("b");
+
+  li.dataset.id = demon.id;
+
+  b.innerText = "#" + demon.position + " - ";
+
+  li.appendChild(b);
+  li.appendChild(document.createTextNode(demon.name));
+  li.appendChild(document.createElement("br"));
+  li.appendChild(document.createTextNode("by " + demon.publisher.name));
 
   return li;
 }

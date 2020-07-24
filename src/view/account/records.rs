@@ -35,7 +35,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                             }
                         }
 
-                        iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
+                        iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Video"}
                         p.info-red.output style = "margin: 10px" {}
                         p.info-green.output style = "margin: 10px" {}
                         div.stats-container.flex.space  {

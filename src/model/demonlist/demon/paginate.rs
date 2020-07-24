@@ -29,6 +29,9 @@ pub struct DemonIdPagination {
     name: Option<CiString>,
 
     #[serde(default, deserialize_with = "non_nullable")]
+    name_contains: Option<CiString>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
     requirement: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
@@ -84,6 +87,7 @@ impl DemonIdPagination {
             .bind(self.verifier_name.as_ref().map(|s| s.as_str()))
             .bind(self.publisher_id)
             .bind(self.publisher_name.as_ref().map(|s| s.as_str()))
+            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
@@ -134,6 +138,9 @@ pub struct DemonPositionPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<CiString>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    name_contains: Option<CiString>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     requirement: Option<i16>,
@@ -191,6 +198,7 @@ impl DemonPositionPagination {
             .bind(self.verifier_name.as_ref().map(|s| s.as_str()))
             .bind(self.publisher_id)
             .bind(self.publisher_name.as_ref().map(|s| s.as_str()))
+            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 

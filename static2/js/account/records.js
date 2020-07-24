@@ -19,28 +19,12 @@ import {
   initializeRecordSubmitter,
   generatePlayer,
   generateRecord,
+  embedVideo,
 } from "../modules/demonlist.mjs";
 import { FilteredPaginator } from "../modules/form.mjs";
 import { Viewer } from "../modules/form.mjs";
 
 export let recordManager;
-
-function embedVideo(video) {
-  if (!video) return;
-  // welcome to incredibly fragile string parsing with stadust
-  // see pointercrate::video::embed for a proper implementation of this
-
-  if (video.startsWith("https://www.youtube")) {
-    return "https://www.youtube.com/embed/" + video.substring(32);
-  }
-
-  if (video.startsWith("https://www.twitch")) {
-    return (
-      "https://player.twitch.tv/?autoplay=false&parent=pointercrate.com&video=" +
-      video.substring(29)
-    );
-  }
-}
 
 class RecordManager extends Viewer {
   constructor(tok) {
@@ -236,9 +220,6 @@ class RecordManager extends Viewer {
   onReceive(response) {
     super.onReceive(response);
 
-    this.setError(null);
-    this.setSuccess(null);
-
     if (response.status == 204) {
       return;
     }
@@ -251,7 +232,7 @@ class RecordManager extends Viewer {
     if (embeddedVideo !== undefined) {
       this._video.style.display = "block";
       this._video_link.style.display = "initial";
-      this._video.src = embedVideo(recordData.video);
+      this._video.src = embeddedVideo;
       this._video_link.href = recordData.video;
       this._video_link.innerHTML = recordData.video;
     } else {

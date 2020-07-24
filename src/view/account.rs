@@ -83,6 +83,10 @@ impl Page for AccountPage {
             "js/modules/tab.mjs",
             "js/account/profile.js",
             "js/account/users.js",
+            "js/account/records.js",
+            "js/account/demon.js",
+            "js/account/player.js",
+            "js/account/submitter.js",
             "js/staff.js",
         ]
     }

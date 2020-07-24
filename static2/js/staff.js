@@ -7,6 +7,7 @@ import {
   submitterManager,
 } from "./account/submitter.js";
 import { TabbedPane } from "./modules/tab.mjs";
+import { initialize as initDemons, demonManager } from "./account/demon.js";
 
 let usersInitialized = false;
 let playersInitialized = false;
@@ -43,6 +44,12 @@ $(document).ready(function () {
       initPlayers(csrfToken, accountTabber);
     }
     playersInitialized = true;
+  });
+
+  accountTabber.addSwitchListener("5", () => {
+    if (!demonManager) {
+      initDemons(csrfToken, accountTabber);
+    }
   });
 
   accountTabber.addSwitchListener("6", () => {
