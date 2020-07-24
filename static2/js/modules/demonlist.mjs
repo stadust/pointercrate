@@ -230,7 +230,9 @@ export function generateDemon(demon) {
   b.innerText = "#" + demon.position + " - ";
 
   li.appendChild(b);
-  li.appendChild(document.createTextNode(demon.name));
+  li.appendChild(
+    document.createTextNode(demon.name + " (ID: " + demon.id + ")")
+  );
   li.appendChild(document.createElement("br"));
   li.appendChild(document.createTextNode("by " + demon.publisher.name));
 

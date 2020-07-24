@@ -42,6 +42,8 @@ export class DemonManager extends FilteredViewer {
 
     this._id.innerText = this.currentDemon.id;
     this._name.innerText = this.currentDemon.name;
+    this._position.innerText = this.currentDemon.position;
+    this._requirement.innerText = this.currentDemon.requirement;
 
     var embeddedVideo = embedVideo(this.currentDemon.video);
 
