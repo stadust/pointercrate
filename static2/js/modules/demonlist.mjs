@@ -175,7 +175,13 @@ export function generatePlayer(player) {
   var b = document.createElement("b");
   var b2 = document.createElement("b");
 
-  li.className = "white hover";
+  li.className = "white";
+
+  if (player.banned) {
+    li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+  } else {
+    li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+  }
 
   li.dataset.name = player.name;
   li.dataset.id = player.id;
@@ -195,6 +201,46 @@ export function generatePlayer(player) {
   li.appendChild(b);
   li.appendChild(document.createTextNode(player.name + " - "));
   li.appendChild(b2);
+
+  return li;
+}
+
+export function generateRecord(record) {
+  var li = document.createElement("li");
+  var recordId = document.createElement("b");
+
+  li.className = "white";
+  li.dataset.id = record.id;
+
+  switch (record.status) {
+    case "approved":
+      li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+      break;
+    case "rejected":
+      li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+      break;
+    case "submitted":
+      li.style.backgroundColor = "rgba(255, 255, 161, .3)";
+      break;
+    case "under consideration":
+      li.style.backgroundColor = "rgba(142, 230, 230, .3)";
+      break;
+    default:
+      break;
+  }
+
+  recordId.appendChild(document.createTextNode("Record #" + record.id));
+
+  li.appendChild(recordId);
+  li.appendChild(document.createElement("br"));
+  li.appendChild(
+    document.createTextNode(record.player.name + " (" + record.player.id + ")")
+  );
+  li.appendChild(document.createElement("br"));
+  li.appendChild(
+    document.createTextNode(record.progress + "% on " + record.demon.name)
+  );
+  li.appendChild(document.createElement("br"));
 
   return li;
 }

@@ -19,50 +19,11 @@ import {
 import {
   initializeRecordSubmitter,
   generatePlayer,
+  generateRecord,
 } from "../modules/demonlist.mjs";
 import { FilteredPaginator } from "../modules/form.mjs";
 
 export let recordManager;
-
-function generateRecord(record) {
-  var li = document.createElement("li");
-  var recordId = document.createElement("b");
-
-  li.className = "white hover";
-  li.dataset.id = record.id;
-
-  switch (record.status) {
-    case "approved":
-      li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
-      break;
-    case "rejected":
-      li.style.backgroundColor = "rgba(255, 161, 174, .3)";
-      break;
-    case "submitted":
-      li.style.backgroundColor = "rgba(255, 255, 161, .3)";
-      break;
-    case "under consideration":
-      li.style.backgroundColor = "rgba(142, 230, 230, .3)";
-      break;
-    default:
-      break;
-  }
-
-  recordId.appendChild(document.createTextNode("Record #" + record.id));
-
-  li.appendChild(recordId);
-  li.appendChild(document.createElement("br"));
-  li.appendChild(
-    document.createTextNode(record.player.name + " (" + record.player.id + ")")
-  );
-  li.appendChild(document.createElement("br"));
-  li.appendChild(
-    document.createTextNode(record.progress + "% on " + record.demon.name)
-  );
-  li.appendChild(document.createElement("br"));
-
-  return li;
-}
 
 function embedVideo(video) {
   if (!video) return;
