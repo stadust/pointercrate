@@ -288,7 +288,7 @@ pub enum PointercrateError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42218`
-    #[display(fmt = "The given player is banned!")]
+    #[display(fmt = "The given player is banned and thus cannot have non-rejected records on the list!")]
     PlayerBanned,
 
     /// `422 UNPROCESSABLE ENTITY` variant

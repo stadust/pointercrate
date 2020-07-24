@@ -216,6 +216,10 @@ impl FullRecord {
     /// If the new player has a record that would stand in conflict with this one, this records
     /// takes precedence and overrides the existing one.
     pub async fn set_player(&mut self, player: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
+        if player.banned && self.status != RecordStatus::Rejected {
+            return Err(PointercrateError::PlayerBanned)
+        }
+
         info!("Setting player of record {} to {}", self, player);
 
         self.ensure_invariants(player.id, self.demon.id, connection).await?;
