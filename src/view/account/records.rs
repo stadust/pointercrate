@@ -17,73 +17,72 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                     "Click on a record on the left to get started!"
                 }
                 div.viewer-content {
-                    div {
-                        div.flex.col {
-                            h3 style = "font-size:1.1em; margin-top: 10px" {
-                                "Record #"
-                                i#record-id {}
-                                " - "
-                                div.dropdown-menu.js-search#edit-record-status style = "max-width: 220px"{
-                                    input type="text" style = "color: #444446; font-weight: bold;";
-                                    div.menu {
-                                        ul {
-                                            li.white.hover data-value="approved" {"Approved"}
-                                            li.white.hover data-value="rejected" {"Rejected"}
-                                            li.white.hover data-value="under consideration" {"Under Consideration"}
-                                            li.white.hover data-value="submitted" {"Submitted"}
-                                        }
+                    div.flex.col {
+                        h3 style = "font-size:1.1em; margin-top: 10px" {
+                            "Record #"
+                            i#record-id {}
+                            " - "
+                            div.dropdown-menu.js-search#edit-record-status style = "max-width: 220px"{
+                                input type="text" style = "color: #444446; font-weight: bold;";
+                                div.menu {
+                                    ul {
+                                        li.white.hover data-value="approved" {"Approved"}
+                                        li.white.hover data-value="rejected" {"Rejected"}
+                                        li.white.hover data-value="under consideration" {"Under Consideration"}
+                                        li.white.hover data-value="submitted" {"Submitted"}
                                     }
                                 }
                             }
-
-                            iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
-                            p.info-red.output style = "margin: 10px" {}
-                            p.info-green.output style = "margin: 10px" {}
-                            div.stats-container.flex.space  {
-                                span{
-                                    b {
-                                        i.fa.fa-pencil.clickable#record-video-pen aria-hidden = "true" {} " Video Link:"
-                                    }
-                                    br;
-                                    a.link#record-video-link target = "_blank" {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        i.fa.fa-pencil.clickable#record-demon-pen aria-hidden = "true" {} " Demon:"
-                                    }
-                                    br;
-                                    span#record-demon {}
-                                }
-                                span {
-                                    b {
-                                        i.fa.fa-pencil.clickable#record-holder-pen aria-hidden = "true" {} " Record Holder:"
-                                    }
-                                    br;
-                                    span#record-holder {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        i.fa.fa-pencil.clickable#record-progress-pen aria-hidden = "true" {} " Progress:"
-                                    }
-                                    br;
-                                    span#record-progress {}
-                                }
-                                span {
-                                    b {
-                                        "Submitter ID:"
-                                    }
-                                    br;
-                                    span#record-submitter {}
-                                }
-                            }
-                            span.button.red.hover#record-delete style = "margin: 15px auto 0px" {"Delete Record"};
                         }
+
+                        iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
+                        p.info-red.output style = "margin: 10px" {}
+                        p.info-green.output style = "margin: 10px" {}
+                        div.stats-container.flex.space  {
+                            span{
+                                b {
+                                    i.fa.fa-pencil.clickable#record-video-pen aria-hidden = "true" {} " Video Link:"
+                                }
+                                br;
+                                a.link#record-video-link target = "_blank" {}
+                            }
+                        }
+                        div.stats-container.flex.space {
+                            span {
+                                b {
+                                    i.fa.fa-pencil.clickable#record-demon-pen aria-hidden = "true" {} " Demon:"
+                                }
+                                br;
+                                span#record-demon {}
+                            }
+                            span {
+                                b {
+                                    i.fa.fa-pencil.clickable#record-holder-pen aria-hidden = "true" {} " Record Holder:"
+                                }
+                                br;
+                                span#record-holder {}
+                            }
+                        }
+                        div.stats-container.flex.space {
+                            span {
+                                b {
+                                    i.fa.fa-pencil.clickable#record-progress-pen aria-hidden = "true" {} " Progress:"
+                                }
+                                br;
+                                span#record-progress {}
+                            }
+                            span {
+                                b {
+                                    "Submitter ID:"
+                                }
+                                br;
+                                span#record-submitter {}
+                            }
+                        }
+                        span.button.red.hover#record-delete style = "margin: 15px auto 0px" {"Delete Record"};
                     }
                 }
+
             }
         }
     }

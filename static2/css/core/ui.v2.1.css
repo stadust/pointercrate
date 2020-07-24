@@ -152,7 +152,7 @@ a {
   align-items: center;
 }
 
-.flex:not(.no-stretch) > * {
+.flex:not(.no-stretch) > *:not(.no-stretch) {
   flex-grow: 1;
 }
 

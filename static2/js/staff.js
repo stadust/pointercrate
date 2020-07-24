@@ -1,11 +1,10 @@
 import { initialize as initProfile } from "./account/profile.js";
 import { initialize as initUsers } from "./account/users.js";
-import { initialize as initRecords } from "./account/records.js";
+import { initialize as initRecords, recordManager } from "./account/records.js";
 import { initialize as initPlayers } from "./account/player.js";
 import { TabbedPane } from "./modules/tab.mjs";
 
 let usersInitialized = false;
-let recordsInitialized = false;
 let playersInitialized = false;
 
 $(document).ready(function () {
@@ -30,16 +29,14 @@ $(document).ready(function () {
   });
 
   accountTabber.addSwitchListener("3", () => {
-    if (!recordsInitialized) {
+    if (recordManager == null) {
       initRecords(csrfToken);
-
-      recordsInitialized = true;
     }
   });
 
   accountTabber.addSwitchListener("4", () => {
     if (!playersInitialized) {
-      initPlayers(csrfToken);
+      initPlayers(csrfToken, accountTabber);
     }
     playersInitialized = true;
   });

@@ -435,7 +435,7 @@ function setupRecordFilterPlayerIdForm() {
 
   playerId.addValidator(valueMissing, "Player ID required");
   recordFilterPlayerIdForm.onSubmit(function (event) {
-    window.recordManager.updateQueryData("player", playerId.value);
+    recordManager.updateQueryData("player", playerId.value);
   });
 }
 

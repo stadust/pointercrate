@@ -7,6 +7,7 @@ import {
   FilteredViewer,
   valueMissing,
 } from "../modules/form.mjs";
+import { recordManager } from "./records.js";
 
 export let playerManager;
 
@@ -152,9 +153,16 @@ function setupPlayerSearchPlayerIdForm() {
   });
 }
 
-export function initialize(csrfToken) {
+export function initialize(csrfToken, tabber) {
   setupPlayerSearchPlayerIdForm();
 
   playerManager = new PlayerManager(csrfToken);
   playerManager.initialize();
+
+  document
+    .getElementById("player-list-records")
+    .addEventListener("click", () => {
+      tabber.selectPane("3"); // definitely initializes the record manager
+      recordManager.updateQueryData("player", playerManager.currentPlayer.id);
+    });
 }

@@ -14,54 +14,57 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                         p.viewer-welcome {
                             "Click on a player on the left to get started!"
                         }
-                        div.viewer-content.flex.col {
-                            h3 style = "font-size:1.1em; margin: 10px 0" {
-                                "Player #"
-                                i#player-player-id {}
-                                " - "
-                                i.fa.fa-pencil.clickable#player-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#player-player-name {}
-                            }
-                            p.info-red.output style = "margin: 10px" {}
-                            p.info-green.output style = "margin: 10px" {}
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Banned:"
-                                    }
-                                    br;
-                                    div.dropdown-menu.js-search#edit-player-banned style = "max-width: 50px"{
-                                        input type="text" style = "color: #444446; font-weight: bold;";
-                                        div.menu {
-                                            ul {
-                                                li.white.hover data-value="true" {"yes"}
-                                                li.white.hover data-value="false" {"no"}
+                        div.viewer-content {
+                            div.flex.col{
+                                h3 style = "font-size:1.1em; margin: 10px 0" {
+                                    "Player #"
+                                    i#player-player-id {}
+                                    " - "
+                                    i.fa.fa-pencil.clickable#player-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#player-player-name {}
+                                }
+                                p.info-red.output style = "margin: 10px" {}
+                                p.info-green.output style = "margin: 10px" {}
+                                div.stats-container.flex.space {
+                                    span {
+                                        b {
+                                            "Banned:"
+                                        }
+                                        br;
+                                        div.dropdown-menu.js-search#edit-player-banned style = "max-width: 50px"{
+                                            input type="text" style = "color: #444446; font-weight: bold;";
+                                            div.menu {
+                                                ul {
+                                                    li.white.hover data-value="true" {"yes"}
+                                                    li.white.hover data-value="false" {"no"}
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                span {
-                                    b {
-                                        "Nationality:"
-                                    }
-                                    br;
-                                    div.dropdown-menu.js-search#edit-player-nationality data-default = "None" {
-                                        input type="text" style = "color: #444446; font-weight: bold;";
-                                        div.menu {
-                                            ul {
-                                                li.white.hover.underlined data-value = "None" {"None"}
-                                                @for nation in nationalities {
-                                                    li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                                                        span class = {"flag-icon flag-icon-" (nation.iso_country_code.to_lowercase())} {}
-                                                        (PreEscaped("&nbsp;"))
-                                                        b {(nation.iso_country_code)}
-                                                        br;
-                                                        span style = "font-size: 90%; font-style: italic" {(nation.nation)}
+                                    span {
+                                        b {
+                                            "Nationality:"
+                                        }
+                                        br;
+                                        div.dropdown-menu.js-search#edit-player-nationality data-default = "None" {
+                                            input type="text" style = "color: #444446; font-weight: bold;";
+                                            div.menu {
+                                                ul {
+                                                    li.white.hover.underlined data-value = "None" {"None"}
+                                                    @for nation in nationalities {
+                                                        li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
+                                                            span class = {"flag-icon flag-icon-" (nation.iso_country_code.to_lowercase())} {}
+                                                            (PreEscaped("&nbsp;"))
+                                                            b {(nation.iso_country_code)}
+                                                            br;
+                                                            span style = "font-size: 90%; font-style: italic" {(nation.nation)}
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                                span.button.blue.hover#player-list-records style = "margin: 15px auto 0px" {"Show records in record manager"};
                             }
                         }
                     }
