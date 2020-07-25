@@ -143,11 +143,11 @@ impl Demon {
     }
 
     pub async fn remove_video(&mut self, connection: &mut PgConnection) -> Result<()> {
-        self.video = None;
-
         sqlx::query!("UPDATE demons SET video = NULL WHERE id = $1", self.base.id)
             .execute(connection)
             .await?;
+
+        self.video = None;
 
         Ok(())
     }
