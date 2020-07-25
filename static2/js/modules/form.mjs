@@ -697,7 +697,6 @@ export class Form extends Output {
     this.invalidHandler = undefined;
     this.errorOutput = this.html.getElementsByClassName("output")[0];
     this.successOutput = this.html.getElementsByClassName("output")[1];
-    this._clearOnSubmit = false;
     this._errorRedirects = {};
 
     for (var input of this.html.getElementsByClassName("form-input")) {
@@ -722,12 +721,6 @@ export class Form extends Output {
           if (this.submitHandler !== undefined) {
             // todo: maybe just pass the result of .serialize here?
             this.submitHandler(event);
-
-            if (this._clearOnSubmit) {
-              for (let input of this.inputs) {
-                input.value = "";
-              }
-            }
           }
         } else if (this.invalidHandler !== undefined) {
           this.invalidHandler();
@@ -737,8 +730,10 @@ export class Form extends Output {
     );
   }
 
-  setClearOnSubmit(clear) {
-    this._clearOnSubmit = clear;
+  clear() {
+    for (let input of this.inputs) {
+      input.value = "";
+    }
   }
 
   /**

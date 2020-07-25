@@ -359,7 +359,7 @@ export function initialize(csrfToken) {
   setupEditRecordForm(csrfToken);
   setupRecordSearchRecordIdForm();
 
-  initializeRecordSubmitter();
+  initializeRecordSubmitter(csrfToken, true);
 
   recordManager = new RecordManager(csrfToken);
   return recordManager.initialize();

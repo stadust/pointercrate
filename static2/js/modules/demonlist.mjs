@@ -33,10 +33,8 @@ export function embedVideo(video) {
   }
 }
 
-export function initializeRecordSubmitter() {
+export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
   var submissionForm = new Form(document.getElementById("submission-form"));
-
-  submissionForm.setClearOnSubmit(true);
 
   var demon = submissionForm.input("id_demon");
   var player = submissionForm.input("id_player");
@@ -67,10 +65,18 @@ export function initializeRecordSubmitter() {
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
   submissionForm.onSubmit(function (event) {
-    post("/api/v1/records/", {}, submissionForm.serialize())
-      .then((response) =>
-        submissionForm.setSuccess("Record successfully submitted")
-      )
+    let data = submissionForm.serialize();
+    let headers = {};
+
+    if (submitApproved) {
+      data.status = "approved";
+      headers["X-CSRF-TOKEN"] = csrf;
+    }
+    post("/api/v1/records/", headers, data)
+      .then((response) => {
+        submissionForm.setSuccess("Record successfully submitted");
+        submissionForm.clear();
+      })
       .catch((response) => submissionForm.setError(response.data.message)); // TODO: maybe specially handle some error codes
   });
 }
