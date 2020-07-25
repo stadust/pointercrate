@@ -1,6 +1,5 @@
 import {
   Dropdown,
-  get,
   Form,
   post,
   valueMissing,
@@ -64,7 +63,7 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
-  submissionForm.onSubmit(function (event) {
+  submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
     let headers = {};
 
@@ -73,7 +72,7 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
       headers["X-CSRF-TOKEN"] = csrf;
     }
     post("/api/v1/records/", headers, data)
-      .then((response) => {
+      .then(() => {
         submissionForm.setSuccess("Record successfully submitted");
         submissionForm.clear();
       })

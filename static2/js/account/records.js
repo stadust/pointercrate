@@ -1,5 +1,3 @@
-"use strict";
-
 import {
   post,
   del,
@@ -288,7 +286,7 @@ function setupRecordFilterPlayerIdForm() {
   var playerId = recordFilterPlayerIdForm.input("record-player-id");
 
   playerId.addValidator(valueMissing, "Player ID required");
-  recordFilterPlayerIdForm.onSubmit(function (event) {
+  recordFilterPlayerIdForm.onSubmit(function () {
     recordManager.updateQueryData("player", playerId.value);
   });
 }
@@ -300,7 +298,7 @@ function setupRecordSearchRecordIdForm() {
   var recordId = recordSearchByIdForm.input("record-record-id");
 
   recordId.addValidator(valueMissing, "Record ID required");
-  recordSearchByIdForm.onSubmit(function (event) {
+  recordSearchByIdForm.onSubmit(function () {
     recordManager
       .selectArbitrary(parseInt(recordId.value))
       .catch(displayError(recordSearchByIdForm));
@@ -317,7 +315,7 @@ function setupRecordFilterPlayerNameForm() {
     "Player name required": valueMissing,
   });
 
-  recordFilterPlayerNameForm.onSubmit(function (event) {
+  recordFilterPlayerNameForm.onSubmit(function () {
     get("/api/v1/players/?name=" + playerName.value)
       .then((response) => {
         let json = response.data;

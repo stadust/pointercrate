@@ -177,7 +177,7 @@ export function setupDropdownEditor(
 
   dropdown.addEventListener((selected) => {
     let data = {};
-    if (translationTable.hasOwnProperty(selected)) {
+    if (Object.prototype.hasOwnProperty.call(translationTable, selected)) {
       data[field] = translationTable[selected];
     } else {
       data[field] = selected;

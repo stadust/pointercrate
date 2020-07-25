@@ -40,7 +40,7 @@ function setupGetAccessToken() {
     "Password too short. It needs to be at least 10 characters long.": tooShort,
   });
 
-  loginForm.onSubmit(function (event) {
+  loginForm.onSubmit(function () {
     post("/api/v1/auth/", {
       Authorization:
         "Basic " + btoa(window.username + ":" + loginPassword.value),
@@ -215,19 +215,15 @@ function setupInvalidateToken() {
     },
   });
 
-  invalidateForm.onSubmit(function (event) {
+  invalidateForm.addErrorOverride(40100, "invalidate-auth-password");
+
+  invalidateForm.onSubmit(function () {
     post("/api/v1/auth/invalidate/", {
       Authorization:
         "Basic " + btoa(window.username + ":" + invalidatePassword.value),
     })
-      .then((response) => window.location.reload())
-      .catch((response) => {
-        if (response.data.code == 40100) {
-          loginPassword.setError("Invalid credentials");
-        } else {
-          invalidateForm.setError(response.data.message);
-        }
-      });
+      .then(() => window.location.reload())
+      .catch(displayError(invalidateForm));
   });
 }
 

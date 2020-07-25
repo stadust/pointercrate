@@ -88,7 +88,7 @@ function setupPlayerSearchPlayerIdForm() {
   var playerId = playerSearchByIdForm.input("search-player-id");
 
   playerId.addValidator(valueMissing, "Player ID required");
-  playerSearchByIdForm.onSubmit(function (event) {
+  playerSearchByIdForm.onSubmit(function () {
     playerManager
       .selectArbitrary(parseInt(playerId.value))
       .catch(displayError(playerSearchByIdForm));

@@ -69,7 +69,7 @@ function setupSubmitterSearchSubmitterIdForm() {
   var submitterId = submitterSearchByIdForm.input("search-submitter-id");
 
   submitterId.addValidator(valueMissing, "Submitter ID required");
-  submitterSearchByIdForm.onSubmit(function (event) {
+  submitterSearchByIdForm.onSubmit(function () {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))
       .catch(displayError(submitterSearchByIdForm));

@@ -16,7 +16,7 @@ let editForm;
 
 function setupPatchUserPermissionsForm(csrfToken) {
   editForm = new Form(document.getElementById("patch-permissions"));
-  editForm.onSubmit(function (event) {
+  editForm.onSubmit(function () {
     patch(
       "/api/v1/users/" + selectedUser.id + "/",
       {
@@ -55,7 +55,7 @@ function setupPatchUserPermissionsForm(csrfToken) {
         "X-CSRF-TOKEN": csrfToken,
         "If-Match": selectedUser.etag,
       })
-        .then((response) => editForm.setSuccess("Successfully deleted user!"))
+        .then(() => editForm.setSuccess("Successfully deleted user!"))
         .catch(displayError(editForm));
     });
   }
