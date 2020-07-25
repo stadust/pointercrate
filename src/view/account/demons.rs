@@ -248,7 +248,7 @@ fn change_publisher_dialog() -> Markup {
                             "Change the publisher of this demon. If the player you want to change the publisher to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
                         }
                         form.flex.col novalidate = "" {
-                            p.info-red.output {}
+                            p.info-red.output {}k
                             p.info-green.output {}
                             span.form-input#demon-publisher-name-edit {
                                 label for = "publisher" {"Publisher name:"}

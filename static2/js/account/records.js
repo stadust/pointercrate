@@ -206,7 +206,7 @@ function createNoteHtml(note, csrfToken) {
       if (confirm("This action will irrevocably delete this note. Proceed?")) {
         del(
           "/api/v1/records/" +
-            recordManager.currentRecord.id +
+            recordManager.currentObject.id +
             "/notes/" +
             note.id +
             "/",
@@ -260,7 +260,7 @@ function setupAddNote(csrfToken) {
 
   add.addEventListener("click", () => {
     post(
-      "/api/v1/records/" + recordManager.currentRecord.id + "/notes/",
+      "/api/v1/records/" + recordManager.currentObject.id + "/notes/",
       { "X-CSRF-TOKEN": csrfToken },
       { content: textArea.value }
     )
@@ -339,9 +339,9 @@ function setupEditRecordForm(csrfToken) {
         "Are you sure? This will irrevocably delete this record and all notes made on it!"
       )
     ) {
-      del("/api/v1/records/" + recordManager.currentRecord.id + "/", {
+      del("/api/v1/records/" + recordManager.currentObject.id + "/", {
         "X-CSRF-TOKEN": csrfToken,
-        "If-Match": window.recordManager.currentRecordEtag,
+        "If-Match": window.recordManager.currentEtag,
       }).then(() => {
         $(recordManager._content).hide(100);
         $(recordManager._notes.parentElement).hide(100);

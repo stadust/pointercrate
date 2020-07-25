@@ -29,9 +29,6 @@ export class DemonManager extends FilteredPaginator {
 
     this.retrievalEndpoint = "/api/v2/demons/";
 
-    this.currentDemon = null;
-    this.currentDemonEtag = null;
-
     this._id = document.getElementById("demon-demon-id");
     this._name = document.getElementById("demon-demon-name");
 
@@ -134,15 +131,12 @@ export class DemonManager extends FilteredPaginator {
       return;
     }
 
-    this.currentDemon = response.data.data;
-    this.currentDemonEtag = response.headers["etag"];
+    this._id.innerText = this.currentObject.id;
+    this._name.innerText = this.currentObject.name;
+    this._position.innerText = this.currentObject.position;
+    this._requirement.innerText = this.currentObject.requirement;
 
-    this._id.innerText = this.currentDemon.id;
-    this._name.innerText = this.currentDemon.name;
-    this._position.innerText = this.currentDemon.position;
-    this._requirement.innerText = this.currentDemon.requirement;
-
-    var embeddedVideo = embedVideo(this.currentDemon.video);
+    var embeddedVideo = embedVideo(this.currentObject.video);
 
     if (embeddedVideo !== undefined) {
       this._video.style.display = "block";
@@ -152,22 +146,22 @@ export class DemonManager extends FilteredPaginator {
       this._video.style.display = "none";
     }
 
-    if (this.currentDemon.video) {
-      this._video_link.href = this.currentDemon.video;
-      this._video_link.innerHTML = this.currentDemon.video;
+    if (this.currentObject.video) {
+      this._video_link.href = this.currentObject.video;
+      this._video_link.innerHTML = this.currentObject.video;
     } else {
       this._video_link.style.display = "none";
     }
 
     this._publisher.innerHTML =
-      this.currentDemon.publisher.name +
+      this.currentObject.publisher.name +
       " (" +
-      this.currentDemon.publisher.id +
+      this.currentObject.publisher.id +
       ")";
     this._verifier.innerHTML =
-      this.currentDemon.verifier.name +
+      this.currentObject.verifier.name +
       " (" +
-      this.currentDemon.verifier.id +
+      this.currentObject.verifier.id +
       ")";
   }
 }
