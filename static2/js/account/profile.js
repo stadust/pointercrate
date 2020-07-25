@@ -179,25 +179,15 @@ function setupEditAccount() {
     "Password too short. It needs to be at least 10 characters long.": tooShort,
   });
 
+  deleteAccountForm.addErrorOverride(40100, "auth-delete");
+
   deleteAccountForm.onSubmit(() => {
     del("/api/v1/auth/me/", {
       "If-Match": window.etag,
       Authorization: "Basic " + btoa(window.username + ":" + deleteAuth.value),
     })
       .then(() => window.location.reload())
-      .catch(
-        displayError(deleteAccountForm.errorOutput, {
-          40100: () => deleteAuth.setError("Invalid credentials"),
-          41200: () =>
-            deleteAccountForm.setError(
-              "Concurrent account access was made. Please reload the page"
-            ),
-          41800: () =>
-            deleteAccountForm.setError(
-              "Concurrent account access was made. Please reload the page"
-            ),
-        })
-      );
+      .catch(displayError(deleteAccountForm));
   });
 }
 

@@ -91,7 +91,7 @@ function setupPlayerSearchPlayerIdForm() {
   playerSearchByIdForm.onSubmit(function (event) {
     playerManager
       .selectArbitrary(parseInt(playerId.value))
-      .catch(displayError(playerSearchByIdForm.errorOutput));
+      .catch(displayError(playerSearchByIdForm));
   });
 }
 
