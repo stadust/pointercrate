@@ -5,11 +5,14 @@ import {
   valueMissing,
   tooShort,
   post,
-  patch,
+  Output,
   typeMismatch,
+  del,
+  displayError,
 } from "../modules/form.mjs";
-import { displayError } from "../modules/form.mjs";
-import { del } from "../modules/form.mjs";
+import { EditorBackend } from "../modules/form.mjs";
+import { setupFormDialogEditor } from "../modules/form.mjs";
+import { Input } from "../modules/form.mjs";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");
@@ -58,67 +61,71 @@ function setupGetAccessToken() {
   });
 }
 
-function setupEditAccount() {
-  var editDisplayNameDialog = document.getElementById("edit-dn-dialog");
-  var editDisplayNameForm = new Form(
-    editDisplayNameDialog.getElementsByTagName("form")[0]
-  );
-  document.getElementById("display-name-pen").addEventListener("click", () => {
-    $(editDisplayNameDialog.parentElement).show();
-  });
+class ProfileEditorBackend extends EditorBackend {
+  constructor(passwordInput) {
+    super();
 
-  var authPassword = editDisplayNameForm.input("auth-dn");
+    this._pw = passwordInput;
+    this._displayName = document.getElementById("profile-display-name");
+    this._youtube = document.getElementById("profile-youtube-channel");
+  }
 
-  authPassword.addValidators({
-    "Password required": valueMissing,
-    "Password too short. It needs to be at least 10 characters long.": tooShort,
-  });
+  url() {
+    return "/api/v1/auth/me/";
+  }
 
-  function editHandler(form, auth, handlers) {
-    return () => {
-      patch(
-        "/api/v1/auth/me/",
-        {
-          "If-Match": window.etag,
-          Authorization: "Basic " + btoa(window.username + ":" + auth.value),
-        },
-        form.serialize()
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            form.setSuccess("Nothing changed!");
-          } else {
-            window.location.reload();
-          }
-        })
-        .catch(displayError(form.errorOutput, handlers));
+  headers() {
+    return {
+      "If-Match": window.etag,
+      Authorization: "Basic " + btoa(window.username + ":" + this._pw.value),
     };
   }
 
-  editDisplayNameForm.onSubmit(
-    editHandler(editDisplayNameForm, authPassword, {
-      40100: () => authPassword.setError("Invalid credentials"),
-      41200: () =>
-        editDisplayNameForm.setError(
-          "Concurrent account access was made. Please reload the page"
-        ),
-      41800: () =>
-        editDisplayNameForm.setError(
-          "Concurrent account access was made. Please reload the page"
-        ),
-    })
+  onSuccess(response) {
+    if (response.status == 204) {
+      window.location.reload();
+    } else {
+      window.etag = response.headers["etag"];
+      window.username = response.data.data.name;
+
+      this._displayName.innerText = response.data.data.display_name || "-";
+      this._youtube.removeChild(this._youtube.lastChild); // only ever has one child
+      if (response.data.data.youtube_channel) {
+        let a = document.createElement("a");
+        a.href = response.data.data.youtube_channel;
+        a.classList.add("link");
+        this._youtube.appendChild(a);
+      } else {
+        this._youtube.innerText = "-";
+      }
+    }
+  }
+}
+
+function setupEditAccount() {
+  let output = new Output(document.getElementById("things"));
+  let editDisplayNameForm = setupFormDialogEditor(
+    new ProfileEditorBackend(new Input(document.getElementById("auth-dn"))), // not pretty, but oh well
+    "edit-dn-dialog",
+    "display-name-pen",
+    output
   );
 
-  var editYoutubeDialog = document.getElementById("edit-yt-dialog");
-  var editYoutubeForm = new Form(
-    editYoutubeDialog.getElementsByTagName("form")[0]
-  );
-  document.getElementById("youtube-pen").addEventListener("click", () => {
-    $(editYoutubeDialog.parentElement).show();
+  editDisplayNameForm.addValidators({
+    "auth-dn": {
+      "Password required": valueMissing,
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+    },
   });
 
-  var ytAuth = editYoutubeForm.input("auth-yt");
-  var editYt = editYoutubeForm.input("edit-yt");
+  editDisplayNameForm.addErrorOverride(40100, "auth-dn");
+
+  let editYoutubeForm = setupFormDialogEditor(
+    new ProfileEditorBackend(new Input(document.getElementById("auth-yt"))), // not pretty, but oh well
+    "edit-yt-dialog",
+    "youtube-pen",
+    output
+  );
 
   editYoutubeForm.addValidators({
     "edit-yt": {
@@ -130,59 +137,33 @@ function setupEditAccount() {
     },
   });
 
-  editYoutubeForm.onSubmit(
-    editHandler(editYoutubeForm, ytAuth, {
-      40100: () => ytAuth.setError("Invalid credentials"),
-      41200: () =>
-        editYoutubeForm.setError(
-          "Concurrent account access was made. Please reload the page"
-        ),
-      41800: () =>
-        editYoutubeForm.setError(
-          "Concurrent account access was made. Please reload the page"
-        ),
-      42225: () => editYt.setError(response.data.message),
-    })
+  editYoutubeForm.addErrorOverride(40100, "auth-yt");
+  editYoutubeForm.addErrorOverride(42225, "edit-yt");
+
+  let changePasswordForm = setupFormDialogEditor(
+    new ProfileEditorBackend(new Input(document.getElementById("auth-pw"))), // not pretty, but oh well
+    "edit-pw-dialog",
+    "change-password",
+    output
   );
 
-  var changePasswordDialog = document.getElementById("edit-pw-dialog");
-  var changePasswordForm = new Form(
-    changePasswordDialog.getElementsByTagName("form")[0]
-  );
-  document.getElementById("change-password").addEventListener("click", () => {
-    $(changePasswordDialog.parentElement).show();
+  let editPw = changePasswordForm.input("edit-pw");
+
+  changePasswordForm.addValidators({
+    "auth-pw": {
+      "Password required": valueMissing,
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+    },
+    "edit-pw": {
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+    },
+    "edit-pw-repeat": {
+      "Password too short. It needs to be at least 10 characters long.": tooShort,
+      "Passwords don't match": (rpp) => rpp.value == editPw.value,
+    },
   });
 
-  var pwAuth = changePasswordForm.input("auth-pw");
-  var editPw = changePasswordForm.input("edit-pw");
-  var editPwRepeat = changePasswordForm.input("edit-pw-repeat");
-
-  pwAuth.addValidators({
-    "Password required": valueMissing,
-    "Password too short. It needs to be at least 10 characters long.": tooShort,
-  });
-  editPw.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-  editPwRepeat.addValidators({
-    "Password too short. It needs to be at least 10 characters long.": tooShort,
-    "Passwords don't match": (rpp) => rpp.value == editPw.value,
-  });
-
-  changePasswordForm.onSubmit(
-    editHandler(changePasswordForm, pwAuth, {
-      40100: () => ytAuth.setError("Invalid credentials"),
-      41200: () =>
-        editYoutubeForm.setError(
-          "Concurrent account access was made. Please reload the page"
-        ),
-      41800: () =>
-        editYoutubeForm.setError(
-          "Concurrent account access was made. Please reload the page"
-        ),
-    })
-  );
+  changePasswordForm.addErrorOverride(40100, "auth-pw");
 
   var deleteAccountDialog = document.getElementById("delete-acc-dialog");
   var deleteAccountForm = new Form(

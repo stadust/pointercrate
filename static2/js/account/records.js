@@ -2,7 +2,6 @@
 
 import {
   post,
-  patch,
   del,
   get,
   displayError,
@@ -13,27 +12,34 @@ import {
   rangeUnderflow,
   rangeOverflow,
   stepMismatch,
+  Paginator,
   typeMismatch,
+  Viewer,
+  setupFormDialogEditor,
+  Output,
+  setupDropdownEditor,
+  setupDialogEditor,
+  PaginatorEditorBackend,
 } from "../modules/form.mjs";
 import {
   initializeRecordSubmitter,
-  generatePlayer,
   generateRecord,
   embedVideo,
 } from "../modules/demonlist.mjs";
-import { FilteredPaginator } from "../modules/form.mjs";
-import { Viewer } from "../modules/form.mjs";
+import { setupPlayerSelectionEditor } from "../modules/demonlist.mjs";
 
 export let recordManager;
 
-class RecordManager extends Viewer {
+class RecordManager extends Paginator {
   constructor(tok) {
     super("record-pagination", {}, generateRecord);
 
     var manager = document.getElementById("record-manager");
 
-    this.currentRecord = null;
-    this.currentRecordEtag = null;
+    this.output = new Viewer(
+      manager.getElementsByClassName("viewer-content")[0],
+      this
+    );
 
     this._video = document.getElementById("record-video");
     this._video_link = document.getElementById("record-video-link");
@@ -62,159 +68,75 @@ class RecordManager extends Viewer {
       else this.updateQueryData("status", selected);
     });
 
-    this._status = new Dropdown(document.getElementById("edit-record-status"));
-    this._status.addEventListener((selected) => {
-      if (selected != this.currentRecord.status) {
-        patch(
-          "/api/v1/records/" + this.currentRecord.id + "/",
-          {
-            "X-CSRF-TOKEN": this._tok,
-            "If-Match": this.currentRecordEtag,
-          },
-          { status: selected }
-        )
-          .then((response) => {
-            if (response.status == 304) {
-              this.setSuccess("Nothing changed!");
-            } else {
-              // directly refresh the record manager :pog:
-              this.refresh();
-              this.onReceive(response);
-
-              this.setSuccess("Record status successfully edited!");
-            }
-          })
-          .catch(displayError(this.errorOutput));
-      }
-    });
+    this._status = setupDropdownEditor(
+      new PaginatorEditorBackend(this, this._tok, true),
+      "edit-record-status",
+      "status",
+      this.output
+    );
 
     this.initProgressDialog();
     this.initVideoDialog();
-    new HolderDialog();
+    setupPlayerSelectionEditor(
+      new PaginatorEditorBackend(this, this._tok, true),
+      "record-holder-dialog-pagination",
+      "record-holder-pen",
+      this.output
+    );
     this.initDemonDialog();
   }
 
   initProgressDialog() {
-    var editProgressDialog = document.getElementById("record-progress-dialog");
-    var editProgressForm = new Form(
-      editProgressDialog.getElementsByTagName("form")[0]
+    let form = setupFormDialogEditor(
+      new PaginatorEditorBackend(this, this._tok, true),
+      "record-progress-dialog",
+      "record-progress-pen",
+      this.output
     );
-    document
-      .getElementById("record-progress-pen")
-      .addEventListener("click", () => {
-        $(editProgressDialog.parentElement).show();
-      });
 
-    let progress = editProgressForm.input("record-progress-edit");
-
-    progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
-    progress.addValidator(
-      rangeOverflow,
-      "Record progress cannot be larger than 100%"
-    );
-    progress.addValidator(badInput, "Record progress must be a valid integer");
-    progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
-
-    editProgressForm.onSubmit(() => {
-      patch(
-        "/api/v1/records/" + this.currentRecord.id + "/",
-        {
-          "X-CSRF-TOKEN": this._tok,
-          "If-Match": this.currentRecordEtag,
-        },
-        editProgressForm.serialize()
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            // directly refresh the record manager :pog:
-            this.refresh();
-            this.onReceive(response);
-            this.setSuccess("Record progress successfully edited!");
-          }
-          $(editProgressDialog.parentElement).hide();
-        })
-        .catch(
-          displayError(editProgressForm.errorOutput, {
-            42215: (response) => progress.setError(response.message),
-          })
-        );
+    form.addValidators({
+      "record-progress-edit": {
+        "Record progress cannot be negative": rangeUnderflow,
+        "Record progress cannot be larger than 100%": rangeOverflow,
+        "Record progress must be a valid integer": badInput,
+        "Record progress mustn't be a decimal": stepMismatch,
+        "Please enter a progress value": valueMissing,
+      },
     });
+
+    form.addErrorOverride(42215, "record-progress-edit");
   }
 
   initVideoDialog() {
-    var editVideoDialog = document.getElementById("record-video-dialog");
-    var editVideoForm = new Form(
-      editVideoDialog.getElementsByTagName("form")[0]
+    let form = setupFormDialogEditor(
+      new PaginatorEditorBackend(this, this._tok, false),
+      "record-video-dialog",
+      "record-video-pen",
+      this.output
     );
-    document
-      .getElementById("record-video-pen")
-      .addEventListener("click", () => {
-        $(editVideoDialog.parentElement).show();
-      });
 
-    let video = editVideoForm.input("record-video-edit");
-
-    video.addValidator(typeMismatch, "Please enter a valid URL");
-
-    editVideoForm.onSubmit(() => {
-      patch(
-        "/api/v1/records/" + this.currentRecord.id + "/",
-        {
-          "X-CSRF-TOKEN": this._tok,
-          "If-Match": this.currentRecordEtag,
-        },
-        editVideoForm.serialize()
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            this.onReceive(response);
-            this.setSuccess("Record video successfully edited!");
-          }
-          $(editVideoDialog.parentElement).hide();
-        })
-        .catch(displayError(video.errorOutput));
+    form.addValidators({
+      "record-video-edit": {
+        "Please enter a valid URL": typeMismatch,
+      },
     });
+
+    for (let errorCode of [42222, 42223, 42224, 42225]) {
+      form.addErrorOverride(errorCode, "record-video-edit");
+    }
   }
 
   initDemonDialog() {
-    var editDemonDialog = document.getElementById("record-demon-dialog");
-
-    document
-      .getElementById("record-demon-pen")
-      .addEventListener("click", () => {
-        $(editDemonDialog.parentElement).show();
-      });
-
-    new Dropdown(document.getElementById("edit-demon-record")).addEventListener(
-      (demonId) => {
-        patch(
-          "/api/v1/records/" + this.currentRecord.id + "/",
-          {
-            "X-CSRF-TOKEN": this._tok,
-            "If-Match": this.currentRecordEtag,
-          },
-          { demon_id: parseInt(demonId) }
-        )
-          .then((response) => {
-            if (response.status == 304) {
-              this.setSuccess("Nothing changed!");
-            } else {
-              this.refresh();
-              this.onReceive(response);
-              this.setSuccess("Record demon successfully edited!");
-            }
-            $(editDemonDialog.parentElement).hide();
-          })
-          .catch((response) => {
-            displayError(this.errorOutput)(response);
-            $(editDemonDialog.parentElement).hide();
-          });
-      }
+    var editor = setupDialogEditor(
+      new PaginatorEditorBackend(this, this._tok, true),
+      "record-demon-dialog",
+      "record-demon-pen",
+      this.output
     );
+
+    new Dropdown(
+      document.getElementById("edit-demon-record")
+    ).addEventListener((demonId) => editor({ demon_id: parseInt(demonId) }));
   }
 
   onReceive(response) {
@@ -224,90 +146,41 @@ class RecordManager extends Viewer {
       return;
     }
 
-    var recordData = (this.currentRecord = response.data.data);
-    this.currentRecordEtag = response.headers["etag"];
-
-    var embeddedVideo = embedVideo(recordData.video);
+    var embeddedVideo = embedVideo(this.currentObject.video);
 
     if (embeddedVideo !== undefined) {
       this._video.style.display = "block";
       this._video_link.style.display = "initial";
       this._video.src = embeddedVideo;
-      this._video_link.href = recordData.video;
-      this._video_link.innerHTML = recordData.video;
+      this._video_link.href = this.currentObject.video;
+      this._video_link.innerHTML = this.currentObject.video;
     } else {
       this._video.style.display = "none";
       this._video_link.style.display = "none";
     }
 
-    this._id.innerHTML = recordData.id;
+    this._id.innerHTML = this.currentObject.id;
     this._demon.innerHTML =
-      recordData.demon.name + " (" + recordData.demon.id + ")";
+      this.currentObject.demon.name + " (" + this.currentObject.demon.id + ")";
     this._holder.innerHTML =
-      recordData.player.name + " (" + recordData.player.id + ")";
-    this._status.select(recordData.status);
-    this._progress.innerHTML = recordData.progress + "%";
-    this._submitter.innerHTML = recordData.submitter.id;
+      this.currentObject.player.name +
+      " (" +
+      this.currentObject.player.id +
+      ")";
+    this._status.selectSilently(this.currentObject.status);
+    this._progress.innerHTML = this.currentObject.progress + "%";
+    this._submitter.innerHTML = this.currentObject.submitter.id;
 
     // clear notes
     while (this._notes.firstChild) {
       this._notes.removeChild(this._notes.firstChild);
     }
 
-    for (let note of recordData.notes) {
+    for (let note of this.currentObject.notes) {
       this._notes.appendChild(createNoteHtml(note, this._tok));
     }
 
-    $(this._notes.parentElement).show(100); // TODO: maybe via CSS transform?
-  }
-}
-
-class HolderDialog extends FilteredPaginator {
-  constructor() {
-    super("record-holder-dialog-pagination", generatePlayer, "name_contains");
-
-    this.editHolderDialog = document.getElementById("record-holder-dialog");
-    this.editHolderForm = new Form(
-      this.editHolderDialog.getElementsByTagName("form")[0]
-    );
-    document
-      .getElementById("record-holder-pen")
-      .addEventListener("click", () => {
-        this.initialize();
-        $(this.editHolderDialog.parentElement).show();
-      });
-
-    this.editHolderForm.onSubmit(() =>
-      this.changeHolder(
-        this.editHolderForm.input("record-holder-name-edit").value
-      )
-    );
-  }
-
-  changeHolder(newHolder) {
-    patch(
-      "/api/v1/records/" + recordManager.currentRecord.id + "/",
-      {
-        "X-CSRF-TOKEN": recordManager._tok,
-        "If-Match": recordManager.currentRecordEtag,
-      },
-      { player: newHolder }
-    )
-      .then((response) => {
-        if (response.status == 304) {
-          recordManager.setSuccess("Nothing changed!");
-        } else {
-          recordManager.onReceive(response);
-          recordManager.refresh();
-          recordManager.setSuccess("Record holder successfully edited!");
-        }
-        $(this.editHolderDialog.parentElement).hide();
-      })
-      .catch(displayError(this.editHolderForm.errorOutput));
-  }
-
-  onSelect(selected) {
-    this.changeHolder(selected.dataset.name);
+    $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
   }
 }
 
@@ -381,7 +254,7 @@ function createNoteHtml(note, csrfToken) {
 
 function setupAddNote(csrfToken) {
   let adder = document.getElementById("add-record-note");
-  let output = adder.getElementsByClassName("output")[0];
+  let output = new Output(adder);
   let textArea = adder.getElementsByTagName("textarea")[0];
   let add = adder.getElementsByClassName("button")[0];
 
@@ -404,7 +277,7 @@ function setupAddNote(csrfToken) {
   document
     .getElementById("add-record-note-open")
     .addEventListener("click", () => {
-      $(adder).show(100);
+      $(adder).show(300);
     });
 }
 
@@ -430,7 +303,7 @@ function setupRecordSearchRecordIdForm() {
   recordSearchByIdForm.onSubmit(function (event) {
     recordManager
       .selectArbitrary(parseInt(recordId.value))
-      .catch(displayError(recordSearchByIdForm.errorOutput));
+      .catch(displayError(recordSearchByIdForm));
   });
 }
 
@@ -455,7 +328,7 @@ function setupRecordFilterPlayerNameForm() {
           recordManager.updateQueryData("player", json[0].id);
         }
       })
-      .catch(displayError(recordFilterPlayerNameForm.errorOutput));
+      .catch(displayError(recordFilterPlayerNameForm));
   });
 }
 

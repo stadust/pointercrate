@@ -1,84 +1,45 @@
 import { generatePlayer } from "../modules/demonlist.mjs";
 import {
-  patch,
   displayError,
   Form,
-  Dropdown,
-  FilteredViewer,
   valueMissing,
+  FilteredPaginator,
+  setupFormDialogEditor,
+  PaginatorEditorBackend,
+  setupDropdownEditor,
+  Viewer,
 } from "../modules/form.mjs";
 import { recordManager, initialize as initRecords } from "./records.js";
 
 export let playerManager;
 
-class PlayerManager extends FilteredViewer {
+class PlayerManager extends FilteredPaginator {
   constructor(csrfToken) {
     super("player-pagination", generatePlayer, "name_contains");
 
-    this.currentPlayer = null;
-    this.currentPlayerEtag = null;
+    this.output = new Viewer(
+      this.html.parentNode.getElementsByClassName("viewer-content")[0],
+      this
+    );
 
     this._id = document.getElementById("player-player-id");
     this._name = document.getElementById("player-player-name");
 
-    this._banned = new Dropdown(document.getElementById("edit-player-banned"));
-    this._banned.addEventListener((selected) => {
-      let banned = selected == "true";
-
-      if (banned == this.currentPlayer.banned) return;
-
-      patch(
-        "/api/v1/players/" + this.currentPlayer.id + "/",
-        {
-          "X-CSRF-TOKEN": csrfToken,
-          "If-Match": this.currentPlayerEtag,
-        },
-        { banned: banned }
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            this.refresh();
-            this.onReceive(response);
-
-            this.setSuccess("Player successfully edited!");
-          }
-        })
-        .catch(displayError(this.errorOutput));
-    });
-
-    this._nationality = new Dropdown(
-      document.getElementById("edit-player-nationality")
+    this._banned = setupDropdownEditor(
+      new PaginatorEditorBackend(this, csrfToken, true),
+      "edit-player-banned",
+      "banned",
+      this.output,
+      { true: true, false: false }
     );
-    this._nationality.addEventListener((selected) => {
-      if (selected == "None") selected = null;
-      if (
-        (selected == null && this.currentPlayer.nationality == null) ||
-        (this.currentPlayer.nationality != null &&
-          selected == this.currentPlayer.nationality.country_code)
-      )
-        return;
-      patch(
-        "/api/v1/players/" + this.currentPlayer.id + "/",
-        {
-          "X-CSRF-TOKEN": csrfToken,
-          "If-Match": this.currentPlayerEtag,
-        },
-        { nationality: selected }
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            this.refresh();
-            this.onReceive(response);
 
-            this.setSuccess("Player nationality successfully edited!");
-          }
-        })
-        .catch(displayError(this.errorOutput));
-    });
+    this._nationality = setupDropdownEditor(
+      new PaginatorEditorBackend(this, csrfToken, true),
+      "edit-player-nationality",
+      "nationality",
+      this.output,
+      { None: null }
+    );
 
     this.initNameDialog(csrfToken);
   }
@@ -90,51 +51,32 @@ class PlayerManager extends FilteredViewer {
       return;
     }
 
-    this.currentPlayer = response.data.data;
-    this.currentPlayerEtag = response.headers["etag"];
+    this._id.innerText = this.currentObject.id;
+    this._name.innerText = this.currentObject.name;
 
-    this._id.innerText = this.currentPlayer.id;
-    this._name.innerText = this.currentPlayer.name;
-    this._banned.select(this.currentPlayer.banned.toString());
-    if (this.currentPlayer.nationality) {
-      this._nationality.select(this.currentPlayer.nationality.country_code);
+    this._banned.selectSilently(this.currentObject.banned.toString());
+
+    if (this.currentObject.nationality) {
+      this._nationality.selectSilently(
+        this.currentObject.nationality.country_code
+      );
     } else {
-      this._nationality.select("None");
+      this._nationality.selectSilently("None");
     }
   }
 
   initNameDialog(csrfToken) {
-    var editNameDialog = document.getElementById("player-name-dialog");
-    var editNameForm = new Form(editNameDialog.getElementsByTagName("form")[0]);
-    document.getElementById("player-name-pen").addEventListener("click", () => {
-      $(editNameDialog.parentElement).show();
-    });
+    let form = setupFormDialogEditor(
+      new PaginatorEditorBackend(this, csrfToken, true),
+      "player-name-dialog",
+      "player-name-pen",
+      this.output
+    );
 
-    let name = editNameForm.input("player-name-edit");
-
-    name.addValidator(valueMissing, "Please provide a name for the player");
-
-    editNameForm.onSubmit(() => {
-      patch(
-        "/api/v1/players/" + this.currentPlayer.id + "/",
-        {
-          "X-CSRF-TOKEN": csrfToken,
-          "If-Match": this.currentPlayerEtag,
-        },
-        editNameForm.serialize()
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            // directly refresh the record manager :pog:
-            this.refresh();
-            this.onReceive(response);
-            this.setSuccess("Player name successfully edited!");
-          }
-          $(editNameDialog.parentElement).hide();
-        })
-        .catch(displayError(editNameForm.errorOutput));
+    form.addValidators({
+      "player-name-edit": {
+        "Please provide a name for the player": valueMissing,
+      },
     });
   }
 }
@@ -167,12 +109,12 @@ export function initialize(csrfToken, tabber) {
         initRecords(csrfToken).then(() => {
           recordManager.updateQueryData(
             "player",
-            playerManager.currentPlayer.id
+            playerManager.currentObject.id
           );
           tabber.selectPane("3");
         });
       } else {
-        recordManager.updateQueryData("player", playerManager.currentPlayer.id);
+        recordManager.updateQueryData("player", playerManager.currentObject.id);
         tabber.selectPane("3"); // definitely initializes the record manager
       }
     });

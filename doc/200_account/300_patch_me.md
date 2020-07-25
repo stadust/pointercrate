@@ -25,7 +25,9 @@ other people at least cannot change your password, allowing you to invalidate th
 | display_name    | string | Set to update your diplay name. Set to `null` to reset it                     | true     |
 | youtube_channel | string | Set to update the link to your youtube channel displayed along with your name | true     |
 
-### Response: `200 OK`
+### Response: `200 OK` or `204 NO CONTENT`
+
+In case the password was changed, a `204` is returned and the user has to reauthenticate. Otherwise, a `200` response is generated.
 
 | Header       | Value                                    |
 | ------------ | ---------------------------------------- |

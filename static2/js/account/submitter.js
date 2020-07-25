@@ -1,10 +1,11 @@
 import {
-  patch,
   displayError,
   Form,
-  Dropdown,
   Viewer,
   valueMissing,
+  Paginator,
+  setupDropdownEditor,
+  PaginatorEditorBackend,
 } from "../modules/form.mjs";
 import { recordManager, initialize as initRecords } from "./records.js";
 
@@ -30,43 +31,23 @@ function generateSubmitter(submitter) {
   return li;
 }
 
-class SubmitterManager extends Viewer {
+class SubmitterManager extends Paginator {
   constructor(csrfToken) {
     super("submitter-pagination", {}, generateSubmitter);
 
-    this.currentSubmitter = null;
-    this.currentSubmitterEtag = null;
+    this.output = new Viewer(
+      this.html.parentNode.getElementsByClassName("viewer-content")[0],
+      this
+    );
 
     this._id = document.getElementById("submitter-submitter-id");
-
-    this._banned = new Dropdown(
-      document.getElementById("edit-submitter-banned")
+    this._banned = setupDropdownEditor(
+      new PaginatorEditorBackend(this, csrfToken, true),
+      "edit-submitter-banned",
+      "banned",
+      this.output,
+      { true: true, false: false }
     );
-    this._banned.addEventListener((selected) => {
-      let banned = selected == "true";
-
-      if (banned == this.currentSubmitter.banned) return;
-
-      patch(
-        "/api/v1/submitters/" + this.currentSubmitter.id + "/",
-        {
-          "X-CSRF-TOKEN": csrfToken,
-          "If-Match": this.currentSubmitterEtag,
-        },
-        { banned: banned }
-      )
-        .then((response) => {
-          if (response.status == 304) {
-            this.setSuccess("Nothing changed!");
-          } else {
-            this.refresh();
-            this.onReceive(response);
-
-            this.setSuccess("Submitter successfully edited!");
-          }
-        })
-        .catch(displayError(this.errorOutput));
-    });
   }
 
   onReceive(response) {
@@ -76,11 +57,8 @@ class SubmitterManager extends Viewer {
       return;
     }
 
-    this.currentSubmitter = response.data.data;
-    this.currentSubmitterEtag = response.headers["etag"];
-
-    this._id.innerText = this.currentSubmitter.id;
-    this._banned.select(this.currentSubmitter.banned.toString());
+    this._id.innerText = this.currentObject.id;
+    this._banned.selectSilently(this.currentObject.banned.toString());
   }
 }
 
@@ -94,7 +72,7 @@ function setupSubmitterSearchSubmitterIdForm() {
   submitterSearchByIdForm.onSubmit(function (event) {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))
-      .catch(displayError(submitterSearchByIdForm.errorOutput));
+      .catch(displayError(submitterSearchByIdForm));
   });
 }
 
@@ -112,14 +90,14 @@ export function initialize(csrfToken, tabber) {
         initRecords(csrfToken).then(() => {
           recordManager.updateQueryData(
             "submitter",
-            submitterManager.currentSubmitter.id
+            submitterManager.currentObject.id
           );
           tabber.selectPane("3");
         });
       } else {
         recordManager.updateQueryData(
           "submitter",
-          submitterManager.currentSubmitter.id
+          submitterManager.currentObject.id
         );
         tabber.selectPane("3");
       }

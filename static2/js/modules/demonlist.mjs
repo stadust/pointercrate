@@ -10,8 +10,11 @@ import {
   rangeUnderflow,
   rangeOverflow,
   tooLong,
+  findParentWithClass,
+  FilteredPaginator,
 } from "./form.mjs";
-import { FilteredViewer } from "./form.mjs";
+import { setupFormDialogEditor } from "./form.mjs";
+import { Viewer } from "./form.mjs";
 
 export function embedVideo(video) {
   if (!video) return;
@@ -72,7 +75,7 @@ export function initializeRecordSubmitter() {
   });
 }
 
-export class StatsViewer extends FilteredViewer {
+export class StatsViewer extends FilteredPaginator {
   /**
    * Constructs a new StatsViewer
    *
@@ -85,7 +88,14 @@ export class StatsViewer extends FilteredViewer {
       "name_contains"
     );
 
+    // different from pagination endpoint here!
+    this.retrievalEndpoint = "/api/v1/players/";
+
     this.html = html;
+    this.output = new Viewer(
+      html.getElementsByClassName("viewer-content")[0],
+      this
+    );
 
     this._name = document.getElementById("player-name");
     this._created = document.getElementById("created");
@@ -111,11 +121,6 @@ export class StatsViewer extends FilteredViewer {
         this.updateQueryData("nation", selected);
       }
     });
-  }
-
-  // we have to override this because the pagination endpoint is different from the endpoint we retrieve data from
-  selectArbitrary(id) {
-    return get("/api/v1/players/" + id + "/").then(this.onReceive.bind(this));
   }
 
   onReceive(response) {
@@ -184,6 +189,36 @@ export class StatsViewer extends FilteredViewer {
 
     formatRecordsInto(this._progress, non100Records);
   }
+}
+
+export function setupPlayerSelectionEditor(
+  backend,
+  paginatorId,
+  buttonId,
+  output
+) {
+  let paginator = new FilteredPaginator(
+    paginatorId,
+    generatePlayer,
+    "name_contains"
+  );
+
+  let form = setupFormDialogEditor(
+    backend,
+    findParentWithClass(paginator.html, "dialog").id,
+    buttonId,
+    output
+  );
+
+  let playerName = form.inputs[0];
+
+  playerName.addValidator(valueMissing, "Please provide a player name");
+
+  paginator.initialize();
+  paginator.addSelectionListener((selected) => {
+    playerName.value = selected.name;
+    form.html.requestSubmit();
+  });
 }
 
 export function generatePlayer(player) {

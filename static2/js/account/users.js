@@ -5,12 +5,10 @@ import {
   displayError,
   patch,
   valueMissing,
-  tooShort,
-  get,
   FilteredPaginator,
   Form,
+  Viewer,
 } from "../modules/form.mjs";
-import { FilteredViewer } from "../modules/form.mjs";
 
 let selectedUser;
 let userPaginator;
@@ -45,7 +43,7 @@ function setupPatchUserPermissionsForm(csrfToken) {
           editForm.setSuccess("No changes made!");
         }
       })
-      .catch(displayError(editForm.errorOutput));
+      .catch(displayError(editForm));
   });
 
   let deleteUserButton = document.getElementById("delete-user");
@@ -58,7 +56,7 @@ function setupPatchUserPermissionsForm(csrfToken) {
         "If-Match": selectedUser.etag,
       })
         .then((response) => editForm.setSuccess("Successfully deleted user!"))
-        .catch(displayError(editForm.errorOutput));
+        .catch(displayError(editForm));
     });
   }
 }
@@ -102,9 +100,14 @@ function generateUser(userData) {
   return li;
 }
 
-class UserPaginator extends FilteredViewer {
+class UserPaginator extends FilteredPaginator {
   constructor() {
     super("user-pagination", generateUser, "name_contains", { limit: 10 });
+
+    this.output = new Viewer(
+      this.html.parentNode.getElementsByClassName("viewer-content")[0],
+      this
+    );
   }
 
   onReceive(response) {

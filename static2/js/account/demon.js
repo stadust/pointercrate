@@ -1,11 +1,18 @@
-import { FilteredViewer, get, patch } from "../modules/form.mjs";
 import { generateDemon, embedVideo } from "../modules/demonlist.mjs";
+import { FilteredPaginator, Viewer } from "../modules/form.mjs";
 
 export let demonManager;
 
-export class DemonManager extends FilteredViewer {
+export class DemonManager extends FilteredPaginator {
   constructor(csrfToken) {
     super("demon-pagination", generateDemon, "name_contains");
+
+    this.output = new Viewer(
+      this.html.parentNode.getElementsByClassName("viewer-content")[0],
+      this
+    );
+
+    this.retrievalEndpoint = "/api/v2/demons/";
 
     this.currentDemon = null;
     this.currentDemonEtag = null;
@@ -23,11 +30,6 @@ export class DemonManager extends FilteredViewer {
     this._publisher = document.getElementById("demon-publisher");
 
     this._creators = document.getElementById("demon-creators");
-  }
-
-  selectArbitrary(id) {
-    // pagination endpoint different from data retrieval endpoint!
-    return get("/api/v2/demons/" + id + "/").then(this.onReceive.bind(this));
   }
 
   onReceive(response) {
@@ -51,10 +53,14 @@ export class DemonManager extends FilteredViewer {
       this._video.style.display = "block";
       this._video_link.style.display = "initial";
       this._video.src = embeddedVideo;
+    } else {
+      this._video.style.display = "none";
+    }
+
+    if (this.currentDemon.video) {
       this._video_link.href = this.currentDemon.video;
       this._video_link.innerHTML = this.currentDemon.video;
     } else {
-      this._video.style.display = "none";
       this._video_link.style.display = "none";
     }
 

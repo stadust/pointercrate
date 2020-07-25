@@ -51,12 +51,202 @@ export class Dropdown {
     }
   }
 
+  selectSilently(entry) {
+    if (entry in this.values) {
+      this.selected = entry;
+      this.input.value = this.values[entry];
+    }
+  }
+
   addEventListener(listener) {
     this.listeners.push(listener);
   }
 }
 
-export class Paginator {
+/**
+ * Class representing complex HTML components that contain elements with the `.output` class, meaning we can display success and error messages in them somewhere.
+ *
+ * @export
+ * @class Output
+ */
+export class Output {
+  constructor(html) {
+    this.html = html;
+
+    this.errorOutput = this.html.getElementsByClassName("output")[0];
+    this.successOutput = this.html.getElementsByClassName("output")[1];
+  }
+
+  setError(message, errorCode) {
+    if (this.successOutput) this.successOutput.style.display = "none";
+
+    if (this.errorOutput) {
+      if (message === null || message === undefined) {
+        this.errorOutput.style.display = "none";
+      } else {
+        this.errorOutput.innerHTML = message;
+        this.errorOutput.style.display = "block";
+      }
+    }
+  }
+
+  setSuccess(message) {
+    if (this.errorOutput) this.errorOutput.style.display = "none";
+
+    if (this.successOutput) {
+      if (message === null || message === undefined) {
+        this.successOutput.style.display = "none";
+      } else {
+        this.successOutput.innerHTML = message;
+        this.successOutput.style.display = "block";
+      }
+    }
+  }
+}
+
+export class EditorBackend {
+  url() {
+    throw new Error("unimplemented");
+  }
+
+  headers() {
+    throw new Error("unimplemented");
+  }
+
+  onSuccess(response) {}
+
+  onError(response) {}
+
+  edit(data, successCallback, errorCallback, unchangedCallback) {
+    return patch(this.url(), this.headers(), data)
+      .then((response) => {
+        if (response.status == 304) {
+          unchangedCallback();
+        } else {
+          this.onSuccess(response);
+          successCallback(response);
+        }
+      })
+      .catch((response) => {
+        this.onError(response);
+        errorCallback(response);
+      });
+  }
+}
+
+export class PaginatorEditorBackend extends EditorBackend {
+  constructor(paginator, csrf, shouldRefresh) {
+    super();
+
+    this._paginator = paginator;
+    this._csrf = csrf;
+    this._shouldRefresh = shouldRefresh;
+  }
+
+  headers() {
+    return {
+      "X-CSRF-TOKEN": this._csrf,
+      "If-Match": this._paginator.currentEtag,
+    };
+  }
+
+  url() {
+    return (
+      this._paginator.retrievalEndpoint +
+      this._paginator.currentlySelected.dataset.id +
+      "/"
+    );
+  }
+
+  onSuccess(response) {
+    this._paginator.onReceive(response);
+    if (this._shouldRefresh) {
+      this._paginator.refresh();
+    }
+  }
+}
+
+export function setupDropdownEditor(
+  backend,
+  dropdownId,
+  field,
+  output,
+  translationTable = {}
+) {
+  let dropdown = new Dropdown(document.getElementById(dropdownId));
+
+  dropdown.addEventListener((selected) => {
+    let data = {};
+    if (translationTable.hasOwnProperty(selected)) {
+      data[field] = translationTable[selected];
+    } else {
+      data[field] = selected;
+    }
+
+    backend.edit(
+      data,
+      () => output.setSuccess("Edit successful!"),
+      (response) => displayError(output)(response),
+      () => output.setSuccess("Nothing changed!")
+    );
+  });
+
+  return dropdown;
+}
+
+export function setupDialogEditor(backend, dialogId, buttonId, output) {
+  let dialog = document.getElementById(dialogId);
+  let button = document.getElementById(buttonId);
+
+  button.addEventListener("click", () => $(dialog.parentNode).fadeIn(300));
+
+  return function (data) {
+    backend.edit(
+      data,
+      () => {
+        output.setSuccess("Edit successful!");
+        $(dialog.parentNode).fadeOut(300);
+      },
+      (response) => {
+        displayError(output)(response);
+        $(dialog.parentNode).fadeOut(300);
+      },
+      () => {
+        output.setSuccess("Nothing changed");
+        $(dialog.parentNode).fadeOut(300);
+      }
+    );
+  };
+}
+
+export function setupFormDialogEditor(backend, dialogId, buttonId, output) {
+  let dialog = document.getElementById(dialogId);
+  let button = document.getElementById(buttonId);
+
+  button.addEventListener("click", () => $(dialog.parentNode).fadeIn(300));
+
+  let form = new Form(dialog.getElementsByTagName("form")[0]);
+  form.onSubmit(() => {
+    backend.edit(
+      form.serialize(),
+      () => {
+        output.setSuccess("Edit successful!");
+        $(dialog.parentNode).fadeOut(300);
+      },
+      (response) => {
+        displayError(form)(response);
+      },
+      () => {
+        output.setSuccess("Nothing changed");
+        $(dialog.parentNode).fadeOut(300);
+      }
+    );
+  });
+
+  return form;
+}
+
+export class Paginator extends Output {
   /**
    * Creates an instance of Paginator. Retrieves its endpoint from the `data-endpoint` data attribute of `html`.
    *
@@ -66,7 +256,7 @@ export class Paginator {
    * @memberof Paginator
    */
   constructor(elementId, queryData, itemConstructor) {
-    this.html = document.getElementById(elementId);
+    super(document.getElementById(elementId));
 
     // Next and previous buttons
     this.next = this.html.getElementsByClassName("next")[0];
@@ -74,10 +264,20 @@ export class Paginator {
 
     // The li that was last clicked and thus counts as "selected"
     this.currentlySelected = null;
+    // The 'data' part of the response that the server sent after clicking 'currentlySelected'
+    this.currentObject = null;
+    // The etag of 'currentObject'
+    this.currentEtag = null;
+
+    // external selection listeners
+    this.selectionListeners = [];
 
     // The endpoint which will be paginated. By storing this, we assume that the 'Links' header never redirects
     // us to a different endpoint (this is the case with the pointercrate API)
     this.endpoint = this.html.dataset.endpoint;
+    // The endpoint from which the actual objects will be retrieved. By default equal to the pagination endpoint.
+    this.retrievalEndpoint = this.endpoint;
+
     // The link for the request that was made to display the current data (required for refreshing)
     this.currentLink = this.endpoint + "?" + $.param(queryData);
     // The query data for the first request. Pagination may only update the 'before' and 'after' parameter,
@@ -93,9 +293,6 @@ export class Paginator {
 
     // The list displaying the results of the request
     this.list = this.html.getElementsByClassName("selection-list")[0];
-
-    // Some HTML element where we will display errors messages
-    this.errorOutput = this.html.getElementsByClassName("output")[0];
 
     this.nextHandler = this.onNextClick.bind(this);
     this.prevHandler = this.onPreviousClick.bind(this);
@@ -118,7 +315,9 @@ export class Paginator {
    * @returns A promise
    */
   selectArbitrary(id) {
-    return get(this.endpoint + id + "/").then(this.onReceive.bind(this));
+    return get(this.retrievalEndpoint + id + "/").then(
+      this.onReceive.bind(this)
+    );
   }
 
   /**
@@ -133,9 +332,7 @@ export class Paginator {
    */
   onSelect(selected) {
     this.currentlySelected = selected;
-    this.selectArbitrary(selected.dataset.id).catch(
-      displayError(this.errorOutput)
-    );
+    this.selectArbitrary(selected.dataset.id).catch(displayError(this));
   }
 
   /**
@@ -144,7 +341,23 @@ export class Paginator {
    * @param {*} response
    * @memberof Paginator
    */
-  onReceive(response) {}
+  onReceive(response) {
+    // I dont know why we check this everywhere, and at this point I'm too afraid to ask. But the API shouldn't return a 204 on a GET.
+    if (response.status != 204) {
+      if (response.status == 200 || response.status == 201) {
+        this.currentObject = response.data.data;
+        this.currentEtag = response.headers["etag"];
+      }
+
+      for (let listener of this.selectionListeners) {
+        listener(this.currentObject);
+      }
+    }
+  }
+
+  addSelectionListener(listener) {
+    this.selectionListeners.push(listener);
+  }
 
   /**
    * Initializes this Paginator by making the request using the query data specified in the constructor.
@@ -211,14 +424,14 @@ export class Paginator {
   refresh() {
     return get(this.currentLink)
       .then(this.handleResponse.bind(this))
-      .catch(displayError(this.errorOutput));
+      .catch(displayError(this));
   }
 
   onPreviousClick() {
     if (this.links.prev) {
       get(this.links.prev)
         .then(this.handleResponse.bind(this))
-        .catch(displayError(this.errorOutput));
+        .catch(displayError(this));
     }
   }
 
@@ -226,7 +439,7 @@ export class Paginator {
     if (this.links.next) {
       get(this.links.next)
         .then(this.handleResponse.bind(this))
-        .catch(displayError(this.errorOutput));
+        .catch(displayError(this));
     }
   }
 
@@ -248,7 +461,7 @@ function parsePagination(linkHeader) {
   return links;
 }
 
-function findParentWithClass(element, clz) {
+export function findParentWithClass(element, clz) {
   let parent = element;
 
   while (parent !== null && parent.classList !== null) {
@@ -259,52 +472,23 @@ function findParentWithClass(element, clz) {
   }
 }
 
-export class Viewer extends Paginator {
-  constructor(elementId, queryData, itemConstructor) {
-    super(elementId, queryData, itemConstructor);
+export class Viewer extends Output {
+  constructor(elementId, paginator) {
+    super(elementId);
 
     this.viewer = findParentWithClass(this.html, "viewer");
+    this.paginator = paginator;
 
     this._welcome = this.viewer.getElementsByClassName("viewer-welcome")[0];
     this._content = this.viewer.getElementsByClassName("viewer-content")[0];
 
-    // Gotta start counting at '1', since '0' is the error output of the paginator
-    this.errorOutput2 = this.viewer.getElementsByClassName("output")[1];
-    this.successOutput = this.viewer.getElementsByClassName("output")[2];
-  }
+    this.paginator.addSelectionListener(() => {
+      this.setError(null);
+      this.setSuccess(null);
 
-  onReceive(response) {
-    this.setError(null);
-    this.setSuccess(null);
-
-    $(this._welcome).hide(100);
-    $(this._content).show(100);
-  }
-
-  setError(message) {
-    if (this.successOutput) this.successOutput.style.display = "none";
-
-    if (this.errorOutput2) {
-      if (message === null || message === undefined) {
-        this.errorOutput2.style.display = "none";
-      } else {
-        this.errorOutput2.innerHTML = message;
-        this.errorOutput2.style.display = "block";
-      }
-    }
-  }
-
-  setSuccess(message) {
-    if (this.errorOutput2) this.errorOutput2.style.display = "none";
-
-    if (this.successOutput) {
-      if (message === null || message === undefined) {
-        this.successOutput.style.display = "none";
-      } else {
-        this.successOutput.innerHTML = message;
-        this.successOutput.style.display = "block";
-      }
-    }
+      $(this._welcome).fadeOut(100);
+      $(this._content).fadeIn(100);
+    });
   }
 }
 
@@ -366,60 +550,6 @@ export class FilteredPaginator extends Paginator {
         1000
       );
     });
-  }
-}
-
-export class FilteredViewer extends FilteredPaginator {
-  constructor(
-    paginatorID,
-    itemConstructor,
-    filterParam,
-    initialQueryData = {}
-  ) {
-    super(paginatorID, itemConstructor, filterParam, initialQueryData);
-
-    this.viewer = findParentWithClass(this.html, "viewer");
-
-    this._welcome = this.viewer.getElementsByClassName("viewer-welcome")[0];
-    this._content = this.viewer.getElementsByClassName("viewer-content")[0];
-
-    // Gotta start counting at '1', since '0' is the error output of the paginator
-    this.errorOutput2 = this.viewer.getElementsByClassName("output")[1];
-    this.successOutput = this.viewer.getElementsByClassName("output")[2];
-  }
-
-  onReceive(response) {
-    this.setError(null);
-    this.setSuccess(null);
-
-    $(this._welcome).hide(100);
-    $(this._content).show(100);
-  }
-
-  setError(message) {
-    if (this.successOutput) this.successOutput.style.display = "none";
-
-    if (this.errorOutput2) {
-      if (message === null || message === undefined) {
-        this.errorOutput2.style.display = "none";
-      } else {
-        this.errorOutput2.innerHTML = message;
-        this.errorOutput2.style.display = "block";
-      }
-    }
-  }
-
-  setSuccess(message) {
-    if (this.errorOutput2) this.errorOutput2.style.display = "none";
-
-    if (this.successOutput) {
-      if (message === null || message === undefined) {
-        this.successOutput.style.display = "none";
-      } else {
-        this.successOutput.innerHTML = message;
-        this.successOutput.style.display = "block";
-      }
-    }
   }
 }
 
@@ -558,21 +688,23 @@ export class Input {
   }
 }
 
-export class Form {
+export class Form extends Output {
   constructor(form) {
-    this.html = form;
+    super(form);
+
     this.inputs = [];
     this.submitHandler = undefined;
     this.invalidHandler = undefined;
-    this.errorOutput = form.getElementsByClassName("output")[0];
-    this.successOutput = form.getElementsByClassName("output")[1];
+    this.errorOutput = this.html.getElementsByClassName("output")[0];
+    this.successOutput = this.html.getElementsByClassName("output")[1];
     this._clearOnSubmit = false;
+    this._errorRedirects = {};
 
-    for (var input of form.getElementsByClassName("form-input")) {
+    for (var input of this.html.getElementsByClassName("form-input")) {
       this.inputs.push(new Input(input));
     }
 
-    form.addEventListener(
+    this.html.addEventListener(
       "submit",
       (event) => {
         event.preventDefault();
@@ -609,6 +741,17 @@ export class Form {
     this._clearOnSubmit = clear;
   }
 
+  /**
+   * Adds an override to have errors with the given code be displayed as an error at the given input element instead of globally
+   *
+   * @param {int} errorCode The error code
+   * @param {string} inputId The id of the input
+   * @memberof Form
+   */
+  addErrorOverride(errorCode, inputId) {
+    this._errorRedirects[errorCode] = inputId;
+  }
+
   serialize() {
     let data = {};
 
@@ -621,28 +764,25 @@ export class Form {
     return data;
   }
 
-  setError(message) {
+  setError(message, errorCode) {
     if (this.successOutput) this.successOutput.style.display = "none";
 
     if (this.errorOutput) {
       if (message === null || message === undefined) {
         this.errorOutput.style.display = "none";
       } else {
-        this.errorOutput.innerHTML = message;
-        this.errorOutput.style.display = "block";
-      }
-    }
-  }
-
-  setSuccess(message) {
-    if (this.errorOutput) this.errorOutput.style.display = "none";
-
-    if (this.successOutput) {
-      if (message === null || message === undefined) {
-        this.successOutput.style.display = "none";
-      } else {
-        this.successOutput.innerHTML = message;
-        this.successOutput.style.display = "block";
+        if (errorCode in this._errorRedirects) {
+          let input = this.input(this._errorRedirects[errorCode]);
+          if (input) {
+            input.setError(message);
+          } else {
+            this.errorOutput.style.display = "block";
+            this.errorOutput.innerHTML = message;
+          }
+        } else {
+          this.errorOutput.style.display = "block";
+          this.errorOutput.innerHTML = message;
+        }
       }
     }
   }
@@ -717,19 +857,18 @@ export function valueMissing(input) {
  * @param errorOutput The HTML element whose `innerHtml` property should be set to the error message
  * @param specialCodes Special error handlers for specific error codes. Special handlers should be keyed by pointercrate error code and take the error object as only argument
  */
-export function displayError(errorOutput, specialCodes = {}) {
+export function displayError(output, specialCodes = {}) {
   return function (response) {
-    if (response) {
+    if (response.data) {
       if (response.data.code in specialCodes) {
         specialCodes[response.data.code](response.data);
       } else {
-        errorOutput.style.display = "block";
-        errorOutput.innerHTML = response.data.message;
+        output.setError(response.data.message, response.data.code);
       }
     } else {
-      errorOutput.style.display = "block";
-      errorOutput.innerHTML =
-        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!";
+      output.setError(
+        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!"
+      );
       throw new Error("FrontendError");
     }
   };

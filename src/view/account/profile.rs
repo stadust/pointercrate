@@ -10,6 +10,8 @@ pub(super) fn page(user: &User) -> Markup {
                         "Profile - " (user.name())
                     }
                     div.flex.space.wrap#things {
+                        p.info-red.output style = "margin: 10px" {}
+                        p.info-green.output style = "margin: 10px" {}
                         span {
                             b {
                                 "Username: "
@@ -23,9 +25,11 @@ pub(super) fn page(user: &User) -> Markup {
                             b {
                                 i.fa.fa-pencil.clickable#display-name-pen aria-hidden = "true" {} " Display name: "
                             }
-                            @match user.display_name {
-                                Some(ref dn) => (dn),
-                                None => "-"
+                            i#profile-display-name {
+                                @match user.display_name {
+                                    Some(ref dn) => (dn),
+                                    None => "-"
+                                }
                             }
                             p {
                                 "If set, this name will be displayed instead of your username. Display names aren't unique and you cannot use your display name to login to your pointercrate account."
@@ -35,10 +39,11 @@ pub(super) fn page(user: &User) -> Markup {
                             b {
                                 i.fa.fa-pencil.clickable#youtube-pen aria-hidden = "true" {} " YouTube channel: "
                             }
-
-                            @match user.youtube_channel {
-                                Some(ref yc) => a.link href = (yc) {},
-                                None => "-"
+                            i#profile-youtube-channel {
+                                @match user.youtube_channel {
+                                    Some(ref yc) => a.link href = (yc) {},
+                                    None => "-"
+                                }
                             }
                             p {
                                 "A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it."
