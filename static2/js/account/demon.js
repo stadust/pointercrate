@@ -14,6 +14,8 @@ import {
   stepMismatch,
   valueMissing,
   typeMismatch,
+  del,
+  displayError,
 } from "../modules/form.mjs";
 
 export let demonManager;
@@ -26,6 +28,8 @@ export class DemonManager extends FilteredPaginator {
       this.html.parentNode.getElementsByClassName("viewer-content")[0],
       this
     );
+
+    this._tok = csrfToken;
 
     this.retrievalEndpoint = "/api/v2/demons/";
 
@@ -61,7 +65,7 @@ export class DemonManager extends FilteredPaginator {
     }
 
     let requirementForm = setupFormDialogEditor(
-      new PaginatorEditorBackend(this, csrfToken, true),
+      new PaginatorEditorBackend(this, csrfToken, false),
       "demon-requirement-dialog",
       "demon-requirement-pen",
       this.output
@@ -117,7 +121,7 @@ export class DemonManager extends FilteredPaginator {
       this.output
     );
     setupPlayerSelectionEditor(
-      new PaginatorEditorBackend(this, csrfToken, true),
+      new PaginatorEditorBackend(this, csrfToken, false),
       "demon-publisher-dialog-pagination",
       "demon-publisher-pen",
       this.output
@@ -163,6 +167,50 @@ export class DemonManager extends FilteredPaginator {
       " (" +
       this.currentObject.verifier.id +
       ")";
+
+    while (this._creators.lastChild) {
+      this._creators.removeChild(this._creators.lastChild);
+    }
+
+    for (let creator of this.currentObject.creators) {
+      let span = document.createElement("span");
+
+      span.style.display = "inline-block"; // Prevent line breaks in the middle of a creator, especially between the 'x' and the name
+
+      let i = document.createElement("i");
+
+      i.innerText = creator.name + " (" + creator.id + ")";
+
+      let closeX = document.createElement("i");
+
+      closeX.classList.add("fa");
+      closeX.classList.add("fa-times");
+      closeX.classList.add("hover");
+      closeX.classList.add("fa-lg");
+
+      closeX.style.margin = "3px";
+
+      closeX.addEventListener("click", () => {
+        del(
+          "/api/v2/demons/" +
+            this.currentObject.id +
+            "/creators/" +
+            creator.id +
+            "/",
+          { "X-CSRF-TOKEN": this._tok }
+        )
+          .then(() => span.parentElement.removeChild(span))
+          .catch(displayError(this.output));
+      });
+
+      span.appendChild(closeX);
+      span.appendChild(i);
+      span.appendChild(document.createTextNode(", "));
+
+      this._creators.appendChild(span);
+    }
+    this._creators.removeChild(this._creators.lastChild);
+    this._creators.append(document.createElement("br"));
   }
 }
 

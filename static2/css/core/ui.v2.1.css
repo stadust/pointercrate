@@ -455,7 +455,7 @@ textarea:invalid {
   font-size: 110%;
 }
 
-.stats-container :not(b) {
+.stats-container :not(b):not(.fa) {
   font-size: 90%;
 }
 

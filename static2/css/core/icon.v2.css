@@ -98,7 +98,8 @@
 
 .hamburger.hover,
 .plus.hover,
-.arrow.hover {
+.arrow.hover,
+i.fa.hover {
   opacity: 0.3;
   cursor: pointer;
 }
@@ -113,7 +114,8 @@
 
 .hamburger.hover:hover,
 .plus.hover:hover,
-.arrow.hover:hover {
+.arrow.hover:hover,
+i.fa.hover:hover {
   opacity: 1;
 }
 

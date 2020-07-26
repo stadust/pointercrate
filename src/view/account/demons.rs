@@ -75,7 +75,6 @@ pub(super) fn page() -> Markup {
                                         }
                                         br;
                                         span#demon-creators {}
-                                        (PreEscaped("&nbsp;"))
                                         i.fa.fa-plus.clickable#demon-position-pen aria-hidden = "true" {}
                                     }
                                 }
