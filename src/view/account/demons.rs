@@ -71,12 +71,12 @@ pub(super) fn page() -> Markup {
                                 }
                                 div.stats-container.flex.space  {
                                     span{
-                                        b {
-                                            "Creators:"
+                                        i.fa.fa-plus.clickable#demon-add-creator-pen aria-hidden = "true" {} b {
+                                            " Creators:"
                                         }
                                         br;
                                         span#demon-creators {}
-                                        i.fa.fa-plus.clickable#demon-add-creator-pen aria-hidden = "true" {}
+
                                     }
                                 }
                             }
@@ -366,7 +366,7 @@ fn demon_submitter() -> Markup {
                     }
                     span {
                         i.fa.fa-plus.clickable#add-demon-add-creator-pen aria-hidden = "true" {} i {
-                            "Creators:"
+                            " Creators: "
                         }
                         span#demon-add-creators {}
                     }

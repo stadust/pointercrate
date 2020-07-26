@@ -207,7 +207,6 @@ function insertCreatorInto(creator, container) {
   if (container.children.length == 0) {
     // trailing comma
     html.removeChild(html.lastChild);
-    container.append(document.createElement("br"));
   }
 
   container.prepend(html);
@@ -352,23 +351,17 @@ export function initialize(csrfToken) {
         })
         .catch(displayError(creatorDialogForm));
     } else {
-      let creator = createCreatorHtml({ name: data.creator });
+      let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
       creator.children[0].addEventListener("click", () => {
         addDemonForm.creators.splice(
           addDemonForm.creators.indexOf(data.creator),
           1
         );
-        if (addDemonForm.creators.length == 0) {
-          creator.parentElement.removeChild(creator.parentElement.lastChild);
-        }
-        creator.parentElement.removeChild(creator);
+        dialogCreators.removeChild(creator);
       });
-      if (addDemonForm.creators.length == 0) {
-        creator.removeChild(creator.lastChild);
-        dialogCreators.appendChild(document.createElement("br"));
-      }
-      dialogCreators.prepend(creator);
+
       addDemonForm.creators.push(data.creator);
+
       $(dialog.parentNode).fadeOut(300);
     }
   });
