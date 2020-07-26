@@ -175,36 +175,14 @@ export class DemonManager extends FilteredPaginator {
       this._creators.removeChild(this._creators.lastChild);
     }
 
-    let lastCreator;
-
     for (let creator of this.currentObject.creators) {
-      lastCreator = this.createCreator(creator);
-      this._creators.appendChild(lastCreator);
+      this.addCreator(creator);
     }
-
-    if (lastCreator) lastCreator.removeChild(lastCreator.lastChild);
-    this._creators.append(document.createElement("br"));
   }
 
-  createCreator(creator) {
-    let span = document.createElement("span");
-
-    span.style.display = "inline-block"; // Prevent line breaks in the middle of a creator, especially between the 'x' and the name
-
-    let i = document.createElement("i");
-
-    i.innerText = creator.name + " (" + creator.id + ")";
-
-    let closeX = document.createElement("i");
-
-    closeX.classList.add("fa");
-    closeX.classList.add("fa-times");
-    closeX.classList.add("hover");
-    closeX.classList.add("fa-lg");
-
-    closeX.style.margin = "3px";
-
-    closeX.addEventListener("click", () => {
+  addCreator(creator) {
+    let html = insertCreatorInto(creator, this._creators);
+    html.children[0].addEventListener("click", () => {
       del(
         "/api/v2/demons/" +
           this.currentObject.id +
@@ -216,30 +194,115 @@ export class DemonManager extends FilteredPaginator {
         }
       )
         .then(() => {
-          span.parentElement.removeChild(span);
-          demonManager.output.setSuccess("owo uwu owo");
+          this._creators.removeChild(html);
+          this.output.setSuccess("owo uwu owo");
         })
         .catch(displayError(this.output));
     });
-
-    span.appendChild(closeX);
-    span.appendChild(i);
-    span.appendChild(document.createTextNode(", "));
-
-    return span;
   }
+}
+
+function insertCreatorInto(creator, container) {
+  let html = createCreatorHtml(creator);
+  if (container.children.length == 0) {
+    // trailing comma
+    html.removeChild(html.lastChild);
+    container.append(document.createElement("br"));
+  }
+
+  container.prepend(html);
+  return html;
+}
+
+function createCreatorHtml(creator) {
+  let span = document.createElement("span");
+
+  span.style.display = "inline-block"; // Prevent line breaks in the middle of a creator, especially between the 'x' and the name
+
+  let i = document.createElement("i");
+
+  i.innerText = creator.name;
+
+  if (creator.id) {
+    i.innerText += " (" + creator.id + ")";
+  }
+
+  let closeX = document.createElement("i");
+
+  closeX.classList.add("fa");
+  closeX.classList.add("fa-times");
+  closeX.classList.add("hover");
+  closeX.classList.add("fa-lg");
+
+  closeX.style.margin = "3px";
+
+  span.appendChild(closeX);
+  span.appendChild(i);
+  span.appendChild(document.createTextNode(", "));
+
+  return span;
+}
+
+function setupDemonAdditionForm(csrfToken) {
+  let form = new Form(document.getElementById("demon-submission-form"));
+
+  form.addValidators({
+    "demon-add-name": { "Please specify a name": valueMissing },
+    "demon-add-position": {
+      "Please specify a position": valueMissing,
+      "Demon position cannot be smaller than 1": rangeUnderflow,
+      "Demon position must be a valid integer": badInput,
+      "Demon position must be integer": stepMismatch,
+    },
+    "demon-add-requirement": {
+      "Please specify a requirement for record progress on this demon": valueMissing,
+      "Record requirement cannot be smaller than 0%": rangeUnderflow,
+      "Record requirement cannot be greater than 100%": rangeOverflow,
+      "Record requirement must be a valid integer": badInput,
+      "Record requirement must be integer": stepMismatch,
+    },
+    "demon-add-verifier": { "Please specify a verifier": valueMissing },
+    "demon-add-publisher": { "Please specify a publisher": valueMissing },
+    "demon-add-video": { "Please enter a valid URL": typeMismatch },
+  });
+
+  form.creators = [];
+
+  form.onSubmit(() => {
+    let data = form.serialize();
+
+    data["creators"] = form.creators;
+
+    post("/api/v1/demons/", { "X-CSRF-TOKEN": csrfToken }, data)
+      .then(() => {
+        form.setSuccess("Successfully added demon!");
+        demonManager.refresh();
+        form.clear();
+      })
+      .catch(displayError(form));
+  });
+
+  return form;
 }
 
 export function initialize(csrfToken) {
   demonManager = new DemonManager(csrfToken);
   demonManager.initialize();
 
+  let addDemonForm = setupDemonAdditionForm(csrfToken);
+
   let dialog = document.getElementById("demon-add-creator-dialog");
   let button1 = document.getElementById("demon-add-creator-pen");
+  let button2 = document.getElementById("add-demon-add-creator-pen");
 
   button1.addEventListener("click", () => {
     $(dialog.parentNode).fadeIn(300);
     creatorDialogForm.inPostMode = true;
+  });
+
+  button2.addEventListener("click", () => {
+    $(dialog.parentNode).fadeIn(300);
+    creatorDialogForm.inPostMode = false;
   });
 
   let creatorDialogForm = new Form(dialog.getElementsByTagName("form")[0]);
@@ -259,6 +322,8 @@ export function initialize(csrfToken) {
     creatorDialogForm.html.requestSubmit();
   });
 
+  let dialogCreators = document.getElementById("demon-add-creators");
+
   creatorDialogForm.onSubmit(() => {
     let data = creatorDialogForm.serialize();
 
@@ -273,21 +338,38 @@ export function initialize(csrfToken) {
         .then((response) => {
           let location = response.headers["location"];
 
-          demonManager._creators.prepend(
-            demonManager.createCreator({
-              name: data.creator,
-              id: location.substring(
-                location.lastIndexOf("/", location.length - 2) + 1,
-                location.length - 1
-              ),
-            })
-          );
+          demonManager.addCreator({
+            name: data.creator,
+            id: location.substring(
+              location.lastIndexOf("/", location.length - 2) + 1,
+              location.length - 1
+            ),
+          });
 
           demonManager.output.setSuccess("Successfully added creator");
 
           $(dialog.parentNode).fadeOut(300);
         })
         .catch(displayError(creatorDialogForm));
+    } else {
+      let creator = createCreatorHtml({ name: data.creator });
+      creator.children[0].addEventListener("click", () => {
+        addDemonForm.creators.splice(
+          addDemonForm.creators.indexOf(data.creator),
+          1
+        );
+        if (addDemonForm.creators.length == 0) {
+          creator.parentElement.removeChild(creator.parentElement.lastChild);
+        }
+        creator.parentElement.removeChild(creator);
+      });
+      if (addDemonForm.creators.length == 0) {
+        creator.removeChild(creator.lastChild);
+        dialogCreators.appendChild(document.createElement("br"));
+      }
+      dialogCreators.prepend(creator);
+      addDemonForm.creators.push(data.creator);
+      $(dialog.parentNode).fadeOut(300);
     }
   });
 }

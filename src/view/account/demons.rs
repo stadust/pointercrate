@@ -5,6 +5,7 @@ pub(super) fn page() -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "5"{
             div.left {
+                (demon_submitter())
                 div.panel.fade {
                     h2.underlined.pad {
                         "Demon Manager"
@@ -85,7 +86,7 @@ pub(super) fn page() -> Markup {
                 div style="height: 50px" {} // to make sure that the footer doesnt float. if it floats, the user page is the only one without a scrollbar at the right, which causes jumpiness when switching tabs.
             }
             div.right {
-
+                (submit_panel())
             }
             (change_name_dialog())
             (change_position_dialog())
@@ -94,6 +95,21 @@ pub(super) fn page() -> Markup {
             (change_verifier_dialog())
             (change_publisher_dialog())
             (add_creator_dialog())
+        }
+    }
+}
+
+pub(super) fn submit_panel() -> Markup {
+    html! {
+        section.panel.fade.js-scroll-anim data-anim = "fade" {
+            div.underlined {
+                h2 {
+                    "Add Demon:"
+                }
+            }
+            a.blue.hover.button.js-scroll data-destination = "demon-submitter" data-reveal = "true" {
+                "Add a demon!"
+            }
         }
     }
 }
@@ -289,6 +305,72 @@ fn add_creator_dialog() -> Markup {
                             input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Add";
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+fn demon_submitter() -> Markup {
+    html! {
+        section.panel.fade.closable#demon-submitter style = "display: none" {
+            span.plus.cross.hover {}
+            div.flex {
+                form#demon-submission-form novalidate = "" {
+                    div.underlined {
+                        h2 {"Add demon:"}
+                    }
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input.flex.col#demon-add-name {
+                        label for = "name" {
+                            "Demon name:"
+                        }
+                        input type = "text" name = "name" required="";
+                        p.error {}
+                    }
+                    span.form-input.flex.col#demon-add-position {
+                        label for = "position" {
+                            "Position:"
+                        }
+                        input type = "number" name = "position" required="" min="1";
+                        p.error {}
+                    }
+                    span.form-input.flex.col#demon-add-requirement {
+                        label for = "requirement" {
+                            "Requirement:"
+                        }
+                        input type = "number" name = "requirement" required="" min="0" max = "100";
+                        p.error {}
+                    }
+                    span.form-input.flex.col#demon-add-verifier {
+                        label for = "verifier" {
+                            "Verifier:"
+                        }
+                        input type = "text" name = "verifier" required="";
+                        p.error {}
+                    }
+                    span.form-input.flex.col#demon-add-publisher {
+                        label for = "publisher" {
+                            "Publisher:"
+                        }
+                        input type = "text" name = "publisher" required="";
+                        p.error {}
+                    }
+                    span.form-input.flex.col#demon-add-video {
+                        label for = "video" {
+                            "Verification Video:"
+                        }
+                        input type = "url" name = "video";
+                        p.error {}
+                    }
+                    span {
+                        i.fa.fa-plus.clickable#add-demon-add-creator-pen aria-hidden = "true" {} i {
+                            "Creators:"
+                        }
+                        span#demon-add-creators {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Add Demon";
                 }
             }
         }
