@@ -40,18 +40,7 @@ pub struct Demon {
     /// This [`Demon`]'s verifier
     pub verifier: DatabasePlayer,
 }
-/*
-/// Temporary solution. In the future this will become `ListedDemon` and contain
-/// id, name, position, video and publisher name of all demons that have a non-null position
-#[derive(Debug, Hash, Eq, PartialEq, Serialize, Display)]
-#[display(fmt = "{}", base)]
-pub struct MinimalDemonP {
-    #[serde(flatten)]
-    pub base: MinimalDemon,
-    pub video: Option<String>,
-    pub publisher: DatabasePlayer,
-}
-*/
+
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
 #[derive(Debug, Hash, Serialize, Display, PartialEq, Eq, Clone)]
 #[display(fmt = "{} (at {})", name, position)]
@@ -85,10 +74,8 @@ pub struct FullDemon {
 
 impl Hash for FullDemon {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        // We only hash the demon here, because the creators don't matter for the ETag value - they
-        // are modified through a different endpoint than the demon objects themselves, and
-        // conflicting access to them is impossible anyway
-        self.demon.hash(state)
+        self.demon.hash(state);
+        self.creators.hash(state);
     }
 }
 

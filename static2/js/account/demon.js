@@ -2,6 +2,7 @@ import {
   generateDemon,
   embedVideo,
   setupPlayerSelectionEditor,
+  generatePlayer,
 } from "../modules/demonlist.mjs";
 import {
   FilteredPaginator,
@@ -16,6 +17,8 @@ import {
   typeMismatch,
   del,
   displayError,
+  Form,
+  post,
 } from "../modules/form.mjs";
 
 export let demonManager;
@@ -172,49 +175,119 @@ export class DemonManager extends FilteredPaginator {
       this._creators.removeChild(this._creators.lastChild);
     }
 
+    let lastCreator;
+
     for (let creator of this.currentObject.creators) {
-      let span = document.createElement("span");
-
-      span.style.display = "inline-block"; // Prevent line breaks in the middle of a creator, especially between the 'x' and the name
-
-      let i = document.createElement("i");
-
-      i.innerText = creator.name + " (" + creator.id + ")";
-
-      let closeX = document.createElement("i");
-
-      closeX.classList.add("fa");
-      closeX.classList.add("fa-times");
-      closeX.classList.add("hover");
-      closeX.classList.add("fa-lg");
-
-      closeX.style.margin = "3px";
-
-      closeX.addEventListener("click", () => {
-        del(
-          "/api/v2/demons/" +
-            this.currentObject.id +
-            "/creators/" +
-            creator.id +
-            "/",
-          { "X-CSRF-TOKEN": this._tok }
-        )
-          .then(() => span.parentElement.removeChild(span))
-          .catch(displayError(this.output));
-      });
-
-      span.appendChild(closeX);
-      span.appendChild(i);
-      span.appendChild(document.createTextNode(", "));
-
-      this._creators.appendChild(span);
+      lastCreator = this.createCreator(creator);
+      this._creators.appendChild(lastCreator);
     }
-    this._creators.removeChild(this._creators.lastChild);
+
+    if (lastCreator) lastCreator.removeChild(lastCreator.lastChild);
     this._creators.append(document.createElement("br"));
+  }
+
+  createCreator(creator) {
+    let span = document.createElement("span");
+
+    span.style.display = "inline-block"; // Prevent line breaks in the middle of a creator, especially between the 'x' and the name
+
+    let i = document.createElement("i");
+
+    i.innerText = creator.name + " (" + creator.id + ")";
+
+    let closeX = document.createElement("i");
+
+    closeX.classList.add("fa");
+    closeX.classList.add("fa-times");
+    closeX.classList.add("hover");
+    closeX.classList.add("fa-lg");
+
+    closeX.style.margin = "3px";
+
+    closeX.addEventListener("click", () => {
+      del(
+        "/api/v2/demons/" +
+          this.currentObject.id +
+          "/creators/" +
+          creator.id +
+          "/",
+        {
+          "X-CSRF-TOKEN": this._tok,
+        }
+      )
+        .then(() => {
+          span.parentElement.removeChild(span);
+          demonManager.output.setSuccess("owo uwu owo");
+        })
+        .catch(displayError(this.output));
+    });
+
+    span.appendChild(closeX);
+    span.appendChild(i);
+    span.appendChild(document.createTextNode(", "));
+
+    return span;
   }
 }
 
 export function initialize(csrfToken) {
   demonManager = new DemonManager(csrfToken);
   demonManager.initialize();
+
+  let dialog = document.getElementById("demon-add-creator-dialog");
+  let button1 = document.getElementById("demon-add-creator-pen");
+
+  button1.addEventListener("click", () => {
+    $(dialog.parentNode).fadeIn(300);
+    creatorDialogForm.inPostMode = true;
+  });
+
+  let creatorDialogForm = new Form(dialog.getElementsByTagName("form")[0]);
+  let paginator = new FilteredPaginator(
+    "demon-add-creator-dialog-pagination",
+    generatePlayer,
+    "name_contains"
+  );
+
+  let playerName = creatorDialogForm.inputs[0];
+
+  playerName.addValidator(valueMissing, "Please provide a player name");
+
+  paginator.initialize();
+  paginator.addSelectionListener((selected) => {
+    playerName.value = selected.name;
+    creatorDialogForm.html.requestSubmit();
+  });
+
+  creatorDialogForm.onSubmit(() => {
+    let data = creatorDialogForm.serialize();
+
+    if (creatorDialogForm.inPostMode) {
+      post(
+        "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
+        {
+          "X-CSRF-TOKEN": csrfToken,
+        },
+        data
+      )
+        .then((response) => {
+          let location = response.headers["location"];
+
+          demonManager._creators.prepend(
+            demonManager.createCreator({
+              name: data.creator,
+              id: location.substring(
+                location.lastIndexOf("/", location.length - 2) + 1,
+                location.length - 1
+              ),
+            })
+          );
+
+          demonManager.output.setSuccess("Successfully added creator");
+
+          $(dialog.parentNode).fadeOut(300);
+        })
+        .catch(displayError(creatorDialogForm));
+    }
+  });
 }

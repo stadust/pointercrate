@@ -11,9 +11,9 @@ import {
   tooLong,
   findParentWithClass,
   FilteredPaginator,
+  Viewer,
+  setupFormDialogEditor,
 } from "./form.mjs";
-import { setupFormDialogEditor } from "./form.mjs";
-import { Viewer } from "./form.mjs";
 
 export function embedVideo(video) {
   if (!video) return;

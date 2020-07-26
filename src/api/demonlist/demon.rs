@@ -224,7 +224,7 @@ pub mod v2 {
         Ok(HttpResponse::Created()
             .header(
                 "Location",
-                format!("/api/v1/demons/{}/creators/{}/", demon.base.position, player.id),
+                format!("/api/v2/demons/{}/creators/{}/", demon.base.position, player.id),
             )
             .finish())
     }

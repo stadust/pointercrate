@@ -75,14 +75,14 @@ pub(super) fn page() -> Markup {
                                         }
                                         br;
                                         span#demon-creators {}
-                                        i.fa.fa-plus.clickable#demon-position-pen aria-hidden = "true" {}
+                                        i.fa.fa-plus.clickable#demon-add-creator-pen aria-hidden = "true" {}
                                     }
                                 }
                             }
                         }
                     }
                 }
-                div style="height: 50px" {} // to make sure that the footer doesnt float. if it floats, the user page is the only one without a scrollbar at the right, which causes jumpyness when switching tabs.
+                div style="height: 50px" {} // to make sure that the footer doesnt float. if it floats, the user page is the only one without a scrollbar at the right, which causes jumpiness when switching tabs.
             }
             div.right {
 
@@ -93,6 +93,7 @@ pub(super) fn page() -> Markup {
             (change_video_dialog())
             (change_verifier_dialog())
             (change_publisher_dialog())
+            (add_creator_dialog())
         }
     }
 }
@@ -247,7 +248,7 @@ fn change_publisher_dialog() -> Markup {
                             "Change the publisher of this demon. If the player you want to change the publisher to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
                         }
                         form.flex.col novalidate = "" {
-                            p.info-red.output {}k
+                            p.info-red.output {}
                             p.info-green.output {}
                             span.form-input#demon-publisher-name-edit {
                                 label for = "publisher" {"Publisher name:"}
@@ -255,6 +256,37 @@ fn change_publisher_dialog() -> Markup {
                                 p.error {}
                             }
                             input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn add_creator_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#demon-add-creator-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Add creator:"
+                }
+                div.flex.viewer {
+                    (crate::view::filtered_paginator("demon-add-creator-dialog-pagination", "/api/v1/players/"))
+                    div {
+                        p {
+                            "Select a creator to add to this demon. If the player you want to change the publisher to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
+                        }
+                        form.flex.col novalidate = "" {
+                            p.info-red.output {}
+                            p.info-green.output {}
+                            span.form-input#demon-add-creator-name-edit {
+                                label for = "creator" {"Creator name:"}
+                                input name = "creator" type="text" required = "";
+                                p.error {}
+                            }
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Add";
                         }
                     }
                 }
