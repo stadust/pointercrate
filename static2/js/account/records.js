@@ -339,11 +339,9 @@ function setupEditRecordForm(csrfToken) {
     ) {
       del("/api/v1/records/" + recordManager.currentObject.id + "/", {
         "X-CSRF-TOKEN": csrfToken,
-        "If-Match": window.recordManager.currentEtag,
+        "If-Match": recordManager.currentEtag,
       }).then(() => {
-        $(recordManager._content).hide(100);
-        $(recordManager._notes.parentElement).hide(100);
-        $(recordManager._welcome).show(100);
+        recordManager.output.hideContent();
         recordManager.refresh();
       });
     }

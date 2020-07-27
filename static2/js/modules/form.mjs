@@ -486,9 +486,14 @@ export class Viewer extends Output {
       this.setError(null);
       this.setSuccess(null);
 
-      $(this._welcome).fadeOut(100);
       $(this._content).fadeIn(100);
+      $(this._welcome).fadeOut(100);
     });
+  }
+
+  hideContent() {
+    $(this._welcome).fadeIn(100);
+    $(this._content).fadeOut(100);
   }
 }
 
