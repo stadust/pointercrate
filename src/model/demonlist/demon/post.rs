@@ -65,6 +65,7 @@ impl FullDemon {
             video,
             publisher,
             verifier,
+            level_id: None,
         };
 
         let mut creators = Vec::new();

@@ -174,6 +174,7 @@ struct FetchedDemon {
     verifier_id: i32,
     verifier_name: String,
     verifier_banned: bool,
+    level_id: Option<i64>,
 }
 
 impl Into<Demon> for FetchedDemon {
@@ -196,6 +197,7 @@ impl Into<Demon> for FetchedDemon {
                 name: CiString(self.verifier_name),
                 banned: self.verifier_banned,
             },
+            level_id: self.level_id.map(|id| id as u64),
         }
     }
 }

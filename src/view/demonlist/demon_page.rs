@@ -1,5 +1,5 @@
 use crate::{
-    compat, config,
+    config,
     model::demonlist::demon::FullDemon,
     state::PointercrateState,
     video,
@@ -9,11 +9,6 @@ use crate::{
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
-use gdcf::cache::CacheEntry;
-use gdcf_model::{
-    level::{data::LevelInformationSource, Level, Password},
-    user::Creator,
-};
 use log::error;
 use maud::{html, Markup, PreEscaped, Render};
 
@@ -27,7 +22,6 @@ pub struct DemonMovement {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: FullDemon,
-    server_level: Option<CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>>,
     movements: Vec<DemonMovement>,
     link_banned: bool,
 }
@@ -37,7 +31,6 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
     let mut connection = state.connection().await?;
     let overview = DemonlistOverview::load(&mut connection).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
-    let gd_demon = compat::gd_demon_by_name(&state.gdcf, &demon.demon.base.name);
     let link_banned = sqlx::query!("SELECT link_banned FROM players WHERE id = $1", demon.demon.verifier.id)
         .fetch_one(&mut connection)
         .await?
@@ -72,7 +65,6 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
         Demonlist {
             overview,
             data: demon,
-            server_level: gd_demon.ok(),
             movements,
             link_banned,
         }
@@ -121,7 +113,7 @@ impl Demonlist {
                         }
                     }
                 }
-                @if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
+               /* @if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
                     @if let Some(ref description) = level.base.description {
                         div.underlined.pad {
                             q {
@@ -129,7 +121,7 @@ impl Demonlist {
                             }
                         }
                     }
-                }
+                }*/
                 @if self.link_banned {
                     p {
                         "Due to the questionable nature of the verifier's youtube content, embedding of their videos has been disabled"
@@ -146,7 +138,7 @@ impl Demonlist {
                     }
                 }
                 div.underlined.pad.flex.wrap#level-info {
-                    @match self.server_level {
+                    /*@match self.server_level {
                         None => {
                             p.info-red {
                                 "An internal error occured while trying to access the GDCF database, or while processing Geometry Dash data. This is a bug."
@@ -206,7 +198,7 @@ impl Demonlist {
                                 }
                             }
                         }
-                    }
+                    }*/
                     @if position <= config::extended_list_size() {
                         span {
                             b {
@@ -329,11 +321,11 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
+        /*if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
             if let Some(ref description) = level.base.description {
                 return format!("{}: {}", self.title(), description)
             }
-        }
+        }*/
         format!("{}: <No Description Provided>", self.title())
     }
 

@@ -39,6 +39,12 @@ pub struct Demon {
 
     /// This [`Demon`]'s verifier
     pub verifier: DatabasePlayer,
+
+    /// This ['Demons']'s Geometry Dash level ID
+    ///
+    /// This is automatically queried based on the level name, but can be manually overridden by a
+    /// list mod.
+    pub level_id: Option<u64>,
 }
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object

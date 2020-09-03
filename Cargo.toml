@@ -31,21 +31,5 @@ env_logger = "0.7.1"
 dotenv = "0.15.0"
 chrono = "0.4.10"
 
-[dependencies.gdcf]
-git = "https://github.com/stadust/gdcf"
-
-[dependencies.gdcf_model]
-git = "https://github.com/stadust/gdcf"
-features = ["serde_support"]
-
-[dependencies.gdcf_parse]
-git = "https://github.com/stadust/gdcf"
-features = ["parallel"]
-
-[dependencies.gdcf_diesel]
-git = "https://github.com/stadust/gdcf"
-default-features = false
-features = ["pg"]
-
-[dependencies.gdrs]
-git = "https://github.com/stadust/gdcf"
+[dependencies.dash-rs]
+git = "https://github.com/stadust/dash-rs"
