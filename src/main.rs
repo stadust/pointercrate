@@ -1,6 +1,6 @@
 #![feature(proc_macro_hygiene)]
 #![allow(non_upper_case_globals)]
-#![deny(unused_imports)]
+//#![deny(unused_imports)]
 
 use crate::{
     error::{HtmlError, JsonError, PointercrateError},
@@ -25,11 +25,11 @@ use std::net::SocketAddr;
 mod util;
 mod api;
 mod cistring;
-mod compat;
 mod config;
 mod documentation;
 mod error;
 mod extractor;
+mod gd;
 mod middleware;
 mod model;
 mod permissions;
