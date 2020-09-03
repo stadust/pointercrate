@@ -1,18 +1,18 @@
 -- Your SQL goes here
 
-CREATE TABLE creator (
+CREATE TABLE gj_creator (
     user_id bigint PRIMARY KEY NOT NULL,
     name text NOT NULL,
     account_id bigint
 );
 
-CREATE TABLE creator_meta (
+CREATE TABLE gj_creator_meta (
     user_id bigint PRIMARY KEY NOT NULL,  -- No REFERENCES creator(user_id) as we also have to keep track of _missing_ entries here!
     cached_at timestamp without time zone,
     absent boolean DEFAULT false NOT NULL
 );
 
-CREATE TABLE level (
+CREATE TABLE gj_level (
     level_id bigint PRIMARY KEY NOT NULL,
     level_name text NOT NULL,
     description text,
@@ -39,26 +39,26 @@ CREATE TABLE level (
     index_47 text
 );
 
-CREATE TABLE level_meta (
+CREATE TABLE gj_level_meta (
     level_id bigint PRIMARY KEY NOT NULL,
     cached_at timestamp without time zone,
     absent boolean DEFAULT false NOT NULL
 );
 
 -- Many-to-many table mapping each level request to the list of levels it returned
-CREATE TABLE level_request_results (
+CREATE TABLE gj_level_request_results (
     level_id bigint NOT NULL,
     request_hash bigint NOT NULL
 );
 
-CREATE TABLE level_request_meta (
+CREATE TABLE gj_level_request_meta (
     request_hash bigint PRIMARY KEY NOT NULL,
     cached_at timestamp without time zone,
     absent boolean DEFAULT false NOT NULL
 );
 
-CREATE TABLE level_data (
-    level_id bigint PRIMARY KEY REFERENCES level(level_id) NOT NULL,
+CREATE TABLE gj_level_data (
+    level_id bigint PRIMARY KEY REFERENCES gj_level(level_id) NOT NULL,
     level_data bytea NOT NULL,
     level_password text,
     time_since_upload text NOT NULL,
@@ -66,13 +66,13 @@ CREATE TABLE level_data (
     index_36 text
 );
 
-CREATE TABLE level_data_meta (
+CREATE TABLE gj_level_data_meta (
   level_id bigint PRIMARY KEY NOT NULL,
   cached_at timestamp without time zone,
   absent boolean DEFAULT false NOT NULL
 );
 
-CREATE TABLE newgrounds_song (
+CREATE TABLE gj_newgrounds_song (
     song_id bigint PRIMARY KEY NOT NULL,
     song_name text NOT NULL,
     index_3 bigint,
@@ -84,10 +84,10 @@ CREATE TABLE newgrounds_song (
     song_link text
 );
 
-CREATE TABLE newgrounds_song_meta (
+CREATE TABLE gj_newgrounds_song_meta (
     song_id bigint PRIMARY KEY NOT NULL,
     cached_at timestamp without time zone,
     absent boolean DEFAULT false NOT NULL
 );
 
-ALTER TABLE demons ADD COLUMN level_id INT8 NULL UNIQUE REFERENCES level(level_id);
+ALTER TABLE demons ADD COLUMN level_id INT8 NULL UNIQUE REFERENCES gj_level(level_id);
