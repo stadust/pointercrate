@@ -173,11 +173,14 @@ export class StatsViewer extends FilteredPaginator {
         record.demon.position <= window.extended_list_length
     ).length;
 
+    let verifiedExtended = playerData.verified.filter(demon => demon.position <= window.extended_list_length && demon.position > window.list_length).length;
+    let verifiedLegacy = playerData.verified.filter(demon => demon.position > window.extended_list_length).length;
+
     formatRecordsInto(this._beaten, beaten);
 
     this._amountBeaten.textContent =
-      beaten.length - legacy - extended + " ( + " + extended + " )";
-    this._amountLegacy.textContent = legacy;
+      (beaten.length - legacy - extended + playerData.verified.length - verifiedExtended - verifiedLegacy) + " ( + " + (extended + verifiedExtended) + " )";
+    this._amountLegacy.textContent = legacy + verifiedLegacy;
 
     var hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
