@@ -1,7 +1,7 @@
 use crate::{model::demonlist::submitter::Submitter, util::non_nullable, Result};
 use log::info;
 use serde::Deserialize;
-use sqlx::PgConnection;
+use sqlx::{Done, PgConnection};
 
 #[derive(Debug, Deserialize)]
 pub struct PatchSubmitter {
@@ -12,14 +12,18 @@ pub struct PatchSubmitter {
 impl Submitter {
     pub async fn ban(&mut self, connection: &mut PgConnection) -> Result<()> {
         sqlx::query!("UPDATE submitters SET banned = true WHERE submitter_id = $1", self.id)
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
 
         let deleted = sqlx::query!("DELETE FROM records WHERE submitter = $1 AND status_ = 'SUBMITTED'", self.id)
             .execute(connection)
             .await?;
 
-        info!("Banning submitter {} caused deletion of {} submissions", self, deleted);
+        info!(
+            "Banning submitter {} caused deletion of {} submissions",
+            self,
+            deleted.rows_affected()
+        );
 
         self.banned = true;
 

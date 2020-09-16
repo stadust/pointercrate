@@ -51,7 +51,7 @@ impl FullDemon {
             verifier.id,
             publisher.id
         )
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await?
         .id;
 
@@ -71,7 +71,7 @@ impl FullDemon {
         let mut creators = Vec::new();
 
         for creator in data.creators {
-            let player = DatabasePlayer::by_name_or_create(creator.as_ref(), connection).await?;
+            let player = DatabasePlayer::by_name_or_create(creator.as_ref(), &mut *connection).await?;
             Creator::insert(&demon.base, &player, connection).await?;
 
             creators.push(player);

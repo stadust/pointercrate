@@ -13,7 +13,7 @@ use dash_rs::{
 };
 use log::error;
 use reqwest::Client;
-use sqlx::{pool::PoolConnection, PgConnection, Pool, Row};
+use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres, Row};
 use std::borrow::Cow;
 
 pub struct CacheEntryMeta {
@@ -30,7 +30,7 @@ pub enum CacheEntry<T> {
 }
 
 pub struct PgCache {
-    pool: Pool<PgConnection>,
+    pool: Pool<Postgres>,
     expire_after: Duration,
 }
 
@@ -55,7 +55,7 @@ impl PgCache {
         .await;
 
         let meta = match meta {
-            Err(sqlx::Error::NotFound) => return Ok(CacheEntry::Missing),
+            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
             Err(err) => return Err(err.into()),
             Ok(meta) => meta,
         };
@@ -141,7 +141,7 @@ pub async fn gather_gj_data(state: PointercrateState, demon: &mut Demon) -> Resu
         .await?
     {
         return Ok(Err(match reason.what.as_ref() {
-            "notfound" => GjIntegrationError::NotFound,
+            "notfound" => GjIntegrationError::RowNotFound,
             "malformed" => GjIntegrationError::Malformed,
             _ => unreachable!(),
         }))
@@ -185,7 +185,7 @@ pub async fn download_level(http_client: &Client, level_id: u64) -> std::result:
             let data = std::str::from_utf8(bytes).unwrap();
 
             if data == "-1" {
-                return Err(GjIntegrationError::NotFound)
+                return Err(GjIntegrationError::RowNotFound)
             }
 
             match data.split('#').next() {
@@ -265,7 +265,7 @@ pub async fn determine_level_id(http_client: &Client, name: &str) -> std::result
             let data = std::str::from_utf8(bytes).unwrap();
 
             if data == "-1" {
-                return Err(GjIntegrationError::NotFound)
+                return Err(GjIntegrationError::RowNotFound)
             }
 
             match data.split('#').next() {
@@ -277,7 +277,7 @@ pub async fn determine_level_id(http_client: &Client, name: &str) -> std::result
                         .filter(|demon| demon.name.to_lowercase() == name.to_lowercase())
                         .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
                         .map(|level| level.level_id)
-                        .ok_or(GjIntegrationError::NotFound),
+                        .ok_or(GjIntegrationError::RowNotFound),
                 None => Err(GjIntegrationError::Malformed),
             }
         },

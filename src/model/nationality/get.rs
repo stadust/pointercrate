@@ -10,7 +10,7 @@ use sqlx::{Error, PgConnection};
 impl Nationality {
     pub async fn by_country_code_or_name(code: &CiStr, connection: &mut PgConnection) -> Result<Nationality> {
         sqlx::query!(
-            "SELECT nation::text, iso_country_code::text FROM nationalities WHERE iso_country_code = $1 or nation = $1",
+            r#"SELECT nation as "nation: String", iso_country_code as "iso_country_code: String" FROM nationalities WHERE iso_country_code = $1 or nation = $1"#,
             code.to_string() /* FIXME(sqlx 0.3) */
         )
         .fetch_one(connection)
@@ -23,7 +23,7 @@ impl Nationality {
         })
         .map_err(|sqlx_error| {
             match sqlx_error {
-                Error::NotFound =>
+                Error::RowNotFound =>
                     PointercrateError::ModelNotFound {
                         model: "Nationality",
                         identified_by: code.to_string(),
@@ -34,7 +34,9 @@ impl Nationality {
     }
 
     pub async fn all(connection: &mut PgConnection) -> Result<Vec<Nationality>> {
-        let mut stream = sqlx::query!("SELECT nation::text, iso_country_code::text FROM nationalities").fetch(connection);
+        let mut stream =
+            sqlx::query!(r#"SELECT nation as "nation: String", iso_country_code as "iso_country_code: String" FROM nationalities"#)
+                .fetch(connection);
         let mut nationalities = Vec::new();
 
         while let Some(row) = stream.next().await {

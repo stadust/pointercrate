@@ -13,7 +13,7 @@ use sqlx::{Error, PgConnection};
 struct FetchedUser {
     member_id: i32,
     name: String,
-    permissions: i32, // FIXME(sqlx) once custom types are supported
+    permissions: i32,
     display_name: Option<String>,
     youtube_channel: Option<String>,
     password_hash: String,
@@ -104,15 +104,15 @@ impl AuthenticatedUser {
     async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query_as!(
             FetchedUser,
-            "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE \
-             member_id = $1",
+            r#"SELECT member_id, name, permissions::integer as "permissions!: i32", display_name, youtube_channel::text, password_hash FROM members WHERE 
+             member_id = $1"#,
             id
         )
         .fetch_one(connection)
         .await;
 
         match row {
-            Err(Error::NotFound) => Err(PointercrateError::Unauthorized),
+            Err(Error::RowNotFound) => Err(PointercrateError::Unauthorized),
             Err(err) => Err(err.into()),
             Ok(row) =>
                 Ok(AuthenticatedUser {
@@ -131,14 +131,14 @@ impl AuthenticatedUser {
     async fn by_name(name: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query_as!(
             FetchedUser,
-            "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE name = $1",
+            r#"SELECT member_id, name, permissions::integer as "permissions!: i32", display_name, youtube_channel::text, password_hash FROM members WHERE name = $1"#,
             name.to_string()
         )
         .fetch_one(connection)
         .await;
 
         match row {
-            Err(Error::NotFound) => Err(PointercrateError::Unauthorized),
+            Err(Error::RowNotFound) => Err(PointercrateError::Unauthorized),
             Err(err) => Err(err.into()),
             Ok(row) =>
                 Ok(AuthenticatedUser {

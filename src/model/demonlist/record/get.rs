@@ -30,7 +30,7 @@ struct FetchedRecord {
 impl FullRecord {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<FullRecord> {
         let result = sqlx::query_file_as!(FetchedRecord, "sql/record_by_id.sql", id)
-            .fetch_one(connection)
+            .fetch_one(&mut *connection)
             .await;
 
         match result {
@@ -57,7 +57,7 @@ impl FullRecord {
                     notes: notes_on(id, connection).await?,
                 }),
 
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Record",
                     identified_by: id.to_string(),
@@ -68,20 +68,10 @@ impl FullRecord {
 }
 
 pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalRecordD>> {
-    struct Fetched {
-        id: i32,
-        progress: i16,
-        video: Option<String>,
-        demon_id: i32,
-        name: String,
-        position: i16,
-    }
-
-    let mut stream = sqlx::query_as!(
-        Fetched,
-        "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, demons.id AS demon_id, \
-         demons.name::text, demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id \
-         = $1 WHERE status_ = 'APPROVED' AND records.player = $1",
+    let mut stream = sqlx::query!(
+        r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, demons.id AS demon_id, 
+         demons.name as "name: String", demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id 
+         = $1 WHERE status_ = 'APPROVED' AND records.player = $1"#,
         player.id
     )
     .fetch(connection);
@@ -119,9 +109,9 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
 
     let mut stream = sqlx::query_as!(
         Fetched,
-        "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, \
-         players.name::text, players.banned FROM records INNER JOIN players ON records.player = players.id WHERE status_ = 'APPROVED' AND \
-         records.demon = $1 ORDER BY progress DESC, id ASC",
+        r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
+         players.name AS "name: String", players.banned FROM records INNER JOIN players ON records.player = players.id WHERE status_ = 'APPROVED' AND 
+         records.demon = $1 ORDER BY progress DESC, id ASC"#,
         demon.id
     )
     .fetch(connection);

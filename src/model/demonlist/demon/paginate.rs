@@ -10,7 +10,7 @@ use crate::{
 };
 use futures::stream::StreamExt;
 use serde::{Deserialize, Serialize};
-use sqlx::{row::Row, PgConnection};
+use sqlx::{PgConnection, Row};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DemonIdPagination {

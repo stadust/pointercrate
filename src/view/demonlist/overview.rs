@@ -33,9 +33,9 @@ pub struct DemonlistOverview {
 pub async fn overview_demons(connection: &mut PgConnection) -> Result<Vec<OverviewDemon>> {
     Ok(sqlx::query_as!(
         OverviewDemon,
-        "SELECT demons.id, position, demons.name::TEXT, CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, \
-         players.name::TEXT as publisher FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers \
-         ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"
+        r#"SELECT demons.id, position, demons.name as "name: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
+         players.name as "publisher: String" FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
+         ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"#
     )
     .fetch_all(connection)
     .await?)

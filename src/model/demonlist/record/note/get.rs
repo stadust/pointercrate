@@ -41,16 +41,16 @@ impl Note {
         // TODO: handling of deleted users
         let row = sqlx::query_as!(
             PartialNote,
-            "SELECT id, record, content, members.name AS author, EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL \
-             AND id = $1) AS transferred FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on \
-             members.member_id = record_notes_additions.userid WHERE id = $1",
+            r#"SELECT id, record, content, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL 
+             AND id = $1) AS "transferred!: bool" FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on 
+             members.member_id = record_notes_additions.userid WHERE id = $1"#,
             note_id
         )
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await;
 
         match row {
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Note",
                     identified_by: note_id.to_string(),
@@ -64,12 +64,12 @@ impl Note {
 pub async fn notes_on(record_id: i32, connection: &mut PgConnection) -> Result<Vec<Note>> {
     let partials = sqlx::query_as!(
         PartialNote,
-        "SELECT id, record, content, members.name AS author, EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND \
-         id = $1) AS transferred  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = \
-         record_notes_additions.userid WHERE record = $1",
+        r#"SELECT id, record, content, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND 
+         id = $1) AS "transferred!: bool"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = 
+         record_notes_additions.userid WHERE record = $1"#,
         record_id
     )
-    .fetch_all(connection)
+    .fetch_all(&mut *connection)
     .await?;
 
     let mut notes = Vec::new();

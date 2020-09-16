@@ -31,15 +31,19 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
     let mut connection = state.connection().await?;
     let overview = DemonlistOverview::load(&mut connection).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
-    let link_banned = sqlx::query!("SELECT link_banned FROM players WHERE id = $1", demon.demon.verifier.id)
-        .fetch_one(&mut connection)
-        .await?
-        .link_banned;
+    let link_banned = sqlx::query!(
+        r#"SELECT link_banned AS "link_banned!: bool" FROM players WHERE id = $1"#,
+        demon.demon.verifier.id
+    ) // not NULL
+    .fetch_one(&mut connection)
+    .await?
+    .link_banned;
 
     let mut movements: Vec<DemonMovement> = sqlx::query_as!(
         DemonMovement,
-        "SELECT position AS from_position, time AS at FROM demon_modifications WHERE position IS NOT NULL AND id = $1 AND position > 0 \
-         ORDER BY time",
+        // note that position is not null as by the WHERE-clause
+        r#"SELECT position AS "from_position!: i16", time AS at FROM demon_modifications WHERE position IS NOT NULL AND id = $1 AND position > 0 
+         ORDER BY time"#,
         demon.demon.base.id
     )
     .fetch_all(&mut connection)

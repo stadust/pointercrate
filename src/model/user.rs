@@ -96,7 +96,7 @@ impl User {
     ///
     /// The returned tuple is of the form (max, min)
     pub async fn extremal_member_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
-        let row = sqlx::query!("SELECT MAX(member_id) AS max_id, MIN(member_id) AS min_id FROM members")
+        let row = sqlx::query!(r#"SELECT MAX(member_id) AS "max_id!: i32", MIN(member_id) AS "min_id!: i32" FROM members"#)
             .fetch_one(connection)
             .await?; // FIXME: crashes on empty table
         Ok((row.max_id, row.min_id))

@@ -1,10 +1,7 @@
 use crate::{config, documentation, model::user::AuthenticatedUser, ratelimit::Ratelimits, Result};
 use log::trace;
 use reqwest::Client;
-use sqlx::{
-    pool::{Builder, PoolConnection},
-    PgConnection, Pool, Transaction,
-};
+use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 #[derive(Clone)]
@@ -12,7 +9,7 @@ pub struct PointercrateState {
     pub documentation_toc: Arc<String>,
     pub documentation_topics: Arc<HashMap<String, String>>,
     pub secret: Arc<Vec<u8>>,
-    pub connection_pool: Pool<PgConnection>,
+    pub connection_pool: Pool<Postgres>,
     pub ratelimits: Ratelimits,
 
     pub http_client: Client,
@@ -28,10 +25,10 @@ impl PointercrateState {
         let documentation_toc = Arc::new(documentation::read_table_of_contents().unwrap());
         let documentation_topics = Arc::new(documentation::read_documentation_topics().unwrap());
 
-        let connection_pool = Builder::default()
-            .max_size(8)
+        let connection_pool = PgPoolOptions::default()
+            .max_connections(8)
             .max_lifetime(Some(Duration::from_secs(60 * 60 * 24)))
-            .build(&config::database_url())
+            .connect(&config::database_url())
             .await
             .expect("Failed to connect to pointercrate database");
 
@@ -47,38 +44,38 @@ impl PointercrateState {
     }
 
     /// Gets a connection from the connection pool
-    pub async fn connection(&self) -> Result<PoolConnection<PgConnection>> {
+    pub async fn connection(&self) -> Result<PoolConnection<Postgres>> {
         let mut connection = self.connection_pool.acquire().await?;
 
-        audit_connection(&mut connection, 0).await?;
+        audit_connection(&mut *connection, 0).await?;
 
         Ok(connection)
     }
 
-    pub async fn transaction(&self) -> Result<Transaction<PoolConnection<PgConnection>>> {
+    pub async fn transaction(&self) -> Result<Transaction<'static, Postgres>> {
         let mut connection = self.connection_pool.begin().await?;
 
-        audit_connection(&mut connection, 0).await?;
+        audit_connection(&mut *connection, 0).await?;
 
         Ok(connection)
     }
 
     /// Prepares this connection such that all audit log entries generated while using it are
     /// attributed to the givne authenticated user
-    pub async fn audited_connection(&self, user: &AuthenticatedUser) -> Result<PoolConnection<PgConnection>> {
+    pub async fn audited_connection(&self, user: &AuthenticatedUser) -> Result<PoolConnection<Postgres>> {
         let mut connection = self.connection_pool.acquire().await?;
 
-        audit_connection(&mut connection, user.inner().id).await?;
+        audit_connection(&mut *connection, user.inner().id).await?;
 
         Ok(connection)
     }
 
     /// Prepares this transaction connection such that all audit log entries generated while using
-    /// it are attributed to the givne authenticated user
-    pub async fn audited_transaction(&self, user: &AuthenticatedUser) -> Result<Transaction<PoolConnection<PgConnection>>> {
+    /// it are attributed to the given authenticated user
+    pub async fn audited_transaction(&self, user: &AuthenticatedUser) -> Result<Transaction<'static, Postgres>> {
         let mut connection = self.connection_pool.begin().await?;
 
-        audit_connection(&mut connection, user.inner().id).await?;
+        audit_connection(&mut *connection, user.inner().id).await?;
 
         Ok(connection)
     }
@@ -91,9 +88,9 @@ pub async fn audit_connection(connection: &mut PgConnection, user_id: i32) -> Re
     );
 
     sqlx::query!("CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)")
-        .execute(connection)
+        .execute(&mut *connection)
         .await?;
-    sqlx::query!("DELETE FROM active_user").execute(connection).await?;
+    sqlx::query!("DELETE FROM active_user").execute(&mut *connection).await?;
     sqlx::query!("INSERT INTO active_user (id) VALUES ($1)", user_id)
         .execute(connection)
         .await?;

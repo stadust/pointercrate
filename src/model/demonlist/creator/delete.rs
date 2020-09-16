@@ -1,7 +1,7 @@
 use super::Creator;
 use crate::Result;
 use log::info;
-use sqlx::PgConnection;
+use sqlx::{Done, PgConnection};
 
 impl Creator {
     pub async fn delete(self, connection: &mut PgConnection) -> Result<()> {
@@ -11,7 +11,7 @@ impl Creator {
             sqlx::query!("DELETE FROM creators WHERE creator = $1 AND demon = $2", self.creator, self.demon)
                 .execute(connection)
                 .await
-                .map(|how_many| info!("Deletion of effected {} rows", how_many))?,
+                .map(|how_many| info!("Deletion of effected {} rows", how_many.rows_affected()))?,
         )
     }
 }

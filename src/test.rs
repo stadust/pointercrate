@@ -1,4 +1,4 @@
-use sqlx::{Connect, PgConnection};
+use sqlx::{Connection, PgConnection};
 
 /// Connects to a local test database (called pointercrate_test) with a dummy account (username:
 /// pc_test, password: test), starts a transaction in a new connection and inserts some dummy data

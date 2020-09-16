@@ -19,7 +19,7 @@ use serde::{
     Serialize,
 };
 use serde_json::json;
-use sqlx::Error;
+use sqlx::{postgres::PgDatabaseError, Error};
 use std::time::Duration;
 
 // TODO: proper name
@@ -662,30 +662,24 @@ impl From<Error> for PointercrateError {
     fn from(error: Error) -> Self {
         match error {
             Error::Database(database_error) => {
-                error!(
-                    "Database error: {}. Table: {:?}, column: {:?}, constraints: {:?}, hint: {:?}, details: {:?}",
-                    database_error.message(),
-                    database_error.table_name(),
-                    database_error.column_name(),
-                    database_error.constraint_name(),
-                    database_error.hint(),
-                    database_error.details()
-                );
+                let database_error = database_error.downcast::<PgDatabaseError>();
+
+                error!("Database error: {:?}. ", database_error);
 
                 PointercrateError::DatabaseError
             },
-            Error::PoolClosed | Error::PoolTimedOut(_) => PointercrateError::DatabaseConnectionError,
+            Error::PoolClosed | Error::PoolTimedOut => PointercrateError::DatabaseConnectionError,
             Error::ColumnNotFound(column) => {
                 error!("Invalid access to column {}, which does not exist", column);
 
                 PointercrateError::InternalServerError
             },
-            Error::NotFound => {
+            Error::RowNotFound => {
                 error!("Unhandled 'NotFound', this is a logic or data consistency error");
 
                 PointercrateError::InternalServerError
             },
-            Error::FoundMoreThanOne => PointercrateError::Ambiguous,
+            //Error::FoundMoreThanOne => PointercrateError::Ambiguous,
             _ => {
                 error!("Database error: {:?}", error);
 

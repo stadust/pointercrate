@@ -29,7 +29,7 @@ mod config;
 mod documentation;
 mod error;
 mod extractor;
-mod gd;
+//mod gd;
 mod middleware;
 mod model;
 mod permissions;
