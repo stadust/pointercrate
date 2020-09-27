@@ -8,7 +8,7 @@ CREATE TABLE gj_creator (
 
 CREATE TABLE gj_creator_meta (
     user_id bigint PRIMARY KEY NOT NULL,  -- No REFERENCES creator(user_id) as we also have to keep track of _missing_ entries here!
-    cached_at timestamp without time zone,
+    cached_at timestamp without time zone NOT NULL,
     absent boolean DEFAULT false NOT NULL
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE gj_level (
 
 CREATE TABLE gj_level_meta (
     level_id bigint PRIMARY KEY NOT NULL,
-    cached_at timestamp without time zone,
+    cached_at timestamp without time zone NOT NULL,
     absent boolean DEFAULT false NOT NULL
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE gj_level_request_results (
 
 CREATE TABLE gj_level_request_meta (
     request_hash bigint PRIMARY KEY NOT NULL,
-    cached_at timestamp without time zone,
+    cached_at timestamp without time zone NOT NULL,
     absent boolean DEFAULT false NOT NULL
 );
 
@@ -68,7 +68,7 @@ CREATE TABLE gj_level_data (
 
 CREATE TABLE gj_level_data_meta (
   level_id bigint PRIMARY KEY NOT NULL,
-  cached_at timestamp without time zone,
+  cached_at timestamp without time zone NOT NULL,
   absent boolean DEFAULT false NOT NULL
 );
 
@@ -86,7 +86,7 @@ CREATE TABLE gj_newgrounds_song (
 
 CREATE TABLE gj_newgrounds_song_meta (
     song_id bigint PRIMARY KEY NOT NULL,
-    cached_at timestamp without time zone,
+    cached_at timestamp without time zone NOT NULL,
     absent boolean DEFAULT false NOT NULL
 );
 

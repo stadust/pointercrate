@@ -10,14 +10,13 @@ use sqlx::PgConnection;
 impl Creator {
     pub async fn get(demon: &MinimalDemon, player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Creator> {
         let exists = sqlx::query!(
-            "SELECT EXISTS (SELECT FROM creators WHERE creator=$1 AND demon = $2) AS result",
+            r#"SELECT EXISTS (SELECT FROM creators WHERE creator=$1 AND demon = $2) AS "result!: bool""#,
             player.id,
             demon.id
         )
         .fetch_one(connection)
         .await?
-        .result
-        .unwrap(); //FIXME(sqlx) EXISTS interpreted as nullable
+        .result;
 
         if exists {
             Ok(Creator {

@@ -51,7 +51,7 @@ impl PgCache {
             "SELECT user_id AS key, cached_at AS made, absent FROM gj_creator_meta WHERE user_id = $1",
             user_id
         )
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await;
 
         let meta = match meta {
@@ -60,14 +60,8 @@ impl PgCache {
             Ok(meta) => meta,
         };
 
-        struct _Creator {
-            user_id: i64,
-            name: String,
-            account_id: Option<i64>,
-        }
-
-        let creator_row = sqlx::query_as!(_Creator, "SELECT * FROM gj_creator WHERE user_id = $1", user_id)
-            .fetch_one(connection)
+        let creator_row = sqlx::query!("SELECT * FROM gj_creator WHERE user_id = $1", user_id)
+            .fetch_one(&mut *connection)
             .await?;
 
         let creator = Creator {
