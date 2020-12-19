@@ -15,3 +15,5 @@ DROP TABLE gj_level_request_meta;
 
 DROP TABLE gj_newgrounds_song;
 DROP TABLE gj_newgrounds_song_meta;
+
+DROP TABLE download_lock;

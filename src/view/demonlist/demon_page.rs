@@ -1,5 +1,6 @@
 use crate::{
     config,
+    gd::GDIntegrationResult,
     model::demonlist::demon::FullDemon,
     state::PointercrateState,
     video,
@@ -9,6 +10,7 @@ use crate::{
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
+use dash_rs::Thunk;
 use log::error;
 use maud::{html, Markup, PreEscaped, Render};
 
@@ -24,6 +26,7 @@ pub struct Demonlist {
     data: FullDemon,
     movements: Vec<DemonMovement>,
     link_banned: bool,
+    integration: GDIntegrationResult,
 }
 
 #[get("/demonlist/{position}/")]
@@ -65,12 +68,15 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
         None => error!("No addition logged for demon {}!", demon),
     }
 
+    let integration = state.gd_integration.data_for_demon(state.http_client.clone(), &demon.demon).await?;
+
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
         Demonlist {
             overview,
             data: demon,
             movements,
             link_banned,
+            integration,
         }
         .render()
         .0,
@@ -117,15 +123,15 @@ impl Demonlist {
                         }
                     }
                 }
-               /* @if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
-                    @if let Some(ref description) = level.base.description {
+                @if let GDIntegrationResult::Success(ref level, _) = self.integration {
+                    @if let Some(Thunk::Processed(ref description)) = level.description {
                         div.underlined.pad {
                             q {
-                                (description)
+                                (description.0)
                             }
                         }
                     }
-                }*/
+                }
                 @if self.link_banned {
                     p {
                         "Due to the questionable nature of the verifier's youtube content, embedding of their videos has been disabled"

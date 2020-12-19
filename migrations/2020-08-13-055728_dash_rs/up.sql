@@ -90,4 +90,8 @@ CREATE TABLE gj_newgrounds_song_meta (
     absent boolean DEFAULT false NOT NULL
 );
 
+CREATE TABLE download_lock(
+    level_id bigint not null
+);
+
 ALTER TABLE demons ADD COLUMN level_id INT8 NULL UNIQUE REFERENCES gj_level(level_id);

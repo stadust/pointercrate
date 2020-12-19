@@ -1,8 +1,9 @@
-use crate::{config, documentation, model::user::AuthenticatedUser, ratelimit::Ratelimits, Result};
+use crate::{config, documentation, gd::PgCache, model::user::AuthenticatedUser, ratelimit::Ratelimits, Result};
+use chrono::Duration;
 use log::trace;
 use reqwest::Client;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc};
 
 #[derive(Clone)]
 pub struct PointercrateState {
@@ -14,6 +15,7 @@ pub struct PointercrateState {
 
     pub http_client: Client,
     pub webhook_url: Option<Arc<String>>,
+    pub gd_integration: PgCache,
 }
 
 impl PointercrateState {
@@ -27,12 +29,13 @@ impl PointercrateState {
 
         let connection_pool = PgPoolOptions::default()
             .max_connections(8)
-            .max_lifetime(Some(Duration::from_secs(60 * 60 * 24)))
+            .max_lifetime(Some(std::time::Duration::from_secs(60 * 60 * 24)))
             .connect(&config::database_url())
             .await
             .expect("Failed to connect to pointercrate database");
 
         PointercrateState {
+            gd_integration: PgCache::new(connection_pool.clone(), Duration::minutes(30)),
             documentation_toc,
             documentation_topics,
             connection_pool,

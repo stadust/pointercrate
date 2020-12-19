@@ -1,4 +1,4 @@
-use crate::{model::demonlist::demon::Demon, state::PointercrateState};
+use crate::{error::PointercrateError, model::demonlist::demon::Demon, state::PointercrateState};
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use dash_rs::{
     model::{
@@ -11,11 +11,12 @@ use dash_rs::{
         GameVersion,
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
+    response::ResponseError,
     Base64Decoded, HasRobtopFormat, PercentDecoded, ProcessError, Thunk, ThunkContent,
 };
 use futures::StreamExt;
-use log::error;
-use reqwest::Client;
+use log::{error, info, trace, warn};
+use reqwest::{header::CONTENT_TYPE, Client};
 use sqlx::{pool::PoolConnection, Error, PgConnection, Pool, Postgres};
 use std::{
     borrow::{Borrow, Cow},
@@ -23,17 +24,220 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+#[derive(Debug)]
+pub enum GDIntegrationResult {
+    Success(Level<'static, ()>, LevelData<'static>),
+    DemonNotFoundByName,
+    DemonNotYetCached,
+    LevelDataNotFound,
+    LevelDataNotCached,
+}
+
+impl PgCache {
+    pub async fn data_for_demon(&self, http_client: Client, demon: &Demon) -> Result<GDIntegrationResult, PointercrateError> {
+        trace!("Retrieving data for demon {:?}", demon);
+
+        match demon.level_id {
+            None => {
+                info!("Data for demon {} not cached, trying to download!", demon.base.id);
+
+                let request = LevelsRequest::default()
+                    .request_type(LevelRequestType::MostLiked)
+                    .search(&demon.base.name)
+                    .with_rating(LevelRating::Demon(DemonRating::Hard))
+                    .search_filters(SearchFilters::default().rated());
+
+                let entry = match self.lookup_levels_request(&request).await {
+                    Err(CacheError::Db(err)) => return Err(err.into()),
+                    Err(_) => return Err(PointercrateError::InternalServerError), // shouldn't be reachable
+                    Ok(entry) => entry,
+                };
+
+                match entry {
+                    CacheEntry::Absent => Ok(GDIntegrationResult::DemonNotFoundByName),
+                    // Okay we _could_ do something more elaborate here if we dont have a "Missing" variant, but honestly I dont care
+                    _ => {
+                        actix_rt::spawn(self.clone().find_demon(http_client, demon.base.name.to_string(), demon.base.id));
+
+                        Ok(GDIntegrationResult::DemonNotYetCached)
+                    },
+                }
+            },
+            Some(level_id) => {
+                let entry = match self.lookup_level(level_id).await {
+                    Err(CacheError::Db(err)) => return Err(err.into()),
+                    Err(_) => return Err(PointercrateError::InternalServerError), // shouldn't be reachable
+                    Ok(entry) => entry,
+                };
+
+                trace!(
+                    "Lookup of level with id {} (associated with demon '{}') yielded: {:?}",
+                    level_id,
+                    demon.base.name,
+                    entry
+                );
+
+                let level = match entry {
+                    // Something went very wrong
+                    CacheEntry::Missing => return Ok(GDIntegrationResult::LevelDataNotCached),
+                    CacheEntry::Absent => return Ok(GDIntegrationResult::LevelDataNotFound),
+                    CacheEntry::Expired(level, _) => {
+                        actix_rt::spawn(
+                            self.clone()
+                                .find_demon(http_client.clone(), demon.base.name.to_string(), demon.base.id),
+                        );
+
+                        level
+                    },
+                    CacheEntry::Live(level, _) => level,
+                };
+
+                let level_data = match self.lookup_level_data(level_id).await {
+                    Err(CacheError::Db(err)) => return Err(err.into()),
+                    Err(_) => return Err(PointercrateError::InternalServerError), // shouldn't be reachable
+                    Ok(CacheEntry::Missing) => return Ok(GDIntegrationResult::LevelDataNotCached),
+                    Ok(CacheEntry::Absent) => return Ok(GDIntegrationResult::LevelDataNotFound),
+                    Ok(CacheEntry::Expired(level_data, _)) => {
+                        actix_rt::spawn(self.clone().download_demon(http_client, level.level_id.into(), demon.base.id));
+
+                        level_data
+                    },
+                    Ok(CacheEntry::Live(level_data, _)) => level_data,
+                };
+
+                Ok(GDIntegrationResult::Success(level, level_data))
+            },
+        }
+    }
+
+    async fn find_demon(self, http_client: Client, demon_name: String, demon: i32) {
+        let request = LevelsRequest::default()
+            .request_type(LevelRequestType::MostLiked)
+            .search(&demon_name)
+            .with_rating(LevelRating::Demon(DemonRating::Hard))
+            .search_filters(SearchFilters::default().rated());
+
+        trace!("Trying to find demon {} via request {:?}", demon_name, request);
+
+        let request_result = http_client
+            .post(&request.to_url())
+            .body(request.to_string())
+            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .send()
+            .await;
+
+        trace!("Request result is {:?}", request_result);
+
+        match request_result {
+            Ok(response) => {
+                let content = response.text().await;
+
+                if let Ok(text) = content {
+                    match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
+                        Err(ResponseError::NotFound) => {
+                            self.mark_levels_request_result_as_absent(&request).await.unwrap();
+                        },
+                        Ok(demons) =>
+                            if demons.len() == 0 {
+                                self.mark_levels_request_result_as_absent(&request).await;
+                            } else {
+                                trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
+
+                                self.store_levels_request(&request, &demons).await;
+
+                                let hardest = demons.into_iter().max_by(|x, y| x.difficulty.cmp(&y.difficulty)).unwrap();
+
+                                trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
+
+                                self.download_demon(http_client, hardest.level_id.into(), demon).await;
+                            },
+                        _ => (),
+                    }
+                }
+            },
+            Err(error) => error!("Error making request: {:?}", error),
+        }
+    }
+
+    async fn download_demon(self, http_client: Client, request: LevelRequest<'static>, demon_id: i32) {
+        trace!("Downloading demon with id {}", request.level_id);
+
+        let mut connection = match self.pool.begin().await {
+            Ok(conn) => conn,
+            _ => return,
+        };
+        sqlx::query!("LOCK download_lock").execute(&mut *connection).await;
+        let is_concurrent_download = sqlx::query!(
+            r#"SELECT EXISTS (SELECT 1 FROM download_lock WHERE level_id = $1) AS "concurrent!: bool""#,
+            request.level_id as i64
+        )
+        .fetch_one(&mut *connection)
+        .await;
+
+        if is_concurrent_download.is_err() || is_concurrent_download.unwrap().concurrent {
+            warn!("Multiple concurrent download attempts for level {}. Cancelling!", request.level_id);
+
+            connection.commit().await;
+
+            return
+        }
+
+        sqlx::query!("INSERT INTO download_lock (level_id) VALUES ($1)", request.level_id as i64)
+            .execute(&mut *connection)
+            .await;
+
+        connection.commit().await;
+
+        let request_result = http_client
+            .post(&request.to_url())
+            .body(request.to_string())
+            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .send()
+            .await;
+
+        if let Ok(response) = request_result {
+            let content = response.text().await;
+
+            if let Ok(text) = content {
+                match dash_rs::response::parse_download_gj_level_response(&text[..]) {
+                    Ok(demon) => {
+                        self.store_level_data(demon.level_id, &demon.level_data)
+                            .await
+                            .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err));
+
+                        sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
+                            .execute(&self.pool)
+                            .await;
+
+                        sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
+                            .execute(&self.pool)
+                            .await;
+
+                        info!("Successfully retrieved demon data!");
+                    },
+                    Err(ResponseError::NotFound) => {
+                        self.mark_level_data_as_absent(request.level_id).await;
+                    },
+                    Err(_) => {},
+                }
+            }
+        }
+    }
+}
+
 // FIXME: Right now this implementation always stores processed data. In case of processing failure,
 // it refuses to store the object. In the future, we probably want to store the unprocessed data
 // then with a special flag. However, this is not yet supported by dash-rs, as dash-rs doesnt
 // support owned, unprocessed data.
 
+#[derive(Debug)]
 pub struct CacheEntryMeta {
     made: NaiveDateTime,
     key: i64,
     absent: bool,
 }
 
+#[derive(Debug)]
 pub enum CacheError {
     Db(Error),
     Malformed(ProcessError),
@@ -52,6 +256,7 @@ impl From<ProcessError> for CacheError {
     }
 }
 
+#[derive(Debug)]
 pub enum CacheEntry<T> {
     Missing,
     Absent,
@@ -59,6 +264,7 @@ pub enum CacheEntry<T> {
     Live(T, CacheEntryMeta),
 }
 
+#[derive(Clone)]
 pub struct PgCache {
     pool: Pool<Postgres>,
     expire_after: Duration,
@@ -218,15 +424,19 @@ impl PgCache {
     pub async fn mark_level_data_as_absent<'a>(&self, level_id: u64) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
-        Ok(sqlx::query_as!(
+        let meta = sqlx::query_as!(
             CacheEntryMeta,
             "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (level_id) DO UPDATE SET \
-             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent",
+             cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING level_id AS key, cached_at AS made, absent",
             level_id as i64,
             Utc::now().naive_utc()
         )
         .fetch_one(&mut connection)
-        .await?)
+        .await?;
+
+        connection.commit().await?;
+
+        Ok(meta)
     }
 
     pub async fn lookup_level_data<'a>(&self, level_id: u64) -> Result<CacheEntry<LevelData<'static>>, CacheError> {
@@ -267,7 +477,7 @@ impl PgCache {
         Ok(self.make_cache_entry(meta, level))
     }
 
-    pub async fn store_level_data<'a>(&self, level_id: u64, data: LevelData<'a>) -> Result<CacheEntryMeta, CacheError> {
+    pub async fn store_level_data<'a>(&self, level_id: u64, data: &LevelData<'a>) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
         let meta = sqlx::query_as!(
@@ -307,10 +517,14 @@ impl PgCache {
         .execute(&mut *connection)
         .await?;
 
+        connection.commit().await?;
+
         Ok(meta)
     }
 
     pub async fn mark_levels_request_result_as_absent<'a>(&self, request: &LevelsRequest<'a>) -> Result<CacheEntryMeta, CacheError> {
+        trace!("Marking result of request {:?} as absent!", request);
+
         let hash = {
             let mut hasher = DefaultHasher::new();
             request.hash(&mut hasher);
@@ -319,15 +533,19 @@ impl PgCache {
 
         let mut connection = self.pool.begin().await?;
 
-        Ok(sqlx::query_as!(
+        let meta = sqlx::query_as!(
             CacheEntryMeta,
             "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (request_hash) DO \
-             UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING request_hash AS key, cached_at AS made, absent",
+             UPDATE SET cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING request_hash AS key, cached_at AS made, absent",
             hash,
             Utc::now().naive_utc()
         )
         .fetch_one(&mut connection)
-        .await?)
+        .await?;
+
+        connection.commit().await?;
+
+        Ok(meta)
     }
 
     pub async fn lookup_levels_request<'a>(
@@ -393,8 +611,8 @@ impl PgCache {
         for level in levels {
             self.store_level(
                 level,
-                level.creator.as_ref().map(|c| c.user_id).unwrap_or(0) as i64,
-                level.custom_song.as_ref().map(|n| n.song_id as i64),
+                level.creator.as_ref().map(|c| c.user_id).unwrap_or(0),
+                level.custom_song.as_ref().map(|n| n.song_id),
             )
             .await?;
 
@@ -477,7 +695,7 @@ impl PgCache {
 
     // This must be the most horrifying piece of code I have ever written.
     async fn store_level<'a, T, U, V>(
-        &self, level: &Level<'a, T, U, V>, creator_id: i64, custom_song_id: Option<i64>,
+        &self, level: &Level<'a, T, U, V>, creator_id: u64, custom_song_id: Option<u64>,
     ) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
@@ -516,7 +734,7 @@ impl PgCache {
                 None => None,
             },
             level.version as i32,
-            creator_id,
+            creator_id as i64,
             level_rating_to_i16(level.difficulty),
             level.difficulty.is_demon(),
             level.downloads as i32,
@@ -528,7 +746,7 @@ impl PgCache {
             i32::from(level.featured),
             level.copy_of.map(|id| id as i64),
             level.two_player,
-            custom_song_id,
+            custom_song_id.map(|id| id as i64),
             level.coin_amount as i16,
             level.coins_verified,
             level.stars_requested.map(|req| req as i16),
