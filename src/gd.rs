@@ -26,7 +26,7 @@ use std::{
 
 #[derive(Debug)]
 pub enum GDIntegrationResult {
-    Success(Level<'static, ()>, LevelData<'static>),
+    Success(Level<'static, ()>, LevelData<'static>, Option<NewgroundsSong<'static>>),
     DemonNotFoundByName,
     DemonNotYetCached,
     LevelDataNotFound,
@@ -105,7 +105,22 @@ impl PgCache {
                     Ok(CacheEntry::Live(level_data, _)) => level_data,
                 };
 
-                Ok(GDIntegrationResult::Success(level, level_data))
+                let song = match level.custom_song {
+                    Some(id) =>
+                        self.lookup_newgrounds_song(id)
+                            .await
+                            .ok()
+                            .map(|entry| {
+                                match entry {
+                                    CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
+                                    _ => None,
+                                }
+                            })
+                            .flatten(),
+                    None => None,
+                };
+
+                Ok(GDIntegrationResult::Success(level, level_data, song))
             },
         }
     }
@@ -129,32 +144,35 @@ impl PgCache {
         trace!("Request result is {:?}", request_result);
 
         match request_result {
-            Ok(response) => {
-                let content = response.text().await;
-
-                if let Ok(text) = content {
-                    match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
-                        Err(ResponseError::NotFound) => {
-                            self.mark_levels_request_result_as_absent(&request).await.unwrap();
-                        },
-                        Ok(demons) =>
-                            if demons.len() == 0 {
-                                self.mark_levels_request_result_as_absent(&request).await;
-                            } else {
-                                trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
-
-                                self.store_levels_request(&request, &demons).await;
-
-                                let hardest = demons.into_iter().max_by(|x, y| x.difficulty.cmp(&y.difficulty)).unwrap();
-
-                                trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
-
-                                self.download_demon(http_client, hardest.level_id.into(), demon).await;
+            Ok(response) =>
+                match response.text().await {
+                    Ok(text) =>
+                        match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
+                            Err(ResponseError::NotFound) => {
+                                self.mark_levels_request_result_as_absent(&request)
+                                    .await
+                                    .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err));
                             },
-                        _ => (),
-                    }
-                }
-            },
+                            Ok(demons) =>
+                                if demons.len() == 0 {
+                                    self.mark_levels_request_result_as_absent(&request)
+                                        .await
+                                        .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err));
+                                } else {
+                                    trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
+
+                                    self.store_levels_request(&request, &demons).await;
+
+                                    let hardest = demons.into_iter().max_by(|x, y| x.difficulty.cmp(&y.difficulty)).unwrap();
+
+                                    trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
+
+                                    self.download_demon(http_client, hardest.level_id.into(), demon).await;
+                                },
+                            Err(err) => error!("Error processing response to request {:?}: {:?}", request, err),
+                        },
+                    Err(error) => error!("Error reading server response: {:?}", error),
+                },
             Err(error) => error!("Error making request: {:?}", error),
         }
     }
@@ -491,12 +509,17 @@ impl PgCache {
         .await?;
 
         // FIXME: this
+        trace!("Starting to parse level data");
         let objects = match data.level_data {
-            Thunk::Unprocessed(unprocessed) =>
-                bincode::serialize(&Objects::from_unprocessed(unprocessed).map_err(|_| CacheError::MalformedLevelData)?),
+            Thunk::Unprocessed(unprocessed) => {
+                let processed = Objects::from_unprocessed(unprocessed).map_err(|_| CacheError::MalformedLevelData)?;
+
+                bincode::serialize(&processed)
+            },
             Thunk::Processed(ref proc) => bincode::serialize(proc),
         }
         .map_err(|_| CacheError::MalformedLevelData)?;
+        trace!("Finished parsing level data");
 
         sqlx::query!(
             "INSERT INTO gj_level_data(level_id,level_data,level_password,time_since_upload,time_since_update,index_36) VALUES \
@@ -795,7 +818,7 @@ fn i16_to_level_rating(value: i16, is_demon: bool) -> LevelRating {
         }
     }
 
-    if is_demon {
+    if !is_demon {
         match value {
             1 => LevelRating::Auto,
             2 => LevelRating::Easy,

@@ -10,7 +10,13 @@ use crate::{
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
-use dash_rs::{model::level::Password, Thunk};
+use dash_rs::{
+    model::{
+        level::{DemonRating, LevelRating, Password},
+        GameVersion,
+    },
+    Thunk,
+};
 use log::error;
 use maud::{html, Markup, PreEscaped, Render};
 
@@ -123,7 +129,7 @@ impl Demonlist {
                         }
                     }
                 }
-                @if let GDIntegrationResult::Success(ref level, _) = self.integration {
+                @if let GDIntegrationResult::Success(ref level, ..) = self.integration {
                     @if let Some(Thunk::Processed(ref description)) = level.description {
                         div.underlined.pad {
                             q {
@@ -165,11 +171,11 @@ impl Demonlist {
                             }
                         }
                         GDIntegrationResult::LevelDataNotCached => {
-                            p.red-info {
+                            p.info-red {
                                 "This demon's level data is not stored in our database, even though the demon ID was successfully resolved. This either indicates a (hopefully temporary) inconsistent database state, or an error in dash-rs' level data processing. If this error persists, please contact an administrator!"
                             }
                         }
-                        GDIntegrationResult::Success(level, level_data) => {
+                        GDIntegrationResult::Success(level, level_data, song) => {
                             span {
                                 b {
                                     "Level Password: "
@@ -212,69 +218,48 @@ impl Demonlist {
                                     _ => "unreachable!()"
                                 }
                             }
-                        }
-                    }
-                    /*@match self.server_level {
-                        None => {
-                            p.info-red {
-                                "An internal error occured while trying to access the GDCF database, or while processing Geometry Dash data. This is a bug."
-                            }
-                        }
-                        Some(CacheEntry::Missing) => {
-                            p.info-yellow {
-                                "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
-                            }
-                        },
-                        Some(CacheEntry::MarkedAbsent(_)) => {
-                            p.info-red {
-                                "This demon has not been found on the Geometry Dash servers. Its name was most likely misspelled when entered into the database. Please contact a list moderator to fix this."
-                            }
-                        },
-                        Some(CacheEntry::Cached(ref level, ref meta)) => {
-                            @let level_data = level.decompress_data().ok();
-                            @let level_data = level_data.as_ref().and_then(|data| gdcf_parse::level::data::parse_lazy_parallel(data).ok());
-                            @let stats = level_data.map(LevelInformationSource::stats);
-
                             span {
                                 b {
-                                    "Level Password: "
+                                    "In-Game Difficulty: "
                                 }
                                 br;
-                                @match level.password {
-                                    Password::NoCopy => "Not copyable",
-                                    Password::FreeCopy => "Free to copy",
-                                    Password::PasswordCopy(ref pw) => (pw)
+                                @match level.difficulty {
+                                    LevelRating::NotAvailable => "Unrated",
+                                    LevelRating::Demon(demon_rating) => @match demon_rating {
+                                        DemonRating::Easy => "Easy Demon",
+                                        DemonRating::Medium => "Medium Demon",
+                                        DemonRating::Hard => "Hard Demon",
+                                        DemonRating::Insane => "Insane Demon",
+                                        DemonRating::Extreme => "Extreme Demon",
+                                        _ => "???"
+                                    },
+                                    _ => "Level not rated demon, list mods fucked up"
                                 }
                             }
-                            span {
-                                b {
-                                    "Level ID: "
-                                }
-                                br;
-                                (level.base.level_id)
+                            @match level.gd_version {
+                                GameVersion::Version{major, minor} => span {
+                                    b {
+                                        "Created in:"
+                                    }
+                                    br;
+                                    (major) "." (minor)
+                                },
+                                _ => {}
                             }
-                            span {
-                                b {
-                                    "Level length: "
-                                }
-                                br;
-                                @match stats {
-                                    Some(ref stats) => (format!("{}m:{:02}s", stats.duration.as_secs() / 60, stats.duration.as_secs() % 60)),
-                                    _ => (level.base.length.to_string())
-                                }
-                            }
-                            span {
-                                b {
-                                    "Object count: "
-                                }
-                                br;
-                                @match stats {
-                                    Some(ref stats) => (stats.object_count),
-                                    _ => (level.base.object_amount.unwrap_or(0))
+                            @if let Some(song) = song {
+                                span style = "width: 100%"{
+                                    b {
+                                        "Newgrounds Song:"
+                                    }
+                                    br;
+                                    @match song.link {
+                                        Thunk::Processed(ref link) => a.link href = (link.0) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
+                                        _ => "unreachable!()"
+                                    }
                                 }
                             }
                         }
-                    }*/
+                    }
                     @if position <= config::extended_list_size() {
                         span {
                             b {
