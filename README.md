@@ -14,7 +14,6 @@ As of march 2nd 2019 this is the official repository for pointercrate. It contai
 Pointercrate is mainly configured via optional environment variables. It will attempt to load them from an `.env` file. These are:
 
 - `DATABASE_URL`: The URL to the postgres database to connect to, including authentication
-- `GDCF_URL`: The URL to the postgres database for GDCF to connect to
 - `PORT`: The port to run on (defaults to `8088`)
 - `DOCUMENTATION`: The directory with the compiled documentation html files (defaults to `env!("OUT_DIR")`)
 
