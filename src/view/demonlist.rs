@@ -186,10 +186,9 @@ pub(super) fn submission_panel() -> Markup {
                     }
                     p {
                         "Provide any additional notes you'd like to pass on to the list moderator receiving your submission."
-
                     }
                     span.form-input.flex.col#submit-note {
-                        textarea name = "note" placeholder = "Your dreams and hopes for this records... or something like that" {}
+                        textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
