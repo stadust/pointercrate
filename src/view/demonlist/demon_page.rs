@@ -10,7 +10,7 @@ use crate::{
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
-use dash_rs::Thunk;
+use dash_rs::{model::level::Password, Thunk};
 use log::error;
 use maud::{html, Markup, PreEscaped, Render};
 
@@ -148,6 +148,72 @@ impl Demonlist {
                     }
                 }
                 div.underlined.pad.flex.wrap#level-info {
+                    @match &self.integration {
+                        GDIntegrationResult::DemonNotFoundByName => {
+                            p.info-red {
+                                "A demon with this name was not found on the Geometry Dash servers. Please notify a list moderator of this, as it means they most likely misspelled the name!"
+                            }
+                        }
+                        GDIntegrationResult::DemonNotYetCached => {
+                            p.info-yellow {
+                                "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
+                            }
+                        }
+                        GDIntegrationResult::LevelDataNotFound => {
+                            p.info-red {
+                                "It seems like this level has been deleted from the Geometry Dash servers"
+                            }
+                        }
+                        GDIntegrationResult::LevelDataNotCached => {
+                            p.red-info {
+                                "This demon's level data is not stored in our database, even though the demon ID was successfully resolved. This either indicates a (hopefully temporary) inconsistent database state, or an error in dash-rs' level data processing. If this error persists, please contact an administrator!"
+                            }
+                        }
+                        GDIntegrationResult::Success(level, level_data) => {
+                            span {
+                                b {
+                                    "Level Password: "
+                                }
+                                br;
+                                @match level_data.password {
+                                    Password::NoCopy => "Not copyable",
+                                    Password::FreeCopy => "Free to copy",
+                                    Password::PasswordCopy(ref pw) => (pw)
+                                }
+                            }
+                            span {
+                                b {
+                                    "Level ID: "
+                                }
+                                br;
+                                (level.level_id)
+                            }
+                            span {
+                                b {
+                                    "Level length: "
+                                }
+                                br;
+                                @match level_data.level_data {
+                                    Thunk::Processed(ref objects) => {
+                                        @let length_in_seconds = objects.length_in_seconds();
+
+                                        (format!("{}m:{:02}s", (length_in_seconds as i32)/ 60, (length_in_seconds as i32) % 60))
+                                    }
+                                    _ => "unreachable!()"
+                                }
+                            }
+                            span {
+                                b {
+                                    "Object count: "
+                                }
+                                br;
+                                @match level_data.level_data {
+                                    Thunk::Processed(ref objects) => (objects.objects.len()),
+                                    _ => "unreachable!()"
+                                }
+                            }
+                        }
+                    }
                     /*@match self.server_level {
                         None => {
                             p.info-red {
