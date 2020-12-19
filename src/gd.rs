@@ -5,17 +5,23 @@ use dash_rs::{
         creator::Creator,
         level::{
             object::{speed::Speed, ObjectData},
-            DemonRating, Level, LevelRating, ListedLevel, Password,
+            DemonRating, Featured, Level, LevelData, LevelLength, LevelRating, ListedLevel, Objects, Password,
         },
-        song::NewgroundsSong,
+        song::{MainSong, NewgroundsSong},
+        GameVersion,
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
-    HasRobtopFormat, PercentDecoded, ProcessError, Thunk, ThunkContent,
+    Base64Decoded, HasRobtopFormat, PercentDecoded, ProcessError, Thunk, ThunkContent,
 };
+use futures::StreamExt;
 use log::error;
 use reqwest::Client;
 use sqlx::{pool::PoolConnection, Error, PgConnection, Pool, Postgres};
-use std::borrow::{Borrow, Cow};
+use std::{
+    borrow::{Borrow, Cow},
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 // FIXME: Right now this implementation always stores processed data. In case of processing failure,
 // it refuses to store the object. In the future, we probably want to store the unprocessed data
@@ -31,6 +37,7 @@ pub struct CacheEntryMeta {
 pub enum CacheError {
     Db(Error),
     Malformed(ProcessError),
+    MalformedLevelData,
 }
 
 impl From<Error> for CacheError {
@@ -84,6 +91,7 @@ impl PgCache {
         let meta = match meta {
             Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
             Err(err) => return Err(err.into()),
+            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
             Ok(meta) => meta,
         };
 
@@ -142,9 +150,11 @@ impl PgCache {
         let meta = match meta {
             Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
             Err(err) => return Err(err.into()),
+            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
             Ok(meta) => meta,
         };
 
+        let mut connection = self.pool.begin().await?;
         let song_row = sqlx::query!("SELECT * from gj_newgrounds_song WHERE song_id = $1", song_id as i64)
             .fetch_one(&mut *connection)
             .await?;
@@ -204,7 +214,418 @@ impl PgCache {
 
         Ok(meta)
     }
+
+    pub async fn mark_level_data_as_absent<'a>(&self, level_id: u64) -> Result<CacheEntryMeta, CacheError> {
+        let mut connection = self.pool.begin().await?;
+
+        Ok(sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (level_id) DO UPDATE SET \
+             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent",
+            level_id as i64,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?)
+    }
+
+    pub async fn lookup_level_data<'a>(&self, level_id: u64) -> Result<CacheEntry<LevelData<'static>>, CacheError> {
+        let mut connection = self.pool.acquire().await?;
+        let mut connection = &mut *connection;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_data_meta WHERE level_id = $1",
+            level_id as i64
+        )
+        .fetch_one(&mut *connection)
+        .await;
+
+        let meta = match meta {
+            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
+            Err(err) => return Err(err.into()),
+            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
+            Ok(meta) => meta,
+        };
+
+        let row = sqlx::query!("SELECT * FROM gj_level_data WHERE level_id = $1", level_id as i64)
+            .fetch_one(&mut *connection)
+            .await?;
+
+        let level = LevelData {
+            level_data: Thunk::Processed(bincode::deserialize(&row.level_data[..]).unwrap()),
+            password: match row.level_password {
+                None => Password::NoCopy,
+                Some(-1) => Password::FreeCopy,
+                Some(number) => Password::PasswordCopy(number as u32),
+            },
+            time_since_upload: Cow::Owned(row.time_since_upload),
+            time_since_update: Cow::Owned(row.time_since_update),
+            index_36: row.index_36.map(Cow::Owned),
+        };
+
+        Ok(self.make_cache_entry(meta, level))
+    }
+
+    pub async fn store_level_data<'a>(&self, level_id: u64, data: LevelData<'a>) -> Result<CacheEntryMeta, CacheError> {
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET \
+             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent",
+            level_id as i64,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?;
+
+        // FIXME: this
+        let objects = match data.level_data {
+            Thunk::Unprocessed(unprocessed) =>
+                bincode::serialize(&Objects::from_unprocessed(unprocessed).map_err(|_| CacheError::MalformedLevelData)?),
+            Thunk::Processed(ref proc) => bincode::serialize(proc),
+        }
+        .map_err(|_| CacheError::MalformedLevelData)?;
+
+        sqlx::query!(
+            "INSERT INTO gj_level_data(level_id,level_data,level_password,time_since_upload,time_since_update,index_36) VALUES \
+             ($1,$2,$3,$4,$5,$6) ON CONFLICT(level_id) DO UPDATE SET \
+             level_id=EXCLUDED.level_id,level_data=EXCLUDED.level_data,level_password=EXCLUDED.level_password,time_since_upload=EXCLUDED.\
+             time_since_upload,time_since_update=EXCLUDED.time_since_update,index_36=EXCLUDED.index_36",
+            level_id as i64,
+            objects,
+            match data.password {
+                Password::NoCopy => None,
+                Password::FreeCopy => Some(-1),
+                Password::PasswordCopy(pw) => Some(pw as i32),
+            },
+            data.time_since_upload.as_ref(),
+            data.time_since_update.as_ref(),
+            data.index_36.as_deref()
+        )
+        .execute(&mut *connection)
+        .await?;
+
+        Ok(meta)
+    }
+
+    pub async fn mark_levels_request_result_as_absent<'a>(&self, request: &LevelsRequest<'a>) -> Result<CacheEntryMeta, CacheError> {
+        let hash = {
+            let mut hasher = DefaultHasher::new();
+            request.hash(&mut hasher);
+            hasher.finish() as i64
+        };
+
+        let mut connection = self.pool.begin().await?;
+
+        Ok(sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (request_hash) DO \
+             UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING request_hash AS key, cached_at AS made, absent",
+            hash,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?)
+    }
+
+    pub async fn lookup_levels_request<'a>(
+        &self, request: &LevelsRequest<'a>,
+    ) -> Result<CacheEntry<Vec<CacheEntry<Level<'static, ()>>>>, CacheError> {
+        let hash = {
+            let mut hasher = DefaultHasher::new();
+            request.hash(&mut hasher);
+            hasher.finish() as i64
+        };
+
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "SELECT request_hash AS key, cached_at AS made, absent FROM gj_level_request_meta WHERE request_hash = $1",
+            hash
+        )
+        .fetch_one(&mut *connection)
+        .await;
+
+        let meta = match meta {
+            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
+            Err(err) => return Err(err.into()),
+            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
+            Ok(meta) => meta,
+        };
+
+        let mut stream =
+            sqlx::query!("SELECT level_id from gj_level_request_results WHERE request_hash = $1", hash).fetch(&mut *connection);
+        let mut levels = Vec::new();
+
+        while let Some(row) = stream.next().await {
+            let level_id = row?.level_id as u64;
+
+            levels.push(self.lookup_level(level_id).await?);
+        }
+
+        Ok(self.make_cache_entry(meta, levels))
+    }
+
+    pub async fn store_levels_request<'a, 'b>(
+        &self, request: &LevelsRequest<'a>, levels: &Vec<ListedLevel<'b>>,
+    ) -> Result<CacheEntryMeta, CacheError> {
+        let hash = {
+            let mut hasher = DefaultHasher::new();
+            request.hash(&mut hasher);
+            hasher.finish() as i64
+        };
+
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (request_hash) DO \
+             UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING request_hash AS key, cached_at AS made, absent",
+            hash,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?;
+
+        for level in levels {
+            self.store_level(
+                level,
+                level.creator.as_ref().map(|c| c.user_id).unwrap_or(0) as i64,
+                level.custom_song.as_ref().map(|n| n.song_id as i64),
+            )
+            .await?;
+
+            // FIXME: We do not correctly handle the case where newgrounds song/creator is absent. For
+            // pointercrate, this should not be a problem however.
+
+            if let Some(ref creator) = level.creator {
+                self.store_creator(creator).await?;
+            }
+
+            if let Some(ref song) = level.custom_song {
+                self.store_newgrounds_song(song).await?;
+            }
+
+            sqlx::query!(
+                "INSERT INTO gj_level_request_results(level_id, request_hash) VALUES ($1, $2)",
+                level.level_id as i64,
+                hash
+            )
+            .execute(&mut *connection)
+            .await?;
+        }
+
+        Ok(meta)
+    }
+
+    pub async fn lookup_level(&self, level_id: u64) -> Result<CacheEntry<Level<'static, ()>>, CacheError> {
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_meta WHERE level_id = $1",
+            level_id as i64
+        )
+        .fetch_one(&mut *connection)
+        .await;
+
+        let meta = match meta {
+            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
+            Err(err) => return Err(err.into()),
+            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
+            Ok(meta) => meta,
+        };
+
+        let row = sqlx::query!("SELECT * FROM gj_level WHERE level_id = $1", level_id as i64)
+            .fetch_one(&mut connection)
+            .await?;
+
+        let level = Level {
+            level_id,
+            name: Cow::Owned(row.level_name),
+            description: row
+                .description
+                .map(|description| Thunk::Processed(Base64Decoded(Cow::Owned(description)))),
+            version: row.level_version as u32,
+            creator: row.creator_id as u64,
+            difficulty: i16_to_level_rating(row.difficulty, row.is_demon),
+            downloads: row.downloads as u32,
+            main_song: row.main_song.map(|id| MainSong::from(id as u8)),
+            gd_version: GameVersion::from(row.gd_version as u8),
+            likes: row.likes,
+            length: i16_to_level_length(row.level_length),
+            stars: row.stars as u8,
+            featured: Featured::from(row.featured),
+            copy_of: row.copy_of.map(|id| id as u64),
+            two_player: row.two_player,
+            custom_song: row.custom_song_id.map(|id| id as u64),
+            coin_amount: row.coin_amount as u8,
+            coins_verified: row.coins_verified,
+            stars_requested: row.stars_requested.map(|req| req as u8),
+            is_epic: row.is_epic,
+            object_amount: row.object_amount.map(|count| count as u32),
+            index_46: row.index_46.map(Cow::Owned),
+            index_47: row.index_47.map(Cow::Owned),
+            level_data: (),
+        };
+
+        Ok(self.make_cache_entry(meta, level))
+    }
+
+    // This must be the most horrifying piece of code I have ever written.
+    async fn store_level<'a, T, U, V>(
+        &self, level: &Level<'a, T, U, V>, creator_id: i64, custom_song_id: Option<i64>,
+    ) -> Result<CacheEntryMeta, CacheError> {
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_level_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET \
+             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent",
+            level.level_id as i64,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?;
+
+        sqlx::query!(
+            "INSERT INTO \
+             gj_level(level_id,level_name,description,level_version,creator_id,difficulty,is_demon,downloads,main_song,gd_version,likes,\
+             level_length,stars,featured,copy_of,two_player,custom_song_id,coin_amount,coins_verified,stars_requested,is_epic,\
+             object_amount,index_46,index_47) VALUES \
+             ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) ON CONFLICT(level_id) DO UPDATE SET \
+             level_id=EXCLUDED.level_id,level_name=EXCLUDED.level_name,description=EXCLUDED.description,level_version=EXCLUDED.\
+             level_version,creator_id=EXCLUDED.creator_id,difficulty=EXCLUDED.difficulty,is_demon=EXCLUDED.is_demon,downloads=EXCLUDED.\
+             downloads,main_song=EXCLUDED.main_song,gd_version=EXCLUDED.gd_version,likes=EXCLUDED.likes,level_length=EXCLUDED.\
+             level_length,stars=EXCLUDED.stars,featured=EXCLUDED.featured,copy_of=EXCLUDED.copy_of,two_player=EXCLUDED.two_player,\
+             custom_song_id=EXCLUDED.custom_song_id,coin_amount=EXCLUDED.coin_amount,coins_verified=EXCLUDED.coins_verified,\
+             stars_requested=EXCLUDED.stars_requested,is_epic=EXCLUDED.is_epic,object_amount=EXCLUDED.object_amount,index_46=EXCLUDED.\
+             index_46,index_47=EXCLUDED.index_47",
+            level.level_id as i64,
+            level.name.as_ref(),
+            match &level.description {
+                Some(thunk) => {
+                    Some(match thunk {
+                        Thunk::Processed(processed) => processed.0.to_string(),
+                        Thunk::Unprocessed(unproc) => Base64Decoded::from_unprocessed(unproc)?.0.to_string(),
+                    })
+                },
+                None => None,
+            },
+            level.version as i32,
+            creator_id,
+            level_rating_to_i16(level.difficulty),
+            level.difficulty.is_demon(),
+            level.downloads as i32,
+            level.main_song.map(|song| song.main_song_id as i16),
+            u8::from(level.gd_version) as i16,
+            level.likes,
+            level_length_to_i16(level.length),
+            level.stars as i16,
+            i32::from(level.featured),
+            level.copy_of.map(|id| id as i64),
+            level.two_player,
+            custom_song_id,
+            level.coin_amount as i16,
+            level.coins_verified,
+            level.stars_requested.map(|req| req as i16),
+            level.is_epic,
+            level.object_amount.map(|objects| objects as i32),
+            level.index_46.as_deref(),
+            level.index_47.as_deref()
+        )
+        .execute(&mut connection)
+        .await?;
+
+        connection.commit().await?;
+
+        Ok(meta)
+    }
 }
+
+fn level_rating_to_i16(level_rating: LevelRating) -> i16 {
+    match level_rating {
+        LevelRating::Unknown(unknown) => (unknown as i16) * 100,
+        LevelRating::Auto => 1,
+        LevelRating::Easy => 2,
+        LevelRating::Normal => 3,
+        LevelRating::Hard => 4,
+        LevelRating::Harder => 5,
+        LevelRating::Insane => 6,
+        LevelRating::NotAvailable => 7,
+        LevelRating::Demon(demon_rating) =>
+            match demon_rating {
+                DemonRating::Unknown(unknown) => (unknown as i16) * 100,
+                DemonRating::Easy => 1,
+                DemonRating::Medium => 2,
+                DemonRating::Hard => 3,
+                DemonRating::Insane => 4,
+                DemonRating::Extreme => 5,
+            },
+    }
+}
+
+fn i16_to_level_rating(value: i16, is_demon: bool) -> LevelRating {
+    if value.abs() >= 100 || value == 0 {
+        if is_demon {
+            return LevelRating::Demon(DemonRating::Unknown((value / 100) as i32))
+        } else {
+            return LevelRating::Unknown((value / 100) as i32)
+        }
+    }
+
+    if is_demon {
+        match value {
+            1 => LevelRating::Auto,
+            2 => LevelRating::Easy,
+            3 => LevelRating::NotAvailable,
+            4 => LevelRating::Hard,
+            5 => LevelRating::Harder,
+            6 => LevelRating::Insane,
+            7 => LevelRating::NotAvailable,
+            _ => unreachable!(),
+        }
+    } else {
+        LevelRating::Demon(match value {
+            1 => DemonRating::Easy,
+            2 => DemonRating::Medium,
+            3 => DemonRating::Hard,
+            4 => DemonRating::Insane,
+            5 => DemonRating::Extreme,
+            _ => unreachable!(),
+        })
+    }
+}
+
+fn level_length_to_i16(length: LevelLength) -> i16 {
+    match length {
+        LevelLength::Unknown(value) => (value as i16) * 100,
+        LevelLength::Tiny => 1,
+        LevelLength::Short => 2,
+        LevelLength::Medium => 3,
+        LevelLength::Long => 4,
+        LevelLength::ExtraLong => 5,
+    }
+}
+
+fn i16_to_level_length(value: i16) -> LevelLength {
+    if value.abs() >= 100 || value == 0 {
+        return LevelLength::Unknown((value / 100) as i32)
+    }
+
+    match value {
+        1 => LevelLength::Tiny,
+        2 => LevelLength::Short,
+        3 => LevelLength::Medium,
+        4 => LevelLength::Long,
+        5 => LevelLength::ExtraLong,
+        _ => unreachable!(),
+    }
+}
+
 /*
 pub struct BoomlingsClient {
     inner: reqwest::Client,
