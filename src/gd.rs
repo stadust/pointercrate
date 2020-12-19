@@ -1,4 +1,4 @@
-use crate::{model::demonlist::demon::Demon, state::PointercrateState, Result};
+use crate::{model::demonlist::demon::Demon, state::PointercrateState};
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use dash_rs::{
     model::{
@@ -10,14 +10,14 @@ use dash_rs::{
         song::NewgroundsSong,
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
-    HasRobtopFormat, PercentDecoded, Thunk, ThunkContent,
+    HasRobtopFormat, PercentDecoded, ProcessError, Thunk, ThunkContent,
 };
 use log::error;
 use reqwest::Client;
-use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
+use sqlx::{pool::PoolConnection, Error, PgConnection, Pool, Postgres};
 use std::borrow::{Borrow, Cow};
 
-// FIXME: Right now this implementation always stored processed data. In case of processing failure,
+// FIXME: Right now this implementation always stores processed data. In case of processing failure,
 // it refuses to store the object. In the future, we probably want to store the unprocessed data
 // then with a special flag. However, this is not yet supported by dash-rs, as dash-rs doesnt
 // support owned, unprocessed data.
@@ -26,6 +26,23 @@ pub struct CacheEntryMeta {
     made: NaiveDateTime,
     key: i64,
     absent: bool,
+}
+
+pub enum CacheError {
+    Db(Error),
+    Malformed(ProcessError),
+}
+
+impl From<Error> for CacheError {
+    fn from(err: Error) -> Self {
+        CacheError::Db(err)
+    }
+}
+
+impl From<ProcessError> for CacheError {
+    fn from(err: ProcessError) -> Self {
+        CacheError::Malformed(err)
+    }
 }
 
 pub enum CacheEntry<T> {
@@ -53,7 +70,7 @@ impl PgCache {
         }
     }
 
-    pub async fn lookup_creator(&self, user_id: u64) -> Result<CacheEntry<Creator<'static>>> {
+    pub async fn lookup_creator(&self, user_id: u64) -> Result<CacheEntry<Creator<'static>>, CacheError> {
         let mut connection = self.pool.acquire().await?;
         let mut connection = &mut *connection;
         let meta = sqlx::query_as!(
@@ -83,7 +100,7 @@ impl PgCache {
         Ok(self.make_cache_entry(meta, creator))
     }
 
-    pub async fn store_creator<'a>(&self, creator: &Creator<'a>) -> Result<CacheEntryMeta> {
+    pub async fn store_creator<'a>(&self, creator: &Creator<'a>) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
         let meta = sqlx::query_as!(
@@ -111,7 +128,7 @@ impl PgCache {
         Ok(meta)
     }
 
-    pub async fn lookup_newgrounds_song(&self, song_id: u64) -> Result<CacheEntry<NewgroundsSong<'static>>> {
+    pub async fn lookup_newgrounds_song(&self, song_id: u64) -> Result<CacheEntry<NewgroundsSong<'static>>, CacheError> {
         let mut connection = self.pool.acquire().await?;
         let mut connection = &mut *connection;
         let meta = sqlx::query_as!(
@@ -147,7 +164,7 @@ impl PgCache {
         Ok(self.make_cache_entry(meta, song))
     }
 
-    pub async fn store_newgrounds_song<'a>(&self, song: &NewgroundsSong<'a>) -> Result<CacheEntryMeta> {
+    pub async fn store_newgrounds_song<'a>(&self, song: &NewgroundsSong<'a>) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
         let meta = sqlx::query_as!(
@@ -162,7 +179,7 @@ impl PgCache {
 
         // FIXME: this
         let song_link = match song.link {
-            Thunk::Unprocessed(unprocessed) => PercentDecoded::from_unprocessed(unprocessed).unwrap().0.to_string(),
+            Thunk::Unprocessed(unprocessed) => PercentDecoded::from_unprocessed(unprocessed)?.0.to_string(),
             Thunk::Processed(ref link) => link.0.to_string(),
         };
 
