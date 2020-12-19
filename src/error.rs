@@ -382,7 +382,7 @@ pub enum PointercrateError {
     /// `429 TOO MANY REQUESTS`
     ///
     /// Error Code `42900`
-    #[display(fmt = "{}. Try again at in {:?}", scope, remaining)]
+    #[display(fmt = "{} Try again in {:.2?}", scope, remaining)]
     Ratelimited {
         #[serde(skip)]
         scope: RatelimitScope,

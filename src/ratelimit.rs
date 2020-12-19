@@ -21,7 +21,7 @@ pub enum RatelimitScope {
     #[display(fmt = "Too many registrations!")]
     Registration,
 
-    #[display(fmt = "Too many failed registration attempts")]
+    #[display(fmt = "Too many failed registration attempts!")]
     SoftRegistration,
 
     #[display(fmt = "Too many login attempts!")]
