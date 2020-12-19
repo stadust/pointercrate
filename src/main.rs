@@ -1,6 +1,6 @@
 #![feature(proc_macro_hygiene)]
 #![allow(non_upper_case_globals)]
-//#![deny(unused_imports)]
+#![deny(unused_imports)]
 
 use crate::{
     error::{HtmlError, JsonError, PointercrateError},

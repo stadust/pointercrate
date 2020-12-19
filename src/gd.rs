@@ -1,25 +1,22 @@
-use crate::{error::PointercrateError, model::demonlist::demon::Demon, state::PointercrateState};
+use crate::{error::PointercrateError, model::demonlist::demon::Demon};
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use dash_rs::{
     model::{
         creator::Creator,
-        level::{
-            object::{speed::Speed, ObjectData},
-            DemonRating, Featured, Level, LevelData, LevelLength, LevelRating, ListedLevel, Objects, Password,
-        },
+        level::{DemonRating, Featured, Level, LevelData, LevelLength, LevelRating, ListedLevel, Objects, Password},
         song::{MainSong, NewgroundsSong},
         GameVersion,
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
     response::ResponseError,
-    Base64Decoded, HasRobtopFormat, PercentDecoded, ProcessError, Thunk, ThunkContent,
+    Base64Decoded, PercentDecoded, ProcessError, Thunk, ThunkContent,
 };
 use futures::StreamExt;
 use log::{error, info, trace, warn};
 use reqwest::{header::CONTENT_TYPE, Client};
-use sqlx::{pool::PoolConnection, Error, PgConnection, Pool, Postgres};
+use sqlx::{Error, Pool, Postgres};
 use std::{
-    borrow::{Borrow, Cow},
+    borrow::Cow,
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
 };
