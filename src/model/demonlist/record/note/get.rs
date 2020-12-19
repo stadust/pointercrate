@@ -14,7 +14,7 @@ impl PartialNote {
     async fn upgrade(self, connection: &mut PgConnection) -> Result<Note> {
         let mut stream = sqlx::query!(
             "SELECT members.name AS name FROM record_notes_modifications AS rnm INNER JOIN members ON members.member_id = rnm.userid \
-             WHERE id = $1",
+             WHERE id = $1 AND content IS NOT NULL",
             self.id
         )
         .fetch(connection);
