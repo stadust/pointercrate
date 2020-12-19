@@ -161,7 +161,18 @@ pub async fn delete(
     let record = FullRecord::by_id(record_id.into_inner(), &mut connection).await?;
 
     if record.status == RecordStatus::Submitted {
-        user.inner().require_permissions(Permissions::ListHelper)?;
+        if sqlx::query!(
+            r#"SELECT EXISTS (SELECT 1 FROM record_modifications WHERE id = $1 AND status_ IS NOT NULL) AS "was_modified!: bool""#,
+            record.id
+        )
+        .fetch_one(&mut *connection)
+        .await?
+        .was_modified
+        {
+            user.inner().require_permissions(Permissions::ListModerator)?;
+        } else {
+            user.inner().require_permissions(Permissions::ListHelper)?;
+        }
     } else {
         user.inner().require_permissions(Permissions::ListModerator)?;
     }

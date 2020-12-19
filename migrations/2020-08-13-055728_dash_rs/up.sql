@@ -75,13 +75,13 @@ CREATE TABLE gj_level_data_meta (
 CREATE TABLE gj_newgrounds_song (
     song_id bigint PRIMARY KEY NOT NULL,
     song_name text NOT NULL,
-    index_3 bigint,
+    index_3 bigint NOT NULL,
     song_artist text NOT NULL,
     filesize double precision NOT NULL,
     index_6 text,
     index_7 text,
-    index_8 text,
-    song_link text
+    index_8 text NOT NULL,
+    song_link text NOT NULL
 );
 
 CREATE TABLE gj_newgrounds_song_meta (

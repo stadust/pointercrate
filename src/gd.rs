@@ -7,14 +7,20 @@ use dash_rs::{
             object::{speed::Speed, ObjectData},
             DemonRating, Level, LevelRating, ListedLevel, Password,
         },
+        song::NewgroundsSong,
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
-    HasRobtopFormat,
+    HasRobtopFormat, PercentDecoded, Thunk, ThunkContent,
 };
 use log::error;
 use reqwest::Client;
-use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres, Row};
-use std::borrow::Cow;
+use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
+use std::borrow::{Borrow, Cow};
+
+// FIXME: Right now this implementation always stored processed data. In case of processing failure,
+// it refuses to store the object. In the future, we probably want to store the unprocessed data
+// then with a special flag. However, this is not yet supported by dash-rs, as dash-rs doesnt
+// support owned, unprocessed data.
 
 pub struct CacheEntryMeta {
     made: NaiveDateTime,
@@ -35,6 +41,10 @@ pub struct PgCache {
 }
 
 impl PgCache {
+    pub fn new(pool: Pool<Postgres>, expire_after: Duration) -> Self {
+        PgCache { pool, expire_after }
+    }
+
     fn make_cache_entry<T>(&self, meta: CacheEntryMeta, t: T) -> CacheEntry<T> {
         if DateTime::<Utc>::from_utc(meta.made, Utc) - Utc::now() < self.expire_after {
             CacheEntry::Live(t, meta)
@@ -43,13 +53,13 @@ impl PgCache {
         }
     }
 
-    pub async fn lookup_creator(&self, user_id: i64) -> Result<CacheEntry<Creator<'static>>> {
+    pub async fn lookup_creator(&self, user_id: u64) -> Result<CacheEntry<Creator<'static>>> {
         let mut connection = self.pool.acquire().await?;
         let mut connection = &mut *connection;
         let meta = sqlx::query_as!(
             CacheEntryMeta,
             "SELECT user_id AS key, cached_at AS made, absent FROM gj_creator_meta WHERE user_id = $1",
-            user_id
+            user_id as i64
         )
         .fetch_one(&mut *connection)
         .await;
@@ -60,7 +70,7 @@ impl PgCache {
             Ok(meta) => meta,
         };
 
-        let creator_row = sqlx::query!("SELECT * FROM gj_creator WHERE user_id = $1", user_id)
+        let creator_row = sqlx::query!("SELECT * FROM gj_creator WHERE user_id = $1", user_id as i64)
             .fetch_one(&mut *connection)
             .await?;
 
@@ -71,6 +81,111 @@ impl PgCache {
         };
 
         Ok(self.make_cache_entry(meta, creator))
+    }
+
+    pub async fn store_creator<'a>(&self, creator: &Creator<'a>) -> Result<CacheEntryMeta> {
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_creator_meta (user_id, cached_at, absent) VALUES($1, $2, FALSE) ON CONFLICT (user_id) DO UPDATE SET cached_at \
+             = EXCLUDED.cached_at, absent = FALSE RETURNING user_id AS key, cached_at AS made, absent",
+            creator.user_id as i64,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?;
+
+        sqlx::query!(
+            "INSERT INTO gj_creator (user_id, name, account_id) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET name = \
+             EXCLUDED.name, account_id = EXCLUDED.account_id",
+            creator.user_id as i64,
+            creator.name.to_string(), // FIXME: figure out why it doesnt accept a reference
+            creator.account_id.map(|id| id as i64)
+        )
+        .execute(&mut connection)
+        .await?;
+
+        connection.commit().await?;
+
+        Ok(meta)
+    }
+
+    pub async fn lookup_newgrounds_song(&self, song_id: u64) -> Result<CacheEntry<NewgroundsSong<'static>>> {
+        let mut connection = self.pool.acquire().await?;
+        let mut connection = &mut *connection;
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "SELECT song_id AS key, cached_at AS made, absent FROM gj_newgrounds_song_meta WHERE song_id = $1",
+            song_id as i64
+        )
+        .fetch_one(&mut *connection)
+        .await;
+
+        let meta = match meta {
+            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
+            Err(err) => return Err(err.into()),
+            Ok(meta) => meta,
+        };
+
+        let song_row = sqlx::query!("SELECT * from gj_newgrounds_song WHERE song_id = $1", song_id as i64)
+            .fetch_one(&mut *connection)
+            .await?;
+
+        let song = NewgroundsSong {
+            song_id,
+            name: Cow::Owned(song_row.song_name),
+            index_3: song_row.index_3 as u64,
+            artist: Cow::Owned(song_row.song_artist),
+            filesize: song_row.filesize,
+            index_6: song_row.index_6.map(Cow::Owned),
+            index_7: song_row.index_7.map(Cow::Owned),
+            index_8: Cow::Owned(song_row.index_8),
+            link: Thunk::Processed(PercentDecoded(Cow::Owned(song_row.song_link))),
+        };
+
+        Ok(self.make_cache_entry(meta, song))
+    }
+
+    pub async fn store_newgrounds_song<'a>(&self, song: &NewgroundsSong<'a>) -> Result<CacheEntryMeta> {
+        let mut connection = self.pool.begin().await?;
+
+        let meta = sqlx::query_as!(
+            CacheEntryMeta,
+            "INSERT INTO gj_newgrounds_song_meta (song_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (song_id) DO UPDATE SET \
+             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING song_id AS key, cached_at AS made, absent",
+            song.song_id as i64,
+            Utc::now().naive_utc()
+        )
+        .fetch_one(&mut connection)
+        .await?;
+
+        // FIXME: this
+        let song_link = match song.link {
+            Thunk::Unprocessed(unprocessed) => PercentDecoded::from_unprocessed(unprocessed).unwrap().0.to_string(),
+            Thunk::Processed(ref link) => link.0.to_string(),
+        };
+
+        sqlx::query!(
+            "INSERT INTO gj_newgrounds_song (song_id, song_name, index_3, song_artist, filesize, index_6, index_7, index_8, song_link) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (song_id) DO UPDATE SET song_id = $1, song_name = $2, index_3 = $3, \
+             song_artist = $4, filesize = $5, index_6 = $6, index_7 = $7, index_8 = $8, song_link = $9",
+            song.song_id as i64,
+            song.name.as_ref(),
+            song.index_3 as i64,
+            song.artist.as_ref(),
+            song.filesize,
+            song.index_6.as_deref(),
+            song.index_7.as_deref(),
+            &song.index_8.as_ref(),
+            song_link
+        )
+        .execute(&mut connection)
+        .await?;
+
+        connection.commit().await?;
+
+        Ok(meta)
     }
 }
 /*
