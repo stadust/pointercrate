@@ -84,7 +84,7 @@ export class StatsViewer extends FilteredPaginator {
   /**
    * Constructs a new StatsViewer
    *
-   * @param {HtmlElement} html The container element of this stats viewer instance
+   * @param {HTMLElement} html The container element of this stats viewer instance
    */
   constructor(html) {
     super(
@@ -182,7 +182,7 @@ export class StatsViewer extends FilteredPaginator {
       (beaten.length - legacy - extended + playerData.verified.length - verifiedExtended - verifiedLegacy) + " ( + " + (extended + verifiedExtended) + " )";
     this._amountLegacy.textContent = legacy + verifiedLegacy;
 
-    var hardest = playerData.verified
+    let hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
         position: 34832834,
@@ -191,7 +191,7 @@ export class StatsViewer extends FilteredPaginator {
 
     this._hardest.textContent = hardest.name || "None";
 
-    var non100Records = playerData.records
+    let non100Records = playerData.records
       .filter((record) => record.progress != 100)
       .sort((r1, r2) => r1.progress - r2.progress);
 

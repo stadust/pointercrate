@@ -76,9 +76,13 @@ pub async fn patch(
     // FIXME: Prevent "Lost Update" by using SELECT ... FOR UPDATE
     let gotten_user = User::by_id(user_id.into_inner(), &mut connection).await?;
 
+    if gotten_user.id == user.0.inner().id {
+        return Err(PointercrateError::PatchSelf.into())
+    }
+
     // We probably don't have to check if we are even allowed to retrieve this user, since we require a
     // correct ETag, which means we previously retrieved this user successfully and passed the
-    // permissions check at GET. However, on might guess the ETag. Or use an ETag value they got from
+    // permissions check at GET. However, one might guess the ETag. Or use an ETag value they got from
     // before they were demoted.
     if !user.0.inner().has_permission(Permissions::Administrator)
         && !(user.0.inner().has_permission(Permissions::ListAdministrator) && gotten_user.has_permission(Permissions::ListHelper))
