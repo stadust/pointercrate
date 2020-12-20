@@ -24,23 +24,25 @@ fn build_project(location: impl AsRef<Path>, url_location: &str) {
 
     for dir in directories {
         let name = dir.file_name();
-        let name = &name.to_str().unwrap()[4..].replace("_", " ");
-        let filename = format!("{}.html", name);
+        let filename = &name.to_str().unwrap()[4..];
+        let section_name = filename.replace("_", " ");
+        let url_name = filename.to_lowercase().replace("_", "");
+        let filename = format!("{}.html", url_name);
         let file = out_directory.join(filename);
         let file = File::create(file).unwrap();
 
-        if name != "index" {
-            let mut title_name = name.to_string();
+        if section_name != "index" {
+            let mut title_name = section_name.to_string();
             if let Some(r) = title_name.get_mut(0..1) {
                 r.make_ascii_uppercase()
             }
-            table_of_contents.push_str(&format!("<li><a href='/{}/{}'>{}</a><ol>", url_location, name, title_name));
+            table_of_contents.push_str(&format!("<li><a href='/{}/{}'>{}</a><ol>", url_location, url_name, title_name));
         }
-        for li in process_directory(&dir, name, url_location) {
+        for li in process_directory(&dir, &section_name, url_location) {
             table_of_contents.push_str(&format!("{}", li));
         }
 
-        if name != "index" {
+        if section_name != "index" {
             table_of_contents.push_str(&format!("</ol></li>"));
         }
 
@@ -69,7 +71,7 @@ fn build_project(location: impl AsRef<Path>, url_location: &str) {
 }
 
 fn main() {
-    println!("cargo:rerun-if-changed=build-documentation.rs");
+    println!("cargo:rerun-if-changed=./build-documentation.rs");
 
     build_project(Path::new("./doc"), "documentation");
     build_project(Path::new("./demonlist-guidelines"), "guidelines");
