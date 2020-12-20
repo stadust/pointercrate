@@ -24,7 +24,7 @@ fn build_project(location: impl AsRef<Path>, url_location: &str) {
 
     for dir in directories {
         let name = dir.file_name();
-        let name = &name.to_str().unwrap()[4..];
+        let name = &name.to_str().unwrap()[4..].replace("_", " ");
         let filename = format!("{}.html", name);
         let file = out_directory.join(filename);
         let file = File::create(file).unwrap();
