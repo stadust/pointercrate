@@ -122,7 +122,7 @@ impl Page for Homepage {
                         h2 { "Now on GitHub "}
                         h3 { "The entirety of the pointercrate codebase can now be found on GitHub"}
                         p{"Found a bug on the website? Want to help with development? Or maybe you just want to find out how everything here works? Head over to the pointercrate GitHub repository!"}
-                        p{"Even our custom Geometry Dash API wrapper, GDCF, can be found there!"}
+                        p{"Even our Geometry Dash integration, dash-rs, can be found there!"}
                     }
                 }
             }
@@ -135,11 +135,33 @@ impl Page for Homepage {
             }
             div.center.information-banner.left {
                 div.tab-display#changelog-tabs {
-                    div style = "display: flex; flex-flow: column;"{
+                    div style = "display: flex; flex-flow: column;" {
                         h2 style="text-align: left; margin-top: 0px" {
                             "Changelog"
                         }
-                        div.tab-content.tab-content-active data-tab-id ="99" {
+                        div.tab-content.tab-content-active data-tab-id ="98" {
+                            h3 style="text-align: left; font-size: 110%" {
+                                "2020: Not a lot tbh!"
+                            }
+                            p {
+                                "Keeping up with the tradition of updating this part of the website precisely once a year, I find myself not really able to report about a major update at all. While there were some quite significant changes made to pointercrate this year, they were mostly internal, or not available to the public. Which is why I am using this entry to just quickly summarize the few things that did change this year"
+                            }
+                            ul {
+                                li {
+                                    "GD Integration has been reworked and is now based upon a must more solid foundation. Our new GD connector, dash-rs, was developed in collaboration with " a.link href = "https://github.com/mgostIH" {"mgostIH"} "."
+                                }
+                                li {
+                                    "Back in march, pointercrate's internals were rewritten to utilize the then-stabilized " code { "async/await" } " mechanics. At the same time, the entire database layer was rewritten. "
+                                }
+                                li {
+                                    "Since september, the list mods use a web interface for managing the list, instead of a disord bot"
+                                }
+                            }
+                            p {
+                                "Some of these changes will bring improvements to the public facing parts of pointercrate soon hopefully. Mainly, there are plans to overhault the record submitters using some of the UI components that have been developed for the internal management interface. A completely list of planned featured can also be found on " a.link href = "https://trello.com/b/10tslTjl/pointercrate" { "this trello board" } "."
+                            }
+                        }
+                        div.tab-content data-tab-id ="99" {
                             h3 style="text-align: left; font-size: 110%" {
                                 "2019-03-02: Rustification!"
                             }
@@ -156,7 +178,7 @@ impl Page for Homepage {
                                     "which shows an actual list (revolutionary, I know) of all demons"
                                 }
                                 li {
-                                    "The API has been majorly overhauled. " i{"Most"} " changes should be backward compatible, since I just added a ton of fields, but there are some other changes as well, so be sure to check the documentation again. Mainly, there is no `state` parameter for demons anymore and `player.beaten` has become the more general `player.records`"
+                                    "The API has been majorly overhauled. " i{"Most"} " changes should be backward compatible, since I just added a ton of fields, but there are some other changes as well, so be sure to check the documentation again. Mainly, there is no " code { "state" } " parameter for demons anymore and " code{"player.beaten"} " has become the more general " code{"player.records"} "."
                                 }
                                 li {
                                     "There is now deeper integration with the GD servers, allowing me to display additions stats for each demon. The code to calculate level length and accurately count objects was contributed by cos8o, so big thanks to him!"
@@ -220,7 +242,8 @@ impl Page for Homepage {
                         }
                     }
                     aside.tab-selection style="padding: 20px 0px; text-align: center"{
-                        h3.tab.tab-active data-tab-id="99" style="padding: 10px; text-align:left" { "2019-03-02" }
+                        h3.tab.tab-active data-tab-id="98" style="padding: 10px; text-align:left" { "2020" }
+                        h3.tab data-tab-id="99" style="padding: 10px; text-align:left" { "2019-03-02" }
                         h3.tab data-tab-id="100" style="padding: 10px; text-align:left" { "2018-04-04" }
                         h3.tab data-tab-id="101" style="padding: 10px; text-align: left" { "2017-10-29" }
                     }
