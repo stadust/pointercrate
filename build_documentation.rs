@@ -18,7 +18,7 @@ fn build_project(location: impl AsRef<Path>, url_location: &str) {
 
     let mut table_of_contents = "\
         <div class='panel fade' id='toc'><h2>Table of contents</h2><div class='search js-search seperated' style='margin:0px'><input \
-                                 placeholder='Search...' type='text' style='height:1em'></div>;<ol style='padding-left: 0px'>
+                                 placeholder='Search...' type='text' style='height:1em'></div><ol style='padding-left: 0px'>
     "
     .to_owned();
 

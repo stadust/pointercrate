@@ -509,13 +509,21 @@ impl PgCache {
         trace!("Starting to parse level data");
         let objects = match data.level_data {
             Thunk::Unprocessed(unprocessed) => {
-                let processed = Objects::from_unprocessed(unprocessed).map_err(|_| CacheError::MalformedLevelData)?;
+                let processed = Objects::from_unprocessed(unprocessed).map_err(|err| {
+                    error!("Error processing level data: {:?}", err);
+
+                    CacheError::MalformedLevelData
+                })?;
 
                 bincode::serialize(&processed)
             },
             Thunk::Processed(ref proc) => bincode::serialize(proc),
         }
-        .map_err(|_| CacheError::MalformedLevelData)?;
+        .map_err(|err| {
+            error!("Error binary serializing level data: {:?}", err);
+
+            CacheError::MalformedLevelData
+        })?;
         trace!("Finished parsing level data");
 
         sqlx::query!(
