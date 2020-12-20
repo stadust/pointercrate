@@ -1,6 +1,7 @@
 /*
 !/src
 !/Cargo.toml
+!/Cargo.lock
 !/rustfmt.toml
 !/diesel.toml
 !/migrations
