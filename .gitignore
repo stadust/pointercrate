@@ -11,3 +11,5 @@
 !/doc
 !/sql
 !/robots.txt
+!/demonlist-guidelines
+!/.gitmodules
