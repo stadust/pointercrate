@@ -163,7 +163,7 @@ impl Page for DemonlistOverview {
                                             }
                                             h3 style = "text-align: left" {
                                                 i {
-                                                    "by " (demon.publisher)
+                                                    (demon.publisher)
                                                 }
                                             }
                                         }
