@@ -83,6 +83,8 @@ async fn main() -> std::io::Result<()> {
             .service(view::account::index)
             .service(view::documentation::index)
             .service(view::documentation::topic)
+            .service(view::documentation::guildelines_index)
+            .service(view::documentation::guidelines_topic)
             .service(
                 scope("/api/v1")
                     .service(misc::list_information)

@@ -1,30 +1,17 @@
 use std::{
     collections::HashMap,
-    env,
     ffi::OsStr,
     fs::{read_dir, read_to_string},
     io,
     path::Path,
 };
 
-pub fn read_table_of_contents() -> io::Result<String> {
-    let env_var = env::var("DOCUMENTATION");
-    let doc_files_location = match env_var {
-        Ok(ref env_var) => Path::new(env_var),
-        Err(_) => Path::new(env!("OUT_DIR")),
-    };
-
-    read_to_string(doc_files_location.join("../output"))
+pub fn read_table_of_contents(documentation_project: &str) -> io::Result<String> {
+    read_to_string(Path::new(documentation_project).join("toc.html"))
 }
 
-pub fn read_documentation_topics() -> io::Result<HashMap<String, String>> {
-    let env_var = env::var("DOCUMENTATION");
-    let doc_files_location = match env_var {
-        Ok(ref env_var) => Path::new(env_var),
-        Err(_) => Path::new(env!("OUT_DIR")),
-    };
-
-    read_dir(doc_files_location)?
+pub fn read_topics(documentation_project: &str) -> io::Result<HashMap<String, String>> {
+    read_dir(Path::new(documentation_project))?
         .map(|result| result.map(|entry| entry.path()))
         .filter(|result| {
             match result {
