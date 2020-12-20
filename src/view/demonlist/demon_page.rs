@@ -12,7 +12,7 @@ use actix_web_codegen::get;
 use chrono::NaiveDateTime;
 use dash_rs::{
     model::{
-        level::{DemonRating, LevelRating, Password},
+        level::{DemonRating, LevelRating},
         GameVersion,
     },
     Thunk,
@@ -181,11 +181,7 @@ impl Demonlist {
                                     "Level Password: "
                                 }
                                 br;
-                                @match level_data.password {
-                                    Password::NoCopy => "Not copyable",
-                                    Password::FreeCopy => "Free to copy",
-                                    Password::PasswordCopy(ref pw) => (pw)
-                                }
+                                (level_data.password)
                             }
                             span {
                                 b {
