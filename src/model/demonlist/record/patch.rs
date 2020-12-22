@@ -192,7 +192,7 @@ impl FullRecord {
     pub async fn set_video(&mut self, video: String, connection: &mut PgConnection) -> Result<()> {
         let video = crate::video::validate(&video)?;
 
-        if Some(video) == self.video {
+        if Some(&video) == self.video.as_ref() {
             return Ok(())
         }
 
