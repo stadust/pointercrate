@@ -192,6 +192,17 @@ impl FullRecord {
     pub async fn set_video(&mut self, video: String, connection: &mut PgConnection) -> Result<()> {
         let video = crate::video::validate(&video)?;
 
+        if Some(video) == self.video {
+            return Ok(())
+        }
+
+        if let Some(row) = sqlx::query!(r#"SELECT id FROM records WHERE video = $1"#, video.to_string())
+            .fetch_optional(&mut *connection)
+            .await?
+        {
+            return Err(PointercrateError::DuplicateVideo { id: row.id })
+        }
+
         sqlx::query!("UPDATE records SET video = $1::text WHERE id = $2", video, self.id)
             .execute(connection)
             .await?;

@@ -373,6 +373,12 @@ pub enum PointercrateError {
     #[display(fmt = "Notes mustn't be empty!")]
     NoteEmpty,
 
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42231`
+    #[display(fmt = "This video is already used by record #{}", id)]
+    DuplicateVideo { id: i32 },
+
     /// `428 PRECONDITION REQUIRED`
     ///
     /// Error Code `42800`
@@ -496,6 +502,7 @@ impl PointercrateError {
             PointercrateError::DemonNameNotUnique { .. } => 42228,
             PointercrateError::MutuallyExclusive => 42229,
             PointercrateError::NoteEmpty => 42230,
+            PointercrateError::DuplicateVideo { .. } => 42231,
 
             PointercrateError::PreconditionRequired => 42800,
 
