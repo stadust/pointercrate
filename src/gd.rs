@@ -185,7 +185,7 @@ impl PgCache {
             Ok(conn) => conn,
             _ => return,
         };
-        sqlx::query!("LOCK download_lock").execute(&mut *connection).await;
+        //sqlx::query!("LOCK download_lock").execute(&mut *connection).await;
         let is_concurrent_download = sqlx::query!(
             r#"SELECT EXISTS (SELECT 1 FROM download_lock WHERE level_id = $1) AS "concurrent!: bool""#,
             request.level_id as i64
