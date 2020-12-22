@@ -16,7 +16,7 @@ pub struct PostCreator {
 impl Creator {
     pub async fn insert(demon: &MinimalDemon, player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Creator> {
         match Creator::get(demon, player, connection).await {
-            Ok(creator) => return Err(PointercrateError::CreatorExists),
+            Ok(_) => return Err(PointercrateError::CreatorExists),
             Err(PointercrateError::ModelNotFound { .. }) => (),
             Err(err) => return Err(err),
         }

@@ -76,7 +76,7 @@ impl AuthenticatedUser {
         if let Authorization::Token { access_token, csrf_token } = auth {
             // Well this is reassuring. Also we directly deconstruct it and only save the ID
             // so we don't accidentally use unsafe values later on
-            let Claims { id, .. } = jsonwebtoken::dangerous_unsafe_decode::<Claims>(&access_token)
+            let Claims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<Claims>(&access_token)
                 .map_err(|_| PointercrateError::Unauthorized)?
                 .claims;
 

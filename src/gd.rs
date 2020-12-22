@@ -304,7 +304,7 @@ impl PgCache {
 
     pub async fn lookup_creator(&self, user_id: u64) -> Result<CacheEntry<Creator<'static>>, CacheError> {
         let mut connection = self.pool.acquire().await?;
-        let mut connection = &mut *connection;
+
         let meta = sqlx::query_as!(
             CacheEntryMeta,
             "SELECT user_id AS key, cached_at AS made, absent FROM gj_creator_meta WHERE user_id = $1",
@@ -363,7 +363,7 @@ impl PgCache {
 
     pub async fn lookup_newgrounds_song(&self, song_id: u64) -> Result<CacheEntry<NewgroundsSong<'static>>, CacheError> {
         let mut connection = self.pool.acquire().await?;
-        let mut connection = &mut *connection;
+
         let meta = sqlx::query_as!(
             CacheEntryMeta,
             "SELECT song_id AS key, cached_at AS made, absent FROM gj_newgrounds_song_meta WHERE song_id = $1",
@@ -460,7 +460,6 @@ impl PgCache {
 
     pub async fn lookup_level_data<'a>(&self, level_id: u64) -> Result<CacheEntry<LevelData<'static>>, CacheError> {
         let mut connection = self.pool.acquire().await?;
-        let mut connection = &mut *connection;
 
         let meta = sqlx::query_as!(
             CacheEntryMeta,
