@@ -229,11 +229,13 @@ impl Demonlist {
                                     _ => "Level not rated demon, list mods fucked up"
                                 }
                             }
-                            b {
-                                "Created in:"
+                            span {
+                                b {
+                                    "Created in:"
+                                }
+                                br;
+                                (level.gd_version)
                             }
-                            br;
-                            (level.gd_version)
                             @if let Some(song) = song {
                                 span style = "width: 100%"{
                                     b {
@@ -254,7 +256,7 @@ impl Demonlist {
                                 "Demonlist score (100%): "
                             }
                             br;
-                                (format!("{:.2}", score100))
+                            (format!("{:.2}", score100))
                         }
                     }
                     @if position <= config::list_size(){
