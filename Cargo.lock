@@ -732,7 +732,7 @@ dependencies = [
 [[package]]
 name = "dash-rs"
 version = "0.1.0"
-source = "git+https://github.com/stadust/dash-rs#0382bedfb6f4460c7f19b52a8084d0c4b7083101"
+source = "git+https://github.com/stadust/dash-rs#fdb019ca79bbb43317413f4d75ce65df0c432ef7"
 dependencies = [
  "base64 0.11.0",
  "dtoa",

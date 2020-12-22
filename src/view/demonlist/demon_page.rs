@@ -11,10 +11,7 @@ use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
 use dash_rs::{
-    model::{
-        level::{DemonRating, LevelRating},
-        GameVersion,
-    },
+    model::level::{DemonRating, LevelRating},
     Thunk,
 };
 use log::error;
@@ -232,16 +229,11 @@ impl Demonlist {
                                     _ => "Level not rated demon, list mods fucked up"
                                 }
                             }
-                            @match level.gd_version {
-                                GameVersion::Version{major, minor} => span {
-                                    b {
-                                        "Created in:"
-                                    }
-                                    br;
-                                    (major) "." (minor)
-                                },
-                                _ => {}
+                            b {
+                                "Created in:"
                             }
+                            br;
+                            (level.gd_version)
                             @if let Some(song) = song {
                                 span style = "width: 100%"{
                                     b {
