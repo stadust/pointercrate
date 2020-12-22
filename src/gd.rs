@@ -160,7 +160,11 @@ impl PgCache {
 
                                     self.store_levels_request(&request, &demons).await;
 
-                                    let hardest = demons.into_iter().max_by(|x, y| x.difficulty.cmp(&y.difficulty)).unwrap();
+                                    let hardest = demons
+                                        .into_iter()
+                                        .filter(|demon| demon.name.to_lowercase() == demon_name.to_lowercase())
+                                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
+                                        .unwrap();
 
                                     trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
 
