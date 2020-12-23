@@ -288,7 +288,7 @@ impl FullRecord {
                 {
                     "type": "rich",
                     "title": format!("{}% on {}", self.progress, self.demon.name),
-                    "description": format!("{} just got {}% on {}! Go add his record!", self.player.name, self.progress, self.demon.name),
+                    "description": format!("{} just got {}% on {}! Go add their record!", self.player.name, self.progress, self.demon.name),
                     "footer": {
                         "text": format!("This record has been submitted by submitter #{}", self.submitter.map(|s|s.id).unwrap_or(1))
                     },
