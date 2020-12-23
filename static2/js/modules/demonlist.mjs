@@ -76,7 +76,27 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
         submissionForm.setSuccess("Record successfully submitted");
         submissionForm.clear();
       })
-      .catch((response) => submissionForm.setError(response.data.message)); // TODO: maybe specially handle some error codes
+      .catch((response) =>  {
+        switch(response.data.code) {
+          case 40401:
+            demon.setError(response.data.message);
+            break;
+          case 42218:
+            player.setError(response.data.message);
+            break;
+          case 42215:
+            progress.setError(response.data.message);
+            break;
+          case 42222:
+          case 42223:
+          case 42224:
+          case 42225:
+            video.setError(response.data.message);
+            break;
+          default:
+            submissionForm.setError(response.data.message)
+        }
+      }); // TODO: maybe specially handle some error codes
   });
 }
 
