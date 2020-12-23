@@ -171,7 +171,7 @@ impl Page for DemonlistOverview {
                                     @else {
                                         h2 {
                                             a href = {"/demonlist/" (demon.position)} {
-                                                "#" (demon.position) " &#8211; " (demon.name) " by " (demon.publisher)
+                                                "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name) " by " (demon.publisher)
                                             }
                                         }
                                     }
