@@ -18,7 +18,7 @@ The accepted URL formats are:
 | ---------- | ----------------------------------------- |
 | YouTube    | `http[s]://www.youtube.com/watch?v={id}`  |
 | YouTube    | `http[s]://m.youtube.com/watch?v={id}`    |
-| YouTube    | `http[s]://youtube.com/watch?w={id}`      |
+| YouTube    | `http[s]://youtube.com/watch?v={id}`      |
 | YouTube    | `http[s]://youtu.be/{id}`                 |
 | Twitch     | `http[s]://www.twitch.tv/videos/{id}`     |
 | Twitch     | `http[s]://twitch.tv/videos/{id}`         |

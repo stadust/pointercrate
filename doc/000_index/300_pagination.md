@@ -62,5 +62,6 @@ These error conditions can occur at any endpoint supporting pagination and are t
 | Status code | Error code | Description                                                     |
 | ----------- | ---------- | --------------------------------------------------------------- |
 | 422         | 42207      | The `limit` parameter is smaller than `1` or greater than `100` |
+| 422 | 42227 | In pagination, the `after` value was smaller than the `before` value | `-` |
 
 </div>

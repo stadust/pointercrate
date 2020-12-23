@@ -1,15 +1,16 @@
 <div class='panel fade js-scroll-anim' data-anim='fade'>
+<div style="top:0;right:0;left:0;bottom:0;background: rgba(0,0,0,0.1);z-index: 500; position:absolute"></div>
 
-# Adding creators
+# Adding creators (Deprecated)
 
-## `POST`{.verb} `/v1/demons/` `id`{.param} `/creators/`
+## `POST`{.verb} `/v1/demons/` `position`{.param} `/creators/`
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
 Access to this endpoint requires at least `ListModerator` permissions.
 </div>
 
-Adds a creator the creator list of the demon with the specified id
+Adds a creator the creator list of the demon at the specified position.
 
 ### Request:
 
@@ -30,13 +31,13 @@ _Nothing_
 
 | Status code | Error code | Description                                         |
 | ----------- | ---------- | --------------------------------------------------- |
-| 404         | 40401      | No demon with the specified `id`             |
+| 404         | 40401      | No demon at the specified `position`                |
 | 409         | 40905      | The given player is already registered as a creator |
 
 ### Example request:
 
 ```json
-POST /api/v2/demons/2/creators/
+POST /api/v1/demons/2/creators/
 Accept: application/json
 Authorization: Bearer <omitted>
 Content-Type: application/json

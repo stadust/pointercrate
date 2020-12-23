@@ -1,10 +1,10 @@
 % demons
 
-<div class='panel fade js-scroll-anim' data-anim='fade'>
+<div class='panel fade js-scroll-anim' data-anim='fade' style="position: relative">
 
-# Demon listing
+# List all demons
 
-## `GET`{.verb} `/demons/`
+## `GET`{.verb} `/v2/demons/`
 
 <div class='info-green'>
 <b>Pagination:</b><br>
@@ -12,14 +12,14 @@ This endpoint supports [pagination and filtering](/documentation/#pagination) vi
 on the additional request and response fields headers.
 </div>
 
-Allows to retrieve a potentionally filtered version of the demonlist.
+Retrieves a, potentially filtered, list of every demon in the pointercrate database, sorted by  `id`.
 
 ### Filtering:
 
-The result can be filtered by any of the following fields: `name`, `name_contains`, `position`, `requirement`, `verifier.id` (via `verifier_id`), `publisher.id` (via `publisher_id`), `verifier.name` (via `verifier_name`), `publisher.name` (via `publisher.name`). To filter by creator, please use
+The result can be filtered by any of the following fields: `name`, `name_contains`, `requirement`, `verifier.id` (via `verifier_id`), `publisher.id` (via `publisher_id`), `verifier.name` (via `verifier_name`), `publisher.name` (via `publisher.name`). To filter by creator, please use
 [`GET /players/player_id/`](/documentation/players/#get-player) and inspect the relevant fields of the [Player](/documentation/objects/#player) object.
 
-Pagination is done via the `position` field.
+Pagination is done via the `id` field.
 
 ### Request:
 
@@ -38,7 +38,7 @@ _No request data required_
 ### Example request:
 
 ```json
-GET /api/v1/demons/
+GET /api/v2/demons/
 Accept: application/json
 ```
 
