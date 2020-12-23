@@ -18,7 +18,7 @@ When embedded into other objects (for example, as part of a [Record](/documentat
 | Field    | Type    | Description                                                                               |
 | -------- | ------- | ----------------------------------------------------------------------------------------- |
 | name     | string  | The name of the demon                                                                     |
-| position | integer | The position of the demon                                                                 |
+| position  | integer?           | The position of the demon. Is `null` for unplaced demons|
 | id       | integer | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
 
 ## Listed Form
@@ -28,7 +28,7 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | Field     | Type              | Description                                                                               |
 | --------- | ----------------- | ----------------------------------------------------------------------------------------- |
 | name      | string            | The name of the demon                                                                     |
-| position  | integer?           | The position of the demon. Is `null` for unplaced demons                                                                 |
+| position  | integer?           | The position of the demon. Is `null` for unplaced demons|
 | id        | integer           | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
 | publisher | [Player](#player) | The player that published this demon                                                      |
 | verifier  | [Player](#player) | The player that verified this demon                                                       |
