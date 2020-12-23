@@ -379,7 +379,6 @@ impl PgCache {
             Ok(meta) => meta,
         };
 
-        let mut connection = self.pool.begin().await?;
         let song_row = sqlx::query!("SELECT * from gj_newgrounds_song WHERE song_id = $1", song_id as i64)
             .fetch_one(&mut *connection)
             .await?;
@@ -588,7 +587,7 @@ impl PgCache {
             hasher.finish() as i64
         };
 
-        let mut connection = self.pool.begin().await?;
+        let mut connection = self.pool.acquire().await?;
 
         let meta = sqlx::query_as!(
             CacheEntryMeta,
@@ -667,11 +666,13 @@ impl PgCache {
             .await?;
         }
 
+        connection.commit().await?;
+
         Ok(meta)
     }
 
     pub async fn lookup_level(&self, level_id: u64) -> Result<CacheEntry<Level<'static, ()>>, CacheError> {
-        let mut connection = self.pool.begin().await?;
+        let mut connection = self.pool.acquire().await?;
 
         let meta = sqlx::query_as!(
             CacheEntryMeta,
