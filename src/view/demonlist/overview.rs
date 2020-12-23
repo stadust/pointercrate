@@ -150,15 +150,15 @@ impl Page for DemonlistOverview {
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {
                             section.panel.fade style="overflow:hidden" {
-                                div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
+                                div.flex style = "align-items: center" {
                                     @if let Some(ref video) = demon.video {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
                                             a.play href = (video) {}
                                         }
-                                        div.leftlined.pad {
+                                        div style = "padding-left: 10px" {
                                             h2 style = "text-align: left; margin-bottom: 0px" {
                                                 a href = {"/demonlist/" (demon.position)} {
-                                                    "#" (demon.position) " - " (demon.name)
+                                                    "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
                                                 }
                                             }
                                             h3 style = "text-align: left" {
@@ -171,7 +171,7 @@ impl Page for DemonlistOverview {
                                     @else {
                                         h2 {
                                             a href = {"/demonlist/" (demon.position)} {
-                                                "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                                "#" (demon.position) " &#8211; " (demon.name) " by " (demon.publisher)
                                             }
                                         }
                                     }
