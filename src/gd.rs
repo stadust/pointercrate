@@ -11,8 +11,8 @@ use dash_rs::{
     response::ResponseError,
     Base64Decoded, PercentDecoded, ProcessError, Thunk, ThunkContent,
 };
-use futures::StreamExt;
-use log::{error, info, trace, warn};
+use futures::{FutureExt, StreamExt};
+use log::{error, info, trace};
 use reqwest::{header::CONTENT_TYPE, Client};
 use sqlx::{Error, Pool, Postgres};
 use std::{
@@ -54,7 +54,11 @@ impl PgCache {
                     CacheEntry::Absent => Ok(GDIntegrationResult::DemonNotFoundByName),
                     // Okay we _could_ do something more elaborate here if we dont have a "Missing" variant, but honestly I dont care
                     _ => {
-                        actix_rt::spawn(self.clone().find_demon(http_client, demon.base.name.to_string(), demon.base.id));
+                        actix_rt::spawn(
+                            self.clone()
+                                .find_demon(http_client, demon.base.name.to_string(), demon.base.id)
+                                .map(|_| ()),
+                        );
 
                         Ok(GDIntegrationResult::DemonNotYetCached)
                     },
@@ -81,7 +85,8 @@ impl PgCache {
                     CacheEntry::Expired(level, _) => {
                         actix_rt::spawn(
                             self.clone()
-                                .find_demon(http_client.clone(), demon.base.name.to_string(), demon.base.id),
+                                .find_demon(http_client.clone(), demon.base.name.to_string(), demon.base.id)
+                                .map(|_| ()),
                         );
 
                         level
@@ -95,7 +100,11 @@ impl PgCache {
                     Ok(CacheEntry::Missing) => return Ok(GDIntegrationResult::LevelDataNotCached),
                     Ok(CacheEntry::Absent) => return Ok(GDIntegrationResult::LevelDataNotFound),
                     Ok(CacheEntry::Expired(level_data, _)) => {
-                        actix_rt::spawn(self.clone().download_demon(http_client, level.level_id.into(), demon.base.id));
+                        actix_rt::spawn(
+                            self.clone()
+                                .download_demon(http_client, level.level_id.into(), demon.base.id)
+                                .map(|_| ()),
+                        );
 
                         level_data
                     },
@@ -122,7 +131,7 @@ impl PgCache {
         }
     }
 
-    async fn find_demon(self, http_client: Client, demon_name: String, demon: i32) {
+    async fn find_demon(self, http_client: Client, demon_name: String, demon: i32) -> Result<(), ()> {
         let request = LevelsRequest::default()
             .request_type(LevelRequestType::MostLiked)
             .search(&demon_name)
@@ -145,20 +154,23 @@ impl PgCache {
                 match response.text().await {
                     Ok(text) =>
                         match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
-                            Err(ResponseError::NotFound) => {
+                            Err(ResponseError::NotFound) =>
                                 self.mark_levels_request_result_as_absent(&request)
                                     .await
-                                    .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err));
-                            },
+                                    .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
+                                    .map(|_| ()),
                             Ok(demons) =>
                                 if demons.len() == 0 {
                                     self.mark_levels_request_result_as_absent(&request)
                                         .await
-                                        .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err));
+                                        .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
+                                        .map(|_| ())
                                 } else {
                                     trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
 
-                                    self.store_levels_request(&request, &demons).await;
+                                    self.store_levels_request(&request, &demons)
+                                        .await
+                                        .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
 
                                     let hardest = demons
                                         .into_iter()
@@ -168,44 +180,18 @@ impl PgCache {
 
                                     trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
 
-                                    self.download_demon(http_client, hardest.level_id.into(), demon).await;
+                                    self.download_demon(http_client, hardest.level_id.into(), demon).await
                                 },
-                            Err(err) => error!("Error processing response to request {:?}: {:?}", request, err),
+                            Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
                         },
-                    Err(error) => error!("Error reading server response: {:?}", error),
+                    Err(error) => Err(error!("Error reading server response: {:?}", error)),
                 },
-            Err(error) => error!("Error making request: {:?}", error),
+            Err(error) => Err(error!("Error making request: {:?}", error)),
         }
     }
 
-    async fn download_demon(self, http_client: Client, request: LevelRequest<'static>, demon_id: i32) {
+    async fn download_demon(self, http_client: Client, request: LevelRequest<'static>, demon_id: i32) -> Result<(), ()> {
         trace!("Downloading demon with id {}", request.level_id);
-
-        let mut connection = match self.pool.begin().await {
-            Ok(conn) => conn,
-            _ => return,
-        };
-        //sqlx::query!("LOCK download_lock").execute(&mut *connection).await;
-        let is_concurrent_download = sqlx::query!(
-            r#"SELECT EXISTS (SELECT 1 FROM download_lock WHERE level_id = $1) AS "concurrent!: bool""#,
-            request.level_id as i64
-        )
-        .fetch_one(&mut *connection)
-        .await;
-
-        if is_concurrent_download.is_err() || is_concurrent_download.unwrap().concurrent {
-            warn!("Multiple concurrent download attempts for level {}. Cancelling!", request.level_id);
-
-            connection.commit().await;
-
-            return
-        }
-
-        sqlx::query!("INSERT INTO download_lock (level_id) VALUES ($1)", request.level_id as i64)
-            .execute(&mut *connection)
-            .await;
-
-        connection.commit().await;
 
         let request_result = http_client
             .post(&request.to_url())
@@ -214,32 +200,41 @@ impl PgCache {
             .send()
             .await;
 
-        if let Ok(response) = request_result {
-            let content = response.text().await;
+        match request_result {
+            Ok(response) => {
+                let content = response.text().await;
 
-            if let Ok(text) = content {
-                match dash_rs::response::parse_download_gj_level_response(&text[..]) {
-                    Ok(demon) => {
-                        self.store_level_data(demon.level_id, &demon.level_data)
-                            .await
-                            .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err));
+                match content {
+                    Ok(text) =>
+                        match dash_rs::response::parse_download_gj_level_response(&text[..]) {
+                            Ok(demon) => {
+                                self.store_level_data(demon.level_id, &demon.level_data)
+                                    .await
+                                    .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
 
-                        sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
-                            .execute(&self.pool)
-                            .await;
+                                sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
+                                    .execute(&self.pool)
+                                    .await
+                                    .map_err(|err| error!("Error updating level_id: {:?}", err))?;
 
-                        sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
-                            .execute(&self.pool)
-                            .await;
+                                sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
+                                    .execute(&self.pool)
+                                    .await
+                                    .map_err(|err| error!("Error freeing download lock: {:?}", err))?;
 
-                        info!("Successfully retrieved demon data!");
-                    },
-                    Err(ResponseError::NotFound) => {
-                        self.mark_level_data_as_absent(request.level_id).await;
-                    },
-                    Err(_) => {},
+                                Ok(info!("Successfully retrieved demon data!"))
+                            },
+                            Err(ResponseError::NotFound) =>
+                                self.mark_level_data_as_absent(request.level_id)
+                                    .await
+                                    .map_err(|err| error!("Error marking level as absent: {:?}", err))
+                                    .map(|_| ()),
+                            Err(err) => Err(error!("Error processing response: {:?}", err)),
+                        },
+                    Err(err) => Err(error!("Error making http request: {:?}", err)),
                 }
-            }
+            },
+            Err(err) => Err(error!("Error making http request: {:?}", err)),
         }
     }
 }
