@@ -1,6 +1,6 @@
 use crate::{config, documentation, gd::PgCache, model::user::AuthenticatedUser, ratelimit::Ratelimits, Result};
 use chrono::Duration;
-use log::trace;
+use log::{info, trace};
 use reqwest::Client;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
 use std::{collections::HashMap, sync::Arc};
@@ -28,6 +28,8 @@ impl PointercrateState {
     /// Loads in the API documentation files and values from config files. Also establishes database
     /// connections
     pub async fn initialize() -> PointercrateState {
+        info!("Initializing pointercrate state!");
+
         let documentation_toc = Arc::new(documentation::read_table_of_contents(&config::documentation_location()).unwrap());
         let documentation_topics = Arc::new(documentation::read_topics(&config::documentation_location()).unwrap());
 
@@ -37,6 +39,7 @@ impl PointercrateState {
         let connection_pool = PgPoolOptions::default()
             .max_connections(8)
             .max_lifetime(Some(std::time::Duration::from_secs(60 * 60 * 24)))
+            .idle_timeout(Some(std::time::Duration::from_secs(60 * 5))) // try to fix the weird "idle locks"
             .connect(&config::database_url())
             .await
             .expect("Failed to connect to pointercrate database");
