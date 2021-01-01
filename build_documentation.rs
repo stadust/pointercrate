@@ -38,7 +38,7 @@ fn build_project(location: impl AsRef<Path>, url_location: &str) {
             }
             table_of_contents.push_str(&format!("<li><a href='/{}/{}'>{}</a><ol>", url_location, url_name, title_name));
         }
-        for li in process_directory(&dir, &section_name, url_location) {
+        for li in process_directory(&dir, &url_name, url_location) {
             table_of_contents.push_str(&format!("{}", li));
         }
 
