@@ -431,7 +431,6 @@ impl Page for Demonlist {
                         }
                         div.ct-chart.ct-perfect-fourth.js-collapse-content#position-chart style="display:none" {}
                     }
-                    (super::rules_panel())
                     (self.records_panel())
                     (PreEscaped(format!("
                         <script>
@@ -444,6 +443,7 @@ impl Page for Demonlist {
                 }
                 aside.right {
                     (self.overview.team_panel())
+                    (super::rules_panel())
                     (super::submit_panel())
                     (super::stats_viewer_panel())
                     (super::discord_panel())
