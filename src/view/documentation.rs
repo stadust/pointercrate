@@ -1,5 +1,5 @@
 use super::Page;
-use crate::{error::PointercrateError, extractor::auth::TokenAuth, permissions::Permissions, state::PointercrateState, Result, ViewResult};
+use crate::{error::PointercrateError, state::PointercrateState, Result, ViewResult};
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};
