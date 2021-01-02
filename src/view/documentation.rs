@@ -56,9 +56,7 @@ pub async fn topic(state: PointercrateState, topic: Path<String>) -> ViewResult<
 
 // actix complains if these aren't async, although they don't not have to be
 #[get("/guidelines/")]
-pub async fn guildelines_index(TokenAuth(user): TokenAuth, state: PointercrateState) -> ViewResult<HttpResponse> {
-    user.inner().require_permissions(Permissions::ListHelper)?;
-
+pub async fn guildelines_index(state: PointercrateState) -> ViewResult<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(Documentation::guidelines(&state, "index")?.render().0))
@@ -67,9 +65,7 @@ pub async fn guildelines_index(TokenAuth(user): TokenAuth, state: PointercrateSt
 // cannot have multiple parameters with the same name in the same field it seems because actix_web
 // generates a unit struct for them.
 #[get("/guidelines/{gtopic}/")]
-pub async fn guidelines_topic(TokenAuth(user): TokenAuth, state: PointercrateState, gtopic: Path<String>) -> ViewResult<HttpResponse> {
-    user.inner().require_permissions(Permissions::ListHelper)?;
-
+pub async fn guidelines_topic(state: PointercrateState, gtopic: Path<String>) -> ViewResult<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(Documentation::guidelines(&state, &gtopic.into_inner())?.render().0))
