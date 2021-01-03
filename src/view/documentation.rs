@@ -9,6 +9,8 @@ pub struct Documentation<'a> {
     toc: &'a str,
     content: &'a str,
     page: &'a str,
+    description: &'static str,
+    title: &'static str,
 }
 
 impl<'a> Documentation<'a> {
@@ -22,6 +24,8 @@ impl<'a> Documentation<'a> {
             toc: &*state.documentation_toc,
             content,
             page,
+            description: "The pointercrate API, which allows you to programmatically interface with the Demonlist",
+            title: "API Documentation",
         })
     }
 
@@ -35,6 +39,8 @@ impl<'a> Documentation<'a> {
             toc: &*state.guidelines_toc,
             content,
             page,
+            description: "The Demonlist guidelines regarding record submission/acceptance and level placements",
+            title: "Guildlines",
         })
     }
 }
@@ -73,11 +79,11 @@ pub async fn guidelines_topic(state: PointercrateState, gtopic: Path<String>) ->
 
 impl<'a> Page for Documentation<'a> {
     fn title(&self) -> String {
-        format!("API Documentation - {}", self.page)
+        format!("{} - {}", self.title, self.page)
     }
 
     fn description(&self) -> String {
-        "The pointercrate API, which allows you to programmatically interface with the Demonlist".to_owned()
+        self.description.to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {
@@ -114,43 +120,43 @@ impl<'a> Page for Documentation<'a> {
 
     fn head(&self) -> Vec<Markup> {
         vec![html! {
-            (PreEscaped(r#"
+            (PreEscaped(format!(r#"
 <script type="application/ld+json">
-  {
+  {{
     "@context": "http://schema.org",
     "@type": "WebPage",
-    "breadcrumb": {
+    "breadcrumb": {{
       "@type": "BreadcrumbList",
-      "itemListElement": [{
+      "itemListElement": [{{
         "@type": "ListItem",
         "position": 1,
-        "item": {
+        "item": {{
           "@id": "https://pointercrate.com/",
           "name": "pointercrate"
-        }
-      },{
+        }}
+      }},{{
         "@type": "ListItem",
         "position": 2,
-        "item": {
+        "item": {{
           "@id": "https://pointercrate.com/documentation/",
           "name": "documentation"
-        }
-      },{
+        }}
+      }},{{
         "@type": "ListItem",
         "position": 3,
-        "item": {
+        "item": {{
             "@id": "https://pointercrate.com/documentation/account/",
             "name": "account"
-        }
-      }]
-    },
-    "name": "API Documentation",
-    "description": "The pointercrate API, which allows you to programmatically interface with the Demonlist",
+        }}
+      }}]
+    }},
+    "name": "{}",
+    "description": "{}",
     "url": "https://pointercrate.com/documentation/account/",
     "dateCreated": "2017-04-08"
-  }
+  }}
 </script>
-            "#))
+            "#, self.title, self.description)))
         }]
     }
 }
