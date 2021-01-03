@@ -103,7 +103,7 @@ impl<'a> Page for Documentation<'a> {
                 // you know, this might be the most ugly solution to a problem I have ever thought of
                 $(document).ready(function() {
                   for(let header of document.getElementsByTagName("h1")) {
-                    header.innerHTML += '<a class="fa fa-link fa-3 link-anchor" aria-hidden="true" title="Permanent link to this topic" href = #' + header.parentNode.id + '></a>';
+                    header.innerHTML += '<a class="fa fa-link fa-3 link-anchor" aria-hidden="true" title="Permanent link to this topic" href = #' + (header.id || header.parentNode.id) + '></a>';
                     header.innerHTML = '<i class="fa fa-link fa-3 link-anchor" style="visibility:hidden" aria-hidden="true"></i>' + header.innerHTML;
                   }
                 })
