@@ -144,7 +144,7 @@ pub(super) fn submission_panel() -> Markup {
                         "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
                     }
                     span.form-input.flex.col#id_demon {
-                        input type = "text" name = "demon" required="" placeholder = "e. g. 'Bloodbath', 'Yatagarasu'" ;
+                        input type = "text" name = "demon" required="" placeholder = "e. g. 'Sonic Wave', 'Yatagarasu'" ;
                         p.error {}
                     }
                     h3 {
