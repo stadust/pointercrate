@@ -381,6 +381,7 @@ function formatDemon(demon, link) {
     element = document.createElement("span");
   } else {
     element = document.createElement("i");
+    element.style.opacity = ".5";
   }
 
   if (link) {
