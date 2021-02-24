@@ -55,7 +55,7 @@ FROM
                  SELECT player,
                         progress,
                         position,
-                        CASE WHEN demons.position >= 75 THEN 100 ELSE requirement END AS requirement
+                        CASE WHEN demons.position > 75 THEN 100 ELSE requirement END AS requirement
                  FROM records
                           INNER JOIN demons
                                      ON demons.id = demon
