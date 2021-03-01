@@ -1,10 +1,11 @@
 <div class='panel fade js-scroll-anim' data-anim='fade'>
+<div style="top:0;right:0;left:0;bottom:0;background: rgba(0,0,0,0.1);z-index: 500; position:absolute"></div>
 
-# Demon retrieval
+# Demon retrieval (Deprecated)
 
-## `GET`{.verb} `/v2/demons/` `id`{.param} `/`
+## `GET`{.verb} `/v1/demons/` `position`{.param} `/`
 
-Retrieves detailed information about the demon with the given `id`
+Retrieves detailed information about the demon at `position`
 
 ### Request:
 
@@ -36,12 +37,12 @@ Returned if the `If-None-Match` header is set, and the etag for the demon object
 
 | Status code | Error code | Description                          |
 | ----------- | ---------- | ------------------------------------ |
-| 404         | 40401      | No demon with the specified `id` |
+| 404         | 40401      | No demon at the specified `position` |
 
 ### Example request:
 
 ```json
-GET /api/v2/demons/1/
+GET /api/v1/demons/1/
 Accept: application/json
 ```
 

@@ -68,4 +68,4 @@ CREATE OR REPLACE VIEW players_with_score AS
     ON scores.player = players.id
     LEFT OUTER JOIN nationalities
     ON players.nationality = nationalities.iso_country_code
-    WHERE NOT players.banned;
+    WHERE NOT players.banned AND players.id != 1534;

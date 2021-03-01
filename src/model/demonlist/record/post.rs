@@ -70,7 +70,7 @@ impl FullRecord {
             return Err(PointercrateError::Non100Extended)
         }
 
-        let requirement = demon.requirement(connection).await?;
+        let requirement = demon.requirement(&mut *connection).await?;
 
         // Check if the record meets the record requirement for this demon
         if submission.progress > 100 || submission.progress < requirement {
@@ -83,8 +83,8 @@ impl FullRecord {
         // exactly that video exists.
 
         if let Some(ref video) = video {
-            if let Some(row) = sqlx::query!("SELECT id, status_::text FROM records WHERE video = $1", video.to_string())
-                .fetch_optional(connection) // FIXME(sqlx)
+            if let Some(row) = sqlx::query!(r#"SELECT id, status_::text as "status_!: String" FROM records WHERE video = $1"#, video.to_string())
+                .fetch_optional(&mut *connection) // FIXME(sqlx)
                 .await?
             {
                 return Err(PointercrateError::SubmissionExists {
@@ -95,13 +95,13 @@ impl FullRecord {
         }
 
         let existing = sqlx::query!(
-            "SELECT id, status_::text FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR status_ = \
-             'UNDER_CONSIDERATION' OR (status_ = 'APPROVED' AND progress >= $3)) LIMIT 1",
+            r#"SELECT id, status_::text as "status_!: String" FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR status_ = 
+             'UNDER_CONSIDERATION' OR (status_ = 'APPROVED' AND progress >= $3)) LIMIT 1"#,
             demon.id,
             player.id,
             submission.progress
         )
-        .fetch_optional(connection)
+        .fetch_optional(&mut *connection)
         .await?;
 
         if let Some(row) = existing {
@@ -127,7 +127,7 @@ impl FullRecord {
         .bind(player.id)
         .bind(submitter.id)
         .bind(demon.id)
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await?
         .get("id");
 
@@ -145,7 +145,7 @@ impl FullRecord {
         // Dealing with different status and upholding their invariant is complicated, we should not
         // duplicate that code!
         if submission.status != RecordStatus::Submitted {
-            record.set_status(submission.status, connection).await?;
+            record.set_status(submission.status, &mut *connection).await?;
         }
 
         if let Some(note) = submission.note {

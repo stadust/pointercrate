@@ -118,7 +118,7 @@ impl Demon {
 
         // Delete associated notes
         sqlx::query!("DELETE FROM records WHERE demon = $1 AND progress < $2", self.base.id, requirement)
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
 
         sqlx::query!("UPDATE demons SET requirement = $1 WHERE id = $2", requirement, self.base.id)
@@ -187,7 +187,7 @@ impl MinimalDemon {
         // complains. I actually dont know why, its DEFERRABLE INITIALLY IMMEDIATE (whatever the
         // fuck that means, it made it work in the python version)
         sqlx::query!("UPDATE demons SET position = -1 WHERE id = $1", self.id)
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
 
         if to > self.position {
@@ -201,7 +201,7 @@ impl MinimalDemon {
                 self.position,
                 to
             )
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
         } else if to < self.position {
             debug!(
@@ -214,7 +214,7 @@ impl MinimalDemon {
                 to,
                 self.position
             )
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
         }
 

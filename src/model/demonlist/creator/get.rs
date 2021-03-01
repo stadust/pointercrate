@@ -10,7 +10,7 @@ use sqlx::PgConnection;
 impl Creator {
     pub async fn get(demon: &MinimalDemon, player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Creator> {
         let exists = sqlx::query!(
-            "SELECT EXISTS (SELECT FROM creators WHERE creator=$1 AND demon = $2) AS result",
+            r#"SELECT EXISTS (SELECT FROM creators WHERE creator=$1 AND demon = $2) AS "result!: bool""#,
             player.id,
             demon.id
         )
@@ -34,8 +34,8 @@ impl Creator {
 
 pub async fn creators_of(demon: &MinimalDemon, connection: &mut PgConnection) -> Result<Vec<DatabasePlayer>> {
     let mut stream = sqlx::query!(
-        "SELECT players.id, players.name::TEXT, players.banned FROM players INNER JOIN creators ON players.id = creators.creator WHERE \
-         creators.demon = $1",
+        r#"SELECT players.id, players.name AS "name: String", players.banned FROM players INNER JOIN creators ON players.id = creators.creator WHERE 
+         creators.demon = $1"#,
         demon.id
     )
     .fetch(connection);
@@ -56,8 +56,8 @@ pub async fn creators_of(demon: &MinimalDemon, connection: &mut PgConnection) ->
 
 pub async fn created_by(player_id: i32, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     let mut stream = sqlx::query!(
-        "SELECT demons.id, demons.name::TEXT, demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE \
-         creators.creator=$1",
+        r#"SELECT demons.id, demons.name as "name: String", demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE 
+         creators.creator=$1"#,
         player_id
     )
     .fetch(connection);

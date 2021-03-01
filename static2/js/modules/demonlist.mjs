@@ -76,7 +76,27 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
         submissionForm.setSuccess("Record successfully submitted");
         submissionForm.clear();
       })
-      .catch((response) => submissionForm.setError(response.data.message)); // TODO: maybe specially handle some error codes
+      .catch((response) =>  {
+        switch(response.data.code) {
+          case 40401:
+            demon.setError(response.data.message);
+            break;
+          case 42218:
+            player.setError(response.data.message);
+            break;
+          case 42215:
+            progress.setError(response.data.message);
+            break;
+          case 42222:
+          case 42223:
+          case 42224:
+          case 42225:
+            video.setError(response.data.message);
+            break;
+          default:
+            submissionForm.setError(response.data.message)
+        }
+      }); // TODO: maybe specially handle some error codes
   });
 }
 
@@ -84,7 +104,7 @@ export class StatsViewer extends FilteredPaginator {
   /**
    * Constructs a new StatsViewer
    *
-   * @param {HtmlElement} html The container element of this stats viewer instance
+   * @param {HTMLElement} html The container element of this stats viewer instance
    */
   constructor(html) {
     super(
@@ -131,6 +151,7 @@ export class StatsViewer extends FilteredPaginator {
   onReceive(response) {
     super.onReceive(response);
 
+    // Using currentlySelected is O.K. here, as selection via clicking li-elements is the only possibility!
     this._rank.innerHTML = this.currentlySelected.dataset.rank;
     this._score.innerHTML = this.currentlySelected.getElementsByTagName(
       "i"
@@ -182,7 +203,7 @@ export class StatsViewer extends FilteredPaginator {
       (beaten.length - legacy - extended + playerData.verified.length - verifiedExtended - verifiedLegacy) + " ( + " + (extended + verifiedExtended) + " )";
     this._amountLegacy.textContent = legacy + verifiedLegacy;
 
-    var hardest = playerData.verified
+    let hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
         position: 34832834,
@@ -191,7 +212,7 @@ export class StatsViewer extends FilteredPaginator {
 
     this._hardest.textContent = hardest.name || "None";
 
-    var non100Records = playerData.records
+    let non100Records = playerData.records
       .filter((record) => record.progress != 100)
       .sort((r1, r2) => r1.progress - r2.progress);
 
@@ -360,6 +381,7 @@ function formatDemon(demon, link) {
     element = document.createElement("span");
   } else {
     element = document.createElement("i");
+    element.style.opacity = ".5";
   }
 
   if (link) {

@@ -10,7 +10,7 @@ use crate::{
 };
 use futures::stream::StreamExt;
 use serde::{Deserialize, Serialize};
-use sqlx::{row::Row, PgConnection};
+use sqlx::{PgConnection, Row};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DemonIdPagination {
@@ -116,6 +116,7 @@ impl DemonIdPagination {
                     name: CiString(row.get("verifier_name")),
                     banned: row.get("verifier_banned"),
                 },
+                level_id: row.get::<Option<i64>, _>("level_id").map(|id| id as u64),
             })
         }
 
@@ -227,6 +228,7 @@ impl DemonPositionPagination {
                     name: CiString(row.get("verifier_name")),
                     banned: row.get("verifier_banned"),
                 },
+                level_id: row.get::<Option<i64>, _>("level_id").map(|id| id as u64),
             })
         }
 

@@ -144,7 +144,7 @@ pub(super) fn submission_panel() -> Markup {
                         "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
                     }
                     span.form-input.flex.col#id_demon {
-                        input type = "text" name = "demon" required="" placeholder = "e. g. 'Bloodbath', 'Yatagarasu'" ;
+                        input type = "text" name = "demon" required="" placeholder = "e. g. 'Sonic Wave', 'Yatagarasu'" ;
                         p.error {}
                     }
                     h3 {
@@ -185,12 +185,14 @@ pub(super) fn submission_panel() -> Markup {
                         "Notes or comments: "
                     }
                     p {
-                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission."
-
+                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission. In particular, any required " b { "raw footage"} " goes here."
                     }
                     span.form-input.flex.col#submit-note {
-                        textarea name = "note" placeholder = "Your dreams and hopes for this records... or something like that" {}
+                        textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
                         p.error {}
+                    }
+                    p {
+                        "By submitting the record you acknowledge the " a.link href = "/guidelines" {"submission guidelines"} "."   
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
@@ -325,79 +327,15 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
 
 fn rules_panel() -> Markup {
     html! {
-        section#rules.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
+        section#rules.panel.fade.js-scroll-anim data-anim = "fade" {
             h2.underlined.pad.clickable {
-                "Rules:"
-                span.arrow.hover {}
+                "Guidelines:"
             }
-            ul.roman.js-collapse-content style="display:none" {
-                h3 {
-                    "Demon rules:"
-                }
-                li {
-                    span {
-                        "Demons need to be rated to be included on this list"
-                    }
-                }
-                li {
-                    span {
-                        "List demons that receive a hacked update changing difficulty will be moved to the legacy section of the list. Alternatively, if a demon gets a hacked update before being list-worthy, it will not get added. However, a demon whose original verification was hacked will still get on the list."
-                    }
-                }
-                h3 {
-                    "Submission rules:"
-                }
-                li {
-                    span {
-                        "Records must be legitimate and either uploaded on YouTube, Vimeo, Bilibili or streamed to be added to the list."
-                    }
-                }
-                li {
-                    span {
-                        " Anyone posting illegitimate recordings and passing them off as legit will have their records removed from the list. Illegitimate records include, but aren't limited to, speedhacks, noclip, auto, nerfs, macros, etc."
-                    }
-                }
-                li {
-                    span {
-                        "Records on a level must be in normal mode and on the live version of the level or on an appropriate bug fixed/low detail copy of said level. Please refer to the bugfix and LDM guidelines."
-                    }
-                }
-                li {
-                    span {
-                        "The record holder must meet the percentage requirement of a level in order to be added to the list for said level."
-                    }
-                }
-                h3 {
-                    "General guidelines:"
-                }
-                li {
-                    span {
-                        "Verifications are not counted as records on the list, but still award points."
-                    }
-                }
-                li {
-                    span {
-                        "Being in a group in which people beat levels for the same channel will cause your records to be temporarily removed from the list."
-                    }
-                }
-                h3 {
-                    "Bugfix and LDM guidelines:"
-                }
-                li {
-                    span {
-                        "Records using a level's built-in LDM are always eligible. "
-                    }
-                }
-                li {
-                    span {
-                        "Records on appropriate LDM copies of levels are eligible. Please take contact with a List Moderator if you are unsure of which decorations can or cannot be removed. Generally speaking, a LDM copy should not remove decorations that obstruct the player's vision, blind transitions, flashes or boss fights, for example. Referring to the first guideline, if the previously stated decorations are removed in a level's built-in LDM though, it is perfectly fine to use it."
-                    }
-                }
-                li {
-                    span {
-                        "Records on appropriate bugfix copies of levels for different refresh rates are eligible. Please take contact with a List Moderator if you are unsure of what is or isn't a bug."
-                    }
-                }
+            p {
+                "All demonlist operations are carried out in accordance to our guidelines. Be sure to check them before submitting a record to ensure a flawless experience!"
+            }
+            a.blue.hover.button href = "/guidelines/" {
+                "Read the guidelines!"
             }
         }
     }

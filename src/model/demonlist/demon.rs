@@ -11,7 +11,7 @@ use crate::{
     Result,
 };
 use derive_more::Display;
-use log::{debug, info};
+use log::info;
 use serde::Serialize;
 use sqlx::PgConnection;
 use std::hash::{Hash, Hasher};
@@ -39,6 +39,12 @@ pub struct Demon {
 
     /// This [`Demon`]'s verifier
     pub verifier: DatabasePlayer,
+
+    /// This ['Demons']'s Geometry Dash level ID
+    ///
+    /// This is automatically queried based on the level name, but can be manually overridden by a
+    /// list mod.
+    pub level_id: Option<u64>,
 }
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
@@ -171,12 +177,11 @@ impl Demon {
     async fn shift_down(starting_at: i16, connection: &mut PgConnection) -> Result<()> {
         info!("Shifting down all demons, starting at {}", starting_at);
 
-        Ok(
-            sqlx::query!("UPDATE demons SET position = position + 1 WHERE position >= $1", starting_at)
-                .execute(connection)
-                .await
-                .map(|how_many| debug!("Shifting affects {} demons", how_many))?,
-        )
+        sqlx::query!("UPDATE demons SET position = position + 1 WHERE position >= $1", starting_at)
+            .execute(connection)
+            .await?;
+
+        Ok(())
     }
 
     /// Decrements the position of all demons with positions equal to or smaller than the given one,
@@ -184,30 +189,29 @@ impl Demon {
     async fn shift_up(until: i16, connection: &mut PgConnection) -> Result<()> {
         info!("Shifting up all demons until {}", until);
 
-        Ok(
-            sqlx::query!("UPDATE demons SET position = position - 1 WHERE position <= $1", until)
-                .execute(connection)
-                .await
-                .map(|how_many| debug!("Shifting affects {} demons", how_many))?,
-        )
+        sqlx::query!("UPDATE demons SET position = position - 1 WHERE position <= $1", until)
+            .execute(connection)
+            .await?;
+
+        Ok(())
     }
 
     /// Gets the current max position a demon has
     pub async fn max_position(connection: &mut PgConnection) -> Result<i16> {
         sqlx::query!("SELECT MAX(position) as max_position FROM demons")
             .fetch_one(connection)
-            .await
-            .map(|row| row.max_position)
-            .map_err(|err| err.into())
+            .await?
+            .max_position
+            .ok_or(PointercrateError::NotFound)
     }
 
     /// Gets the maximal and minimal submitter id currently in use
     ///
     /// The returned tuple is of the form (max, min)
     pub async fn extremal_demon_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
-        let row = sqlx::query!("SELECT MAX(id) AS max_id, MIN(id) AS min_id FROM demons")
+        let row = sqlx::query!(r#"SELECT MAX(id) AS "max_id!: i32", MIN(id) AS "min_id!: i32" FROM demons"#)
             .fetch_one(connection)
-            .await?; // FIXME: crashes on empty table
+            .await?;
         Ok((row.max_id, row.min_id))
     }
 

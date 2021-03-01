@@ -188,7 +188,7 @@ impl FullRecord {
     ///
     /// The returned tuple is of the form (max, min)
     pub async fn extremal_record_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
-        let row = sqlx::query!("SELECT MAX(id) AS max_id, MIN(id) AS min_id FROM records")
+        let row = sqlx::query!(r#"SELECT MAX(id) AS "max_id!: i32", MIN(id) AS "min_id!: i32" FROM records"#)
             .fetch_one(connection)
             .await?; // FIXME: crashes on empty table
         Ok((row.max_id, row.min_id))
@@ -288,7 +288,7 @@ impl FullRecord {
                 {
                     "type": "rich",
                     "title": format!("{}% on {}", self.progress, self.demon.name),
-                    "description": format!("{} just got {}% on {}! Go add his record!", self.player.name, self.progress, self.demon.name),
+                    "description": format!("{} just got {}% on {}! Go add their record!", self.player.name, self.progress, self.demon.name),
                     "footer": {
                         "text": format!("This record has been submitted by submitter #{}", self.submitter.map(|s|s.id).unwrap_or(1))
                     },

@@ -1,8 +1,9 @@
 <div class='panel fade js-scroll-anim' data-anim='fade'>
+<div style="top:0;right:0;left:0;bottom:0;background: rgba(0,0,0,0.1);z-index: 500; position:absolute"></div>
 
-# Modifying a demon
+# Modifying a demon (Deprecated)
 
-## `PATCH`{.verb} `/v2/demons/` `id`{.param} `/`
+## `PATCH`{.verb} `/v1/demons/` `position`{.param} `/`
 
 <div class='info-yellow'>
 <b>Access Restrictions:</b><br>
@@ -11,7 +12,7 @@ Access to this endpoint requires at least `LIST_MODERATOR` permissions.
 
 Modifies a given demon.
 
-Note that updating the position of a demon will automatically shift around the other demons to ensure position consistency.
+Note that updating the position of a demon will automatically shift around the other demons to ensure position consitency.
 
 The `video` value, if provided, must meet the requirements specified [here](/documentation/#video).
 
@@ -55,7 +56,7 @@ Returned when the `PATCH` operation did not make any changes.
 
 | Status code | Error code | Description                                                                                          |
 | ----------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| 404         | 40401      | No demon with the specified `id`                                                             |
+| 404         | 40401      | No demon at the specified `position`                                                                 |
 | 409         | 40904      | A demon with the updated name already exists on the list                                             |
 | 422         | 42212      | The `requirement` value is smaller than `0` or greater than `100`                                    |
 | 422         | 42213      | The `position` value is either smaller than `1` or greater than current amount of demons on the list |
@@ -63,7 +64,7 @@ Returned when the `PATCH` operation did not make any changes.
 ### Example request:
 
 ```json
-PATCH /api/v2/demons/1/
+PATCH /api/v1/demons/1/
 Accept: application/json
 Authorization: Bearer <omitted>
 Content-Type: application/json

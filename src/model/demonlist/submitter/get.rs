@@ -15,7 +15,7 @@ impl Submitter {
 
         match result {
             Ok(row) => Ok(Submitter { id, banned: row.banned }),
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Submitter",
                     identified_by: id.to_string(),
@@ -31,7 +31,7 @@ impl Submitter {
             "SELECT submitter_id, banned FROM submitters WHERE ip_address = cast($1::text as inet)",
             ip.to_string()
         )
-        .fetch_optional(connection)
+        .fetch_optional(&mut *connection)
         .await?;
 
         match optional_row {

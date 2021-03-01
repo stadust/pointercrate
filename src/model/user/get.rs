@@ -5,7 +5,7 @@ use sqlx::{Error, PgConnection};
 pub(super) struct FetchedUser {
     member_id: i32,
     name: String,
-    permissions: i32, // FIXME(sqlx) once custom types are supported
+    permissions: Option<i32>, // FIXME(sqlx) for some reason, a casted column is interpreted as nullable
     display_name: Option<String>,
     youtube_channel: Option<String>,
 }
@@ -15,7 +15,7 @@ impl Into<User> for FetchedUser {
         User {
             id: self.member_id,
             name: self.name,
-            permissions: Permissions::from_bits_truncate(self.permissions as u16),
+            permissions: Permissions::from_bits_truncate(self.permissions.unwrap() as u16),
             display_name: self.display_name,
             youtube_channel: self.youtube_channel,
         }
@@ -33,7 +33,7 @@ impl User {
         .await;
 
         match row {
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "User",
                     identified_by: id.to_string(),
@@ -46,14 +46,14 @@ impl User {
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<User> {
         let row = sqlx::query_as!(
             FetchedUser,
-            "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE name = $1",
+            "SELECT member_id, name, CAST(permissions AS integer), display_name, youtube_channel::text FROM members WHERE name = $1",
             name.to_string() // FIXME(sqlx)
         )
         .fetch_one(connection)
         .await;
 
         match row {
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "User",
                     identified_by: name.to_string(),

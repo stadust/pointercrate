@@ -122,6 +122,15 @@ class UserPaginator extends FilteredPaginator {
       editForm.setError(
         "This is your own account. You cannot modify your own account using this interface!"
       );
+      for(let btn of this.output.html.getElementsByTagName("input")) {
+        btn.classList.add("disabled");
+        btn.disabled = true;
+      }
+    } else {
+      for(let btn of this.output.html.getElementsByTagName("input")) {
+        btn.classList.remove("disabled");
+        btn.disabled = false;
+      }
     }
 
     document.getElementById("user-user-name").innerText = selectedUser.name;

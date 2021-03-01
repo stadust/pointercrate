@@ -1,43 +1,49 @@
 use std::{
+    fs,
     fs::{read_dir, DirEntry, File},
+    io::Write,
     path::Path,
     process::Command,
 };
 
-fn main() {
-    let doc_directory = Path::new("./doc");
+fn build_project(location: impl AsRef<Path>, url_location: &str) {
     let out_directory = std::env::var("OUT_DIR").unwrap();
-    let out_directory = Path::new(&out_directory);
+    let out_directory = Path::new(&out_directory).join(url_location);
 
-    let directories = sorted_dir_entries(doc_directory, |entry| entry.metadata().unwrap().is_dir());
+    if !out_directory.exists() {
+        fs::create_dir(&out_directory).expect("Failed to create output directory");
+    }
 
-    print!("<div class='panel fade' id='toc'>");
-    print!("<h2>Table of contents</h2>");
-    print!("<div class='search js-search seperated' style='margin:0px'>");
-    print!("<input placeholder='Search...' type='text' style='height:1em'>");
-    print!("</div>");
-    print!("<ol style='padding-left: 0px'>");
+    let directories = sorted_dir_entries(location, |entry| entry.metadata().unwrap().is_dir());
+
+    let mut table_of_contents = "\
+        <div class='panel fade' id='toc'><h2>Table of contents</h2><div class='search js-search seperated' style='margin:0px'><input \
+                                 placeholder='Search...' type='text' style='height:1em'></div><ol style='padding-left: 0px'>
+    "
+    .to_owned();
 
     for dir in directories {
         let name = dir.file_name();
-        let name = &name.to_str().unwrap()[4..];
-        let filename = format!("{}.html", name);
+        let filename = &name.to_str().unwrap()[4..];
+        let section_name = filename.replace("_", " ");
+        let url_name = filename.to_lowercase().replace("_", "");
+        let filename = format!("{}.html", url_name);
         let file = out_directory.join(filename);
         let file = File::create(file).unwrap();
 
-        if name != "index" {
-            let mut title_name = name.to_string();
+        if section_name != "index" {
+            let mut title_name = section_name.to_string();
             if let Some(r) = title_name.get_mut(0..1) {
                 r.make_ascii_uppercase()
             }
-            print!("<li><a href='/documentation/{}'>{}</a><ol>", name, title_name);
+            table_of_contents.push_str(&format!("<li><a href='/{}/{}'>{}</a><ol>", url_location, url_name, title_name));
         }
-        for li in process_directory(&dir, name) {
-            print!("{}", li);
+        for li in process_directory(&dir, &url_name, url_location) {
+            table_of_contents.push_str(&format!("{}", li));
         }
 
-        if name != "index" {
-            print!("</ol></li>");
+        if section_name != "index" {
+            table_of_contents.push_str(&format!("</ol></li>"));
         }
 
         let mut command = Command::new("pandoc");
@@ -55,12 +61,28 @@ fn main() {
         eprint!("{}", String::from_utf8_lossy(&output.stderr));
     }
 
-    print!("</ol>");
-    print!("</div>");
+    table_of_contents.push_str(&format!("</ol>"));
+    table_of_contents.push_str(&format!("</div>"));
+
+    let mut file = File::create(out_directory.join("toc.html")).unwrap();
+
+    file.write_all(table_of_contents.as_bytes())
+        .expect("Failed to write table of contents");
+}
+
+fn main() {
+    println!("cargo:rerun-if-changed=./build-documentation.rs");
+
+    build_project(Path::new("./doc"), "documentation");
+    build_project(Path::new("./demonlist-guidelines"), "guidelines");
 }
 
 fn sorted_dir_entries<F: FnMut(&DirEntry) -> bool, P: AsRef<Path>>(path: P, f: F) -> Vec<DirEntry> {
     let mut entries = read_dir(path).unwrap().filter_map(|r| r.ok()).filter(f).collect::<Vec<_>>();
+
+    for entry in &entries {
+        println!("cargo:rerun-if-changed={}", entry.path().to_str().unwrap());
+    }
 
     entries.sort_by_key(|entry| entry.path());
 
@@ -95,10 +117,10 @@ fn find_title<P: AsRef<Path>>(md_file: P) -> (String, String) {
     panic!("No headline found in markdown file");
 }
 
-fn process_directory(entry: &DirEntry, name: &str) -> Vec<String> {
+fn process_directory(entry: &DirEntry, name: &str, url_location: &str) -> Vec<String> {
     sorted_dir_entries(entry.path(), |_| true)
         .into_iter()
         .map(|entry| find_title(entry.path()))
-        .map(|(id, title)| format!("<li><a href = '/documentation/{}#{}'>{}</a></li>", name, id, title))
+        .map(|(id, title)| format!("<li><a href = '/{}/{}#{}'>{}</a></li>", url_location, name, id, title))
         .collect()
 }

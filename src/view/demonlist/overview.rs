@@ -33,9 +33,9 @@ pub struct DemonlistOverview {
 pub async fn overview_demons(connection: &mut PgConnection) -> Result<Vec<OverviewDemon>> {
     Ok(sqlx::query_as!(
         OverviewDemon,
-        "SELECT demons.id, position, demons.name::TEXT, CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, \
-         players.name::TEXT as publisher FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers \
-         ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"
+        r#"SELECT demons.id, position, demons.name as "name: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
+         players.name as "publisher: String" FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
+         ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"#
     )
     .fetch_all(connection)
     .await?)
@@ -150,20 +150,20 @@ impl Page for DemonlistOverview {
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {
                             section.panel.fade style="overflow:hidden" {
-                                div.underlined.flex style = "padding-bottom: 10px; align-items: center" {
+                                div.flex style = "align-items: center" {
                                     @if let Some(ref video) = demon.video {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
                                             a.play href = (video) {}
                                         }
-                                        div.leftlined.pad {
+                                        div style = "padding-left: 10px" {
                                             h2 style = "text-align: left; margin-bottom: 0px" {
                                                 a href = {"/demonlist/" (demon.position)} {
-                                                    "#" (demon.position) " - " (demon.name)
+                                                    "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
                                                 }
                                             }
                                             h3 style = "text-align: left" {
                                                 i {
-                                                    "by " (demon.publisher)
+                                                    (demon.publisher)
                                                 }
                                             }
                                         }
@@ -171,7 +171,7 @@ impl Page for DemonlistOverview {
                                     @else {
                                         h2 {
                                             a href = {"/demonlist/" (demon.position)} {
-                                                "#" (demon.position) " - " (demon.name) " by " (demon.publisher)
+                                                "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name) " by " (demon.publisher)
                                             }
                                         }
                                     }

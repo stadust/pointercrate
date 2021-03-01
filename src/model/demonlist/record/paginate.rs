@@ -97,7 +97,7 @@ impl RecordPagination {
 
         let query = format!(include_str!("../../../../sql/paginate_records.sql"), order);
 
-        let mut stream = sqlx::query_as(&query)
+        let mut stream = sqlx::query(&query)
             .bind(self.before_id)
             .bind(self.after_id)
             .bind(self.progress)
@@ -114,7 +114,7 @@ impl RecordPagination {
             .bind(self.player)
             .bind(self.submitter)
             .bind(limit + 1)
-            .fetch(connection);
+            .fetch(&mut *connection);
 
         let mut records = Vec::new();
 
@@ -122,19 +122,19 @@ impl RecordPagination {
             let row: PgRow = row?;
 
             records.push(MinimalRecordPD {
-                id: row.get("id"),
-                progress: row.get("progress"),
-                video: row.get("video"),
-                status: RecordStatus::from_sql(&row.get::<String, _>("status")),
+                id: row.try_get("id")?,
+                progress: row.try_get("progress")?,
+                video: row.try_get("video")?,
+                status: RecordStatus::from_sql(&row.try_get::<String, _>("status")?),
                 player: DatabasePlayer {
-                    id: row.get("player_id"),
-                    name: CiString(row.get("player_name")),
-                    banned: row.get("player_banned"),
+                    id: row.try_get("player_id")?,
+                    name: CiString(row.try_get("player_name")?),
+                    banned: row.try_get("player_banned")?,
                 },
                 demon: MinimalDemon {
-                    id: row.get("demon_id"),
-                    position: row.get("position"),
-                    name: CiString(row.get("demon_name")),
+                    id: row.try_get("demon_id")?,
+                    position: row.try_get("position")?,
+                    name: CiString(row.try_get("demon_name")?),
                 },
             })
         }

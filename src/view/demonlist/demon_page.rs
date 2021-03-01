@@ -1,5 +1,6 @@
 use crate::{
-    compat, config,
+    config,
+    gd::GDIntegrationResult,
     model::demonlist::demon::FullDemon,
     state::PointercrateState,
     video,
@@ -9,10 +10,9 @@ use crate::{
 use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
-use gdcf::cache::CacheEntry;
-use gdcf_model::{
-    level::{data::LevelInformationSource, Level, Password},
-    user::Creator,
+use dash_rs::{
+    model::level::{DemonRating, LevelRating},
+    Thunk,
 };
 use log::error;
 use maud::{html, Markup, PreEscaped, Render};
@@ -27,9 +27,9 @@ pub struct DemonMovement {
 pub struct Demonlist {
     overview: DemonlistOverview,
     data: FullDemon,
-    server_level: Option<CacheEntry<Level<Option<u64>, Option<Creator>>, gdcf_diesel::Entry>>,
     movements: Vec<DemonMovement>,
     link_banned: bool,
+    integration: GDIntegrationResult,
 }
 
 #[get("/demonlist/{position}/")]
@@ -37,16 +37,19 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
     let mut connection = state.connection().await?;
     let overview = DemonlistOverview::load(&mut connection).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
-    let gd_demon = compat::gd_demon_by_name(&state.gdcf, &demon.demon.base.name);
-    let link_banned = sqlx::query!("SELECT link_banned FROM players WHERE id = $1", demon.demon.verifier.id)
-        .fetch_one(&mut connection)
-        .await?
-        .link_banned;
+    let link_banned = sqlx::query!(
+        r#"SELECT link_banned AS "link_banned!: bool" FROM players WHERE id = $1"#,
+        demon.demon.verifier.id
+    ) // not NULL
+    .fetch_one(&mut connection)
+    .await?
+    .link_banned;
 
     let mut movements: Vec<DemonMovement> = sqlx::query_as!(
         DemonMovement,
-        "SELECT position AS from_position, time AS at FROM demon_modifications WHERE position IS NOT NULL AND id = $1 AND position > 0 \
-         ORDER BY time",
+        // note that position is not null as by the WHERE-clause
+        r#"SELECT position AS "from_position!: i16", time AS at FROM demon_modifications WHERE position IS NOT NULL AND id = $1 AND position > 0 
+         ORDER BY time"#,
         demon.demon.base.id
     )
     .fetch_all(&mut connection)
@@ -68,13 +71,15 @@ pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<H
         None => error!("No addition logged for demon {}!", demon),
     }
 
+    let integration = state.gd_integration.data_for_demon(state.http_client.clone(), &demon.demon).await?;
+
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
         Demonlist {
             overview,
             data: demon,
-            server_level: gd_demon.ok(),
             movements,
             link_banned,
+            integration,
         }
         .render()
         .0,
@@ -121,11 +126,11 @@ impl Demonlist {
                         }
                     }
                 }
-                @if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
-                    @if let Some(ref description) = level.base.description {
+                @if let GDIntegrationResult::Success(ref level, ..) = self.integration {
+                    @if let Some(Thunk::Processed(ref description)) = level.description {
                         div.underlined.pad {
                             q {
-                                (description)
+                                (description.0)
                             }
                         }
                     }
@@ -146,53 +151,54 @@ impl Demonlist {
                     }
                 }
                 div.underlined.pad.flex.wrap#level-info {
-                    @match self.server_level {
-                        None => {
+                    @match &self.integration {
+                        GDIntegrationResult::DemonNotFoundByName => {
                             p.info-red {
-                                "An internal error occured while trying to access the GDCF database, or while processing Geometry Dash data. This is a bug."
+                                "A demon with this name was not found on the Geometry Dash servers. Please notify a list moderator of this, as it means they most likely misspelled the name!"
                             }
                         }
-                        Some(CacheEntry::Missing) => {
+                        GDIntegrationResult::DemonNotYetCached => {
                             p.info-yellow {
                                 "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
                             }
-                        },
-                        Some(CacheEntry::MarkedAbsent(_)) => {
+                        }
+                        GDIntegrationResult::LevelDataNotFound => {
                             p.info-red {
-                                "This demon has not been found on the Geometry Dash servers. Its name was most likely misspelled when entered into the database. Please contact a list moderator to fix this."
+                                "It seems like this level has been deleted from the Geometry Dash servers"
                             }
-                        },
-                        Some(CacheEntry::Cached(ref level, ref meta)) => {
-                            @let level_data = level.decompress_data().ok();
-                            @let level_data = level_data.as_ref().and_then(|data| gdcf_parse::level::data::parse_lazy_parallel(data).ok());
-                            @let stats = level_data.map(LevelInformationSource::stats);
-
+                        }
+                        GDIntegrationResult::LevelDataNotCached => {
+                            p.info-red {
+                                "This demon's level data is not stored in our database, even though the demon ID was successfully resolved. This either indicates a (hopefully temporary) inconsistent database state, or an error in dash-rs' level data processing. If this error persists, please contact an administrator!"
+                            }
+                        }
+                        GDIntegrationResult::Success(level, level_data, song) => {
                             span {
                                 b {
                                     "Level Password: "
                                 }
                                 br;
-                                @match level.password {
-                                    Password::NoCopy => "Not copyable",
-                                    Password::FreeCopy => "Free to copy",
-                                    Password::PasswordCopy(ref pw) => (pw)
-                                }
+                                (level_data.password)
                             }
                             span {
                                 b {
                                     "Level ID: "
                                 }
                                 br;
-                                (level.base.level_id)
+                                (level.level_id)
                             }
                             span {
                                 b {
                                     "Level length: "
                                 }
                                 br;
-                                @match stats {
-                                    Some(ref stats) => (format!("{}m:{:02}s", stats.duration.as_secs() / 60, stats.duration.as_secs() % 60)),
-                                    _ => (level.base.length.to_string())
+                                @match level_data.level_data {
+                                    Thunk::Processed(ref objects) => {
+                                        @let length_in_seconds = objects.length_in_seconds();
+
+                                        (format!("{}m:{:02}s", (length_in_seconds as i32)/ 60, (length_in_seconds as i32) % 60))
+                                    }
+                                    _ => "unreachable!()"
                                 }
                             }
                             span {
@@ -200,9 +206,46 @@ impl Demonlist {
                                     "Object count: "
                                 }
                                 br;
-                                @match stats {
-                                    Some(ref stats) => (stats.object_count),
-                                    _ => (level.base.object_amount.unwrap_or(0))
+                                @match level_data.level_data {
+                                    Thunk::Processed(ref objects) => (objects.objects.len()),
+                                    _ => "unreachable!()"
+                                }
+                            }
+                            span {
+                                b {
+                                    "In-Game Difficulty: "
+                                }
+                                br;
+                                @match level.difficulty {
+                                    LevelRating::NotAvailable => "Unrated",
+                                    LevelRating::Demon(demon_rating) => @match demon_rating {
+                                        DemonRating::Easy => "Easy Demon",
+                                        DemonRating::Medium => "Medium Demon",
+                                        DemonRating::Hard => "Hard Demon",
+                                        DemonRating::Insane => "Insane Demon",
+                                        DemonRating::Extreme => "Extreme Demon",
+                                        _ => "???"
+                                    },
+                                    _ => "Level not rated demon, list mods fucked up"
+                                }
+                            }
+                            span {
+                                b {
+                                    "Created in:"
+                                }
+                                br;
+                                (level.gd_version)
+                            }
+                            @if let Some(song) = song {
+                                span style = "width: 100%"{
+                                    b {
+                                        "Newgrounds Song:"
+                                    }
+                                    br;
+                                    @match song.link {
+                                        Thunk::Processed(ref link) => a.link href = (link.0) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
+                                        _ => "unreachable!()"
+                                    }
                                 }
                             }
                         }
@@ -213,7 +256,7 @@ impl Demonlist {
                                 "Demonlist score (100%): "
                             }
                             br;
-                                (format!("{:.2}", score100))
+                            (format!("{:.2}", score100))
                         }
                     }
                     @if position <= config::list_size(){
@@ -329,11 +372,11 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
+        /*if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
             if let Some(ref description) = level.base.description {
                 return format!("{}: {}", self.title(), description)
             }
-        }
+        }*/
         format!("{}: <No Description Provided>", self.title())
     }
 
@@ -388,7 +431,6 @@ impl Page for Demonlist {
                         }
                         div.ct-chart.ct-perfect-fourth.js-collapse-content#position-chart style="display:none" {}
                     }
-                    (super::rules_panel())
                     (self.records_panel())
                     (PreEscaped(format!("
                         <script>
@@ -401,6 +443,7 @@ impl Page for Demonlist {
                 }
                 aside.right {
                     (self.overview.team_panel())
+                    (super::rules_panel())
                     (super::submit_panel())
                     (super::stats_viewer_panel())
                     (super::discord_panel())

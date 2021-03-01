@@ -19,7 +19,7 @@ use serde::{
     Serialize,
 };
 use serde_json::json;
-use sqlx::Error;
+use sqlx::{postgres::PgDatabaseError, Error};
 use std::time::Duration;
 
 // TODO: proper name
@@ -51,7 +51,7 @@ pub enum PointercrateError {
 
     /// `400 BAD REQUEST` error with a message
     ///
-    /// Error Code `40000`
+    /// Error Code `40001`
     #[display(fmt = "{}", message)]
     BadRequest {
         #[serde(skip)]
@@ -69,7 +69,7 @@ pub enum PointercrateError {
 
     /// `401 UNAUTHORIZED`
     ///
-    /// Erro code 40100
+    /// Error code 40100
     #[display(
         fmt = "The server could not verify that you are authorized to access the URL requested. You either supplied the wrong credentials \
                (e.g. a bad password) or your browser doesn't understand how to supply the credentials required."
@@ -185,6 +185,12 @@ pub enum PointercrateError {
     /// Error Code: `40905`
     #[display(fmt = "This player is already registered as a creator on this demon")]
     CreatorExists,
+
+    /// `409 CONFLICT` variant
+    ///
+    /// Error Code `40906`
+    #[display(fmt = "This video is already used by record #{}", id)]
+    DuplicateVideo { id: i32 },
 
     /// `411 LENGTH REQUIRED`
     ///
@@ -382,7 +388,7 @@ pub enum PointercrateError {
     /// `429 TOO MANY REQUESTS`
     ///
     /// Error Code `42900`
-    #[display(fmt = "{}. Try again at in {:?}", scope, remaining)]
+    #[display(fmt = "{} Try again in {:.2?}", scope, remaining)]
     Ratelimited {
         #[serde(skip)]
         scope: RatelimitScope,
@@ -466,6 +472,7 @@ impl PointercrateError {
             PointercrateError::NameTaken => 40902,
             PointercrateError::DemonExists { .. } => 40904,
             PointercrateError::CreatorExists => 40905,
+            PointercrateError::DuplicateVideo { .. } => 40906,
 
             PointercrateError::LengthRequired => 41100,
 
@@ -662,30 +669,24 @@ impl From<Error> for PointercrateError {
     fn from(error: Error) -> Self {
         match error {
             Error::Database(database_error) => {
-                error!(
-                    "Database error: {}. Table: {:?}, column: {:?}, constraints: {:?}, hint: {:?}, details: {:?}",
-                    database_error.message(),
-                    database_error.table_name(),
-                    database_error.column_name(),
-                    database_error.constraint_name(),
-                    database_error.hint(),
-                    database_error.details()
-                );
+                let database_error = database_error.downcast::<PgDatabaseError>();
+
+                error!("Database error: {:?}. ", database_error);
 
                 PointercrateError::DatabaseError
             },
-            Error::PoolClosed | Error::PoolTimedOut(_) => PointercrateError::DatabaseConnectionError,
+            Error::PoolClosed | Error::PoolTimedOut => PointercrateError::DatabaseConnectionError,
             Error::ColumnNotFound(column) => {
                 error!("Invalid access to column {}, which does not exist", column);
 
                 PointercrateError::InternalServerError
             },
-            Error::NotFound => {
+            Error::RowNotFound => {
                 error!("Unhandled 'NotFound', this is a logic or data consistency error");
 
                 PointercrateError::InternalServerError
             },
-            Error::FoundMoreThanOne => PointercrateError::Ambiguous,
+            //Error::FoundMoreThanOne => PointercrateError::Ambiguous,
             _ => {
                 error!("Database error: {:?}", error);
 

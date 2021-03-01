@@ -18,7 +18,7 @@ When embedded into other objects (for example, as part of a [Record](/documentat
 | Field    | Type    | Description                                                                               |
 | -------- | ------- | ----------------------------------------------------------------------------------------- |
 | name     | string  | The name of the demon                                                                     |
-| position | integer | The position of the demon                                                                 |
+| position  | integer?           | The position of the demon. Is `null` for unplaced demons|
 | id       | integer | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
 
 ## Listed Form
@@ -28,11 +28,12 @@ When retrieving demons via [`GET /demons/`](/documentation/demons/#get-demons), 
 | Field     | Type              | Description                                                                               |
 | --------- | ----------------- | ----------------------------------------------------------------------------------------- |
 | name      | string            | The name of the demon                                                                     |
-| position  | integer           | The position of the demon                                                                 |
+| position  | integer?           | The position of the demon. Is `null` for unplaced demons|
 | id        | integer           | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
 | publisher | [Player](#player) | The player that published this demon                                                      |
 | verifier  | [Player](#player) | The player that verified this demon                                                       |
 | video     | URL?              | The verification video                                                                    |
+| level_id  | integer?          | The level ID of this demon on the Geometry Dash servers. |
 
 ## Full Form
 
@@ -41,10 +42,11 @@ The listed record objects do not contain the current demon embedded into the `de
 | Field       | Type                    | Description                                                                               |
 | ----------- | ----------------------- | ----------------------------------------------------------------------------------------- |
 | name        | string                  | The name of the demon                                                                     |
-| position    | integer                 | The position of the demon                                                                 |
+| position    | integer?                 | The position of the demon                                                                 |
 | id          | integer                 | The demons internal ID (has nothing to do with its level ID on the geometry dash servers) |
 | requirement | integer                 | The minimum percentage a record on this demon has to be, to be accepted                   |
 | video       | URL?                    | The verification video.                                                                   |
+| level_id  | integer?          | The level ID of this demon on the Geometry Dash servers. |
 | verifier    | [Player](#player)       | The demon's verifier                                                                      |
 | publisher   | [Player](#player)       | The demon's publisher                                                                     |
 | creators    | List[[Player](#player)] | The demon's creators                                                                      |

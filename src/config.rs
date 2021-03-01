@@ -10,6 +10,14 @@ where
     }
 }
 
+pub fn documentation_location() -> String {
+    from_env_or_default("DOCUMENTATION", format!("{}/documentation/", env!("OUT_DIR")))
+}
+
+pub fn guidelines_location() -> String {
+    from_env_or_default("GUIDELINES", format!("{}/guidelines/", env!("OUT_DIR")))
+}
+
 pub fn list_size() -> i16 {
     from_env_or_default("LIST_SIZE", 50)
 }

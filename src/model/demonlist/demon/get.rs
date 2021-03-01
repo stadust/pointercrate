@@ -14,7 +14,7 @@ use sqlx::{Error, PgConnection};
 
 impl MinimalDemon {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<MinimalDemon> {
-        let row = sqlx::query!("SELECT id, name::text, position FROM demons WHERE id = $1", id)
+        let row = sqlx::query!(r#"SELECT id, name as "name: String", position FROM demons WHERE id = $1"#, id)
             .fetch_one(connection)
             .await?;
 
@@ -27,7 +27,7 @@ impl MinimalDemon {
 
     pub async fn by_name(name: &CiStr, connection: &mut PgConnection) -> Result<MinimalDemon> {
         let mut stream = sqlx::query!(
-            "SELECT id, name::text, position FROM demons WHERE name = cast($1::text as citext)", // FIXME(sqlx) once CITEXT is supported
+            r#"SELECT id, name as "name: String", position FROM demons WHERE name = cast($1::text as citext)"#, // FIXME(sqlx) once CITEXT is supported
             name.to_string()
         )
         .fetch(connection);
@@ -98,7 +98,7 @@ impl Demon {
             .map(Into::into)
             .map_err(|err| {
                 match err {
-                    Error::NotFound =>
+                    Error::RowNotFound =>
                         PointercrateError::ModelNotFound {
                             model: "Demon",
                             identified_by: id.to_string(),
@@ -115,7 +115,7 @@ impl Demon {
             .map(Into::into)
             .map_err(|err| {
                 match err {
-                    Error::NotFound =>
+                    Error::RowNotFound =>
                         PointercrateError::ModelNotFound {
                             model: "Demon",
                             identified_by: position.to_string(),
@@ -127,7 +127,11 @@ impl Demon {
 }
 
 pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
-    let mut stream = sqlx::query!("SELECT id, name::text, position FROM demons WHERE publisher = $1", player.id).fetch(connection);
+    let mut stream = sqlx::query!(
+        r#"SELECT id, name AS "name: String", position FROM demons WHERE publisher = $1"#,
+        player.id
+    )
+    .fetch(connection);
 
     let mut demons = Vec::new();
 
@@ -145,7 +149,11 @@ pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection
 }
 
 pub async fn verified_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
-    let mut stream = sqlx::query!("SELECT id, name::text, position FROM demons WHERE verifier = $1", player.id).fetch(connection);
+    let mut stream = sqlx::query!(
+        r#"SELECT id, name as "name: String", position FROM demons WHERE verifier = $1"#,
+        player.id
+    )
+    .fetch(connection);
 
     let mut demons = Vec::new();
 
@@ -174,6 +182,7 @@ struct FetchedDemon {
     verifier_id: i32,
     verifier_name: String,
     verifier_banned: bool,
+    level_id: Option<i64>,
 }
 
 impl Into<Demon> for FetchedDemon {
@@ -196,6 +205,7 @@ impl Into<Demon> for FetchedDemon {
                 name: CiString(self.verifier_name),
                 banned: self.verifier_banned,
             },
+            level_id: self.level_id.map(|id| id as u64),
         }
     }
 }

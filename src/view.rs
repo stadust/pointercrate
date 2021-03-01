@@ -41,7 +41,8 @@ pub trait Page {
                     meta property="og:title" content = (self.title());
                     meta property="og:description" content = (self.description());
 
-                    meta name ="viewport" content="initial-scale=1, maximum-scale=1";
+                    meta name="referrer" content = "no-referrer";
+                    meta name="viewport" content="initial-scale=1, maximum-scale=1";
                     meta name="author" content = "stadust";
                     meta name="keywords" content ="stardust1971,official,geometry,dash,hardest,extreme,insane,demon,list,demonlist,hardest,levels,gmd,gd,stadust,game,top,level,levels,player,players,geometry dash";
                     meta name="description" content = (self.description());

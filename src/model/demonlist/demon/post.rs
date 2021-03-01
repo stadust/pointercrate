@@ -47,11 +47,11 @@ impl FullDemon {
             data.name.to_string(),
             data.position,
             data.requirement,
-            video.as_ref().map(AsRef::as_ref).unwrap_or("").to_string(), // FIXME(sqlx)
+            video.as_ref(),
             verifier.id,
             publisher.id
         )
-        .fetch_one(connection)
+        .fetch_one(&mut *connection)
         .await?
         .id;
 
@@ -65,12 +65,13 @@ impl FullDemon {
             video,
             publisher,
             verifier,
+            level_id: None,
         };
 
         let mut creators = Vec::new();
 
         for creator in data.creators {
-            let player = DatabasePlayer::by_name_or_create(creator.as_ref(), connection).await?;
+            let player = DatabasePlayer::by_name_or_create(creator.as_ref(), &mut *connection).await?;
             Creator::insert(&demon.base, &player, connection).await?;
 
             creators.push(player);

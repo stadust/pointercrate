@@ -11,7 +11,7 @@ use crate::{
 };
 use log::{info, warn};
 use serde::Deserialize;
-use sqlx::PgConnection;
+use sqlx::{Done, PgConnection};
 
 #[derive(Debug, Deserialize)]
 pub struct PatchRecord {
@@ -92,7 +92,7 @@ impl FullRecord {
                     demon,
                     player
                 )
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
 
                 let records_deleted = sqlx::query!("DELETE FROM records WHERE player = $1 AND demon = $2", player, demon)
@@ -101,7 +101,11 @@ impl FullRecord {
 
                 info!(
                     "Turning {} into a ({}, {})-record caused the transfer of {} notes and the deletion of {} records!",
-                    self, player, demon, notes_transferred, records_deleted
+                    self,
+                    player,
+                    demon,
+                    notes_transferred.rows_affected(),
+                    records_deleted.rows_affected()
                 );
             },
             RecordStatus::Approved => {
@@ -124,7 +128,7 @@ impl FullRecord {
                     player,
                     self.progress
                 )
-                .fetch_optional(connection)
+                .fetch_optional(&mut *connection)
                 .await?;
 
                 if let Some(row) = row {
@@ -132,7 +136,7 @@ impl FullRecord {
                         .bind(&row.video)
                         .bind(row.progress)
                         .bind(self.id)
-                        .execute(connection)
+                        .execute(&mut *connection)
                         .await?;
 
                     self.progress = row.progress;
@@ -147,7 +151,7 @@ impl FullRecord {
                     player,
                     self.progress
                 )
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
 
                 let records_deleted = sqlx::query!(
@@ -161,7 +165,11 @@ impl FullRecord {
 
                 info!(
                     "Turning {} into a ({}, {})-record caused the transfer of {} notes and the deletion of {} records!",
-                    self, player, demon, notes_transferred, records_deleted
+                    self,
+                    player,
+                    demon,
+                    notes_transferred.rows_affected(),
+                    records_deleted.rows_affected()
                 );
             },
             // Nothing needed to be done here!
@@ -183,6 +191,17 @@ impl FullRecord {
 
     pub async fn set_video(&mut self, video: String, connection: &mut PgConnection) -> Result<()> {
         let video = crate::video::validate(&video)?;
+
+        if Some(&video) == self.video.as_ref() {
+            return Ok(())
+        }
+
+        if let Some(row) = sqlx::query!(r#"SELECT id FROM records WHERE video = $1"#, video.to_string())
+            .fetch_optional(&mut *connection)
+            .await?
+        {
+            return Err(PointercrateError::DuplicateVideo { id: row.id })
+        }
 
         sqlx::query!("UPDATE records SET video = $1::text WHERE id = $2", video, self.id)
             .execute(connection)
@@ -248,7 +267,7 @@ impl FullRecord {
                     self.player.id,
                     self.demon.id
                 )
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
 
                 sqlx::query!(
@@ -257,7 +276,7 @@ impl FullRecord {
                     self.player.id,
                     self.demon.id
                 )
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
             },
 
@@ -281,7 +300,7 @@ impl FullRecord {
                     self.demon.id,
                     self.progress
                 )
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
 
                 sqlx::query!(
@@ -291,7 +310,7 @@ impl FullRecord {
                     self.demon.id,
                     self.progress
                 )
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
             },
 
@@ -319,7 +338,7 @@ impl FullRecord {
     /// If this record is approved, all submissions with lower progress of the same (player,
     /// demon)-tuple are deleted and have their notes transferred to this record.
     pub async fn set_progress(&mut self, progress: i16, connection: &mut PgConnection) -> Result<()> {
-        let requirement = self.demon.requirement(connection).await?;
+        let requirement = self.demon.requirement(&mut *connection).await?;
 
         if progress > 100 || progress < requirement {
             return Err(PointercrateError::InvalidProgress { requirement })
@@ -335,7 +354,7 @@ impl FullRecord {
                 self.demon.id,
                 progress
             )
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
 
             let deleted = sqlx::query!(
@@ -343,12 +362,15 @@ impl FullRecord {
                 self.player.id,
                 self.demon.id
             )
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
 
             info!(
                 "Changing progress of record {} from {} to {} caused the deletion of {} submissions",
-                self, self.progress, progress, deleted
+                self,
+                self.progress,
+                progress,
+                deleted.rows_affected()
             );
         }
 

@@ -42,8 +42,8 @@ impl Player {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Player> {
         let result = sqlx::query_as!(
             FetchedPlayer,
-            "SELECT id, name::text, banned, nation::text, iso_country_code::text FROM players LEFT OUTER JOIN nationalities ON \
-             players.nationality = nationalities.iso_country_code WHERE id = $1",
+            r#"SELECT id, name AS "name: String", banned, nation::text, iso_country_code::text FROM players LEFT OUTER JOIN nationalities ON 
+             players.nationality = nationalities.iso_country_code WHERE id = $1"#,
             id
         )
         .fetch_one(connection)
@@ -68,7 +68,7 @@ impl Player {
                     nationality,
                 })
             },
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Player",
                     identified_by: id.to_string(),
@@ -93,10 +93,10 @@ impl DatabasePlayer {
             Ok(row) =>
                 Ok(DatabasePlayer {
                     id: row.id,
-                    name: CiString(row.name),
+                    name: CiString(row.name.unwrap()), // FIXME(sqlx) casted columns interpreted as nullable
                     banned: row.banned,
                 }),
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Player",
                     identified_by: name.to_string(),
@@ -106,7 +106,7 @@ impl DatabasePlayer {
     }
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<DatabasePlayer> {
-        let result = sqlx::query!("SELECT id, name::text, banned FROM players WHERE id = $1", id)
+        let result = sqlx::query!(r#"SELECT id, name as "name: String", banned FROM players WHERE id = $1"#, id)
             .fetch_one(connection)
             .await;
 
@@ -117,7 +117,7 @@ impl DatabasePlayer {
                     name: CiString(row.name),
                     banned: row.banned,
                 }),
-            Err(Error::NotFound) =>
+            Err(Error::RowNotFound) =>
                 Err(PointercrateError::ModelNotFound {
                     model: "Player",
                     identified_by: id.to_string(),

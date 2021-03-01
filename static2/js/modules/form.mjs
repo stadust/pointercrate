@@ -135,6 +135,12 @@ export class EditorBackend {
 }
 
 export class PaginatorEditorBackend extends EditorBackend {
+  /**
+   *
+   * @param {Paginator} paginator
+   * @param {String} csrf
+   * @param {boolean} shouldRefresh
+   */
   constructor(paginator, csrf, shouldRefresh) {
     super();
 
@@ -153,7 +159,7 @@ export class PaginatorEditorBackend extends EditorBackend {
   url() {
     return (
       this._paginator.retrievalEndpoint +
-      this._paginator.currentlySelected.dataset.id +
+      this._paginator.currentObject.id +
       "/"
     );
   }
@@ -250,6 +256,8 @@ export class Paginator extends Output {
   /**
    * Creates an instance of Paginator. Retrieves its endpoint from the `data-endpoint` data attribute of `html`.
    *
+   * **Important:** The objects being paginated are assumed to have an `id` property!
+   *
    * @param {String} elementId The Id of the DOM element of this paginator
    * @param {Object} queryData The initial query data to use
    * @param {*} itemConstructor Callback used to construct the list items of this Paginator
@@ -262,9 +270,9 @@ export class Paginator extends Output {
     this.next = this.html.getElementsByClassName("next")[0];
     this.prev = this.html.getElementsByClassName("prev")[0];
 
-    // The li that was last clicked and thus counts as "selected"
+    // The li that was last clicked and thus counts as "selected". Note that this attribute can be null if selection was not performed via a click to a list objects, but instead via a direct call to `selectArbitrary`
     this.currentlySelected = null;
-    // The 'data' part of the response that the server sent after clicking 'currentlySelected'
+    // The 'data' part of the response that the server sent after clicking 'currentlySelected', or after an object was selected directly via `selectArbitrary`
     this.currentObject = null;
     // The etag of 'currentObject'
     this.currentEtag = null;
@@ -327,7 +335,7 @@ export class Paginator extends Output {
    * concatenates it to the pagination request URL,
    * makes a request to that URL and calls `onReceive` with the result
    *
-   * @param {*} selected The selected list item
+   * @param {HTMLElement} selected The selected list item
    * @memberof Paginator
    */
   onSelect(selected) {
