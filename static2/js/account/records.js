@@ -82,6 +82,12 @@ class RecordManager extends Paginator {
       this.output
     );
     this.initDemonDialog();
+
+    document.getElementById("record-copy-info").addEventListener('click', () => {
+      navigator.clipboard.writeText(this.currentObject.id + ", " + this._holder.innerText + ", " + this.currentObject.video)
+          .then(() => this.output.setSuccess("Copied record data to clipboard!"))
+          .catch(() => this.output.setError("Error copying to clipboard"));
+    });
   }
 
   initProgressDialog() {
