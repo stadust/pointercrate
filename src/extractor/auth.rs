@@ -93,7 +93,7 @@ fn process_authorization_header(request: &HttpRequest) -> Result<Authorization, 
                         PointercrateError::InvalidHeaderValue { header: "Authorization" }
                     })?;
 
-                if let [username, password] = &decoded.split(':').collect::<Vec<_>>()[..] {
+                if let [username, password] = &decoded.splitn(2, ':').collect::<Vec<_>>()[..] {
                     debug!("Found basic authorization!");
 
                     Ok(Authorization::Basic {
