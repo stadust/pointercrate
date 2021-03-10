@@ -40,7 +40,7 @@ impl<'a> Documentation<'a> {
             content,
             page,
             description: "The Demonlist guidelines regarding record submission/acceptance and level placements",
-            title: "Guildlines",
+            title: "Guidelines",
         })
     }
 }
