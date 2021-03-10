@@ -223,7 +223,7 @@ impl Demon {
         } else if 50 < position && position <= 125 {
             let a = 2.333f64;
             let b = 1.884f64;
-            60f64 * (a.powf((51 - position) as f64 * ((30f64) / 99f64).ln())) + b
+            60f64 * (a.powf((51 - position) as f64 * ((30f64.ln()) / 99f64))) + b
         } else if 20 < position && position <= 50 {
             let c = 1.01327f64;
             let d = 26.489f64;
