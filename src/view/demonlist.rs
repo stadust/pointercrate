@@ -161,7 +161,7 @@ pub(super) fn submission_panel() -> Markup {
                         "Progress:"
                     }
                     p {
-                        "The progress made as percentage. Only values greater than the demons record requirement and smaller than or equal to 100 are accepted!"
+                        "The progress made as percentage. Only values greater than or equal to the demons record requirement and smaller than or equal to 100 are accepted!"
                     }
                     span.form-input.flex.col#id_progress {
                         input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100";
