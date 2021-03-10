@@ -192,7 +192,7 @@ pub(super) fn submission_panel() -> Markup {
                         p.error {}
                     }
                     p {
-                        "By submitting the record you acknowledge the " a.link href = "/guidelines" {"submission guidelines"} "."   
+                        "By submitting the record you acknowledge the " a.link href = "/guidelines" {"submission guidelines"} "."
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
