@@ -1,5 +1,6 @@
 use crate::{
     cistring::CiString,
+    error::PointercrateError,
     model::{
         demonlist::player::{DatabasePlayer, Player, RankedPlayer},
         nationality::Nationality,
