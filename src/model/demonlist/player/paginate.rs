@@ -44,7 +44,7 @@ impl PlayerPagination {
                 return Err(PointercrateError::InvalidPaginationLimit)
             }
         }
-        
+
         let order = if self.after_id.is_none() && self.before_id.is_some() {
             "DESC"
         } else {
@@ -119,7 +119,7 @@ impl RankingPagination {
                 return Err(PointercrateError::InvalidPaginationLimit)
             }
         }
-        
+
         let order = if self.before_index.is_some() && self.after_index.is_none() {
             "DESC"
         } else {
