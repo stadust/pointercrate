@@ -145,7 +145,7 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center.container {
                 main.left {
-                    (super::submission_panel())
+                    (super::submission_panel(&self.demon_overview))
                     (super::stats_viewer(&self.nations))
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {

@@ -14,7 +14,7 @@ This endpoint is ratelimited at 3 successfully submitted records per 20 minutes 
 Unless you set `status` to `SUBMITTED` (or omit the field), access to this endpoint requires at least `LIST_HELPER` permissions.
 </div>
 
-Either adds a record directly to the list, or submits a record to the list mods for approval. The record must meet the demons requirement and the holder in question needn't be banned.
+Either adds a record directly to the list, or submits a record to the list mods for approval. The record must meet the demons requirement, and the holder in question needn't be banned.
 
 The `video` value, if provided, must meet the requirements specified [here](/documentation/#video).
 
@@ -28,7 +28,7 @@ The `video` value, if provided, must meet the requirements specified [here](/doc
 | -------- | ----------------------------------------------------- | ---------------------------------------------------------------- | -------- |
 | progress | integer                                               | The records progress                                             | false    |
 | player   | string                                                | The name of the player holding the record                        | false    |
-| demon    | string                                                | The name of the demon the record is made on                      | false    |
+| demon    | integer                                               | The id of the demon the record is made on                      | false    |
 | video    | URL                                                   | The video of the record                                          | true     |
 | status   | [RecordStatus](/documentation/objects/#record-status) | The status the newly record should have, defaults to `SUBMITTED` | true     |
 | check    | boolean                                               | _deprecated_                                                     | true     |
@@ -71,7 +71,7 @@ Content-Type: application/json
 {
     "progress": 79,
     "player": "stadust",
-    "demon": "Bloodlust"
+    "demon": 70
 }
 ```
 

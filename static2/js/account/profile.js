@@ -12,7 +12,6 @@ import {
 } from "../modules/form.mjs";
 import { EditorBackend } from "../modules/form.mjs";
 import { setupFormDialogEditor } from "../modules/form.mjs";
-import { Input } from "../modules/form.mjs";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");
@@ -34,7 +33,7 @@ function setupGetAccessToken() {
 
   var loginPassword = loginForm.input("login-password");
 
-  loginPassword.setClearOnInvalid(true);
+  loginPassword.clearOnInvalid = true;
   loginPassword.addValidators({
     "Password required": valueMissing,
     "Password too short. It needs to be at least 10 characters long.": tooShort,
@@ -53,7 +52,7 @@ function setupGetAccessToken() {
       })
       .catch((response) => {
         if (response.data.code == 40100) {
-          loginPassword.setError("Invalid credentials");
+          loginPassword.errorText = "Invalid credentials";
         } else {
           loginForm.setError(response.data.message);
         }
@@ -105,7 +104,7 @@ class ProfileEditorBackend extends EditorBackend {
 function setupEditAccount() {
   let output = new Output(document.getElementById("things"));
   let editDisplayNameForm = setupFormDialogEditor(
-    new ProfileEditorBackend(new Input(document.getElementById("auth-dn"))), // not pretty, but oh well
+    new ProfileEditorBackend(document.getElementById("auth-dn")), // not pretty, but oh well
     "edit-dn-dialog",
     "display-name-pen",
     output
@@ -121,7 +120,7 @@ function setupEditAccount() {
   editDisplayNameForm.addErrorOverride(40100, "auth-dn");
 
   let editYoutubeForm = setupFormDialogEditor(
-    new ProfileEditorBackend(new Input(document.getElementById("auth-yt"))), // not pretty, but oh well
+    new ProfileEditorBackend(document.getElementById("auth-yt")), // not pretty, but oh well
     "edit-yt-dialog",
     "youtube-pen",
     output
@@ -141,7 +140,7 @@ function setupEditAccount() {
   editYoutubeForm.addErrorOverride(42225, "edit-yt");
 
   let changePasswordForm = setupFormDialogEditor(
-    new ProfileEditorBackend(new Input(document.getElementById("auth-pw"))), // not pretty, but oh well
+    new ProfileEditorBackend(document.getElementById("auth-pw")), // not pretty, but oh well
     "edit-pw-dialog",
     "change-password",
     output
@@ -207,7 +206,7 @@ function setupInvalidateToken() {
 
   var invalidatePassword = invalidateForm.input("invalidate-auth-password");
 
-  invalidatePassword.setClearOnInvalid(true);
+  invalidatePassword.clearOnInvalid = true;
   invalidateForm.addValidators({
     "invalidate-auth-password": {
       "Password required": valueMissing,

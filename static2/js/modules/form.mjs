@@ -10,6 +10,8 @@ export class Dropdown {
   constructor(html) {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
+    if(this.input.dataset.default === undefined)
+      this.input.placeholder = "Click to select";
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
     this.listeners = [];
 
@@ -21,8 +23,8 @@ export class Dropdown {
       this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
     }
 
-    this.selected = this.input.dataset.default;
-    this.input.value = this.values[this.selected]; // in case some browser randomly decide to store text field values
+    // in case some browser randomly decide to store text field values
+    this.reset();
 
     // temporarily variable to store selection while we clear the text field when the dropdown is opened
     var value;
@@ -38,6 +40,14 @@ export class Dropdown {
       this.menu.fadeOut(300);
       this.input.value = value;
     });
+  }
+
+  reset() {
+    this.selected = this.input.dataset.default;
+    if(this.values[this.selected] )
+      this.input.value = this.values[this.selected];
+    else
+      this.input.value = null;
   }
 
   select(entry) {
@@ -566,54 +576,17 @@ export class FilteredPaginator extends Paginator {
   }
 }
 
-export class Input {
-  constructor(span) {
-    this.span = span;
-    this.input =
-      span.getElementsByTagName("input")[0] ||
-      span.getElementsByTagName("textarea")[0];
-    this.error = span.getElementsByTagName("p")[0];
-    this.clearOnInvalid = false;
-    this.validators = [];
-
-    this.input.addEventListener(
-      "input",
-      () => {
-        if (this.validity.valid || this.validity.customError) {
-          this.resetError();
-        }
-      },
-      false
-    );
-  }
-
-  resetError() {
-    if (this.error) this.error.innerHTML = "";
-    this.input.setCustomValidity("");
-  }
-
-  setError(errorString) {
-    this.resetError();
-    this.appendError(errorString);
-  }
-
-  appendError(errorString) {
-    if (this.error) {
-      if (this.error.innerHTML != "") {
-        this.error.innerHTML += "<br>";
-      }
-
-      this.error.innerHTML += errorString;
-    }
-    this.input.setCustomValidity(this.error.innerHTML);
-
-    if (this.clearOnInvalid) {
-      this.value = "";
-    }
+/**
+ * Abstract class representing inputs that can show up in forms around pointercrate.
+ */
+export class FormInput {
+  constructor() {
+    this._clearOnInvalid = false;
+    this._validators = [];
   }
 
   addValidator(validator, msg) {
-    this.validators.push({
+    this._validators.push({
       validator: validator,
       message: msg,
     });
@@ -621,22 +594,17 @@ export class Input {
 
   addValidators(validators) {
     Object.keys(validators).forEach((message) =>
-      this.addValidator(validators[message], message)
+        this.addValidator(validators[message], message)
     );
   }
 
-  // TODO: maybe just make this a normal `set` property lol
-  setClearOnInvalid(clear) {
-    this.clearOnInvalid = clear;
-  }
+  validate() {
+    this.errorText = "";
 
-  validate(event) {
-    this.resetError();
+    var isValid = true;
 
-    var isValid = this.validity.valid;
-
-    for (var validator of this.validators) {
-      if (!validator.validator(this, event)) {
+    for (var validator of this._validators) {
+      if (!validator.validator(this)) {
         isValid = false;
 
         if (typeof validator.message === "string") {
@@ -647,39 +615,94 @@ export class Input {
       }
     }
 
-    if (!isValid && this.clearOnInvalid) {
-      this.value = "";
-    }
-
     return isValid;
   }
 
-  get required() {
-    return this.input.hasAttribute("required");
+  clear() {
+    throw new Error("Unimplemented");
   }
 
-  get id() {
-    return this.span.id;
+  /**
+   * Whether this input should reset its contents upon unsuccessful validation
+   *
+   * @param value
+   */
+  set clearOnInvalid(value) {
+    this._clearOnInvalid = value;
   }
 
-  get validity() {
-    return this.input.validity;
+  get clearOnInvalid() {
+    return this._clearOnInvalid;
+  }
+
+  /**
+   * The value of this {@link FormInput}
+   */
+  get value() {
+    throw new Error("Abstract Property");
   }
 
   get name() {
-    return this.input.name;
+    throw new Error("Abstract Property");
   }
 
-  get type() {
-    if (this.input.tagName == "textarea") {
-      return "text";
+  get id() {
+    throw new Error("Abstract Property");
+  }
+
+  get required() {
+    return true;
+  }
+
+  get errorText() {
+    return "";
+  }
+
+  set errorText(value) {
+    // clear only if we dont actually reset the error!
+    if (this.clearOnInvalid && value)
+      this.clear();
+  }
+
+  /**
+   * Appends the given error on a new line
+   * @param newError
+   */
+  appendError(newError) {
+    if (this.error) {
+      if (this.errorText != "") {
+        this.errorText += "<br>";
+      }
+
+      this.errorText += newError;
     }
-    return this.input.type;
+  }
+}
+
+export class HtmlFormInput extends FormInput {
+  constructor(span) {
+    super();
+
+    this.span = span;
+    this.input =
+        span.getElementsByTagName("input")[0] ||
+        span.getElementsByTagName("textarea")[0];
+    this.error = span.getElementsByTagName("p")[0];
+
+    this.input.addEventListener(
+        "input",
+        () => {
+          if (this.input.validity.valid || this.input.validity.customError) {
+            this.errorText = "";
+          }
+        },
+        false
+    );
   }
 
   get value() {
     // extend this switch to other input types as required.
-    switch (this.type) {
+    switch (this.input.type) {
       case "checkbox":
         return this.input.checked;
       case "number":
@@ -692,12 +715,88 @@ export class Input {
     }
   }
 
-  set value(value) {
-    if (this.input.type == "checkbox") {
-      this.input.checked = value;
-    } else {
-      this.input.value = value;
-    }
+  get name() {
+    return this.input.name;
+  }
+
+  get id() {
+    return this.span.id;
+  }
+
+  clear() {
+    if(this.input.type === "checkbox")
+      this.input.checked = false;
+    else
+      this.input.value = "";
+  }
+
+  get required() {
+    return this.input.hasAttribute("required");
+  }
+
+  get errorText() {
+    return this.error.innerHTML;
+  }
+
+  set errorText(value) {
+    // weird super call lol
+    super.errorText = value;
+
+    this.error.innerHTML = value;
+    this.input.setCustomValidity(value);
+  }
+}
+
+export class DropdownFormInput extends FormInput {
+  /**
+   *
+   * @param dropdown {HTMLElement}
+   */
+  constructor(dropdown) {
+    super();
+
+    this.dropdown = new Dropdown(dropdown.childNodes[0]);
+    this.error = dropdown.getElementsByTagName("p")[0];
+
+    this.dropdown.addEventListener(selected => {
+      if (this.input.validity.valid || this.input.validity.customError) {
+        this.errorText = "";
+      }
+    });
+  }
+
+  get input() {
+    return this.dropdown.input;
+  }
+
+
+  clear() {
+    this.dropdown.reset();
+  }
+
+  get value() {
+    // FIXME: obviously not always int
+    return parseInt(this.dropdown.selected);
+  }
+
+  get name() {
+    return this.dropdown.input.name;
+  }
+
+  get id() {
+    return this.dropdown.html.id;
+  }
+
+  get errorText() {
+    return this.error.innerHTML;
+  }
+
+  set errorText(value) {
+    // weird super call lol
+    super.errorText = value;
+
+    this.error.innerHTML = value;
+    this.dropdown.input.setCustomValidity(value);
   }
 }
 
@@ -713,7 +812,10 @@ export class Form extends Output {
     this._errorRedirects = {};
 
     for (var input of this.html.getElementsByClassName("form-input")) {
-      this.inputs.push(new Input(input));
+      if(input.dataset.type === 'dropdown')
+        this.inputs.push(new DropdownFormInput(input));
+      else
+        this.inputs.push(new HtmlFormInput(input));
     }
 
     this.html.addEventListener(
@@ -727,7 +829,7 @@ export class Form extends Output {
         var isValid = true;
 
         for (let input of this.inputs) {
-          isValid &= input.validate(event);
+          isValid &= input.validate();
         }
 
         if (isValid) {
@@ -745,7 +847,7 @@ export class Form extends Output {
 
   clear() {
     for (let input of this.inputs) {
-      input.value = "";
+      input.clear();
     }
   }
 
@@ -824,39 +926,39 @@ export class Form extends Output {
 }
 
 export function badInput(input) {
-  return !input.validity.badInput;
+  return !input.input.validity.badInput;
 }
 
 export function patternMismatch(input) {
-  return !input.validity.patternMismatch;
+  return !input.input.validity.patternMismatch;
 }
 
 export function rangeOverflow(input) {
-  return !input.validity.rangeOverflow;
+  return !input.input.validity.rangeOverflow;
 }
 
 export function rangeUnderflow(input) {
-  return !input.validity.rangeUnderflow;
+  return !input.input.validity.rangeUnderflow;
 }
 
 export function stepMismatch(input) {
-  return !input.validity.stepMismatch;
+  return !input.input.validity.stepMismatch;
 }
 
 export function tooLong(input) {
-  return !input.validity.tooLong;
+  return !input.input.validity.tooLong;
 }
 
 export function tooShort(input) {
-  return !input.validity.tooShort;
+  return !input.input.validity.tooShort;
 }
 
 export function typeMismatch(input) {
-  return !input.validity.typeMismatch;
+  return !input.input.validity.typeMismatch;
 }
 
 export function valueMissing(input) {
-  return !input.validity.valueMissing;
+  return !input.input.validity.valueMissing;
 }
 
 /**

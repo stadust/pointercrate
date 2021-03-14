@@ -470,6 +470,7 @@ textarea:invalid {
 .dropdown-menu .menu {
   position: absolute;
   display: none;
+  top: 2em; /* place it below the box! */
 
   width: calc(100% - 2px);
   max-height: 400px;

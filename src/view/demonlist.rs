@@ -126,7 +126,7 @@ fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&De
     }
 }
 
-pub(super) fn submission_panel() -> Markup {
+pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
     html! {
         section.panel.fade.closable#submitter style = "display: none" {
             span.plus.cross.hover {}
@@ -143,8 +143,19 @@ pub(super) fn submission_panel() -> Markup {
                     p {
                         "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
                     }
-                    span.form-input.flex.col#id_demon {
-                        input type = "text" name = "demon" required="" placeholder = "e. g. 'Sonic Wave', 'Yatagarasu'" ;
+                    span.form-input data-type = "dropdown" {
+                        div.dropdown-menu.js-search#id_demon {
+                            input type = "text" name = "demon" required="";
+                            div.menu {
+                               ul {
+                                    @for demon in demons {
+                                        @if demon.position <= config::extended_list_size() {
+                                            li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         p.error {}
                     }
                     h3 {

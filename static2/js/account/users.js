@@ -70,7 +70,7 @@ function setupUserByIdForm() {
   userByIdForm.onSubmit(function () {
     userPaginator.selectArbitrary(userId.value).catch((response) => {
       if (response.data.code == 40401) {
-        userId.setError(response.data.message);
+        userId.errorText = response.data.message;
       } else {
         userByIdForm.setError(response.data.message);
       }

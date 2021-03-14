@@ -21,7 +21,7 @@ use sqlx::{PgConnection, Row};
 pub struct Submission {
     pub progress: i16,
     pub player: CiString,
-    pub demon: CiString,
+    pub demon: i32,
     #[serde(default)]
     pub video: Option<String>,
     #[serde(default)]
@@ -52,7 +52,7 @@ impl FullRecord {
         // Resolve player and demon name against the database
         let player = DatabasePlayer::by_name_or_create(submission.player.as_ref(), connection).await?;
         // TODO: handle the ambiguous case
-        let demon = MinimalDemon::by_name(submission.demon.as_ref(), connection).await?;
+        let demon = MinimalDemon::by_id(submission.demon, connection).await?;
 
         // Banned player can't have records on the list
         if player.banned {

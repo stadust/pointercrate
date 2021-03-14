@@ -421,7 +421,7 @@ impl Page for Demonlist {
 
             div.flex.m-center.container {
                 main.left {
-                    (super::submission_panel())
+                    (super::submission_panel(&self.overview.demon_overview))
                     (super::stats_viewer(&self.overview.nations))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {

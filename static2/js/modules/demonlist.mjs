@@ -40,7 +40,7 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
   var progress = submissionForm.input("id_progress");
   var video = submissionForm.input("id_video");
 
-  demon.addValidator(valueMissing, "Please specify a demon");
+  demon.addValidator(input => input.dropdown.selected !== undefined, "Please specify a demon");
 
   player.addValidator(valueMissing, "Please specify a record holder");
   player.addValidator(
@@ -79,19 +79,20 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
       .catch((response) =>  {
         switch(response.data.code) {
           case 40401:
-            demon.setError(response.data.message);
+            demon.errorText = response.data.message;
             break;
           case 42218:
-            player.setError(response.data.message);
+            player.errorText = response.data.message;
             break;
           case 42215:
-            progress.setError(response.data.message);
+          case 42220:
+            progress.errorText = response.data.message;
             break;
           case 42222:
           case 42223:
           case 42224:
           case 42225:
-            video.setError(response.data.message);
+            video.errorText = response.data.message;
             break;
           default:
             submissionForm.setError(response.data.message)

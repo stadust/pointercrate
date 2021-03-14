@@ -12,7 +12,7 @@ function initializeLoginForm() {
     "Username too short. It needs to be at least 3 characters long."
   );
 
-  loginPassword.setClearOnInvalid(true);
+  loginPassword.clearOnInvalid = true;
   loginPassword.addValidator(valueMissing, "Password required");
   loginPassword.addValidator(
     tooShort,
@@ -30,7 +30,7 @@ function initializeLoginForm() {
       .catch(response => {
         console.log(response);
         if (response.status === 401) {
-          loginPassword.setError("Invalid credentials");
+          loginPassword.errorText = "Invalid credentials";
         } else {
           loginForm.setError(response.data.message);
         }
@@ -74,9 +74,7 @@ function intializeRegisterForm() {
       })
       .catch(response => {
         if (response.status === 409) {
-          registerUsername.setError(
-            "This username is already taken. Please choose another one"
-          );
+          registerUsername.errorText = "This username is already taken. Please choose another one";
         } else {
           registerForm.setError(response.data.message);
         }
