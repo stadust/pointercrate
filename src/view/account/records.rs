@@ -313,7 +313,7 @@ fn change_video_dialog() -> Markup {
 fn change_holder_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#record-holder-dialog {
+            div.dialog#record-holder-dialog style = "scroll=auto;max-height=100%;box-sizing:border-box"{
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change record holder:"
