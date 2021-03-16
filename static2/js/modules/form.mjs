@@ -642,6 +642,10 @@ export class FormInput {
     throw new Error("Abstract Property");
   }
 
+  set value(value) {
+    throw new Error("Abstract Property");
+  }
+
   get name() {
     throw new Error("Abstract Property");
   }
@@ -714,6 +718,13 @@ export class HtmlFormInput extends FormInput {
         return this.input.value;
     }
   }
+
+set value(value) {
+    if(this.input.type === "checkbox")
+      this.input.checked = value;
+    else
+      this.input.value = value;
+}
 
   get name() {
     return this.input.name;
