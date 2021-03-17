@@ -36,7 +36,7 @@ pub trait Page {
                         (self.title())
                     }
 
-                    script data-ad-client="ca-pub-3064790497687357" async ="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+                    script data-ad-client="ca-pub-3064790497687357" async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" {}
 
                     meta property="og:site_name" content="pointercrate";
                     meta property="og:type" content="website";
