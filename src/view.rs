@@ -38,6 +38,18 @@ pub trait Page {
 
                     script data-ad-client="ca-pub-3064790497687357" async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" {}
 
+                    (PreEscaped(r#"
+                    <!-- Global site tag (gtag.js) - Google Analytics -->
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DV94JFR4Q2"></script>
+                    <script>
+                      window.dataLayer = window.dataLayer || [];
+                      function gtag(){dataLayer.push(arguments);}
+                      gtag('js', new Date());
+                    
+                      gtag('config', 'G-DV94JFR4Q2');
+                    </script>
+                    "#));
+
                     meta property="og:site_name" content="pointercrate";
                     meta property="og:type" content="website";
                     meta property="og:title" content = (self.title());
