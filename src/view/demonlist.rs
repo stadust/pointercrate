@@ -126,6 +126,52 @@ fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&De
     }
 }
 
+pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a OverviewDemon>) -> Markup {
+    html! {
+        div.dropdown-menu.js-search#(dropdown_id) {
+            input type = "text" name = "demon" required="";
+            div.menu {
+               ul {
+                    @for demon in demons {
+                        li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &str) -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#(dialog_id) style = "scroll=auto;max-height=100%;box-sizing:border-box"{
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    (headline)
+                }
+                div.flex.viewer {
+                    (crate::view::filtered_paginator(&format!("{}-paginator", dialog_id), "/api/v1/players/"))
+                    div {
+                        p {
+                            (description)
+                        }
+                        form.flex.col novalidate = "" {
+                            p.info-red.output {}
+                            p.info-green.output {}
+                            span.form-input#{(dialog_id)"-input"} {
+                                label for = "player" {"Player name:"}
+                                input name = "player" type="text" required = "";
+                                p.error {}
+                            }
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
     html! {
         section.panel.fade.closable#submitter style = "display: none" {
@@ -144,18 +190,7 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
                         "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
                     }
                     span.form-input data-type = "dropdown" {
-                        div.dropdown-menu.js-search#id_demon {
-                            input type = "text" name = "demon" required="";
-                            div.menu {
-                               ul {
-                                    @for demon in demons {
-                                        @if demon.position <= config::extended_list_size() {
-                                            li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        (demon_dropdown("id_demon", demons.iter().filter(|demon| demon.position <= config::extended_list_size())))
                         p.error {}
                     }
                     h3 {
@@ -209,6 +244,11 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
                 }
             }
         }
+        (player_selection_dialog(
+            "submission-holder-dialog",
+            "Select player:",
+            "To select the player holding this record, search them up on the left to see if they already have records on the list and click them. In case the player does not exist, fill out only the text field on the right."
+        ))
     }
 }
 

@@ -36,6 +36,8 @@ pub trait Page {
                         (self.title())
                     }
 
+                    script data-ad-client="ca-pub-3064790497687357" async ="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+
                     meta property="og:site_name" content="pointercrate";
                     meta property="og:type" content="website";
                     meta property="og:title" content = (self.title());
@@ -213,7 +215,7 @@ pub fn filtered_paginator(id: &str, endpoint: &str) -> Markup {
             div.search.seperated.no-stretch {
                 input placeholder = "Enter to search..." type = "text" style = "height: 1em";
             }
-            p.info-red.output style = "margin-top: 5px"{}
+            p.info-red.output style = "margin-top: 5px 0 0"{}
             div style="min-height: 400px; position:relative; flex-grow:1" {
                 ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
             }
