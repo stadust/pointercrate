@@ -40,13 +40,13 @@ pub trait Page {
 
                     (PreEscaped(r#"
                     <!-- Global site tag (gtag.js) - Google Analytics -->
-                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DV94JFR4Q2"></script>
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2SGJ4S0TQM"></script>
                     <script>
                       window.dataLayer = window.dataLayer || [];
                       function gtag(){dataLayer.push(arguments);}
                       gtag('js', new Date());
                     
-                      gtag('config', 'G-DV94JFR4Q2');
+                      gtag('config', 'G-2SGJ4S0TQM');
                     </script>
                     "#));
 
