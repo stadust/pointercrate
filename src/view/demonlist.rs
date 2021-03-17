@@ -150,7 +150,7 @@ pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &st
                     (headline)
                 }
                 div.flex.viewer {
-                    (crate::view::filtered_paginator(&format!("{}-paginator", dialog_id), "/api/v1/players/"))
+                    (crate::view::filtered_paginator(&format!("{}-pagination", dialog_id), "/api/v1/players/"))
                     div {
                         p {
                             (description)
