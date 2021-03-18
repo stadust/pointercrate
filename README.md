@@ -31,6 +31,8 @@ Since pointercrate uses `sqlx`, compilation requires you to be running a postgre
  
 ### Disclaimer:
 
+**Please remove the adsense and google analytics scripts when hosting your own copy!**
+
 While I'm generally OK (in fact, its pretty awesome) with people running their own copies of this code on their own servers (note: running the code. I'm not OK with people copying the content from pointercrate), doing so is **completely unsupported** from my side beyond these instructions. If you have enough knowledge to be capable to run a server, I fully believe in you to be able to figure out how to get it running from these. Depending on what mood I'm in on any given day, I might offer support over in [my discord server](https://discord.gg/sQewUEB).
 
 Furthermore, if you _do_ run a pointercrate copy, I do ask you to remove all references to pointercrate from it and state somewhere that you are not associated with pointercrate in any way or form. I'd appreciate some credit, but it's not required.
