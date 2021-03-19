@@ -372,7 +372,7 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        if let GDIntegrationResult::Success(level, ..) = self.integration {
+        if let GDIntegrationResult::Success(ref level, ..) = self.integration {
             if let Some(Thunk::Processed(ref description)) = level.description {
                 return format!("{}: {}", self.title(), description.0)
             }
