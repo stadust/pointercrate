@@ -372,11 +372,11 @@ impl Page for Demonlist {
     }
 
     fn description(&self) -> String {
-        /*if let Some(CacheEntry::Cached(ref level, _)) = self.server_level {
-            if let Some(ref description) = level.base.description {
-                return format!("{}: {}", self.title(), description)
+        if let GDIntegrationResult::Success(level, ..) = self.integration {
+            if let Some(Thunk::Processed(ref description)) = level.description {
+                return format!("{}: {}", self.title(), description.0)
             }
-        }*/
+        }
         format!("{}: <No Description Provided>", self.title())
     }
 
@@ -443,6 +443,7 @@ impl Page for Demonlist {
                 }
                 aside.right {
                     (self.overview.team_panel())
+                    (super::sidebar_ad())
                     (super::rules_panel())
                     (super::submit_panel())
                     (super::stats_viewer_panel())

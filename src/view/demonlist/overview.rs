@@ -183,6 +183,7 @@ impl Page for DemonlistOverview {
 
                 aside.right {
                     (self.team_panel())
+                    (super::sidebar_ad())
                     (super::rules_panel())
                     (super::submit_panel())
                     (super::stats_viewer_panel())

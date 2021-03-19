@@ -376,6 +376,26 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
     }
 }
 
+fn sidebar_ad() -> Markup {
+    html! {
+        section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1" {
+            (PreEscaped(r#"
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <!-- Demonlist Sidebar Ad -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-3064790497687357"
+                 data-ad-slot="2559641548"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+            "#))
+        }
+    }
+}
+
 fn rules_panel() -> Markup {
     html! {
         section#rules.panel.fade.js-scroll-anim data-anim = "fade" {
