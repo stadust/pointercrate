@@ -74,6 +74,10 @@ async fn main() -> std::io::Result<()> {
                 "/robots.txt",
                 web::get().to(|req: HttpRequest| NamedFile::open("robots.txt").unwrap().into_response(&req).unwrap()),
             )
+            .route(
+                "/ads.txt",
+                web::get().to(|req: HttpRequest| NamedFile::open("ads.txt").unwrap().into_response(&req).unwrap()),
+            )
             .service(view::home::index)
             .service(view::login::index)
             .service(view::login::post)
