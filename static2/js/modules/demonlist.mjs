@@ -12,7 +12,7 @@ import {
   findParentWithClass,
   FilteredPaginator,
   Viewer,
-  setupFormDialogEditor,
+  setupFormDialogEditor, FormDialog, setupEditorDialog,
 } from "./form.mjs";
 
 export function embedVideo(video) {
@@ -221,34 +221,26 @@ export class StatsViewer extends FilteredPaginator {
   }
 }
 
-export function setupPlayerSelectionEditor(
-  backend,
-  paginatorId,
-  buttonId,
-  output
-) {
-  let paginator = new FilteredPaginator(
-    paginatorId,
-    generatePlayer,
-    "name_contains"
-  );
+export class PlayerSelectionDialog extends FormDialog {
+  constructor(dialogId) {
+    super(dialogId);
 
-  let form = setupFormDialogEditor(
-    backend,
-    findParentWithClass(paginator.html, "dialog").id,
-    buttonId,
-    output
-  );
+    let paginator = new FilteredPaginator(
+        dialogId + "-pagination",
+        generatePlayer,
+        "name_contains"
+    );
 
-  let playerName = form.inputs[0];
+    let playerName = this.form.inputs[0];
 
-  playerName.addValidator(valueMissing, "Please provide a player name");
+    playerName.addValidator(valueMissing, "Please provide a player name");
 
-  paginator.initialize();
-  paginator.addSelectionListener((selected) => {
-    playerName.value = selected.name;
-    form.html.requestSubmit();
-  });
+    paginator.initialize();
+    paginator.addSelectionListener((selected) => {
+      playerName.value = selected.name;
+      this.form.html.requestSubmit();
+    });
+  }
 }
 
 export function generatePlayer(player) {

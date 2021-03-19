@@ -127,19 +127,19 @@ export class EditorBackend {
 
   onError(response) {}
 
-  edit(data, successCallback, errorCallback, unchangedCallback) {
+  edit(data) {
     return patch(this.url(), this.headers(), data)
       .then((response) => {
         if (response.status == 304) {
-          unchangedCallback();
+          return true;
         } else {
           this.onSuccess(response);
-          successCallback(response);
+          return false;
         }
       })
       .catch((response) => {
         this.onError(response);
-        errorCallback(response);
+        throw response;
       });
   }
 }
@@ -199,67 +199,110 @@ export function setupDropdownEditor(
       data[field] = selected;
     }
 
-    backend.edit(
-      data,
-      () => output.setSuccess("Edit successful!"),
-      (response) => displayError(output)(response),
-      () => output.setSuccess("Nothing changed!")
-    );
+    backend.edit(data).then(was304 => {
+      if(was304) output.setSuccess("Nothing changed!"); else output.setSuccess("Edit successful!");
+    }).catch(response => displayError(output)(response));
   });
 
   return dropdown;
 }
 
-export function setupDialogEditor(backend, dialogId, buttonId, output) {
-  let dialog = document.getElementById(dialogId);
-  let button = document.getElementById(buttonId);
+export class Dialog {
+  constructor(dialogId) {
+    this.dialog = document.getElementById(dialogId);
 
-  button.addEventListener("click", () => $(dialog.parentNode).fadeIn(300));
+    this.reject = undefined;
+    this.resolve = undefined;
+    this.submissionPredicateFactory = () => new Promise(resolve => resolve());
 
-  return function (data) {
-    backend.edit(
-      data,
-      () => {
-        output.setSuccess("Edit successful!");
-        $(dialog.parentNode).fadeOut(300);
-      },
-      (response) => {
-        displayError(output)(response);
-        $(dialog.parentNode).fadeOut(300);
-      },
-      () => {
-        output.setSuccess("Nothing changed");
-        $(dialog.parentNode).fadeOut(300);
-      }
-    );
+    this.dialog.getElementsByClassName("cross")[0].addEventListener("click", () => {
+      this.reject(); // order important
+      this.close();
+    })
+  }
+
+  onSubmit(data) {
+    this.submissionPredicateFactory(data).then(() => {
+      this.resolve(data);
+      this.close();
+    });
+  }
+
+  /**
+   * Opens this dialog, returning a promise that resolves if the dialog is closed succesfully (e.g. by submitting a form or making a selection) and that rejects when the dialog is closed by clicking the 'x'.
+   *
+   * @returns {Promise<unknown>}
+   */
+  open() {
+    if(this.reject !== undefined)
+      throw new Error("Dialog is already open");
+
+    $(this.dialog.parentNode).fadeIn(300);
+
+    return new Promise((resolve, reject) => {
+      this.reject = reject;
+      this.resolve = resolve;
+    });
+  }
+
+  /**
+   * Closes this dialog, resetting the stored promise.
+   *
+   * Note that no callbacks are actually called, since its impossible for this method to know whether or not the close happened because of successful reasons or not (or what data should be passed along in the success case).
+   */
+  close() {
+    $(this.dialog.parentNode).fadeOut(300);
+
+    this.reject = undefined;
+    this.resolve = undefined;
+  }
+}
+
+export class FormDialog extends Dialog {
+  constructor(dialogId) {
+    super(dialogId);
+
+    this.form = new Form(this.dialog.getElementsByTagName("form")[0]);
+    this.form.onSubmit(() => this.onSubmit(this.form.serialize()));
+  }
+}
+
+export class DropdownDialog extends Dialog {
+  constructor(dialogId, dropdownId) {
+    super(dialogId);
+
+    this.dropdown = new Dropdown( document.getElementById(dropdownId));
+    this.dropdown.addEventListener(selected => this.onSubmit(selected));
+  }
+}
+
+export function setupEditorDialog(dialog, buttonId, backend, output, dataTransform = x => x) {
+  document.getElementById(buttonId)
+      .addEventListener("click", () => dialog.open());
+
+  dialog.submissionPredicateFactory = (data) => {
+    return backend.edit(dataTransform(data))
+        .then(was304 => {
+          if(was304){
+            output.setSuccess("Nothing changed");
+          } else {
+            output.setSuccess("Edit successful!");
+          }
+        })
+        .catch(response => {
+          // FIXME: only works for form dialogs!
+          displayError(dialog.form)(response);
+          throw response;
+        });
   };
 }
 
 export function setupFormDialogEditor(backend, dialogId, buttonId, output) {
-  let dialog = document.getElementById(dialogId);
-  let button = document.getElementById(buttonId);
+  let editor = new FormDialog(dialogId);
 
-  button.addEventListener("click", () => $(dialog.parentNode).fadeIn(300));
+  setupEditorDialog(editor, buttonId, backend, output);
 
-  let form = new Form(dialog.getElementsByTagName("form")[0]);
-  form.onSubmit(() => {
-    backend.edit(
-      form.serialize(),
-      () => {
-        output.setSuccess("Edit successful!");
-        $(dialog.parentNode).fadeOut(300);
-      },
-      (response) => {
-        displayError(form)(response);
-      },
-      () => {
-        output.setSuccess("Nothing changed");
-        $(dialog.parentNode).fadeOut(300);
-      }
-    );
-  });
-
-  return form;
+  return editor.form;
 }
 
 export class Paginator extends Output {
@@ -895,7 +938,7 @@ export class Form extends Output {
         if (errorCode in this._errorRedirects) {
           let input = this.input(this._errorRedirects[errorCode]);
           if (input) {
-            input.setError(message);
+            input.errorText = message;
           } else {
             this.errorOutput.style.display = "block";
             this.errorOutput.innerHTML = message;
