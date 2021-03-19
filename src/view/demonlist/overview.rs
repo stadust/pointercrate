@@ -172,7 +172,7 @@ impl Page for DemonlistOverview {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
                                             a.play href = (video) {}
                                         }
-                                        div style = "padding-left: 10px" {
+                                        div style = "padding-left: 15px" {
                                             h2 style = "text-align: left; margin-bottom: 0px" {
                                                 a href = {"/demonlist/" (demon.position)} {
                                                     "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
