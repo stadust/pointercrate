@@ -141,7 +141,7 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Ov
     }
 }
 
-pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &str) -> Markup {
+pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &str, button_text: &str) -> Markup {
     html! {
         div.overlay.closable {
             div.dialog#(dialog_id) style = "scroll=auto;max-height=100%;box-sizing:border-box"{
@@ -163,7 +163,7 @@ pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &st
                                 input name = "player" type="text" required = "";
                                 p.error {}
                             }
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (button_text);
                         }
                     }
                 }
@@ -247,7 +247,8 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
         (player_selection_dialog(
             "submission-holder-dialog",
             "Select player:",
-            "To select the player holding this record, search them up on the left to see if they already have records on the list and click them. In case the player does not exist, fill out only the text field on the right."
+            "To select the player holding this record, search them up on the left to see if they already have records on the list and click them. In case the player does not exist, fill out only the text field on the right.",
+            "Select"
         ))
     }
 }

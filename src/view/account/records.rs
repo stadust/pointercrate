@@ -318,7 +318,8 @@ fn change_holder_dialog() -> Markup {
         (demonlist::player_selection_dialog(
             "record-holder-dialog",
             "Change record holder:",
-            "Change the player associated with this record. If the player you want to change this record to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
+            "Change the player associated with this record. If the player you want to change this record to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player.",
+            "Edit"
         ))
     }
 }

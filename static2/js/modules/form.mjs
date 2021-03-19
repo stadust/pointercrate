@@ -213,7 +213,7 @@ export class Dialog {
 
     this.reject = undefined;
     this.resolve = undefined;
-    this.submissionPredicateFactory = () => new Promise(resolve => resolve());
+    this.submissionPredicateFactory = (data) => new Promise(resolve => resolve(data));
 
     this.dialog.getElementsByClassName("cross")[0].addEventListener("click", () => {
       this.reject(); // order important
@@ -222,7 +222,7 @@ export class Dialog {
   }
 
   onSubmit(data) {
-    this.submissionPredicateFactory(data).then(() => {
+    this.submissionPredicateFactory(data).then((data) => {
       this.resolve(data);
       this.close();
     });
@@ -762,12 +762,12 @@ export class HtmlFormInput extends FormInput {
     }
   }
 
-set value(value) {
+  set value(value) {
     if(this.input.type === "checkbox")
       this.input.checked = value;
     else
       this.input.value = value;
-}
+  }
 
   get name() {
     return this.input.name;
@@ -852,6 +852,10 @@ export class DropdownFormInput extends FormInput {
     this.error.innerHTML = value;
     this.dropdown.input.setCustomValidity(value);
   }
+}
+
+export class DialogFormInput extends FormInput {
+
 }
 
 export class Form extends Output {

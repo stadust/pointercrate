@@ -1,4 +1,4 @@
-use crate::view::filtered_paginator;
+use crate::view::{demonlist, filtered_paginator};
 use maud::{html, Markup, PreEscaped};
 
 pub(super) fn page() -> Markup {
@@ -219,96 +219,36 @@ fn change_video_dialog() -> Markup {
 }
 
 fn change_verifier_dialog() -> Markup {
-    html! {
-        div.overlay.closable {
-            div.dialog#demon-verifier-dialog {
-                span.plus.cross.hover {}
-                h2.underlined.pad {
-                    "Change demon verifier:"
-                }
-                div.flex.viewer {
-                    (crate::view::filtered_paginator("demon-verifier-dialog-pagination", "/api/v1/players/"))
-                    div {
-                        p {
-                            "Change the verifier of this demon. If the player you want to change the verifier to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
-                        }
-                        form.flex.col novalidate = "" {
-                            p.info-red.output {}
-                            p.info-green.output {}
-                            span.form-input#demon-verifier-name-edit {
-                                label for = "verifier" {"Verifier name:"}
-                                input name = "verifier" type="text" required = "";
-                                p.error {}
-                            }
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
-                        }
-                    }
-                }
-            }
-        }
-    }
+    demonlist::player_selection_dialog(
+        "demon-verifier-dialog",
+        "Change demon verifier:",
+        "Change the verifier of this demon. If the player you want to change the verifier to already exists, search them up on the left \
+         and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
+         create a new player.",
+        "Edit",
+    )
 }
 
 fn change_publisher_dialog() -> Markup {
-    html! {
-        div.overlay.closable {
-            div.dialog#demon-publisher-dialog {
-                span.plus.cross.hover {}
-                h2.underlined.pad {
-                    "Change demon publisher:"
-                }
-                div.flex.viewer {
-                    (crate::view::filtered_paginator("demon-publisher-dialog-pagination", "/api/v1/players/"))
-                    div {
-                        p {
-                            "Change the publisher of this demon. If the player you want to change the publisher to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
-                        }
-                        form.flex.col novalidate = "" {
-                            p.info-red.output {}
-                            p.info-green.output {}
-                            span.form-input#demon-publisher-name-edit {
-                                label for = "publisher" {"Publisher name:"}
-                                input name = "publisher" type="text" required = "";
-                                p.error {}
-                            }
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
-                        }
-                    }
-                }
-            }
-        }
-    }
+    demonlist::player_selection_dialog(
+        "demon-publisher-dialog",
+        "Change demon publisher:",
+        "Change the publisher of this demon. If the player you want to change the publisher to already exists, search them up on the left \
+         and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
+         create a new player.",
+        "Edit",
+    )
 }
 
 fn add_creator_dialog() -> Markup {
-    html! {
-        div.overlay.closable {
-            div.dialog#demon-add-creator-dialog {
-                span.plus.cross.hover {}
-                h2.underlined.pad {
-                    "Add creator:"
-                }
-                div.flex.viewer {
-                    (crate::view::filtered_paginator("demon-add-creator-dialog-pagination", "/api/v1/players/"))
-                    div {
-                        p {
-                            "Select a creator to add to this demon. If the player you want to change the publisher to already exists, search them up on the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to create a new player."
-                        }
-                        form.flex.col novalidate = "" {
-                            p.info-red.output {}
-                            p.info-green.output {}
-                            span.form-input#demon-add-creator-name-edit {
-                                label for = "creator" {"Creator name:"}
-                                input name = "creator" type="text" required = "";
-                                p.error {}
-                            }
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Add";
-                        }
-                    }
-                }
-            }
-        }
-    }
+    demonlist::player_selection_dialog(
+        "demon-add-creator-dialog",
+        "Add creator:",
+        "Select a creator to add to this demon. If the player you want to change the publisher to already exists, search them up on the \
+         left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server \
+         to create a new player.",
+        "Add Creator",
+    )
 }
 
 fn demon_submitter() -> Markup {

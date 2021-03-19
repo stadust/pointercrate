@@ -116,9 +116,9 @@ export class DemonManager extends FilteredPaginator {
       },
     });
 
-    setupEditorDialog(new PlayerSelectionDialog("demon-verifier-dialog"), "demon-verifier-pen", new PaginatorEditorBackend(this, csrfToken, true), this.output);
+    setupEditorDialog(new PlayerSelectionDialog("demon-verifier-dialog"), "demon-verifier-pen", new PaginatorEditorBackend(this, csrfToken, true), this.output, data => ({verifier: data.player}));
 
-    setupEditorDialog(new PlayerSelectionDialog("demon-publisher-dialog"), "demon-publisher-pen", new PaginatorEditorBackend(this, csrfToken, true), this.output);
+    setupEditorDialog(new PlayerSelectionDialog("demon-publisher-dialog"), "demon-publisher-pen", new PaginatorEditorBackend(this, csrfToken, true), this.output, data => ({publisher: data.player}));
   }
 
   onReceive(response) {
@@ -293,13 +293,13 @@ export function initialize(csrfToken) {
           {
             "X-CSRF-TOKEN": csrfToken,
           },
-          data
+          {creator: data.player}
       )
           .then((response) => {
             let location = response.headers["location"];
 
             demonManager.addCreator({
-              name: data.creator,
+              name: data.player,
               id: location.substring(
                   location.lastIndexOf("/", location.length - 2) + 1,
                   location.length - 1
@@ -308,13 +308,16 @@ export function initialize(csrfToken) {
 
             demonManager.output.setSuccess("Successfully added creator");
           })
-          .catch(displayError(creatorFormDialog.form));
+          .catch(response => {
+            displayError(creatorFormDialog.form)(response);
+            throw response;
+          });
     }
     creatorFormDialog.open();
   });
 
   button2.addEventListener("click", () => {
-    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve(data));
+    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve({creator: data.player}));
     creatorFormDialog.open()
         .then(data => {
           let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
