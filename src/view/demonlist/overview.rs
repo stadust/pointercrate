@@ -157,7 +157,7 @@ impl Page for DemonlistOverview {
                                     <ins class="adsbygoogle"
                                          style="display:block"
                                          data-ad-format="fluid"
-                                         data-ad-layout-key="-gc+3m+72-9a-5s"
+                                         data-ad-layout-key="-h1+3z+54-91-j"
                                          data-ad-client="ca-pub-3064790497687357"
                                          data-ad-slot="5157884729"></ins>
                                     <script>
