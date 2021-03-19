@@ -149,23 +149,6 @@ impl Page for DemonlistOverview {
                     (super::stats_viewer(&self.nations))
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {
-                            // Place ad every 50th demon
-                            @if demon.position % 25 == 1 {
-                                section.panel.fade {
-                                (PreEscaped(r#"
-                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-                                    <ins class="adsbygoogle"
-                                         style="display:block"
-                                         data-ad-format="fluid"
-                                         data-ad-layout-key="-h1+3z+54-91-j"
-                                         data-ad-client="ca-pub-3064790497687357"
-                                         data-ad-slot="5157884729"></ins>
-                                    <script>
-                                         (adsbygoogle = window.adsbygoogle || []).push({});
-                                    </script>
-                                    "#))
-                                }
-                            }
                             section.panel.fade style="overflow:hidden" {
                                 div.flex style = "align-items: center" {
                                     @if let Some(ref video) = demon.video {
@@ -193,6 +176,23 @@ impl Page for DemonlistOverview {
                                         }
                                     }
                                 }
+                            }
+                        }
+                        // Place ad every 25th demon
+                        @if demon.position % 25 == 0 || demon.position == 1 {
+                            section.panel.fade {
+                            (PreEscaped(r#"
+                                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                                <ins class="adsbygoogle"
+                                     style="display:block"
+                                     data-ad-format="fluid"
+                                     data-ad-layout-key="-h1+3z+54-91-j"
+                                     data-ad-client="ca-pub-3064790497687357"
+                                     data-ad-slot="5157884729"></ins>
+                                <script>
+                                     (adsbygoogle = window.adsbygoogle || []).push({});
+                                </script>
+                                "#))
                             }
                         }
                     }
