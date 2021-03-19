@@ -145,7 +145,7 @@ pub fn footer() -> Markup {
     html! {
         footer.center {
             span.overline.pad style="text-align:center" {
-                "© Copyright 2017-2020 pointercrate.com"
+                "© Copyright 2017-2021 pointercrate.com"
                 br;
                 "All rights reserved"
                 br;
