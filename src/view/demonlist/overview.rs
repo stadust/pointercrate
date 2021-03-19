@@ -177,22 +177,22 @@ impl Page for DemonlistOverview {
                                     }
                                 }
                             }
-                        }
-                        // Place ad every 25th demon
-                        @if demon.position % 25 == 0 || demon.position == 1 {
-                            section.panel.fade {
-                            (PreEscaped(r#"
-                                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-                                <ins class="adsbygoogle"
-                                     style="display:block"
-                                     data-ad-format="fluid"
-                                     data-ad-layout-key="-h1+40+4u-93+n"
-                                     data-ad-client="ca-pub-3064790497687357"
-                                     data-ad-slot="5157884729"></ins>
-                                <script>
-                                     (adsbygoogle = window.adsbygoogle || []).push({});
-                                </script>
-                                "#))
+                            // Place ad every 25th demon
+                            @if demon.position % 25 == 0 || demon.position == 1 {
+                                section.panel.fade {
+                                (PreEscaped(r#"
+                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                                    <ins class="adsbygoogle"
+                                         style="display:block"
+                                         data-ad-format="fluid"
+                                         data-ad-layout-key="-h1+40+4u-93+n"
+                                         data-ad-client="ca-pub-3064790497687357"
+                                         data-ad-slot="5157884729"></ins>
+                                    <script>
+                                         (adsbygoogle = window.adsbygoogle || []).push({});
+                                    </script>
+                                    "#))
+                                }
                             }
                         }
                     }
