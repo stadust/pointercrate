@@ -16,16 +16,16 @@
 
   /* center using margin */
   .m-center {
-    max-width: 1024px;
-    margin-left: calc(50% - 1024px / 2) !important;
-    margin-right: calc(50% - 1024px / 2) !important;
+    max-width: 1040px;
+    margin-left: calc(50% - 1040px / 2) !important;
+    margin-right: calc(50% - 1040px / 2) !important;
   }
 
   /* center using padding */
   .center {
-    max-width: 1024px;
-    padding-left: calc(50% - 1024px / 2);
-    padding-right: calc(50% - 1024px / 2);
+    max-width: 1040px;
+    padding-left: calc(50% - 1040px / 2);
+    padding-right: calc(50% - 1040px / 2);
   }
 }
 
