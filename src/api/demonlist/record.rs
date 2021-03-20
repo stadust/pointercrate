@@ -4,6 +4,7 @@ use crate::{
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
     model::demonlist::{
         record::{
+            audit,
             note::{NewNote, Note, PatchNote},
             FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission,
         },
@@ -122,6 +123,26 @@ pub async fn get(user: ApiResult<TokenAuth>, state: PointercrateState, record_id
     }
 
     Ok(HttpResponse::Ok().json_with_etag(&record))
+}
+
+#[get("/{record_id}/audit/")]
+pub async fn audit_log(TokenAuth(user): TokenAuth, state: PointercrateState, record_id: Path<i32>) -> ApiResult<HttpResponse> {
+    let mut connection = state.connection().await?;
+
+    user.inner().require_permissions(Permissions::ListHelper)?;
+
+    let record_id = record_id.into_inner();
+    let log = audit::entries_for_record(record_id, &mut connection).await?;
+
+    if log.is_empty() {
+        Err(PointercrateError::ModelNotFound {
+            model: "Record",
+            identified_by: record_id.to_string(),
+        }
+        .into())
+    } else {
+        Ok(HttpResponse::Ok().json(log))
+    }
 }
 
 #[patch("/{record_id}/")]

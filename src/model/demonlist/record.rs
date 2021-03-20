@@ -45,6 +45,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+pub mod audit;
 mod delete;
 mod get;
 pub mod note;

@@ -132,7 +132,8 @@ async fn main() -> std::io::Result<()> {
                             .service(record::submit)
                             .service(record::add_note)
                             .service(record::patch_note)
-                            .service(record::delete_note),
+                            .service(record::delete_note)
+                            .service(record::audit_log),
                     )
                     .service(
                         scope("/players")
