@@ -283,18 +283,28 @@ fn demon_submitter() -> Markup {
                         input type = "number" name = "requirement" required="" min="0" max = "100";
                         p.error {}
                     }
-                    span.form-input.flex.col#demon-add-verifier {
-                        label for = "verifier" {
-                            "Verifier:"
+                    span.form-input.flex.col#demon-add-verifier data-type = "html" data-target-id = "selected-verifier" data-default = "None Selected" {
+                        label{"Verifier:"}
+                        br;
+                        span {
+                            b {
+                                i.fa.fa-pencil.clickable#demon-add-verifier-pen aria-hidden = "true" {}
+                                " "
+                            }
+                            i#selected-verifier data-name = "verifier" {"None Selected"}
                         }
-                        input type = "text" name = "verifier" required="";
                         p.error {}
                     }
-                    span.form-input.flex.col#demon-add-publisher {
-                        label for = "publisher" {
-                            "Publisher:"
+                    span.form-input.flex.col#demon-add-publisher data-type = "html" data-target-id = "selected-publisher" data-default = "None Selected" {
+                        label {"Publisher:"}
+                        br;
+                        span {
+                            b {
+                                i.fa.fa-pencil.clickable#demon-add-publisher-pen aria-hidden = "true" {}
+                                " "
+                            }
+                            i#selected-publisher data-name = "publisher" {"None Selected"}
                         }
-                        input type = "text" name = "publisher" required="";
                         p.error {}
                     }
                     span.form-input.flex.col#demon-add-video {
@@ -314,5 +324,21 @@ fn demon_submitter() -> Markup {
                 }
             }
         }
+        (demonlist::player_selection_dialog(
+            "demon-add-verifier-dialog",
+            "Set demon verifier:",
+            "Set the verifier of this demon. If the player you want to set as verifier already exists, search them up on the left \
+             and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
+             create a new player.",
+            "Select",
+        ))
+        (demonlist::player_selection_dialog(
+            "demon-add-publisher-dialog",
+            "Set demon publisher:",
+            "Set the publisher of this demon. If the player you want to set as publisher already exists, search them up on the left \
+             and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
+             create a new player.",
+            "Select",
+        ))
     }
 }

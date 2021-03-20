@@ -1063,6 +1063,8 @@ export function typeMismatch(input) {
 }
 
 export function valueMissing(input) {
+  if(input.input === undefined || input.input.validity === undefined)
+    return input.value !== undefined;
   return !input.input.validity.valueMissing;
 }
 
