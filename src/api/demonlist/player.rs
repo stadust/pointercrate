@@ -13,10 +13,7 @@ use actix_web::{
 use actix_web_codegen::{get, patch};
 
 #[get("/")]
-pub async fn paginate(
-    TokenAuth(user): TokenAuth, state: PointercrateState, mut pagination: Query<PlayerPagination>,
-) -> ApiResult<HttpResponse> {
-    user.inner().require_permissions(Permissions::ExtendedAccess)?;
+pub async fn paginate(state: PointercrateState, mut pagination: Query<PlayerPagination>) -> ApiResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     let mut demons = pagination.page(&mut connection).await?;
