@@ -143,9 +143,6 @@ impl Demonlist {
                 @else {
                     @if let Some(ref video) = self.data.demon.video {
                         @if let Some(embedded_video) = video::embed(video) {
-                            h3 {
-                                "Showcase video:"
-                            }
                             iframe."ratio-16-9"."js-delay-attr" style="width:90%; margin: 15px 5%" allowfullscreen="" data-attr = "src" data-attr-value = (embedded_video) {"Verification Video"}
                         }
                     }
