@@ -1,5 +1,4 @@
-use crate::model::demonlist::record::RecordStatus;
-use crate::Result;
+use crate::{model::demonlist::record::RecordStatus, Result};
 use chrono::NaiveDateTime;
 use futures::StreamExt;
 use serde::Serialize;
