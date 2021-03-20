@@ -141,7 +141,7 @@ impl FullPlayer {
 
         // Alright so merging records is HARD. We already implemented it over in the record patching, so
         // while somewhat inefficient maybe, we'll just call that code for each record of the current player
-        for row in sqlx::query!("SELECT id FROM records WHERE player = $1", self.player.base.id)
+        for row in sqlx::query!("SELECT id FROM records WHERE player = $1", with.id)
             .fetch_all(&mut *connection)
             .await?
         {

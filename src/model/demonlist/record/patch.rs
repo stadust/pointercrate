@@ -117,13 +117,15 @@ impl FullRecord {
                 //   determined above) less than or equal to that of this record
 
                 struct _Existing {
+                    id: i32,
                     progress: i16,
                     video: Option<String>,
                 }
 
                 let row = sqlx::query_as!(
                     _Existing,
-                    "SELECT progress, video::TEXT FROM records WHERE status_ = 'APPROVED' AND demon = $1 AND player = $2 AND progress > $3",
+                    "SELECT id, progress, video::TEXT FROM records WHERE status_ = 'APPROVED' AND demon = $1 AND player = $2 AND progress \
+                     > $3",
                     demon,
                     player,
                     self.progress
@@ -132,6 +134,9 @@ impl FullRecord {
                 .await?;
 
                 if let Some(row) = row {
+                    sqlx::query!("DELETE FROM records WHERE id = $1", row.id)
+                        .execute(&mut *connection)
+                        .await?;
                     sqlx::query("UPDATE records SET video = $1::TEXT, progress = $2 WHERE id = $3")
                         .bind(&row.video)
                         .bind(row.progress)
