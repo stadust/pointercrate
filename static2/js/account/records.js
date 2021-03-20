@@ -145,12 +145,16 @@ class RecordManager extends Paginator {
 
     if (embeddedVideo !== undefined) {
       this._video.style.display = "block";
-      this._video_link.style.display = "initial";
       this._video.src = embeddedVideo;
-      this._video_link.href = this.currentObject.video;
-      this._video_link.innerHTML = this.currentObject.video;
     } else {
       this._video.style.display = "none";
+    }
+
+    if(this.currentObject.video !== undefined) {
+      this._video_link.href = this.currentObject.video;
+      this._video_link.innerHTML = this.currentObject.video;
+      this._video_link.style.display = "initial";
+    } else {
       this._video_link.style.display = "none";
     }
 
