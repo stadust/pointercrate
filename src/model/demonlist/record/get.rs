@@ -1,12 +1,14 @@
-use crate::model::nationality::Nationality;
 use crate::{
     cistring::CiString,
     error::PointercrateError,
-    model::demonlist::{
-        demon::MinimalDemon,
-        player::DatabasePlayer,
-        record::{note::notes_on, FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
-        submitter::Submitter,
+    model::{
+        demonlist::{
+            demon::MinimalDemon,
+            player::DatabasePlayer,
+            record::{note::notes_on, FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
+            submitter::Submitter,
+        },
+        nationality::Nationality,
     },
     Result,
 };

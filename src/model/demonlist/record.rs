@@ -27,9 +27,11 @@ pub use self::{
     patch::PatchRecord,
     post::Submission,
 };
-use crate::model::nationality::Nationality;
 use crate::{
-    model::demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
+    model::{
+        demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
+        nationality::Nationality,
+    },
     state::PointercrateState,
     Result,
 };
