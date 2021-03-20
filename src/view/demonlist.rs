@@ -197,10 +197,16 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
                         "Holder:"
                     }
                     p {
-                        "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs!"
+                        "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
                     }
-                    span.form-input.flex.col#id_player {
-                        input type = "text" name = "player" required="" placeholder="e. g. 'Slypp, 'KrmaL'" maxlength="50" ;
+                    span.form-input.flex.col#id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
+                        span {
+                            b {
+                                i.fa.fa-pencil.clickable#record-submitter-holder-pen aria-hidden = "true" {}
+                                " "
+                            }
+                            i#selected-holder data-name = "player" {"None Selected"}
+                        }
                         p.error {}
                     }
                     h3 {

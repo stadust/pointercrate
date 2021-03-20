@@ -42,9 +42,12 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
 
   demon.addValidator(input => input.dropdown.selected !== undefined, "Please specify a demon");
 
-  player.addValidator(valueMissing, "Please specify a record holder");
+  let holderSelector = new PlayerSelectionDialog("submission-holder-dialog");
+  document.getElementById("record-submitter-holder-pen").addEventListener('click', () => holderSelector.open().then(data => player.value = data.player));
+
+  player.addValidator(input => input.value !== undefined, "Please specify a record holder");
   player.addValidator(
-    tooLong,
+    input => input.value === undefined || input.value.length <= 50,
     "Due to Geometry Dash's limitations I know that no player has such a long name"
   );
 

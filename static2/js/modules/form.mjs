@@ -854,8 +854,53 @@ export class DropdownFormInput extends FormInput {
   }
 }
 
-export class DialogFormInput extends FormInput {
+/**
+ * Input class that simply reads out the value of a specified tag
+ */
+export class HtmlInput extends FormInput {
+  constructor(input) {
+    super();
 
+    this.input = input;
+    this.default = input.dataset.default;
+    this.target = document.getElementById(input.dataset.targetId);
+
+    this.error = input.getElementsByTagName("p")[0];
+
+    let mutationObserver = new MutationObserver(() => this.errorText = "");
+    mutationObserver.observe(this.target, { attributes: true, childList: true, subtree: true });
+  }
+
+  clear() {
+    this.target.innerText = this.default;
+  }
+
+  get value() {
+    return this.target.innerText === this.default ? undefined : this.target.innerText;
+  }
+
+  set value(value) {
+    this.target.innerText = value;
+  }
+
+  get name() {
+    return this.target.dataset.name;
+  }
+
+  get id() {
+    return this.input.id;
+  }
+
+  get errorText() {
+    return this.error.innerHTML;
+  }
+
+  set errorText(value) {
+    // weird super call lol
+    super.errorText = value;
+
+    this.error.innerHTML = value;
+  }
 }
 
 export class Form extends Output {
@@ -872,6 +917,8 @@ export class Form extends Output {
     for (var input of this.html.getElementsByClassName("form-input")) {
       if(input.dataset.type === 'dropdown')
         this.inputs.push(new DropdownFormInput(input));
+      else if(input.dataset.type === "html")
+        this.inputs.push(new HtmlInput(input))
       else
         this.inputs.push(new HtmlFormInput(input));
     }
