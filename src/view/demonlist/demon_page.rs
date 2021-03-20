@@ -419,7 +419,7 @@ impl Page for Demonlist {
         html! {
             (dropdowns)
 
-            div.panel.fade.m-center {
+            div.panel.fade.m-center style = "padding: 0px; height: 90px" {
                 (PreEscaped(r#"
                 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                 <!-- Demon page banner ad -->
