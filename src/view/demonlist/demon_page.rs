@@ -319,6 +319,7 @@ impl Demonlist {
                         table {
                             tbody {
                                 tr {
+                                    th.blue {}
                                     th.blue {
                                         "Record Holder"
                                     }
@@ -331,6 +332,11 @@ impl Demonlist {
                                 }
                                 @for record in &self.data.records {
                                     tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
+                                        td {
+                                            @if let Some(ref nationality) = record.nationality {
+                                                (nationality)
+                                            }
+                                        }
                                         td {
                                             @if let Some(ref video) = record.video {
                                                  a href = (video) target = "_blank"{

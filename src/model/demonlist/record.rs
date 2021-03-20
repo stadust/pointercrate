@@ -27,6 +27,7 @@ pub use self::{
     patch::PatchRecord,
     post::Submission,
 };
+use crate::model::nationality::Nationality;
 use crate::{
     model::demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
     state::PointercrateState,
@@ -181,6 +182,7 @@ pub struct MinimalRecordP {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub player: DatabasePlayer,
+    pub nationality: Option<Nationality>,
 }
 
 impl FullRecord {

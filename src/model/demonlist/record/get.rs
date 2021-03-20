@@ -1,3 +1,4 @@
+use crate::model::nationality::Nationality;
 use crate::{
     cistring::CiString,
     error::PointercrateError,
@@ -105,12 +106,14 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
         player_id: i32,
         name: String,
         banned: bool,
+        nation: Option<String>,
+        iso_country_code: Option<String>,
     }
 
     let mut stream = sqlx::query_as!(
         Fetched,
         r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
-         players.name AS "name: String", players.banned FROM records INNER JOIN players ON records.player = players.id WHERE status_ = 'APPROVED' AND 
+         players.name AS "name: String", players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
          records.demon = $1 ORDER BY progress DESC, id ASC"#,
         demon.id
     )
@@ -130,6 +133,14 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
                 id: row.player_id,
                 name: CiString(row.name),
                 banned: row.banned,
+            },
+            nationality: match (row.nation, row.iso_country_code) {
+                (Some(nation), Some(code)) =>
+                    Some(Nationality {
+                        iso_country_code: code,
+                        nation: CiString(nation),
+                    }),
+                _ => None,
             },
         })
     }

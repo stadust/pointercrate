@@ -6,7 +6,7 @@ use crate::{
     config,
     model::{demonlist::demon::Demon, nationality::Nationality},
 };
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup, PreEscaped, Render};
 
 mod demon_page;
 mod overview;
@@ -462,6 +462,14 @@ fn discord_panel() -> Markup {
             p {
                 "Join the official Demonlist discord server, where you can get in touch with the demonlist team!"
             }
+        }
+    }
+}
+
+impl Render for Nationality {
+    fn render(&self) -> Markup {
+        html! {
+            span.flag-icon.{"flag-icon-"(self.iso_country_code.to_lowercase())} title = (self.nation) {}
         }
     }
 }
