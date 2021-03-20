@@ -242,7 +242,7 @@ pub fn filtered_paginator(id: &str, endpoint: &str) -> Markup {
 pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl Iterator<Item = Markup>) -> Markup {
     html! {
         div.dropdown-menu.js-search.no-stretch {
-            input type="text" data-default=(default_entry) style = "color: #444446; font-weight: bold;";
+            input type="text" data-default=(default_entry) autocomplete="off" style = "color: #444446; font-weight: bold;";
             div.menu {
                 ul {
                     (default_item)

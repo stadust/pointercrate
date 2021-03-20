@@ -129,7 +129,7 @@ fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&De
 pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a OverviewDemon>) -> Markup {
     html! {
         div.dropdown-menu.js-search#(dropdown_id) {
-            input type = "text" name = "demon" required="";
+            input type = "text" name = "demon" required="" autocomplete="off";
             div.menu {
                ul {
                     @for demon in demons {
