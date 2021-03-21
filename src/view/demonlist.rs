@@ -144,7 +144,7 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Ov
 pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &str, button_text: &str) -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#(dialog_id) style = "scroll=auto;max-height=100%;box-sizing:border-box"{
+            div.dialog#(dialog_id) {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     (headline)
