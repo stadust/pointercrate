@@ -11,7 +11,10 @@ $(document).ready(function () {
 
   document
     .getElementById("show-stats-viewer")
-    .addEventListener("click", () => window.statsViewer.initialize());
+    .addEventListener("click", () => {
+      gtag('event', 'stats-viewer-opened', {'event-category': 'demonlist'});
+      window.statsViewer.initialize()
+    });
 });
 
 function initializePositionChart() {

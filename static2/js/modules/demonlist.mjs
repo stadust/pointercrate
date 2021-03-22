@@ -66,6 +66,7 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
+  submissionForm.onInvalid(() => gtag('event', 'record-submit-failure-frontend', {'event-category': 'demonlist'}));
   submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
     let headers = {};
@@ -78,6 +79,7 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
       .then(() => {
         submissionForm.setSuccess("Record successfully submitted");
         submissionForm.clear();
+        gtag('event', 'record-submit-success', {'event-category': 'demonlist'});
       })
       .catch((response) =>  {
         switch(response.data.code) {
@@ -100,6 +102,7 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
           default:
             submissionForm.setError(response.data.message)
         }
+        gtag('event', 'record-submit-failure-backend', {'event-category': 'demonlist'});
       }); // TODO: maybe specially handle some error codes
   });
 }
