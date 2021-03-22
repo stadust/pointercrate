@@ -796,7 +796,10 @@ export class HtmlFormInput extends FormInput {
     // weird super call lol
     super.errorText = value;
 
-    this.error.innerHTML = value;
+    if(this.error)
+      this.error.innerHTML = value;
+    else if(value !== "")
+      console.log("Unreportable error on input " + this.input + ": " + value);
     this.input.setCustomValidity(value);
   }
 }
