@@ -1,8 +1,7 @@
-use crate::model::demonlist::demon::MinimalDemon;
 use crate::{
     config,
     gd::GDIntegrationResult,
-    model::demonlist::demon::FullDemon,
+    model::demonlist::demon::{FullDemon, MinimalDemon},
     state::PointercrateState,
     video,
     view::{demonlist::overview::DemonlistOverview, Page},
