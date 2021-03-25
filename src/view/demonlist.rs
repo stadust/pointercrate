@@ -1,5 +1,5 @@
 pub use self::{
-    demon_page::page,
+    demon_page::{demon_permalink, page},
     overview::{index, overview_demons, OverviewDemon},
 };
 use crate::{

@@ -1,3 +1,4 @@
+use crate::model::demonlist::demon::MinimalDemon;
 use crate::{
     config,
     gd::GDIntegrationResult,
@@ -30,6 +31,16 @@ pub struct Demonlist {
     movements: Vec<DemonMovement>,
     link_banned: bool,
     integration: GDIntegrationResult,
+}
+
+#[get("/demonlist/permalink/{id}/")]
+pub async fn demon_permalink(state: PointercrateState, id: Path<i32>) -> ViewResult<HttpResponse> {
+    let mut connection = state.connection().await?;
+    let demon = MinimalDemon::by_id(id.into_inner(), &mut connection).await?;
+
+    Ok(actix_web::HttpResponse::Found()
+        .header(actix_web::http::header::LOCATION, format!("/demonlist/{}/", demon.position))
+        .finish())
 }
 
 #[get("/demonlist/{position}/")]
@@ -97,7 +108,7 @@ impl Demonlist {
         html! {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
                 div.underlined {
-                    h1 style = "overflow: hidden"{
+                    h1#demon-heading style = "overflow: hidden"{
                         @if self.data.demon.base.position != 1 {
                             a href=(format!("/demonlist/{:?}", self.data.demon.base.position - 1)) {
                                 i class="fa fa-chevron-left" style="padding-right: 5%" {}
@@ -110,6 +121,11 @@ impl Demonlist {
                             }
                         }
                     }
+                    (PreEscaped(format!(r#"
+                    <script>
+                    document.getElementById("demon-heading").addEventListener('click', () => navigator.clipboard.writeText('https://pointercrate.com/permalink/{}/'))
+                    </script>
+                    "#, self.data.demon.base.id)))
                     h3 {
                         @if self.data.creators.len() > 3 {
                             "by " (self.data.creators[0].name) " and "

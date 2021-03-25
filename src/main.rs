@@ -82,6 +82,7 @@ async fn main() -> std::io::Result<()> {
             .service(view::login::index)
             .service(view::login::post)
             .service(view::login::register)
+            .service(view::demonlist::demon_permalink)
             .service(view::demonlist::page)
             .service(view::demonlist::index)
             .service(view::account::index)
