@@ -327,7 +327,7 @@ fn change_holder_dialog() -> Markup {
 fn change_demon_dialog(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#record-demon-dialog "overflow = initial" {
+            div.dialog#record-demon-dialog style="overflow: initial;" {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change record demon:"
