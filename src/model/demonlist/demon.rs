@@ -81,7 +81,7 @@ pub struct FullDemon {
 impl Hash for FullDemon {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.demon.hash(state);
-        self.creators.hash(state);
+        // creators have sub-endpoint -> no hash
     }
 }
 

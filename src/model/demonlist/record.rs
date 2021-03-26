@@ -151,7 +151,7 @@ impl Hash for FullRecord {
         self.status.hash(state);
         self.player.id.hash(state);
         self.demon.id.hash(state);
-        self.notes.hash(state)
+        // notes have sub-endpoint -> no hash
         // submitter cannot be patched -> no hash
     }
 }
