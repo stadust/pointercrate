@@ -212,12 +212,11 @@ export class StatsViewer extends FilteredPaginator {
 
     let hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
-      .reduce((acc, next) => (acc.position > next.position ? next : acc), {
-        position: 34832834,
-        name: "None",
-      });
+      .reduce((acc, next) => (acc.position > next.position ? next : acc), {name: "None", position: 321321321321});
 
-    this._hardest.textContent = hardest.name || "None";
+    if(this._hardest.lastChild)
+      this._hardest.removeChild(this._hardest.lastChild);
+    this._hardest.appendChild(hardest.name === "None" ? document.createTextNode("None") : formatDemon(hardest, "/demonlist/permalink/" + hardest.id + "/"));
 
     let non100Records = playerData.records
       .filter((record) => record.progress != 100)
@@ -404,7 +403,7 @@ function formatDemonsInto(element, demons) {
   if (demons.length) {
     for (var demon of demons) {
       element.appendChild(
-        formatDemon(demon, "/demonlist/" + demon.position + "/")
+        formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
       );
       element.appendChild(document.createTextNode(" - "));
     }
@@ -419,11 +418,9 @@ function formatRecordsInto(element, records) {
     element.removeChild(element.lastChild);
   }
 
-  console.log("record thingy");
-
   if (records.length) {
     for (var record of records) {
-      let demon = formatDemon(record.demon, record.video);
+      let demon = formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
       if (record.progress != 100) {
         demon.appendChild(
           document.createTextNode(" (" + record.progress + "%)")
