@@ -227,6 +227,10 @@ ul.roman li {
 
 /* General Input Styles */
 
+input, textarea {
+  border-radius: 0;
+}
+
 textarea {
   background: rgba(0, 0, 0, 0);
   border: 1px solid #ddd;
