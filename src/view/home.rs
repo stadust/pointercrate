@@ -82,7 +82,7 @@ impl Page for Homepage {
                                 h3 {
                                     "Stats Viewer"
                                 }
-                                i class = "fa fa-globe fa-2x" aria-hidden="true" {}
+                                i class = "fa fa-globe-americas fa-2x" aria-hidden="true" {}
                             }
                             div.tab.hover.scale data-tab-id="3" style="padding: 10px" {
                                 h3 {
@@ -114,7 +114,7 @@ impl Page for Homepage {
             div.center.information-banner.right {
                 div {
                     a.big.blue.hover.button.js-scroll-anim data-anim="fade" href = "https://github.com/stadust/pointercrate" target = "_blank"{
-                        i.fa.fa-github aria-hidden="true" {}
+                        i.fab.fa-github aria-hidden="true" {}
                         (PreEscaped("&nbsp;&nbsp;&nbsp;"))
                         "To the repository"
                     }

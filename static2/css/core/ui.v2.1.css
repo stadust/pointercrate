@@ -31,8 +31,8 @@ a.link {
 }
 
 a.link:after {
-  font-family: FontAwesome;
-  font-weight: normal;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 600;
   font-style: normal;
 
   display: inline-block;
@@ -43,7 +43,7 @@ a.link:after {
 }
 
 a.link:after {
-  content: "\f08e";
+  content: "\f35d";
   text-decoration: none;
 }
 
@@ -376,9 +376,11 @@ textarea:invalid {
 
 .search:before,
 .search:after {
-  font-family: FontAwesome;
-  font-weight: normal;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
   font-style: normal;
+
+  cursor: pointer;
 
   display: inline-block;
 

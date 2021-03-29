@@ -78,7 +78,7 @@ pub trait Page {
                         script src = {(STATIC)(script)} type="module" {}
                     }
 
-                    link rel = "stylesheet" href = "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css";
+                    link rel = "stylesheet" href = "/static2/fa/css/all.min.css";
                     link rel = "stylesheet" href = "https://fonts.googleapis.com/css?family=Montserrat|Montserrat:light,bold";
 
                     link rel = "stylesheet" href = {(STATIC) "css/core/icon.v2.css"};
@@ -192,7 +192,7 @@ pub fn footer() -> Markup {
                 }
             }
             div style="display: flex; justify-content: flex-end; align-items: center" {
-                i class = "fa fa-twitter fa-2x" {}
+                i class = "fab fa-twitter fa-2x" {}
                 (PreEscaped("&nbsp;&nbsp;Tweet Us:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"))
                 a href="https://twitter.com/stadust1971" target="_blank" style = "color: #666" {
                     "Developer"
