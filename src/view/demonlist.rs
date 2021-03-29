@@ -202,7 +202,7 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
                     span.form-input.flex.col#id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
                         span {
                             b {
-                                i.fa.fa-pencil.clickable#record-submitter-holder-pen aria-hidden = "true" {}
+                                i.fa.fa-pencil-alt.clickable#record-submitter-holder-pen aria-hidden = "true" {}
                                 " "
                             }
                             i#selected-holder data-name = "player" {"None Selected"}

@@ -23,7 +23,7 @@ pub(super) fn page(user: &User) -> Markup {
                         }
                         span {
                             b {
-                                i.fa.fa-pencil.clickable#display-name-pen aria-hidden = "true" {} " Display name: "
+                                i.fa.fa-pencil-alt.clickable#display-name-pen aria-hidden = "true" {} " Display name: "
                             }
                             i#profile-display-name {
                                 @match user.display_name {
@@ -37,7 +37,7 @@ pub(super) fn page(user: &User) -> Markup {
                         }
                         span {
                             b {
-                                i.fa.fa-pencil.clickable#youtube-pen aria-hidden = "true" {} " YouTube channel: "
+                                i.fa.fa-pencil-alt.clickable#youtube-pen aria-hidden = "true" {} " YouTube channel: "
                             }
                             i#profile-youtube-channel {
                                 @match user.youtube_channel {

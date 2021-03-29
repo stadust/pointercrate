@@ -20,7 +20,7 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                     "Player #"
                                     i#player-player-id {}
                                     " - "
-                                    i.fa.fa-pencil.clickable#player-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#player-player-name {}
+                                    i.fa.fa-pencil-alt.clickable#player-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#player-player-name {}
                                 }
                                 p {
                                     "Welcome to the player manager. Here you can ban or unban players. Banning a player will delete all records of theirs which are in the submitted or under consideration state. All approved records will instead be set to rejected."

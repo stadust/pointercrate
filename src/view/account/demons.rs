@@ -22,7 +22,7 @@ pub(super) fn page() -> Markup {
                                     "Demon #"
                                     i#demon-demon-id {}
                                     " - "
-                                    i.fa.fa-pencil.clickable#demon-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#demon-demon-name {}
+                                    i.fa.fa-pencil-alt.clickable#demon-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i#demon-demon-name {}
                                 }
 
                                 iframe."ratio-16-9"#demon-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
@@ -31,7 +31,7 @@ pub(super) fn page() -> Markup {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil.clickable#demon-video-pen aria-hidden = "true" {} " Verification Video:"
+                                            i.fa.fa-pencil-alt.clickable#demon-video-pen aria-hidden = "true" {} " Verification Video:"
                                         }
                                         br;
                                         a.link#demon-video-link target = "_blank" {}
@@ -40,14 +40,14 @@ pub(super) fn page() -> Markup {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil.clickable#demon-position-pen aria-hidden = "true" {} " Position:"
+                                            i.fa.fa-pencil-alt.clickable#demon-position-pen aria-hidden = "true" {} " Position:"
                                         }
                                         br;
                                         span#demon-position {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil.clickable#demon-requirement-pen aria-hidden = "true" {} " Requirement:"
+                                            i.fa.fa-pencil-alt.clickable#demon-requirement-pen aria-hidden = "true" {} " Requirement:"
                                         }
                                         br;
                                         span#demon-requirement {}
@@ -56,14 +56,14 @@ pub(super) fn page() -> Markup {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil.clickable#demon-publisher-pen aria-hidden = "true" {} " Publisher:"
+                                            i.fa.fa-pencil-alt.clickable#demon-publisher-pen aria-hidden = "true" {} " Publisher:"
                                         }
                                         br;
                                         span#demon-publisher {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil.clickable#demon-verifier-pen aria-hidden = "true" {} " Verifier:"
+                                            i.fa.fa-pencil-alt.clickable#demon-verifier-pen aria-hidden = "true" {} " Verifier:"
                                         }
                                         br;
                                         span#demon-verifier {}
@@ -288,7 +288,7 @@ fn demon_submitter() -> Markup {
                         br;
                         span {
                             b {
-                                i.fa.fa-pencil.clickable#demon-add-verifier-pen aria-hidden = "true" {}
+                                i.fa.fa-pencil-alt.clickable#demon-add-verifier-pen aria-hidden = "true" {}
                                 " "
                             }
                             i#selected-verifier data-name = "verifier" {"None Selected"}
@@ -300,7 +300,7 @@ fn demon_submitter() -> Markup {
                         br;
                         span {
                             b {
-                                i.fa.fa-pencil.clickable#demon-add-publisher-pen aria-hidden = "true" {}
+                                i.fa.fa-pencil-alt.clickable#demon-add-publisher-pen aria-hidden = "true" {}
                                 " "
                             }
                             i#selected-publisher data-name = "publisher" {"None Selected"}

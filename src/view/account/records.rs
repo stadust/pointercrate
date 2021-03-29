@@ -45,7 +45,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                         div.stats-container.flex.space  {
                             span {
                                 b {
-                                    i.fa.fa-pencil.clickable#record-video-pen aria-hidden = "true" {} " Video Link:"
+                                    i.fa.fa-pencil-alt.clickable#record-video-pen aria-hidden = "true" {} " Video Link:"
                                 }
                                 br;
                                 a.link#record-video-link target = "_blank" {}
@@ -54,14 +54,14 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil.clickable#record-demon-pen aria-hidden = "true" {} " Demon:"
+                                    i.fa.fa-pencil-alt.clickable#record-demon-pen aria-hidden = "true" {} " Demon:"
                                 }
                                 br;
                                 span#record-demon {}
                             }
                             span {
                                 b {
-                                    i.fa.fa-pencil.clickable#record-holder-pen aria-hidden = "true" {} " Record Holder:"
+                                    i.fa.fa-pencil-alt.clickable#record-holder-pen aria-hidden = "true" {} " Record Holder:"
                                 }
                                 br;
                                 span#record-holder {}
@@ -70,7 +70,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil.clickable#record-progress-pen aria-hidden = "true" {} " Progress:"
+                                    i.fa.fa-pencil-alt.clickable#record-progress-pen aria-hidden = "true" {} " Progress:"
                                 }
                                 br;
                                 span#record-progress {}
