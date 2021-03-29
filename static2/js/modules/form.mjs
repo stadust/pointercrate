@@ -974,7 +974,7 @@ export class Form extends Output {
     let data = {};
 
     for (let input of this.inputs) {
-      if (input.name !== null && (input.value !== null || !input.required)) {
+      if (input.name && (input.value !== null || !input.required)) {
         data[input.name] = input.value;
       }
     }

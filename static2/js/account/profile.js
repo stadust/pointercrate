@@ -104,7 +104,7 @@ class ProfileEditorBackend extends EditorBackend {
 function setupEditAccount() {
   let output = new Output(document.getElementById("things"));
   let editDisplayNameForm = setupFormDialogEditor(
-    new ProfileEditorBackend(document.getElementById("auth-dn")), // not pretty, but oh well
+    new ProfileEditorBackend(document.querySelector("#auth-dn input")), // not pretty, but oh well
     "edit-dn-dialog",
     "display-name-pen",
     output
@@ -120,7 +120,7 @@ function setupEditAccount() {
   editDisplayNameForm.addErrorOverride(40100, "auth-dn");
 
   let editYoutubeForm = setupFormDialogEditor(
-    new ProfileEditorBackend(document.getElementById("auth-yt")), // not pretty, but oh well
+    new ProfileEditorBackend(document.querySelector("#auth-yt input")), // not pretty, but oh well
     "edit-yt-dialog",
     "youtube-pen",
     output
@@ -140,7 +140,7 @@ function setupEditAccount() {
   editYoutubeForm.addErrorOverride(42225, "edit-yt");
 
   let changePasswordForm = setupFormDialogEditor(
-    new ProfileEditorBackend(document.getElementById("auth-pw")), // not pretty, but oh well
+    new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
     "edit-pw-dialog",
     "change-password",
     output
