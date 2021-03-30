@@ -47,6 +47,10 @@ tr:nth-child(even) {
   font-weight: normal;
 }
 
+#outofboundsad {
+  width: 200px;
+}
+
 @media (max-width: 1600px) {
   #outofboundsad {
     display: none;
