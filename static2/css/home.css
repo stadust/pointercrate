@@ -17,15 +17,12 @@
   display: flex;
   justify-content: center;
   font-size: 110%;
-  width: 1072px;
-  padding-left: calc(45% - 1072px/2);
-  padding-right: calc(55% - 1072px/2);
 }
 
 .information-banner > * {
   background: white;
   padding: 50px 20px;
-  max-width: 1024px;
+  max-width: 1072px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -47,7 +44,7 @@
     url("data:image/gif;base64,R0lGODlhBQAKAIABAAAAAP///yH5BAEAAAEALAAAAAAFAAoAAAIIjI+ZwKwPUQEAOw==");
 }
 
-@media (max-width: 1043px) {
+@media (max-width: 1199px) {
   .information-banner > * {
     width: 100%;
   }
@@ -74,7 +71,14 @@
   }
 }
 
-@media (min-width: 1044px) {
+@media (min-width: 1072px) {
+  .information-banner {
+    padding-left: calc(45% - 1072px / 2);
+    padding-right: calc(55% - 1072px / 2);
+  }
+}
+
+@media (min-width: 1200px) {
   .information-banner > * {
     flex-flow: row;
     /* This makes it work, don't question it */
