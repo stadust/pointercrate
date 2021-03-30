@@ -51,7 +51,7 @@ tr:nth-child(even) {
   width: 200px;
 }
 
-@media (max-width: 1600px) {
+@media (max-width: 1359px) {
   #outofboundsad {
     display: none;
   }
