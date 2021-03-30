@@ -131,7 +131,7 @@ ul {
   font-weight: bold;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1072px) {
   .right {
     order: -1;
   }

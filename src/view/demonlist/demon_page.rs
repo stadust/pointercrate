@@ -435,6 +435,7 @@ impl Page for Demonlist {
         }
 
         html! {
+            (super::besides_sidebar_ad())
             (dropdowns)
 
             div.flex.m-center.container {

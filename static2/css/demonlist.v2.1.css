@@ -47,7 +47,13 @@ tr:nth-child(even) {
   font-weight: normal;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1600px) {
+  #outofboundsad {
+    display: none;
+  }
+}
+
+@media (max-width: 1071px) {
   #rules,
   #discord {
     order: -1;

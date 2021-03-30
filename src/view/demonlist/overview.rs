@@ -141,6 +141,7 @@ impl Page for DemonlistOverview {
         let dropdowns = super::dropdowns(&self.demon_overview, None);
 
         html! {
+            (super::besides_sidebar_ad())
             (dropdowns)
 
             div.flex.m-center.container {
