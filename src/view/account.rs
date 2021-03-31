@@ -39,7 +39,7 @@ pub async fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> View
             let (demons, nations) = if user.inner().has_permission(Permissions::ListHelper) {
                 let mut connection = state.connection().await?;
                 (
-                    overview_demons(&mut connection).await?,
+                    overview_demons(&mut connection, None).await?,
                     if user.inner().has_permission(Permissions::ListModerator) {
                         Nationality::all(&mut connection).await?
                     } else {

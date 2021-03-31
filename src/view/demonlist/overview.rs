@@ -7,9 +7,12 @@ use crate::{
     view::Page,
     Result, ViewResult,
 };
+use actix_web::web::Query;
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
+use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped};
+use serde::Deserialize;
 use sqlx::PgConnection;
 
 #[derive(Debug)]
@@ -30,15 +33,25 @@ pub struct DemonlistOverview {
     pub nations: Vec<Nationality>,
 }
 
-pub async fn overview_demons(connection: &mut PgConnection) -> Result<Vec<OverviewDemon>> {
-    Ok(sqlx::query_as!(
-        OverviewDemon,
-        r#"SELECT demons.id, position, demons.name as "name: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
-         players.name as "publisher: String" FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
-         ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"#
-    )
-    .fetch_all(connection)
-    .await?)
+pub async fn overview_demons(connection: &mut PgConnection, at: Option<NaiveDateTime>) -> Result<Vec<OverviewDemon>> {
+    match at {
+        None => Ok(sqlx::query_as!(
+                OverviewDemon,
+                r#"SELECT demons.id, position, demons.name as "name: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
+                 players.name as "publisher: String" FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
+                 ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"#
+            )
+            .fetch_all(connection)
+            .await?),
+        Some(time) => Ok(sqlx::query_as!(
+                OverviewDemon,
+                r#"SELECT demons.id as "id!", position as "position!", demons.name as "name!: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
+                 players.name as "publisher: String" FROM list_at($1) AS demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
+                 ON demons.verifier = verifiers.id ORDER BY position"#, time
+            )
+            .fetch_all(connection)
+            .await?)
+    }
 }
 
 impl DemonlistOverview {
@@ -93,13 +106,13 @@ impl DemonlistOverview {
         }
     }
 
-    pub(super) async fn load(connection: &mut PgConnection) -> Result<DemonlistOverview> {
+    pub(super) async fn load(connection: &mut PgConnection, when: Option<NaiveDateTime>) -> Result<DemonlistOverview> {
         let admins = User::by_permission(Permissions::ListAdministrator, connection).await?;
         let mods = User::by_permission(Permissions::ListModerator, connection).await?;
         let helpers = User::by_permission(Permissions::ListHelper, connection).await?;
 
         let nations = Nationality::all(connection).await?;
-        let demon_overview = overview_demons(connection).await?;
+        let demon_overview = overview_demons(connection, when).await?;
 
         Ok(DemonlistOverview {
             admins,
@@ -111,13 +124,18 @@ impl DemonlistOverview {
     }
 }
 
+#[derive(Deserialize)]
+pub struct TimeMachineData {
+    when: Option<NaiveDateTime>,
+}
+
 #[get("/demonlist/")]
-pub async fn index(state: PointercrateState) -> ViewResult<HttpResponse> {
+pub async fn index(state: PointercrateState, when: Query<TimeMachineData>) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(DemonlistOverview::load(&mut connection).await?.render().0))
+        .body(DemonlistOverview::load(&mut connection, when.into_inner().when).await?.render().0))
 }
 
 impl Page for DemonlistOverview {
@@ -178,8 +196,8 @@ impl Page for DemonlistOverview {
                                     }
                                 }
                             }
-                            // Place ad every 25th demon
-                            @if demon.position % 25 == 0 || demon.position == 1 {
+                            // Place ad every 20th demon
+                            @if demon.position % 20 == 0 || demon.position == 1 {
                                 section.panel.fade {
                                 (PreEscaped(r#"
                                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
