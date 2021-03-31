@@ -7,8 +7,7 @@ use crate::{
     view::Page,
     Result, ViewResult,
 };
-use actix_web::web::Query;
-use actix_web::HttpResponse;
+use actix_web::{web::Query, HttpResponse};
 use actix_web_codegen::get;
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped};
