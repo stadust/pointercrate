@@ -73,6 +73,13 @@
 
 @media (min-width: 1072px) {
   .information-banner {
+    padding-left: calc(50% - 1072px / 2);
+    padding-right: calc(50% - 1072px / 2);
+  }
+}
+
+@media (min-width: 1359px) {
+  .information-banner {
     padding-left: calc(45% - 1072px / 2);
     padding-right: calc(55% - 1072px / 2);
   }
