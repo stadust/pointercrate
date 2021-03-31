@@ -193,7 +193,7 @@ impl Page for DemonlistOverview {
                                         }
                                         div style = "padding-left: 15px" {
                                             h2 style = "text-align: left; margin-bottom: 0px" {
-                                                a href = {"/demonlist/permalink/" (demon.id)} {
+                                                a href = {"/demonlist/permalink/" (demon.id) "/"} {
                                                     "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
                                                 }
                                             }

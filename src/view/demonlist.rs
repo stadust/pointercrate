@@ -75,7 +75,7 @@ fn dropdowns(all_demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
 fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
     let format = |demon: &OverviewDemon| -> Markup {
         html! {
-            a href = {"/demonlist/" (demon.position)} {
+            a href = {"/demonlist/permalink/" (demon.id) "/"} {
                 @if section.numbered {
                     {"#" (demon.position) " - " (demon.name)}
                     br ;
