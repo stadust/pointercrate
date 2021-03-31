@@ -3,7 +3,7 @@
 CREATE FUNCTION list_at(TIMESTAMP WITHOUT TIME ZONE)
 RETURNS TABLE (LIKE demons)
 AS $$
-    SELECT name, CASE WHEN t.position IS NULL THEN demons.position ELSE t.position END, requirement, video, verifier, publisher, t.id, level_id
+    SELECT name, CASE WHEN t.position IS NULL THEN demons.position ELSE t.position END, requirement, video, verifier, publisher, demons.id, level_id
     FROM demons
     LEFT OUTER JOIN (
             SELECT DISTINCT ON (id) id, position

@@ -9,7 +9,7 @@ use crate::{
 };
 use actix_web::{web::Query, HttpResponse};
 use actix_web_codegen::get;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use maud::{html, Markup, PreEscaped};
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -142,6 +142,9 @@ pub async fn index(state: PointercrateState, when: Query<TimeMachineData>) -> Vi
     if let Some(when) = specified_when {
         if when < EARLIEST_DATE {
             specified_when = Some(EARLIEST_DATE);
+        }
+        if when >= Utc::now().naive_utc() {
+            specified_when = None;
         }
     }
 
