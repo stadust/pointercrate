@@ -9,7 +9,7 @@ use crate::{
 };
 use actix_web::{web::Query, HttpResponse};
 use actix_web_codegen::get;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use maud::{html, Markup, PreEscaped};
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -30,6 +30,7 @@ pub struct DemonlistOverview {
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
     pub nations: Vec<Nationality>,
+    pub when: Option<NaiveDateTime>,
 }
 
 pub async fn overview_demons(connection: &mut PgConnection, at: Option<NaiveDateTime>) -> Result<Vec<OverviewDemon>> {
@@ -119,6 +120,7 @@ impl DemonlistOverview {
             helpers,
             nations,
             demon_overview,
+            when,
         })
     }
 }
@@ -130,11 +132,22 @@ pub struct TimeMachineData {
 
 #[get("/demonlist/")]
 pub async fn index(state: PointercrateState, when: Query<TimeMachineData>) -> ViewResult<HttpResponse> {
+    /* static */
+    let EARLIEST_DATE: NaiveDateTime = NaiveDateTime::new(NaiveDate::from_ymd(2017, 8, 5), NaiveTime::from_hms(0, 0, 0));
+
     let mut connection = state.connection().await?;
+
+    let mut specified_when = when.into_inner().when;
+
+    if let Some(when) = specified_when {
+        if when < EARLIEST_DATE {
+            specified_when = Some(EARLIEST_DATE);
+        }
+    }
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(DemonlistOverview::load(&mut connection, when.into_inner().when).await?.render().0))
+        .body(DemonlistOverview::load(&mut connection, specified_when).await?.render().0))
 }
 
 impl Page for DemonlistOverview {
@@ -165,6 +178,11 @@ impl Page for DemonlistOverview {
                 main.left {
                     (super::submission_panel(&self.demon_overview))
                     (super::stats_viewer(&self.nations))
+                    @if let Some(when) = self.when {
+                        div.panel.fade.green {
+                            "You are currently looking at the demonlist how it was on " b{(when)}"."
+                        }
+                    }
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {
                             section.panel.fade style="overflow:hidden" {
@@ -175,7 +193,7 @@ impl Page for DemonlistOverview {
                                         }
                                         div style = "padding-left: 15px" {
                                             h2 style = "text-align: left; margin-bottom: 0px" {
-                                                a href = {"/demonlist/" (demon.position)} {
+                                                a href = {"/demonlist/permalink/" (demon.id)} {
                                                     "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
                                                 }
                                             }
