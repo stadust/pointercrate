@@ -219,8 +219,25 @@ impl Page for DemonlistOverview {
                                     }
                                 }
                             }
+                            @if demon.position == 1 {
+                                section.panel.fade style = "padding: 0px"{
+                                (PreEscaped(r#"
+                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                                    <!-- Demonlist Responsive Feed Ad -->
+                                    <ins class="adsbygoogle"
+                                         style="display:block"
+                                         data-ad-client="ca-pub-3064790497687357"
+                                         data-ad-slot="2819150519"
+                                         data-ad-format="auto"
+                                         data-full-width-responsive="true"></ins>
+                                    <script>
+                                         (adsbygoogle = window.adsbygoogle || []).push({});
+                                    </script>
+                                    "#))
+                                }
+                            }
                             // Place ad every 20th demon
-                            @if demon.position % 20 == 0 || demon.position == 1 {
+                            @if demon.position % 20 == 0 {
                                 section.panel.fade {
                                 (PreEscaped(r#"
                                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
