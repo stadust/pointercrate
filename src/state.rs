@@ -37,7 +37,7 @@ impl PointercrateState {
         let guidelines_topics = Arc::new(documentation::read_topics(&config::guidelines_location()).unwrap());
 
         let connection_pool = PgPoolOptions::default()
-            .max_connections(8)
+            .max_connections(20)
             .max_lifetime(Some(std::time::Duration::from_secs(60 * 60 * 24)))
             .idle_timeout(Some(std::time::Duration::from_secs(60 * 5))) // try to fix the weird "idle locks"
             .connect(&config::database_url())
