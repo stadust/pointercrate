@@ -1,11 +1,13 @@
-use crate::view::demonlist::overview::OverviewQueryData;
 use crate::{
     config,
     gd::GDIntegrationResult,
     model::demonlist::demon::{FullDemon, MinimalDemon},
     state::PointercrateState,
     video,
-    view::{demonlist::overview::DemonlistOverview, Page},
+    view::{
+        demonlist::overview::{DemonlistOverview, OverviewQueryData},
+        Page,
+    },
     ViewResult,
 };
 use actix_web::{web::Path, HttpResponse};
