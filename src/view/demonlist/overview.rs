@@ -21,6 +21,7 @@ pub struct OverviewDemon {
     pub name: String,
     pub publisher: String,
     pub video: Option<String>,
+    pub current_position: Option<i16>,
 }
 
 #[derive(Debug)]
@@ -38,16 +39,16 @@ pub async fn overview_demons(connection: &mut PgConnection, at: Option<NaiveDate
         None => Ok(sqlx::query_as!(
                 OverviewDemon,
                 r#"SELECT demons.id, position, demons.name as "name: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
-                 players.name as "publisher: String" FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
+                 players.name as "publisher: String", null::smallint as current_position FROM demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
                  ON demons.verifier = verifiers.id WHERE position IS NOT NULL ORDER BY position"#
             )
             .fetch_all(connection)
             .await?),
         Some(time) => Ok(sqlx::query_as!(
                 OverviewDemon,
-                r#"SELECT demons.id as "id!", position as "position!", demons.name as "name!: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
-                 players.name as "publisher: String" FROM list_at($1) AS demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
-                 ON demons.verifier = verifiers.id ORDER BY position"#, time
+                r#"SELECT demons.id as "id!", position_ as "position!", demons.name as "name!: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
+                 players.name as "publisher: String", current_position FROM list_at($1) AS demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
+                 ON demons.verifier = verifiers.id ORDER BY position_"#, time
             )
             .fetch_all(connection)
             .await?)
@@ -192,8 +193,8 @@ impl Page for DemonlistOverview {
                     @for demon in &self.demon_overview {
                         @if demon.position <= config::extended_list_size() {
                             section.panel.fade style="overflow:hidden" {
-                                div.flex style = "align-items: center" {
-                                    @if let Some(ref video) = demon.video {
+                                @if let Some(ref video) = demon.video {
+                                    div.flex style = "align-items: center" {
                                         div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (video::thumbnail(video)) "')"} {
                                             a.play href = (video) {}
                                         }
@@ -207,13 +208,38 @@ impl Page for DemonlistOverview {
                                                 i {
                                                     (demon.publisher)
                                                 }
+                                                @if let Some(current_position) = demon.current_position {
+                                                    br;
+                                                    @if current_position > config::extended_list_size() {
+                                                        "Currently Legacy"
+                                                    }
+                                                    @else {
+                                                        "Currently #"(current_position)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                    @else {
-                                        h2 {
-                                            a href = {"/demonlist/" (demon.position)} {
-                                                "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name) " by " (demon.publisher)
+                                }
+                                @else {
+                                    div.flex.col style = "align-items: center" {
+                                        h2 style = "margin-bottom: 0px"{
+                                            a href = {"/demonlist/permalink/" (demon.id) "/"} {
+                                                "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
+                                            }
+                                        }
+                                        h3 {
+                                            i {
+                                                (demon.publisher)
+                                            }
+                                            @if let Some(current_position) = demon.current_position {
+                                                br;
+                                                @if current_position > config::extended_list_size() {
+                                                    "Currently Legacy"
+                                                }
+                                                @else {
+                                                    "Currently #"(current_position)
+                                                }
                                             }
                                         }
                                     }
