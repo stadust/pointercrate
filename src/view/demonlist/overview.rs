@@ -31,7 +31,8 @@ pub struct DemonlistOverview {
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
     pub nations: Vec<Nationality>,
-    pub when: Option<DateTime<FixedOffset>>,
+
+    pub query_data: OverviewQueryData,
 }
 
 pub async fn overview_demons(connection: &mut PgConnection, at: Option<DateTime<FixedOffset>>) -> Result<Vec<OverviewDemon>> {
@@ -108,13 +109,13 @@ impl DemonlistOverview {
         }
     }
 
-    pub(super) async fn load(connection: &mut PgConnection, when: Option<DateTime<FixedOffset>>) -> Result<DemonlistOverview> {
+    pub(super) async fn load(connection: &mut PgConnection, query_data: OverviewQueryData) -> Result<DemonlistOverview> {
         let admins = User::by_permission(Permissions::ListAdministrator, connection).await?;
         let mods = User::by_permission(Permissions::ListModerator, connection).await?;
         let helpers = User::by_permission(Permissions::ListHelper, connection).await?;
 
         let nations = Nationality::all(connection).await?;
-        let demon_overview = overview_demons(connection, when).await?;
+        let demon_overview = overview_demons(connection, query_data.when).await?;
 
         Ok(DemonlistOverview {
             admins,
@@ -122,37 +123,49 @@ impl DemonlistOverview {
             helpers,
             nations,
             demon_overview,
-            when,
+            query_data,
         })
     }
 }
 
-#[derive(Deserialize)]
-pub struct TimeMachineData {
+#[derive(Deserialize, Debug, Default)]
+pub struct OverviewQueryData {
     when: Option<DateTime<FixedOffset>>,
+
+    #[serde(rename = "timemachine", default)]
+    time_machine_shown: bool,
+
+    #[serde(rename = "statsviewer", default)]
+    stats_viewer_shown: bool,
+
+    #[serde(rename = "submitter", default)]
+    record_submitter_shown: bool,
 }
 
 #[get("/demonlist/")]
-pub async fn index(state: PointercrateState, when: Query<TimeMachineData>) -> ViewResult<HttpResponse> {
+pub async fn index(state: PointercrateState, query_data: Query<OverviewQueryData>) -> ViewResult<HttpResponse> {
     /* static */
     let EARLIEST_DATE: DateTime<FixedOffset> = FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 8, 5).and_hms(0, 0, 0));
 
     let mut connection = state.connection().await?;
 
-    let mut specified_when = when.into_inner().when;
+    let mut query_data = query_data.into_inner();
+
+    let mut specified_when = query_data.when;
 
     if let Some(when) = specified_when {
         if when < EARLIEST_DATE {
-            specified_when = Some(EARLIEST_DATE);
-        }
-        if when >= Utc::now() {
-            specified_when = None;
+            query_data.when = Some(EARLIEST_DATE);
+        } else if when >= Utc::now() {
+            query_data.when = None;
+        } else {
+            query_data.when = specified_when
         }
     }
 
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(DemonlistOverview::load(&mut connection, specified_when).await?.render().0))
+        .body(DemonlistOverview::load(&mut connection, query_data).await?.render().0))
 }
 
 impl Page for DemonlistOverview {
@@ -181,10 +194,10 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center.container {
                 main.left {
-                    (time_machine())
-                    (super::submission_panel(&self.demon_overview))
-                    (super::stats_viewer(&self.nations))
-                    @if let Some(when) = self.when {
+                    (time_machine(self.query_data.time_machine_shown))
+                    (super::submission_panel(&self.demon_overview, self.query_data.record_submitter_shown))
+                    (super::stats_viewer(&self.nations, self.query_data.stats_viewer_shown))
+                    @if let Some(when) = self.query_data.when {
                         div.panel.fade.blue.flex style="align-items: center;" {
                              span style = "text-align: end"{
                                 "You are currently looking at the demonlist how it was on"
@@ -355,7 +368,7 @@ impl Page for DemonlistOverview {
     }
 }
 
-fn time_machine() -> Markup {
+fn time_machine(visible: bool) -> Markup {
     let current_year = FixedOffset::east(3600 * 23 + 3599)
         .from_utc_datetime(&Utc::now().naive_utc())
         .year();
@@ -376,7 +389,7 @@ fn time_machine() -> Markup {
     ];
 
     html! {
-        section.panel.fade.closable#time-machine style = "display: none; overflow: initial" {
+        section.panel.fade.closable#time-machine  style=(if !visible {"display:none;overflow: initial"} else {"overflow: initial"}) {
             span.plus.cross.hover {}
             form#time-machine-form novalidate = "" {
                 div.underlined {

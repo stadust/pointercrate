@@ -10,12 +10,14 @@ $(document).ready(function () {
 
   window.statsViewer = new StatsViewer(document.getElementById("statsviewer"));
 
-  document
-    .getElementById("show-stats-viewer")
-    .addEventListener("click", () => {
-      gtag('event', 'stats-viewer-opened', {'event-category': 'demonlist'});
-      window.statsViewer.initialize()
-    });
+  if(window.location.toString().includes("statsviewer=true"))
+    window.statsViewer.initialize()
+  else
+    document
+      .getElementById("show-stats-viewer")
+      .addEventListener("click", () => {
+        gtag('event', 'stats-viewer-opened', {'event-category': 'demonlist'});
+      });
 });
 
 function initializePositionChart() {

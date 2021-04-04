@@ -172,9 +172,9 @@ pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &st
     }
 }
 
-pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
+pub(super) fn submission_panel(demons: &[OverviewDemon], visible: bool) -> Markup {
     html! {
-        section.panel.fade.closable#submitter style = "display: none" {
+        section.panel.fade.closable#submitter style=(if !visible {"display:none"} else {""}) {
             span.plus.cross.hover {}
             form#submission-form novalidate = "" {
                 div.underlined {
@@ -257,9 +257,9 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
     }
 }
 
-fn stats_viewer(nations: &[Nationality]) -> Markup {
+fn stats_viewer(nations: &[Nationality], visible: bool) -> Markup {
     html! {
-        section.panel.fade.closable#statsviewer style = "display:none" {
+        section.panel.fade.closable#statsviewer  style=(if !visible {"display:none"} else {""}) {
             span.plus.cross.hover {}
             h2.underlined.pad {
                 "Stats Viewer - "

@@ -1,3 +1,4 @@
+use crate::view::demonlist::overview::OverviewQueryData;
 use crate::{
     config,
     gd::GDIntegrationResult,
@@ -45,7 +46,7 @@ pub async fn demon_permalink(state: PointercrateState, id: Path<i32>) -> ViewRes
 #[get("/demonlist/{position}/")]
 pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
-    let overview = DemonlistOverview::load(&mut connection, None).await?;
+    let overview = DemonlistOverview::load(&mut connection, OverviewQueryData::default()).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
     let link_banned = sqlx::query!(
         r#"SELECT link_banned AS "link_banned!: bool" FROM players WHERE id = $1"#,
@@ -453,8 +454,8 @@ impl Page for Demonlist {
                         </script>
                         "#))
                     }
-                    (super::submission_panel(&self.overview.demon_overview))
-                    (super::stats_viewer(&self.overview.nations))
+                    (super::submission_panel(&self.overview.demon_overview, false))
+                    (super::stats_viewer(&self.overview.nations, false))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {

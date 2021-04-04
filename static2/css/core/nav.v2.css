@@ -113,8 +113,9 @@ header nav .nav-group:hover .nav-hover-dropdown {
 }
 
 header nav .nav-hover-dropdown a {
-  padding: 5px 20px;
+  padding: 10px 20px;
   display: block;
+  text-align: left;
 }
 
 header nav .nav-drop-down .nav-hover-dropdown a {

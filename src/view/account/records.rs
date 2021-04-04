@@ -236,7 +236,7 @@ pub(super) fn page(demons: &[OverviewDemon]) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "3" {
             div.left {
-                (crate::view::demonlist::submission_panel(demons))
+                (crate::view::demonlist::submission_panel(demons, false))
                 (record_manager(demons))
                 (note_adder())
                 div.panel.fade#record-notes-container style = "display:none" {
