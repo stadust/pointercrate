@@ -280,11 +280,9 @@ impl Page for DemonlistOverview {
                                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                                     <!-- Demonlist Responsive Feed Ad -->
                                     <ins class="adsbygoogle"
-                                         style="display:block"
+                                         style="display:inline-block;width:728px;height:90px"
                                          data-ad-client="ca-pub-3064790497687357"
-                                         data-ad-slot="2819150519"
-                                         data-ad-format="auto"
-                                         data-full-width-responsive="true"></ins>
+                                         data-ad-slot="2819150519"></ins>
                                     <script>
                                          (adsbygoogle = window.adsbygoogle || []).push({});
                                     </script>
