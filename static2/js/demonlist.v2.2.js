@@ -11,12 +11,13 @@ $(document).ready(function () {
   window.statsViewer = new StatsViewer(document.getElementById("statsviewer"));
 
   if(window.location.toString().includes("statsviewer=true"))
-    window.statsViewer.initialize()
+    window.statsViewer.initialize();
   else
     document
       .getElementById("show-stats-viewer")
       .addEventListener("click", () => {
         gtag('event', 'stats-viewer-opened', {'event-category': 'demonlist'});
+        window.statsViewer.initialize();
       });
 });
 
