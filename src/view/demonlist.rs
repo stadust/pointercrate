@@ -385,7 +385,7 @@ fn stats_viewer(nations: &[Nationality]) -> Markup {
 
 fn sidebar_ad() -> Markup {
     html! {
-        section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px" {
+        section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
             (PreEscaped(r#"
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
             <!-- Demonlist Sidebar Ad -->

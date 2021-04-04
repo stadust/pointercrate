@@ -149,6 +149,9 @@ impl Page for Homepage {
                             p {
                                 "But beyond that, I also have a very exciting new feature to share: Pointercrate's own WayBackMachine! It is now possible to view old versions of the demon list going back to 2017-08-05 (I sadly do not have data from most of the 'blue' era, as paqoe calls it, or the forum days). This was definitely one of the most requested features, so I am very happy to announce its implementation (and it going live on pointercrate's 4th anniversary is quite fitting)."
                             }
+                            p {
+                                "Note that for now, past versions of the stats viewer are not available. This is definitely planned, though."
+                            }
                         }
                         div.tab-content.tab-content data-tab-id ="98" {
                             h3 style="text-align: left; font-size: 110%" {
