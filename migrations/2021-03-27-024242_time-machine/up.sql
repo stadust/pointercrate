@@ -9,7 +9,7 @@ RETURNS TABLE (
     verifier INTEGER,
     publisher INTEGER,
     id INTEGER,
-    level_id INTEGER,
+    level_id BIGINT,
     current_position SMALLINT
 )
 AS $$
