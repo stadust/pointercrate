@@ -364,6 +364,9 @@ impl Page for DemonlistOverview {
                     </script>", config::list_size(), config::extended_list_size())
                 ))
             },
+            html! {
+                link ref = "canonical" href = "https://pointercrate.com/demonlist/";
+            },
         ]
     }
 }
