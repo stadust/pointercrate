@@ -9,7 +9,7 @@ use crate::{
 };
 use actix_web::{web::Query, HttpResponse};
 use actix_web_codegen::get;
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone, Utc};
 use maud::{html, Markup, PreEscaped};
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -31,10 +31,10 @@ pub struct DemonlistOverview {
     pub mods: Vec<User>,
     pub helpers: Vec<User>,
     pub nations: Vec<Nationality>,
-    pub when: Option<NaiveDateTime>,
+    pub when: Option<DateTime<FixedOffset>>,
 }
 
-pub async fn overview_demons(connection: &mut PgConnection, at: Option<NaiveDateTime>) -> Result<Vec<OverviewDemon>> {
+pub async fn overview_demons(connection: &mut PgConnection, at: Option<DateTime<FixedOffset>>) -> Result<Vec<OverviewDemon>> {
     match at {
         None => Ok(sqlx::query_as!(
                 OverviewDemon,
@@ -48,10 +48,11 @@ pub async fn overview_demons(connection: &mut PgConnection, at: Option<NaiveDate
                 OverviewDemon,
                 r#"SELECT demons.id as "id!", position_ as "position!", demons.name as "name!: String", CASE WHEN verifiers.link_banned THEN NULL ELSE video::TEXT END, 
                  players.name as "publisher: String", current_position FROM list_at($1) AS demons INNER JOIN players ON demons.publisher = players.id INNER JOIN players AS verifiers 
-                 ON demons.verifier = verifiers.id ORDER BY position_"#, time
+                 ON demons.verifier = verifiers.id ORDER BY position_"#, time.naive_utc()
             )
             .fetch_all(connection)
             .await?)
+
     }
 }
 
@@ -107,7 +108,7 @@ impl DemonlistOverview {
         }
     }
 
-    pub(super) async fn load(connection: &mut PgConnection, when: Option<NaiveDateTime>) -> Result<DemonlistOverview> {
+    pub(super) async fn load(connection: &mut PgConnection, when: Option<DateTime<FixedOffset>>) -> Result<DemonlistOverview> {
         let admins = User::by_permission(Permissions::ListAdministrator, connection).await?;
         let mods = User::by_permission(Permissions::ListModerator, connection).await?;
         let helpers = User::by_permission(Permissions::ListHelper, connection).await?;
@@ -128,13 +129,13 @@ impl DemonlistOverview {
 
 #[derive(Deserialize)]
 pub struct TimeMachineData {
-    when: Option<NaiveDateTime>,
+    when: Option<DateTime<FixedOffset>>,
 }
 
 #[get("/demonlist/")]
 pub async fn index(state: PointercrateState, when: Query<TimeMachineData>) -> ViewResult<HttpResponse> {
     /* static */
-    let EARLIEST_DATE: NaiveDateTime = NaiveDateTime::new(NaiveDate::from_ymd(2017, 8, 5), NaiveTime::from_hms(0, 0, 0));
+    let EARLIEST_DATE: DateTime<FixedOffset> = FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 8, 5).and_hms(0, 0, 0));
 
     let mut connection = state.connection().await?;
 
@@ -144,7 +145,7 @@ pub async fn index(state: PointercrateState, when: Query<TimeMachineData>) -> Vi
         if when < EARLIEST_DATE {
             specified_when = Some(EARLIEST_DATE);
         }
-        if when >= Utc::now().naive_utc() {
+        if when >= Utc::now() {
             specified_when = None;
         }
     }
@@ -184,9 +185,11 @@ impl Page for DemonlistOverview {
                     (super::stats_viewer(&self.nations))
                     @if let Some(when) = self.when {
                         div.panel.fade.blue.flex style="align-items: end; " {
-                             span style = "text-align: end"{"You are currently looking at the demonlist how it was on"
-                             br;
-                             b{(when)}}
+                             span style = "text-align: end"{
+                                "You are currently looking at the demonlist how it was on"
+                                 br;
+                                 b{(when.format("%A, %B %eth %Y at %l:%M:%S%P GMT%Z"))}
+                             }
                              a.white.button href = "/demonlist/" style = "margin-left: 15px"{ b{"Go to present" }}
                         }
                     }
