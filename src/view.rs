@@ -118,19 +118,33 @@ pub fn nav_bar() -> Markup {
                             span {"Documentation"}
                         }
                     }
-                    a.nav-item.hover.white href = "/demonlist/" title = "Geometry Dash Demonlist" {
-                        span style ="display:flex; flex-direction:column;" {
+                }
+                div.nav-group {
+                    a.nav-item.hover.white href = "/demonlist/" {
+                        span.flex.col {
                             span style ="font-size: 50%" {"Geometry Dash"}
                             span {"DEMONLIST"}
                         }
+                         i.fas.fa-sort-down style = "height: 50%; padding-left: 5px" {}
                     }
-                    div.nav-item.collapse-button {
-                        div.hamburger.hover {
-                            input type="checkbox"{}
-                            span{}
-                            span{}
-                            span{}
+                    ul.nav-hover-dropdown {
+                        li {
+                            a.white.hover href = "/demonlist/?statsviewer=true" {"Stats Viewer"}
                         }
+                        li {
+                            a.white.hover href = "/demonlist/?submitter=true" {"Record Submitter"}
+                        }
+                        li {
+                            a.white.hover href = "/demonlist/?timemachine=true" { "Time Machine" }
+                        }
+                    }
+                }
+                div.nav-item.collapse-button {
+                    div.hamburger.hover {
+                        input type="checkbox"{}
+                        span{}
+                        span{}
+                        span{}
                     }
                 }
             }

@@ -39,6 +39,8 @@ header nav .nav-item {
   padding: 5px 20px;
 
   cursor: pointer;
+
+  position: relative;
 }
 
 header nav .nav-item-right {
@@ -47,6 +49,7 @@ header nav .nav-item-right {
 
 header nav .nav-group {
   display: flex;
+  position: relative;
 }
 
 header nav .nav-group-right {
@@ -85,6 +88,37 @@ header nav .nav-drop-down .seperator {
 
   margin: 0px 10px 10px 10px;
   padding: 10px 0px 0px 0px;
+}
+
+/*
+ * Things for on hover sub-menus
+ */
+header nav .nav-hover-dropdown {
+  margin: 0;
+  width: 100%;
+  font-size: 90%;
+}
+
+header nav .nav-group .nav-hover-dropdown {
+  position: absolute;
+  top: 70px;
+
+  border: 1px solid rgba(211, 211, 211, 1);
+  border-top: 0;
+  display: none;
+}
+
+header nav .nav-group:hover .nav-hover-dropdown {
+  display: block;
+}
+
+header nav .nav-hover-dropdown a {
+  padding: 5px 20px;
+  display: block;
+}
+
+header nav .nav-drop-down .nav-hover-dropdown a {
+  padding-left: 35px;
 }
 
 /* --------- smartphone ----------- */

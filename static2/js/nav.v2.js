@@ -3,7 +3,7 @@
 const TEMPLATES = {
   DROP_DOWN: "<div class='nav-drop-down'></div>",
   BUTTON:
-    '<div class="hamburger hover"><input type="checkbox" /><span></span><span></span><span></span></div>'
+    '<div class ="nav-item collapse-button nav-nohide"><div class="hamburger hover"><input type="checkbox" /><span></span><span></span><span></span></div></div>'
 };
 
 const NOHIDE_CLASSES = [".collapse-button", ".nav-icon"];
@@ -12,14 +12,28 @@ class NavigationBar {
   constructor(navigation) {
     this.extended = false;
     this.nav = $(navigation);
-    this.items = this.nav.find(".nav-item:not(.nav-nohide)");
+
+    let dropDown = document.createElement("div");
+    dropDown.classList.add("nav-drop-down");
+
+    for(let navGroup of navigation.getElementsByClassName("nav-group")) {
+      for(let navItem of navGroup.childNodes) {
+        if(!navItem.classList.contains("nav-nohide")) {
+          let clone = navItem.cloneNode(true);
+
+          for (let hovered of clone.getElementsByClassName("nav-hover-dropdown"))
+            hovered.classList.remove("nav-hover-dropdown");
+
+          dropDown.appendChild(clone);
+        }
+      }
+    }
+    navigation.appendChild(dropDown);
+
+    console.log(dropDown);
+
+    this.dropDown = $(dropDown);
     this.button = this.ensureButton();
-
-    this.dropDown = $(TEMPLATES.DROP_DOWN);
-
-    this.nav.append(this.dropDown);
-    this.items.clone().appendTo(this.dropDown);
-
     this.registerHandlers();
   }
 
