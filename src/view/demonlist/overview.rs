@@ -401,7 +401,7 @@ fn time_machine(visible: bool) -> Markup {
                 div.flex {
                     span.form-input data-type = "dropdown" style = "max-width:33%" {
                         h3 {"Year:"}
-                        (crate::view::simple_dropdown("time-machine-year", None, (2017..=current_year)))
+                        (crate::view::simple_dropdown("time-machine-year", None, 2017..=current_year))
                         p.error {}
                     }
                     span.form-input data-type = "dropdown" style = "max-width:33%"  {
@@ -411,24 +411,24 @@ fn time_machine(visible: bool) -> Markup {
                     }
                     span.form-input data-type = "dropdown" style = "max-width:33%"  {
                         h3 {"Day:"}
-                        (crate::view::simple_dropdown("time-machine-day", None, (1..=31)))
+                        (crate::view::simple_dropdown("time-machine-day", None, 1..=31))
                         p.error {}
                     }
                 }
                 div.flex {
                     span.form-input data-type = "dropdown" style = "max-width:33%" {
                         h3 {"Hour:"}
-                        (crate::view::simple_dropdown("time-machine-hour", Some(0), (0..24)))
+                        (crate::view::simple_dropdown("time-machine-hour", Some(0), 0..24))
                         p.error {}
                     }
                     span.form-input data-type = "dropdown" style = "max-width:33%"  {
                         h3 {"Minute:"}
-                        (crate::view::simple_dropdown("time-machine-minute", Some(0), (0..=59)))
+                        (crate::view::simple_dropdown("time-machine-minute", Some(0), 0..=59))
                         p.error {}
                     }
                     span.form-input data-type = "dropdown" style = "max-width:33%"  {
                         h3 {"Second:"}
-                        (crate::view::simple_dropdown("time-machine-second", Some(0), (0..=59)))
+                        (crate::view::simple_dropdown("time-machine-second", Some(0), 0..=59))
                         p.error {}
                     }
                 }
