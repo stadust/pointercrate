@@ -1,11 +1,12 @@
 import {
-  initializeRecordSubmitter,
+  initializeRecordSubmitter, initializeTimeMachine,
   StatsViewer,
 } from "./modules/demonlist.mjs";
 
 $(document).ready(function () {
   initializePositionChart();
   initializeRecordSubmitter();
+  initializeTimeMachine();
 
   window.statsViewer = new StatsViewer(document.getElementById("statsviewer"));
 

@@ -3,6 +3,7 @@
 
 use crate::config;
 use maud::{html, Markup, PreEscaped, DOCTYPE};
+use std::fmt::Display;
 
 pub mod account;
 pub mod demonlist;
@@ -248,6 +249,33 @@ pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl It
                     (default_item)
                     @for item in filter_items {
                         (item)
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, items: impl Iterator<Item = T1>) -> Markup {
+    html! {
+        div.dropdown-menu.js-search.no-stretch#(dropdown_id) {
+            @match default {
+                Some(default) => {
+                    input type="text" required="" autocomplete="off" data-default=(default) style = "color: #444446; font-weight: bold;";
+                }
+                None => {
+                    input type="text" required="" autocomplete="off" style = "color: #444446; font-weight: bold;";
+                }
+            }
+
+            div.menu {
+                ul {
+                    @for item in items {
+                        li.white.hover data-value=(item) data-display = (item)  {
+                            b {
+                                (item)
+                            }
+                        }
                     }
                 }
             }

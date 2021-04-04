@@ -176,78 +176,76 @@ pub(super) fn submission_panel(demons: &[OverviewDemon]) -> Markup {
     html! {
         section.panel.fade.closable#submitter style = "display: none" {
             span.plus.cross.hover {}
-            div.flex {
-                form#submission-form novalidate = "" {
-                    div.underlined {
-                        h2 {"Record Submission"}
-                    }
-                    p.info-red.output {}
-                    p.info-green.output {}
-                    h3 {
-                        "Demon:"
-                    }
-                    p {
-                        "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
-                    }
-                    span.form-input data-type = "dropdown" {
-                        (demon_dropdown("id_demon", demons.iter().filter(|demon| demon.position <= config::extended_list_size())))
-                        p.error {}
-                    }
-                    h3 {
-                        "Holder:"
-                    }
-                    p {
-                        "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
-                    }
-                    span.form-input.flex.col#id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable#record-submitter-holder-pen aria-hidden = "true" {}
-                                " "
-                            }
-                            i#selected-holder data-name = "player" {"None Selected"}
-                        }
-                        p.error {}
-                    }
-                    h3 {
-                        "Progress:"
-                    }
-                    p {
-                        "The progress made as percentage. Only values greater than or equal to the demons record requirement and smaller than or equal to 100 are accepted!"
-                    }
-                    span.form-input.flex.col#id_progress {
-                        input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100";
-                        p.error {}
-                    }
-                    h3 {
-                        "Video: "
-                    }
-                    p {
-                        "A proof video of the legitimacy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream."
-                        br {}
-
-                        i { "Note: " }
-                        "Please pay attention to only submit well-formed URLs!"
-                    }
-                    span.form-input.flex.col#id_video {
-                        input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
-                        p.error {}
-                    }
-                    h3 {
-                        "Notes or comments: "
-                    }
-                    p {
-                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission. In particular, any required " b { "raw footage"} " goes here."
-                    }
-                    span.form-input.flex.col#submit-note {
-                        textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
-                        p.error {}
-                    }
-                    p {
-                        "By submitting the record you acknowledge the " a.link href = "/guidelines" {"submission guidelines"} "."
-                    }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
+            form#submission-form novalidate = "" {
+                div.underlined {
+                    h2 {"Record Submission"}
                 }
+                p.info-red.output {}
+                p.info-green.output {}
+                h3 {
+                    "Demon:"
+                }
+                p {
+                    "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
+                }
+                span.form-input data-type = "dropdown" {
+                    (demon_dropdown("id_demon", demons.iter().filter(|demon| demon.position <= config::extended_list_size())))
+                    p.error {}
+                }
+                h3 {
+                    "Holder:"
+                }
+                p {
+                    "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
+                }
+                span.form-input.flex.col#id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
+                    span {
+                        b {
+                            i.fa.fa-pencil-alt.clickable#record-submitter-holder-pen aria-hidden = "true" {}
+                            " "
+                        }
+                        i#selected-holder data-name = "player" {"None Selected"}
+                    }
+                    p.error {}
+                }
+                h3 {
+                    "Progress:"
+                }
+                p {
+                    "The progress made as percentage. Only values greater than or equal to the demons record requirement and smaller than or equal to 100 are accepted!"
+                }
+                span.form-input.flex.col#id_progress {
+                    input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100";
+                    p.error {}
+                }
+                h3 {
+                    "Video: "
+                }
+                p {
+                    "A proof video of the legitimacy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream."
+                    br {}
+
+                    i { "Note: " }
+                    "Please pay attention to only submit well-formed URLs!"
+                }
+                span.form-input.flex.col#id_video {
+                    input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
+                    p.error {}
+                }
+                h3 {
+                    "Notes or comments: "
+                }
+                p {
+                    "Provide any additional notes you'd like to pass on to the list moderator receiving your submission. In particular, any required " b { "raw footage"} " goes here."
+                }
+                span.form-input.flex.col#submit-note {
+                    textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
+                    p.error {}
+                }
+                p {
+                    "By submitting the record you acknowledge the " a.link href = "/guidelines" {"submission guidelines"} "."
+                }
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
             }
         }
         (player_selection_dialog(

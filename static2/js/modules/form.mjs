@@ -812,7 +812,7 @@ export class DropdownFormInput extends FormInput {
   constructor(dropdown) {
     super();
 
-    this.dropdown = new Dropdown(dropdown.childNodes[0]);
+    this.dropdown = new Dropdown(dropdown.getElementsByClassName("dropdown-menu")[0]);
     this.error = dropdown.getElementsByTagName("p")[0];
 
     this.dropdown.addEventListener(selected => {
@@ -833,7 +833,8 @@ export class DropdownFormInput extends FormInput {
 
   get value() {
     // FIXME: obviously not always int
-    return parseInt(this.dropdown.selected);
+    let asInt = parseInt(this.dropdown.selected);
+    return isNaN(asInt) ? this.dropdown.selected : asInt;
   }
 
   get name() {

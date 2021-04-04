@@ -9,7 +9,7 @@ use crate::{
 };
 use actix_web::{web::Query, HttpResponse};
 use actix_web_codegen::get;
-use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone, Utc};
+use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, TimeZone, Utc};
 use maud::{html, Markup, PreEscaped};
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -181,14 +181,21 @@ impl Page for DemonlistOverview {
 
             div.flex.m-center.container {
                 main.left {
+                    (time_machine())
                     (super::submission_panel(&self.demon_overview))
                     (super::stats_viewer(&self.nations))
                     @if let Some(when) = self.when {
-                        div.panel.fade.blue.flex style="align-items: end; " {
+                        div.panel.fade.blue.flex style="align-items: center;" {
                              span style = "text-align: end"{
                                 "You are currently looking at the demonlist how it was on"
                                  br;
-                                 b{(when.format("%A, %B %eth %Y at %l:%M:%S%P GMT%Z"))}
+                                 b {
+                                     @match when.day() {
+                                        1 | 21 | 31 => (when.format("%A, %B %est %Y at %l:%M:%S%P GMT%Z")),
+                                        2 | 22 => (when.format("%A, %B %end %Y at %l:%M:%S%P GMT%Z")),
+                                        _ => (when.format("%A, %B %eth %Y at %l:%M:%S%P GMT%Z"))
+                                     }
+                                 }
                              }
                              a.white.button href = "/demonlist/" style = "margin-left: 15px"{ b{"Go to present" }}
                         }
@@ -345,5 +352,75 @@ impl Page for DemonlistOverview {
                 ))
             },
         ]
+    }
+}
+
+fn time_machine() -> Markup {
+    let current_year = FixedOffset::east(3600 * 23 + 3599)
+        .from_utc_datetime(&Utc::now().naive_utc())
+        .year();
+
+    let months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+
+    html! {
+        section.panel.fade.closable#time-machine style = "display: none; overflow: initial" {
+            span.plus.cross.hover {}
+            form#time-machine-form novalidate = "" {
+                div.underlined {
+                    h2 {"Time Machine"}
+                }
+                p {
+                    "Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is August 5th 2017."
+                }
+                div.flex {
+                    span.form-input data-type = "dropdown" style = "max-width:33%" {
+                        h3 {"Year:"}
+                        (crate::view::simple_dropdown("time-machine-year", None, (2017..=current_year)))
+                        p.error {}
+                    }
+                    span.form-input data-type = "dropdown" style = "max-width:33%"  {
+                        h3 {"Month:"}
+                        (crate::view::simple_dropdown("time-machine-month", None, months.iter()))
+                        p.error {}
+                    }
+                    span.form-input data-type = "dropdown" style = "max-width:33%"  {
+                        h3 {"Day:"}
+                        (crate::view::simple_dropdown("time-machine-day", None, (1..=31)))
+                        p.error {}
+                    }
+                }
+                div.flex {
+                    span.form-input data-type = "dropdown" style = "max-width:33%" {
+                        h3 {"Hour:"}
+                        (crate::view::simple_dropdown("time-machine-hour", Some(0), (0..24)))
+                        p.error {}
+                    }
+                    span.form-input data-type = "dropdown" style = "max-width:33%"  {
+                        h3 {"Minute:"}
+                        (crate::view::simple_dropdown("time-machine-minute", Some(0), (0..=59)))
+                        p.error {}
+                    }
+                    span.form-input data-type = "dropdown" style = "max-width:33%"  {
+                        h3 {"Second:"}
+                        (crate::view::simple_dropdown("time-machine-second", Some(0), (0..=59)))
+                        p.error {}
+                    }
+                }
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Let's goooo!";
+            }
+        }
     }
 }
