@@ -48,7 +48,7 @@ pub async fn demon_permalink(state: PointercrateState, id: Path<i32>) -> ViewRes
 #[get("/demonlist/{position}/")]
 pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
-    let overview = DemonlistOverview::load(&mut connection, OverviewQueryData::default()).await?;
+    let overview = DemonlistOverview::load(&mut connection, None, OverviewQueryData::default()).await?;
     let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
     let link_banned = sqlx::query!(
         r#"SELECT link_banned AS "link_banned!: bool" FROM players WHERE id = $1"#,

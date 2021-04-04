@@ -7,7 +7,7 @@ use crate::{
     view::Page,
     Result, ViewResult,
 };
-use actix_web::{web::Query, HttpResponse};
+use actix_web::{web::Query, HttpMessage, HttpRequest, HttpResponse};
 use actix_web_codegen::get;
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, TimeZone, Utc};
 use maud::{html, Markup, PreEscaped};
@@ -32,6 +32,7 @@ pub struct DemonlistOverview {
     pub helpers: Vec<User>,
     pub nations: Vec<Nationality>,
 
+    pub when: Option<DateTime<FixedOffset>>,
     pub query_data: OverviewQueryData,
 }
 
@@ -109,13 +110,15 @@ impl DemonlistOverview {
         }
     }
 
-    pub(super) async fn load(connection: &mut PgConnection, query_data: OverviewQueryData) -> Result<DemonlistOverview> {
+    pub(super) async fn load(
+        connection: &mut PgConnection, when: Option<DateTime<FixedOffset>>, query_data: OverviewQueryData,
+    ) -> Result<DemonlistOverview> {
         let admins = User::by_permission(Permissions::ListAdministrator, connection).await?;
         let mods = User::by_permission(Permissions::ListModerator, connection).await?;
         let helpers = User::by_permission(Permissions::ListHelper, connection).await?;
 
         let nations = Nationality::all(connection).await?;
-        let demon_overview = overview_demons(connection, query_data.when).await?;
+        let demon_overview = overview_demons(connection, when).await?;
 
         Ok(DemonlistOverview {
             admins,
@@ -123,6 +126,7 @@ impl DemonlistOverview {
             helpers,
             nations,
             demon_overview,
+            when,
             query_data,
         })
     }
@@ -130,8 +134,6 @@ impl DemonlistOverview {
 
 #[derive(Deserialize, Debug, Default)]
 pub struct OverviewQueryData {
-    when: Option<DateTime<FixedOffset>>,
-
     #[serde(rename = "timemachine", default)]
     time_machine_shown: bool,
 
@@ -143,29 +145,33 @@ pub struct OverviewQueryData {
 }
 
 #[get("/demonlist/")]
-pub async fn index(state: PointercrateState, query_data: Query<OverviewQueryData>) -> ViewResult<HttpResponse> {
+pub async fn index(request: HttpRequest, state: PointercrateState, query_data: Query<OverviewQueryData>) -> ViewResult<HttpResponse> {
     /* static */
     let EARLIEST_DATE: DateTime<FixedOffset> = FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 8, 5).and_hms(0, 0, 0));
 
     let mut connection = state.connection().await?;
 
-    let mut query_data = query_data.into_inner();
+    let mut specified_when = request
+        .cookie("when")
+        .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()));
 
-    let mut specified_when = query_data.when;
-
-    if let Some(when) = specified_when {
-        if when < EARLIEST_DATE {
-            query_data.when = Some(EARLIEST_DATE);
-        } else if when >= Utc::now() {
-            query_data.when = None;
-        } else {
-            query_data.when = specified_when
+    let when = if let Some(when) = specified_when {
+        match when {
+            Ok(when) if when < EARLIEST_DATE => Some(EARLIEST_DATE),
+            Ok(when) if when >= Utc::now() => None,
+            Ok(when) => Some(when),
+            _ => None,
         }
-    }
+    } else {
+        None
+    };
 
-    Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(DemonlistOverview::load(&mut connection, query_data).await?.render().0))
+    Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
+        DemonlistOverview::load(&mut connection, when, query_data.into_inner())
+            .await?
+            .render()
+            .0,
+    ))
 }
 
 impl Page for DemonlistOverview {
@@ -197,7 +203,7 @@ impl Page for DemonlistOverview {
                     (time_machine(self.query_data.time_machine_shown))
                     (super::submission_panel(&self.demon_overview, self.query_data.record_submitter_shown))
                     (super::stats_viewer(&self.nations, self.query_data.stats_viewer_shown))
-                    @if let Some(when) = self.query_data.when {
+                    @if let Some(when) = self.when {
                         div.panel.fade.blue.flex style="align-items: center;" {
                              span style = "text-align: end"{
                                 "You are currently looking at the demonlist how it was on"
@@ -210,7 +216,7 @@ impl Page for DemonlistOverview {
                                      }
                                  }
                              }
-                             a.white.button href = "/demonlist/" style = "margin-left: 15px"{ b{"Go to present" }}
+                             a.white.button href = "/demonlist/" onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{"Go to present" }}
                         }
                     }
                     @for demon in &self.demon_overview {

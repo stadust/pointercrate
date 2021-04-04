@@ -61,15 +61,16 @@ export function initializeTimeMachine() {
   ];
 
   timeMachineForm.onSubmit(() => {
-
-    console.log(inputs[1].value);
-    window.location = "/demonlist/?when="
-        + inputs[0].value + "-"
-        + ("" + MONTHS.indexOf(inputs[1].value)).padStart(2, '0') + "-"
+    let when = inputs[0].value + "-"
+        + ("" + (MONTHS.indexOf(inputs[1].value) + 1)).padStart(2, '0') + "-"
         + ("" + inputs[2].value).padStart(2, '0') + "T"
         + ("" + inputs[3].value).padStart(2, '0') + ":"
         + ("" + inputs[4].value).padStart(2, '0') + ":"
         + ("" + inputs[5].value).padStart(2, '0') + (offsetHours < 0 ? "%2B" : "-") + (offsetHours + "").padStart(2, "0") + ":" + (offsetMinutes + "").padStart(2, "0");
+
+    document.cookie = "when=" + when;
+
+    window.location = "/demonlist/";
   })
 }
 
