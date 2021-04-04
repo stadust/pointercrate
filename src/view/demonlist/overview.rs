@@ -269,7 +269,7 @@ impl Page for DemonlistOverview {
                                 }
                             }
                             @if demon.position == 1 {
-                                section.panel.fade style = "padding: 0px"{
+                                section.panel.fade style = "padding: 0px; height: 90px"{
                                 (PreEscaped(r#"
                                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                                     <!-- Demonlist Responsive Feed Ad -->
