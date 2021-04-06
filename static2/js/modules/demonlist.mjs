@@ -33,7 +33,12 @@ export function embedVideo(video) {
 }
 
 export function initializeTimeMachine() {
-  var timeMachineForm = new Form(document.getElementById("time-machine-form"));
+  let formHtml = document.getElementById("time-machine-form");
+  
+  if(formHtml === null)
+    return;
+  
+  var timeMachineForm = new Form(formHtml);
 
   var inputs = ['year', 'month', 'day', 'hour', 'minute', 'second'].map(name => timeMachineForm.input("time-machine-" + name));
 
