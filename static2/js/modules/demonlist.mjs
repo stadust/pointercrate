@@ -69,6 +69,7 @@ export function initializeTimeMachine() {
         + ("" + inputs[5].value).padStart(2, '0') + (offsetHours < 0 ? "%2B" : "-") + (offsetHours + "").padStart(2, "0") + ":" + (offsetMinutes + "").padStart(2, "0");
 
     document.cookie = "when=" + when;
+    gtag('event', 'time-machine-usage', {'event-category': 'demonlist', 'label': when});
 
     window.location = "/demonlist/";
   })
