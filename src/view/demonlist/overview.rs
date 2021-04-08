@@ -147,7 +147,7 @@ pub struct OverviewQueryData {
 #[get("/demonlist/")]
 pub async fn index(request: HttpRequest, state: PointercrateState, query_data: Query<OverviewQueryData>) -> ViewResult<HttpResponse> {
     /* static */
-    let EARLIEST_DATE: DateTime<FixedOffset> = FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 8, 5).and_hms(0, 0, 0));
+    let EARLIEST_DATE: DateTime<FixedOffset> = FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 1, 4).and_hms(0, 0, 0));
 
     let mut connection = state.connection().await?;
 
@@ -403,7 +403,7 @@ fn time_machine(visible: bool) -> Markup {
                     h2 {"Time Machine"}
                 }
                 p {
-                    "Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is August 5th 2017."
+                    "Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is January 4th 2017. Note however that data before August 4th 2017 is only provided on a best-effort basis and not guaranteed to be 100% accurate. Particularly data from before April 4th 2017 contains significant errors!"
                 }
                 div.flex {
                     span.form-input data-type = "dropdown" style = "max-width:33%" {
