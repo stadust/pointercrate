@@ -92,7 +92,8 @@ pub trait Page {
                         link rel = "stylesheet" href = {(STATIC) (sheet)};
                     }
                 }
-                body style={"background-image: url(" (STATIC) "images/squares3.png)"}{
+                body style = "z-index: -10"{
+                    div style={"background-image: url(" (STATIC) "images/squares3.png);width: 100%;height: 100%;position: fixed;top: 0;left: 0;background-size: cover;background-repeat: repeat-y;pointer-events: none; z-index:-1"} {}
                     (nav_bar())
                     (self.body())
                     (footer())

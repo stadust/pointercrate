@@ -1,6 +1,7 @@
 pub use self::{
     demon_page::{demon_permalink, page},
     overview::{index, overview_demons, OverviewDemon},
+    statsviewer::stats_viewer as stats_viewer2,
 };
 use crate::{
     config,
@@ -10,6 +11,7 @@ use maud::{html, Markup, PreEscaped, Render};
 
 mod demon_page;
 mod overview;
+mod statsviewer;
 
 struct ListSection {
     name: &'static str,

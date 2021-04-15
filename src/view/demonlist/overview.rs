@@ -151,7 +151,7 @@ pub async fn index(request: HttpRequest, state: PointercrateState, query_data: Q
 
     let mut connection = state.connection().await?;
 
-    let mut specified_when = request
+    let specified_when = request
         .cookie("when")
         .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()));
 

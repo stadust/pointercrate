@@ -12,7 +12,7 @@ import {
   findParentWithClass,
   FilteredPaginator,
   Viewer,
-  setupFormDialogEditor, FormDialog, setupEditorDialog,
+  setupFormDialogEditor, FormDialog, setupEditorDialog, get,
 } from "./form.mjs";
 
 export function embedVideo(video) {
@@ -191,15 +191,28 @@ export class StatsViewer extends FilteredPaginator {
     this._progress = document.getElementById("progress");
     this._content = html.getElementsByClassName("viewer-content")[0];
 
-    this.dropdown = new Dropdown(
-      html.getElementsByClassName("dropdown-menu")[0]
-    );
-    this.dropdown.addEventListener((selected) => {
-      if (selected == "International") {
-        this.updateQueryData("nation", undefined);
-      } else {
-        this.updateQueryData("nation", selected);
-      }
+    try {
+      this.dropdown = new Dropdown(
+          html.getElementsByClassName("dropdown-menu")[0]
+      );
+      this.dropdown.addEventListener((selected) => {
+        if (selected == "International") {
+          this.updateQueryData("nation", undefined);
+        } else {
+          this.updateQueryData("nation", selected);
+        }
+      });
+    }catch (e) {
+      
+    }
+  }
+
+  initialize() {
+    return get("/api/v1/list_information/").then(data => {
+      this.list_size = data.data['list_size'];
+      this.extended_list_size = data.data['extended_list_size'];
+
+      super.initialize()
     });
   }
 
@@ -232,27 +245,27 @@ export class StatsViewer extends FilteredPaginator {
       this._name.appendChild(span);
     }
 
-    formatDemonsInto(this._created, playerData.created);
-    formatDemonsInto(this._published, playerData.published);
-    formatDemonsInto(this._verified, playerData.verified);
+    this.formatDemonsInto(this._created, playerData.created);
+    this.formatDemonsInto(this._published, playerData.published);
+    this.formatDemonsInto(this._verified, playerData.verified);
 
     let beaten = playerData.records.filter((record) => record.progress == 100);
 
     beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
 
     let legacy = beaten.filter(
-      (record) => record.demon.position > window.extended_list_length
+      (record) => record.demon.position > this.extended_list_size
     ).length;
     let extended = beaten.filter(
       (record) =>
-        record.demon.position > window.list_length &&
-        record.demon.position <= window.extended_list_length
+        record.demon.position > this.list_size &&
+        record.demon.position <= this.extended_list_size
     ).length;
 
-    let verifiedExtended = playerData.verified.filter(demon => demon.position <= window.extended_list_length && demon.position > window.list_length).length;
-    let verifiedLegacy = playerData.verified.filter(demon => demon.position > window.extended_list_length).length;
+    let verifiedExtended = playerData.verified.filter(demon => demon.position <= this.extended_list_size && demon.position > this.list_size).length;
+    let verifiedLegacy = playerData.verified.filter(demon => demon.position > this.extended_list_size).length;
 
-    formatRecordsInto(this._beaten, beaten);
+    this.formatRecordsInto(this._beaten, beaten);
 
     this._amountBeaten.textContent =
       (beaten.length - legacy - extended + playerData.verified.length - verifiedExtended - verifiedLegacy) + " ( + " + (extended + verifiedExtended) + " )";
@@ -264,14 +277,80 @@ export class StatsViewer extends FilteredPaginator {
 
     if(this._hardest.lastChild)
       this._hardest.removeChild(this._hardest.lastChild);
-    this._hardest.appendChild(hardest.name === "None" ? document.createTextNode("None") : formatDemon(hardest, "/demonlist/permalink/" + hardest.id + "/"));
+    this._hardest.appendChild(hardest.name === "None" ? document.createTextNode("None") : this.formatDemon(hardest, "/demonlist/permalink/" + hardest.id + "/"));
 
     let non100Records = playerData.records
       .filter((record) => record.progress != 100)
       .sort((r1, r2) => r1.progress - r2.progress);
 
-    formatRecordsInto(this._progress, non100Records);
+    this.formatRecordsInto(this._progress, non100Records);
   }
+
+  formatDemon(demon, link) {
+    var element;
+
+    if (demon.position <= this.list_size) {
+      element = document.createElement("b");
+    } else if (demon.position <= this.extended_list_size) {
+      element = document.createElement("span");
+    } else {
+      element = document.createElement("i");
+      element.style.opacity = ".5";
+    }
+
+    if (link) {
+      let a = document.createElement("a");
+      a.href = link;
+      a.textContent = demon.name;
+
+      element.appendChild(a);
+    } else {
+      element.textContent = demon.name;
+    }
+
+    return element;
+  }
+
+  formatDemonsInto(element, demons) {
+    while (element.lastChild) {
+      element.removeChild(element.lastChild);
+    }
+
+    if (demons.length) {
+      for (var demon of demons) {
+        element.appendChild(
+            this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
+        );
+        element.appendChild(document.createTextNode(" - "));
+      }
+      element.removeChild(element.lastChild);
+    } else {
+      element.appendChild(document.createTextNode("None"));
+    }
+  }
+
+  formatRecordsInto(element, records) {
+    while (element.lastChild) {
+      element.removeChild(element.lastChild);
+    }
+
+    if (records.length) {
+      for (var record of records) {
+        let demon = this.formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
+        if (record.progress != 100) {
+          demon.appendChild(
+              document.createTextNode(" (" + record.progress + "%)")
+          );
+        }
+        element.appendChild(demon);
+        element.appendChild(document.createTextNode(" - "));
+      }
+      element.removeChild(element.lastChild);
+    } else {
+      element.appendChild(document.createTextNode("None"));
+    }
+  }
+
 }
 
 export class PlayerSelectionDialog extends FormDialog {
@@ -416,69 +495,4 @@ function generateStatsViewerPlayer(player) {
   li.appendChild(i);
 
   return li;
-}
-
-function formatDemon(demon, link) {
-  var element;
-
-  if (demon.position <= window.list_length) {
-    element = document.createElement("b");
-  } else if (demon.position <= window.extended_list_length) {
-    element = document.createElement("span");
-  } else {
-    element = document.createElement("i");
-    element.style.opacity = ".5";
-  }
-
-  if (link) {
-    let a = document.createElement("a");
-    a.href = link;
-    a.textContent = demon.name;
-
-    element.appendChild(a);
-  } else {
-    element.textContent = demon.name;
-  }
-
-  return element;
-}
-
-function formatDemonsInto(element, demons) {
-  while (element.lastChild) {
-    element.removeChild(element.lastChild);
-  }
-
-  if (demons.length) {
-    for (var demon of demons) {
-      element.appendChild(
-        formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
-      );
-      element.appendChild(document.createTextNode(" - "));
-    }
-    element.removeChild(element.lastChild);
-  } else {
-    element.appendChild(document.createTextNode("None"));
-  }
-}
-
-function formatRecordsInto(element, records) {
-  while (element.lastChild) {
-    element.removeChild(element.lastChild);
-  }
-
-  if (records.length) {
-    for (var record of records) {
-      let demon = formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
-      if (record.progress != 100) {
-        demon.appendChild(
-          document.createTextNode(" (" + record.progress + "%)")
-        );
-      }
-      element.appendChild(demon);
-      element.appendChild(document.createTextNode(" - "));
-    }
-    element.removeChild(element.lastChild);
-  } else {
-    element.appendChild(document.createTextNode("None"));
-  }
 }
