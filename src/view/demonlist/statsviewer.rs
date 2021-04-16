@@ -1,15 +1,14 @@
-use crate::extractor::auth::TokenAuth;
-use crate::permissions::Permissions;
-use crate::state::PointercrateState;
-use crate::view::filtered_paginator;
-use crate::view::Page;
-use crate::ViewResult;
+use crate::{
+    extractor::auth::TokenAuth,
+    permissions::Permissions,
+    state::PointercrateState,
+    view::{filtered_paginator, Page},
+    ViewResult,
+};
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use futures::StreamExt;
-use maud::html;
-use maud::Markup;
-use maud::PreEscaped;
+use maud::{html, Markup, PreEscaped};
 use sqlx::query;
 use std::collections::HashMap;
 
