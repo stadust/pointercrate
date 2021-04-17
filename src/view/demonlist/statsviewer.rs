@@ -152,7 +152,7 @@ impl Page for StatsViewer {
                 (PreEscaped(css_string))
             }
             div#world-map-wrapper {
-                object#world-map data="/static2/images/world.svg" {}
+                object#world-map data="/static2/images/world.svg" type="image/svg+xml" {}
             }
             div.flex.m-center.container {
                 main.left {
