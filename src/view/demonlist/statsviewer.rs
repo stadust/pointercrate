@@ -85,7 +85,9 @@ impl HeatMap {
 
 #[get("/demonlist/statsviewer/")]
 pub async fn stats_viewer(TokenAuth(user): TokenAuth, state: PointercrateState) -> ViewResult<HttpResponse> {
-    user.inner().require_permissions(Permissions::ListHelper)?;
+    if !user.inner().has_permission(Permissions::Administrator) {
+        user.inner().require_permissions(Permissions::ListHelper)?;
+    }
 
     let mut connection = state.connection().await?;
 
