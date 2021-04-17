@@ -1,9 +1,9 @@
 import {StatsViewer} from "./modules/demonlist.mjs";
 
-$(document).ready(function () {
+$(window).on("load", function () {
     let worldMapWrapper = document.getElementById("world-map-wrapper");
     let worldMap = document.getElementById("world-map");
-    let svg = worldMap.contentDocument.children[0]
+    let svg = worldMap.contentDocument.children[0];
 
     window.statsViewer = new StatsViewer(document.getElementById("statsviewer"));
     window.statsViewer.initialize();
@@ -13,6 +13,7 @@ $(document).ready(function () {
 
         worldMapWrapper.style.filter = "blur(" + (scrollRatio * .25) + "rem)";
     });
+
 
     let nationIndicator = document.getElementById("current-nation");
     let currentlySelected = undefined;
@@ -65,10 +66,12 @@ $(document).ready(function () {
     });
 
     svg.addEventListener('wheel', event => {
-        if(event.shiftKey) {
+        if (event.shiftKey) {
             zoom -= event.deltaY / Math.abs(event.deltaY) * .1;
 
             // TODO: recenter at original mouse cursor position
+
+            console.log("hi")
 
             svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
         }
