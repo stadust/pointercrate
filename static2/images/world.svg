@@ -57,6 +57,7 @@
 svg {
   transform-origin: center;
   transform: scale(2) translate(-200px, 200px);
+  transition: transform .1s;
   overflow: hidden;
 }
 #gb path, #dk path {
