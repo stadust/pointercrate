@@ -22,7 +22,7 @@
 
 #world-map {
     /* adjust programmatically later on probably */
-    width: 1920px;
+    width: 100%;
 }
 
 .container {
