@@ -8,6 +8,8 @@ use crate::{
     state::PointercrateState,
 };
 use actix_files::{Files, NamedFile};
+use actix_web::http::ContentEncoding;
+use actix_web::middleware::Compress;
 use actix_web::{
     middleware::{Logger, NormalizePath},
     web,
@@ -68,6 +70,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Etag)
             .wrap(Logger::default())
             .wrap(NormalizePath::default())
+            .wrap(Compress::new(ContentEncoding::Gzip))
             .app_data(application_state.clone())
             .service(Files::new("/static2", "./static2").use_etag(true))
             .route(
