@@ -8,10 +8,9 @@ use crate::{
     state::PointercrateState,
 };
 use actix_files::{Files, NamedFile};
-use actix_web::http::ContentEncoding;
-use actix_web::middleware::Compress;
 use actix_web::{
-    middleware::{Logger, NormalizePath},
+    http::ContentEncoding,
+    middleware::{Compress, Logger, NormalizePath},
     web,
     web::{route, scope, JsonConfig, PathConfig, QueryConfig},
     App, HttpRequest, HttpServer,
