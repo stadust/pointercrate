@@ -444,17 +444,17 @@ impl Page for Demonlist {
             div.flex.m-center.container {
                 main.left {
                     div.panel.fade style = "padding: 0px; height: 90px" {
-                        (PreEscaped(r#"
+                        (PreEscaped(format!(r#"
                         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                         <!-- Demonpage Banner ad -->
                         <ins class="adsbygoogle"
                              style="display:inline-block;width:728px;height:90px"
-                             data-ad-client="ca-pub-3064790497687357"
+                             data-ad-client="{}"
                              data-ad-slot="4829214686"></ins>
                         <script>
-                             (adsbygoogle = window.adsbygoogle || []).push({});
+                             (adsbygoogle = window.adsbygoogle || []).push({{}});
                         </script>
-                        "#))
+                        "#, config::adsense_publisher_id())))
                     }
                     (super::submission_panel(&self.overview.demon_overview, false))
                     (super::stats_viewer(&self.overview.nations, false))

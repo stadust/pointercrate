@@ -37,19 +37,19 @@ pub trait Page {
                         (self.title())
                     }
 
-                    script data-ad-client="ca-pub-3064790497687357" async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" {}
+                    script data-ad-client=(config::adsense_publisher_id()) async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" {}
 
-                    (PreEscaped(r#"
+                    (PreEscaped(format!(r#"
                     <!-- Global site tag (gtag.js) - Google Analytics -->
                     <script async src="https://www.googletagmanager.com/gtag/js?id=G-2SGJ4S0TQM"></script>
                     <script>
                       window.dataLayer = window.dataLayer || [];
-                      function gtag(){dataLayer.push(arguments);}
+                      function gtag(){{dataLayer.push(arguments);}}
                       gtag('js', new Date());
                     
-                      gtag('config', 'G-2SGJ4S0TQM');
+                      gtag('config', '{}');
                     </script>
-                    "#));
+                    "#, config::google_analytics_tag())));
 
                     meta property="og:site_name" content="pointercrate";
                     meta property="og:type" content="website";
