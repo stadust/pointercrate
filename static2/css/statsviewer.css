@@ -20,11 +20,6 @@
     pointer-events: none;
 }
 
-#world-map {
-    /* adjust programmatically later on probably */
-    width: 100%;
-}
-
 .container {
     margin-top: calc(50vh - 90px);;
 }

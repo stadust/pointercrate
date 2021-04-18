@@ -14,13 +14,15 @@ $(window).on("load", function () {
         worldMapWrapper.style.filter = "blur(" + (scrollRatio * .25) + "rem)";
     });
 
-
     let nationIndicator = document.getElementById("current-nation");
     let currentlySelected = undefined;
 
-    let zoom = 2.0;
-    let translateX = -200;
-    let translateY = 200;
+    let zoom = 1.0;
+    let translateX = 0;
+    let translateY = 0;
+
+    let mouseXrelativeToMap;
+    let mouseYrelativeToMap;
 
     let isDragging = false;
 
@@ -40,6 +42,9 @@ $(window).on("load", function () {
 
             svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
         }
+
+        mouseXrelativeToMap = event.clientX - svg.getBoundingClientRect().left + translateX * zoom;
+        mouseYrelativeToMap = event.clientY - svg.getBoundingClientRect().top + translateY * zoom;
     });
 
     svg.addEventListener("mouseleave", event => {
@@ -67,11 +72,16 @@ $(window).on("load", function () {
 
     svg.addEventListener('wheel', event => {
         if (event.shiftKey) {
+            let unzoomedMouseX = mouseXrelativeToMap / zoom;
+            let unzoomedMouseY = mouseYrelativeToMap / zoom;
+
             zoom -= event.deltaY / Math.abs(event.deltaY) * .1;
 
-            // TODO: recenter at original mouse cursor position
+            let rezoomedMouseX = mouseXrelativeToMap / zoom;
+            let rezoomedMouseY = mouseYrelativeToMap / zoom;
 
-            console.log("hi")
+            translateX += (rezoomedMouseX - unzoomedMouseX);
+            translateY += (rezoomedMouseY - unzoomedMouseY);
 
             svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
         }

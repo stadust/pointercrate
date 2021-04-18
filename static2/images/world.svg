@@ -55,9 +55,8 @@
      type="text/css"
      id="style7">
 svg {
-  transform-origin: center;
-  transform: scale(2) translate(-200px, 200px);
-  transition: transform .1s;
+  transform-origin: top left;
+  /*transform: scale(2) translate(-200px, 200px);*/
   overflow: hidden;
 }
 #gb path, #dk path {
