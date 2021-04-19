@@ -196,7 +196,7 @@ export class StatsViewer extends FilteredPaginator {
           html.getElementsByClassName("dropdown-menu")[0]
       );
       this.dropdown.addEventListener((selected) => {
-        if (selected == "International") {
+        if (selected === "International") {
           this.updateQueryData("nation", undefined);
         } else {
           this.updateQueryData("nation", selected);
@@ -337,7 +337,7 @@ export class StatsViewer extends FilteredPaginator {
     if (records.length) {
       for (var record of records) {
         let demon = this.formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
-        if (record.progress != 100) {
+        if (record.progress !== 100) {
           demon.appendChild(
               document.createTextNode(" (" + record.progress + "%)")
           );
