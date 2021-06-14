@@ -1,8 +1,7 @@
-use crate::model::nationality::Subdivision;
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
-    model::nationality::Nationality,
+    model::nationality::{Nationality, Subdivision},
     Result,
 };
 use futures::stream::StreamExt;

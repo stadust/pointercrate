@@ -1,6 +1,5 @@
 use futures::StreamExt;
-use sqlx::query;
-use sqlx::PgConnection;
+use sqlx::{query, PgConnection};
 use std::collections::HashMap;
 
 #[derive(Debug)]

@@ -1,10 +1,9 @@
-use crate::model::nationality::Continent;
 use crate::{
     cistring::CiString,
     error::PointercrateError,
     model::{
         demonlist::player::{DatabasePlayer, Player, RankedPlayer},
-        nationality::Nationality,
+        nationality::{Continent, Nationality},
     },
     util::{non_nullable, nullable},
     Result,

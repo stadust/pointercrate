@@ -1,9 +1,5 @@
-use crate::cistring::CiString;
-use crate::model::nationality::Nationality;
-use crate::state::PointercrateState;
-use crate::ApiResult;
-use actix_web::web::Path;
-use actix_web::HttpResponse;
+use crate::{cistring::CiString, model::nationality::Nationality, state::PointercrateState, ApiResult};
+use actix_web::{web::Path, HttpResponse};
 use actix_web_codegen::get;
 
 #[get("/{iso_code}/subdivisions/")]

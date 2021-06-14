@@ -1,4 +1,3 @@
-use crate::model::nationality::Subdivision;
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
@@ -9,7 +8,7 @@ use crate::{
             player::{DatabasePlayer, FullPlayer, Player},
             record::approved_records_by,
         },
-        nationality::Nationality,
+        nationality::{Nationality, Subdivision},
     },
     Result,
 };
