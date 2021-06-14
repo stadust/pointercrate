@@ -141,6 +141,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
                     Some(Nationality {
                         iso_country_code: code,
                         nation: CiString(nation),
+                        subdivision: None, // don't display states in the records list
                     }),
                 _ => None,
             },

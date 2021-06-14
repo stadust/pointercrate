@@ -192,6 +192,12 @@ pub enum PointercrateError {
     #[display(fmt = "This video is already used by record #{}", id)]
     DuplicateVideo { id: i32 },
 
+    /// `409 CONFLICT` variant
+    ///
+    /// Error Code `40907`
+    #[display(fmt = "Attempt to set subdivision without nation")]
+    NoNationSet,
+
     /// `411 LENGTH REQUIRED`
     ///
     /// Error Code `41100`
@@ -473,6 +479,7 @@ impl PointercrateError {
             PointercrateError::DemonExists { .. } => 40904,
             PointercrateError::CreatorExists => 40905,
             PointercrateError::DuplicateVideo { .. } => 40906,
+            PointercrateError::NoNationSet => 40907,
 
             PointercrateError::LengthRequired => 41100,
 

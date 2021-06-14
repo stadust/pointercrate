@@ -1,3 +1,4 @@
+use crate::model::nationality::Subdivision;
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
@@ -21,6 +22,8 @@ struct FetchedPlayer {
     banned: bool,
     nation: Option<String>,
     iso_country_code: Option<String>,
+    subdivision_name: Option<String>,
+    subdivision_code: Option<String>,
 }
 
 impl Player {
@@ -42,8 +45,8 @@ impl Player {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Player> {
         let result = sqlx::query_as!(
             FetchedPlayer,
-            r#"SELECT id, name AS "name: String", banned, nation::text, iso_country_code::text FROM players LEFT OUTER JOIN nationalities ON 
-             players.nationality = nationalities.iso_country_code WHERE id = $1"#,
+            r#"SELECT id, players.name AS "name: String", banned, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
+             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1"#,
             id
         )
         .fetch_one(connection)
@@ -55,6 +58,14 @@ impl Player {
                     Some(Nationality {
                         iso_country_code,
                         nation: CiString(nation),
+                        subdivision: if let (Some(subdivision), Some(subdivision_code)) = (row.subdivision_name, row.subdivision_code) {
+                            Some(Subdivision {
+                                iso_code: subdivision_code,
+                                name: CiString(subdivision),
+                            })
+                        } else {
+                            None
+                        },
                     })
                 } else {
                     None

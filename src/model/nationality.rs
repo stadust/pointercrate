@@ -9,6 +9,7 @@ pub struct Nationality {
     #[serde(rename = "country_code")]
     pub iso_country_code: String,
     pub nation: CiString,
+    pub subdivision: Option<Subdivision>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Constructor)]

@@ -77,6 +77,7 @@ impl PlayerPagination {
                     Some(Nationality {
                         iso_country_code: country_code,
                         nation: CiString(nation),
+                        subdivision: None, // dont include subdivision in pagination data
                     }),
                 _ => None,
             };
@@ -154,6 +155,7 @@ impl RankingPagination {
                     Some(Nationality {
                         iso_country_code: country_code,
                         nation: CiString(nation),
+                        subdivision: None, // dont include subdivision in pagination data
                     }),
                 _ => None,
             };

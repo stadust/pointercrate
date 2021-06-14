@@ -40,6 +40,7 @@ impl Nationality {
             Nationality {
                 nation: CiString::from(row.nation),
                 iso_country_code: row.iso_country_code,
+                subdivision: None
             }
         })
         .map_err(|sqlx_error| {
@@ -66,6 +67,7 @@ impl Nationality {
             nationalities.push(Nationality {
                 nation: CiString::from(row.nation),
                 iso_country_code: row.iso_country_code,
+                subdivision: None,
             })
         }
 

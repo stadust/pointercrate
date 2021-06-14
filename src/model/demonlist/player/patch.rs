@@ -1,3 +1,4 @@
+use crate::model::nationality::Subdivision;
 use crate::{
     cistring::CiString,
     error::PointercrateError,
@@ -25,6 +26,9 @@ pub struct PatchPlayer {
 
     #[serde(default, deserialize_with = "nullable")]
     nationality: Option<Option<CiString>>,
+
+    #[serde(default, deserialize_with = "nullable")]
+    subdivision: Option<Option<String>>,
 }
 
 impl FullPlayer {
@@ -36,6 +40,13 @@ impl FullPlayer {
                         .set_nationality(Nationality::by_country_code_or_name(ident.as_ref(), connection).await?, connection)
                         .await?,
                 None => self.player.reset_nationality(connection).await?,
+            }
+        }
+
+        if let Some(subdivision) = patch.subdivision {
+            match subdivision {
+                Some(subdivision) => self.player.set_subdivision(subdivision, connection).await?,
+                None => self.player.reset_subdivision(connection).await?,
             }
         }
 
@@ -172,9 +183,12 @@ impl FullPlayer {
 
 impl Player {
     pub async fn reset_nationality(&mut self, connection: &mut PgConnection) -> Result<()> {
-        sqlx::query!("UPDATE players SET nationality = NULL WHERE id = $1", self.base.id)
-            .execute(connection)
-            .await?;
+        sqlx::query!(
+            "UPDATE players SET nationality = NULL, subdivision = NULL WHERE id = $1",
+            self.base.id
+        )
+        .execute(connection)
+        .await?;
 
         self.nationality = None;
 
@@ -193,6 +207,60 @@ impl Player {
         self.nationality = Some(nationality);
 
         Ok(())
+    }
+
+    pub async fn reset_subdivision(&mut self, connection: &mut PgConnection) -> Result<()> {
+        if let Some(ref mut nationality) = self.nationality {
+            sqlx::query!("UPDATE players SET subdivision = NULL WHERE id = $1", self.base.id)
+                .execute(connection)
+                .await?;
+
+            nationality.subdivision = None;
+        }
+
+        Ok(())
+    }
+
+    pub async fn set_subdivision(&mut self, subdivision_code: String, connection: &mut PgConnection) -> Result<()> {
+        match self.nationality {
+            Some(ref mut nationality) => {
+                let result = sqlx::query!(
+                    "SELECT iso_code, name::TEXT FROM subdivisions WHERE iso_code = $1 AND nation = $2",
+                    subdivision_code,
+                    nationality.iso_country_code
+                )
+                .fetch_one(&mut *connection)
+                .await;
+
+                match result {
+                    Ok(row) => {
+                        let subdivision = Subdivision {
+                            iso_code: row.iso_code,
+                            name: CiString(row.name.unwrap()),
+                        };
+
+                        sqlx::query!(
+                            "UPDATE players SET subdivision = $1::TEXT where id = $2",
+                            subdivision_code,
+                            self.base.id
+                        )
+                        .execute(connection)
+                        .await?;
+
+                        nationality.subdivision = Some(subdivision);
+
+                        Ok(())
+                    },
+                    Err(sqlx::Error::RowNotFound) =>
+                        Err(PointercrateError::ModelNotFound {
+                            model: "subdivision",
+                            identified_by: subdivision_code,
+                        }),
+                    Err(err) => Err(err.into()),
+                }
+            },
+            None => return Err(PointercrateError::NoNationSet),
+        }
     }
 }
 
