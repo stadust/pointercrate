@@ -18,7 +18,7 @@ use actix_web::{
 use api::{
     auth,
     demonlist::{demon, misc, player, record, submitter},
-    user,
+    nationality, user,
 };
 use std::net::SocketAddr;
 
@@ -96,6 +96,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 scope("/api/v1")
                     .service(misc::list_information)
+                    .service(scope("/nationalities").service(nationality::subdivisions))
                     .service(
                         scope("/auth")
                             .service(auth::register)

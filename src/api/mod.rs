@@ -3,6 +3,7 @@ use actix_web::{http::Method, HttpRequest, HttpResponse, ResponseError};
 
 pub mod auth;
 pub mod demonlist;
+pub mod nationality;
 pub mod user;
 
 pub fn handle_404_or_405(request: HttpRequest) -> HttpResponse {

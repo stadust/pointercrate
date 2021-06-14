@@ -11,6 +11,12 @@ pub struct Nationality {
     pub nation: CiString,
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Constructor)]
+pub struct Subdivision {
+    pub iso_code: String,
+    pub name: CiString,
+}
+
 #[derive(Debug, Eq, PartialEq, Hash, Copy, Clone)]
 pub enum Continent {
     Asia,

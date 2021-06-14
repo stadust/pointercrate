@@ -1,3 +1,4 @@
+use crate::model::nationality::Subdivision;
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
@@ -8,6 +9,26 @@ use futures::stream::StreamExt;
 use sqlx::{Error, PgConnection};
 
 impl Nationality {
+    pub async fn subdivisions(&self, connection: &mut PgConnection) -> Result<Vec<Subdivision>> {
+        let mut stream = sqlx::query!(
+            r#"SELECT iso_code as "iso_code: String", name as "name: String" FROM subdivisions WHERE nation = $1"#,
+            self.iso_country_code
+        )
+        .fetch(connection);
+        let mut subdivisions = Vec::new();
+
+        while let Some(row) = stream.next().await {
+            let row = row?;
+
+            subdivisions.push(Subdivision {
+                name: CiString::from(row.name),
+                iso_code: row.iso_code,
+            })
+        }
+
+        Ok(subdivisions)
+    }
+
     pub async fn by_country_code_or_name(code: &CiStr, connection: &mut PgConnection) -> Result<Nationality> {
         sqlx::query!(
             r#"SELECT nation as "nation: String", iso_country_code as "iso_country_code: String" FROM nationalities WHERE iso_country_code = $1 or nation = $1"#,
