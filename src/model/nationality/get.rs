@@ -11,7 +11,7 @@ use sqlx::{Error, PgConnection};
 impl Nationality {
     pub async fn subdivisions(&self, connection: &mut PgConnection) -> Result<Vec<Subdivision>> {
         let mut stream = sqlx::query!(
-            r#"SELECT iso_code as "iso_code: String", name as "name: String" FROM subdivisions WHERE nation = $1"#,
+            r#"SELECT iso_code as "iso_code: String", name as "name: String" FROM subdivisions WHERE nation = $1 ORDER BY name"#,
             self.iso_country_code
         )
         .fetch(connection);

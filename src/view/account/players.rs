@@ -5,7 +5,7 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "4"{
             div.left {
-                div.panel.fade {
+                div.panel.fade style = "overflow: initial"{
                     h2.underlined.pad {
                         "Player Manager"
                     }
@@ -62,6 +62,22 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                                             span style = "font-size: 90%; font-style: italic" {(nation.nation)}
                                                         }
                                                     }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                div.stats-container.flex.space {
+                                    span {
+                                        b {
+                                            "Political Subdivision:"
+                                        }
+                                        br;
+                                        div.dropdown-menu.js-search#edit-player-subdivision data-default = "None" {
+                                            input type="text" style = "color: #444446; font-weight: bold;";
+                                            div.menu {
+                                                ul {
+                                                    li.white.hover.underlined data-value = "None" {"None"}
                                                 }
                                             }
                                         }

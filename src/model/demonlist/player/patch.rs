@@ -197,7 +197,7 @@ impl Player {
 
     pub async fn set_nationality(&mut self, nationality: Nationality, connection: &mut PgConnection) -> Result<()> {
         sqlx::query!(
-            "UPDATE players SET nationality = $1::text WHERE id = $2",
+            "UPDATE players SET nationality = $1::text, subdivision = NULL WHERE id = $2",
             nationality.iso_country_code,
             self.base.id
         )

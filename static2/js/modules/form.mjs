@@ -23,6 +23,26 @@ export class Dropdown {
       this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
     }
 
+    const config = {attributes: false, childList: true, subtree: false};
+    const callback = (mutationList) => {
+      for(let mutation of mutationList) {
+        /*for(let addedLI of mutation.addedNodes) {
+          addedLI.addEventListener("click", () => this.select(addedLI.dataset.value));
+
+          this.values[addedLI.dataset.value] = addedLI.dataset.display || addedLI.innerHTML;
+        }*/
+        for(let removedLI of mutation.removedNodes) {
+          delete this.values[removedLI.dataset.value];
+        }
+      }
+    };
+
+    this.ul = this.html.getElementsByTagName("ul")[0];
+
+    const observer = new MutationObserver(callback);
+    observer.observe(this.ul, config);
+
+
     // in case some browser randomly decide to store text field values
     this.reset();
 
@@ -40,6 +60,15 @@ export class Dropdown {
       this.menu.fadeOut(300);
       this.input.value = value;
     });
+  }
+
+  // FIXME: horrible hack
+  addLI(li) {
+    this.ul.appendChild(li);
+
+    li.addEventListener("click", () => this.select(li.dataset.value));
+
+    this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
   }
 
   reset() {
