@@ -98,6 +98,9 @@ $(window).on("load", function () {
             let unzoomedMouseX = mouseXrelativeToMap / zoom;
             let unzoomedMouseY = mouseYrelativeToMap / zoom;
 
+            if(zoom - event.deltaY / Math.abs(event.deltaY) * .1 < 0.2)
+                return;
+
             zoom -= event.deltaY / Math.abs(event.deltaY) * .1;
 
             let rezoomedMouseX = mouseXrelativeToMap / zoom;
