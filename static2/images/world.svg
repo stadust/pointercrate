@@ -56,7 +56,6 @@
      id="style7">
 svg {
   transform-origin: top left;
-  /*transform: scale(2) translate(-200px, 200px);*/
   overflow: hidden;
 }
 #gb path, #dk path {
@@ -94,8 +93,7 @@ svg {
 }
 
 .land-with-states .state {
-    stroke-width: 5;
-  stroke-dasharray: 13px;
+    stroke-width: 2;
 }
 	 </style>
   <g

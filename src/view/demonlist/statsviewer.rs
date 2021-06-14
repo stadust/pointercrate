@@ -3,7 +3,7 @@ use crate::{
     extractor::auth::TokenAuth,
     permissions::Permissions,
     state::PointercrateState,
-    view::{filtered_paginator, Page},
+    view::{filtered_paginator, simple_dropdown, Page},
     ViewResult,
 };
 use actix_web::HttpResponse;
@@ -79,6 +79,15 @@ impl Page for StatsViewer {
                     (stats_viewer2())
                 }
                 aside.right {
+                    div.panel.fade style="overflow:initial"{
+                        h3.underlined {
+                            "Continent"
+                        }
+                        p {
+                            "Select a continent below to focus the stats viewer to that continent. Select 'All' to reset selection."
+                        }
+                        (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Middle America"].into_iter()))
+                    }
                     div.panel.fade {
                         h3.underlined {
                             "Very important thing"

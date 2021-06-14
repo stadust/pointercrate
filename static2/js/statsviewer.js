@@ -1,4 +1,5 @@
 import {StatsViewer} from "./modules/demonlist.mjs";
+import {Dropdown} from "./modules/form.mjs";
 
 $(window).on("load", function () {
     let worldMapWrapper = document.getElementById("world-map-wrapper");
@@ -7,6 +8,14 @@ $(window).on("load", function () {
 
     window.statsViewer = new StatsViewer(document.getElementById("statsviewer"));
     window.statsViewer.initialize();
+
+    new Dropdown(
+        document
+            .getElementById("continent-dropdown")
+    ).addEventListener(selected => {
+        if(selected === "All") window.statsViewer.updateQueryData("continent", undefined);
+        else window.statsViewer.updateQueryData("continent", selected);
+    });
 
     document.addEventListener('scroll', () => {
         let scrollRatio = window.scrollY / worldMapWrapper.clientHeight;

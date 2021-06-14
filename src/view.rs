@@ -275,7 +275,7 @@ pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, item
     html! {
         div.dropdown-menu.js-search.no-stretch#(dropdown_id) {
             @match default {
-                Some(default) => {
+                Some(ref default) => {
                     input type="text" required="" autocomplete="off" data-default=(default) style = "color: #444446; font-weight: bold;";
                 }
                 None => {
@@ -285,6 +285,13 @@ pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, item
 
             div.menu {
                 ul {
+                    @if let Some(ref default) = default {
+                        li.white.underlined.hover data-value=(default) data-display=(default) {
+                            b {
+                                (default)
+                            }
+                        }
+                    }
                     @for item in items {
                         li.white.hover data-value=(item) data-display = (item)  {
                             b {

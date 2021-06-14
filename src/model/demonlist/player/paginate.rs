@@ -1,3 +1,4 @@
+use crate::model::nationality::Continent;
 use crate::{
     cistring::CiString,
     error::PointercrateError,
@@ -109,6 +110,10 @@ pub struct RankingPagination {
 
     #[serde(default, deserialize_with = "nullable")]
     nation: Option<Option<String>>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    continent: Option<Continent>,
+
     #[serde(default, deserialize_with = "non_nullable")]
     name_contains: Option<CiString>,
 }
@@ -135,6 +140,7 @@ impl RankingPagination {
             .bind(self.name_contains.as_ref().map(|s| s.as_str()))
             .bind(&self.nation)
             .bind(self.nation == Some(None))
+            .bind(self.continent.as_ref().map(|c| c.to_sql()))
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
