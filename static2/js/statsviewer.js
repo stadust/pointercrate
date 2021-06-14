@@ -13,8 +13,22 @@ $(window).on("load", function () {
         document
             .getElementById("continent-dropdown")
     ).addEventListener(selected => {
-        if(selected === "All") window.statsViewer.updateQueryData("continent", undefined);
-        else window.statsViewer.updateQueryData("continent", selected);
+        if(selected === "All") {
+            window.statsViewer.updateQueryData("continent", undefined);
+            for(let continent of svg.getElementsByClassName("continent")) {
+                continent.classList.add("selectable");
+            }
+        } else {
+            window.statsViewer.updateQueryData("continent", selected);
+
+            for(let continent of svg.getElementsByClassName("continent")) {
+                if(continent.id !== selected.toLowerCase().replaceAll(' ', "-")) {
+                    continent.classList.remove("selectable");
+                } else {
+                    continent.classList.add("selectable");
+                }
+            }
+        }
     });
 
     document.addEventListener('scroll', () => {
@@ -101,6 +115,10 @@ $(window).on("load", function () {
         clickable.addEventListener('click', () => {
             if (isDragging)
                 return false;
+
+            if(!clickable.parentNode.classList.contains("selectable"))
+                return false;
+
             if (currentlySelected !== undefined)
                 currentlySelected.classList.remove("selected");
 

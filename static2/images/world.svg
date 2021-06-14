@@ -75,7 +75,7 @@ svg {
   transition: fill .3s;
 }
 
-.land:hover path,.island:hover path, .land-with-states .state:hover, .land.selected path {
+.selectable .land:hover path, .selectable .island:hover path, .selectable .land-with-states .state:hover, .selectable .land.selected path {
   fill: #0881c6 !important;
 }
 
@@ -95,10 +95,18 @@ svg {
 .land-with-states .state {
     stroke-width: 2;
 }
+
+.continent {
+      opacity: .5;
+}
+
+.selectable.continent {
+    opacity: 1;
+}
 	 </style>
   <g
      id="middle-america"
-     class="continent">
+     class="continent selectable">
     <g
        id="bq"
        class="island">
@@ -585,7 +593,7 @@ svg {
   </g>
   <g
      id="north-america"
-     class="continent">
+     class="continent selectable">
     <g
        id="us"
        class="land-with-states">
@@ -1050,7 +1058,7 @@ svg {
   </g>
   <g
      id="south-america"
-     class="continent">
+     class="continent selectable">
     <g
        id="br"
        class="land">
@@ -1258,7 +1266,8 @@ svg {
     </g>
   </g>
   <g
-     id="africa">
+     id="africa"
+     class="continent selectable">
     <g
        id="td"
        class="land">
@@ -1858,7 +1867,8 @@ svg {
     </g>
   </g>
   <g
-     id="europe">
+     id="europe"
+     class="continent selectable">
     <g
        id="fr"
        class="land">
@@ -2964,7 +2974,8 @@ svg {
     </g>
   </g>
   <g
-     id="asia">
+     id="asia"
+     class="continent selectable">
     <g
        id="lk"
        class="land">
@@ -3834,7 +3845,8 @@ svg {
     </g>
   </g>
   <g
-     id="australia">
+     id="australia"
+     class="continent selectable">
     <g
        id="ki"
        class="island">
