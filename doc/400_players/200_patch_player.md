@@ -29,6 +29,7 @@ the record will the higher progress will take precedence.
 | name   | string  | Set to update the player's name          | true     |
 | banned | boolean | Set to update the player's banned status | true     |
 |nationality|string| Set to update the player's nationality. Can be either the nation's name, or its ISO countrycode| true|
+|subdivision|string| Set to update the player's political subdivision| true |
 
 ### Response: `200 OK`
 
@@ -55,7 +56,8 @@ Returned when the `PATCH` operation did not make any changes.
 | ----------- | ---------- | ------------------------------------------------------- |
 | 400         | 40003      | Invalid data type for requested field                   |
 | 403         | 40302      | The requested field cannot be updated via this endpoint |
-| 404         | 40401      | No player with id `player_id` was found, or the specified nationality wasn't recognized                 |
+| 404         | 40401      | No player with id `player_id` was found, or the specified nationality or subdivision wasn't recognized                 |
+| 409| 40907 | A political subdivision was provided, but no nationality set |
 
 ### Example request:
 
@@ -67,7 +69,9 @@ Content-Type: application/json
 If-Match: FfbtbML27VL1ciOI1Ar0mX20Yhc=
 
 {
-    "banned": true
+    "banned": true,
+    "nationality": "US",
+    "subdivision": "OH"
 }
 ```
 
