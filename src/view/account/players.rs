@@ -33,7 +33,7 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Banned:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-player-banned style = "max-width: 50px" data-search-depth = "2" {
+                                        div.dropdown-menu.js-search#edit-player-banned style = "max-width: 50px" {
                                             div {
                                                 input type="text" style = "color: #444446; font-weight: bold;";
                                             }
@@ -50,7 +50,7 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Nationality:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-player-nationality data-default = "None" data-search-depth = "2" {
+                                        div.dropdown-menu.js-search#edit-player-nationality data-default = "None" {
                                             div {
                                                 input type="text" style = "color: #444446; font-weight: bold;";
                                             }
@@ -77,7 +77,7 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Political Subdivision:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-player-subdivision data-default = "None" data-search-depth = "2" {
+                                        div.dropdown-menu.js-search#edit-player-subdivision data-default = "None" {
                                             div{
                                                 input type="text" style = "color: #444446; font-weight: bold;";
                                             }

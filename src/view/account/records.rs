@@ -26,7 +26,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                             " Record #"
                             i#record-id {}
                             " - "
-                            div.dropdown-menu.js-search#edit-record-status style = "max-width: 220px" data-search-depth = "2" {
+                            div.dropdown-menu.js-search#edit-record-status style = "max-width: 220px" {
                                 div{
                                     input type="text" style = "color: #444446; font-weight: bold;";
                                 }

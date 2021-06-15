@@ -259,7 +259,7 @@ pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl It
     html! {
         div.dropdown-menu.js-search.no-stretch {
             div {
-                input type="text" data-default=(default_entry) data-search-depth = "2" autocomplete="off" style = "color: #444446; font-weight: bold;";
+                input type="text" data-default=(default_entry) autocomplete="off" style = "color: #444446; font-weight: bold;";
             }
             div.menu {
                 ul {
