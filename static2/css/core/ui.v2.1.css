@@ -375,7 +375,8 @@ textarea:invalid {
 }
 
 .search:before,
-.search:after {
+.search:after,
+.dropdown-menu div:first-child:after {
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
   font-style: normal;
@@ -395,6 +396,13 @@ textarea:invalid {
 
 .search:after {
   content: "\f057";
+}
+
+.dropdown-menu div:first-child:after {
+  content: "\f078";
+  position: absolute;
+  right: 0;
+  top: .5em;
 }
 
 .search input {
@@ -500,20 +508,28 @@ h2 .dropdown-menu ul {
   font-weight: normal;
 }
 
-.dropdown-menu > input[type="text"] {
-  border: none;
+.dropdown-menu > div {
   border-bottom: 1px dotted #555;
   width: 100%;
-  font-size: 1em;
 }
 
-.dropdown-menu > input:focus {
+.dropdown-menu input[type="text"] {
+  border: none;
+  font-size: 1em;
+  width: 100%
+}
+
+.dropdown-menu div:focus-within {
   border: 1px solid #bbb;
   border-bottom: none;
-  box-shadow: 0px 0px 10px 5px #ccc;
+  box-shadow: 0 0 10px 5px #ccc;
 }
 
-.dropdown-menu input:focus + .menu {
+.dropdown-menu input:focus, .dropdown-menu input:invalid {
+  border: none;
+}
+
+.dropdown-menu div:focus-within + .menu {
   /*opacity: 0.95;*/
   border-top: none;
 }

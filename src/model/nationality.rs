@@ -55,6 +55,7 @@ impl<'de> Deserialize<'de> for Continent {
             "asia" => Ok(Continent::Asia),
             "europe" => Ok(Continent::Europe),
             "australia" => Ok(Continent::AustraliaAndOceania),
+            "africa" => Ok(Continent::Africa),
             "north america" => Ok(Continent::NorthAmerica),
             "south america" => Ok(Continent::SouthAmerica),
             "middle america" => Ok(Continent::MiddleAmerica),

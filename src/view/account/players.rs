@@ -33,8 +33,10 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Banned:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-player-banned style = "max-width: 50px"{
-                                            input type="text" style = "color: #444446; font-weight: bold;";
+                                        div.dropdown-menu.js-search#edit-player-banned style = "max-width: 50px" data-search-depth = "2" {
+                                            div {
+                                                input type="text" style = "color: #444446; font-weight: bold;";
+                                            }
                                             div.menu {
                                                 ul {
                                                     li.white.hover data-value="true" {"yes"}
@@ -48,8 +50,10 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Nationality:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-player-nationality data-default = "None" {
-                                            input type="text" style = "color: #444446; font-weight: bold;";
+                                        div.dropdown-menu.js-search#edit-player-nationality data-default = "None" data-search-depth = "2" {
+                                            div {
+                                                input type="text" style = "color: #444446; font-weight: bold;";
+                                            }
                                             div.menu {
                                                 ul {
                                                     li.white.hover.underlined data-value = "None" {"None"}
@@ -73,8 +77,10 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Political Subdivision:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-player-subdivision data-default = "None" {
-                                            input type="text" style = "color: #444446; font-weight: bold;";
+                                        div.dropdown-menu.js-search#edit-player-subdivision data-default = "None" data-search-depth = "2" {
+                                            div{
+                                                input type="text" style = "color: #444446; font-weight: bold;";
+                                            }
                                             div.menu {
                                                 ul {
                                                     li.white.hover.underlined data-value = "None" {"None"}

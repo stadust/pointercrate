@@ -60,7 +60,7 @@ DropDown.allDropDowns = {};
 class Search {
   constructor(search) {
     this.search = $(search);
-    this.input = this.search.children("input");
+    this.input = $(search.getElementsByTagName("input")[0]);
     this.searchDepth = this.search.data("search-depth");
 
     if (typeof this.searchDepth === "undefined") {

@@ -258,7 +258,9 @@ pub fn filtered_paginator(id: &str, endpoint: &str) -> Markup {
 pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl Iterator<Item = Markup>) -> Markup {
     html! {
         div.dropdown-menu.js-search.no-stretch {
-            input type="text" data-default=(default_entry) autocomplete="off" style = "color: #444446; font-weight: bold;";
+            div {
+                input type="text" data-default=(default_entry) data-search-depth = "2" autocomplete="off" style = "color: #444446; font-weight: bold;";
+            }
             div.menu {
                 ul {
                     (default_item)
@@ -274,12 +276,14 @@ pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl It
 pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, items: impl Iterator<Item = T1>) -> Markup {
     html! {
         div.dropdown-menu.js-search.no-stretch#(dropdown_id) {
-            @match default {
-                Some(ref default) => {
-                    input type="text" required="" autocomplete="off" data-default=(default) style = "color: #444446; font-weight: bold;";
-                }
-                None => {
-                    input type="text" required="" autocomplete="off" style = "color: #444446; font-weight: bold;";
+            div {
+                @match default {
+                    Some(ref default) => {
+                        input type="text" autocomplete="off" data-default=(default) style = "color: #444446; font-weight: bold;";
+                    }
+                    None => {
+                        input type="text" autocomplete="off" style = "color: #444446; font-weight: bold;";
+                    }
                 }
             }
 
