@@ -240,7 +240,7 @@ pub(super) fn submission_panel(demons: &[OverviewDemon], visible: bool) -> Marku
                     "Notes or comments: "
                 }
                 p {
-                    "Provide any additional notes you'd like to pass on to the list moderator receiving your submission. In particular, any required " b { "raw footage"} " goes here."
+                    "Provide any additional notes you'd like to pass on to the list moderator receiving your submission. In particular, any required " b { "raw footage"} " goes here. Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator."
                 }
                 span.form-input.flex.col#submit-note {
                     textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
