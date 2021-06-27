@@ -32,7 +32,7 @@ pub struct PlayerPagination {
     name_contains: Option<CiString>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    banned: Option<bool>,
+    pub banned: Option<bool>,
 
     #[serde(default, deserialize_with = "nullable")]
     nation: Option<Option<String>>,
