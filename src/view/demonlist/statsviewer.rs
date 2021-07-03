@@ -102,10 +102,7 @@ impl Page for StatsViewer {
     }
 
     fn head(&self) -> Vec<Markup> {
-        vec![html! {
-            (PreEscaped(format!(r#"
-                <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet">"#)))
-        }]
+        vec![]
     }
 }
 

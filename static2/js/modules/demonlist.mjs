@@ -230,19 +230,27 @@ export class StatsViewer extends FilteredPaginator {
     if (playerData.nationality == null) {
       this._name.textContent = playerData.name;
     } else {
-      let flagClass =
-        "flag-icon-" + playerData.nationality.country_code.toLowerCase();
-
-      let span = document.createElement("span");
-      span.classList.add("flag-icon", flagClass);
-      span.title = playerData.nationality.nation;
+      let countrySpan = document.createElement("span");
+      countrySpan.classList.add("flag-icon");
+      countrySpan.title = playerData.nationality.nation;
+      countrySpan.style.backgroundImage = "url(/static2/images/flags/" + playerData.nationality.country_code.toLowerCase() + ".svg";
 
       while (this._name.lastChild) {
         this._name.removeChild(this._name.lastChild);
       }
 
       this._name.textContent = playerData.name + " ";
-      this._name.appendChild(span);
+      this._name.appendChild(countrySpan);
+
+      if (playerData.nationality.subdivision !== null) {
+        let stateSpan = document.createElement("span");
+        stateSpan.classList.add("flag-icon");
+        stateSpan.title = playerData.nationality.subdivision.name;
+        stateSpan.style.backgroundImage = "url(/static2/images/flags/" + playerData.nationality.country_code.toLowerCase() + "/" + playerData.nationality.subdivision.iso_code.toLowerCase() + ".svg";
+        stateSpan.style.paddingLeft = "15px";
+
+        this._name.appendChild(stateSpan);
+      }
     }
 
     this.formatDemonsInto(this._created, playerData.created);
@@ -482,9 +490,8 @@ function generateStatsViewerPlayer(player) {
 
   if (player.nationality) {
     var span = document.createElement("span");
-
-    span.className =
-      "flag-icon flag-icon-" + player.nationality.country_code.toLowerCase();
+    span.style.backgroundImage = "url(/static2/images/flags/" + player.nationality.country_code.toLowerCase() + ".svg";
+    span.className = "flag-icon";
 
     li.appendChild(span);
     li.appendChild(document.createTextNode(" "));
