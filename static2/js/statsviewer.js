@@ -37,7 +37,6 @@ $(window).on("load", function () {
         worldMapWrapper.style.filter = "blur(" + (scrollRatio * .25) + "rem)";
     });
 
-    let nationIndicator = document.getElementById("current-nation");
     let currentlySelected = undefined;
 
     let zoom = 1.0;
@@ -126,16 +125,29 @@ $(window).on("load", function () {
                 currentlySelected.classList.remove("selected");
 
             if (clickable !== currentlySelected) {
-                statsViewer.updateQueryData('nation', clickable.id.toUpperCase());
-                nationIndicator.innerText = clickable.getElementsByTagName("title")[0].innerHTML;
+                statsViewer.dropdown.select(clickable.id.toUpperCase());
 
                 currentlySelected = clickable;
                 currentlySelected.classList.add("selected");
             } else {
-                statsViewer.updateQueryData('nation', undefined);
-                nationIndicator.innerText = 'International';
+                statsViewer.dropdown.select('International');
                 currentlySelected = undefined;
             }
         })
     }
+
+    statsViewer.dropdown.addEventListener(selected => {
+        if(currentlySelected !== undefined && currentlySelected.id.toUpperCase() === selected)
+            return;
+
+        if (currentlySelected !== undefined)
+            currentlySelected.classList.remove("selected");
+
+        if(selected === 'International') {
+            currentlySelected = undefined;
+        } else {
+            currentlySelected = worldMap.contentDocument.getElementById(selected.toLowerCase());
+            currentlySelected.classList.add("selected");
+        }
+    })
 });
