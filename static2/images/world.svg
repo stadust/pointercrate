@@ -75,8 +75,13 @@ svg {
   transition: fill .3s;
 }
 
-.selectable .land:hover path, .selectable .island:hover path, .selectable .land-with-states .state:hover, .selectable .land.selected path {
+.selectable .land:hover path, .selectable .island:hover path, .selectable .land-with-states .state:hover, .selectable .land.selected path, .selectable .land-with-states.selected {
   fill: #0881c6 !important;
+}
+
+.selectable .land-with-states.selected .state {
+  stroke: none;
+  fill: none;
 }
 
 .land path, .land-with-states {
