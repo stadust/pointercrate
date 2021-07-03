@@ -72,4 +72,24 @@ impl Nationality {
 
         Ok(nationalities)
     }
+
+    pub async fn used(connection: &mut PgConnection) -> Result<Vec<Nationality>> {
+        let mut stream = sqlx::query!(
+            r#"SELECT DISTINCT nation as "nation: String", iso_country_code as "iso_country_code: String" FROM players INNER JOIN nationalities ON nationality=iso_country_code ORDER BY nation"#
+        )
+        .fetch(connection);
+        let mut nationalities = Vec::new();
+
+        while let Some(row) = stream.next().await {
+            let row = row?;
+
+            nationalities.push(Nationality {
+                nation: CiString::from(row.nation),
+                iso_country_code: row.iso_country_code,
+                subdivision: None,
+            })
+        }
+
+        Ok(nationalities)
+    }
 }

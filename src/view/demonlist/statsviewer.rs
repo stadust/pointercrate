@@ -1,9 +1,10 @@
 use self::heatmap::HeatMap;
+use crate::model::nationality::Nationality;
 use crate::{
     extractor::auth::TokenAuth,
     permissions::Permissions,
     state::PointercrateState,
-    view::{filtered_paginator, simple_dropdown, Page},
+    view::{simple_dropdown, Page},
     ViewResult,
 };
 use actix_web::HttpResponse;
@@ -15,6 +16,7 @@ mod heatmap;
 #[derive(Debug)]
 struct StatsViewer {
     heatmap: HeatMap,
+    nationalities_in_use: Vec<Nationality>,
 }
 
 #[get("/demonlist/statsviewer/")]
@@ -28,6 +30,7 @@ pub async fn stats_viewer(TokenAuth(user): TokenAuth, state: PointercrateState) 
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
         StatsViewer {
             heatmap: HeatMap::load_total_point_heatmap(&mut connection).await?,
+            nationalities_in_use: Nationality::used(&mut *connection).await?,
         }
         .render()
         .0,
@@ -76,7 +79,7 @@ impl Page for StatsViewer {
             }
             div.flex.m-center.container {
                 main.left {
-                    (stats_viewer2())
+                    (super::stats_viewer(&self.nationalities_in_use))
                 }
                 aside.right {
                     div.panel.fade style="overflow:initial"{
@@ -103,108 +106,5 @@ impl Page for StatsViewer {
 
     fn head(&self) -> Vec<Markup> {
         vec![]
-    }
-}
-
-fn stats_viewer2() -> Markup {
-    html! {
-        section.panel.fade#statsviewer {
-            h2.underlined.pad {
-                "Stats Viewer - " span#current-nation {"International"}
-            }
-            div.flex.viewer {
-                (filtered_paginator("stats-viewer-pagination", "/api/v1/players/ranking/"))
-                p.viewer-welcome {
-                    "Click on a player's name on the left to get started!"
-                }
-                div.viewer-content {
-                    div {
-                        div.flex.col {
-                            h3#player-name style = "font-size:1.4em; overflow: hidden" {}
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "List demons completed:"
-                                    }
-                                    br;
-                                    span#amount-beaten {}
-                                }
-                                span {
-                                    b {
-                                        "Legacy demons completed:"
-                                    }
-                                    br;
-                                    span#amount-legacy {}
-                                }
-                                span {
-                                    b {
-                                        "Demonlist score:"
-                                    }
-                                    br;
-                                    span#score {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Demonlist rank:"
-                                    }
-                                    br;
-                                    span#rank {}
-                                }
-                                span {
-                                    b {
-                                        "Hardest demon:"
-                                    }
-                                    br;
-                                    span#hardest {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Demons completed:"
-                                    }
-                                    br;
-                                    span#beaten {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "List demons created:"
-                                    }
-                                    br;
-                                    span#created {}
-                                }
-                                span {
-                                    b {
-                                        "List demons published:"
-                                    }
-                                    br;
-                                    span#published {}
-                                }
-                                span {
-                                    b {
-                                        "List demons verified:"
-                                    }
-                                    br;
-                                    span#verified {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Progress on:"
-                                    }
-                                    br;
-                                    span#progress {}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 }

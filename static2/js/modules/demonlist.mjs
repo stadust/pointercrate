@@ -191,20 +191,16 @@ export class StatsViewer extends FilteredPaginator {
     this._progress = document.getElementById("progress");
     this._content = html.getElementsByClassName("viewer-content")[0];
 
-    try {
-      this.dropdown = new Dropdown(
-          html.getElementsByClassName("dropdown-menu")[0]
-      );
-      this.dropdown.addEventListener((selected) => {
-        if (selected === "International") {
-          this.updateQueryData("nation", undefined);
-        } else {
-          this.updateQueryData("nation", selected);
-        }
-      });
-    }catch (e) {
-      
-    }
+    this.dropdown = new Dropdown(
+        html.getElementsByClassName("dropdown-menu")[0]
+    );
+    this.dropdown.addEventListener((selected) => {
+      if (selected === "International") {
+        this.updateQueryData("nation", undefined);
+      } else {
+        this.updateQueryData("nation", selected);
+      }
+    });
   }
 
   initialize() {

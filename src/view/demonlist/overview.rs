@@ -137,9 +137,6 @@ pub struct OverviewQueryData {
     #[serde(rename = "timemachine", default)]
     time_machine_shown: bool,
 
-    #[serde(rename = "statsviewer", default)]
-    stats_viewer_shown: bool,
-
     #[serde(rename = "submitter", default)]
     record_submitter_shown: bool,
 }
@@ -202,7 +199,6 @@ impl Page for DemonlistOverview {
                 main.left {
                     (time_machine(self.query_data.time_machine_shown))
                     (super::submission_panel(&self.demon_overview, self.query_data.record_submitter_shown))
-                    (super::stats_viewer(&self.nations, self.query_data.stats_viewer_shown))
                     @if let Some(when) = self.when {
                         div.panel.fade.blue.flex style="align-items: center;" {
                              span style = "text-align: end"{

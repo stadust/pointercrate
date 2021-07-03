@@ -457,7 +457,6 @@ impl Page for Demonlist {
                         "#, config::adsense_publisher_id())))
                     }
                     (super::submission_panel(&self.overview.demon_overview, false))
-                    (super::stats_viewer(&self.overview.nations, false))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {

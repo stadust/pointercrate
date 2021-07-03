@@ -130,7 +130,7 @@ pub fn nav_bar() -> Markup {
                     }
                     ul.nav-hover-dropdown {
                         li {
-                            a.white.hover href = "/demonlist/?statsviewer=true" {"Stats Viewer"}
+                            a.white.hover href = "/demonlist/statsviewer/" {"Stats Viewer"}
                         }
                         li {
                             a.white.hover href = "/demonlist/?submitter=true" {"Record Submitter"}
