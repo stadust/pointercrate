@@ -186,6 +186,8 @@ $(window).on("load", function () {
             } else {
                 statsViewer.dropdown.select('International');
             }
+
+            statsViewer.dropdown.updateQueryData('subdivision', undefined);
         })
     }
 
@@ -207,6 +209,6 @@ $(window).on("load", function () {
         // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
         populateSubdivisionDropdown(subdivisionDropdown, selected);
 
-        statsViewer.dropdown.updateQueryData('subdivision', undefined);
+        statsViewer.updateQueryData('subdivision', undefined);
     })
 });
