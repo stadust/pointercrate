@@ -263,8 +263,7 @@ pub(super) fn submission_panel(demons: &[OverviewDemon], visible: bool) -> Marku
 
 fn stats_viewer(nations: &[Nationality]) -> Markup {
     html! {
-        section.panel.fade.closable#statsviewer {
-            span.plus.cross.hover {}
+        section.panel.fade#statsviewer {
             h2.underlined.pad {
                 "Stats Viewer - "
                 (super::dropdown("International",
