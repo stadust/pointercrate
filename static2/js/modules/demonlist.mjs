@@ -230,14 +230,17 @@ export class StatsViewer extends FilteredPaginator {
         this._name.removeChild(this._name.lastChild);
       }
 
-      this._name.textContent = playerData.name + " ";
+      let nameSpan = document.createElement("span");
+      nameSpan.style.padding = "0 8px";
+      nameSpan.innerText = playerData.name;
+
       this._name.appendChild(getCountryFlag(playerData.nationality.nation, playerData.nationality.country_code));
+      this._name.appendChild(nameSpan);
 
       if (playerData.nationality.subdivision !== null) {
-        let stateSpan = getSubdivisionFlag(playerData.nationality.subdivision.name, playerData.nationality.country_code, playerData.nationality.subdivision.iso_code);
-        stateSpan.style.paddingLeft = "15px";
-
-        this._name.appendChild(stateSpan);
+        this._name.appendChild(getSubdivisionFlag(playerData.nationality.subdivision.name, playerData.nationality.country_code, playerData.nationality.subdivision.iso_code));
+      } else {
+        this._name.appendChild(document.createElement("span"));
       }
     }
 

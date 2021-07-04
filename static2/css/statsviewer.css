@@ -35,6 +35,21 @@
     font-variant: small-caps;
 }
 
+#player-name {
+    display: flex;
+    justify-content: center;
+}
+
+#player-name span:first-child {
+    background-position: 100%;
+    flex-grow: 2;
+}
+
+#player-name span:last-child {
+    background-position: 0%;
+    flex-grow: 2;
+}
+
 /*
  Flag styles, taken from https://github.com/lipis/flag-icon-css
  */
