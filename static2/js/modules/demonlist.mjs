@@ -374,9 +374,9 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
   while(subdivisionList.childNodes.length > 1)
     subdivisionList.removeChild(subdivisionList.lastChild);
 
-  return get("/api/v1/nationalities/" + countryCode + "/subdivisions/").then(result => {
-    dropdown.reset();
+  dropdown.reset();
 
+  return get("/api/v1/nationalities/" + countryCode + "/subdivisions/").then(result => {
     for(let subdivision of result.data) {
       let flag = getSubdivisionFlag(subdivision.name, countryCode, subdivision.iso_code);
 
