@@ -1,4 +1,4 @@
-import { generatePlayer } from "../modules/demonlist.mjs";
+import {generatePlayer, getSubdivisionFlag} from "../modules/demonlist.mjs";
 import {
   displayError,
   Form,
@@ -79,11 +79,18 @@ class PlayerManager extends FilteredPaginator {
         this._subdivision.reset();
 
         for(let subdivision of result.data) {
+          let flag = getSubdivisionFlag(subdivision.name, this.currentObject.nationality.country_code, subdivision.iso_code);
+
+          flag.style.marginLeft = "-10px";
+          flag.style.paddingRight = "10px";
+
           let li = document.createElement("li");
 
           li.className = "white hover";
           li.dataset.value = subdivision.iso_code;
-          li.innerText = subdivision.name;
+          li.dataset.display = subdivision.name;
+          li.appendChild(flag);
+          li.appendChild(document.createTextNode(subdivision.name));
 
           this._subdivision.addLI(li);
         }

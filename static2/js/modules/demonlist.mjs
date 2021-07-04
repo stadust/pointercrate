@@ -34,10 +34,10 @@ export function embedVideo(video) {
 
 export function initializeTimeMachine() {
   let formHtml = document.getElementById("time-machine-form");
-  
+
   if(formHtml === null)
     return;
-  
+
   var timeMachineForm = new Form(formHtml);
 
   var inputs = ['year', 'month', 'day', 'hour', 'minute', 'second'].map(name => timeMachineForm.input("time-machine-" + name));
@@ -226,23 +226,15 @@ export class StatsViewer extends FilteredPaginator {
     if (playerData.nationality == null) {
       this._name.textContent = playerData.name;
     } else {
-      let countrySpan = document.createElement("span");
-      countrySpan.classList.add("flag-icon");
-      countrySpan.title = playerData.nationality.nation;
-      countrySpan.style.backgroundImage = "url(/static2/images/flags/" + playerData.nationality.country_code.toLowerCase() + ".svg";
-
       while (this._name.lastChild) {
         this._name.removeChild(this._name.lastChild);
       }
 
       this._name.textContent = playerData.name + " ";
-      this._name.appendChild(countrySpan);
+      this._name.appendChild(getCountryFlag(playerData.nationality.nation, playerData.nationality.country_code));
 
       if (playerData.nationality.subdivision !== null) {
-        let stateSpan = document.createElement("span");
-        stateSpan.classList.add("flag-icon");
-        stateSpan.title = playerData.nationality.subdivision.name;
-        stateSpan.style.backgroundImage = "url(/static2/images/flags/" + playerData.nationality.country_code.toLowerCase() + "/" + playerData.nationality.subdivision.iso_code.toLowerCase() + ".svg";
+        let stateSpan = getSubdivisionFlag(playerData.nationality.subdivision.name, playerData.nationality.country_code, playerData.nationality.subdivision.iso_code);
         stateSpan.style.paddingLeft = "15px";
 
         this._name.appendChild(stateSpan);
@@ -354,7 +346,22 @@ export class StatsViewer extends FilteredPaginator {
       element.appendChild(document.createTextNode("None"));
     }
   }
+}
 
+export function getCountryFlag(title, countryCode) {
+  let countrySpan = document.createElement("span");
+  countrySpan.classList.add("flag-icon");
+  countrySpan.title = title;
+  countrySpan.style.backgroundImage = "url(/static2/images/flags/" + countryCode.toLowerCase() + ".svg";
+  return countrySpan;
+}
+
+export function getSubdivisionFlag(title, countryCode, subdivisionCode) {
+  let stateSpan = document.createElement("span");
+  stateSpan.classList.add("flag-icon");
+  stateSpan.title = title;
+  stateSpan.style.backgroundImage = "url(/static2/images/flags/" + countryCode.toLowerCase() + "/" + subdivisionCode.toLowerCase() + ".svg";
+  return stateSpan;
 }
 
 export class PlayerSelectionDialog extends FormDialog {
@@ -485,11 +492,7 @@ function generateStatsViewerPlayer(player) {
   i.appendChild(document.createTextNode(player.score.toFixed(2)));
 
   if (player.nationality) {
-    var span = document.createElement("span");
-    span.style.backgroundImage = "url(/static2/images/flags/" + player.nationality.country_code.toLowerCase() + ".svg";
-    span.className = "flag-icon";
-
-    li.appendChild(span);
+    li.appendChild(getCountryFlag(player.nationality.nation, player.nationality.country_code));
     li.appendChild(document.createTextNode(" "));
   }
 
