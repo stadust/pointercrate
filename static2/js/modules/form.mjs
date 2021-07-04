@@ -487,8 +487,16 @@ export class Paginator extends Output {
    * @memberof Paginator
    */
   updateQueryData(key, value) {
-    if (value === undefined) delete this.queryData[key];
-    else this.queryData[key] = value;
+    let obj = {};
+    obj[key] = value;
+    this.updateQueryData2(obj);
+  }
+
+  updateQueryData2(obj) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === undefined) delete this.queryData[key];
+      else this.queryData[key] = value;
+    }
 
     this.currentLink = this.endpoint + "?" + $.param(this.queryData);
     this.refresh();

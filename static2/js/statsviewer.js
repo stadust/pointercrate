@@ -150,13 +150,13 @@ $(window).on("load", function () {
                 subdivisionDropdown.selectSilently(subdivisionCode);
             }
 
-            statsViewer.setQueryData({nation: countryCode, subdivision: subdivisionCode});
+            statsViewer.updateQueryData2({nation: countryCode, subdivision: subdivisionCode});
 
             currentlySelected = subdivision;
             currentlySelected.classList.add("selected");
         } else {
             statsViewer.dropdown.selectSilently('International');
-            statsViewer.setQueryData({});
+            statsViewer.updateQueryData2({nation: undefined, subdivision: undefined});
 
             currentlySelected = undefined;
         }
@@ -207,7 +207,6 @@ $(window).on("load", function () {
         // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
         populateSubdivisionDropdown(subdivisionDropdown, selected);
 
-        // override potential subdivision data
-        statsViewer.setQueryData({nation: selected});
+        statsViewer.dropdown.updateQueryData('subdivision', undefined);
     })
 });
