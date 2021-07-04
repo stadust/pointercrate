@@ -1,4 +1,4 @@
-import {generatePlayer, getSubdivisionFlag} from "../modules/demonlist.mjs";
+import {generatePlayer, getSubdivisionFlag, populateSubdivisionDropdown} from "../modules/demonlist.mjs";
 import {
   displayError,
   Form,
@@ -64,37 +64,12 @@ class PlayerManager extends FilteredPaginator {
 
     this._banned.selectSilently(this.currentObject.banned.toString());
 
-    let subdivisionList = this._subdivision.html.getElementsByTagName("ul")[0];
-
-    // Kill all but the default entry
-    while(subdivisionList.childNodes.length > 1)
-      subdivisionList.removeChild(subdivisionList.lastChild);
-
     if (this.currentObject.nationality) {
       this._nationality.selectSilently(
         this.currentObject.nationality.country_code
       );
 
-      get("/api/v1/nationalities/" + this.currentObject.nationality.country_code + "/subdivisions/").then(result => {
-        this._subdivision.reset();
-
-        for(let subdivision of result.data) {
-          let flag = getSubdivisionFlag(subdivision.name, this.currentObject.nationality.country_code, subdivision.iso_code);
-
-          flag.style.marginLeft = "-10px";
-          flag.style.paddingRight = "10px";
-
-          let li = document.createElement("li");
-
-          li.className = "white hover";
-          li.dataset.value = subdivision.iso_code;
-          li.dataset.display = subdivision.name;
-          li.appendChild(flag);
-          li.appendChild(document.createTextNode(subdivision.name));
-
-          this._subdivision.addLI(li);
-        }
-
+      populateSubdivisionDropdown(this._subdivision, this.currentObject.nationality.country_code).then(() => {
         if(!this.currentObject.nationality.subdivision) {
           this._subdivision.selectSilently("None");
         } else {

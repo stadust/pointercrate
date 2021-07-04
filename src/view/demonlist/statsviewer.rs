@@ -91,12 +91,22 @@ impl Page for StatsViewer {
                         }
                         (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Middle America"].into_iter()))
                     }
-                    div.panel.fade {
+                    div.panel.fade style = "overflow: initial;" {
                         h3.underlined {
-                            "Very important thing"
+                            "Political Subdivision:"
                         }
                         p {
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse lacinia nibh nec arcu bibendum, posuere maximus ante sodales. Duis bibendum dui vel velit gravida, semper laoreet magna efficitur. Vestibulum ac lectus vitae tortor bibendum placerat. Nunc varius, risus molestie fermentum molestie, ante ex fermentum ex, sed efficitur felis urna a urna. Suspendisse mattis finibus lectus. Fusce cursus nisl non facilisis laoreet. Donec lacus ipsum, rutrum at euismod et, fringilla nec tortor. Cras molestie sem sit amet tellus hendrerit, at feugiat purus ornare. Nunc consequat purus non condimentum efficitur. Etiam aliquet mollis ante et eleifend. Integer sagittis libero et erat ultricies volutpat. Nulla facilisi. "
+                            "For the " i {"United States of America"} ", " i {"The United Kingdom of Great Britain and Northern Ireland"} ", " i{"Australia"} " and " i{"Canada"} " you can select a state/province from the dropdown below to focus the stats viewer to that state/province."
+                        }
+                        div.dropdown-menu.js-search#subdivision-dropdown data-default = "None" {
+                            div{
+                                input type="text" style = "color: #444446; font-weight: bold;";
+                            }
+                            div.menu {
+                                ul {
+                                    li.white.hover.underlined data-value = "None" {"None"}
+                                }
+                            }
                         }
                     }
                 }

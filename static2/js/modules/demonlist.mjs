@@ -367,6 +367,35 @@ export function getSubdivisionFlag(title, countryCode, subdivisionCode) {
   return stateSpan;
 }
 
+export function populateSubdivisionDropdown(dropdown, countryCode) {
+  let subdivisionList = dropdown.html.getElementsByTagName("ul")[0];
+
+  // Kill all but the default entry
+  while(subdivisionList.childNodes.length > 1)
+    subdivisionList.removeChild(subdivisionList.lastChild);
+
+  return get("/api/v1/nationalities/" + countryCode + "/subdivisions/").then(result => {
+    dropdown.reset();
+
+    for(let subdivision of result.data) {
+      let flag = getSubdivisionFlag(subdivision.name, countryCode, subdivision.iso_code);
+
+      flag.style.marginLeft = "-10px";
+      flag.style.paddingRight = "1em";
+
+      let li = document.createElement("li");
+
+      li.className = "white hover";
+      li.dataset.value = subdivision.iso_code;
+      li.dataset.display = subdivision.name;
+      li.appendChild(flag);
+      li.appendChild(document.createTextNode(subdivision.name));
+
+      dropdown.addLI(li);
+    }
+  });
+}
+
 export class PlayerSelectionDialog extends FormDialog {
   constructor(dialogId) {
     super(dialogId);

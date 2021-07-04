@@ -1,4 +1,4 @@
-import {StatsViewer} from "./modules/demonlist.mjs";
+import {populateSubdivisionDropdown, StatsViewer} from "./modules/demonlist.mjs";
 import {Dropdown} from "./modules/form.mjs";
 
 $(window).on("load", function () {
@@ -112,8 +112,68 @@ $(window).on("load", function () {
         }
     })
 
+    let subdivisionDropdown = new Dropdown(document.getElementById("subdivision-dropdown"));
+
+    subdivisionDropdown.addEventListener(selected => {
+        if(selected === 'None') {
+            statsViewer.dropdown.select(statsViewer.queryData['nation']);
+        } else {
+            let countryCode = statsViewer.queryData['nation'];
+            let targetElement = worldMap.contentDocument.getElementById(countryCode.toUpperCase() + "-" + selected.toUpperCase());
+
+            if (targetElement !== currentlySelected)
+                selectSubdivision(targetElement);
+        }
+    });
+
+    function selectSubdivision(subdivision) {
+        let subdivisionCode = subdivision.id.substring(3);
+        let countryCode = subdivision.id.substring(0, 2);
+
+        if(isDragging)
+            return false;
+
+        // bruh
+        if(!subdivision.parentNode.parentNode.parentNode.classList.contains("selectable"))
+            return false;
+
+        if (currentlySelected !== undefined)
+            currentlySelected.classList.remove("selected");
+
+        if (subdivision !== currentlySelected) {
+            if(currentlySelected === undefined || currentlySelected.id.substring(0, 2) !== countryCode) {
+                statsViewer.dropdown.selectSilently(countryCode);
+
+                populateSubdivisionDropdown(subdivisionDropdown, countryCode)
+                    .then(() => subdivisionDropdown.select(subdivisionCode));
+            } else {
+                subdivisionDropdown.selectSilently(subdivisionCode);
+            }
+
+            statsViewer.setQueryData({nation: countryCode, subdivision: subdivisionCode});
+
+            currentlySelected = subdivision;
+            currentlySelected.classList.add("selected");
+        } else {
+            statsViewer.dropdown.selectSilently('International');
+            statsViewer.setQueryData({});
+
+            currentlySelected = undefined;
+        }
+    }
+
+    for (let subdivision of worldMap.contentDocument.querySelectorAll(".land-with-states .state")) {
+        subdivision.addEventListener('click', event => {
+            // states are overlaid over the .land-with-states. We need to stop propagation as otherwise the
+            // event handler on the .land-with-states is also run and it would select the entire country.
+            event.stopPropagation();
+
+            selectSubdivision(subdivision);
+        });
+    }
+
     // TODO: investigate loading (ready is sometimes fired before page is loaded)
-    for (let clickable of worldMap.contentDocument.querySelectorAll(".land, .island")) {
+    for (let clickable of worldMap.contentDocument.querySelectorAll(".land, .island, .land-with-states")) {
         clickable.addEventListener('click', () => {
             if (isDragging)
                 return false;
@@ -121,23 +181,17 @@ $(window).on("load", function () {
             if(!clickable.parentNode.classList.contains("selectable"))
                 return false;
 
-            if (currentlySelected !== undefined)
-                currentlySelected.classList.remove("selected");
-
             if (clickable !== currentlySelected) {
                 statsViewer.dropdown.select(clickable.id.toUpperCase());
-
-                currentlySelected = clickable;
-                currentlySelected.classList.add("selected");
             } else {
                 statsViewer.dropdown.select('International');
-                currentlySelected = undefined;
             }
         })
     }
 
     statsViewer.dropdown.addEventListener(selected => {
-        if(currentlySelected !== undefined && currentlySelected.id.toUpperCase() === selected)
+        // Selection unchanged
+        if(currentlySelected === undefined && selected === 'International' || currentlySelected !== undefined && currentlySelected.id.toUpperCase() === selected)
             return;
 
         if (currentlySelected !== undefined)
@@ -149,5 +203,11 @@ $(window).on("load", function () {
             currentlySelected = worldMap.contentDocument.getElementById(selected.toLowerCase());
             currentlySelected.classList.add("selected");
         }
+
+        // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
+        populateSubdivisionDropdown(subdivisionDropdown, selected);
+
+        // override potential subdivision data
+        statsViewer.setQueryData({nation: selected});
     })
 });
