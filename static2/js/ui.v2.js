@@ -75,7 +75,6 @@ class Search {
       this.container = src;
     }
 
-    this.target = this.container.find("li");
     this.registerHandlers();
 
     if (this.input.val()) {
@@ -87,7 +86,7 @@ class Search {
     var queries = searchString.split(";");
     this.container.find("ul").each((i, l) => $(l).hide());
 
-    this.target.each((index, element) => {
+    this.container.find("li").each((index, element) => {
       element = $(element);
       var content = element.text().toLowerCase();
       if (queries.some(q => content.includes(q))) {
