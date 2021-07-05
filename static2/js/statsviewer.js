@@ -189,7 +189,7 @@ $(window).on("load", function () {
                 statsViewer.dropdown.select('International');
             }
 
-            statsViewer.dropdown.updateQueryData('subdivision', undefined);
+            statsViewer.updateQueryData('subdivision', undefined);
         })
     }
 
