@@ -50,6 +50,9 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Nationality:"
                                         }
                                         br;
+                                        p {
+                                            "Note that this is to be understood as 'Country of legal residency' and nothing else. No exceptions. "
+                                        }
                                         div.dropdown-menu.js-search#edit-player-nationality data-default = "None" {
                                             div {
                                                 input type="text" style = "color: #444446; font-weight: bold;";
