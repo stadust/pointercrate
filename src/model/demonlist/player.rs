@@ -2,9 +2,9 @@ pub use self::{
     paginate::{PlayerPagination, RankingPagination},
     patch::PatchPlayer,
 };
-use crate::etag::Taggable;
 use crate::{
     cistring::CiString,
+    etag::Taggable,
     model::{
         demonlist::{demon::MinimalDemon, record::MinimalRecordD},
         nationality::Nationality,
@@ -14,8 +14,10 @@ use crate::{
 use derive_more::Display;
 use serde::Serialize;
 use sqlx::PgConnection;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 mod get;
 mod paginate;

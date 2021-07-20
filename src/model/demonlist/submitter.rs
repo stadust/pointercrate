@@ -1,6 +1,5 @@
 pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
-use crate::etag::Taggable;
-use crate::Result;
+use crate::{etag::Taggable, Result};
 use derive_more::Display;
 use serde::Serialize;
 use sqlx::PgConnection;

@@ -27,8 +27,8 @@ pub use self::{
     patch::PatchRecord,
     post::Submission,
 };
-use crate::etag::Taggable;
 use crate::{
+    etag::Taggable,
     model::{
         demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
         nationality::Nationality,
@@ -41,8 +41,8 @@ use log::{debug, error, warn};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
 use sqlx::PgConnection;
-use std::collections::hash_map::DefaultHasher;
 use std::{
+    collections::hash_map::DefaultHasher,
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
 };

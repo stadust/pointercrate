@@ -4,10 +4,10 @@ pub use self::{
     patch::PatchDemon,
     post::PostDemon,
 };
-use crate::etag::Taggable;
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
+    etag::Taggable,
     model::demonlist::{player::DatabasePlayer, record::MinimalRecordP},
     Result,
 };
@@ -15,8 +15,10 @@ use derive_more::Display;
 use log::info;
 use serde::Serialize;
 use sqlx::PgConnection;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 mod get;
 mod paginate;

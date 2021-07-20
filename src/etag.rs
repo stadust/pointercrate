@@ -16,11 +16,12 @@
 //! are not modifiable via `PATCH` (e.g. the record list of a player), so having changes to them
 //! cause a `412` is silly, yet for caching purposes, those parts are obviously important.
 
-use actix_web::dev::HttpResponseBuilder;
-use actix_web::HttpResponse;
+use actix_web::{dev::HttpResponseBuilder, HttpResponse};
 use serde::Serialize;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 /// Trait defining methods for producing the two parts of the pointercrate ETag format
 pub trait Taggable: Hash {

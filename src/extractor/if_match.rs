@@ -1,5 +1,7 @@
-use crate::error::{JsonError, PointercrateError};
-use crate::etag::Taggable;
+use crate::{
+    error::{JsonError, PointercrateError},
+    etag::Taggable,
+};
 use actix_web::{
     dev::{Payload, PayloadStream},
     FromRequest, HttpRequest,

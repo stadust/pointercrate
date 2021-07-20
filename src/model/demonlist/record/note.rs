@@ -1,8 +1,10 @@
 pub use self::{get::notes_on, patch::PatchNote, post::NewNote};
 use crate::etag::Taggable;
 use serde::Serialize;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 mod delete;
 mod get;

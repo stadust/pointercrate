@@ -10,8 +10,7 @@ pub use self::{
     paginate::UserPagination,
     patch::PatchUser,
 };
-use crate::etag::Taggable;
-use crate::{error::PointercrateError, permissions::Permissions, Result};
+use crate::{error::PointercrateError, etag::Taggable, permissions::Permissions, Result};
 use serde::Serialize;
 use sqlx::PgConnection;
 use std::{
