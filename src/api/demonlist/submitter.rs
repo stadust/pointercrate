@@ -1,9 +1,9 @@
 use crate::{
+    etag::HttpResponseBuilderEtagExt,
     extractor::{auth::TokenAuth, if_match::IfMatch},
     model::demonlist::submitter::{PatchSubmitter, Submitter, SubmitterPagination},
     permissions::Permissions,
     state::PointercrateState,
-    util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{

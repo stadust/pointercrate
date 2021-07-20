@@ -1,4 +1,5 @@
 pub use self::{paginate::SubmitterPagination, patch::PatchSubmitter};
+use crate::etag::Taggable;
 use crate::Result;
 use derive_more::Display;
 use serde::Serialize;
@@ -14,6 +15,8 @@ pub struct Submitter {
     pub id: i32,
     pub banned: bool,
 }
+
+impl Taggable for Submitter {}
 
 impl Submitter {
     /// Gets the maximal and minimal submitter id currently in use

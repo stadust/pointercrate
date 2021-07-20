@@ -1,15 +1,11 @@
 //! Some utils for pagination and patch
 
 use crate::error::PointercrateError;
-use actix_web::{dev::HttpResponseBuilder, http::HeaderMap, HttpResponse};
+use actix_web::http::HeaderMap;
 use log::warn;
 use mime::Mime;
-use serde::{de::Error, Deserialize, Deserializer, Serialize};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    str::FromStr,
-};
+use serde::{de::Error, Deserialize, Deserializer};
+use std::str::FromStr;
 
 macro_rules! pagination_response {
     ($endpoint: expr, $objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
@@ -205,22 +201,5 @@ where
     match Option::deserialize(deseralizer)? {
         None => Err(<D as Deserializer<'de>>::Error::custom("null value on non-nullable field")),
         some => Ok(some),
-    }
-}
-
-pub trait HttpResponseBuilderExt {
-    fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self;
-    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: &H) -> HttpResponse;
-}
-
-impl HttpResponseBuilderExt for HttpResponseBuilder {
-    fn etag<H: Hash>(&mut self, obj: &H) -> &mut Self {
-        let mut hasher = DefaultHasher::new();
-        obj.hash(&mut hasher);
-        self.header("ETag", hasher.finish().to_string())
-    }
-
-    fn json_with_etag<H: Serialize + Hash>(&mut self, obj: &H) -> HttpResponse {
-        self.etag(obj).json(serde_json::json!({ "data": obj }))
     }
 }

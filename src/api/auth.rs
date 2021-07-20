@@ -1,6 +1,7 @@
 //! Handlers for all endpoints under the `/api/v1/auth` prefix
 
 use crate::{
+    etag::HttpResponseBuilderEtagExt,
     extractor::{
         auth::{BasicAuth, TokenAuth},
         if_match::IfMatch,
@@ -9,7 +10,6 @@ use crate::{
     model::user::{AuthenticatedUser, Authorization, PatchMe, Registration},
     ratelimit::RatelimitScope,
     state::PointercrateState,
-    util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{web::Json, HttpResponse};

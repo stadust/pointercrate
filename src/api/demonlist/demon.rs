@@ -1,9 +1,9 @@
 use crate::{
+    etag::HttpResponseBuilderEtagExt,
     extractor::auth::TokenAuth,
     model::demonlist::demon::{FullDemon, PostDemon},
     permissions::Permissions,
     state::PointercrateState,
-    util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{web::Json, HttpResponse};
@@ -24,6 +24,7 @@ pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Js
 
 pub mod v1 {
     use crate::{
+        etag::HttpResponseBuilderEtagExt,
         extractor::{auth::TokenAuth, if_match::IfMatch},
         model::demonlist::{
             creator::{Creator, PostCreator},
@@ -32,7 +33,6 @@ pub mod v1 {
         },
         permissions::Permissions,
         state::PointercrateState,
-        util::HttpResponseBuilderExt,
         ApiResult,
     };
     use actix_web::{
@@ -132,6 +132,7 @@ pub mod v1 {
 
 pub mod v2 {
     use crate::{
+        etag::HttpResponseBuilderEtagExt,
         extractor::{auth::TokenAuth, if_match::IfMatch},
         model::demonlist::{
             creator::{Creator, PostCreator},
@@ -140,7 +141,6 @@ pub mod v2 {
         },
         permissions::Permissions,
         state::PointercrateState,
-        util::HttpResponseBuilderExt,
         ApiResult,
     };
     use actix_web::{

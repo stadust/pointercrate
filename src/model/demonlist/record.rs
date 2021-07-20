@@ -27,6 +27,7 @@ pub use self::{
     patch::PatchRecord,
     post::Submission,
 };
+use crate::etag::Taggable;
 use crate::{
     model::{
         demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
@@ -40,6 +41,7 @@ use log::{debug, error, warn};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
 use sqlx::PgConnection;
+use std::collections::hash_map::DefaultHasher;
 use std::{
     fmt::{Display, Formatter},
     hash::{Hash, Hasher},
@@ -130,7 +132,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-#[derive(Debug, Serialize, Display)]
+#[derive(Debug, Serialize, Display, Hash)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct FullRecord {
     pub id: i32,
@@ -143,16 +145,18 @@ pub struct FullRecord {
     pub notes: Vec<Note>,
 }
 
-impl Hash for FullRecord {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-        self.progress.hash(state);
-        self.video.hash(state);
-        self.status.hash(state);
-        self.player.id.hash(state);
-        self.demon.id.hash(state);
+impl Taggable for FullRecord {
+    fn patch_part(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.id.hash(&mut hasher);
+        self.progress.hash(&mut hasher);
+        self.video.hash(&mut hasher);
+        self.status.hash(&mut hasher);
+        self.player.id.hash(&mut hasher);
+        self.demon.id.hash(&mut hasher);
         // notes have sub-endpoint -> no hash
         // submitter cannot be patched -> no hash
+        hasher.finish()
     }
 }
 

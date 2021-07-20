@@ -1,25 +1,19 @@
 use crate::error::{JsonError, PointercrateError};
+use crate::etag::Taggable;
 use actix_web::{
     dev::{Payload, PayloadStream},
     FromRequest, HttpRequest,
 };
 use derive_more::Display;
 use futures::future::{err, ready, Ready};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-};
 
 #[derive(Debug, Display)]
 #[display(fmt = "'object hash equal to any of {:?}'", _0)]
 pub struct IfMatch(Vec<u64>);
 
 impl IfMatch {
-    pub fn require_etag_match<H: Hash>(&self, h: &H) -> Result<(), PointercrateError> {
-        let mut hasher = DefaultHasher::new();
-        h.hash(&mut hasher);
-
-        if self.0.contains(&hasher.finish()) {
+    pub fn require_etag_match<H: Taggable>(&self, h: &H) -> Result<(), PointercrateError> {
+        if self.0.contains(&h.patch_part()) {
             Ok(())
         } else {
             Err(PointercrateError::PreconditionFailed)
@@ -46,8 +40,10 @@ impl FromRequest for IfMatch {
             header
                 .split(',')
                 .map(|hash| {
-                    hash.parse()
-                        .map_err(|_| PointercrateError::InvalidHeaderValue { header: "If-Match" })
+                    hash.split(";")
+                        .next()
+                        .and_then(|patch_part| patch_part.parse().ok())
+                        .ok_or(PointercrateError::InvalidHeaderValue { header: "If-Match" })
                 })
                 .collect::<Result<_, _>>()
                 .map(IfMatch)

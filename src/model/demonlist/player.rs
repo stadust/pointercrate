@@ -2,6 +2,7 @@ pub use self::{
     paginate::{PlayerPagination, RankingPagination},
     patch::PatchPlayer,
 };
+use crate::etag::Taggable;
 use crate::{
     cistring::CiString,
     model::{
@@ -13,6 +14,7 @@ use crate::{
 use derive_more::Display;
 use serde::Serialize;
 use sqlx::PgConnection;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
 mod get;
@@ -27,7 +29,7 @@ pub struct DatabasePlayer {
     pub banned: bool,
 }
 
-#[derive(Debug, Serialize, Display, PartialEq, Eq)]
+#[derive(Debug, Serialize, Display, PartialEq, Eq, Hash)]
 #[display(fmt = "{}", player)]
 pub struct FullPlayer {
     #[serde(flatten)]
@@ -59,9 +61,11 @@ pub struct Player {
     pub nationality: Option<Nationality>,
 }
 
-impl Hash for FullPlayer {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.player.hash(state)
+impl Taggable for FullPlayer {
+    fn patch_part(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.player.hash(&mut hasher);
+        hasher.finish()
     }
 }
 

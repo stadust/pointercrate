@@ -1,6 +1,7 @@
 use crate::{
     config,
     error::{JsonError, PointercrateError},
+    etag::HttpResponseBuilderEtagExt,
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
     model::demonlist::{
         record::{
@@ -12,7 +13,6 @@ use crate::{
     },
     permissions::Permissions,
     state::{audit_connection, PointercrateState},
-    util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{

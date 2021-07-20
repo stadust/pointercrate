@@ -29,6 +29,7 @@ mod cistring;
 mod config;
 mod documentation;
 mod error;
+mod etag;
 mod extractor;
 mod gd;
 mod middleware;

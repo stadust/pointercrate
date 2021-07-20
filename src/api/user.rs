@@ -2,11 +2,11 @@
 
 use crate::{
     error::{JsonError, PointercrateError},
+    etag::HttpResponseBuilderEtagExt,
     extractor::{auth::TokenAuth, if_match::IfMatch},
     model::user::{PatchUser, User, UserPagination},
     permissions::Permissions,
     state::PointercrateState,
-    util::HttpResponseBuilderExt,
     ApiResult,
 };
 use actix_web::{
