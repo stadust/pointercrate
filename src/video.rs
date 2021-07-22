@@ -1,4 +1,5 @@
 use crate::{error::PointercrateError, Result};
+use std::borrow::Cow;
 use url::Url;
 
 const SCHEMES: [&str; 2] = ["http", "https"];
@@ -179,7 +180,7 @@ pub fn thumbnail(video: &str) -> String {
     let video_id = url
         .query_pairs()
         .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
-        .unwrap();
+        .unwrap_or(Cow::Borrowed("dQw4w9WgXcQ"));
 
     format!("https://i.ytimg.com/vi/{}/mqdefault.jpg", video_id)
 }
