@@ -21,10 +21,6 @@ struct StatsViewer {
 
 #[get("/demonlist/statsviewer/")]
 pub async fn stats_viewer(TokenAuth(user): TokenAuth, state: PointercrateState) -> ViewResult<HttpResponse> {
-    if !user.inner().has_permission(Permissions::Administrator) {
-        user.inner().require_permissions(Permissions::ListHelper)?;
-    }
-
     let mut connection = state.connection().await?;
 
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
