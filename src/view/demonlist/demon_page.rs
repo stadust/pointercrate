@@ -445,15 +445,16 @@ impl Page for Demonlist {
                 main.left {
                     div.panel.fade style = "padding: 0px; height: 90px" {
                         (PreEscaped(format!(r#"
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-                        <!-- Demonpage Banner ad -->
-                        <ins class="adsbygoogle"
-                             style="display:inline-block;width:728px;height:90px"
-                             data-ad-client="{}"
-                             data-ad-slot="4829214686"></ins>
-                        <script>
-                             (adsbygoogle = window.adsbygoogle || []).push({{}});
-                        </script>
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+     crossorigin="anonymous"></script>
+<!-- Demonpage Banner ad -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="{0}"
+     data-ad-slot="4829214686"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({{}});
+</script>
                         "#, config::adsense_publisher_id())))
                     }
                     (super::submission_panel(&self.overview.demon_overview, false))

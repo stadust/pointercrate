@@ -273,15 +273,17 @@ impl Page for DemonlistOverview {
                             @if demon.position == 1 {
                                 section.panel.fade style = "padding: 0px; height: 90px"{
                                 (PreEscaped(format!(r#"
-                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-                                    <!-- Demonlist Responsive Feed Ad -->
-                                    <ins class="adsbygoogle"
-                                         style="display:inline-block;width:728px;height:90px"
-                                         data-ad-client="{}"
-                                         data-ad-slot="2819150519"></ins>
-                                    <script>
-                                         (adsbygoogle = window.adsbygoogle || []).push({{}});
-                                    </script>
+                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+     crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="-h1+40+4u-93+n"
+     data-ad-client="{0}"
+     data-ad-slot="5157884729"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({{}});
+</script>
                                     "#, config::adsense_publisher_id())))
                                 }
                             }
@@ -289,16 +291,17 @@ impl Page for DemonlistOverview {
                             @if demon.position % 20 == 0 {
                                 section.panel.fade {
                                 (PreEscaped(format!(r#"
-                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-                                    <ins class="adsbygoogle"
-                                         style="display:block"
-                                         data-ad-format="fluid"
-                                         data-ad-layout-key="-h1+40+4u-93+n"
-                                         data-ad-client="{}"
-                                         data-ad-slot="5157884729"></ins>
-                                    <script>
-                                         (adsbygoogle = window.adsbygoogle || []).push({{}});
-                                    </script>
+                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+     crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="-h1+40+4u-93+n"
+     data-ad-client="{0}"
+     data-ad-slot="5157884729"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({{}});
+</script>
                                     "#, config::adsense_publisher_id())))
                                 }
                             }
