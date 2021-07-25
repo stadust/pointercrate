@@ -368,13 +368,7 @@ export function getSubdivisionFlag(title, countryCode, subdivisionCode) {
 }
 
 export function populateSubdivisionDropdown(dropdown, countryCode) {
-  let subdivisionList = dropdown.html.getElementsByTagName("ul")[0];
-
-  // Kill all but the default entry
-  while(subdivisionList.childNodes.length > 1)
-    subdivisionList.removeChild(subdivisionList.lastChild);
-
-  dropdown.reset();
+  dropdown.clearOptions();
 
   return get("/api/v1/nationalities/" + countryCode + "/subdivisions/").then(result => {
     for(let subdivision of result.data) {

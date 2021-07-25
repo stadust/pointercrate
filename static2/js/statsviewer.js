@@ -158,7 +158,7 @@ $(window).on("load", function () {
             statsViewer.dropdown.selectSilently('International');
             statsViewer.updateQueryData2({nation: undefined, subdivision: undefined});
 
-            subdivisionDropdown.reset();
+            subdivisionDropdown.clearOptions();
 
             currentlySelected = undefined;
         }

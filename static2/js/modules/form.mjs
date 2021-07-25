@@ -71,6 +71,17 @@ export class Dropdown {
     this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
   }
 
+  /**
+   * Clears all dropdown options but the default one (which is selected)
+   */
+  clearOptions() {
+    this.reset();
+
+    // Kill all but the default entry
+    while(this.ul.childNodes.length > 1)
+      this.ul.removeChild(this.ul.lastChild);
+  }
+
   reset() {
     this.selected = this.input.dataset.default;
     if(this.values[this.selected] )
