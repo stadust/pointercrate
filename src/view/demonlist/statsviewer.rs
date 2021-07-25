@@ -2,7 +2,6 @@ use self::heatmap::HeatMap;
 use crate::model::nationality::Nationality;
 use crate::{
     extractor::auth::TokenAuth,
-    permissions::Permissions,
     state::PointercrateState,
     view::{simple_dropdown, Page},
     ViewResult,
