@@ -36,7 +36,7 @@ pub trait Page {
                     title {
                         (self.title())
                     }
-                    (PreEscaped(format!(r#"<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={}" crossorigin="anonymous"</script>"#, config::adsense_publisher_id())))
+                    (PreEscaped(format!(r#"<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={}" crossorigin="anonymous"></script>"#, config::adsense_publisher_id())))
 
                     (PreEscaped(format!(r#"
                     <!-- Global site tag (gtag.js) - Google Analytics -->
