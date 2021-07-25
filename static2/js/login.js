@@ -1,4 +1,4 @@
-import { Form, valueMissing, tooShort, post } from "./modules/form.mjs";
+import { Form, valueMissing, tooShort, post } from "./modules/formv2.mjs";
 
 function initializeLoginForm() {
   var loginForm = new Form(document.getElementById("login-form"));

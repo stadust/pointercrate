@@ -1,5 +1,5 @@
-import {populateSubdivisionDropdown, StatsViewer} from "./modules/demonlist.mjs";
-import {Dropdown} from "./modules/form.mjs";
+import {populateSubdivisionDropdown, StatsViewer} from "./modules/demonlistv2.mjs";
+import {Dropdown} from "./modules/formv2.mjs";
 
 $(window).on("load", function () {
     let worldMapWrapper = document.getElementById("world-map-wrapper");

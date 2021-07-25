@@ -9,9 +9,9 @@ import {
   typeMismatch,
   del,
   displayError,
-} from "../modules/form.mjs";
-import { EditorBackend } from "../modules/form.mjs";
-import { setupFormDialogEditor } from "../modules/form.mjs";
+} from "../modules/formv2.mjs";
+import { EditorBackend } from "../modules/formv2.mjs";
+import { setupFormDialogEditor } from "../modules/formv2.mjs";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");

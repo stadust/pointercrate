@@ -8,7 +8,7 @@ import {
   FilteredPaginator,
   Form,
   Viewer,
-} from "../modules/form.mjs";
+} from "../modules/formv2.mjs";
 
 let selectedUser;
 let userPaginator;

@@ -17,12 +17,12 @@ import {
   Output,
   setupDropdownEditor,
   PaginatorEditorBackend, setupEditorDialog, DropdownDialog,
-} from "../modules/form.mjs";
+} from "../modules/formv2.mjs";
 import {
   initializeRecordSubmitter,
   generateRecord,
   embedVideo, PlayerSelectionDialog,
-} from "../modules/demonlist.mjs";
+} from "../modules/demonlistv2.mjs";
 
 export let recordManager;
 

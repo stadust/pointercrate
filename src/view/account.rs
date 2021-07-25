@@ -79,7 +79,7 @@ impl Page for AccountPage {
 
     fn scripts(&self) -> Vec<&str> {
         vec![
-            "js/modules/form.mjs",
+            "js/modules/formv2.mjs",
             "js/modules/tab.mjs",
             "js/account/profile.js",
             "js/account/users.js",
