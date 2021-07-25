@@ -55,15 +55,58 @@ $(window).on("load", function () {
         isDragging = true;
     });
 
-    svg.addEventListener("mousemove", event => {
-        if (isDragging) {
-            translateX += event.movementX / zoom;
-            translateY += event.movementY / zoom;
+    let lastPos = {x:0, y:0};
 
-            dragDistance += Math.sqrt(translateX * translateX + translateY * translateY);
+    function setLastPosFromTouchEvent(event) {
+        lastPos.x = event.touches[0].pageX;
+        lastPos.y = event.touches[0].pageY;
+    }
 
-            svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
+    svg.addEventListener("touchstart", event => {
+        isDragging = event.touches.length === 1;
+
+        if(isDragging) {
+            setLastPosFromTouchEvent(event);
+
+            event.preventDefault();
         }
+    });
+
+    svg.addEventListener("touchend", event => {
+        isDragging = event.touches.length !== 1;
+
+        if(isDragging) {
+            setLastPosFromTouchEvent(event);
+
+            event.preventDefault();
+        }
+    });
+
+    svg.addEventListener("touchmove", event => {
+        if(isDragging) {
+            doDrag(event.touches[0].pageX - lastPos.x, event.touches[0].pageY - lastPos.y);
+
+            setLastPosFromTouchEvent(event);
+
+            event.preventDefault();
+        }
+    });
+
+    function doDrag(deltaX, deltaY) {
+        if(deltaX === undefined || deltaY === undefined)
+            return;
+
+        translateX += deltaX / zoom;
+        translateY += deltaY / zoom;
+
+        dragDistance += Math.sqrt(translateX * translateX + translateY * translateY);
+
+        svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
+    }
+
+    svg.addEventListener("mousemove", event => {
+        if (isDragging)
+            doDrag(event.movementX, event.movementY);
 
         mouseXrelativeToMap = event.clientX - svg.getBoundingClientRect().left + translateX * zoom;
         mouseYrelativeToMap = event.clientY - svg.getBoundingClientRect().top + translateY * zoom;

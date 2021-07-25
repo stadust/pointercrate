@@ -61,6 +61,9 @@ svg {
 #gb path, #dk path {
   stroke-width: 2;
 }
+      * {
+      touch-action:none;
+      }
 .circle {
     opacity: 0;
     fill: #e0e0e0;
