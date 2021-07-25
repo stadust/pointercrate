@@ -1,8 +1,7 @@
 use self::heatmap::HeatMap;
+use crate::model::nationality::Nationality;
 use crate::{
     config,
-    extractor::auth::TokenAuth,
-    model::nationality::Nationality,
     state::PointercrateState,
     view::{simple_dropdown, Page},
     ViewResult,
@@ -20,7 +19,7 @@ struct StatsViewer {
 }
 
 #[get("/demonlist/statsviewer/")]
-pub async fn stats_viewer(TokenAuth(user): TokenAuth, state: PointercrateState) -> ViewResult<HttpResponse> {
+pub async fn stats_viewer(state: PointercrateState) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
