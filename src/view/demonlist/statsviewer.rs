@@ -38,7 +38,9 @@ impl Page for StatsViewer {
     }
 
     fn description(&self) -> String {
-        "Stats Viewer".to_owned()
+        "The pointercrate stats viewer, a ranking of the worlds best Geometry Dash players. Now more locla than ever, allowing you to see \
+         who's the best in your state!"
+            .to_owned()
     }
 
     fn scripts(&self) -> Vec<&str> {
