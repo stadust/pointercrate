@@ -76,7 +76,7 @@ impl Page for StatsViewer {
                 main.left {
                     section.panel.fade style = "padding: 0px; height: 90px"{
                     (PreEscaped(format!(r#"
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3064790497687357"
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
                              crossorigin="anonymous"></script>
                         <!-- Statsviewer Banner Ad -->
                         <ins class="adsbygoogle"
@@ -102,12 +102,12 @@ impl Page for StatsViewer {
                     }
                     section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
                         (PreEscaped(format!(r#"
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3064790497687357"
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
                              crossorigin="anonymous"></script>
                         <!-- Statsviewer Sidebar Ad -->
                         <ins class="adsbygoogle"
                              style="display:block"
-                             data-ad-client="{}"
+                             data-ad-client="{0}"
                              data-ad-slot="2211027222"
                              data-ad-format="auto"
                              data-full-width-responsive="true"></ins>
