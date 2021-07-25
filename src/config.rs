@@ -1,5 +1,4 @@
-use std::net::IpAddr;
-use std::{fmt::Debug, fs::File, io::Read, str::FromStr};
+use std::{fmt::Debug, fs::File, io::Read, net::IpAddr, str::FromStr};
 
 fn from_env_or_default<T: FromStr>(key: &str, default: T) -> T
 where
