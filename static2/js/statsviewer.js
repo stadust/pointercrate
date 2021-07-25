@@ -1,4 +1,4 @@
-import {StatsViewer} from "./modules/demonlist.mjs";
+import {populateSubdivisionDropdown, StatsViewer} from "./modules/demonlist.mjs";
 import {Dropdown} from "./modules/form.mjs";
 
 $(window).on("load", function () {
@@ -37,7 +37,6 @@ $(window).on("load", function () {
         worldMapWrapper.style.filter = "blur(" + (scrollRatio * .25) + "rem)";
     });
 
-    let nationIndicator = document.getElementById("current-nation");
     let currentlySelected = undefined;
 
     let zoom = 1.0;
@@ -56,15 +55,58 @@ $(window).on("load", function () {
         isDragging = true;
     });
 
-    svg.addEventListener("mousemove", event => {
-        if (isDragging) {
-            translateX += event.movementX / zoom;
-            translateY += event.movementY / zoom;
+    let lastPos = {x:0, y:0};
 
-            dragDistance += Math.sqrt(translateX * translateX + translateY * translateY);
+    function setLastPosFromTouchEvent(event) {
+        lastPos.x = event.touches[0].pageX;
+        lastPos.y = event.touches[0].pageY;
+    }
 
-            svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
+    svg.addEventListener("touchstart", event => {
+        isDragging = event.touches.length === 1;
+
+        if(isDragging) {
+            setLastPosFromTouchEvent(event);
+
+            event.preventDefault();
         }
+    });
+
+    svg.addEventListener("touchend", event => {
+        isDragging = event.touches.length !== 1;
+
+        if(isDragging) {
+            setLastPosFromTouchEvent(event);
+
+            event.preventDefault();
+        }
+    });
+
+    svg.addEventListener("touchmove", event => {
+        if(isDragging) {
+            doDrag(event.touches[0].pageX - lastPos.x, event.touches[0].pageY - lastPos.y);
+
+            setLastPosFromTouchEvent(event);
+
+            event.preventDefault();
+        }
+    });
+
+    function doDrag(deltaX, deltaY) {
+        if(deltaX === undefined || deltaY === undefined)
+            return;
+
+        translateX += deltaX / zoom;
+        translateY += deltaY / zoom;
+
+        dragDistance += Math.sqrt(translateX * translateX + translateY * translateY);
+
+        svg.style.transform = "scale(" + zoom + ") translate(" + translateX + "px, " + translateY + "px)";
+    }
+
+    svg.addEventListener("mousemove", event => {
+        if (isDragging)
+            doDrag(event.movementX, event.movementY);
 
         mouseXrelativeToMap = event.clientX - svg.getBoundingClientRect().left + translateX * zoom;
         mouseYrelativeToMap = event.clientY - svg.getBoundingClientRect().top + translateY * zoom;
@@ -113,8 +155,70 @@ $(window).on("load", function () {
         }
     })
 
+    let subdivisionDropdown = new Dropdown(document.getElementById("subdivision-dropdown"));
+
+    subdivisionDropdown.addEventListener(selected => {
+        if(selected === 'None') {
+            statsViewer.dropdown.select(statsViewer.queryData['nation']);
+        } else {
+            let countryCode = statsViewer.queryData['nation'];
+            let targetElement = worldMap.contentDocument.getElementById(countryCode.toUpperCase() + "-" + selected.toUpperCase());
+
+            if (targetElement !== currentlySelected)
+                selectSubdivision(targetElement);
+        }
+    });
+
+    function selectSubdivision(subdivision) {
+        let subdivisionCode = subdivision.id.substring(3);
+        let countryCode = subdivision.id.substring(0, 2);
+
+        if(isDragging)
+            return false;
+
+        // bruh
+        if(!subdivision.parentNode.parentNode.parentNode.classList.contains("selectable"))
+            return false;
+
+        if (currentlySelected !== undefined)
+            currentlySelected.classList.remove("selected");
+
+        if (subdivision !== currentlySelected) {
+            if(currentlySelected === undefined || currentlySelected.id.substring(0, 2) !== countryCode) {
+                statsViewer.dropdown.selectSilently(countryCode);
+
+                populateSubdivisionDropdown(subdivisionDropdown, countryCode)
+                    .then(() => subdivisionDropdown.select(subdivisionCode));
+            } else {
+                subdivisionDropdown.selectSilently(subdivisionCode);
+            }
+
+            statsViewer.updateQueryData2({nation: countryCode, subdivision: subdivisionCode});
+
+            currentlySelected = subdivision;
+            currentlySelected.classList.add("selected");
+        } else {
+            statsViewer.dropdown.selectSilently('International');
+            statsViewer.updateQueryData2({nation: undefined, subdivision: undefined});
+
+            subdivisionDropdown.clearOptions();
+
+            currentlySelected = undefined;
+        }
+    }
+
+    for (let subdivision of worldMap.contentDocument.querySelectorAll(".land-with-states .state")) {
+        subdivision.addEventListener('click', event => {
+            // states are overlaid over the .land-with-states. We need to stop propagation as otherwise the
+            // event handler on the .land-with-states is also run and it would select the entire country.
+            event.stopPropagation();
+
+            selectSubdivision(subdivision);
+        });
+    }
+
     // TODO: investigate loading (ready is sometimes fired before page is loaded)
-    for (let clickable of worldMap.contentDocument.querySelectorAll(".land, .island")) {
+    for (let clickable of worldMap.contentDocument.querySelectorAll(".land, .island, .land-with-states")) {
         clickable.addEventListener('click', () => {
             if (isDragging)
                 return false;
@@ -122,20 +226,34 @@ $(window).on("load", function () {
             if(!clickable.parentNode.classList.contains("selectable"))
                 return false;
 
-            if (currentlySelected !== undefined)
-                currentlySelected.classList.remove("selected");
-
             if (clickable !== currentlySelected) {
-                statsViewer.updateQueryData('nation', clickable.id.toUpperCase());
-                nationIndicator.innerText = clickable.getElementsByTagName("title")[0].innerHTML;
-
-                currentlySelected = clickable;
-                currentlySelected.classList.add("selected");
+                statsViewer.dropdown.select(clickable.id.toUpperCase());
             } else {
-                statsViewer.updateQueryData('nation', undefined);
-                nationIndicator.innerText = 'International';
-                currentlySelected = undefined;
+                statsViewer.dropdown.select('International');
             }
+
+            statsViewer.updateQueryData('subdivision', undefined);
         })
     }
+
+    statsViewer.dropdown.addEventListener(selected => {
+        // Selection unchanged
+        if(currentlySelected === undefined && selected === 'International' || currentlySelected !== undefined && currentlySelected.id.toUpperCase() === selected)
+            return;
+
+        if (currentlySelected !== undefined)
+            currentlySelected.classList.remove("selected");
+
+        if(selected === 'International') {
+            currentlySelected = undefined;
+        } else {
+            currentlySelected = worldMap.contentDocument.getElementById(selected.toLowerCase());
+            currentlySelected.classList.add("selected");
+        }
+
+        // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
+        populateSubdivisionDropdown(subdivisionDropdown, selected);
+
+        statsViewer.updateQueryData('subdivision', undefined);
+    })
 });

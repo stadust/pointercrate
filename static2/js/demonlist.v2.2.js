@@ -1,24 +1,11 @@
 import {
   initializeRecordSubmitter, initializeTimeMachine,
-  StatsViewer,
 } from "./modules/demonlist.mjs";
 
 $(document).ready(function () {
   initializePositionChart();
   initializeRecordSubmitter();
   initializeTimeMachine();
-
-  window.statsViewer = new StatsViewer(document.getElementById("statsviewer"));
-
-  if(window.location.toString().includes("statsviewer=true"))
-    window.statsViewer.initialize();
-  else
-    document
-      .getElementById("show-stats-viewer")
-      .addEventListener("click", () => {
-        gtag('event', 'stats-viewer-opened', {'event-category': 'demonlist'});
-        window.statsViewer.initialize();
-      });
 });
 
 function initializePositionChart() {

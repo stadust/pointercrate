@@ -115,6 +115,9 @@ pub struct RankingPagination {
     continent: Option<Continent>,
 
     #[serde(default, deserialize_with = "non_nullable")]
+    subdivision: Option<String>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
     name_contains: Option<CiString>,
 }
 
@@ -141,6 +144,7 @@ impl RankingPagination {
             .bind(&self.nation)
             .bind(self.nation == Some(None))
             .bind(self.continent.as_ref().map(|c| c.to_sql()))
+            .bind(&self.subdivision)
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 

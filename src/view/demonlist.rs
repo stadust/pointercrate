@@ -261,10 +261,9 @@ pub(super) fn submission_panel(demons: &[OverviewDemon], visible: bool) -> Marku
     }
 }
 
-fn stats_viewer(nations: &[Nationality], visible: bool) -> Markup {
+fn stats_viewer(nations: &[Nationality]) -> Markup {
     html! {
-        section.panel.fade.closable#statsviewer  style=(if !visible {"display:none"} else {""}) {
-            span.plus.cross.hover {}
+        section.panel.fade#statsviewer {
             h2.underlined.pad {
                 "Stats Viewer - "
                 (super::dropdown("International",
@@ -279,7 +278,7 @@ fn stats_viewer(nations: &[Nationality], visible: bool) -> Markup {
                     },
                     nations.iter().map(|nation| html! {
                         li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                            span class = {"flag-icon flag-icon-" (nation.iso_country_code.to_lowercase())} {}
+                            span class = "flag-icon" style={"background-image: url(/static2/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
                             (PreEscaped("&nbsp;"))
                             b {(nation.iso_country_code)}
                             br;
@@ -470,7 +469,7 @@ fn stats_viewer_panel() -> Markup {
             p {
                 "Get a detailed overview of who completed the most, created the most demons or beat the hardest demons! There is even a leaderboard to compare yourself to the very best!"
             }
-            a.blue.hover.button.js-scroll#show-stats-viewer data-destination = "statsviewer" data-reveal = "true" {
+            a.blue.hover.button#show-stats-viewer href = "/demonlist/statsviewer/ "{
                 "Open the stats viewer!"
             }
         }

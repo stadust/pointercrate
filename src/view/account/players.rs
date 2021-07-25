@@ -50,6 +50,9 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                             "Nationality:"
                                         }
                                         br;
+                                        p {
+                                            "Note that this is to be understood as 'Country of legal residency' and nothing else. No exceptions. "
+                                        }
                                         div.dropdown-menu.js-search#edit-player-nationality data-default = "None" {
                                             div {
                                                 input type="text" style = "color: #444446; font-weight: bold;";
@@ -59,7 +62,7 @@ pub(super) fn page(nationalities: &[Nationality]) -> Markup {
                                                     li.white.hover.underlined data-value = "None" {"None"}
                                                     @for nation in nationalities {
                                                         li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                                                            span class = {"flag-icon flag-icon-" (nation.iso_country_code.to_lowercase())} {}
+                                                            span class = "flag-icon" style={"background-image: url(/static2/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
                                                             (PreEscaped("&nbsp;"))
                                                             b {(nation.iso_country_code)}
                                                             br;

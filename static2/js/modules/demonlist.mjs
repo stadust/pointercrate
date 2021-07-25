@@ -34,10 +34,10 @@ export function embedVideo(video) {
 
 export function initializeTimeMachine() {
   let formHtml = document.getElementById("time-machine-form");
-  
+
   if(formHtml === null)
     return;
-  
+
   var timeMachineForm = new Form(formHtml);
 
   var inputs = ['year', 'month', 'day', 'hour', 'minute', 'second'].map(name => timeMachineForm.input("time-machine-" + name));
@@ -191,20 +191,16 @@ export class StatsViewer extends FilteredPaginator {
     this._progress = document.getElementById("progress");
     this._content = html.getElementsByClassName("viewer-content")[0];
 
-    try {
-      this.dropdown = new Dropdown(
-          html.getElementsByClassName("dropdown-menu")[0]
-      );
-      this.dropdown.addEventListener((selected) => {
-        if (selected === "International") {
-          this.updateQueryData("nation", undefined);
-        } else {
-          this.updateQueryData("nation", selected);
-        }
-      });
-    }catch (e) {
-      
-    }
+    this.dropdown = new Dropdown(
+        html.getElementsByClassName("dropdown-menu")[0]
+    );
+    this.dropdown.addEventListener((selected) => {
+      if (selected === "International") {
+        this.updateQueryData("nation", undefined);
+      } else {
+        this.updateQueryData("nation", selected);
+      }
+    });
   }
 
   initialize() {
@@ -230,19 +226,22 @@ export class StatsViewer extends FilteredPaginator {
     if (playerData.nationality == null) {
       this._name.textContent = playerData.name;
     } else {
-      let flagClass =
-        "flag-icon-" + playerData.nationality.country_code.toLowerCase();
-
-      let span = document.createElement("span");
-      span.classList.add("flag-icon", flagClass);
-      span.title = playerData.nationality.nation;
-
       while (this._name.lastChild) {
         this._name.removeChild(this._name.lastChild);
       }
 
-      this._name.textContent = playerData.name + " ";
-      this._name.appendChild(span);
+      let nameSpan = document.createElement("span");
+      nameSpan.style.padding = "0 8px";
+      nameSpan.innerText = playerData.name;
+
+      this._name.appendChild(getCountryFlag(playerData.nationality.nation, playerData.nationality.country_code));
+      this._name.appendChild(nameSpan);
+
+      if (playerData.nationality.subdivision !== null) {
+        this._name.appendChild(getSubdivisionFlag(playerData.nationality.subdivision.name, playerData.nationality.country_code, playerData.nationality.subdivision.iso_code));
+      } else {
+        this._name.appendChild(document.createElement("span"));
+      }
     }
 
     this.formatDemonsInto(this._created, playerData.created);
@@ -350,7 +349,45 @@ export class StatsViewer extends FilteredPaginator {
       element.appendChild(document.createTextNode("None"));
     }
   }
+}
 
+export function getCountryFlag(title, countryCode) {
+  let countrySpan = document.createElement("span");
+  countrySpan.classList.add("flag-icon");
+  countrySpan.title = title;
+  countrySpan.style.backgroundImage = "url(/static2/images/flags/" + countryCode.toLowerCase() + ".svg";
+  return countrySpan;
+}
+
+export function getSubdivisionFlag(title, countryCode, subdivisionCode) {
+  let stateSpan = document.createElement("span");
+  stateSpan.classList.add("flag-icon");
+  stateSpan.title = title;
+  stateSpan.style.backgroundImage = "url(/static2/images/flags/" + countryCode.toLowerCase() + "/" + subdivisionCode.toLowerCase() + ".svg";
+  return stateSpan;
+}
+
+export function populateSubdivisionDropdown(dropdown, countryCode) {
+  dropdown.clearOptions();
+
+  return get("/api/v1/nationalities/" + countryCode + "/subdivisions/").then(result => {
+    for(let subdivision of result.data) {
+      let flag = getSubdivisionFlag(subdivision.name, countryCode, subdivision.iso_code);
+
+      flag.style.marginLeft = "-10px";
+      flag.style.paddingRight = "1em";
+
+      let li = document.createElement("li");
+
+      li.className = "white hover";
+      li.dataset.value = subdivision.iso_code;
+      li.dataset.display = subdivision.name;
+      li.appendChild(flag);
+      li.appendChild(document.createTextNode(subdivision.name));
+
+      dropdown.addLI(li);
+    }
+  });
 }
 
 export class PlayerSelectionDialog extends FormDialog {
@@ -481,12 +518,7 @@ function generateStatsViewerPlayer(player) {
   i.appendChild(document.createTextNode(player.score.toFixed(2)));
 
   if (player.nationality) {
-    var span = document.createElement("span");
-
-    span.className =
-      "flag-icon flag-icon-" + player.nationality.country_code.toLowerCase();
-
-    li.appendChild(span);
+    li.appendChild(getCountryFlag(player.nationality.nation, player.nationality.country_code));
     li.appendChild(document.createTextNode(" "));
   }
 
