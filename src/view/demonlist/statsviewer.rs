@@ -1,6 +1,7 @@
 use self::heatmap::HeatMap;
 use crate::model::nationality::Nationality;
 use crate::{
+    config,
     extractor::auth::TokenAuth,
     state::PointercrateState,
     view::{simple_dropdown, Page},
@@ -74,6 +75,20 @@ impl Page for StatsViewer {
             }
             div.flex.m-center.container {
                 main.left {
+                    section.panel.fade style = "padding: 0px; height: 90px"{
+                    (PreEscaped(format!(r#"
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3064790497687357"
+                             crossorigin="anonymous"></script>
+                        <!-- Statsviewer Banner Ad -->
+                        <ins class="adsbygoogle"
+                             style="display:inline-block;width:728px;height:90px"
+                             data-ad-client="{}"
+                             data-ad-slot="5855948132"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({{}});
+                        </script>
+                        "#, config::adsense_publisher_id())))
+                    }
                     (super::stats_viewer(&self.nationalities_in_use))
                 }
                 aside.right {
@@ -85,6 +100,22 @@ impl Page for StatsViewer {
                             "Select a continent below to focus the stats viewer to that continent. Select 'All' to reset selection."
                         }
                         (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Middle America"].into_iter()))
+                    }
+                    section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
+                        (PreEscaped(format!(r#"
+                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3064790497687357"
+                             crossorigin="anonymous"></script>
+                        <!-- Statsviewer Sidebar Ad -->
+                        <ins class="adsbygoogle"
+                             style="display:block"
+                             data-ad-client="{}"
+                             data-ad-slot="2211027222"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({{}});
+                        </script>
+                        "#, config::adsense_publisher_id())))
                     }
                     div.panel.fade style = "overflow: initial;" {
                         h3.underlined {
