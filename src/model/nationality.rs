@@ -38,7 +38,7 @@ impl Continent {
             Continent::Africa => "Africa",
             Continent::NorthAmerica => "North America",
             Continent::SouthAmerica => "South America",
-            Continent::MiddleAmerica => "Middle America",
+            Continent::MiddleAmerica => "Central America",
         }
         .to_owned()
     }
@@ -58,11 +58,11 @@ impl<'de> Deserialize<'de> for Continent {
             "africa" => Ok(Continent::Africa),
             "north america" => Ok(Continent::NorthAmerica),
             "south america" => Ok(Continent::SouthAmerica),
-            "middle america" => Ok(Continent::MiddleAmerica),
+            "central america" => Ok(Continent::MiddleAmerica),
             _ =>
                 Err(serde::de::Error::invalid_value(
                     serde::de::Unexpected::Str(&string),
-                    &"'Asia', 'Europe', 'Australia', 'Africa', 'North America', 'South America' or 'Middle America'",
+                    &"'Asia', 'Europe', 'Australia', 'Africa', 'North America', 'South America' or 'Central America'",
                 )),
         }
     }
@@ -80,7 +80,7 @@ impl Serialize for Continent {
             Continent::Africa => "africa",
             Continent::NorthAmerica => "north america",
             Continent::SouthAmerica => "south america",
-            Continent::MiddleAmerica => "middle america",
+            Continent::MiddleAmerica => "central america",
         })
     }
 }

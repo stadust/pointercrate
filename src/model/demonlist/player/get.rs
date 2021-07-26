@@ -45,7 +45,7 @@ impl Player {
         let result = sqlx::query_as!(
             FetchedPlayer,
             r#"SELECT id, players.name AS "name: String", banned, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
-             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1"#,
+             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1 AND subdivisions.nation=nationalities.iso_country_code"#,
             id
         )
         .fetch_one(connection)

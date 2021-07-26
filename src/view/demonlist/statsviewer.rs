@@ -100,7 +100,7 @@ impl Page for StatsViewer {
                         p {
                             "Select a continent below to focus the stats viewer to that continent. Select 'All' to reset selection."
                         }
-                        (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Middle America"].into_iter()))
+                        (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Central America"].into_iter()))
                     }
                     section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
                         (PreEscaped(format!(r#"
