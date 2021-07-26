@@ -126,48 +126,39 @@ impl Demon {
     }
 }
 
+macro_rules! query_many_demons {
+    ($connection:expr, $query:expr, $id:expr) => {{
+        let mut stream = sqlx::query!($query, $id).fetch($connection);
+        let mut demons = Vec::new();
+
+        while let Some(row) = stream.next().await {
+            let row = row?;
+
+            demons.push(MinimalDemon {
+                id: row.id,
+                position: row.position,
+                name: CiString(row.name),
+            })
+        }
+
+        Ok(demons)
+    }};
+}
+
 pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
-    let mut stream = sqlx::query!(
+    query_many_demons!(
+        connection,
         r#"SELECT id, name AS "name: String", position FROM demons WHERE publisher = $1"#,
         player.id
     )
-    .fetch(connection);
-
-    let mut demons = Vec::new();
-
-    while let Some(row) = stream.next().await {
-        let row = row?;
-
-        demons.push(MinimalDemon {
-            id: row.id,
-            position: row.position,
-            name: CiString(row.name),
-        })
-    }
-
-    Ok(demons)
 }
 
 pub async fn verified_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
-    let mut stream = sqlx::query!(
+    query_many_demons!(
+        connection,
         r#"SELECT id, name as "name: String", position FROM demons WHERE verifier = $1"#,
         player.id
     )
-    .fetch(connection);
-
-    let mut demons = Vec::new();
-
-    while let Some(row) = stream.next().await {
-        let row = row?;
-
-        demons.push(MinimalDemon {
-            id: row.id,
-            position: row.position,
-            name: CiString(row.name),
-        })
-    }
-
-    Ok(demons)
 }
 
 struct FetchedDemon {
