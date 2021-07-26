@@ -97,7 +97,11 @@ async fn main() -> std::io::Result<()> {
             .service(
                 scope("/api/v1")
                     .service(misc::list_information)
-                    .service(scope("/nationalities").service(nationality::subdivisions))
+                    .service(
+                        scope("/nationalities")
+                            .service(nationality::subdivisions)
+                            .service(nationality::ranking),
+                    )
                     .service(
                         scope("/auth")
                             .service(auth::register)

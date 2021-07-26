@@ -2,7 +2,10 @@ use crate::cistring::CiString;
 use derive_more::Constructor;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+pub use paginate::{NationalityRankingPagination, RankedNation};
+
 mod get;
+mod paginate;
 
 #[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
 pub struct Nationality {

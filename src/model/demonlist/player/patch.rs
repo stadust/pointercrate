@@ -103,8 +103,10 @@ impl FullPlayer {
     /// Note that this method **does not** rename `Self`
     pub async fn merge(&mut self, with: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
         info!("Merging player {} with player {}", self, with);
-        // First, delete duplicate creator entries
 
+        // TODO: deal with claim conflicts :(
+
+        // First, delete duplicate creator entries
         let deleted = sqlx::query!(
             "DELETE FROM creators AS c1 WHERE c1.creator = $2 AND EXISTS (SELECT 1 FROM creators AS c2 WHERE c2.demon = c1.demon AND \
              c2.creator = $1)",
