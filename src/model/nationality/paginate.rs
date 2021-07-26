@@ -1,10 +1,11 @@
-use crate::cistring::CiString;
-use crate::model::nationality::{Continent, Nationality};
-use crate::util::non_nullable;
-use crate::Result;
+use crate::{
+    cistring::CiString,
+    model::nationality::{Continent, Nationality},
+    util::non_nullable,
+    Result,
+};
 use futures::StreamExt;
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

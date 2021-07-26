@@ -1,7 +1,13 @@
-use crate::model::nationality::NationalityRankingPagination;
-use crate::{cistring::CiString, model::nationality::Nationality, state::PointercrateState, ApiResult};
-use actix_web::web::Query;
-use actix_web::{web::Path, HttpResponse};
+use crate::{
+    cistring::CiString,
+    model::nationality::{Nationality, NationalityRankingPagination},
+    state::PointercrateState,
+    ApiResult,
+};
+use actix_web::{
+    web::{Path, Query},
+    HttpResponse,
+};
 use actix_web_codegen::get;
 
 #[get("/{iso_code}/subdivisions/")]
