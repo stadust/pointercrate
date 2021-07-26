@@ -58,6 +58,7 @@ impl AuthenticatedUser {
                         permissions: Permissions::empty(),
                         display_name: None,
                         youtube_channel: None,
+                        claimed_player: None,
                     },
                     password_hash: hash,
                 })

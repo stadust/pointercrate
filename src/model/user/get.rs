@@ -1,6 +1,26 @@
 use crate::{error::PointercrateError, model::user::User, permissions::Permissions, Result};
-use futures::StreamExt;
 use sqlx::{Error, PgConnection};
+
+macro_rules! construct_from_row {
+    ($row:expr) => {
+        User {
+            id: $row.member_id,
+            name: $row.name,
+            permissions: Permissions::from_bits_truncate($row.permissions.unwrap() as u16),
+            display_name: $row.display_name,
+            youtube_channel: $row.youtube_channel,
+            claimed_player: match ($row.cp_id, $row.cp_name, $row.cp_banned) {
+                (Some(id), Some(name), Some(banned)) =>
+                    Some(crate::model::user::DatabasePlayer {
+                        id,
+                        name: crate::cistring::CiString(name),
+                        banned,
+                    }),
+                _ => None,
+            },
+        }
+    };
+}
 
 macro_rules! query_user {
     ($connection: expr, $query:expr, $id: expr, $($param: expr),*) => {{
@@ -13,13 +33,7 @@ macro_rules! query_user {
                     identified_by: $id.to_string(),
                 }),
             Err(err) => Err(err.into()),
-            Ok(row) => Ok(User {
-                id: row.member_id,
-                name: row.name,
-                permissions: Permissions::from_bits_truncate(row.permissions.unwrap() as u16),
-                display_name: row.display_name,
-                youtube_channel: row.youtube_channel,
-            }),
+            Ok(row) => Ok(construct_from_row!(row)),
         }
     }};
 }
@@ -28,7 +42,9 @@ impl User {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<User> {
         query_user!(
             connection,
-            "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE member_id = $1",
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, players.id as "cp_id?", 
+             players.name::text as cp_name, players.banned as "cp_banned?" FROM members LEFT OUTER JOIN players ON players.id = 
+             members.claimed_player WHERE member_id = $1"#,
             id,
         )
     }
@@ -36,34 +52,10 @@ impl User {
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<User> {
         query_user!(
             connection,
-            "SELECT member_id, name, CAST(permissions AS integer), display_name, youtube_channel::text FROM members WHERE name = $1",
+            r#"SELECT member_id, members.name, CAST(permissions AS integer), display_name, youtube_channel::text, players.id as "cp_id?", 
+             players.name::text as cp_name, players.banned as "cp_banned?" FROM members LEFT OUTER JOIN players ON players.id = 
+             members.claimed_player WHERE members.name = $1"#,
             name,
         )
-    }
-
-    /// Gets all users that have the given permission bits all set
-    pub async fn by_permission(permissions: Permissions, connection: &mut PgConnection) -> Result<Vec<User>> {
-        let mut stream = sqlx::query!(
-            "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE permissions & \
-             CAST($1::INTEGER AS BIT(16)) = CAST($1::INTEGER AS BIT(16))",
-            permissions.bits() as i32
-        )
-        .fetch(connection);
-
-        let mut users = Vec::new();
-
-        while let Some(row) = stream.next().await {
-            let row = row?;
-
-            users.push(User {
-                id: row.member_id,
-                name: row.name,
-                permissions: Permissions::from_bits_truncate(row.permissions.unwrap() as u16),
-                display_name: row.display_name,
-                youtube_channel: row.youtube_channel,
-            })
-        }
-
-        Ok(users)
     }
 }

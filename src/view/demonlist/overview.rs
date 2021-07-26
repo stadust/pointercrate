@@ -1,11 +1,6 @@
+use crate::model::user::ListedUser;
 use crate::{
-    config,
-    model::{nationality::Nationality, user::User},
-    permissions::Permissions,
-    state::PointercrateState,
-    video,
-    view::Page,
-    Result, ViewResult,
+    config, model::nationality::Nationality, permissions::Permissions, state::PointercrateState, video, view::Page, Result, ViewResult,
 };
 use actix_web::{web::Query, HttpMessage, HttpRequest, HttpResponse};
 use actix_web_codegen::get;
@@ -27,9 +22,9 @@ pub struct OverviewDemon {
 #[derive(Debug)]
 pub struct DemonlistOverview {
     pub demon_overview: Vec<OverviewDemon>,
-    pub admins: Vec<User>,
-    pub mods: Vec<User>,
-    pub helpers: Vec<User>,
+    pub admins: Vec<ListedUser>,
+    pub mods: Vec<ListedUser>,
+    pub helpers: Vec<ListedUser>,
     pub nations: Vec<Nationality>,
 
     pub when: Option<DateTime<FixedOffset>>,
@@ -60,7 +55,7 @@ pub async fn overview_demons(connection: &mut PgConnection, at: Option<DateTime<
 
 impl DemonlistOverview {
     pub(super) fn team_panel(&self) -> Markup {
-        let maybe_link = |user: &User| -> Markup {
+        let maybe_link = |user: &ListedUser| -> Markup {
             html! {
                 li {
                     @match user.youtube_channel {
@@ -113,9 +108,9 @@ impl DemonlistOverview {
     pub(super) async fn load(
         connection: &mut PgConnection, when: Option<DateTime<FixedOffset>>, query_data: OverviewQueryData,
     ) -> Result<DemonlistOverview> {
-        let admins = User::by_permission(Permissions::ListAdministrator, connection).await?;
-        let mods = User::by_permission(Permissions::ListModerator, connection).await?;
-        let helpers = User::by_permission(Permissions::ListHelper, connection).await?;
+        let admins = ListedUser::by_permission(Permissions::ListAdministrator, connection).await?;
+        let mods = ListedUser::by_permission(Permissions::ListModerator, connection).await?;
+        let helpers = ListedUser::by_permission(Permissions::ListHelper, connection).await?;
 
         let nations = Nationality::all(connection).await?;
         let demon_overview = overview_demons(connection, when).await?;
