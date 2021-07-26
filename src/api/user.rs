@@ -51,7 +51,7 @@ pub async fn get(TokenAuth(user): TokenAuth, state: PointercrateState, user_id: 
 
     // We are only allowed to retrieve users who already have permissions we can set.
     // We're also using that ListModerator implies ListHelper
-    if !user.inner().has_permission(Permissions::Administrator)
+    if !(user.inner().has_permission(Permissions::Administrator) || user.inner().has_permission(Permissions::Moderator))
         && !(user.inner().has_permission(Permissions::ListAdministrator) && gotten_user.has_permission(Permissions::ListHelper))
     {
         return Err(JsonError(PointercrateError::ModelNotFound {
