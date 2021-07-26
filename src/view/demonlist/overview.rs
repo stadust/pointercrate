@@ -1,6 +1,11 @@
-use crate::model::user::ListedUser;
 use crate::{
-    config, model::nationality::Nationality, permissions::Permissions, state::PointercrateState, video, view::Page, Result, ViewResult,
+    config,
+    model::{nationality::Nationality, user::ListedUser},
+    permissions::Permissions,
+    state::PointercrateState,
+    video,
+    view::Page,
+    Result, ViewResult,
 };
 use actix_web::{web::Query, HttpMessage, HttpRequest, HttpResponse};
 use actix_web_codegen::get;

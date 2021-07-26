@@ -1,6 +1,8 @@
-use crate::model::demonlist::player::DatabasePlayer;
 use crate::{
-    model::user::{auth::AuthenticatedUser, patch::PatchUser},
+    model::{
+        demonlist::player::DatabasePlayer,
+        user::{auth::AuthenticatedUser, patch::PatchUser},
+    },
     util::{non_nullable, nullable},
     Result,
 };

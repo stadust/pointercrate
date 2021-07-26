@@ -1,7 +1,9 @@
-use crate::model::user::User;
 use crate::{
     error::PointercrateError,
-    model::user::auth::{patch::PatchMe, AuthenticatedUser, Claims},
+    model::user::{
+        auth::{patch::PatchMe, AuthenticatedUser, Claims},
+        User,
+    },
     permissions::Permissions,
     Result,
 };
