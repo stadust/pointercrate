@@ -23,7 +23,7 @@ pub async fn paginate(
 
     // Rule of thumb: If you can assign permissions, you can see all users that currently have those
     // permissions
-    if user.inner().permissions.assigns().is_empty() {
+    if user.inner().permissions.assigns().is_empty() && !user.inner().has_permission(Permissions::Moderator) {
         return Err(JsonError(PointercrateError::Forbidden))
     }
 
