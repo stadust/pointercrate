@@ -30,6 +30,7 @@ impl AuthenticatedUser {
                 password: Some(password),
                 display_name: None,
                 youtube_channel: None,
+                claimed_player: None,
             };
 
             warn!("Invalidating all access tokens for user {}", user.inner());

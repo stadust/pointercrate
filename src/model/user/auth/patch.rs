@@ -1,3 +1,4 @@
+use crate::model::demonlist::player::DatabasePlayer;
 use crate::{
     model::user::{auth::AuthenticatedUser, patch::PatchUser},
     util::{non_nullable, nullable},
@@ -17,6 +18,9 @@ pub struct PatchMe {
 
     #[serde(default, deserialize_with = "nullable")]
     pub(super) youtube_channel: Option<Option<String>>,
+
+    #[serde(default, deserialize_with = "nullable")]
+    pub(super) claimed_player: Option<Option<i32>>,
 }
 
 impl PatchMe {
@@ -31,12 +35,20 @@ impl Debug for PatchMe {
         f.debug_struct("PatchMe")
             .field("display_name", &self.display_name)
             .field("youtube_channel", &self.youtube_channel)
+            .field("claimed_player", &self.claimed_player)
             .finish()
     }
 }
 
 impl AuthenticatedUser {
     pub async fn apply_patch(mut self, patch: PatchMe, connection: &mut PgConnection) -> Result<Self> {
+        if let Some(claim) = patch.claimed_player {
+            match claim {
+                Some(claim) => self.set_claimed_player(claim, connection).await?,
+                None => self.reset_claimed_player(connection).await?,
+            }
+        }
+
         if let Some(password) = patch.password {
             self.set_password(password, connection).await?;
         }
@@ -54,6 +66,32 @@ impl AuthenticatedUser {
             .await?;
 
         Ok(self)
+    }
+
+    pub async fn set_claimed_player(&mut self, new_claim: i32, connection: &mut PgConnection) -> Result<()> {
+        let player = DatabasePlayer::by_id(new_claim, connection).await?;
+
+        sqlx::query!(
+            "UPDATE members SET claimed_player = $2 WHERE member_id = $1",
+            self.user.id,
+            new_claim
+        )
+        .execute(connection)
+        .await?;
+
+        self.user.claimed_player = Some(player);
+
+        Ok(())
+    }
+
+    pub async fn reset_claimed_player(&mut self, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!("UPDATE members SET claimed_player = NULL WHERE member_id = $1", self.user.id)
+            .execute(connection)
+            .await?;
+
+        self.user.claimed_player = None;
+
+        Ok(())
     }
 
     pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
