@@ -20,6 +20,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+#[macro_use]
 mod get;
 mod paginate;
 mod patch;

@@ -55,23 +55,10 @@ pub async fn creators_of(demon: &MinimalDemon, connection: &mut PgConnection) ->
 }
 
 pub async fn created_by(player_id: i32, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
-    let mut stream = sqlx::query!(
-        r#"SELECT demons.id, demons.name as "name: String", demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE 
+    query_many_demons!(
+        connection,
+        r#"SELECT demons.id, demons.name as "name: String", demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE
          creators.creator=$1"#,
         player_id
     )
-    .fetch(connection);
-    let mut demons = Vec::new();
-
-    while let Some(row) = stream.next().await {
-        let row = row?;
-
-        demons.push(MinimalDemon {
-            id: row.id,
-            name: CiString(row.name),
-            position: row.position,
-        })
-    }
-
-    Ok(demons)
 }
