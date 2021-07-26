@@ -391,7 +391,7 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
 }
 
 export class PlayerSelectionDialog extends FormDialog {
-  constructor(dialogId) {
+  constructor(dialogId, selectionHandler) {
     super(dialogId);
 
     let paginator = new FilteredPaginator(
@@ -405,10 +405,14 @@ export class PlayerSelectionDialog extends FormDialog {
     playerName.addValidator(valueMissing, "Please provide a player name");
 
     paginator.initialize();
-    paginator.addSelectionListener((selected) => {
-      playerName.value = selected.name;
-      this.form.html.requestSubmit();
-    });
+    if(selectionHandler === undefined) {
+      paginator.addSelectionListener((selected) => {
+        playerName.value = selected.name;
+        this.form.html.requestSubmit();
+      });
+    } else {
+      paginator.addSelectionListener(selectionHandler);
+    }
   }
 }
 

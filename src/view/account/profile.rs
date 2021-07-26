@@ -51,6 +51,20 @@ pub(super) fn page(user: &User) -> Markup {
                         }
                         span {
                             b {
+                                i.fa.fa-pencil-alt.clickable#player-claim-pen aria-hidden = "true" {} " Claimed Player: "
+                            }
+                            i#profile-claimed-player {
+                                @match user.claimed_player {
+                                    Some(ref claim) => (claim.name),
+                                    None => "None"
+                                }
+                            }
+                            p {
+                                "A confirmed player claim (meaning a claim that has been verified by a staff member) will in the future allow you to customize your player's appearance on the stats viewer."
+                            }
+                        }
+                        span {
+                            b {
                                 "Permissions: "
                             }
                             (user.permissions)
@@ -122,6 +136,40 @@ pub(super) fn page(user: &User) -> Markup {
         (edit_youtube_link_dialog())
         (change_password_dialog())
         (delete_account_dialog())
+        // have to inline this to add the password field :pensive:
+        div.overlay.closable {
+            div.dialog#edit-player-claim-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Claim Player"
+                }
+                div.flex.viewer {
+                    (crate::view::filtered_paginator("edit-player-claim-dialog-pagination", "/api/v1/players/"))
+                    div {
+                        p {
+                            "Select a player to claim. Note that each claim is manually validated by a staff member."
+                        }
+                        form.flex.col novalidate = "" {
+                            p.info-red.output {}
+                            p.info-green.output {}
+                            span.form-input#player-claim-dialog-input style="display: none"{
+                                input name = "claimed_player" type="number" required = "";
+                            }
+                            span.form-input#player-claim-dialog-name-input {
+                                label {"Selected Player:"}
+                                input type="text" disabled="" required="";
+                            }
+                            span.form-input#player-claim-dialog-password {
+                                label {"Password:"}
+                                input type="password" required = "";
+                                p.error {}
+                            }
+                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Initiate Claim";
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -1,17 +1,19 @@
 "use strict";
 
 import {
-  Form,
-  valueMissing,
-  tooShort,
-  post,
-  Output,
-  typeMismatch,
   del,
   displayError,
+  EditorBackend,
+  Form,
+  Output,
+  post,
+  setupEditorDialog,
+  setupFormDialogEditor,
+  tooShort,
+  typeMismatch,
+  valueMissing,
 } from "../modules/formv2.mjs";
-import { EditorBackend } from "../modules/formv2.mjs";
-import { setupFormDialogEditor } from "../modules/formv2.mjs";
+import {PlayerSelectionDialog} from "../modules/demonlistv2.mjs";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");
@@ -67,6 +69,7 @@ class ProfileEditorBackend extends EditorBackend {
     this._pw = passwordInput;
     this._displayName = document.getElementById("profile-display-name");
     this._youtube = document.getElementById("profile-youtube-channel");
+    this._claim = document.getElementById("profile-claimed-player")
   }
 
   url() {
@@ -87,8 +90,9 @@ class ProfileEditorBackend extends EditorBackend {
       window.etag = response.headers["etag"];
       window.username = response.data.data.name;
 
-      this._displayName.innerText = response.data.data.display_name || "-";
+      this._displayName.innerText = response.data.data.display_name || "None";
       this._youtube.removeChild(this._youtube.lastChild); // only ever has one child
+      this._claim.innerText = response.data.data.claimed_player === null ? "None" : response.data.data.claimed_player.name;
       if (response.data.data.youtube_channel) {
         let a = document.createElement("a");
         a.href = response.data.data.youtube_channel;
@@ -103,6 +107,16 @@ class ProfileEditorBackend extends EditorBackend {
 
 function setupEditAccount() {
   let output = new Output(document.getElementById("things"));
+
+  let playerDisplay = document.querySelector("#player-claim-dialog-name-input input");
+  let hiddenPlayerIdInput = document.querySelector("#player-claim-dialog-input input");
+
+  setupEditorDialog(new PlayerSelectionDialog("edit-player-claim-dialog",
+      selected => {
+        playerDisplay.value = selected.name;
+        hiddenPlayerIdInput.value = selected.id;
+      }), "player-claim-pen", new ProfileEditorBackend(document.querySelector("#player-claim-dialog-password input")), output);
+
   let editDisplayNameForm = setupFormDialogEditor(
     new ProfileEditorBackend(document.querySelector("#auth-dn input")), // not pretty, but oh well
     "edit-dn-dialog",
