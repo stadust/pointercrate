@@ -107,7 +107,7 @@ impl Page for AccountPage {
                         (PreEscaped("&nbsp;&nbsp;"))
                         i class = "fa fa-user fa-2x" aria-hidden="true" {}
                     }
-                    @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) {
+                    @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) || self.user.has_permission(Permissions::Moderator) {
                         div.tab.button.white.hover.no-shadow data-tab-id="2" {
                             b {
                                 "Users"
@@ -151,8 +151,8 @@ impl Page for AccountPage {
                 }
 
                 (profile::page(&self.user))
-                @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) {
-                    (users::page(self.user.has_permission(Permissions::Administrator)))
+                @if self.user.has_permission(Permissions::Administrator) || self.user.has_permission(Permissions::ListAdministrator) || self.user.has_permission(Permissions::Moderator) {
+                    (users::page(self.user.has_permission(Permissions::Administrator), self.user.has_permission(Permissions::ListAdministrator)))
                 }
                 @if self.user.has_permission(Permissions::ListHelper) {
                     (records::page(&self.demons))

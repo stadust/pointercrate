@@ -1,7 +1,7 @@
 use crate::view::filtered_paginator;
 use maud::{html, Markup};
 
-pub(super) fn page(is_admin: bool) -> Markup {
+pub(super) fn page(is_admin: bool, is_list_admin: bool) -> Markup {
     html! {
         div.m-center.flex.tab-content.container data-tab-id = "2" {
             div.left {
@@ -61,15 +61,33 @@ pub(super) fn page(is_admin: bool) -> Markup {
                                             span.checkmark {}
                                         }
                                     }
-                                    label.form-input.cb-container#perm-list-helper for = "helper" {
-                                        i {"List Helper"}
-                                        input type = "checkbox" name = "helper";
-                                        span.checkmark {}
+                                    @if is_admin || is_list_admin {
+                                        label.form-input.cb-container#perm-list-helper for = "helper" {
+                                            i {"List Helper"}
+                                            input type = "checkbox" name = "helper";
+                                            span.checkmark {}
+                                        }
                                     }
-                                    label.form-input.cb-container#perm-list-mod for = "mod" {
-                                        i {"List Moderator"}
-                                        input type = "checkbox" name = "mod";
-                                        span.checkmark {}
+                                    @else {
+                                        label.form-input.cb-container#perm-list-helper for = "helper" {
+                                            i {"List Helper"}
+                                            input type = "checkbox" name = "helper" disabled = "";
+                                            span.checkmark {}
+                                        }
+                                    }
+                                    @if is_admin || is_list_admin {
+                                        label.form-input.cb-container#perm-list-mod for = "mod" {
+                                            i {"List Moderator"}
+                                            input type = "checkbox" name = "mod";
+                                            span.checkmark {}
+                                        }
+                                    }
+                                    @else {
+                                        label.form-input.cb-container#perm-list-mod for = "mod" {
+                                            i {"List Moderator"}
+                                            input type = "checkbox" name = "mod" disabled="";
+                                            span.checkmark {}
+                                        }
                                     }
                                     @if is_admin {
                                         label.form-input.cb-container#perm-list-admin for = "admin" {
