@@ -46,6 +46,7 @@ pub struct User {
     /// A user-customizable link to a [YouTube](https://youtube.com) channel
     pub youtube_channel: Option<String>,
 }
+
 impl Taggable for User {}
 
 impl Display for User {
