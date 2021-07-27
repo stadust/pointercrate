@@ -275,12 +275,11 @@ impl Page for DemonlistOverview {
                                 (PreEscaped(format!(r#"
                                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
      crossorigin="anonymous"></script>
+<!-- Demonlist Responsive Feed Ad -->
 <ins class="adsbygoogle"
-     style="display:block"
-     data-ad-format="fluid"
-     data-ad-layout-key="-h1+40+4u-93+n"
+     style="display:inline-block;width:728px;height:90px"
      data-ad-client="{0}"
-     data-ad-slot="5157884729"></ins>
+     data-ad-slot="2819150519"></ins>
 <script>
      (adsbygoogle = window.adsbygoogle || []).push({{}});
 </script>
