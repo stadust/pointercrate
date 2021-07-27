@@ -69,7 +69,7 @@ pub(super) fn page(is_admin: bool, is_list_admin: bool) -> Markup {
                                         }
                                     }
                                     @else {
-                                        label.form-input.cb-container#perm-list-helper for = "helper" {
+                                        label.form-input.cb-container#perm-list-helper for = "helper" style = "opacity: .3" {
                                             i {"List Helper"}
                                             input type = "checkbox" name = "helper" disabled = "";
                                             span.checkmark {}
@@ -83,7 +83,7 @@ pub(super) fn page(is_admin: bool, is_list_admin: bool) -> Markup {
                                         }
                                     }
                                     @else {
-                                        label.form-input.cb-container#perm-list-mod for = "mod" {
+                                        label.form-input.cb-container#perm-list-mod for = "mod" style = "opacity: .3" {
                                             i {"List Moderator"}
                                             input type = "checkbox" name = "mod" disabled="";
                                             span.checkmark {}
