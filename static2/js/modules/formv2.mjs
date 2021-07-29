@@ -92,6 +92,9 @@ export class Dropdown {
 
   select(entry) {
     if (entry in this.values) {
+      if(entry === this.selected)
+        return;
+
       this.selected = entry;
       this.input.value = this.values[entry];
 
