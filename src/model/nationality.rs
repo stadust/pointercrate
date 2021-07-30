@@ -2,6 +2,7 @@ use crate::cistring::CiString;
 use derive_more::Constructor;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+use crate::etag::Taggable;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 
 mod get;
@@ -14,6 +15,44 @@ pub struct Nationality {
     pub nation: CiString,
     pub subdivision: Option<Subdivision>,
 }
+
+#[derive(Debug, Serialize, Hash)]
+pub struct BestRecord {
+    id: i32,
+    demon: String,
+    position: i16,
+    progress: i16,
+    players: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Hash)]
+pub struct MiniDemon {
+    id: i32,
+    demon: String,
+    position: i16,
+    player: String,
+}
+
+#[derive(Debug, Serialize, Hash)]
+pub struct MiniDemonWithPlayers {
+    id: i32,
+    demon: String,
+    position: i16,
+    players: Vec<String>,
+}
+
+#[derive(Debug, Hash, Serialize)]
+pub struct NationalityRecord {
+    pub nation: Nationality,
+
+    #[serde(rename = "records")]
+    pub best_records: Vec<BestRecord>,
+    pub created: Vec<MiniDemonWithPlayers>,
+    pub verified: Vec<MiniDemon>,
+    pub published: Vec<MiniDemon>,
+}
+
+impl Taggable for NationalityRecord {}
 
 #[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Constructor)]
 pub struct Subdivision {

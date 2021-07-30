@@ -86,7 +86,8 @@ async fn main() -> std::io::Result<()> {
             .service(view::login::post)
             .service(view::login::register)
             .service(view::demonlist::demon_permalink)
-            .service(view::demonlist::stats_viewer2)
+            .service(view::demonlist::individual_statsviewer)
+            .service(view::demonlist::nation_statsviewer)
             .service(view::demonlist::page)
             .service(view::demonlist::index)
             .service(view::account::index)
@@ -100,7 +101,8 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         scope("/nationalities")
                             .service(nationality::subdivisions)
-                            .service(nationality::ranking),
+                            .service(nationality::ranking)
+                            .service(nationality::nation),
                     )
                     .service(
                         scope("/auth")

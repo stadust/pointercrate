@@ -1,7 +1,8 @@
 pub use self::{
     demon_page::{demon_permalink, page},
     overview::{index, overview_demons, OverviewDemon},
-    statsviewer::stats_viewer as stats_viewer2,
+    statsviewer::individual::stats_viewer as individual_statsviewer,
+    statsviewer::nationbased::stats_viewer as nation_statsviewer,
 };
 use crate::{
     config,
@@ -260,130 +261,6 @@ pub(super) fn submission_panel(demons: &[OverviewDemon], visible: bool) -> Marku
         ))
     }
 }
-
-fn stats_viewer(nations: &[Nationality]) -> Markup {
-    html! {
-        section.panel.fade#statsviewer {
-            h2.underlined.pad {
-                "Stats Viewer - "
-                (super::dropdown("International",
-                    html! {
-                        li.white.hover.underlined data-value = "International" data-display = "International" {
-                            span.em.em-world_map {}
-                            (PreEscaped("&nbsp;"))
-                            b {"WORLD"}
-                            br;
-                            span style = "font-size: 90%; font-style: italic" { "International" }
-                        }
-                    },
-                    nations.iter().map(|nation| html! {
-                        li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                            span class = "flag-icon" style={"background-image: url(/static2/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
-                            (PreEscaped("&nbsp;"))
-                            b {(nation.iso_country_code)}
-                            br;
-                            span style = "font-size: 90%; font-style: italic" {(nation.nation)}
-                        }
-                    })
-                ))
-            }
-            div.flex.viewer {
-                (super::filtered_paginator("stats-viewer-pagination", "/api/v1/players/ranking/"))
-                p.viewer-welcome {
-                    "Click on a player's name on the left to get started!"
-                }
-                div.viewer-content {
-                    div {
-                        div.flex.col {
-                            h3#player-name style = "font-size:1.4em; overflow: hidden" {}
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "List demons completed:"
-                                    }
-                                    br;
-                                    span#amount-beaten {}
-                                }
-                                span {
-                                    b {
-                                        "Legacy demons completed:"
-                                    }
-                                    br;
-                                    span#amount-legacy {}
-                                }
-                                span {
-                                    b {
-                                        "Demonlist score:"
-                                    }
-                                    br;
-                                    span#score {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Demonlist rank:"
-                                    }
-                                    br;
-                                    span#rank {}
-                                }
-                                span {
-                                    b {
-                                        "Hardest demon:"
-                                    }
-                                    br;
-                                    span#hardest {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Demons completed:"
-                                    }
-                                    br;
-                                    span#beaten {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "List demons created:"
-                                    }
-                                    br;
-                                    span#created {}
-                                }
-                                span {
-                                    b {
-                                        "List demons published:"
-                                    }
-                                    br;
-                                    span#published {}
-                                }
-                                span {
-                                    b {
-                                        "List demons verified:"
-                                    }
-                                    br;
-                                    span#verified {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Progress on:"
-                                    }
-                                    br;
-                                    span#progress {}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 fn sidebar_ad() -> Markup {
     html! {
         section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {

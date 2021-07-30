@@ -1,3 +1,4 @@
+use crate::model::nationality::{BestRecord, MiniDemon, MiniDemonWithPlayers, NationalityRecord};
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
@@ -92,4 +93,105 @@ impl Nationality {
 
         Ok(nationalities)
     }
+
+    pub async fn upgrade(self, connection: &mut PgConnection) -> Result<NationalityRecord> {
+        Ok(NationalityRecord {
+            best_records: best_records_in(&self, connection).await?,
+            created: created_in(&self, connection).await?,
+            verified: verified_in(&self, connection).await?,
+            published: published_in(&self, connection).await?,
+            nation: self,
+        })
+    }
+}
+
+pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
+    let mut stream = sqlx::query!( r#"select distinct on (demon) demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from creators inner join demons on demons.id=demon inner join players on players.id=creator where nationality=$1"#, nation.iso_country_code).fetch(connection);
+
+    let mut creations = Vec::<MiniDemonWithPlayers>::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        match creations.last_mut() {
+            Some(mini_demon) if mini_demon.demon == row.demon_name => mini_demon.players.push(row.player_name),
+            _ =>
+                creations.push(MiniDemonWithPlayers {
+                    id: row.demon,
+                    demon: row.demon_name,
+                    position: row.position,
+                    players: vec![row.player_name],
+                }),
+        }
+    }
+
+    Ok(creations)
+}
+
+pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemon>> {
+    let mut stream = sqlx::query!(
+        r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=verifier where nationality=$1"#, nation.iso_country_code).fetch(connection);
+
+    let mut demons = Vec::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        demons.push(MiniDemon {
+            id: row.demon,
+            demon: row.demon_name,
+            position: row.position,
+            player: row.player_name,
+        });
+    }
+
+    Ok(demons)
+}
+
+pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemon>> {
+    let mut stream = sqlx::query!(
+        r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=publisher where nationality=$1"#, nation.iso_country_code).fetch(connection);
+
+    let mut demons = Vec::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        demons.push(MiniDemon {
+            id: row.demon,
+            demon: row.demon_name,
+            position: row.position,
+            player: row.player_name,
+        });
+    }
+
+    Ok(demons)
+}
+
+pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<BestRecord>> {
+    let mut stream = sqlx::query!(
+        r#"SELECT progress as "progress!", demons.id AS demon_id, demons.name as "demon_name: String", demons.position as "position!", players.name as "player_name: String" FROM best_records_in($1) as records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id = records.player"#,
+        nation.iso_country_code
+    )
+        .fetch(connection);
+
+    let mut records = Vec::<BestRecord>::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        match records.last_mut() {
+            Some(record) if record.demon == row.demon_name => record.players.push(row.player_name),
+            _ =>
+                records.push(BestRecord {
+                    id: row.demon_id,
+                    demon: row.demon_name,
+                    position: row.position,
+                    progress: row.progress,
+                    players: vec![row.player_name],
+                }),
+        }
+    }
+
+    Ok(records)
 }

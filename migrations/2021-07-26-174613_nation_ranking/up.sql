@@ -34,14 +34,23 @@ CREATE OR REPLACE VIEW nations_with_score AS
                        progress,
                        position,
                        CASE WHEN demons.position > 75 THEN 100 ELSE requirement END AS requirement
-                   from records
+                   from (
+                       select demon, player, progress
+                       from records
+                       where status_='APPROVED'
+
+                       union
+
+                       select id, verifier, 100
+                       from demons
+                   ) records
                        inner join demons
                            on demons.id = records.demon
                        inner join players
                            on players.id=records.player
                        inner join nationalities
                            on iso_country_code=players.nationality
-                   where status_='APPROVED' and position <= 150 and not players.banned
+                   where position <= 150 and not players.banned
                    order by nationality, demon, progress desc
                ) AS pseudo_records
           GROUP BY nationality

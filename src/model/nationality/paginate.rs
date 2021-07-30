@@ -21,6 +21,7 @@ pub struct NationalityRankingPagination {
 pub struct RankedNation {
     pub rank: i64,
     pub score: f64,
+    #[serde(flatten)]
     pub nationality: Nationality,
 }
 
