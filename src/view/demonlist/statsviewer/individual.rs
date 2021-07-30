@@ -94,7 +94,7 @@ impl Page for IndividualStatsViewer {
                         </script>
                         "#, config::adsense_publisher_id())))
                     }
-                    (stats_viewer_html(Some(&self.nationalities_in_use)))
+                    (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows()))
                 }
                 aside.right {
                     (super::continent_panel())

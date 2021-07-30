@@ -19,7 +19,23 @@ fn continent_panel() -> Markup {
     }
 }
 
-fn stats_viewer_html(nations: Option<&[Nationality]>) -> Markup {
+struct StatsViewerRow(Vec<(&'static str, &'static str)>);
+
+fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
+    vec![
+        StatsViewerRow(vec![("Demonlist rank", "rank"), ("Demonlist score", "score")]),
+        StatsViewerRow(vec![("Demonlist stats", "stats"), ("Hardest demon", "hardest")]),
+        StatsViewerRow(vec![("Demons completed", "beaten")]),
+        StatsViewerRow(vec![
+            ("Demons created", "created"),
+            ("Demons published", "published"),
+            ("Demons verified", "verified"),
+        ]),
+        StatsViewerRow(vec![("Progress on", "progress")]),
+    ]
+}
+
+fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>) -> Markup {
     html! {
         section.panel.fade#statsviewer style="overflow:initial" {
             h2.underlined.pad {
@@ -57,77 +73,18 @@ fn stats_viewer_html(nations: Option<&[Nationality]>) -> Markup {
                     div {
                         div.flex.col {
                             h3#player-name style = "font-size:1.4em; overflow: hidden" {}
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Demonlist rank:"
+                            @for row in rows {
+                                div.stats-container.flex.space {
+                                    span.arrow.hover {}
+                                    @for column in row.0 {
+                                        span {
+                                            b {
+                                                (column.0)
+                                            }
+                                            br;
+                                            span#(column.1) {}
+                                        }
                                     }
-                                    br;
-                                    span#rank {}
-                                }
-                                span {
-                                    b {
-                                        "Demonlist score:"
-                                    }
-                                    br;
-                                    span#score {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "List Stats:"
-                                    }
-                                    br;
-                                    span#amount-beaten {}
-                                }
-                                span {
-                                    b {
-                                        "Hardest demon:"
-                                    }
-                                    br;
-                                    span#hardest {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Demons completed:"
-                                    }
-                                    br;
-                                    span#beaten {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "List demons created:"
-                                    }
-                                    br;
-                                    span#created {}
-                                }
-                                span {
-                                    b {
-                                        "List demons published:"
-                                    }
-                                    br;
-                                    span#published {}
-                                }
-                                span {
-                                    b {
-                                        "List demons verified:"
-                                    }
-                                    br;
-                                    span#verified {}
-                                }
-                            }
-                            div.stats-container.flex.space {
-                                span {
-                                    b {
-                                        "Progress on:"
-                                    }
-                                    br;
-                                    span#progress {}
                                 }
                             }
                         }

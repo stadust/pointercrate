@@ -3,6 +3,7 @@ use derive_more::Constructor;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::etag::Taggable;
+use crate::model::demonlist::demon::MinimalDemon;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 
 mod get;
@@ -50,6 +51,7 @@ pub struct NationalityRecord {
     pub created: Vec<MiniDemonWithPlayers>,
     pub verified: Vec<MiniDemon>,
     pub published: Vec<MiniDemon>,
+    pub unbeaten: Vec<MinimalDemon>,
 }
 
 impl Taggable for NationalityRecord {}

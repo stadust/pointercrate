@@ -1,6 +1,7 @@
 use super::stats_viewer_html;
 use crate::config;
 use crate::state::PointercrateState;
+use crate::view::demonlist::statsviewer::StatsViewerRow;
 use crate::view::Page;
 use crate::ViewResult;
 use actix_web::HttpResponse;
@@ -37,6 +38,11 @@ impl Page for NationBasedStatsViewer {
     }
 
     fn body(&self) -> Markup {
+        let mut rows = super::standard_stats_viewer_rows();
+
+        rows[0].0.insert(1, ("Players", "players"));
+        rows.push(StatsViewerRow(vec![("Unbeaten demons", "unbeaten")]));
+
         html! {
             nav.flex.wrap.m-center.fade#statsviewers style="text-align: center;" {
                 a.button.white.hover.no-shadow href="/demonlist/statsviewer/"{
@@ -65,7 +71,7 @@ impl Page for NationBasedStatsViewer {
                         </script>
                         "#, config::adsense_publisher_id())))
                     }
-                    (stats_viewer_html(None))
+                    (stats_viewer_html(None, rows))
                 }
                 aside.right {
                     (super::continent_panel())

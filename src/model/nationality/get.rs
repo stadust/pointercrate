@@ -1,3 +1,4 @@
+use crate::model::demonlist::demon::MinimalDemon;
 use crate::model::nationality::{BestRecord, MiniDemon, MiniDemonWithPlayers, NationalityRecord};
 use crate::{
     cistring::{CiStr, CiString},
@@ -100,9 +101,34 @@ impl Nationality {
             created: created_in(&self, connection).await?,
             verified: verified_in(&self, connection).await?,
             published: published_in(&self, connection).await?,
+            unbeaten: unbeaten_in(&self, connection).await?,
             nation: self,
         })
     }
+}
+
+pub async fn unbeaten_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
+    let mut stream = sqlx::query!(
+        r#"select name::text as "name!", id as "id!", position as "position!" from demons where position <= $1 except (select demons.name, demons.id, position from records inner join players on 
+         players.id=records.player inner join demons on demons.id=records.demon where status_='APPROVED' and nationality=$2 and progress=100)"#,
+        crate::config::extended_list_size(),
+        nation.iso_country_code
+    )
+    .fetch(connection);
+
+    let mut unbeaten = Vec::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        unbeaten.push(MinimalDemon {
+            id: row.id,
+            position: row.position,
+            name: CiString(row.name),
+        });
+    }
+
+    Ok(unbeaten)
 }
 
 pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {

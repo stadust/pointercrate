@@ -34,7 +34,7 @@ export class StatsViewer extends FilteredPaginator {
         this._hardest = document.getElementById("hardest");
         this._score = document.getElementById("score");
         this._rank = document.getElementById("rank");
-        this._amountBeaten = document.getElementById("amount-beaten");
+        this._amountBeaten = document.getElementById("stats");
         this._welcome = html.getElementsByClassName("viewer-welcome")[0];
         this._progress = document.getElementById("progress");
         this._content = html.getElementsByClassName("viewer-content")[0];

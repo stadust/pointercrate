@@ -9,6 +9,9 @@ class NationStatsViewer extends StatsViewer {
             rankingEndpoint: "/api/v1/nationalities/ranking/",
             entryGenerator: generateStatsViewerNation
         });
+
+        this._players = document.getElementById("players");
+        this._unbeaten = document.getElementById("unbeaten");
     }
 
 
@@ -27,7 +30,11 @@ class NationStatsViewer extends StatsViewer {
 
         let hardest = undefined;
 
+        let players = new Set();
+
         for(let record of nationData.records) {
+            record.players.forEach(players.add, players);
+
             if(record.progress !== 100)
                 progress.push(record);
             else {
@@ -48,6 +55,8 @@ class NationStatsViewer extends StatsViewer {
         let amountBeaten = beaten.length - extended - legacy;
 
         for(let record of nationData.verified) {
+            players.add(record.player);
+
             if(hardest === undefined || record.position < hardest.position) {
                 hardest = {name: record.demon, position: record.position, id: record.id};
             }
@@ -62,13 +71,17 @@ class NationStatsViewer extends StatsViewer {
                     ++amountBeaten;
         }
 
+        this._players.innerText = players.size.toString();
+
         this.setHardest(hardest);
         this.setCompletionNumber(amountBeaten, extended, legacy);
 
+        nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
         beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
         progress.sort((r1, r2) => r2.progress - r1.progress);
         nationData.created.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
 
+        formatInto(this._unbeaten, nationData.unbeaten.map(demon => this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")))
         formatInto(this._beaten, beaten.map(record => this.formatDemonFromRecord(record)));
         formatInto(this._progress, progress.map(record => this.formatDemonFromRecord(record)));
         formatInto(this._created, nationData.created.map(creation => {
