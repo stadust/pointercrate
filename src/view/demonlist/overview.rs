@@ -437,7 +437,7 @@ fn time_machine(visible: bool) -> Markup {
                         p.error {}
                     }
                 }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Let's goooo!";
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Go!";
             }
         }
     }
