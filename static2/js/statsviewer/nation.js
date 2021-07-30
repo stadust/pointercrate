@@ -45,8 +45,25 @@ class NationStatsViewer extends StatsViewer {
             }
         }
 
+        let amountBeaten = beaten.length - extended - legacy;
+
+        for(let record of nationData.verified) {
+            if(hardest === undefined || record.position < hardest.position) {
+                hardest = {name: record.demon, position: record.position, id: record.id};
+            }
+
+            if(!beaten.some(d => d.id === record.id))
+                if(record.position > this.list_size)
+                    if(record.position <= this.extended_list_size)
+                        ++extended;
+                    else
+                        ++legacy;
+                else
+                    ++amountBeaten;
+        }
+
         this.setHardest(hardest);
-        this.setCompletionNumber(beaten.length - extended - legacy, extended, legacy);
+        this.setCompletionNumber(amountBeaten, extended, legacy);
 
         beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
         progress.sort((r1, r2) => r2.progress - r1.progress);

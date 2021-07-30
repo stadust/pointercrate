@@ -76,7 +76,7 @@ fn stats_viewer_html(nations: Option<&[Nationality]>) -> Markup {
                             div.stats-container.flex.space {
                                 span {
                                     b {
-                                        "Demons completed:"
+                                        "List Stats:"
                                     }
                                     br;
                                     span#amount-beaten {}
