@@ -93,7 +93,7 @@ export class StatsViewer extends FilteredPaginator {
     }
 
     setCompletionNumber(main, extended, legacy) {
-        this._amountBeaten.textContent = main + "M " + extended + "E " + legacy + "L ";
+        this._amountBeaten.textContent = main + " Main, " + extended + " Extended, " + legacy + " Legacy ";
     }
 
     onReceive(response) {
