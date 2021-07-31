@@ -1,5 +1,4 @@
-use crate::state::PointercrateState;
-use crate::ViewResult;
+use crate::{state::PointercrateState, ViewResult};
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use futures::StreamExt;
