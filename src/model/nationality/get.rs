@@ -110,7 +110,7 @@ impl Nationality {
 pub async fn unbeaten_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     let mut stream = sqlx::query!(
         r#"select name::text as "name!", id as "id!", position as "position!" from demons where position <= $1 except (select demons.name, demons.id, position from records inner join players on 
-         players.id=records.player inner join demons on demons.id=records.demon where status_='APPROVED' and nationality=$2 and progress=100)"#,
+         players.id=records.player inner join demons on demons.id=records.demon where status_='APPROVED' and nationality=$2 and progress=100 union select demons.name, demons.id, demons.position from demons inner join players on players.id=verifier where players.nationality=$2)"#,
         crate::config::extended_list_size(),
         nation.iso_country_code
     )
