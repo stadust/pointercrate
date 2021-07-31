@@ -1,9 +1,10 @@
-use crate::model::demonlist::demon::MinimalDemon;
-use crate::model::nationality::{BestRecord, MiniDemon, MiniDemonWithPlayers, NationalityRecord};
 use crate::{
     cistring::{CiStr, CiString},
     error::PointercrateError,
-    model::nationality::{Nationality, Subdivision},
+    model::{
+        demonlist::demon::MinimalDemon,
+        nationality::{BestRecord, MiniDemon, MiniDemonWithPlayers, Nationality, NationalityRecord, Subdivision},
+    },
     Result,
 };
 use futures::stream::StreamExt;

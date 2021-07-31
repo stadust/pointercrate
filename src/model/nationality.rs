@@ -2,8 +2,7 @@ use crate::cistring::CiString;
 use derive_more::Constructor;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::etag::Taggable;
-use crate::model::demonlist::demon::MinimalDemon;
+use crate::{etag::Taggable, model::demonlist::demon::MinimalDemon};
 pub use paginate::{NationalityRankingPagination, RankedNation};
 
 mod get;

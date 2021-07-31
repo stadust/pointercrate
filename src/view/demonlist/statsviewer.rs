@@ -1,4 +1,7 @@
-use crate::{model::nationality::Nationality, view::filtered_paginator, view::simple_dropdown};
+use crate::{
+    model::nationality::Nationality,
+    view::{filtered_paginator, simple_dropdown},
+};
 use maud::{html, Markup, PreEscaped};
 
 mod heatmap;

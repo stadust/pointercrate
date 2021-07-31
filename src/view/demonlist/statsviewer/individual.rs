@@ -1,9 +1,5 @@
 use super::stats_viewer_html;
-use crate::config;
-use crate::model::nationality::Nationality;
-use crate::state::PointercrateState;
-use crate::view::Page;
-use crate::ViewResult;
+use crate::{config, model::nationality::Nationality, state::PointercrateState, view::Page, ViewResult};
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};

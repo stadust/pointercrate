@@ -1,9 +1,10 @@
 use super::stats_viewer_html;
-use crate::config;
-use crate::state::PointercrateState;
-use crate::view::demonlist::statsviewer::StatsViewerRow;
-use crate::view::Page;
-use crate::ViewResult;
+use crate::{
+    config,
+    state::PointercrateState,
+    view::{demonlist::statsviewer::StatsViewerRow, Page},
+    ViewResult,
+};
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};

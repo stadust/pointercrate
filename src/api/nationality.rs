@@ -1,6 +1,6 @@
-use crate::etag::HttpResponseBuilderEtagExt;
 use crate::{
     cistring::CiString,
+    etag::HttpResponseBuilderEtagExt,
     model::nationality::{Nationality, NationalityRankingPagination},
     state::PointercrateState,
     ApiResult,
