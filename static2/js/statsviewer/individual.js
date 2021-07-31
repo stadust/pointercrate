@@ -1,6 +1,6 @@
 import {Dropdown} from "../modules/formv2.mjs";
 import {getCountryFlag, populateSubdivisionDropdown} from "../modules/demonlistv2.mjs";
-import {InteractiveWorldMap, StatsViewer} from "../statsviewer.js";
+import {formatInto, InteractiveWorldMap, StatsViewer} from "../statsviewer.js";
 
 class IndividualStatsViewer extends StatsViewer {
     constructor(html) {
@@ -55,43 +55,19 @@ class IndividualStatsViewer extends StatsViewer {
     }
 
     formatDemonsInto(element, demons) {
-        while (element.lastChild) {
-            element.removeChild(element.lastChild);
-        }
-
-        if (demons.length) {
-            for (var demon of demons) {
-                element.appendChild(
-                    this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
-                );
-                element.appendChild(document.createTextNode(" - "));
-            }
-            element.removeChild(element.lastChild);
-        } else {
-            element.appendChild(document.createTextNode("None"));
-        }
+        formatInto(element, demons.map(demon =>  this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")));
     }
 
     formatRecordsInto(element, records) {
-        while (element.lastChild) {
-            element.removeChild(element.lastChild);
-        }
-
-        if (records.length) {
-            for (var record of records) {
-                let demon = this.formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
-                if (record.progress !== 100) {
-                    demon.appendChild(
-                        document.createTextNode(" (" + record.progress + "%)")
-                    );
-                }
-                element.appendChild(demon);
-                element.appendChild(document.createTextNode(" - "));
+        formatInto(element, records.map(record => {
+            let demon = this.formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
+            if (record.progress !== 100) {
+                demon.appendChild(
+                    document.createTextNode(" (" + record.progress + "%)")
+                );
             }
-            element.removeChild(element.lastChild);
-        } else {
-            element.appendChild(document.createTextNode("None"));
-        }
+            return demon;
+        }));
     }
 }
 

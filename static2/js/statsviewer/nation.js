@@ -85,46 +85,31 @@ class NationStatsViewer extends StatsViewer {
         formatInto(this._beaten, beaten.map(record => this.formatDemonFromRecord(record)));
         formatInto(this._progress, progress.map(record => this.formatDemonFromRecord(record)));
         formatInto(this._created, nationData.created.map(creation => {
-            let tooltiptext = document.createElement("div");
-            let b = document.createElement("b");
-
-            b.innerHTML = "(Co)created&nbsp;by&nbsp;" + creation.players.length + "&nbsp;player" + (creation.players.length === 1 ? "" : "s") + "&nbsp;in&nbsp;this&nbsp;country: ";
-            tooltiptext.appendChild(b);
-            tooltiptext.appendChild(document.createTextNode(creation.players.join(", ")));
-
-            return this.wrapInTooltip(this.formatDemon({name: creation.demon, position: creation.position}, "/demonlist/permalink/" + creation.id + "/"), tooltiptext);
+            return this.makeTooltip(this.formatDemon({name: creation.demon, position: creation.position}, "/demonlist/permalink/" + creation.id + "/"), "(Co)created&nbsp;by&nbsp;" + creation.players.length + "&nbsp;player" + (creation.players.length === 1 ? "" : "s") + "&nbsp;in&nbsp;this&nbsp;country: ", creation.players.join(", "));
         }));
         formatInto(this._verified, nationData.verified.map(verification => {
-            let tooltiptext = document.createElement("div");
-            let b = document.createElement("b");
-
-            b.innerHTML = "Verified&nbsp;by: ";
-            tooltiptext.appendChild(b);
-            tooltiptext.appendChild(document.createTextNode(verification.player));
-
-            return this.wrapInTooltip(this.formatDemon({name: verification.demon, position: verification.position}, "/demonlist/permalink/" + verification.id + "/"), tooltiptext);
+            return this.makeTooltip(this.formatDemon({name: verification.demon, position: verification.position}, "/demonlist/permalink/" + verification.id + "/"), "Verified&nbsp;by: ", verification.player);
         }));
         formatInto(this._published, nationData.published.map(publication => {
-            let tooltiptext = document.createElement("div");
-            let b = document.createElement("b");
-
-            b.innerHTML = "Published&nbsp;by: ";
-            tooltiptext.appendChild(b);
-            tooltiptext.appendChild(document.createTextNode(publication.player));
-
-            return this.wrapInTooltip(this.formatDemon({name: publication.demon, position: publication.position}, "/demonlist/permalink/" + publication.id + "/"), tooltiptext);
+            return this.makeTooltip(this.formatDemon({name: publication.demon, position: publication.position}, "/demonlist/permalink/" + publication.id + "/"), "Published&nbsp;by: ", publication.player);
         }));
     }
 
-    wrapInTooltip(element, tooltipContent) {
+    makeTooltip(hoverElement, title, content) {
+        let tooltipText = document.createElement("div");
+        let b = document.createElement("b");
+
+        b.innerHTML = title;
+        tooltipText.appendChild(b);
+        tooltipText.appendChild(document.createTextNode(content));
+        tooltipText.classList.add("tooltiptext", "fade");
+
         let tooltip = document.createElement("div");
 
         tooltip.classList.add("tooltip");
-        tooltip.appendChild(element);
 
-        tooltipContent.classList.add("tooltiptext", "fade");
-
-        tooltip.appendChild(tooltipContent);
+        tooltip.appendChild(hoverElement);
+        tooltip.appendChild(tooltipText);
 
         return tooltip;
     }
@@ -135,18 +120,9 @@ class NationStatsViewer extends StatsViewer {
         if(record.progress !== 100)
             baseElement.appendChild(document.createTextNode(" (" + record.progress + "%)"));
 
-        let tooltiptext = document.createElement("div");
-        let b = document.createElement("b");
+        let title = (record.progress === 100 ? "Beaten" : "Achieved") + "&nbsp;by&nbsp;" + record.players.length + "&nbsp;player" + (record.players.length === 1 ? "" : "s") + "&nbsp;in&nbsp;this&nbsp;country: ";
 
-        if(record.progress === 100)
-            b.innerHTML = "Beaten&nbsp;by&nbsp;" + record.players.length + "&nbsp;player" + (record.players.length === 1 ? "" : "s") + "&nbsp;in&nbsp;this&nbsp;country: ";
-        else
-            b.innerHTML = "Achieved&nbsp;by&nbsp;" + record.players.length + "&nbsp;player" + (record.players.length === 1 ? "" : "s") + "&nbsp;in&nbsp;this&nbsp;country: ";
-
-        tooltiptext.appendChild(b);
-        tooltiptext.appendChild(document.createTextNode(record.players.join(", ")));
-
-        return this.wrapInTooltip(baseElement, tooltiptext);
+        return this.makeTooltip(baseElement, title, record.players.join(", "));
     }
 }
 

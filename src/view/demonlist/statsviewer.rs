@@ -75,7 +75,6 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
                             h3#player-name style = "font-size:1.4em; overflow: hidden" {}
                             @for row in rows {
                                 div.stats-container.flex.space {
-                                    span.arrow.hover {}
                                     @for column in row.0 {
                                         span {
                                             b {
