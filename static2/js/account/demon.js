@@ -2,7 +2,7 @@ import {
   generateDemon,
   embedVideo,
   generatePlayer, PlayerSelectionDialog,
-} from "../modules/demonlistv2.mjs";
+} from "../modules/demonlistv2.js";
 import {
   FilteredPaginator,
   Viewer,
@@ -18,7 +18,7 @@ import {
   displayError,
   Form,
   post, setupEditorDialog, FormDialog,
-} from "../modules/formv2.mjs";
+} from "../modules/formv2.js";
 
 export let demonManager;
 

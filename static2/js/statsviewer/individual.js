@@ -1,5 +1,5 @@
-import {Dropdown} from "../modules/formv2.mjs";
-import {getCountryFlag, populateSubdivisionDropdown} from "../modules/demonlistv2.mjs";
+import {Dropdown} from "../modules/formv2.js";
+import {getCountryFlag, populateSubdivisionDropdown} from "../modules/demonlistv2.js";
 import {formatInto, InteractiveWorldMap, StatsViewer} from "../statsviewer.js";
 
 class IndividualStatsViewer extends StatsViewer {

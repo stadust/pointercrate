@@ -1,4 +1,4 @@
-import {generatePlayer, getSubdivisionFlag, populateSubdivisionDropdown} from "../modules/demonlistv2.mjs";
+import {generatePlayer, getSubdivisionFlag, populateSubdivisionDropdown} from "../modules/demonlistv2.js";
 import {
   displayError,
   Form,
@@ -8,7 +8,7 @@ import {
   PaginatorEditorBackend,
   setupDropdownEditor,
   Viewer, get,
-} from "../modules/formv2.mjs";
+} from "../modules/formv2.js";
 import { recordManager, initialize as initRecords } from "./records.js";
 
 export let playerManager;

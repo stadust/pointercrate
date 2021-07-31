@@ -6,7 +6,7 @@ import {
   initialize as initSubmitters,
   submitterManager,
 } from "./account/submitter.js";
-import { TabbedPane } from "./modules/tab.mjs";
+import { TabbedPane } from "./modules/tab.js";
 import { initialize as initDemons, demonManager } from "./account/demon.js";
 
 let usersInitialized = false;

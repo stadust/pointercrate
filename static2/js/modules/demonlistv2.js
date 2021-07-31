@@ -13,7 +13,7 @@ import {
   FilteredPaginator,
   Viewer,
   setupFormDialogEditor, FormDialog, setupEditorDialog, get,
-} from "./formv2.mjs";
+} from "./formv2.js";
 
 export function embedVideo(video) {
   if (!video) return;

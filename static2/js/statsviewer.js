@@ -1,5 +1,5 @@
-import {getCountryFlag, getSubdivisionFlag, populateSubdivisionDropdown} from "./modules/demonlistv2.mjs";
-import {Dropdown, FilteredPaginator, findParentWithClass, get, Viewer} from "./modules/formv2.mjs";
+import {getCountryFlag, getSubdivisionFlag, populateSubdivisionDropdown} from "./modules/demonlistv2.js";
+import {Dropdown, FilteredPaginator, findParentWithClass, get, Viewer} from "./modules/formv2.js";
 
 export class StatsViewer extends FilteredPaginator {
     /**

@@ -1,4 +1,4 @@
-import { TabbedPane } from "./modules/tab.mjs";
+import { TabbedPane } from "./modules/tab.js";
 
 $(document).ready(function() {
   new TabbedPane(

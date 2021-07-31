@@ -82,7 +82,7 @@ impl Page for LoginPage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/login.js", "js/modules/formv2.mjs"]
+        vec!["js/login.js", "js/modules/formv2.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {

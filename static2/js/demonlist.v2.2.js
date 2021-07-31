@@ -1,6 +1,6 @@
 import {
   initializeRecordSubmitter, initializeTimeMachine,
-} from "./modules/demonlistv2.mjs";
+} from "./modules/demonlistv2.js";
 
 $(document).ready(function () {
   initializePositionChart();

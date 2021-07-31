@@ -39,7 +39,7 @@ impl Page for Homepage {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/home.js", "js/modules/tab.mjs"]
+        vec!["js/home.js", "js/modules/tab.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {

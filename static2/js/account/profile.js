@@ -12,8 +12,8 @@ import {
   tooShort,
   typeMismatch,
   valueMissing,
-} from "../modules/formv2.mjs";
-import {PlayerSelectionDialog} from "../modules/demonlistv2.mjs";
+} from "../modules/formv2.js";
+import {PlayerSelectionDialog} from "../modules/demonlistv2.js";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");

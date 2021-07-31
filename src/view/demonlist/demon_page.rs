@@ -402,7 +402,7 @@ impl Page for Demonlist {
     }
 
     fn scripts(&self) -> Vec<&str> {
-        vec!["js/modules/formv2.mjs", "js/modules/demonlistv2.mjs", "js/demonlist.v2.2.js"]
+        vec!["js/modules/formv2.js", "js/modules/demonlistv2.js", "js/demonlist.v2.2.js"]
     }
 
     fn stylesheets(&self) -> Vec<&str> {
