@@ -1,6 +1,17 @@
+use crate::state::PointercrateState;
+use crate::ViewResult;
+use actix_web::HttpResponse;
+use actix_web_codegen::get;
 use futures::StreamExt;
 use sqlx::{query, PgConnection};
 use std::collections::HashMap;
+
+#[get("/demonlist/statsviewer/heatmap.css")]
+pub async fn heatmap_css(state: PointercrateState) -> ViewResult<HttpResponse> {
+    let mut connection = state.connection().await?;
+
+    Ok(HttpResponse::Ok().content_type("text/css").body("#de path {};"))
+}
 
 #[derive(Debug)]
 pub struct HeatMap {

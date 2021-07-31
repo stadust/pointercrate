@@ -88,6 +88,7 @@ async fn main() -> std::io::Result<()> {
             .service(view::demonlist::demon_permalink)
             .service(view::demonlist::individual_statsviewer)
             .service(view::demonlist::nation_statsviewer)
+            .service(view::demonlist::heatmap_css)
             .service(view::demonlist::page)
             .service(view::demonlist::index)
             .service(view::account::index)

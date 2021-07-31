@@ -4,7 +4,7 @@ use crate::{
 };
 use maud::{html, Markup, PreEscaped};
 
-mod heatmap;
+pub(super) mod heatmap;
 pub(super) mod individual;
 pub(super) mod nationbased;
 

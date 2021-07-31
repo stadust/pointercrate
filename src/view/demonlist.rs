@@ -1,7 +1,9 @@
 pub use self::{
     demon_page::{demon_permalink, page},
     overview::{index, overview_demons, OverviewDemon},
-    statsviewer::{individual::stats_viewer as individual_statsviewer, nationbased::stats_viewer as nation_statsviewer},
+    statsviewer::{
+        heatmap::heatmap_css, individual::stats_viewer as individual_statsviewer, nationbased::stats_viewer as nation_statsviewer,
+    },
 };
 use crate::{
     config,
