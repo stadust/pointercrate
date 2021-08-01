@@ -8,8 +8,34 @@ use std::collections::HashMap;
 #[get("/demonlist/statsviewer/heatmap.css")]
 pub async fn heatmap_css(state: PointercrateState) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
-
     let mut css = String::new();
+
+    let mut stream = sqlx::query!(r#"SELECT iso_country_code as "code!", score as "score!" from nations_with_score order by score desc"#)
+        .fetch(&mut connection);
+
+    if let Some(firstrow) = stream.next().await {
+        // first one is the one with most score
+        let firstrow = firstrow?;
+        let highest_score = firstrow.score * 1.5;
+
+        let make_css_rule = |code: &str, score: f64| -> String {
+            format!(
+                ".heatmapped #{} path:not(.state) {{ fill: rgb({}, {}, {}); }}",
+                code.to_lowercase(),
+                0xda as f64 + (0x08 - 0xda) as f64 * (score / highest_score),
+                0xdc as f64 + (0x81 - 0xdc) as f64 * (score / highest_score),
+                0xe0 as f64 + (0xc6 - 0xe0) as f64 * (score / highest_score),
+            )
+        };
+
+        css.push_str(&make_css_rule(&firstrow.code, highest_score));
+
+        while let Some(row) = stream.next().await {
+            let row = row?;
+
+            css.push_str(&make_css_rule(&row.code, row.score));
+        }
+    }
 
     Ok(HttpResponse::Ok().content_type("text/css").body(css))
 }

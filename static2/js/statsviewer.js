@@ -261,6 +261,8 @@ export class InteractiveWorldMap {
     }
 
     showSubdivisions() {
+        this.svg.classList.remove("heatmapped");
+
         for(let divided of this.map.contentDocument.querySelectorAll(".land-with-states")) {
             divided.classList.add("subdivided");
         }
