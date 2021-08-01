@@ -110,6 +110,7 @@ impl Page for IndividualStatsViewer {
                         </script>
                         "#, config::adsense_publisher_id())))
                     }
+                    (super::hide_subdivision_panel())
                     section.panel.fade style = "overflow: initial;" {
                         h3.underlined {
                             "Political Subdivision:"

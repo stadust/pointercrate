@@ -73,6 +73,15 @@ class IndividualStatsViewer extends StatsViewer {
 
 $(window).on("load", function () {
     let map = new InteractiveWorldMap();
+    map.showSubdivisions();
+
+    let subdivisionCheckbox = document.getElementById("show-subdivisions-checkbox");
+    subdivisionCheckbox.addEventListener('change', () => {
+        if(subdivisionCheckbox.checked)
+            map.showSubdivisions();
+        else
+            map.hideSubdivisions();
+    });
 
     window.statsViewer = new IndividualStatsViewer(document.getElementById("statsviewer"));
     window.statsViewer.initialize();

@@ -22,6 +22,24 @@ fn continent_panel() -> Markup {
     }
 }
 
+fn hide_subdivision_panel() -> Markup {
+    html! {
+        section.panel.fade {
+            h3.underlined {
+                "Show subdivisions"
+            }
+            p {
+                "Whether the map should display political subdivisions"
+            }
+            div.cb-container.flex.no-stretch style="margin-bottom:10px" {
+                i {"Show political subdivisions"}
+                input#show-subdivisions-checkbox type = "checkbox" checked="";
+                span.checkmark {}
+            }
+        }
+    }
+}
+
 struct StatsViewerRow(Vec<(&'static str, &'static str)>);
 
 fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {

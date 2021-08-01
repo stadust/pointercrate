@@ -260,6 +260,18 @@ export class InteractiveWorldMap {
         this._deselect(false);
     }
 
+    showSubdivisions() {
+        for(let divided of this.map.contentDocument.querySelectorAll(".land-with-states")) {
+            divided.classList.add("subdivided");
+        }
+    }
+
+    hideSubdivisions() {
+        for(let divided of this.map.contentDocument.querySelectorAll(".land-with-states.subdivided")) {
+            divided.classList.remove("subdivided");
+        }
+    }
+
     // private
 
     _select(clicked, fireEvents = true) {

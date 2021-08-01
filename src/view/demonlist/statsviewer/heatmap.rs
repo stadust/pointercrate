@@ -9,7 +9,9 @@ use std::collections::HashMap;
 pub async fn heatmap_css(state: PointercrateState) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
 
-    Ok(HttpResponse::Ok().content_type("text/css").body("#de path {};"))
+    let mut css = String::new();
+
+    Ok(HttpResponse::Ok().content_type("text/css").body(css))
 }
 
 #[derive(Debug)]
