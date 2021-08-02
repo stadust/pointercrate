@@ -8,7 +8,9 @@ As of march 2nd 2019 this is the official repository for pointercrate. It contai
 
 - PostgreSQL (database used by pointercrate)
 - pandoc     (to build the markdown documentation and the guidelines)
-- diesel-cli (install via `cargo install diesel_cli`. Install with only the postgres feature enabled and make sure you have the postgres library installed to link against)
+- diesel-cli (install via `cargo install diesel_cli`. Install with only the postgres feature enabled and make sure you have the postgres library installed to link against [`cargo install diesel_cli --no-default-features --features postgres`])
+- libssl-dev (one of the prereqs for diesel_cli)
+- libpq-dev (one of the prereqs for diesel_cli)
 
 ### Configuration
 
@@ -20,18 +22,20 @@ Pointercrate is mainly configured via optional environment variables. It will at
 - `GUIDELINES`: The directory with the compiled guidelines html files (defaults to `env!("OUT_DIR")/guidelines`)
 - `LIST_SIZE`: Size of the main list (defaults to 50)
 - `EXTENDED_LIST_SIZE`: Size of the main list + extended list (defaults to 100)
+- `ADSENSE_PUBLISHER_ID`: Used for displaying advertisements on the website (optional. read [disclaimer](https://github.com/stadust/pointercrate#disclaimer).)
+- `ANALYTICS_TAG`: Used for utilizing google analytics on your website (optional. read [disclaimer](https://github.com/stadust/pointercrate#disclaimer).)
 
-Additionally, you'll need a `.secret` file containing the secret to sign access tokens with.
+Additionally, you'll need a `.secret` file containing the secret to sign access tokens with (an easy way to do that is to use openssl).
 
 ### Getting it running
 
-Even though pointercrate no longer uses diesel as it's database driver, it still uses diesel's migration system. To get a database instance running, run `diesel migration run`. You might have to mess around with the initial migrations a bit to get them working because they are partially based upon the existing scheme of a very old python version of pointercrate.
+Even though pointercrate no longer uses diesel as its database driver, it still uses diesel's migration system. To get a database instance running, run `diesel migration run`. You might have to mess around with the initial migrations a bit to get them working because they are partially based upon the existing scheme of a very old python version of pointercrate.
 
 Since pointercrate uses `sqlx`, compilation requires you to be running a postgres database with the pointercrate schema. This is because `sqlx` validates all SQL queries at compile time (syntactically _and_ semantically) by sending them over to a locally running postgres server.
  
 ### Disclaimer:
 
-**Please remove the adsense and google analytics scripts when hosting your own copy!**
+**Please remove the adsense and google analytics scripts when hosting your own copy if you will not use them!**
 
 While I'm generally OK (in fact, its pretty awesome) with people running their own copies of this code on their own servers (note: running the code. I'm not OK with people copying the content from pointercrate), doing so is **completely unsupported** from my side beyond these instructions. If you have enough knowledge to be capable to run a server, I fully believe in you to be able to figure out how to get it running from these. Depending on what mood I'm in on any given day, I might offer support over in [my discord server](https://discord.gg/sQewUEB).
 
