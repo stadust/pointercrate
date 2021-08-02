@@ -7,7 +7,7 @@ build = "build_documentation.rs"
 [dependencies]
 sqlx = { version = "0.4.2", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
 actix-web = "2.0.0"
-maud = "0.21.0"
+maud = "0.22"
 reqwest = "0.10.3"
 actix-files = "0.2.1"
 log = "0.4.8"

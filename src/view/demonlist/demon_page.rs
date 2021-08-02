@@ -349,7 +349,7 @@ impl Demonlist {
                                     tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
                                         td {
                                             @if let Some(ref nationality) = record.nationality {
-                                                (nationality)
+                                                (*nationality)
                                             }
                                         }
                                         td {

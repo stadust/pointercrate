@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene)]
 #![allow(non_upper_case_globals)]
 #![deny(unused_imports)]
 
