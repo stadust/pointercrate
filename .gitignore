@@ -13,3 +13,4 @@
 !/robots.txt
 !/demonlist-guidelines
 !/.gitmodules
+!/pointercrate-**

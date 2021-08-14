@@ -1938,6 +1938,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "pointercrate-core"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-demonlist"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-demonlist-api"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-demonlist-pages"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-integrate"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-user"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-user-api"
+version = "0.1.0"
+
+[[package]]
+name = "pointercrate-user-pages"
+version = "0.1.0"
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"

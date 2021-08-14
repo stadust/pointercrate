@@ -1,3 +1,15 @@
+[workspace]
+members = [
+    "pointercrate-core",
+    "pointercrate-demonlist",
+    "pointercrate-demonlist-api",
+    "pointercrate-demonlist-pages",
+    "pointercrate-user",
+    "pointercrate-user-api",
+    "pointercrate-user-pages",
+    "pointercrate-integrate"
+]
+
 [package]
 name = "pointercrate"
 version = "0.1.0"
