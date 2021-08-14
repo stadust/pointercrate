@@ -6,13 +6,13 @@ use crate::{
         demon::MinimalDemon,
         player::DatabasePlayer,
         record::{note::Note, FullRecord, RecordStatus},
-        submitter::Submitter,
     },
     ratelimit::{PreparedRatelimits, RatelimitScope},
     Result,
 };
 use derive_more::Display;
 use log::{debug, info};
+use pointercrate_demonlist::submitter::Submitter;
 use serde::Deserialize;
 use sqlx::{PgConnection, Row};
 

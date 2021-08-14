@@ -16,22 +16,24 @@
 //! are not modifiable via `PATCH` (e.g. the record list of a player), so having changes to them
 //! cause a `412` is silly, yet for caching purposes, those parts are obviously important.
 
-use actix_web::{dev::HttpResponseBuilder, HttpResponse};
-use serde::Serialize;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
-pub use pointercrate_core::etag::Taggable;
-
-pub trait HttpResponseBuilderEtagExt {
-    fn etag<H: Taggable>(&mut self, obj: &H) -> &mut Self;
-    fn json_with_etag<H: Serialize + Taggable>(&mut self, obj: &H) -> HttpResponse;
-}
-
-impl HttpResponseBuilderEtagExt for HttpResponseBuilder {
-    fn etag<H: Taggable>(&mut self, obj: &H) -> &mut Self {
-        self.header("ETag", obj.etag_string())
+/// Trait defining methods for producing the two parts of the pointercrate ETag format
+pub trait Taggable: Hash {
+    fn patch_part(&self) -> u64 {
+        self.get_part()
     }
 
-    fn json_with_etag<H: Serialize + Taggable>(&mut self, obj: &H) -> HttpResponse {
-        self.etag(obj).json(serde_json::json!({ "data": obj }))
+    fn get_part(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn etag_string(&self) -> String {
+        format!("{};{}", self.patch_part(), self.get_part())
     }
 }

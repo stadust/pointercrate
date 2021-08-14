@@ -3,15 +3,13 @@ use crate::{
     error::{JsonError, PointercrateError},
     etag::HttpResponseBuilderEtagExt,
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
-    model::demonlist::{
-        record::{
-            audit,
-            note::{NewNote, Note, PatchNote},
-            FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission,
-        },
-        submitter::Submitter,
+    model::demonlist::record::{
+        audit,
+        note::{NewNote, Note, PatchNote},
+        FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission,
     },
     permissions::Permissions,
+    ratelimit::RatelimitScope,
     state::{audit_connection, PointercrateState},
     ApiResult,
 };
@@ -20,6 +18,7 @@ use actix_web::{
     HttpResponse,
 };
 use actix_web_codegen::{delete, get, patch, post};
+use pointercrate_demonlist::{error::DemonlistError, submitter::Submitter};
 
 #[get("/")]
 pub async fn paginate(
@@ -56,6 +55,12 @@ pub async fn paginate(
     pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, before_id, after_id, id)
 }
 
+impl From<DemonlistError> for JsonError {
+    fn from(_: DemonlistError) -> Self {
+        todo!()
+    }
+}
+
 #[post("/")]
 pub async fn submit(
     Ip(ip): Ip, user: ApiResult<TokenAuth>, submission: Json<Submission>, state: PointercrateState,
@@ -78,7 +83,14 @@ pub async fn submit(
 
     let ratelimiter = state.ratelimits.prepare(ip);
 
-    let submitter = Submitter::by_ip_or_create(ip, &mut connection, Some(ratelimiter)).await?;
+    let submitter = match Submitter::by_ip(ip, &mut connection).await? {
+        Some(submitter) => submitter,
+        None => {
+            ratelimiter.check(RatelimitScope::NewSubmitter)?;
+
+            Submitter::create_submitter(ip, &mut connection).await?
+        },
+    };
 
     let record = if shall_ratelimit {
         FullRecord::create_from(submitter, submission.into_inner(), &mut connection, Some(ratelimiter)).await?

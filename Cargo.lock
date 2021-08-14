@@ -1928,6 +1928,8 @@ dependencies = [
  "maud",
  "mime",
  "nonzero_ext 0.2.0",
+ "pointercrate-core",
+ "pointercrate-demonlist",
  "ratelimit_meter",
  "reqwest",
  "serde",
@@ -1940,10 +1942,23 @@ dependencies = [
 [[package]]
 name = "pointercrate-core"
 version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "serde",
+ "sqlx",
+]
 
 [[package]]
 name = "pointercrate-demonlist"
 version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "futures",
+ "log",
+ "pointercrate-core",
+ "serde",
+ "sqlx",
+]
 
 [[package]]
 name = "pointercrate-demonlist-api"

@@ -30,7 +30,7 @@ pub use self::{
 use crate::{
     etag::Taggable,
     model::{
-        demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note, submitter::Submitter},
+        demonlist::{demon::MinimalDemon, player::DatabasePlayer, record::note::Note},
         nationality::Nationality,
     },
     state::PointercrateState,
@@ -38,6 +38,7 @@ use crate::{
 };
 use derive_more::Display;
 use log::{debug, error, warn};
+use pointercrate_demonlist::submitter::Submitter;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::json;
 use sqlx::PgConnection;

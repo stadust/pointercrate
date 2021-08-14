@@ -14,6 +14,8 @@ use actix_web::{
 };
 use derive_more::Display;
 use log::error;
+use pointercrate_core::error::PointercrateError as _;
+use pointercrate_demonlist::error::DemonlistError;
 use serde::{
     ser::{SerializeSeq, Serializer},
     Serialize,
@@ -43,6 +45,9 @@ impl std::error::Error for PointercrateError {}
 #[derive(Debug, Display, Serialize, Clone, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum PointercrateError {
+    #[display(fmt = "{}", _0)]
+    Demonlist(DemonlistError),
+
     /// Generic `400 BAD REQUEST` error
     ///
     /// Error Code `40000`
@@ -457,6 +462,8 @@ where
 impl PointercrateError {
     pub fn error_code(&self) -> u16 {
         match self {
+            PointercrateError::Demonlist(error) => error.error_code(),
+
             PointercrateError::GenericBadRequest => 40000,
             PointercrateError::BadRequest { .. } => 40000,
             PointercrateError::InvalidHeaderValue { .. } => 40002,

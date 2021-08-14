@@ -6,13 +6,13 @@ use crate::{
             demon::MinimalDemon,
             player::DatabasePlayer,
             record::{note::notes_on, FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
-            submitter::Submitter,
         },
         nationality::Nationality,
     },
     Result,
 };
 use futures::stream::StreamExt;
+use pointercrate_demonlist::submitter::Submitter;
 use sqlx::{Error, PgConnection};
 
 // Required until https://github.com/launchbadge/sqlx/pull/108 is merged
