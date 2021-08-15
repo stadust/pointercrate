@@ -26,7 +26,7 @@ struct FetchedRecord {
 
 impl FullRecord {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<FullRecord> {
-        let result = sqlx::query_file_as!(FetchedRecord, "../sql/record_by_id.sql", id)
+        let result = sqlx::query_file_as!(FetchedRecord, "sql/record_by_id.sql", id)
             .fetch_one(&mut *connection)
             .await;
 

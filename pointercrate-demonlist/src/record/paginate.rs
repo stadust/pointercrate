@@ -94,7 +94,7 @@ impl RecordPagination {
             "ASC"
         };
 
-        let query = format!(include_str!("../../../sql/paginate_records.sql"), order);
+        let query = format!(include_str!("../../sql/paginate_records.sql"), order);
 
         let mut stream = sqlx::query(&query)
             .bind(self.before_id)

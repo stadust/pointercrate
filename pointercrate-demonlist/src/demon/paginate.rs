@@ -69,7 +69,7 @@ impl DemonIdPagination {
             "ASC"
         };
 
-        let query = format!(include_str!("../../../sql/paginate_demons_by_id.sql"), order);
+        let query = format!(include_str!("../../sql/paginate_demons_by_id.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
         let mut stream = sqlx::query(&query)
@@ -181,7 +181,7 @@ impl DemonPositionPagination {
             "ASC"
         };
 
-        let query = format!(include_str!("../../../sql/paginate_demons_by_position.sql"), order);
+        let query = format!(include_str!("../../sql/paginate_demons_by_position.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
         let mut stream = sqlx::query(&query)

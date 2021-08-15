@@ -87,7 +87,7 @@ impl Demon {
     }
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Demon> {
-        sqlx::query_file_as!(FetchedDemon, "../sql/demon_by_id.sql", id)
+        sqlx::query_file_as!(FetchedDemon, "sql/demon_by_id.sql", id)
             .fetch_one(connection)
             .await
             .map(Into::into)
@@ -100,7 +100,7 @@ impl Demon {
     }
 
     pub async fn by_position(position: i16, connection: &mut PgConnection) -> Result<Demon> {
-        sqlx::query_file_as!(FetchedDemon, "../sql/demon_by_position.sql", position)
+        sqlx::query_file_as!(FetchedDemon, "sql/demon_by_position.sql", position)
             .fetch_one(connection)
             .await
             .map(Into::into)

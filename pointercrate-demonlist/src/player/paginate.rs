@@ -51,7 +51,7 @@ impl PlayerPagination {
             "ASC"
         };
 
-        let query = format!(include_str!("../../../sql/paginate_players_by_id.sql"), order);
+        let query = format!(include_str!("../../sql/paginate_players_by_id.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
         let mut stream = sqlx::query(&query)
@@ -134,7 +134,7 @@ impl RankingPagination {
             "ASC"
         };
 
-        let query = format!(include_str!("../../../sql/paginate_player_ranking.sql"), order);
+        let query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);
 
         let mut stream = sqlx::query(&query)
             .bind(self.before_index)
