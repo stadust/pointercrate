@@ -16,6 +16,4 @@
 //! Only the `Database` representation always exists. The others are occasionally not necessary
 //! distinct from each other
 
-pub mod demonlist;
-pub mod nationality;
 pub mod user;

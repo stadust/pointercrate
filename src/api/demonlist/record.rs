@@ -3,11 +3,6 @@ use crate::{
     error::{JsonError, PointercrateError},
     etag::HttpResponseBuilderEtagExt,
     extractor::{auth::TokenAuth, if_match::IfMatch, ip::Ip},
-    model::demonlist::record::{
-        audit,
-        note::{NewNote, Note, PatchNote},
-        FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission,
-    },
     permissions::Permissions,
     ratelimit::RatelimitScope,
     state::{audit_connection, PointercrateState},
@@ -18,7 +13,17 @@ use actix_web::{
     HttpResponse,
 };
 use actix_web_codegen::{delete, get, patch, post};
-use pointercrate_demonlist::{error::DemonlistError, submitter::Submitter};
+use log::{debug, error, warn};
+use pointercrate_demonlist::{
+    error::DemonlistError,
+    record::{
+        audit,
+        note::{NewNote, Note, PatchNote},
+        FullRecord, PatchRecord, RecordPagination, RecordStatus, Submission,
+    },
+    submitter::Submitter,
+};
+use serde_json::json;
 
 #[get("/")]
 pub async fn paginate(
@@ -92,11 +97,16 @@ pub async fn submit(
         },
     };
 
-    let record = if shall_ratelimit {
-        FullRecord::create_from(submitter, submission.into_inner(), &mut connection, Some(ratelimiter)).await?
-    } else {
-        FullRecord::create_from(submitter, submission.into_inner(), &mut connection, None).await?
-    };
+    let validated = submission.0.validate(submitter, &mut connection).await?;
+
+    if shall_ratelimit {
+        // Check ratelimits before any change is made to the database so that the transaction rollback is
+        // easier.
+        ratelimiter.check(RatelimitScope::RecordSubmissionGlobal)?;
+        ratelimiter.check(RatelimitScope::RecordSubmission)?;
+    }
+
+    let record = validated.create(&mut connection).await?;
 
     connection.commit().await?;
 
@@ -106,7 +116,7 @@ pub async fn submit(
 
     // spawn background task to validate record
     if record.status == RecordStatus::Submitted {
-        actix_rt::spawn(record.validate(state));
+        actix_rt::spawn(validate(record, state));
     }
 
     Ok(response)
@@ -245,21 +255,13 @@ pub async fn patch_note(
 
     let (record_id, note_id) = ids.into_inner();
 
-    let note = Note::by_id(note_id, &mut connection).await?;
+    let note = Note::by_id(record_id, note_id, &mut connection).await?;
 
     // Generally you can only modify your own notes
     if note.author.as_ref() != Some(&user.inner().name) {
         user.inner().require_permissions(Permissions::ListAdministrator)?;
     } else {
         user.inner().require_permissions(Permissions::ListHelper)?;
-    }
-
-    if note.record != record_id {
-        return Err(PointercrateError::ModelNotFound {
-            model: "Note",
-            identified_by: format!("{} on record {}", note_id, record_id),
-        }
-        .into())
     }
 
     let note = note.apply_patch(data.into_inner(), &mut connection).await?;
@@ -275,7 +277,7 @@ pub async fn delete_note(TokenAuth(user): TokenAuth, ids: Path<(i32, i32)>, stat
 
     let (record_id, note_id) = ids.into_inner();
 
-    let note = Note::by_id(note_id, &mut connection).await?;
+    let note = Note::by_id(record_id, note_id, &mut connection).await?;
 
     // Generally you can only delete your own notes
     if note.author.as_ref() != Some(&user.inner().name) {
@@ -284,17 +286,130 @@ pub async fn delete_note(TokenAuth(user): TokenAuth, ids: Path<(i32, i32)>, stat
         user.inner().require_permissions(Permissions::ListHelper)?;
     }
 
-    if note.record != record_id {
-        return Err(PointercrateError::ModelNotFound {
-            model: "Note",
-            identified_by: format!("{} on record {}", note_id, record_id),
-        }
-        .into())
-    }
-
     note.delete(&mut connection).await?;
 
     connection.commit().await?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+async fn validate(record: FullRecord, state: PointercrateState) {
+    let mut connection = match state.connection().await {
+        Ok(connection) => connection,
+        Err(err) => return error!("INTERNAL SERVER ERROR: failed to acquire database connection: {:?}", err),
+    };
+
+    let video = match record.video {
+        Some(ref video) => video,
+        None => return,
+    };
+
+    debug!("Verifying that submission {} with video {} actually is valid", record, video);
+
+    match state.http_client.head(video).send().await {
+        Ok(response) => {
+            let status = response.status().as_u16();
+
+            if status == 401 || status == 403 || status == 405 {
+                // Some websites (billibilli) respond unfavorably to HEAD requests. Retry with
+                // GET
+                match state.http_client.get(video).send().await {
+                    Ok(response) => {
+                        let status = response.status().as_u16();
+
+                        if status >= 200 && status < 400 {
+                            debug!("HEAD request yielded some sort of successful response, executing webhook");
+
+                            execute_webhook(&record, &state).await;
+                        }
+                    },
+                    Err(err) => {
+                        error!(
+                            "INTERNAL SERVER ERROR: HEAD request to verify video failed: {:?}. Deleting submission",
+                            err
+                        );
+
+                        match record.delete(&mut connection).await {
+                            Ok(_) => (),
+                            Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
+                        }
+                    },
+                }
+            } else if status >= 200 && status < 400 {
+                debug!("HEAD request yielded some sort of successful response, executing webhook");
+
+                execute_webhook(&record, &state).await;
+            } else {
+                warn!("Server response to 'HEAD {}' was {:?}, deleting submission!", video, response);
+
+                match record.delete(&mut connection).await {
+                    Ok(_) => (),
+                    Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
+                }
+            }
+        },
+        Err(error) => {
+            error!(
+                "INTERNAL SERVER ERROR: HEAD request to verify video failed: {:?}. Deleting submission",
+                error
+            );
+
+            match record.delete(&mut connection).await {
+                Ok(_) => (),
+                Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
+            }
+        },
+    }
+}
+
+async fn execute_webhook(record: &FullRecord, state: &PointercrateState) {
+    if let Some(ref webhook_url) = state.webhook_url {
+        match state
+            .http_client
+            .post(&**webhook_url)
+            .header("Content-Type", "application/json")
+            .body(webhook_embed(record).to_string())
+            .send()
+            .await
+        {
+            Err(error) => error!("INTERNAL SERVER ERROR: Failure to execute discord webhook: {:?}", error),
+            Ok(_) => debug!("Successfully executed discord webhook"),
+        }
+    } else {
+        warn!("Trying to execute webhook, though no link was configured!");
+    }
+}
+
+fn webhook_embed(record: &FullRecord) -> serde_json::Value {
+    let mut payload = json!({
+        "content": format!("**New record submitted! ID: {}**", record.id),
+        "embeds": [
+            {
+                "type": "rich",
+                "title": format!("{}% on {}", record.progress, record.demon.name),
+                "description": format!("{} just got {}% on {}! Go add their record!", record.player.name, record.progress, record.demon.name),
+                "footer": {
+                    "text": format!("This record has been submitted by submitter #{}", record.submitter.map(|s|s.id).unwrap_or(1))
+                },
+                "author": {
+                    "name": format!("{} (ID: {})", record.player.name, record.player.id),
+                    "url": record.video
+                },
+                "thumbnail": {
+                    "url": "https://cdn.discordapp.com/avatars/277391246035648512/b03c85d94dc02084c413a7fdbe2cea79.webp?size=1024"
+                },
+            }
+        ]
+    });
+
+    if let Some(ref video) = record.video {
+        payload["embeds"][0]["fields"] = json! {
+            [{
+                "name": "Video Proof:",
+                "value": video
+            }]
+        };
+    }
+
+    payload
 }

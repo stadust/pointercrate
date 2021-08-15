@@ -1,13 +1,7 @@
-use crate::{
-    etag::HttpResponseBuilderEtagExt,
-    extractor::auth::TokenAuth,
-    model::demonlist::demon::{FullDemon, PostDemon},
-    permissions::Permissions,
-    state::PointercrateState,
-    ApiResult,
-};
+use crate::{etag::HttpResponseBuilderEtagExt, extractor::auth::TokenAuth, permissions::Permissions, state::PointercrateState, ApiResult};
 use actix_web::{web::Json, HttpResponse};
 use actix_web_codegen::post;
+use pointercrate_demonlist::demon::{FullDemon, PostDemon};
 
 #[post("/")]
 pub async fn post(TokenAuth(user): TokenAuth, state: PointercrateState, data: Json<PostDemon>) -> ApiResult<HttpResponse> {
@@ -26,11 +20,6 @@ pub mod v1 {
     use crate::{
         etag::HttpResponseBuilderEtagExt,
         extractor::{auth::TokenAuth, if_match::IfMatch},
-        model::demonlist::{
-            creator::{Creator, PostCreator},
-            demon::{Demon, DemonPositionPagination, FullDemon, PatchDemon},
-            player::DatabasePlayer,
-        },
         permissions::Permissions,
         state::PointercrateState,
         ApiResult,
@@ -40,6 +29,11 @@ pub mod v1 {
         HttpResponse,
     };
     use actix_web_codegen::{delete, get, patch, post};
+    use pointercrate_demonlist::{
+        creator::{Creator, PostCreator},
+        demon::{Demon, DemonPositionPagination, FullDemon, PatchDemon},
+        player::DatabasePlayer,
+    };
 
     #[get("/")]
     pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonPositionPagination>) -> ApiResult<HttpResponse> {
@@ -134,11 +128,6 @@ pub mod v2 {
     use crate::{
         etag::HttpResponseBuilderEtagExt,
         extractor::{auth::TokenAuth, if_match::IfMatch},
-        model::demonlist::{
-            creator::{Creator, PostCreator},
-            demon::{Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon},
-            player::DatabasePlayer,
-        },
         permissions::Permissions,
         state::PointercrateState,
         ApiResult,
@@ -148,6 +137,11 @@ pub mod v2 {
         HttpResponse,
     };
     use actix_web_codegen::{delete, get, patch, post};
+    use pointercrate_demonlist::{
+        creator::{Creator, PostCreator},
+        demon::{Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon},
+        player::DatabasePlayer,
+    };
 
     #[get("/")]
     pub async fn paginate(state: PointercrateState, mut pagination: Query<DemonIdPagination>) -> ApiResult<HttpResponse> {

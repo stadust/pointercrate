@@ -1,7 +1,7 @@
 use crate::{
     config,
+    error::HtmlError,
     gd::GDIntegrationResult,
-    model::demonlist::demon::{FullDemon, MinimalDemon},
     state::PointercrateState,
     video,
     view::{
@@ -19,6 +19,7 @@ use dash_rs::{
 };
 use log::error;
 use maud::{html, Markup, PreEscaped, Render};
+use pointercrate_demonlist::demon::{FullDemon, MinimalDemon};
 
 #[derive(Debug)]
 pub struct DemonMovement {
@@ -38,7 +39,9 @@ pub struct Demonlist {
 #[get("/demonlist/permalink/{id}/")]
 pub async fn demon_permalink(state: PointercrateState, id: Path<i32>) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
-    let demon = MinimalDemon::by_id(id.into_inner(), &mut connection).await?;
+    let demon = MinimalDemon::by_id(id.into_inner(), &mut connection)
+        .await
+        .map_err(|dlerr| HtmlError(dlerr.into()))?;
 
     Ok(actix_web::HttpResponse::Found()
         .header(actix_web::http::header::LOCATION, format!("/demonlist/{}/", demon.position))
@@ -48,8 +51,12 @@ pub async fn demon_permalink(state: PointercrateState, id: Path<i32>) -> ViewRes
 #[get("/demonlist/{position}/")]
 pub async fn page(state: PointercrateState, position: Path<i16>) -> ViewResult<HttpResponse> {
     let mut connection = state.connection().await?;
-    let overview = DemonlistOverview::load(&mut connection, None, OverviewQueryData::default()).await?;
-    let demon = FullDemon::by_position(position.into_inner(), &mut connection).await?;
+    let overview = DemonlistOverview::load(&mut connection, None, OverviewQueryData::default())
+        .await
+        .map_err(|dlerr| HtmlError(dlerr.into()))?;
+    let demon = FullDemon::by_position(position.into_inner(), &mut connection)
+        .await
+        .map_err(|dlerr| HtmlError(dlerr.into()))?;
     let link_banned = sqlx::query!(
         r#"SELECT link_banned AS "link_banned!: bool" FROM players WHERE id = $1"#,
         demon.demon.verifier.id
@@ -349,7 +356,7 @@ impl Demonlist {
                                     tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
                                         td {
                                             @if let Some(ref nationality) = record.nationality {
-                                                (*nationality)
+                                                span.flag-icon.{"flag-icon-"(nationality.iso_country_code.to_lowercase())} title = (nationality.nation) {}
                                             }
                                         }
                                         td {

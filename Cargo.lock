@@ -2126,19 +2126,20 @@ version = "0.1.0"
 dependencies = [
  "derive_more",
  "serde",
- "sqlx",
 ]
 
 [[package]]
 name = "pointercrate-demonlist"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "derive_more",
  "futures",
  "log",
  "pointercrate-core",
  "serde",
  "sqlx",
+ "url",
 ]
 
 [[package]]

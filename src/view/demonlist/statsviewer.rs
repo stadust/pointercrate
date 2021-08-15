@@ -1,8 +1,6 @@
-use crate::{
-    model::nationality::Nationality,
-    view::{filtered_paginator, simple_dropdown},
-};
+use crate::view::{filtered_paginator, simple_dropdown};
 use maud::{html, Markup, PreEscaped};
+use pointercrate_demonlist::nationality::Nationality;
 
 pub(super) mod heatmap;
 pub(super) mod individual;

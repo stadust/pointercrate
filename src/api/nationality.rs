@@ -1,15 +1,10 @@
-use crate::{
-    cistring::CiString,
-    etag::HttpResponseBuilderEtagExt,
-    model::nationality::{Nationality, NationalityRankingPagination},
-    state::PointercrateState,
-    ApiResult,
-};
+use crate::{cistring::CiString, etag::HttpResponseBuilderEtagExt, state::PointercrateState, ApiResult};
 use actix_web::{
     web::{Path, Query},
     HttpResponse,
 };
 use actix_web_codegen::get;
+use pointercrate_demonlist::nationality::{Nationality, NationalityRankingPagination};
 
 #[get("/{iso_code}/subdivisions/")]
 pub async fn subdivisions(state: PointercrateState, iso_code: Path<String>) -> ApiResult<HttpResponse> {

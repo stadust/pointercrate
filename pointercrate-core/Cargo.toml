@@ -8,4 +8,3 @@ edition = "2018"
 [dependencies]
 serde = "1.0.118"
 derive_more = "0.99.11"
-sqlx = { version = "0.4.2", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }

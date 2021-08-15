@@ -1,8 +1,9 @@
 use super::stats_viewer_html;
-use crate::{config, model::nationality::Nationality, state::PointercrateState, view::Page, ViewResult};
+use crate::{config, error::HtmlError, state::PointercrateState, view::Page, ViewResult};
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};
+use pointercrate_demonlist::nationality::Nationality;
 
 #[derive(Debug)]
 struct IndividualStatsViewer {
@@ -17,7 +18,7 @@ pub async fn stats_viewer(state: PointercrateState) -> ViewResult<HttpResponse> 
     Ok(HttpResponse::Ok().content_type("text/html; charset=utf-8").body(
         IndividualStatsViewer {
             //heatmap: HeatMap::load_total_point_heatmap(&mut connection).await?,
-            nationalities_in_use: Nationality::used(&mut *connection).await?,
+            nationalities_in_use: Nationality::used(&mut *connection).await.map_err(|dlerr| HtmlError(dlerr.into()))?,
         }
         .render()
         .0,

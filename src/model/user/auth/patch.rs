@@ -1,11 +1,9 @@
 use crate::{
-    model::{
-        demonlist::player::DatabasePlayer,
-        user::{auth::AuthenticatedUser, patch::PatchUser},
-    },
+    model::user::{auth::AuthenticatedUser, patch::PatchUser},
     util::{non_nullable, nullable},
     Result,
 };
+use pointercrate_demonlist::player::DatabasePlayer;
 use serde::Deserialize;
 use sqlx::PgConnection;
 use std::fmt::{Debug, Formatter};

@@ -1,7 +1,6 @@
 //! Moduling containing the [`PointercrateError`] enum.
 
 use crate::{
-    model::demonlist::{demon::MinimalDemon, record::RecordStatus},
     permissions::Permissions,
     ratelimit::RatelimitScope,
     util::preferred_mime_type,
@@ -15,7 +14,7 @@ use actix_web::{
 use derive_more::Display;
 use log::error;
 use pointercrate_core::error::PointercrateError as _;
-use pointercrate_demonlist::error::DemonlistError;
+use pointercrate_demonlist::{demon::MinimalDemon, error::DemonlistError, record::RecordStatus};
 use serde::{
     ser::{SerializeSeq, Serializer},
     Serialize,
@@ -707,5 +706,11 @@ impl From<Error> for PointercrateError {
                 PointercrateError::DatabaseError
             },
         }
+    }
+}
+
+impl From<DemonlistError> for PointercrateError {
+    fn from(error: DemonlistError) -> Self {
+        PointercrateError::Demonlist(error)
     }
 }

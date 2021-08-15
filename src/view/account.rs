@@ -1,7 +1,8 @@
 use super::Page;
 use crate::{
+    error::HtmlError,
     extractor::auth::TokenAuth,
-    model::{nationality::Nationality, user::User},
+    model::user::User,
     permissions::Permissions,
     state::PointercrateState,
     view::demonlist::{overview_demons, OverviewDemon},
@@ -10,6 +11,7 @@ use crate::{
 use actix_web::HttpResponse;
 use actix_web_codegen::get;
 use maud::{html, Markup, PreEscaped};
+use pointercrate_demonlist::nationality::Nationality;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -41,7 +43,7 @@ pub async fn index(user: ApiResult<TokenAuth>, state: PointercrateState) -> View
                 (
                     overview_demons(&mut connection, None).await?,
                     if user.inner().has_permission(Permissions::ListModerator) {
-                        Nationality::all(&mut connection).await?
+                        Nationality::all(&mut connection).await.map_err(|dlerr| HtmlError(dlerr.into()))?
                     } else {
                         Vec::new()
                     },

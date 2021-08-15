@@ -1,7 +1,6 @@
 use crate::{
     etag::HttpResponseBuilderEtagExt,
     extractor::{auth::TokenAuth, if_match::IfMatch},
-    model::demonlist::player::{PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination},
     permissions::Permissions,
     state::PointercrateState,
     ApiResult,
@@ -11,6 +10,7 @@ use actix_web::{
     HttpResponse,
 };
 use actix_web_codegen::{get, patch};
+use pointercrate_demonlist::player::{PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination};
 
 #[get("/")]
 pub async fn paginate(

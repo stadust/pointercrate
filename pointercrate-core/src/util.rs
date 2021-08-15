@@ -1,4 +1,15 @@
 use serde::{de::Error, Deserialize, Deserializer};
+use std::{fmt::Debug, str::FromStr};
+
+pub fn from_env_or_default<T: FromStr>(key: &str, default: T) -> T
+where
+    <T as FromStr>::Err: Debug,
+{
+    match std::env::var(key) {
+        Ok(value) => value.parse().unwrap(),
+        Err(_) => default,
+    }
+}
 
 #[allow(clippy::option_option)]
 pub fn nullable<'de, T, D>(deserializer: D) -> std::result::Result<Option<Option<T>>, D::Error>

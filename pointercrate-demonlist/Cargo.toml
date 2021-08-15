@@ -12,3 +12,5 @@ derive_more = "0.99.11"
 pointercrate-core = {path = "../pointercrate-core"}
 log = "0.4.11"
 futures = "0.3.8"
+chrono = "0.4.19"
+url = "2.2.0"

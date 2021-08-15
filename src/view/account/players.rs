@@ -1,5 +1,6 @@
-use crate::{model::nationality::Nationality, view::filtered_paginator};
+use crate::view::filtered_paginator;
 use maud::{html, Markup, PreEscaped};
+use pointercrate_demonlist::nationality::Nationality;
 
 pub(super) fn page(nationalities: &[Nationality]) -> Markup {
     html! {

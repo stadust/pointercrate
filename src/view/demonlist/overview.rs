@@ -1,16 +1,9 @@
-use crate::{
-    config,
-    model::{nationality::Nationality, user::ListedUser},
-    permissions::Permissions,
-    state::PointercrateState,
-    video,
-    view::Page,
-    Result, ViewResult,
-};
+use crate::{config, model::user::ListedUser, permissions::Permissions, state::PointercrateState, video, view::Page, Result, ViewResult};
 use actix_web::{web::Query, HttpMessage, HttpRequest, HttpResponse};
 use actix_web_codegen::get;
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, TimeZone, Utc};
 use maud::{html, Markup, PreEscaped};
+use pointercrate_demonlist::nationality::Nationality;
 use serde::Deserialize;
 use sqlx::PgConnection;
 

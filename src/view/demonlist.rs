@@ -5,11 +5,9 @@ pub use self::{
         heatmap::heatmap_css, individual::stats_viewer as individual_statsviewer, nationbased::stats_viewer as nation_statsviewer,
     },
 };
-use crate::{
-    config,
-    model::{demonlist::demon::Demon, nationality::Nationality},
-};
-use maud::{html, Markup, PreEscaped, Render};
+use crate::config;
+use maud::{html, Markup, PreEscaped};
+use pointercrate_demonlist::demon::Demon;
 
 mod demon_page;
 mod overview;
@@ -367,10 +365,10 @@ fn discord_panel() -> Markup {
     }
 }
 
-impl Render for Nationality {
+/*impl Render for Nationality {
     fn render(&self) -> Markup {
         html! {
             span.flag-icon.{"flag-icon-"(self.iso_country_code.to_lowercase())} title = (self.nation) {}
         }
     }
-}
+}*/

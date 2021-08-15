@@ -10,12 +10,7 @@ macro_rules! construct_from_row {
             display_name: $row.display_name,
             youtube_channel: $row.youtube_channel,
             claimed_player: match ($row.cp_id, $row.cp_name, $row.cp_banned) {
-                (Some(id), Some(name), Some(banned)) =>
-                    Some(crate::model::user::DatabasePlayer {
-                        id,
-                        name: crate::cistring::CiString(name),
-                        banned,
-                    }),
+                (Some(id), Some(name), Some(banned)) => Some(crate::model::user::DatabasePlayer { id, name, banned }),
                 _ => None,
             },
         }

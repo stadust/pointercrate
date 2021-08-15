@@ -1,4 +1,4 @@
-use crate::{error::PointercrateError, model::demonlist::demon::Demon};
+use crate::error::PointercrateError;
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use dash_rs::{
     model::{
@@ -13,6 +13,7 @@ use dash_rs::{
 };
 use futures::{FutureExt, StreamExt};
 use log::{error, info, trace};
+use pointercrate_demonlist::demon::Demon;
 use reqwest::{header::CONTENT_TYPE, Client};
 use sqlx::{Error, Pool, Postgres};
 use std::{

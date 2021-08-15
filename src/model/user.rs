@@ -10,7 +10,8 @@ pub use self::{
     paginate::{ListedUser, UserPagination},
     patch::PatchUser,
 };
-use crate::{error::PointercrateError, etag::Taggable, model::demonlist::player::DatabasePlayer, permissions::Permissions, Result};
+use crate::{error::PointercrateError, etag::Taggable, permissions::Permissions, Result};
+use pointercrate_demonlist::player::DatabasePlayer;
 use serde::Serialize;
 use sqlx::PgConnection;
 use std::{
