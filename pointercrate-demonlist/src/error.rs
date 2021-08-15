@@ -130,39 +130,9 @@ pub enum DemonlistError {
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
-    /// Error Code `42222`
-    #[display(fmt = "Invalid URL scheme. Only 'http' and 'https' are supported")]
-    InvalidUrlScheme,
-
-    /// `422 UNPROCESSABLE ENTITY` variant
-    ///
-    /// Error Code `42223`
-    #[display(fmt = "The provided URL contains authentication information. For security reasons it has been rejected")]
-    UrlAuthenticated,
-
-    /// `422 UNPROCESSABLE ENTITY` variant
-    ///
     /// Error Code `42224`
     #[display(fmt = "The given video host is not supported. Supported are 'youtube', 'vimeo', 'everyplay', 'twitch' and 'bilibili'")]
     UnsupportedVideoHost,
-
-    /// `422 UNPROCESSABLE ENTITY` variant
-    ///
-    /// Error Code `42225`
-    #[display(
-        fmt = "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
-        expected
-    )]
-    InvalidUrlFormat {
-        /// A hint as to how the format is expected to look
-        expected: &'static str,
-    },
-
-    /// `422 UNPROCESSABLE ENTITY` variant
-    ///
-    /// Error Code `42226`
-    #[display(fmt = "The given URL is no YouTube URL")]
-    NotYouTube,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
@@ -209,11 +179,7 @@ impl PointercrateError for DemonlistError {
             PlayerBanned => 42218,
             SubmitLegacy => 42219,
             Non100Extended => 42220,
-            InvalidUrlScheme => 42222,
-            UrlAuthenticated => 42223,
             UnsupportedVideoHost => 42224,
-            InvalidUrlFormat { .. } => 42225,
-            NotYouTube => 42226,
             DemonNameNotUnique { .. } => 42228,
         }
     }

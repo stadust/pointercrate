@@ -19,11 +19,11 @@ pub fn validate(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| DemonlistError::MalformedVideoUrl)?;
 
     if !SCHEMES.contains(&url.scheme()) {
-        return Err(DemonlistError::InvalidUrlScheme)
+        return Err(CoreError::InvalidUrlScheme.into())
     }
 
     if !url.username().is_empty() || url.password().is_some() {
-        return Err(DemonlistError::UrlAuthenticated)
+        return Err(CoreError::UrlAuthenticated.into())
     }
 
     if let Some(host) = url.domain() {
@@ -41,7 +41,7 @@ pub fn validate(url: &str) -> Result<String> {
                     }
                 }
 
-                Err(DemonlistError::InvalidUrlFormat { expected: YOUTUBE_FORMAT })
+                Err(CoreError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }.into())
             },
             "youtu.be" =>
                 if let Some(path_segments) = url.path_segments() {
@@ -51,52 +51,54 @@ pub fn validate(url: &str) -> Result<String> {
                                 "https://www.youtube.com/watch?v={}",
                                 video_id.chars().take(11).collect::<String>()
                             )),
-                        _ => Err(DemonlistError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }),
+                        _ => Err(CoreError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }.into()),
                     }
                 } else {
-                    Err(DemonlistError::InvalidUrlFormat { expected: YOUTUBE_FORMAT })
+                    Err(CoreError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }.into())
                 },
             "www.twitch.tv" | "twitch.tv" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["videos", video_id] => Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
                         [_, "v", video_id] => Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
-                        _ => Err(DemonlistError::InvalidUrlFormat { expected: TWITCH_FORMAT }),
+                        _ => Err(CoreError::InvalidUrlFormat { expected: TWITCH_FORMAT }.into()),
                     }
                 } else {
-                    Err(DemonlistError::InvalidUrlFormat { expected: TWITCH_FORMAT })
+                    Err(CoreError::InvalidUrlFormat { expected: TWITCH_FORMAT }.into())
                 },
             "everyplay.com" | "www.everyplay.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["videos", video_id] => Ok(format!("https://everyplay.com/videos/{}", video_id)),
                         _ =>
-                            Err(DemonlistError::InvalidUrlFormat {
+                            Err(CoreError::InvalidUrlFormat {
                                 expected: EVERYPLAY_FORMAT,
-                            }),
+                            }
+                            .into()),
                     }
                 } else {
-                    Err(DemonlistError::InvalidUrlFormat {
+                    Err(CoreError::InvalidUrlFormat {
                         expected: EVERYPLAY_FORMAT,
-                    })
+                    }
+                    .into())
                 },
             "www.bilibili.com" | "bilibili.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["video", video_id] => Ok(format!("https://www.bilibili.com/video/{}", video_id)),
-                        _ => Err(DemonlistError::InvalidUrlFormat { expected: BILIBILI_FORMAT }),
+                        _ => Err(CoreError::InvalidUrlFormat { expected: BILIBILI_FORMAT }.into()),
                     }
                 } else {
-                    Err(DemonlistError::InvalidUrlFormat { expected: BILIBILI_FORMAT })
+                    Err(CoreError::InvalidUrlFormat { expected: BILIBILI_FORMAT }.into())
                 },
             "vimeo.com" | "www.vimeo.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         [video_id] => Ok(format!("https://vimeo.com/{}", video_id)),
-                        _ => Err(DemonlistError::InvalidUrlFormat { expected: VIMEO_FORMAT }),
+                        _ => Err(CoreError::InvalidUrlFormat { expected: VIMEO_FORMAT }.into()),
                     }
                 } else {
-                    Err(DemonlistError::InvalidUrlFormat { expected: VIMEO_FORMAT })
+                    Err(CoreError::InvalidUrlFormat { expected: VIMEO_FORMAT }.into())
                 },
             _ => Err(DemonlistError::UnsupportedVideoHost),
         }

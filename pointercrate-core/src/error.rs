@@ -107,6 +107,30 @@ pub enum CoreError {
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
+    /// Error Code `42222`
+    #[display(fmt = "Invalid URL scheme. Only 'http' and 'https' are supported")]
+    InvalidUrlScheme,
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42223`
+    #[display(fmt = "The provided URL contains authentication information. For security reasons it has been rejected")]
+    UrlAuthenticated,
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42225`
+    #[display(
+        fmt = "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
+        expected
+    )]
+    InvalidUrlFormat {
+        /// A hint as to how the format is expected to look
+        expected: &'static str,
+    },
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
     /// Error Code `42227`
     #[display(
         fmt = "The 'after' value provided for pagination is smaller than the 'before' value. This would result in an empty response is \
@@ -170,6 +194,9 @@ impl PointercrateError for CoreError {
             CoreError::UnsupportedMediaType { .. } => 41500,
             CoreError::UnprocessableEntity => 42200,
             CoreError::InvalidPaginationLimit => 42207,
+            CoreError::InvalidUrlScheme => 42222,
+            CoreError::UrlAuthenticated => 42223,
+            CoreError::InvalidUrlFormat { .. } => 42225,
             CoreError::AfterSmallerBefore => 42227,
             CoreError::MutuallyExclusive => 42229,
             CoreError::PreconditionRequired => 42800,
