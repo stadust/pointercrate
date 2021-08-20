@@ -10,7 +10,7 @@ use pointercrate_core::{
     util::{non_nullable, nullable},
 };
 use serde::Deserialize;
-use sqlx::{Done, PgConnection};
+use sqlx::PgConnection;
 
 #[derive(Debug, Deserialize)]
 pub struct PatchRecord {

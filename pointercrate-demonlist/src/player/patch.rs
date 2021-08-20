@@ -7,7 +7,7 @@ use crate::{
 use log::info;
 use pointercrate_core::util::{non_nullable, nullable};
 use serde::Deserialize;
-use sqlx::{Done, PgConnection};
+use sqlx::PgConnection;
 
 #[derive(Debug, Deserialize, Default)]
 pub struct PatchPlayer {

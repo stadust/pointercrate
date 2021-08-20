@@ -16,13 +16,14 @@
 //! are not modifiable via `PATCH` (e.g. the record list of a player), so having changes to them
 //! cause a `412` is silly, yet for caching purposes, those parts are obviously important.
 
+use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
 };
 
 /// Trait defining methods for producing the two parts of the pointercrate ETag format
-pub trait Taggable: Hash {
+pub trait Taggable: Hash + Serialize {
     fn patch_part(&self) -> u64 {
         self.get_part()
     }

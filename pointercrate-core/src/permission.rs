@@ -2,18 +2,18 @@ use derive_more::Display;
 use serde::Serialize;
 use std::collections::HashMap;
 
-#[derive(Serialize, Debug, Display, Eq, PartialEq, Clone)]
+#[derive(Serialize, Debug, Display, Eq, PartialEq, Clone, Copy)]
 #[serde(transparent)]
 #[display(fmt = "{}", name)]
 pub struct Permission {
-    name: String,
+    name: &'static str,
 
     #[serde(skip)]
     bit: u16,
 }
 
 impl Permission {
-    pub const fn new(name: String, bit: u16) -> Permission {
+    pub const fn new(name: &'static str, bit: u16) -> Permission {
         Permission { name, bit }
     }
 
@@ -27,6 +27,6 @@ impl Permission {
 }
 
 pub struct PermissionTree {
-    implication_map: HashMap<&'static Permission, Vec<&'static Permission>>,
-    assignable_map: HashMap<&'static Permission, Vec<&'static Permission>>,
+    implication_map: HashMap<Permission, Vec<Permission>>,
+    assignable_map: HashMap<Permission, Vec<Permission>>,
 }

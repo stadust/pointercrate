@@ -6,7 +6,7 @@
 //! * Querying account information
 
 pub use self::{
-    auth::{AuthenticatedUser, Authorization, PatchMe, Registration},
+    auth::{AuthenticatedUser, PatchMe, Registration},
     paginate::UserPagination,
     patch::PatchUser,
 };
@@ -28,8 +28,8 @@ mod paginate;
 mod patch;
 mod video;
 
-pub const MODERATOR: Permission = Permission::new(String::from("Moderator"), 0x2000);
-pub const ADMINISTRATOR: Permission = Permission::new(String::from("Administrator"), 0x4000);
+pub const MODERATOR: Permission = Permission::new("Moderator", 0x2000);
+pub const ADMINISTRATOR: Permission = Permission::new("Administrator", 0x4000);
 
 /// Model representing a user in the database
 #[derive(Debug, Serialize, Hash, Eq, PartialEq)]

@@ -7,86 +7,54 @@ use log::{debug, info, warn};
 use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
 
-/// Enum representing a parsed `Authorization` header
-#[derive(Debug)]
-pub enum Authorization {
-    /// No `Authorization` header has been provided
-    Unauthorized,
-
-    /// The chosen authorization method was `Basic`
-    Basic { username: String, password: String },
-
-    /// The chosen authorization method was `Bearer`
-    Token { access_token: String, csrf_token: Option<String> },
-}
-
 impl AuthenticatedUser {
-    pub async fn invalidate_all_tokens(authorization: Authorization, connection: &mut PgConnection) -> Result<()> {
-        let user = Self::basic_auth(&authorization, connection).await?;
+    pub async fn invalidate_all_tokens(username: &str, password: &str, connection: &mut PgConnection) -> Result<()> {
+        let user = Self::basic_auth(username, password, connection).await?;
+        let patch = PatchMe {
+            password: Some(password.to_string()),
+            display_name: None,
+            youtube_channel: None,
+        };
 
-        if let Authorization::Basic { password, .. } = authorization {
-            let patch = PatchMe {
-                password: Some(password),
-                display_name: None,
-                youtube_channel: None,
-            };
+        warn!("Invalidating all access tokens for user {}", user.inner());
 
-            warn!("Invalidating all access tokens for user {}", user.inner());
+        user.apply_patch(patch, connection).await?;
 
-            user.apply_patch(patch, connection).await?;
-
-            Ok(())
-        } else {
-            // actually unreachable
-            Err(CoreError::Unauthorized.into())
-        }
+        Ok(())
     }
 
-    pub async fn basic_auth(auth: &Authorization, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
+    pub async fn basic_auth(username: &str, password: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform basic authentication");
+        debug!("Trying to authorize user {}", username);
 
-        // TODO: ratelimiting here (what did I mean by this?)
-
-        if let Authorization::Basic { username, password } = auth {
-            debug!("Trying to authorize user {}", username);
-
-            Self::by_name(username, connection).await?.verify_password(password)
-        } else {
-            warn!("No basic authentication found");
-
-            Err(CoreError::Unauthorized.into())
-        }
+        Self::by_name(username, connection).await?.verify_password(password)
     }
 
-    pub async fn token_auth(auth: &Authorization, application_secret: &[u8], connection: &mut PgConnection) -> Result<AuthenticatedUser> {
+    pub async fn token_auth(
+        access_token: &str, csrf_token: Option<&str>, application_secret: &[u8], connection: &mut PgConnection,
+    ) -> Result<AuthenticatedUser> {
         info!("We are expected to perform token authentication");
 
-        if let Authorization::Token { access_token, csrf_token } = auth {
-            // Well this is reassuring. Also we directly deconstruct it and only save the ID
-            // so we don't accidentally use unsafe values later on
-            let Claims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<Claims>(&access_token)
-                .map_err(|_| CoreError::Unauthorized)?
-                .claims;
+        // Well this is reassuring. Also we directly deconstruct it and only save the ID
+        // so we don't accidentally use unsafe values later on
+        let Claims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<Claims>(&access_token)
+            .map_err(|_| CoreError::Unauthorized)?
+            .claims;
 
-            debug!("The token identified the user with id {}, validating...", id);
+        debug!("The token identified the user with id {}, validating...", id);
 
-            // Note that at this point we haven't validated the access token OR the csrf token yet.
-            // However, the key they are signed with encompasses the password salt for the user they supposedly
-            // identify, so we need to retrieve that.
-            let user = Self::by_id(id, connection)
-                .await?
-                .validate_token(&access_token, application_secret)?;
+        // Note that at this point we haven't validated the access token OR the csrf token yet.
+        // However, the key they are signed with encompasses the password salt for the user they supposedly
+        // identify, so we need to retrieve that.
+        let user = Self::by_id(id, connection)
+            .await?
+            .validate_token(&access_token, application_secret)?;
 
-            if let Some(ref csrf_token) = csrf_token {
-                user.validate_csrf_token(csrf_token, application_secret)?
-            }
-
-            Ok(user)
-        } else {
-            warn!("No token authentication found");
-
-            Err(CoreError::Unauthorized.into())
+        if let Some(ref csrf_token) = csrf_token {
+            user.validate_csrf_token(csrf_token, application_secret)?
         }
+
+        Ok(user)
     }
 
     async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {

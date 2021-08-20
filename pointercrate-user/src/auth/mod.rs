@@ -5,7 +5,7 @@
 //! * Deletion of own account
 //! * Modification of own account
 
-pub use self::{get::Authorization, patch::PatchMe, post::Registration};
+pub use self::{patch::PatchMe, post::Registration};
 use crate::{
     error::{Result, UserError},
     User,

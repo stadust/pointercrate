@@ -192,7 +192,7 @@ pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -
 
 pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<BestRecord>> {
     let mut stream = sqlx::query!(
-        r#"SELECT progress as "progress!", demons.id AS demon_id, demons.name as "demon_name: String", demons.position as "position!", players.name as "player_name: String" FROM best_records_in($1) as records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id = records.player"#,
+        r#"SELECT progress as "progress!", demons.id AS "demon_id!", demons.name as "demon_name!: String", demons.position as "position!", players.name as "player_name!: String" FROM best_records_in($1) as records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id = records.player"#,
         nation.iso_country_code
     )
         .fetch(connection);

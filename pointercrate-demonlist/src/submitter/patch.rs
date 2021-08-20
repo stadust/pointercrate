@@ -2,7 +2,7 @@ use crate::{error::Result, submitter::Submitter};
 use log::info;
 use pointercrate_core::util::non_nullable;
 use serde::Deserialize;
-use sqlx::{Done, PgConnection};
+use sqlx::PgConnection;
 
 #[derive(Debug, Deserialize)]
 pub struct PatchSubmitter {

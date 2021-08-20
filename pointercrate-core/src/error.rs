@@ -1,6 +1,10 @@
 use derive_more::Display;
+use log::error;
 use serde::Serialize;
+use sqlx::postgres::PgDatabaseError;
 use std::error::Error;
+
+pub type Result<T> = std::result::Result<T, CoreError>;
 
 pub trait PointercrateError: Error + Serialize + From<CoreError> {
     fn error_code(&self) -> u16;
@@ -17,6 +21,15 @@ pub enum CoreError {
     /// Error Code `40000`
     #[display(fmt = "The browser (or proxy) sent a request that this server could not understand.")]
     BadRequest,
+
+    /// `400 BAD REQUEST' error returned when a header value was malformed
+    ///
+    /// Error Code `40002`
+    #[display(fmt = "The value for the header '{}' could not be processed", header)]
+    InvalidHeaderValue {
+        /// The name of the malformed header
+        header: &'static str,
+    },
 
     /// `401 UNAUTHORIZED`
     ///
@@ -183,6 +196,7 @@ impl PointercrateError for CoreError {
     fn error_code(&self) -> u16 {
         match self {
             CoreError::BadRequest => 40000,
+            CoreError::InvalidHeaderValue { .. } => 40002,
             CoreError::Unauthorized => 40100,
             CoreError::Forbidden => 40300,
             CoreError::NotFound => 40400,
@@ -204,6 +218,36 @@ impl PointercrateError for CoreError {
             CoreError::InvalidInternalStateError { .. } => 50001,
             CoreError::DatabaseError => 50003,
             CoreError::DatabaseConnectionError => 50005,
+        }
+    }
+}
+
+impl From<sqlx::Error> for CoreError {
+    fn from(error: sqlx::Error) -> Self {
+        match error {
+            sqlx::Error::Database(database_error) => {
+                let database_error = database_error.downcast::<PgDatabaseError>();
+
+                error!("Database error: {:?}. ", database_error);
+
+                CoreError::DatabaseError
+            },
+            sqlx::Error::PoolClosed | sqlx::Error::PoolTimedOut => CoreError::DatabaseConnectionError,
+            sqlx::Error::ColumnNotFound(column) => {
+                error!("Invalid access to column {}, which does not exist", column);
+
+                CoreError::InternalServerError
+            },
+            sqlx::Error::RowNotFound => {
+                error!("Unhandled 'NotFound', this is a logic or data consistency error");
+
+                CoreError::InternalServerError
+            },
+            _ => {
+                error!("Database error: {:?}", error);
+
+                CoreError::DatabaseError
+            },
         }
     }
 }

@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "pointercrate-core",
+    "pointercrate-core-api",
     "pointercrate-demonlist",
     "pointercrate-demonlist-api",
     "pointercrate-demonlist-pages",

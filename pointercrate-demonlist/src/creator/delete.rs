@@ -1,6 +1,6 @@
 use crate::{creator::Creator, error::Result};
 use log::info;
-use sqlx::{Done, PgConnection};
+use sqlx::PgConnection;
 
 impl Creator {
     pub async fn delete(self, connection: &mut PgConnection) -> Result<()> {
