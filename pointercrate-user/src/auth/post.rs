@@ -54,7 +54,7 @@ impl AuthenticatedUser {
         }
     }
 
-    pub async fn invalidate_all_tokens(mut self, password: &str, connection: &mut PgConnection) -> Result<()> {
+    pub async fn invalidate_all_tokens(self, password: &str, connection: &mut PgConnection) -> Result<()> {
         let patch = PatchMe {
             password: Some(password.to_string()),
             display_name: None,

@@ -1,7 +1,7 @@
 use crate::ratelimits::UserRatelimits;
 use pointercrate_core::{
     error::CoreError,
-    permission::{Permission, PermissionsManager},
+    permission::{Permission},
 };
 use rocket::{Build, Rocket};
 
@@ -17,7 +17,7 @@ fn error() -> pointercrate_core_api::error::Result<()> {
     Err(CoreError::NotFound)?
 }
 
-pub fn setup(mut rocket: Rocket<Build>) -> Rocket<Build> {
+pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = UserRatelimits::new();
 
     rocket

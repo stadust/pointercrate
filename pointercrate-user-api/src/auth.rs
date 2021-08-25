@@ -4,14 +4,14 @@ use pointercrate_core::{
     permission::{Permission, PermissionsManager},
     pool::{audit_connection, PointercratePool},
 };
-use pointercrate_user::{error::UserError, AuthenticatedUser, User};
+use pointercrate_user::{error::UserError, AuthenticatedUser};
 use rocket::{
     http::{Method, Status},
     request::{FromRequest, Outcome},
     Request, State,
 };
-use sqlx::{PgConnection, Postgres, Transaction};
-use std::fmt::Debug;
+use sqlx::{Postgres, Transaction};
+
 
 pub struct Auth<const IsToken: bool> {
     pub user: AuthenticatedUser,
@@ -23,7 +23,7 @@ pub struct Auth<const IsToken: bool> {
 }
 
 impl<const IsToken: bool> Auth<IsToken> {
-    pub async fn commit(mut self) -> Result<(), UserError> {
+    pub async fn commit(self) -> Result<(), UserError> {
         self.connection.commit().await.map_err(UserError::from)
     }
 
@@ -67,7 +67,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
         let pool = request.guard::<&State<PointercratePool>>().await;
         let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
             Outcome::Success(manager) => manager.inner().clone(),
-            _ => return Outcome::Failure(((Status::InternalServerError, CoreError::InternalServerError.into()))),
+            _ => return Outcome::Failure((Status::InternalServerError, CoreError::InternalServerError.into())),
         };
 
         let mut connection = match pool {
@@ -162,7 +162,7 @@ impl<'r> FromRequest<'r> for Auth<false> {
         let pool = request.guard::<&State<PointercratePool>>().await;
         let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
             Outcome::Success(manager) => manager.inner().clone(),
-            _ => return Outcome::Failure(((Status::InternalServerError, CoreError::InternalServerError.into()))),
+            _ => return Outcome::Failure((Status::InternalServerError, CoreError::InternalServerError.into())),
         };
 
         let mut connection = match pool {

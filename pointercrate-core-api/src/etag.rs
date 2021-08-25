@@ -1,7 +1,7 @@
 use crate::response::Response2;
 use pointercrate_core::{error::CoreError, etag::Taggable};
 use rocket::{
-    http::{Header, Method, Status},
+    http::{Method, Status},
     request::{FromRequest, Outcome},
     response::Responder,
     serde::json::Json,

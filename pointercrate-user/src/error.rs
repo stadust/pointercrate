@@ -1,11 +1,11 @@
 use derive_more::Display;
-use log::error;
+
 use pointercrate_core::{
     error::{CoreError, PointercrateError},
     permission::Permission,
 };
 use serde::Serialize;
-use sqlx::{postgres::PgDatabaseError, Error};
+
 
 pub type Result<T> = std::result::Result<T, UserError>;
 

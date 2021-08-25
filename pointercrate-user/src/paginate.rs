@@ -1,5 +1,5 @@
 use crate::{
-    error::{Result, UserError},
+    error::{Result},
     User,
 };
 use futures::StreamExt;

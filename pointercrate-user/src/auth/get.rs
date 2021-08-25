@@ -1,9 +1,9 @@
 use crate::{
-    auth::{patch::PatchMe, AuthenticatedUser, Claims},
-    error::{Result, UserError},
+    auth::{AuthenticatedUser, Claims},
+    error::{Result},
     User,
 };
-use log::{debug, info, warn};
+use log::{debug, info};
 use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
 

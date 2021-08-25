@@ -1,17 +1,17 @@
 use log::warn;
 use pointercrate_core::{
-    error::{CoreError, PointercrateError},
+    error::{PointercrateError},
     view::{error::ErrorFragment, PageConfiguration},
 };
 use rocket::{
-    http::{Accept, ContentType, MediaType, Status},
+    http::{ContentType, MediaType, Status},
     response::Responder,
     serde::json::Json,
-    Request, Response, State,
+    Request, Response,
 };
 use serde::Serialize;
 use serde_json::Value;
-use sqlx::Error;
+
 use std::io::Cursor;
 
 pub type Result<T> = std::result::Result<T, ErrorResponder>;

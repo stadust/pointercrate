@@ -54,7 +54,7 @@ impl PermissionsManager {
 
     // we should probably verify that added permissions are all part of what was in the constructor but
     // wherhaklsrödj
-    pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {
+    pub fn assigns(self, perm1: Permission, perm2: Permission) -> Self {
         {
             let mut lock = self.assignable_map.write().unwrap();
             lock.entry(perm1).or_insert(Vec::new()).push(perm2);
@@ -62,7 +62,7 @@ impl PermissionsManager {
         self
     }
 
-    pub fn implies(mut self, perm1: Permission, perm2: Permission) -> Self {
+    pub fn implies(self, perm1: Permission, perm2: Permission) -> Self {
         {
             let mut lock = self.implication_map.write().unwrap();
             lock.entry(perm1).or_insert(Vec::new()).push(perm2);

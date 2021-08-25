@@ -1,4 +1,4 @@
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, Render};
 
 pub struct TopLevelNavigationBarItem {
     item: NavigationBarItem,

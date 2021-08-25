@@ -1,5 +1,5 @@
 use crate::view::{footer::Footer, navigation::NavigationBar};
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup};
 
 pub mod error;
 pub mod footer;
@@ -23,7 +23,19 @@ impl PageConfiguration {
     pub fn render_fragment<F: PageFragment>(&self, fragment: &F) -> Markup {
         html! {
             head {
+                @for script in &self.default_scripts {
+                    script src = (script);
+                }
+                @for script in fragment.additional_scripts() {
+                    script src = (script);
+                }
 
+                @for stylesheet in &self.default_stylesheets {
+                    link rel = "stylesheet" href = (stylesheet);
+                }
+                @for stylesheet in fragment.additional_stylesheets() {
+                    link rel = "stylesheet" href = (stylesheet);
+                }
             }
             body {
                 (self.nav_bar)

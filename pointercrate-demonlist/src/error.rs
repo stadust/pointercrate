@@ -1,9 +1,9 @@
 use crate::{demon::MinimalDemon, record::RecordStatus};
 use derive_more::Display;
-use log::error;
+
 use pointercrate_core::error::{CoreError, PointercrateError};
 use serde::Serialize;
-use sqlx::{postgres::PgDatabaseError, Error};
+
 
 pub type Result<T> = std::result::Result<T, DemonlistError>;
 
