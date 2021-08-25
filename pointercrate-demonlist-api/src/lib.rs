@@ -19,6 +19,31 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
         .mount("/api/v1/submitters/", rocket::routes![
             endpoints::submitter::paginate,
             endpoints::submitter::get,
-            endpoints::submitter::paginate
+            endpoints::submitter::patch
+        ])
+        .mount("/api/v1/records/", rocket::routes![
+            endpoints::record::add_note,
+            endpoints::record::audit,
+            endpoints::record::delete,
+            endpoints::record::delete,
+            endpoints::record::delete_note,
+            endpoints::record::get,
+            endpoints::record::paginate,
+            endpoints::record::unauthed_pagination,
+            endpoints::record::patch,
+            endpoints::record::patch_note,
+            endpoints::record::submit
+        ])
+        .mount("/api/v1/players/", rocket::routes![
+            endpoints::player::get,
+            endpoints::player::paginate,
+            endpoints::player::unauthed_paginate,
+            endpoints::player::patch,
+            endpoints::player::ranking
+        ])
+        .mount("/api/v1/nationality/", rocket::routes![
+            endpoints::nationality::subdivisions,
+            endpoints::nationality::ranking,
+            endpoints::nationality::nation
         ])
 }
