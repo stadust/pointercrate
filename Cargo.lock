@@ -2353,12 +2353,14 @@ dependencies = [
 name = "pointercrate-demonlist-api"
 version = "0.1.0"
 dependencies = [
+ "log",
  "pointercrate-core",
  "pointercrate-core-api",
  "pointercrate-demonlist",
  "pointercrate-user-api",
  "rocket",
  "serde_json",
+ "serde_urlencoded 0.7.0",
 ]
 
 [[package]]

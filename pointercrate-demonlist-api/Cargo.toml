@@ -12,3 +12,5 @@ pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
 serde_json = "1.0.60"
+log = "0.4.11"
+serde_urlencoded = "0.7.0"

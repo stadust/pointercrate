@@ -59,6 +59,7 @@ impl<'r, 'o: 'r, T: Responder<'r, 'o>> Responder<'r, 'o> for Response2<T> {
         response_builder.ok()
     }
 }
+
 #[macro_export]
 macro_rules! pagination_response {
     ($endpoint: expr, $objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $before_field:ident, $after_field:ident, $($id_field:tt)*) => {{
