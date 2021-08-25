@@ -45,7 +45,7 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
     pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, before_id, after_id, id)
 }
 
-#[rocket::get("/")]
+#[rocket::get("/", rank = 1)]
 pub async fn unauthed_pagination(
     pool: &State<PointercratePool>, query: Query<RecordPagination>,
 ) -> Result<Response2<Json<Vec<MinimalRecordPD>>>> {

@@ -25,7 +25,6 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::record::add_note,
             endpoints::record::audit,
             endpoints::record::delete,
-            endpoints::record::delete,
             endpoints::record::delete_note,
             endpoints::record::get,
             endpoints::record::paginate,
@@ -45,5 +44,14 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::nationality::subdivisions,
             endpoints::nationality::ranking,
             endpoints::nationality::nation
+        ])
+        .mount("/api/v2/demons/", rocket::routes![
+            endpoints::demon::get,
+            endpoints::demon::paginate,
+            endpoints::demon::paginate_listed,
+            endpoints::demon::patch,
+            endpoints::demon::post,
+            endpoints::demon::post_creator,
+            endpoints::demon::delete_creator
         ])
 }

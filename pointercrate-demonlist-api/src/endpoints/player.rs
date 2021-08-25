@@ -33,7 +33,7 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<PlayerPagination>) -> Re
         base.id
     )
 }
-#[rocket::get("/")]
+#[rocket::get("/", rank = 1)]
 pub async fn unauthed_paginate(pool: &State<PointercratePool>, query: Query<PlayerPagination>) -> Result<Response2<Json<Vec<Player>>>> {
     let mut pagination = query.0;
     let mut connection = pool.connection().await?;
