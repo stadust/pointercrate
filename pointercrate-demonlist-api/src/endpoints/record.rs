@@ -173,7 +173,7 @@ pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<Recor
 pub async fn patch(
     record_id: i32, mut auth: TokenAuth, precondition: Precondition, patch: Json<PatchRecord>,
 ) -> Result<Tagged<FullRecord>> {
-    let mut record = FullRecord::by_id(record_id, &mut auth.connection).await?;
+    let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
 
     if record.demon.position > pointercrate_demonlist::config::extended_list_size() {
         auth.require_permission(LIST_MODERATOR)?;

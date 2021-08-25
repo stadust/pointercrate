@@ -10,7 +10,7 @@ pub const LIST_HELPER: Permission = Permission::new("List Helper", 0x2);
 pub const LIST_MODERATOR: Permission = Permission::new("List Moderator", 0x4);
 pub const LIST_ADMINISTRATOR: Permission = Permission::new("List Administrator", 0x8);
 
-pub fn setup(mut rocket: Rocket<Build>) -> Rocket<Build> {
+pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
 
     rocket
