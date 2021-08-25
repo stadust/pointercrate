@@ -2,17 +2,34 @@ use crate::{LIST_ADMINISTRATOR, LIST_MODERATOR};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
+    pagination_response,
     query::Query,
+    response::Response2,
 };
 use pointercrate_demonlist::submitter::{PatchSubmitter, Submitter, SubmitterPagination};
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::serde::json::Json;
 
 #[rocket::get("/")]
-pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination>) -> Result<()> {
+pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination>) -> Result<Response2<Json<Vec<Submitter>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
-    todo!()
+    let mut pagination = pagination.0;
+
+    let mut submitters = pagination.page(&mut auth.connection).await?;
+
+    let (max_id, min_id) = Submitter::extremal_submitter_ids(&mut auth.connection).await?;
+
+    pagination_response!(
+        "/api/v1/submitters/",
+        submitters,
+        pagination,
+        min_id,
+        max_id,
+        before_id,
+        after_id,
+        id
+    )
 }
 
 #[rocket::get("/<submitter_id>")]
