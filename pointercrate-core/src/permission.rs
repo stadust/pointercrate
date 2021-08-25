@@ -85,10 +85,11 @@ impl PermissionsManager {
     pub fn assignable_by(&self, permission: Permission) -> Vec<Permission> {
         let mut assignable = Vec::new();
 
-        if let Some(vec) = self.assignable_map.read().unwrap().get(&permission) {
-            for perm in vec {
-                assignable.push(*perm);
-                assignable.append(&mut self.assignable_by(*perm));
+        for perm in self.implied_by(permission) {
+            if let Some(vec) = self.assignable_map.read().unwrap().get(&perm) {
+                for perm in vec {
+                    assignable.push(*perm);
+                }
             }
         }
 
@@ -98,9 +99,9 @@ impl PermissionsManager {
     pub fn implied_by_bits(&self, permission_bits: u16) -> Vec<Permission> {
         let mut implied = Vec::new();
 
-        for perm in self.implication_map.read().unwrap().keys() {
+        for perm in self.bits_to_permissions(permission_bits) {
             if perm.bit & permission_bits == perm.bit {
-                implied.extend(self.implied_by(*perm));
+                implied.extend(self.implied_by(perm));
             }
         }
 
@@ -110,7 +111,7 @@ impl PermissionsManager {
     pub fn assignable_by_bits(&self, permission_bits: u16) -> Vec<Permission> {
         let mut assignable = Vec::new();
 
-        for perm in self.implied_by_bits(permission_bits) {
+        for perm in self.bits_to_permissions(permission_bits) {
             assignable.extend(self.assignable_by(perm));
         }
 
@@ -137,5 +138,43 @@ impl PermissionsManager {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::permission::{Permission, PermissionsManager};
+
+    const PERM1: Permission = Permission::new("1", 0x1);
+    const PERM2: Permission = Permission::new("2", 0x2);
+    const PERM3: Permission = Permission::new("3", 0x4);
+    const PERM4: Permission = Permission::new("4", 0x8);
+    const PERM5: Permission = Permission::new("5", 0x10);
+    const PERM6: Permission = Permission::new("6", 0x20);
+
+    fn permission_manager() -> PermissionsManager {
+        PermissionsManager::new(vec![PERM1, PERM2, PERM3, PERM4, PERM5])
+            .implies(PERM1, PERM2)
+            .implies(PERM2, PERM3)
+            .implies(PERM4, PERM5)
+            .assigns(PERM4, PERM2)
+            .assigns(PERM2, PERM3)
+            .assigns(PERM4, PERM5)
+            .assigns(PERM5, PERM6)
+    }
+
+    #[test]
+    fn test_implication() {
+        assert_eq!(permission_manager().implied_by(PERM1), vec![PERM1, PERM2, PERM3]);
+        assert_eq!(permission_manager().implied_by(PERM4), vec![PERM4, PERM5]);
+
+        assert_eq!(permission_manager().implied_by_bits(0x1 | 0x8), vec![
+            PERM1, PERM2, PERM3, PERM4, PERM5,
+        ]);
+    }
+
+    #[test]
+    fn test_assignment() {
+        assert_eq!(permission_manager().assignable_by(PERM4), vec![PERM2, PERM5, PERM6]);
     }
 }
