@@ -1,6 +1,7 @@
+use crate::response::Response2;
 use pointercrate_core::{error::CoreError, etag::Taggable};
 use rocket::{
-    http::{Method, Status},
+    http::{Header, Method, Status},
     request::{FromRequest, Outcome},
     response::Responder,
     serde::json::Json,
@@ -60,8 +61,18 @@ impl<'r, T: Taggable> Responder<'r, 'static> for Tagged<T> {
             _ => (),
         }
 
-        Response::build_from(Json(self.0).respond_to(request)?)
-            .raw_header("etag", response_etag)
-            .ok()
+        Response2::new(Json(self.0)).with_header("etag", response_etag).respond_to(request)
     }
 }
+
+pub trait TaggableExt: Taggable {
+    fn require_match(self, precondition: Precondition) -> Result<Self, CoreError>
+    where
+        Self: Sized,
+    {
+        precondition.require_etag_match(&self)?;
+        Ok(self)
+    }
+}
+
+impl<T: Taggable> TaggableExt for T {}

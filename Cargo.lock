@@ -2331,6 +2331,7 @@ dependencies = [
  "rocket",
  "serde",
  "serde_json",
+ "serde_urlencoded 0.7.0",
  "sqlx 0.5.5",
 ]
 
@@ -2352,7 +2353,10 @@ dependencies = [
 name = "pointercrate-demonlist-api"
 version = "0.1.0"
 dependencies = [
+ "pointercrate-core",
+ "pointercrate-core-api",
  "pointercrate-demonlist",
+ "pointercrate-user-api",
  "rocket",
  "serde_json",
 ]
@@ -2389,10 +2393,13 @@ version = "0.1.0"
 dependencies = [
  "base64 0.13.0",
  "log",
+ "nonzero_ext 0.2.0",
  "pointercrate-core",
  "pointercrate-core-api",
  "pointercrate-user",
+ "ratelimit_meter",
  "rocket",
+ "serde_urlencoded 0.7.0",
  "sqlx 0.5.5",
 ]
 

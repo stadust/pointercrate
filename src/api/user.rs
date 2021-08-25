@@ -1,4 +1,4 @@
-//! Handlers for all endpoints under the `/api/v1/auth` prefix
+pub//! Handlers for all endpoints under the `/api/v1/auth` prefix
 
 use crate::{
     error::{JsonError, PointercrateError},
@@ -28,8 +28,7 @@ pub async fn paginate(
     }
 
     if !user.inner().has_permission(Permissions::Moderator) {
-        // Pointercrate staff need to be able to see all users, not only those whose permissions they can
-        // assign
+
         pagination.any_permissions = match pagination.any_permissions {
             Some(perms) => Some(perms | user.inner().permissions.assigns()),
             None => Some(user.inner().permissions.assigns()),

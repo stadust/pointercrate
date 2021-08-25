@@ -34,7 +34,7 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
             Some(accept) => accept.preferred().0.clone(), // ?????
         };
 
-        let status = Status::from_code(self.errror_code / 100).unwrap_or(Status::InternalServerError);
+        let status = Status::from_code(self.error_code / 100).unwrap_or(Status::InternalServerError);
 
         if accept == MediaType::HTML {
             let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;

@@ -1,6 +1,7 @@
 use log::{debug, error, warn};
 use pointercrate_core::{
     error::{CoreError, PointercrateError},
+    permission::{Permission, PermissionsManager},
     pool::{audit_connection, PointercratePool},
 };
 use pointercrate_user::{error::UserError, AuthenticatedUser, User};
@@ -12,7 +13,34 @@ use rocket::{
 use sqlx::{PgConnection, Postgres, Transaction};
 use std::fmt::Debug;
 
-pub struct Auth<const IsToken: bool>(pub AuthenticatedUser, pub Transaction<'static, Postgres>);
+pub struct Auth<const IsToken: bool> {
+    pub user: AuthenticatedUser,
+    pub connection: Transaction<'static, Postgres>,
+    pub permissions: PermissionsManager,
+
+    /* The secret, either token or password */
+    pub(crate) secret: String,
+}
+
+impl<const IsToken: bool> Auth<IsToken> {
+    pub async fn commit(mut self) -> Result<(), UserError> {
+        self.connection.commit().await.map_err(UserError::from)
+    }
+
+    pub fn require_permission(&self, permission: Permission) -> Result<(), UserError> {
+        self.permissions.require_permission(self.user.inner().permissions, permission)?;
+
+        Ok(())
+    }
+
+    pub fn has_permission(&self, permission: Permission) -> bool {
+        self.require_permission(permission).is_ok()
+    }
+
+    pub fn assignable_permissions(&self) -> Vec<Permission> {
+        self.permissions.assignable_by_bits(self.user.inner().permissions)
+    }
+}
 
 pub type BasicAuth = Auth<false>;
 pub type TokenAuth = Auth<true>;
@@ -37,6 +65,10 @@ impl<'r> FromRequest<'r> for Auth<true> {
         }
 
         let pool = request.guard::<&State<PointercratePool>>().await;
+        let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
+            Outcome::Success(manager) => manager.inner().clone(),
+            _ => return Outcome::Failure(((Status::InternalServerError, CoreError::InternalServerError.into()))),
+        };
 
         let mut connection = match pool {
             Outcome::Success(pool) => try_outcome!(pool.transaction().await),
@@ -54,7 +86,12 @@ impl<'r> FromRequest<'r> for Auth<true> {
 
                 try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
-                return Outcome::Success(Auth(user, connection))
+                return Outcome::Success(Auth {
+                    user,
+                    connection,
+                    permissions: permission_manager,
+                    secret: token.to_string(),
+                })
             }
         }
 
@@ -71,7 +108,12 @@ impl<'r> FromRequest<'r> for Auth<true> {
 
                 try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
-                return Outcome::Success(Auth(user, connection))
+                return Outcome::Success(Auth {
+                    user,
+                    connection,
+                    permissions: permission_manager,
+                    secret: access_token.to_string(),
+                })
             }
 
             debug!("Non-GET request, testing X-CSRF-TOKEN header");
@@ -92,7 +134,12 @@ impl<'r> FromRequest<'r> for Auth<true> {
 
                 try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
-                return Outcome::Success(Auth(user, connection))
+                return Outcome::Success(Auth {
+                    user,
+                    connection,
+                    permissions: permission_manager,
+                    secret: access_token.to_string(),
+                })
             } else {
                 warn!("Cookie based authentication was used, but no CSRF-token was provided. This might be a CSRF attack!");
             }
@@ -113,6 +160,10 @@ impl<'r> FromRequest<'r> for Auth<false> {
         }
 
         let pool = request.guard::<&State<PointercratePool>>().await;
+        let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
+            Outcome::Success(manager) => manager.inner().clone(),
+            _ => return Outcome::Failure(((Status::InternalServerError, CoreError::InternalServerError.into()))),
+        };
 
         let mut connection = match pool {
             Outcome::Success(pool) => try_outcome!(pool.transaction().await),
@@ -139,7 +190,12 @@ impl<'r> FromRequest<'r> for Auth<false> {
 
                     try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
-                    return Outcome::Success(Auth(user, connection))
+                    return Outcome::Success(Auth {
+                        user,
+                        connection,
+                        permissions: permission_manager,
+                        secret: password.to_string(),
+                    })
                 }
             }
         }

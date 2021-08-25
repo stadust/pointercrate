@@ -28,9 +28,6 @@ mod paginate;
 mod patch;
 mod video;
 
-pub const MODERATOR: Permission = Permission::new("Moderator", 0x2000);
-pub const ADMINISTRATOR: Permission = Permission::new("Administrator", 0x4000);
-
 /// Model representing a user in the database
 #[derive(Debug, Serialize, Hash, Eq, PartialEq)]
 pub struct User {
@@ -65,6 +62,10 @@ impl Display for User {
 }
 
 impl User {
+    pub fn has_permission(&self, permission: Permission) -> bool {
+        self.has_permissions(permission.bit())
+    }
+
     pub fn has_permissions(&self, perms: u16) -> bool {
         self.permissions & perms == perms
     }

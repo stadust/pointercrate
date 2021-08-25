@@ -1,9 +1,9 @@
-use super::AuthenticatedUser;
 use crate::{
+    auth::{patch::PatchMe, AuthenticatedUser},
     error::{Result, UserError},
     User,
 };
-use log::{info, trace};
+use log::{info, trace, warn};
 use serde::Deserialize;
 use sqlx::PgConnection;
 
@@ -16,9 +16,6 @@ pub struct Registration {
 impl AuthenticatedUser {
     pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("Attempting registration of new user under name {}", registration.name);
-
-        Self::validate_password(&registration.password)?;
-        User::validate_name(&registration.name)?;
 
         trace!("Registration request is formally correct");
 
@@ -55,6 +52,20 @@ impl AuthenticatedUser {
             },
             Err(err) => Err(err),
         }
+    }
+
+    pub async fn invalidate_all_tokens(mut self, password: &str, connection: &mut PgConnection) -> Result<()> {
+        let patch = PatchMe {
+            password: Some(password.to_string()),
+            display_name: None,
+            youtube_channel: None,
+        };
+
+        warn!("Invalidating all access tokens for user {}", self.inner());
+
+        self.apply_patch(patch, connection).await?;
+
+        Ok(())
     }
 }
 

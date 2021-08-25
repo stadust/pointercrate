@@ -8,4 +8,7 @@ edition = "2018"
 [dependencies]
 rocket = "0.5.0-rc.1"
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}
+pointercrate-core = {path = "../pointercrate-core"}
+pointercrate-core-api = {path = "../pointercrate-core-api"}
+pointercrate-user-api = {path = "../pointercrate-user-api"}
 serde_json = "1.0.60"

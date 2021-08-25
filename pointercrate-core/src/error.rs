@@ -1,8 +1,9 @@
+use crate::permission::Permission;
 use derive_more::Display;
 use log::error;
 use serde::Serialize;
 use sqlx::postgres::PgDatabaseError;
-use std::error::Error;
+use std::{error::Error, time::Duration};
 
 pub type Result<T> = std::result::Result<T, CoreError>;
 
@@ -47,6 +48,20 @@ pub enum CoreError {
         fmt = "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."
     )]
     Forbidden,
+
+    /// `403 FORBIDDEN` error that contains the permissions the client needs to have to perform the
+    /// request
+    ///
+    /// Error Code `40301`
+    #[display(
+        fmt = "You do not have the pointercrate permissions to perform this request. Required is: {}, which isn't contained in any of \
+               your permissions",
+        required
+    )]
+    MissingPermissions {
+        /// The permissions required to perform the request
+        required: Permission,
+    },
 
     /// `404 NOT FOUND`
     ///
@@ -163,6 +178,17 @@ pub enum CoreError {
     #[display(fmt = "This request is required to be conditional; try using \"If-Match\"")]
     PreconditionRequired,
 
+    /// `429 TOO MANY REQUESTS`
+    ///
+    /// Error Code `42900`
+    #[display(fmt = "{} Try again in {:.2?}", message, remaining)]
+    Ratelimited {
+        #[serde(skip)]
+        message: String,
+
+        remaining: Duration,
+    },
+
     /// `500 INTERNAL SERVER ERROR`
     #[display(
         fmt = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there \
@@ -199,6 +225,7 @@ impl PointercrateError for CoreError {
             CoreError::InvalidHeaderValue { .. } => 40002,
             CoreError::Unauthorized => 40100,
             CoreError::Forbidden => 40300,
+            CoreError::MissingPermissions { .. } => 40301,
             CoreError::NotFound => 40400,
             CoreError::MethodNotAllowed => 40500,
             CoreError::Conflict => 40900,
@@ -214,6 +241,7 @@ impl PointercrateError for CoreError {
             CoreError::AfterSmallerBefore => 42227,
             CoreError::MutuallyExclusive => 42229,
             CoreError::PreconditionRequired => 42800,
+            CoreError::Ratelimited { .. } => 42900,
             CoreError::InternalServerError => 50000,
             CoreError::InvalidInternalStateError { .. } => 50001,
             CoreError::DatabaseError => 50003,

@@ -17,19 +17,22 @@ pub enum UserError {
     #[display(fmt = "Malformed channel URL")]
     MalformedChannelUrl,
 
-    /// `403 FORBIDDEN` error that contains the permissions the client needs to have to perform the
-    /// request
+    /// `403 FORBIDDEN` error returned when a user attempts to delete his own account via the admin
+    /// panel
     ///
-    /// Error Code `40301`
-    #[display(
-        fmt = "You do not have the pointercrate permissions to perform this request. Required is: {}, which isn't contained in any of \
-               your permissions",
-        required
-    )]
-    MissingPermissions {
-        /// The permissions required to perform the request
-        required: &'static Permission,
-    },
+    /// Error Code `40302`
+    #[display(fmt = "You cannot delete your own account via this endpoint. Use DELETE /api/v1/auth/me/")]
+    DeleteSelf,
+
+    /// `403 FORBIDDEN` error returned when a user attempts to patch his own account via the admin
+    /// panel
+    ///
+    /// Error Code `40303`
+    #[display(fmt = "You cannot modify your own account via this endpoint. Use PATCH /api/v1/auth/me/")]
+    PatchSelf,
+
+    #[display(fmt = "You cannot assign the following permissions: {:?}", non_assignable)]
+    PermissionNotAssignable { non_assignable: Vec<Permission> },
 
     #[display(fmt = "No user with id {} found", user_id)]
     UserNotFound { user_id: i32 },
@@ -80,7 +83,9 @@ impl PointercrateError for UserError {
             Core(core) => core.error_code(),
 
             MalformedChannelUrl => 40001,
-            MissingPermissions { .. } => 40301,
+            DeleteSelf => 40302,
+            PatchSelf => 40303,
+            PermissionNotAssignable { .. } => 40305,
             UserNotFound { .. } => 40401,
             UserNotFoundName { .. } => 40401,
             NameTaken => 40902,
@@ -93,31 +98,6 @@ impl PointercrateError for UserError {
 
 impl From<sqlx::Error> for UserError {
     fn from(error: sqlx::Error) -> Self {
-        match error {
-            Error::Database(database_error) => {
-                let database_error = database_error.downcast::<PgDatabaseError>();
-
-                error!("Database error: {:?}. ", database_error);
-
-                CoreError::DatabaseError
-            },
-            Error::PoolClosed | Error::PoolTimedOut => CoreError::DatabaseConnectionError,
-            Error::ColumnNotFound(column) => {
-                error!("Invalid access to column {}, which does not exist", column);
-
-                CoreError::InternalServerError
-            },
-            Error::RowNotFound => {
-                error!("Unhandled 'NotFound', this is a logic or data consistency error");
-
-                CoreError::InternalServerError
-            },
-            _ => {
-                error!("Database error: {:?}", error);
-
-                CoreError::DatabaseError
-            },
-        }
-        .into()
+        UserError::Core(error.into())
     }
 }

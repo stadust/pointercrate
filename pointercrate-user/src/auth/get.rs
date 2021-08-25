@@ -8,21 +8,6 @@ use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
 
 impl AuthenticatedUser {
-    pub async fn invalidate_all_tokens(username: &str, password: &str, connection: &mut PgConnection) -> Result<()> {
-        let user = Self::basic_auth(username, password, connection).await?;
-        let patch = PatchMe {
-            password: Some(password.to_string()),
-            display_name: None,
-            youtube_channel: None,
-        };
-
-        warn!("Invalidating all access tokens for user {}", user.inner());
-
-        user.apply_patch(patch, connection).await?;
-
-        Ok(())
-    }
-
     pub async fn basic_auth(username: &str, password: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform basic authentication");
         debug!("Trying to authorize user {}", username);

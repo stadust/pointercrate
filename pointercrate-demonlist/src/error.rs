@@ -193,31 +193,6 @@ impl From<CoreError> for DemonlistError {
 
 impl From<sqlx::Error> for DemonlistError {
     fn from(error: sqlx::Error) -> Self {
-        match error {
-            Error::Database(database_error) => {
-                let database_error = database_error.downcast::<PgDatabaseError>();
-
-                error!("Database error: {:?}. ", database_error);
-
-                CoreError::DatabaseError
-            },
-            Error::PoolClosed | Error::PoolTimedOut => CoreError::DatabaseConnectionError,
-            Error::ColumnNotFound(column) => {
-                error!("Invalid access to column {}, which does not exist", column);
-
-                CoreError::InternalServerError
-            },
-            Error::RowNotFound => {
-                error!("Unhandled 'NotFound', this is a logic or data consistency error");
-
-                CoreError::InternalServerError
-            },
-            _ => {
-                error!("Database error: {:?}", error);
-
-                CoreError::DatabaseError
-            },
-        }
-        .into()
+        DemonlistError::Core(error.into())
     }
 }

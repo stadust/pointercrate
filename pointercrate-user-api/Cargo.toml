@@ -13,3 +13,6 @@ pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-api = {path = "../pointercrate-core-api"}
 log = "0.4.11"
 base64 = "0.13.0"
+ratelimit_meter = "5.0.0"
+nonzero_ext = "0.2.0"
+serde_urlencoded = "0.7.0"
