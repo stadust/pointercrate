@@ -195,6 +195,17 @@ impl FullRecord {
             .await?; // FIXME: crashes on empty table
         Ok((row.max_id, row.min_id))
     }
+
+    pub async fn was_modified(&self, connection: &mut PgConnection) -> Result<bool> {
+        Ok(sqlx::query!(
+            r#"SELECT EXISTS (SELECT 1 FROM record_modifications WHERE id = $1 AND status_ IS NOT NULL) AS "was_modified!: bool""#,
+            self.id
+        )
+        .fetch_one(&mut *connection)
+        .await?
+        .was_modified)
+    }
+
     /*
     pub async fn validate(self, state: PointercrateState) {
         let mut connection = match state.connection().await {

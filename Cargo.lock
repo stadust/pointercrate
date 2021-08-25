@@ -2354,13 +2354,17 @@ name = "pointercrate-demonlist-api"
 version = "0.1.0"
 dependencies = [
  "log",
+ "nonzero_ext 0.2.0",
  "pointercrate-core",
  "pointercrate-core-api",
  "pointercrate-demonlist",
  "pointercrate-user-api",
+ "ratelimit_meter",
+ "reqwest",
  "rocket",
  "serde_json",
  "serde_urlencoded 0.7.0",
+ "sqlx 0.5.5",
 ]
 
 [[package]]

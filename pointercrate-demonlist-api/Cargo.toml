@@ -11,6 +11,10 @@ pointercrate-demonlist = {path = "../pointercrate-demonlist"}
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
+sqlx = { version = "0.5", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
 serde_json = "1.0.60"
 log = "0.4.11"
 serde_urlencoded = "0.7.0"
+ratelimit_meter = "5.0.0"
+nonzero_ext = "0.2.0"
+reqwest = "0.10.10"

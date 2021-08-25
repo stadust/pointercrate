@@ -3,7 +3,7 @@ macro_rules! ratelimits {
     ($struct_name: ident {$($tokens:tt)*}) => {
         use nonzero_ext::nonzero;
         use pointercrate_core::error::CoreError;
-        use ratelimit_meter::{KeyedRateLimiter, NonConformance};
+        use ratelimit_meter::{KeyedRateLimiter, NonConformance, DirectRateLimiter};
         use std::{
             net::IpAddr,
             time::{Duration, Instant},
@@ -20,7 +20,7 @@ macro_rules! ratelimits {
     };
 
     (@struct@ $struct_name: ident [$($field: ident: $type: ty | $init: expr),*] $name: ident[$capacity: tt per $seconds: tt] => $message: expr, $($remaining: tt)*) => {
-        ratelimits!(@struct@ $struct_name [$($field: $type | $init,)* $name: DirectRatelimiter | DirectRatelimiter::new(nonzero!($capacity), Duration::from_secs($seconds))] $($remaining)*);
+        ratelimits!(@struct@ $struct_name [$($field: $type | $init,)* $name: DirectRateLimiter | DirectRateLimiter::new(nonzero!($capacity), Duration::from_secs($seconds))] $($remaining)*);
     };
 
     (@struct@ $struct_name: ident [$($field: ident: $type: ty | $init: expr),*] $name: ident[$capacity: tt per $seconds: tt per ip] => $message: expr, $($remaining: tt)*) => {

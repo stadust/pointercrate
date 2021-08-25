@@ -36,7 +36,7 @@ pub enum RecordEntryType {
 }
 
 /// Gets all audit log entries for the given record, in chronological order
-pub async fn entries_for_record(record_id: i32, connection: &mut PgConnection) -> Result<Vec<RecordEntry>> {
+pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection) -> Result<Vec<RecordEntry>> {
     let mut entries = Vec::new();
 
     let addition_row = sqlx::query!(
