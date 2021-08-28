@@ -1,6 +1,7 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
+use pointercrate_core_pages::Script;
 use pointercrate_user::{sqlx::PgConnection, User};
 
 pub struct ProfileTab;
@@ -11,8 +12,8 @@ impl AccountPageTab for ProfileTab {
         true
     }
 
-    fn additional_scripts(&self) -> Vec<String> {
-        vec!["/static/js/account/profile.js".to_string()]
+    fn additional_scripts(&self) -> Vec<Script> {
+        vec![Script::module("/static/js/account/profile.js")]
     }
 
     fn tab(&self) -> Markup {
@@ -25,7 +26,7 @@ impl AccountPageTab for ProfileTab {
         }
     }
 
-    async fn page(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
+    async fn content(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         let permissions = permissions.bits_to_permissions(user.permissions);
         let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");
 

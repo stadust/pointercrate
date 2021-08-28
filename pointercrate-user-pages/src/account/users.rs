@@ -1,6 +1,7 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{permission::PermissionsManager, view::misc::filtered_paginator};
+use pointercrate_core::permission::PermissionsManager;
+use pointercrate_core_pages::{util::filtered_paginator, Script};
 use pointercrate_user::{sqlx::PgConnection, User, ADMINISTRATOR, MODERATOR};
 
 pub struct UsersTab;
@@ -11,8 +12,8 @@ impl AccountPageTab for UsersTab {
         permissions.require_permission(user.permissions, MODERATOR).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<String> {
-        vec!["/static/js/account/users.js".to_string()]
+    fn additional_scripts(&self) -> Vec<Script> {
+        vec![Script::module("/static/js/account/users.js")]
     }
 
     fn tab(&self) -> Markup {
@@ -25,7 +26,7 @@ impl AccountPageTab for UsersTab {
         }
     }
 
-    async fn page(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
         let assignable_permissions = permissions.assignable_by_bits(user.permissions);
 
         html! {

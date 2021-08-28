@@ -1,15 +1,30 @@
 use maud::{html, Markup};
-use pointercrate_core::view::PageFragment;
+use pointercrate_core_pages::{PageFragment, Script};
 
-struct LoginPage;
+pub struct LoginPage;
 
 impl PageFragment for LoginPage {
-    fn additional_scripts(&self) -> Vec<String> {
-        vec!["js/login.js".to_string(), "js/modules/formv2.js".to_string()]
+    fn title(&self) -> String {
+        "Pointercrate - Login".to_string()
+    }
+
+    fn description(&self) -> String {
+        "Log in to an existing pointercrate account or register for a new one!".to_string()
+    }
+
+    fn additional_scripts(&self) -> Vec<Script> {
+        vec![
+            Script::module("/static/js/login.js"),
+            Script::module("/static/js/modules/formv2.js"),
+        ]
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["css/login.css".to_string()]
+        vec!["/static/css/login.css".to_string()]
+    }
+
+    fn head_fragment(&self) -> Markup {
+        html! {}
     }
 
     fn body_fragment(&self) -> Markup {

@@ -2433,6 +2433,7 @@ dependencies = [
  "pointercrate-core",
  "pointercrate-core-api",
  "pointercrate-user",
+ "pointercrate-user-pages",
  "ratelimit_meter",
  "rocket",
  "serde_urlencoded 0.7.0",
@@ -2446,6 +2447,7 @@ dependencies = [
  "async-trait",
  "maud",
  "pointercrate-core",
+ "pointercrate-core-pages",
  "pointercrate-user",
 ]
 

@@ -4,6 +4,7 @@ use rocket::{Build, Rocket};
 
 pub mod auth;
 mod endpoints;
+mod pages;
 mod ratelimits;
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
@@ -24,5 +25,11 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::user::get_user,
             endpoints::user::patch_user,
             endpoints::user::delete_user
+        ])
+        .mount("/", rocket::routes![
+            pages::login_page_authorized,
+            pages::login_page,
+            pages::account_page_unauthorized,
+            pages::account_page
         ])
 }

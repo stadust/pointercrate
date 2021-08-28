@@ -7,6 +7,7 @@ pub mod footer;
 pub mod navigation;
 pub mod util;
 
+#[derive(Debug, Clone)]
 pub struct Script {
     src: String,
     module: bool,
