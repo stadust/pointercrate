@@ -1,13 +1,14 @@
 //! Module containing various UI components that are used across a variety of demonlist pages
 
-use crate::OverviewDemon;
 use maud::{html, Markup};
 use pointercrate_core_pages::util::filtered_paginator;
+use pointercrate_demonlist::demon::Demon;
 
 pub mod submitter;
+pub mod team;
 pub mod time_machine;
 
-pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a OverviewDemon>) -> Markup {
+pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Demon>) -> Markup {
     html! {
         div.dropdown-menu.js-search#(dropdown_id) {
             div {
@@ -16,7 +17,7 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Ov
             div.menu {
                ul {
                     @for demon in demons {
-                        li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}
+                        li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}
                     }
                 }
             }

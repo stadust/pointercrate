@@ -1,42 +1,17 @@
-use crate::{
-    components::{demon_dropdown, player_selection_dialog},
-    OverviewDemon,
-};
+use crate::components::{demon_dropdown, player_selection_dialog};
 use maud::{html, Markup, Render};
-use pointercrate_demonlist::config;
-
-// fake-a-cow
-enum Demons<'a> {
-    Borrowed(&'a [OverviewDemon]),
-    Owned(Vec<OverviewDemon>),
-}
-
-impl Demons<'_> {
-    fn iter(&self) -> impl Iterator<Item = &OverviewDemon> {
-        match self {
-            Demons::Borrowed(d) => d.iter(),
-            Demons::Owned(d) => d.iter(),
-        }
-    }
-}
+use pointercrate_demonlist::{config, demon::Demon};
 
 pub struct RecordSubmitter<'a> {
     initially_visible: bool,
-    demons: Demons<'a>,
+    demons: &'a [Demon],
 }
 
 impl RecordSubmitter<'_> {
-    pub fn new(visible: bool, demons: Vec<OverviewDemon>) -> RecordSubmitter<'static> {
-        RecordSubmitter {
-            demons: Demons::Owned(demons),
-            initially_visible: visible,
-        }
-    }
-
-    pub fn borrowed(visible: bool, demons: &[OverviewDemon]) -> RecordSubmitter {
+    pub fn new(visible: bool, demons: &[Demon]) -> RecordSubmitter {
         RecordSubmitter {
             initially_visible: visible,
-            demons: Demons::Borrowed(demons),
+            demons,
         }
     }
 }
@@ -59,7 +34,7 @@ impl Render for RecordSubmitter<'_> {
                         "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
                     }
                     span.form-input data-type = "dropdown" {
-                        (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.position <= config::extended_list_size())))
+                        (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size())))
                         p.error {}
                     }
                     h3 {

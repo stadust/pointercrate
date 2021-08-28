@@ -1,26 +1,118 @@
-use std::borrow::Cow;
-
-
-use maud::{html, Markup, PreEscaped};
-use url::Url;
-
-use pointercrate_core_pages::{config as page_config, PageFragment, Script};
-use pointercrate_demonlist::{config as list_config};
-
-
 use crate::{
     components::{
         submitter::{submit_panel, RecordSubmitter},
-        time_machine::TimeMachine,
+        team::Team,
+        time_machine::Tardis,
     },
     statsviewer::stats_viewer_panel,
-    DemonlistData,
 };
+use maud::{html, Markup, PreEscaped};
+use pointercrate_core_pages::{config as page_config, PageFragment, Script};
+use pointercrate_demonlist::{
+    config as list_config,
+    demon::{Demon, TimeShiftedDemon},
+};
+use std::borrow::Cow;
+use url::Url;
 
 pub struct OverviewPage {
-    pub data: DemonlistData,
-    pub time_machine: TimeMachine,
-    pub submitter: RecordSubmitter<'static>,
+    pub team: Team,
+    pub demonlist: Vec<Demon>,
+    pub time_machine: Tardis,
+    pub submitter_initially_visible: bool,
+}
+
+fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
+    html! {
+        section.panel.fade style="overflow:hidden" {
+            @if let Some(ref video) = demon.video {
+                div.flex style = "align-items: center" {
+                    div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (thumbnail(video)) "')"} {
+                        a.play href = (video) {}
+                    }
+                    div style = "padding-left: 15px" {
+                        h2 style = "text-align: left; margin-bottom: 0px" {
+                            a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
+                                "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
+                            }
+                        }
+                        h3 style = "text-align: left" {
+                            i {
+                                (demon.publisher.name)
+                            }
+                            @if let Some(current_position) = current_position {
+                                br;
+                                @if current_position > list_config::extended_list_size() {
+                                    "Currently Legacy"
+                                }
+                                @else {
+                                    "Currently #"(current_position)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            @else {
+                div.flex.col style = "align-items: center" {
+                    h2 style = "margin-bottom: 0px"{
+                        a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
+                            "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
+                        }
+                    }
+                    h3 {
+                        i {
+                            (demon.publisher.name)
+                        }
+                        @if let Some(current_position) = current_position {
+                            br;
+                            @if current_position > list_config::extended_list_size() {
+                                "Currently Legacy"
+                            }
+                            @else {
+                                "Currently #"(current_position)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Gotta put the ads in this method although they dont belong here, yikes
+        @if demon.base.position == 1 {
+            section.panel.fade style = "padding: 0px; height: 90px"{
+            (PreEscaped(format!(r#"
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+crossorigin="anonymous"></script>
+<!-- Demonlist Responsive Feed Ad -->
+<ins class="adsbygoogle"
+style="display:inline-block;width:728px;height:90px"
+data-ad-client="{0}"
+data-ad-slot="2819150519"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({{}});
+</script>
+                "#, page_config::adsense_publisher_id())))
+            }
+        }
+        // Place ad every 20th demon
+        @if demon.base.position % 20 == 0 {
+            section.panel.fade {
+            (PreEscaped(format!(r#"
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+style="display:block"
+data-ad-format="fluid"
+data-ad-layout-key="-h1+40+4u-93+n"
+data-ad-client="{0}"
+data-ad-slot="5157884729"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({{}});
+</script>
+                "#, page_config::adsense_publisher_id())))
+            }
+        }
+    }
 }
 
 impl PageFragment for OverviewPage {
@@ -90,7 +182,13 @@ impl PageFragment for OverviewPage {
     }
 
     fn body_fragment(&self) -> Markup {
-        let dropdowns = super::dropdowns(&self.data.demon_overview, None);
+        let demons_for_dropdown: Vec<&Demon> = match self.time_machine {
+            Tardis::Activated { ref demons, .. } => demons.iter().map(|demon| &demon.current_demon).collect(),
+            _ => self.demonlist.iter().collect(),
+        };
+
+        let dropdowns = super::dropdowns(&demons_for_dropdown[..], None);
+
         html! {
             (super::besides_sidebar_ad())
             (dropdowns)
@@ -98,95 +196,20 @@ impl PageFragment for OverviewPage {
             div.flex.m-center.container {
                 main.left {
                     (self.time_machine)
-                    (self.submitter)
+                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist))
 
-                    @for demon in &self.data.demon_overview {
-                        @if demon.position <= list_config::extended_list_size() {
-                            section.panel.fade style="overflow:hidden" {
-                                @if let Some(ref video) = demon.video {
-                                    div.flex style = "align-items: center" {
-                                        div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (thumbnail(video)) "')"} {
-                                            a.play href = (video) {}
-                                        }
-                                        div style = "padding-left: 15px" {
-                                            h2 style = "text-align: left; margin-bottom: 0px" {
-                                                a href = {"/demonlist/permalink/" (demon.id) "/"} {
-                                                    "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
-                                                }
-                                            }
-                                            h3 style = "text-align: left" {
-                                                i {
-                                                    (demon.publisher)
-                                                }
-                                                @if let Some(current_position) = demon.current_position {
-                                                    br;
-                                                    @if current_position > list_config::extended_list_size() {
-                                                        "Currently Legacy"
-                                                    }
-                                                    @else {
-                                                        "Currently #"(current_position)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                @else {
-                                    div.flex.col style = "align-items: center" {
-                                        h2 style = "margin-bottom: 0px"{
-                                            a href = {"/demonlist/permalink/" (demon.id) "/"} {
-                                                "#" (demon.position) (PreEscaped(" &#8211; ")) (demon.name)
-                                            }
-                                        }
-                                        h3 {
-                                            i {
-                                                (demon.publisher)
-                                            }
-                                            @if let Some(current_position) = demon.current_position {
-                                                br;
-                                                @if current_position > list_config::extended_list_size() {
-                                                    "Currently Legacy"
-                                                }
-                                                @else {
-                                                    "Currently #"(current_position)
-                                                }
-                                            }
-                                        }
-                                    }
+                    @match &self.time_machine {
+                        Tardis::Activated { demons, ..} => {
+                            @for TimeShiftedDemon {current_demon, position_now} in demons {
+                                @if current_demon.base.position <= list_config::extended_list_size() {
+                                    (demon_panel(&current_demon, Some(*position_now)))
                                 }
                             }
-                            @if demon.position == 1 {
-                                section.panel.fade style = "padding: 0px; height: 90px"{
-                                (PreEscaped(format!(r#"
-                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-     crossorigin="anonymous"></script>
-<!-- Demonlist Responsive Feed Ad -->
-<ins class="adsbygoogle"
-     style="display:inline-block;width:728px;height:90px"
-     data-ad-client="{0}"
-     data-ad-slot="2819150519"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({{}});
-</script>
-                                    "#, page_config::adsense_publisher_id())))
-                                }
-                            }
-                            // Place ad every 20th demon
-                            @if demon.position % 20 == 0 {
-                                section.panel.fade {
-                                (PreEscaped(format!(r#"
-                                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-     crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-format="fluid"
-     data-ad-layout-key="-h1+40+4u-93+n"
-     data-ad-client="{0}"
-     data-ad-slot="5157884729"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({{}});
-</script>
-                                    "#, page_config::adsense_publisher_id())))
+                        },
+                        _ => {
+                            @for demon in &self.demonlist {
+                                @if demon.base.position <= list_config::extended_list_size() {
+                                    (demon_panel(demon, None))
                                 }
                             }
                         }
@@ -194,7 +217,7 @@ impl PageFragment for OverviewPage {
                 }
 
                 aside.right {
-                    (self.data.team_panel())
+                    (self.team)
                     (super::sidebar_ad())
                     (super::rules_panel())
                     (submit_panel())

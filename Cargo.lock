@@ -2361,12 +2361,14 @@ dependencies = [
 name = "pointercrate-demonlist-api"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "log",
  "nonzero_ext 0.2.0",
  "pointercrate-core",
  "pointercrate-core-api",
  "pointercrate-demonlist",
  "pointercrate-demonlist-pages",
+ "pointercrate-integrate",
  "pointercrate-user",
  "pointercrate-user-api",
  "ratelimit_meter",

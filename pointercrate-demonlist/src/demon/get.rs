@@ -1,10 +1,11 @@
 use crate::{
     creator::creators_of,
-    demon::{Demon, FullDemon, MinimalDemon},
+    demon::{Demon, FullDemon, MinimalDemon, TimeShiftedDemon},
     error::{DemonlistError, Result},
     player::DatabasePlayer,
     record::approved_records_on,
 };
+use chrono::{DateTime, FixedOffset};
 use futures::StreamExt;
 use sqlx::{Error, PgConnection};
 
@@ -186,4 +187,48 @@ impl Into<Demon> for FetchedDemon {
             level_id: self.level_id.map(|id| id as u64),
         }
     }
+}
+
+pub async fn current_list(connection: &mut PgConnection) -> Result<Vec<Demon>> {
+    Ok(sqlx::query_file_as!(FetchedDemon, "sql/all_demons.sql")
+        .fetch_all(connection)
+        .await?
+        .into_iter()
+        .map(Into::into)
+        .collect())
+}
+
+pub async fn list_at(connection: &mut PgConnection, at: DateTime<FixedOffset>) -> Result<Vec<TimeShiftedDemon>> {
+    let mut stream = sqlx::query_file!("sql/all_demons_at.sql", at.naive_utc()).fetch(connection);
+    let mut demons = Vec::new();
+
+    while let Some(row) = stream.next().await {
+        let row = row?;
+
+        demons.push(TimeShiftedDemon {
+            current_demon: Demon {
+                base: MinimalDemon {
+                    id: row.demon_id,
+                    position: row.position,
+                    name: row.demon_name,
+                },
+                requirement: row.requirement,
+                video: row.video,
+                publisher: DatabasePlayer {
+                    id: row.publisher_id,
+                    name: row.publisher_name,
+                    banned: row.publisher_banned,
+                },
+                verifier: DatabasePlayer {
+                    id: row.verifier_id,
+                    name: row.verifier_name,
+                    banned: row.verifier_banned,
+                },
+                level_id: row.level_id.map(|i| i as u64),
+            },
+            position_now: row.current_position,
+        })
+    }
+
+    Ok(demons)
 }

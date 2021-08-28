@@ -55,6 +55,8 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             pages::overview,
             pages::stats_viewer_redirect,
             pages::stats_viewer,
-            pages::nation_stats_viewer
+            pages::nation_stats_viewer,
+            pages::demon_page,
+            pages::demon_permalink
         ])
 }

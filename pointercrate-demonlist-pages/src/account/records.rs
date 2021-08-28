@@ -1,17 +1,18 @@
-use crate::{
-    components::{
-        demon_dropdown, player_selection_dialog,
-        submitter::{submit_panel, RecordSubmitter},
-    },
-    OverviewDemon,
+use crate::components::{
+    demon_dropdown, player_selection_dialog,
+    submitter::{submit_panel, RecordSubmitter},
 };
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::permission::PermissionsManager;
+use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
 use pointercrate_core_pages::{
+    error::ErrorFragment,
     util::{dropdown, paginator},
-    Script,
+    PageFragment, Script,
 };
-use pointercrate_demonlist::LIST_HELPER;
+use pointercrate_demonlist::{
+    demon::{current_list, Demon},
+    LIST_HELPER,
+};
 use pointercrate_user::{sqlx::PgConnection, User};
 use pointercrate_user_pages::account::AccountPageTab;
 
@@ -41,13 +42,22 @@ impl AccountPageTab for RecordsPage {
         }
     }
 
-    async fn content(&self, _user: &User, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
-        let demons = Vec::new();
+    async fn content(&self, _user: &User, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+        let demons = match current_list(connection).await {
+            Ok(demons) => demons,
+            Err(err) =>
+                return ErrorFragment {
+                    status: err.status_code(),
+                    reason: "Internal Server Error".to_string(),
+                    message: err.to_string(),
+                }
+                .body_fragment(),
+        };
 
         html! {
             div.left {
-                (RecordSubmitter::borrowed(false, &demons))
-                (record_manager(&demons))
+                (RecordSubmitter::new(false, &demons[..]))
+                (record_manager(&demons[..]))
                 (note_adder())
                 div.panel.fade#record-notes-container style = "display:none" {
                     div.white.hover.clickable#add-record-note-open {
@@ -66,12 +76,12 @@ impl AccountPageTab for RecordsPage {
             (change_progress_dialog())
             (change_video_dialog())
             (change_holder_dialog())
-            (change_demon_dialog(&demons))
+            (change_demon_dialog(&demons[..]))
         }
     }
 }
 
-fn record_manager(demons: &[OverviewDemon]) -> Markup {
+fn record_manager(demons: &[Demon]) -> Markup {
     html! {
         div.panel.fade#record-manager {
             h2.underlined.pad {
@@ -79,7 +89,7 @@ fn record_manager(demons: &[OverviewDemon]) -> Markup {
                 (dropdown("All", html! {
                     li.white.hover.underlined data-value = "All"
                      {"All Demons"}
-                }, demons.into_iter().map(|demon| html!(li.white.hover data-value = (demon.id) data-display = (demon.name) {b{"#"(demon.position) " - " (demon.name)} br; {"by "(demon.publisher)}}))))
+                }, demons.into_iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}))))
             }
             div.flex.viewer {
                 (paginator("record-pagination", "/api/v1/records/"))
@@ -364,7 +374,7 @@ fn change_holder_dialog() -> Markup {
     )
 }
 
-fn change_demon_dialog(demons: &[OverviewDemon]) -> Markup {
+fn change_demon_dialog(demons: &[Demon]) -> Markup {
     html! {
         div.overlay.closable {
             div.dialog#record-demon-dialog style="overflow: initial;" {

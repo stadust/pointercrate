@@ -1,27 +1,41 @@
 use chrono::{DateTime, Datelike, FixedOffset, TimeZone, Utc};
 use maud::{html, Markup, Render};
-use pointercrate_core_pages::util::{simple_dropdown};
+use pointercrate_core_pages::util::simple_dropdown;
+use pointercrate_demonlist::demon::TimeShiftedDemon;
 
-pub struct TimeMachine {
-    initially_visible: bool,
-    when: Option<DateTime<FixedOffset>>,
+pub enum Tardis {
+    Activated {
+        destination: DateTime<FixedOffset>,
+        demons: Vec<TimeShiftedDemon>,
+        visible: bool,
+    },
+    Deactivated {
+        visible: bool,
+    },
 }
 
-impl TimeMachine {
+impl Tardis {
     pub fn new(visible: bool) -> Self {
-        TimeMachine {
-            initially_visible: visible,
-            when: None,
+        Tardis::Deactivated { visible }
+    }
+
+    pub fn activate(mut self, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>) -> Self {
+        Tardis::Activated {
+            visible: self.visible(),
+            demons: demons_then,
+            destination,
         }
     }
 
-    pub fn at(mut self, when: DateTime<FixedOffset>) -> Self {
-        self.when = Some(when);
-        self
+    pub fn visible(&self) -> bool {
+        match self {
+            Tardis::Activated { visible, .. } => *visible,
+            Tardis::Deactivated { visible } => *visible,
+        }
     }
 }
 
-impl Render for TimeMachine {
+impl Render for Tardis {
     fn render(&self) -> Markup {
         let current_year = FixedOffset::east(3600 * 23 + 3599)
             .from_utc_datetime(&Utc::now().naive_utc())
@@ -43,23 +57,26 @@ impl Render for TimeMachine {
         ];
 
         html! {
-            @if let Some(when) = self.when {
-                div.panel.fade.blue.flex style="align-items: center;" {
-                     span style = "text-align: end"{
-                        "You are currently looking at the demonlist how it was on"
-                         br;
-                         b {
-                             @match when.day() {
-                                1 | 21 | 31 => (when.format("%A, %B %est %Y at %l:%M:%S%P GMT%Z")),
-                                2 | 22 => (when.format("%A, %B %end %Y at %l:%M:%S%P GMT%Z")),
-                                _ => (when.format("%A, %B %eth %Y at %l:%M:%S%P GMT%Z"))
-                             }
-                         }
-                     }
-                     a.white.button href = "/demonlist/" onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{"Go to present" }}
-                }
+            @match self {
+                Tardis::Activated { destination, ..} => {
+                    div.panel.fade.blue.flex style="align-items: center;" {
+                        span style = "text-align: end"{
+                            "You are currently looking at the demonlist how it was on"
+                            br;
+                            b {
+                                @match destination.day() {
+                                   1 | 21 | 31 => (destination.format("%A, %B %est %Y at %l:%M:%S%P GMT%Z")),
+                                   2 | 22 => (destination.format("%A, %B %end %Y at %l:%M:%S%P GMT%Z")),
+                                   _ => (destination.format("%A, %B %eth %Y at %l:%M:%S%P GMT%Z"))
+                                }
+                            }
+                        }
+                        a.white.button href = "/demonlist/" onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{"Go to present" }}
+                    }
+                },
+                _ => {}
             }
-            section.panel.fade.closable#time-machine  style=(if !self.initially_visible {"display:none;overflow: initial"} else {"overflow: initial"}) {
+            section.panel.fade.closable#time-machine  style=(if !self.visible() {"display:none;overflow: initial"} else {"overflow: initial"}) {
                 span.plus.cross.hover {}
                 form#time-machine-form novalidate = "" {
                     div.underlined {

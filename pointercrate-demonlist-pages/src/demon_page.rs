@@ -1,12 +1,17 @@
 use crate::{
-    components::submitter::{submit_panel, RecordSubmitter},
+    components::{
+        submitter::{submit_panel, RecordSubmitter},
+        team::Team,
+    },
     statsviewer::stats_viewer_panel,
-    DemonlistData,
 };
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped, Render};
 use pointercrate_core_pages::{config as page_config, PageFragment, Script};
-use pointercrate_demonlist::{config as list_config, demon::FullDemon};
+use pointercrate_demonlist::{
+    config as list_config,
+    demon::{Demon, FullDemon},
+};
 use pointercrate_integrate::gd::{DemonRating, GDIntegrationResult, LevelRating, Thunk};
 use url::Url;
 
@@ -17,7 +22,8 @@ pub struct DemonMovement {
 }
 
 pub struct DemonPage {
-    pub list_data: DemonlistData,
+    pub team: Team,
+    pub demonlist: Vec<Demon>,
     pub data: FullDemon,
     pub movements: Vec<DemonMovement>,
     pub integration: GDIntegrationResult,
@@ -43,14 +49,14 @@ impl PageFragment for DemonPage {
 
     fn additional_scripts(&self) -> Vec<Script> {
         vec![
-            Script::module("js/modules/formv2.js"),
-            Script::module("js/modules/demonlistv2.js"),
-            Script::module("js/demonlist.v2.2.js"),
+            Script::module("/static/js/modules/formv2.js"),
+            Script::module("/static/js/modules/demonlistv2.js"),
+            Script::module("/static/js/demonlist.v2.2.js"),
         ]
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["css/demonlist.v2.1.css".to_string(), "css/sidebar.css".to_string()]
+        vec!["/static/css/demonlist.v2.1.css".to_string(), "/static/css/sidebar.css".to_string()]
     }
 
     fn head_fragment(&self) -> Markup {
@@ -105,7 +111,7 @@ impl PageFragment for DemonPage {
     }
 
     fn body_fragment(&self) -> Markup {
-        let dropdowns = super::dropdowns(&self.list_data.demon_overview, Some(&self.data.demon));
+        let dropdowns = super::dropdowns(&self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
 
         let mut labels = Vec::new();
 
@@ -152,7 +158,7 @@ impl PageFragment for DemonPage {
 </script>
                         "#, page_config::adsense_publisher_id())))
                     }
-                    (RecordSubmitter::borrowed(false, &self.list_data.demon_overview))
+                    (RecordSubmitter::new(false, &self.demonlist))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
@@ -172,7 +178,7 @@ impl PageFragment for DemonPage {
                     ))) // FIXME: bad
                 }
                 aside.right {
-                    (self.list_data.team_panel())
+                    (self.team)
                     (super::sidebar_ad())
                     (super::rules_panel())
                     (submit_panel())
@@ -202,7 +208,7 @@ impl DemonPage {
                             }
                         }
                         (name)
-                        @if position as usize != self.list_data.demon_overview.len() {
+                        @if position as usize != self.demonlist.len() {
                             a href=(format!("/demonlist/{:?}", position + 1)) {
                                 i class="fa fa-chevron-right" style="padding-left: 5%" {}
                             }

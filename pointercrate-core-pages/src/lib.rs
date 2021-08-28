@@ -73,27 +73,7 @@ pub trait PageFragment {
     fn head_fragment(&self) -> Markup;
     fn body_fragment(&self) -> Markup;
 }
-/*
-pub struct PreRenderedFragment {
-    pub scripts: Vec<String>,
-    pub stylesheets: Vec<String>,
-    pub fragment: Markup,
-}
 
-impl PageFragment for PreRenderedFragment {
-    fn additional_scripts(&self) -> Vec<String> {
-        self.scripts.clone()
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        self.stylesheets.clone()
-    }
-
-    fn body_fragment(&self) -> Markup {
-        self.fragment.clone()
-    }
-}
-*/
 impl PageConfiguration {
     pub fn render_fragment<F: PageFragment>(&self, fragment: &F) -> Markup {
         html! {

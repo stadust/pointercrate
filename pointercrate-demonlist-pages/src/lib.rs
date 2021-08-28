@@ -5,85 +5,15 @@ use pointercrate_user::User;
 
 pub mod account;
 pub mod components;
-mod demon_page;
+pub mod demon_page;
 pub mod overview;
 pub mod statsviewer;
-
-pub struct DemonlistData {
-    pub demon_overview: Vec<OverviewDemon>,
-    pub admins: Vec<User>,
-    pub mods: Vec<User>,
-    pub helpers: Vec<User>,
-}
-
-impl DemonlistData {
-    pub(crate) fn team_panel(&self) -> Markup {
-        let maybe_link = |user: &User| -> Markup {
-            html! {
-                li {
-                    @match user.youtube_channel {
-                        Some(ref channel) => a target = "_blank" href = (channel) {
-                            (user.name())
-                        },
-                        None => (user.name())
-                    }
-                }
-            }
-        };
-
-        html! {
-            section.panel.fade.js-scroll-anim#editors data-anim = "fade" {
-                div.underlined {
-                    h2 {
-                        "List Editors:"
-                    }
-                }
-                p {
-                    "Contact any of these people if you have problems with the list or want to see a specific thing changed."
-                }
-                ul style = "line-height: 30px" {
-                    @for admin in &self.admins {
-                        b {
-                            (maybe_link(admin))
-                        }
-                    }
-                    @for moderator in &self.mods {
-                        (maybe_link(moderator))
-                    }
-                }
-                div.underlined {
-                    h2 {
-                        "List Helpers"
-                    }
-                }
-                p {
-                    "Contact these people if you have any questions regarding why a specific record was rejected. Do not needlessly bug them about checking submissions though!"
-                }
-                ul style = "line-height: 30px" {
-                    @for helper in &self.helpers {
-                        (maybe_link(helper))
-                    }
-                }
-            }
-        }
-    }
-}
 
 struct ListSection {
     name: &'static str,
     description: &'static str,
     id: &'static str,
     numbered: bool,
-}
-
-#[derive(Debug)]
-pub struct OverviewDemon {
-    pub id: i32,
-    pub position: i16,
-    pub name: String,
-    pub publisher: String,
-    pub video: Option<String>,
-    pub current_position: Option<i16>,
 }
 
 static MAIN_SECTION: ListSection = ListSection {
@@ -112,7 +42,7 @@ static LEGACY_SECTION: ListSection = ListSection {
     numbered: false,
 };
 
-fn dropdowns(all_demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
+fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < config::list_size() as usize {
         (&all_demons[..], Default::default(), Default::default())
     } else {
@@ -140,22 +70,22 @@ fn dropdowns(all_demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
     }
 }
 
-fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&Demon>) -> Markup {
-    let format = |demon: &OverviewDemon| -> Markup {
+fn dropdown(section: &ListSection, demons: &[&Demon], current: Option<&Demon>) -> Markup {
+    let format = |demon: &Demon| -> Markup {
         html! {
-            a href = {"/demonlist/permalink/" (demon.id) "/"} {
+            a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
                 @if section.numbered {
-                    {"#" (demon.position) " - " (demon.name)}
+                    {"#" (demon.base.position) " - " (demon.base.name)}
                     br ;
                     i {
-                        (demon.publisher)
+                        (demon.publisher.name)
                     }
                 }
                 @else {
-                    {(demon.name)}
+                    {(demon.base.name)}
                     br ;
                     i {
-                        (demon.publisher)
+                        (demon.publisher.name)
                     }
                 }
             }
@@ -178,12 +108,12 @@ fn dropdown(section: &ListSection, demons: &[OverviewDemon], current: Option<&De
                 ul.flex.wrap.space {
                     @for demon in demons {
                         @match current {
-                            Some(current) if current.base.position == demon.position =>
-                                li.hover.white.active title={"#" (demon.position) " - " (demon.name)} {
+                            Some(current) if current.base.position == demon.base.position =>
+                                li.hover.white.active title={"#" (demon.base.position) " - " (demon.base.name)} {
                                     (format(demon))
                                 },
                             _ =>
-                                li.hover.white title={"#" (demon.position) " - " (demon.name)} {
+                                li.hover.white title={"#" (demon.base.position) " - " (demon.base.name)} {
                                     (format(demon))
                                 }
                         }

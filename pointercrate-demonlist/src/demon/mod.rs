@@ -1,5 +1,5 @@
 pub use self::{
-    get::{published_by, verified_by},
+    get::{current_list, list_at, published_by, verified_by},
     paginate::{DemonIdPagination, DemonPositionPagination},
     patch::PatchDemon,
     post::PostDemon,
@@ -24,6 +24,11 @@ mod get;
 mod paginate;
 mod patch;
 mod post;
+
+pub struct TimeShiftedDemon {
+    pub current_demon: Demon,
+    pub position_now: i16,
+}
 
 /// Struct modelling a demon. These objects are returned from the paginating `/demons/` endpoint
 #[derive(Debug, Serialize, Hash, Display, Eq, PartialEq)]
