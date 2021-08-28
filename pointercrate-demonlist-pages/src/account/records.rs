@@ -41,7 +41,7 @@ impl AccountPageTab for RecordsPage {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &User, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         let demons = Vec::new();
 
         html! {

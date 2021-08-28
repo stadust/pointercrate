@@ -1,6 +1,6 @@
 use chrono::{DateTime, Datelike, FixedOffset, TimeZone, Utc};
-use maud::{html, Markup, PreEscaped, Render};
-use pointercrate_core_pages::util::{filtered_paginator, simple_dropdown};
+use maud::{html, Markup, Render};
+use pointercrate_core_pages::util::{simple_dropdown};
 
 pub struct TimeMachine {
     initially_visible: bool,

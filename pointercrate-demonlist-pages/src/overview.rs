@@ -1,12 +1,12 @@
 use std::borrow::Cow;
 
-use chrono::{DateTime, FixedOffset};
+
 use maud::{html, Markup, PreEscaped};
 use url::Url;
 
 use pointercrate_core_pages::{config as page_config, PageFragment, Script};
-use pointercrate_demonlist::{config as list_config, nationality::Nationality};
-use pointercrate_user::User;
+use pointercrate_demonlist::{config as list_config};
+
 
 use crate::{
     components::{
@@ -14,7 +14,7 @@ use crate::{
         time_machine::TimeMachine,
     },
     statsviewer::stats_viewer_panel,
-    DemonlistData, OverviewDemon,
+    DemonlistData,
 };
 
 pub struct OverviewPage {

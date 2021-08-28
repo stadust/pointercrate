@@ -368,7 +368,7 @@ impl DemonPage {
 
     fn records_panel(&self) -> Markup {
         let position = self.data.demon.base.position;
-        let name = &self.data.demon.base.name;
+        let _name = &self.data.demon.base.name;
 
         html! {
             @if !self.data.records.is_empty() || position <= list_config::extended_list_size() {

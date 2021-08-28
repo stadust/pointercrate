@@ -2,7 +2,7 @@ use crate::components::player_selection_dialog;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_pages::{util::filtered_paginator, Script};
-use pointercrate_demonlist::{LIST_HELPER, LIST_MODERATOR};
+use pointercrate_demonlist::{LIST_MODERATOR};
 use pointercrate_user::{sqlx::PgConnection, User};
 use pointercrate_user_pages::account::AccountPageTab;
 
@@ -32,7 +32,7 @@ impl AccountPageTab for DemonsTab {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &User, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         html! {
             div.left {
                 (demon_submitter())

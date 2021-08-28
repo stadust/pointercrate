@@ -1,10 +1,10 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{
-    error::{CoreError, PointercrateError},
+    error::{PointercrateError},
     permission::PermissionsManager,
 };
 use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator, PageFragment, Script};
-use pointercrate_demonlist::{nationality::Nationality, LIST_HELPER, LIST_MODERATOR};
+use pointercrate_demonlist::{nationality::Nationality, LIST_MODERATOR};
 use pointercrate_user::{sqlx::PgConnection, User};
 use pointercrate_user_pages::account::AccountPageTab;
 
@@ -34,7 +34,7 @@ impl AccountPageTab for PlayersPage {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &User, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
         let nationalities = match Nationality::all(connection).await {
             Ok(nationalities) => nationalities,
             Err(err) =>

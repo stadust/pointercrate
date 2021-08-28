@@ -2,7 +2,7 @@ use crate::{
     components::{demon_dropdown, player_selection_dialog},
     OverviewDemon,
 };
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, Render};
 use pointercrate_demonlist::config;
 
 // fake-a-cow

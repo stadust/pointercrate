@@ -1,6 +1,6 @@
 use maud::{html, Markup, PreEscaped};
 
-use pointercrate_demonlist::{config, demon::Demon, nationality::Nationality};
+use pointercrate_demonlist::{config, demon::Demon};
 use pointercrate_user::User;
 
 pub mod account;

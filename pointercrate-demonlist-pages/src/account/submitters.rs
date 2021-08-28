@@ -31,7 +31,7 @@ impl AccountPageTab for SubmittersPage {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &User, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         html! {
             div.left {
                 div.panel.fade {
