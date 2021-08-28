@@ -1,14 +1,9 @@
 use crate::{error::Result, record::RecordStatus};
 use chrono::NaiveDateTime;
 use futures::StreamExt;
+use pointercrate_core::audit::{AuditLogEntry, AuditLogEntryType, NamedId};
 use serde::Serialize;
 use sqlx::PgConnection;
-
-#[derive(Serialize)]
-pub struct NamedId {
-    id: i32,
-    name: Option<String>,
-}
 
 #[derive(Serialize)]
 pub struct RecordModificationData {
@@ -19,24 +14,8 @@ pub struct RecordModificationData {
     demon: Option<NamedId>,
 }
 
-#[derive(Serialize)]
-pub struct RecordEntry {
-    time: NaiveDateTime,
-    audit_id: i32,
-    record_id: i32,
-    user: NamedId,
-    r#type: RecordEntryType,
-}
-
-#[derive(Serialize)]
-pub enum RecordEntryType {
-    Addition,
-    Modification(RecordModificationData),
-    Deletion,
-}
-
 /// Gets all audit log entries for the given record, in chronological order
-pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection) -> Result<Vec<RecordEntry>> {
+pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection) -> Result<Vec<AuditLogEntry<RecordModificationData>>> {
     let mut entries = Vec::new();
 
     let addition_row = sqlx::query!(
@@ -50,7 +29,7 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
     .await?;
 
     if let Some(addition) = addition_row {
-        entries.push(RecordEntry {
+        entries.push(AuditLogEntry {
             time: addition.time,
             audit_id: addition.audit_id,
             record_id,
@@ -58,7 +37,7 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
                 name: addition.name,
                 id: addition.userid,
             },
-            r#type: RecordEntryType::Addition,
+            r#type: AuditLogEntryType::Addition,
         });
     }
 
@@ -88,11 +67,11 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
         while let Some(modification) = modification_stream.next().await {
             let modification = modification?;
 
-            entries.push(RecordEntry {
+            entries.push(AuditLogEntry {
                 time: modification.time,
                 audit_id: modification.audit_id,
                 record_id,
-                r#type: RecordEntryType::Modification(RecordModificationData {
+                r#type: AuditLogEntryType::Modification(RecordModificationData {
                     progress: modification.progress,
                     status: modification.status_.as_deref().map(RecordStatus::from_sql),
                     player: match modification.player_id {
@@ -132,7 +111,7 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
     .await?;
 
     if let Some(deletion) = deletion_row {
-        entries.push(RecordEntry {
+        entries.push(AuditLogEntry {
             time: deletion.time,
             audit_id: deletion.audit_id,
             record_id,
@@ -140,7 +119,7 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
                 name: deletion.name,
                 id: deletion.userid,
             },
-            r#type: RecordEntryType::Deletion,
+            r#type: AuditLogEntryType::Deletion,
         });
     }
 
