@@ -1,10 +1,8 @@
-use crate::{
-    error::{Result},
-    User,
-};
+use crate::{error::Result, User};
 use futures::StreamExt;
 use pointercrate_core::{
     error::CoreError,
+    permission::Permission,
     util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
@@ -92,8 +90,12 @@ impl UserPagination {
 }
 
 impl User {
+    pub async fn by_permission(permission: Permission, connection: &mut PgConnection) -> Result<Vec<User>> {
+        User::by_permissions(permission.bit(), connection).await
+    }
+
     /// Gets all users that have the given permission bits all set
-    pub async fn by_permission(permissions: u16, connection: &mut PgConnection) -> Result<Vec<User>> {
+    pub async fn by_permissions(permissions: u16, connection: &mut PgConnection) -> Result<Vec<User>> {
         let mut stream = sqlx::query!(
             "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE permissions & \
              CAST($1::INTEGER AS BIT(16)) = CAST($1::INTEGER AS BIT(16))",

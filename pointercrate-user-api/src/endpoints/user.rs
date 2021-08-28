@@ -1,4 +1,4 @@
-use crate::{auth::TokenAuth, ADMINISTRATOR, MODERATOR};
+use crate::auth::TokenAuth;
 use pointercrate_core::error::CoreError;
 use pointercrate_core_api::{
     error::Result,
@@ -7,7 +7,7 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
-use pointercrate_user::{error::UserError, PatchUser, User, UserPagination};
+use pointercrate_user::{error::UserError, PatchUser, User, UserPagination, ADMINISTRATOR, MODERATOR};
 use rocket::{http::Status, serde::json::Json};
 
 #[rocket::get("/")]

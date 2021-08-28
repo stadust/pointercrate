@@ -46,7 +46,9 @@ impl Render for &TopLevelNavigationBarItem {
             div.nav-group {
                 a.nav-item.hover.white href = (self.item.link) {
                     (self.item.content)
-                     i.fas.fa-sort-down style = "height: 50%; padding-left: 5px" {}
+                    @if !self.sub_levels.is_empty() {
+                        i.fas.fa-sort-down style = "height: 50%; padding-left: 5px" {}
+                    }
                 }
                 @if !self.sub_levels.is_empty() {
                     ul.nav-hover-dropdown {
@@ -65,25 +67,27 @@ impl Render for &TopLevelNavigationBarItem {
 impl Render for NavigationBar {
     fn render(&self) -> Markup {
         html! {
-            nav.center.collapse.underlined.see-through {
-                div.nav-icon style = "margin-right: auto" {
-                    a href = "/" {
-                        img src = (self.logo_path) style="height:15px";
+            header {
+                nav.center.collapse.underlined.see-through {
+                    div.nav-icon style = "margin-right: auto" {
+                        a href = "/" {
+                            img src = (self.logo_path) style="height:15px";
+                        }
+                    }
+                    @for item in &self.items {
+                        (item)
+                    }
+                    div.nav-item.collapse-button {
+                        div.hamburger.hover {
+                            input type="checkbox"{}
+                            span{}
+                            span{}
+                            span{}
+                        }
                     }
                 }
-                @for item in &self.items {
-                    (item)
-                }
-                div.nav-item.collapse-button {
-                    div.hamburger.hover {
-                        input type="checkbox"{}
-                        span{}
-                        span{}
-                        span{}
-                    }
-                }
+                div {} // artificial spacing
             }
-            div {} // artificial spacing
         }
     }
 }

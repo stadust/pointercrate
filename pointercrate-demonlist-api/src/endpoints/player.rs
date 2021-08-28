@@ -1,4 +1,3 @@
-use crate::LIST_HELPER;
 use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{
     error::Result,
@@ -7,7 +6,10 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
-use pointercrate_demonlist::player::{FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination};
+use pointercrate_demonlist::{
+    player::{FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination},
+    LIST_HELPER,
+};
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::{serde::json::Json, State};
 

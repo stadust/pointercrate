@@ -1,4 +1,3 @@
-use crate::LIST_MODERATOR;
 use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{
     error::Result,
@@ -11,6 +10,7 @@ use pointercrate_demonlist::{
     creator::{Creator, PostCreator},
     demon::{Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon},
     player::DatabasePlayer,
+    LIST_MODERATOR,
 };
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::{http::Status, serde::json::Json, State};

@@ -4,11 +4,8 @@ use rocket::{Build, Rocket};
 
 pub(crate) mod config;
 mod endpoints;
+pub(crate) mod pages;
 pub(crate) mod ratelimits;
-
-pub const LIST_HELPER: Permission = Permission::new("List Helper", 0x2);
-pub const LIST_MODERATOR: Permission = Permission::new("List Moderator", 0x4);
-pub const LIST_ADMINISTRATOR: Permission = Permission::new("List Administrator", 0x8);
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
@@ -40,7 +37,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::player::patch,
             endpoints::player::ranking
         ])
-        .mount("/api/v1/nationality/", rocket::routes![
+        .mount("/api/v1/nationalities/", rocket::routes![
             endpoints::nationality::subdivisions,
             endpoints::nationality::ranking,
             endpoints::nationality::nation
@@ -53,5 +50,11 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::demon::post,
             endpoints::demon::post_creator,
             endpoints::demon::delete_creator
+        ])
+        .mount("/demonlist/", rocket::routes![
+            pages::overview,
+            pages::stats_viewer_redirect,
+            pages::stats_viewer,
+            pages::nation_stats_viewer
         ])
 }

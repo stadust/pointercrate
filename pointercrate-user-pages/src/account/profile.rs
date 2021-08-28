@@ -1,9 +1,35 @@
-use crate::model::user::User;
-use maud::{html, Markup};
+use crate::account::AccountPageTab;
+use maud::{html, Markup, PreEscaped};
+use pointercrate_core::permission::PermissionsManager;
+use pointercrate_user::{sqlx::PgConnection, User};
 
-pub(super) fn page(user: &User) -> Markup {
-    html! {
-        div.m-center.flex.tab-content.tab-content-active.container data-tab-id = "1"{
+pub struct ProfileTab;
+
+#[async_trait::async_trait]
+impl AccountPageTab for ProfileTab {
+    fn should_display_for(&self, _user: &User, _permissions: &PermissionsManager) -> bool {
+        true
+    }
+
+    fn additional_scripts(&self) -> Vec<String> {
+        vec!["/static/js/account/profile.js".to_string()]
+    }
+
+    fn tab(&self) -> Markup {
+        html! {
+            b {
+                "Profile"
+            }
+            (PreEscaped("&nbsp;&nbsp;"))
+            i class = "fa fa-user fa-2x" aria-hidden="true" {}
+        }
+    }
+
+    async fn page(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
+        let permissions = permissions.bits_to_permissions(user.permissions);
+        let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");
+
+        html! {
             div.left {
                 div.panel.fade {
                     h1.underlined.pad {
@@ -51,25 +77,11 @@ pub(super) fn page(user: &User) -> Markup {
                         }
                         span {
                             b {
-                                i.fa.fa-pencil-alt.clickable#player-claim-pen aria-hidden = "true" {} " Claimed Player: "
-                            }
-                            i#profile-claimed-player {
-                                @match user.claimed_player {
-                                    Some(ref claim) => (claim.name),
-                                    None => "None"
-                                }
-                            }
-                            p {
-                                "A confirmed player claim (meaning a claim that has been verified by a staff member) will in the future allow you to customize your player's appearance on the stats viewer."
-                            }
-                        }
-                        span {
-                            b {
                                 "Permissions: "
                             }
-                            (user.permissions)
+                            (permission_string)
                             p {
-                                "The permissions you have on pointercrate."
+                                "The permissions you have on pointercrate. 'Extended Access' means you can retrieve more data from the API if you authorize yourself, 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
                             }
                         }
                     }
@@ -131,44 +143,10 @@ pub(super) fn page(user: &User) -> Markup {
                     }
                 }
             }
-        }
-        (edit_display_name_dialog())
-        (edit_youtube_link_dialog())
-        (change_password_dialog())
-        (delete_account_dialog())
-        // have to inline this to add the password field :pensive:
-        div.overlay.closable {
-            div.dialog#edit-player-claim-dialog {
-                span.plus.cross.hover {}
-                h2.underlined.pad {
-                    "Claim Player"
-                }
-                div.flex.viewer {
-                    (crate::view::filtered_paginator("edit-player-claim-dialog-pagination", "/api/v1/players/"))
-                    div {
-                        p {
-                            "Select a player to claim. Note that each claim is manually validated by a staff member."
-                        }
-                        form.flex.col novalidate = "" {
-                            p.info-red.output {}
-                            p.info-green.output {}
-                            span.form-input#player-claim-dialog-input style="display: none"{
-                                input name = "claimed_player" type="number" required = "";
-                            }
-                            span.form-input#player-claim-dialog-name-input {
-                                label {"Selected Player:"}
-                                input type="text" disabled="" required="";
-                            }
-                            span.form-input#player-claim-dialog-password {
-                                label {"Password:"}
-                                input type="password" required = "";
-                                p.error {}
-                            }
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Initiate Claim";
-                        }
-                    }
-                }
-            }
+            (edit_display_name_dialog())
+            (edit_youtube_link_dialog())
+            (change_password_dialog())
+            (delete_account_dialog())
         }
     }
 }

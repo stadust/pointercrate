@@ -1,13 +1,29 @@
 use crate::etag::Tagged;
 use pointercrate_core::etag::Taggable;
+use pointercrate_core_pages::{PageConfiguration, PageFragment};
 use rocket::{
-    http::{Header, Status},
+    http::{ContentType, Header, Status},
     response::Responder,
     serde::json::Json,
     Request, Response,
 };
 use serde::Serialize;
-use std::borrow::Cow;
+use std::{borrow::Cow, io::Cursor};
+
+pub struct Page<T: PageFragment>(pub T);
+
+impl<'r, 'o: 'r, T: PageFragment> Responder<'r, 'o> for Page<T> {
+    fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
+        let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
+        let rendered_fragment = page_config.render_fragment(&self.0).0;
+
+        Response::build()
+            .status(Status::Ok)
+            .header(ContentType::HTML)
+            .sized_body(rendered_fragment.len(), Cursor::new(rendered_fragment))
+            .ok()
+    }
+}
 
 pub struct Response2<T> {
     content: T,

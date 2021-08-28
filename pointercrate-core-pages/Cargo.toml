@@ -1,5 +1,5 @@
 [package]
-name = "pointercrate-user-pages"
+name = "pointercrate-core-pages"
 version = "0.1.0"
 edition = "2018"
 
@@ -8,5 +8,3 @@ edition = "2018"
 [dependencies]
 maud = "0.22.1"
 pointercrate-core = {path = "../pointercrate-core"}
-pointercrate-user = {path = "../pointercrate-user"}
-async-trait = "0.1.42"

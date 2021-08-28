@@ -1,4 +1,3 @@
-use crate::{LIST_ADMINISTRATOR, LIST_MODERATOR};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
@@ -6,7 +5,10 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
-use pointercrate_demonlist::submitter::{PatchSubmitter, Submitter, SubmitterPagination};
+use pointercrate_demonlist::{
+    submitter::{PatchSubmitter, Submitter, SubmitterPagination},
+    LIST_ADMINISTRATOR, LIST_MODERATOR,
+};
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::serde::json::Json;
 

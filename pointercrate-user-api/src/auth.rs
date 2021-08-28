@@ -12,7 +12,6 @@ use rocket::{
 };
 use sqlx::{Postgres, Transaction};
 
-
 pub struct Auth<const IsToken: bool> {
     pub user: AuthenticatedUser,
     pub connection: Transaction<'static, Postgres>,

@@ -13,6 +13,7 @@ pub use self::{
 use crate::error::{Result, UserError};
 use pointercrate_core::{etag::Taggable, permission::Permission};
 use serde::Serialize;
+pub use sqlx;
 use sqlx::PgConnection;
 use std::{
     fmt::{Display, Formatter},
@@ -27,6 +28,9 @@ pub mod error;
 mod paginate;
 mod patch;
 mod video;
+
+pub const ADMINISTRATOR: Permission = Permission::new("Administrator", 0x4000);
+pub const MODERATOR: Permission = Permission::new("Moderator", 0x2000);
 
 /// Model representing a user in the database
 #[derive(Debug, Serialize, Hash, Eq, PartialEq)]

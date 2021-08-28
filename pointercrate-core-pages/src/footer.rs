@@ -21,7 +21,7 @@ impl Footer {
     }
 
     pub fn with_link(mut self, href: &'static str, text: &'static str) -> Self {
-        self.twitter_links.push(Link { href, text });
+        self.twitter_links.push(Link::new(href, text));
         self
     }
 }
@@ -32,13 +32,16 @@ pub enum FooterColumn {
 }
 
 pub struct Link {
-    href: &'static str,
-    text: &'static str,
+    href: String,
+    text: String,
 }
 
 impl Link {
-    pub fn new(href: &'static str, text: &'static str) -> Self {
-        Link { href, text }
+    pub fn new<S: Into<String>, T: Into<String>>(href: S, text: T) -> Self {
+        Link {
+            href: href.into(),
+            text: text.into(),
+        }
     }
 }
 

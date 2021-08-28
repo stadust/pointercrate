@@ -1,21 +1,10 @@
 use crate::ratelimits::UserRatelimits;
-use pointercrate_core::{
-    error::CoreError,
-    permission::{Permission},
-};
+use pointercrate_core::{error::CoreError, permission::Permission};
 use rocket::{Build, Rocket};
 
 pub mod auth;
 mod endpoints;
 mod ratelimits;
-
-pub const ADMINISTRATOR: Permission = Permission::new("Administrator", 0x4000);
-pub const MODERATOR: Permission = Permission::new("Moderator", 0x2000);
-
-#[rocket::get("/")]
-fn error() -> pointercrate_core_api::error::Result<()> {
-    Err(CoreError::NotFound)?
-}
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = UserRatelimits::new();
@@ -36,5 +25,4 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::user::patch_user,
             endpoints::user::delete_user
         ])
-        .mount("/error", rocket::routes![error])
 }

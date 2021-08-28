@@ -61,7 +61,9 @@ impl<'r, T: Taggable> Responder<'r, 'static> for Tagged<T> {
             _ => (),
         }
 
-        Response2::new(Json(self.0)).with_header("etag", response_etag).respond_to(request)
+        Response2::new(Json(serde_json::json! {{"data": self.0}}))
+            .with_header("etag", response_etag)
+            .respond_to(request)
     }
 }
 
