@@ -3,7 +3,7 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_demonlist::{config, demon::Demon, nationality::Nationality};
 use pointercrate_user::User;
 
-mod account;
+pub mod account;
 pub mod components;
 mod demon_page;
 pub mod overview;

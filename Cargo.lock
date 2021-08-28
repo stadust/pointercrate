@@ -2381,6 +2381,7 @@ dependencies = [
 name = "pointercrate-demonlist-pages"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "chrono",
  "maud",
  "pointercrate-core",
@@ -2388,6 +2389,7 @@ dependencies = [
  "pointercrate-demonlist",
  "pointercrate-integrate",
  "pointercrate-user",
+ "pointercrate-user-pages",
  "url",
 ]
 

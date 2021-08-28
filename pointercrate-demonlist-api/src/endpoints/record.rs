@@ -222,6 +222,8 @@ pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) 
 
     let note_id = note.id;
 
+    auth.connection.commit().await.map_err(DemonlistError::from)?;
+
     Ok(Response2::tagged(note)
         .status(Status::Created)
         .with_header("Location", format!("/api/v1/records/{}/notes/{}/", record.id, note_id)))
@@ -255,6 +257,8 @@ pub async fn delete_note(record_id: i32, note_id: i32, mut auth: TokenAuth) -> R
     }
 
     note.delete(&mut auth.connection).await?;
+
+    auth.commit().await?;
 
     Ok(Status::NoContent)
 }

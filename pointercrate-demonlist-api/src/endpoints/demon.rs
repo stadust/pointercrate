@@ -92,6 +92,8 @@ pub async fn post_creator(demon_id: i32, mut auth: TokenAuth, creator: Json<Post
 
     Creator::insert(&demon.base, &player, &mut auth.connection).await?;
 
+    auth.commit().await?;
+
     Ok(Response2::json(()).status(Status::Created).with_header(
         "Location",
         format!("/api/v2/demons/{}/creators/{}/", demon.base.position, player.id),
@@ -109,6 +111,8 @@ pub async fn delete_creator(demon_id: i32, player_id: i32, mut auth: TokenAuth) 
         .await?
         .delete(&mut auth.connection)
         .await?;
+
+    auth.commit().await?;
 
     Ok(Status::NoContent)
 }

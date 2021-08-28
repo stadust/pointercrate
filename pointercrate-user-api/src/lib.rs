@@ -27,9 +27,9 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::user::delete_user
         ])
         .mount("/", rocket::routes![
-            pages::login_page_authorized,
             pages::login_page,
-            pages::account_page_unauthorized,
-            pages::account_page
+            pages::account_page,
+            pages::login,
+            pages::register
         ])
 }

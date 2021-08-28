@@ -31,14 +31,19 @@ pub async fn register(
 
     let user = AuthenticatedUser::register(body.0, &mut connection).await?;
 
+    connection.commit().await.map_err(UserError::from)?;
+
     Ok(Response2::tagged(user.into_inner())
         .with_header("Location", "api/v1/auth/me")
         .status(Status::Created))
 }
 
 #[rocket::post("/")]
-pub async fn login(auth: BasicAuth, ip: IpAddr, ratelimits: &State<UserRatelimits>) -> Result<Response2<Json<serde_json::Value>>> {
+pub async fn login(
+    auth: std::result::Result<BasicAuth, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>,
+) -> Result<Response2<Json<serde_json::Value>>> {
     ratelimits.login_attempts(ip)?;
+    let auth = auth?;
 
     Ok(Response2::json(serde_json::json! {
         {
@@ -52,6 +57,7 @@ pub async fn login(auth: BasicAuth, ip: IpAddr, ratelimits: &State<UserRatelimit
 #[rocket::post("/invalidate")]
 pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
     auth.user.invalidate_all_tokens(&auth.secret, &mut auth.connection).await?;
+    auth.connection.commit().await.map_err(UserError::from)?;
 
     Ok(Status::NoContent)
 }

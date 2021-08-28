@@ -16,6 +16,10 @@ impl AccountPageTab for UsersTab {
         vec![Script::module("/static/js/account/users.js")]
     }
 
+    fn tab_id(&self) -> u8 {
+        2
+    }
+
     fn tab(&self) -> Markup {
         html! {
             b {

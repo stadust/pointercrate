@@ -15,6 +15,7 @@ pub trait AccountPageTab {
     fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool;
     fn additional_scripts(&self) -> Vec<Script>;
 
+    fn tab_id(&self) -> u8;
     fn tab(&self) -> Markup;
     async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup;
 }
@@ -49,7 +50,7 @@ impl AccountPageConfig {
                 let content = tab_config.content(&page.user, permissions, connection).await;
 
                 page.scripts.extend(tab_config.additional_scripts());
-                page.tabs.push((tab, content));
+                page.tabs.push((tab, content, tab_config.tab_id()));
             }
         }
 
@@ -60,7 +61,7 @@ impl AccountPageConfig {
 pub struct AccountPage {
     user: User,
     scripts: Vec<Script>,
-    tabs: Vec<(Markup, Markup)>,
+    tabs: Vec<(Markup, Markup, u8)>,
     csrf_token: String,
 }
 
@@ -96,28 +97,28 @@ impl PageFragment for AccountPage {
             span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
-                    @for (i, (tab, _)) in self.tabs.iter().enumerate() {
+                    @for (i, (tab, _, id)) in self.tabs.iter().enumerate() {
                         @if i == 0 {
-                            div.tab.tab-active.button.white.hover.no-shadow data-tab-id=({i+1}) {
+                            div.tab.tab-active.button.white.hover.no-shadow data-tab-id=(id) {
                                 (*tab)
                             }
                         }
                         @else {
-                            div.tab.button.white.hover.no-shadow data-tab-id=({i+1}) {
+                            div.tab.button.white.hover.no-shadow data-tab-id=(id) {
                                 (*tab)
                             }
                         }
                     }
                 }
 
-                @for (i, (_, content)) in self.tabs.iter().enumerate() {
+                @for (i, (_, content, id)) in self.tabs.iter().enumerate() {
                     @if i == 0 {
-                        div.m-center.flex.tab-content.tab-content-active.container data-tab-id = ({i+1}){
+                        div.m-center.flex.tab-content.tab-content-active.container data-tab-id = (id){
                             (*content)
                         }
                     }
                     @else {
-                        div.m-center.flex.tab-content.container data-tab-id = ({i+1}){
+                        div.m-center.flex.tab-content.container data-tab-id = (id){
                             (*content)
                         }
                     }

@@ -1,4 +1,5 @@
 use crate::{auth::AuthenticatedUser, error::Result, patch::PatchUser};
+use log::info;
 use pointercrate_core::util::{non_nullable, nullable};
 use serde::Deserialize;
 use sqlx::PgConnection;
@@ -55,6 +56,8 @@ impl AuthenticatedUser {
 
     pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
         Self::validate_password(&password)?;
+
+        info!("Setting new password for user {}", self.inner());
 
         // it is safe to unwrap here because the only errors that can happen are
         // 'BcryptError::CostNotAllowed' (won't happen because DEFAULT_COST is obviously allowed)
