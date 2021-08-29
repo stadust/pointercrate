@@ -21,6 +21,12 @@ pub enum DemonlistError {
     #[display(fmt = "You are banned from submitting records to the demonlist!")]
     BannedFromSubmissions,
 
+    #[display(fmt = "You claim on this player is unverified")]
+    ClaimUnverified,
+
+    #[display(fmt = "IP Geolocation attempt through VPS detected")]
+    VpsDetected,
+
     #[display(fmt = "No submitter with id {} found", id)]
     SubmitterNotFound { id: i32 },
 
@@ -166,6 +172,8 @@ impl PointercrateError for DemonlistError {
             NoteEmpty => 42230,
             MalformedVideoUrl => 40001,
             BannedFromSubmissions => 40304,
+            ClaimUnverified => 40306,
+            VpsDetected => 40307,
             NationalityNotFound { .. } => 40401,
             SubdivisionNotFound { .. } => 40401,
             PlayerNotFound { .. } => 40401,

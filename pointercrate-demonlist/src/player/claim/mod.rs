@@ -10,6 +10,6 @@ mod put;
 #[derive(Serialize, Debug)]
 pub struct PlayerClaim {
     user_id: i32,
-    player_id: i32,
-    verified: bool,
+    pub player_id: i32,
+    pub verified: bool,
 }

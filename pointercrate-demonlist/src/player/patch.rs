@@ -12,16 +12,16 @@ use sqlx::PgConnection;
 #[derive(Debug, Deserialize, Default)]
 pub struct PatchPlayer {
     #[serde(default, deserialize_with = "non_nullable")]
-    name: Option<String>,
+    pub name: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    banned: Option<bool>,
+    pub banned: Option<bool>,
 
     #[serde(default, deserialize_with = "nullable")]
-    nationality: Option<Option<String>>,
+    pub nationality: Option<Option<String>>,
 
     #[serde(default, deserialize_with = "nullable")]
-    subdivision: Option<Option<String>>,
+    pub subdivision: Option<Option<String>>,
 }
 
 impl FullPlayer {
