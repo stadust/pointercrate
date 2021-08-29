@@ -1,13 +1,10 @@
 use rocket::{response::Redirect, State};
 
-use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone};
+use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone, Utc};
 use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{error::Result, response::Page};
 use pointercrate_demonlist::{
-    demon::{
-        audit::{audit_log_for_demon},
-        current_list, list_at, FullDemon, MinimalDemon,
-    },
+    demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
     nationality::Nationality,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
@@ -31,7 +28,7 @@ pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
 ) -> Result<Page<OverviewPage>> {
     // should be const, but chrono aint const :(
-    let _beginning_of_time: DateTime<FixedOffset> =
+    let beginning_of_time: DateTime<FixedOffset> =
         FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 1, 4).and_hms(0, 0, 0));
 
     let mut connection = pool.connection().await?;
@@ -42,9 +39,15 @@ pub async fn overview(
         .get("when")
         .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()));
 
+    let specified_when = match specified_when {
+        Some(Ok(when)) if when < beginning_of_time => Some(beginning_of_time),
+        Some(Ok(when)) if when >= Utc::now() => None,
+        Some(Ok(when)) => Some(when),
+        _ => None,
+    };
+
     let tardis = match specified_when {
-        Some(Ok(destination)) =>
-            Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut connection, destination).await?),
+        Some(destination) => Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut connection, destination).await?),
         _ => Tardis::new(timemachine.unwrap_or(false)),
     };
 
