@@ -2,7 +2,6 @@ use maud::{html, Markup, PreEscaped};
 
 use pointercrate_demonlist::{config, demon::Demon};
 
-
 pub mod account;
 pub mod components;
 pub mod demon_page;

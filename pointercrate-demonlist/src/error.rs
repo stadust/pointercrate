@@ -4,7 +4,6 @@ use derive_more::Display;
 use pointercrate_core::error::{CoreError, PointercrateError};
 use serde::Serialize;
 
-
 pub type Result<T> = std::result::Result<T, DemonlistError>;
 
 #[derive(Serialize, Display, Debug, Eq, PartialEq, Clone)]

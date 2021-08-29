@@ -1,11 +1,7 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
 use pointercrate_core_pages::{PageFragment, Script};
-use pointercrate_user::{
-    sqlx::{PgConnection},
-    User,
-};
-
+use pointercrate_user::{sqlx::PgConnection, User};
 
 pub mod profile;
 pub mod users;

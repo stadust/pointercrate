@@ -1,6 +1,6 @@
 use pointercrate_demonlist::config;
 use rocket::response::content::Json;
-use serde_json::{json};
+use serde_json::json;
 
 #[rocket::get("/")]
 pub fn list_information() -> Json<String> {

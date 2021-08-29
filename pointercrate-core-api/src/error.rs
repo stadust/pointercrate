@@ -1,6 +1,6 @@
 use log::warn;
 use pointercrate_core::error::PointercrateError;
-use pointercrate_core_pages::{error::ErrorFragment};
+use pointercrate_core_pages::error::ErrorFragment;
 use rocket::{
     http::{MediaType, Status},
     response::Responder,
@@ -11,7 +11,6 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::response::Page;
-
 
 pub type Result<T> = std::result::Result<T, ErrorResponder>;
 
