@@ -1,6 +1,6 @@
 use crate::{endpoints::misc, ratelimits::DemonlistRatelimits};
 use chrono::Duration;
-use pointercrate_core::{permission::Permission, pool::PointercratePool};
+use pointercrate_core::{pool::PointercratePool};
 use pointercrate_integrate::gd::PgCache;
 use rocket::{Build, Rocket};
 

@@ -1,6 +1,6 @@
 use crate::{
     auth::{AuthenticatedUser, Claims},
-    error::{Result},
+    error::Result,
     User,
 };
 use log::{debug, info};
@@ -78,64 +78,5 @@ impl AuthenticatedUser {
                     password_hash: row.password_hash,
                 }),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{
-        error::PointercrateError,
-        model::user::{AuthenticatedUser, Authorization},
-    };
-
-    #[actix_rt::test]
-    async fn test_successful_basic_auth() {
-        let mut connection = crate::test::test_setup().await;
-
-        let result = AuthenticatedUser::basic_auth(
-            &Authorization::Basic {
-                username: "stadust_existing".to_owned(),
-                password: "password1234567890".to_string(),
-            },
-            &mut connection,
-        )
-        .await;
-
-        assert!(result.is_ok(), "{:?}", result.err().unwrap());
-        assert_eq!(result.unwrap().inner().name, "stadust_existing");
-    }
-
-    #[actix_rt::test]
-    async fn test_basic_auth_fail_invalid_name() {
-        let mut connection = crate::test::test_setup().await;
-
-        let result = AuthenticatedUser::basic_auth(
-            &Authorization::Basic {
-                username: "stadust_nonexisting".to_owned(),
-                password: "password1234567890".to_string(),
-            },
-            &mut connection,
-        )
-        .await;
-
-        assert!(result.is_err(), "{:?}", result.ok().unwrap().inner());
-        assert_eq!(result.err().unwrap(), PointercrateError::Unauthorized);
-    }
-
-    #[actix_rt::test]
-    async fn test_basic_auth_fail_invalid_password() {
-        let mut connection = crate::test::test_setup().await;
-
-        let result = AuthenticatedUser::basic_auth(
-            &Authorization::Basic {
-                username: "stadust_existing".to_owned(),
-                password: "wrong password".to_string(),
-            },
-            &mut connection,
-        )
-        .await;
-
-        assert!(result.is_err(), "{:?}", result.ok().unwrap().inner());
-        assert_eq!(result.err().unwrap(), PointercrateError::Unauthorized);
     }
 }

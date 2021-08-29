@@ -5,14 +5,14 @@ use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{error::Result, response::Page};
 use pointercrate_demonlist::{
     demon::{
-        audit::{audit_log_for_demon, DemonModificationData},
+        audit::{audit_log_for_demon},
         current_list, list_at, FullDemon, MinimalDemon,
     },
     nationality::Nationality,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_demonlist_pages::{
-    components::{submitter::RecordSubmitter, team::Team, time_machine::Tardis},
+    components::{team::Team, time_machine::Tardis},
     demon_page::{DemonMovement, DemonPage},
     overview::OverviewPage,
     statsviewer::{individual::IndividualStatsViewer, national::NationBasedStatsViewer},
@@ -31,7 +31,7 @@ pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
 ) -> Result<Page<OverviewPage>> {
     // should be const, but chrono aint const :(
-    let beginning_of_time: DateTime<FixedOffset> =
+    let _beginning_of_time: DateTime<FixedOffset> =
         FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 1, 4).and_hms(0, 0, 0));
 
     let mut connection = pool.connection().await?;

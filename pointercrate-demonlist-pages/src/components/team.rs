@@ -1,4 +1,4 @@
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, Render};
 use pointercrate_user::User;
 
 pub struct Team {

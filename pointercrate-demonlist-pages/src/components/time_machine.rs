@@ -19,7 +19,7 @@ impl Tardis {
         Tardis::Deactivated { visible }
     }
 
-    pub fn activate(mut self, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>) -> Self {
+    pub fn activate(self, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>) -> Self {
         Tardis::Activated {
             visible: self.visible(),
             demons: demons_then,

@@ -18,7 +18,7 @@ use rocket::{
 use std::net::IpAddr;
 
 #[rocket::get("/login")]
-pub async fn login_page(mut auth: Result<TokenAuth, UserError>) -> Result<Redirect, Page<LoginPage>> {
+pub async fn login_page(auth: Result<TokenAuth, UserError>) -> Result<Redirect, Page<LoginPage>> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page))).map_err(|_| Page(LoginPage))
 }
 
@@ -78,7 +78,7 @@ pub async fn register(
 
 #[rocket::get("/account")]
 pub async fn account_page(
-    mut auth: Result<TokenAuth, UserError>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
+    auth: Result<TokenAuth, UserError>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page<AccountPage>, Redirect> {
     match auth {
         Ok(mut auth) => {

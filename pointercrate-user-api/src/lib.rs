@@ -1,5 +1,5 @@
 use crate::ratelimits::UserRatelimits;
-use pointercrate_core::{error::CoreError, permission::Permission};
+
 use rocket::{Build, Rocket};
 
 pub mod auth;
