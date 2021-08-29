@@ -17,7 +17,7 @@ use pointercrate_demonlist_pages::{
     overview::OverviewPage,
     statsviewer::{individual::IndividualStatsViewer, national::NationBasedStatsViewer},
 };
-use pointercrate_integrate::gd::GDIntegrationResult;
+use pointercrate_integrate::gd::{GDIntegrationResult, PgCache};
 use pointercrate_user::User;
 use rocket::http::CookieJar;
 
@@ -70,7 +70,7 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[rocket::get("/<position>")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>) -> Result<Page<DemonPage>> {
+pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>) -> Result<Page<DemonPage>> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut connection).await?;
@@ -120,8 +120,16 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>) -> Result
         },
         demonlist: current_list(&mut connection).await?,
         movements: modifications,
+        integration: gd
+            .data_for_demon(
+                reqwest::Client::new(),
+                full_demon.demon.level_id,
+                full_demon.demon.base.name.clone(),
+                full_demon.demon.base.id,
+            )
+            .await
+            .unwrap_or(GDIntegrationResult::LevelDataNotFound),
         data: full_demon,
-        integration: GDIntegrationResult::DemonNotFoundByName,
     }))
 }
 

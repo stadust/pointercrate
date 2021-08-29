@@ -1,5 +1,7 @@
 use crate::{endpoints::misc, ratelimits::DemonlistRatelimits};
-use pointercrate_core::permission::Permission;
+use chrono::Duration;
+use pointercrate_core::{permission::Permission, pool::PointercratePool};
+use pointercrate_integrate::gd::PgCache;
 use rocket::{Build, Rocket};
 
 pub(crate) mod config;
@@ -9,9 +11,11 @@ pub(crate) mod ratelimits;
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
+    let dash_rs = PgCache::new(rocket.state::<PointercratePool>().unwrap().clone_inner(), Duration::minutes(30));
 
     rocket
         .manage(ratelimits)
+        .manage(dash_rs)
         .mount("/api/v1/list_information/", rocket::routes![misc::list_information])
         .mount("/api/v1/submitters/", rocket::routes![
             endpoints::submitter::paginate,

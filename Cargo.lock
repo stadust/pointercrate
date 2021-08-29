@@ -1529,6 +1529,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyper-tls"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
+dependencies = [
+ "bytes 1.0.1",
+ "hyper 0.14.11",
+ "native-tls",
+ "tokio 1.10.0",
+ "tokio-native-tls 0.3.0",
+]
+
+[[package]]
 name = "idna"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1910,9 +1923,9 @@ dependencies = [
 
 [[package]]
 name = "native-tls"
-version = "0.2.6"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6fcc7939b5edc4e4f86b1b4a04bb1498afaaf871b1a6691838ed06fcb48d3a3f"
+checksum = "48ba9f7719b5a0f42f338907614285fb5fd70e53858141f69898a1fb7203b24d"
 dependencies = [
  "lazy_static",
  "libc",
@@ -2303,7 +2316,7 @@ dependencies = [
  "pointercrate-demonlist",
  "pointercrate-user",
  "ratelimit_meter",
- "reqwest",
+ "reqwest 0.10.10",
  "serde",
  "serde_json",
  "serde_urlencoded 0.6.1",
@@ -2372,7 +2385,7 @@ dependencies = [
  "pointercrate-user",
  "pointercrate-user-api",
  "ratelimit_meter",
- "reqwest",
+ "reqwest 0.11.4",
  "rocket",
  "serde_json",
  "serde_urlencoded 0.7.0",
@@ -2404,8 +2417,8 @@ dependencies = [
  "dash-rs",
  "futures",
  "log",
- "reqwest",
- "sqlx 0.4.2",
+ "reqwest 0.11.4",
+ "sqlx 0.5.5",
  "tokio 1.10.0",
 ]
 
@@ -2718,7 +2731,7 @@ dependencies = [
  "http",
  "http-body 0.3.1",
  "hyper 0.13.9",
- "hyper-tls",
+ "hyper-tls 0.4.3",
  "ipnet",
  "js-sys",
  "lazy_static",
@@ -2732,6 +2745,40 @@ dependencies = [
  "serde_urlencoded 0.7.0",
  "tokio 0.2.24",
  "tokio-tls",
+ "url",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "winreg 0.7.0",
+]
+
+[[package]]
+name = "reqwest"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "246e9f61b9bb77df069a947682be06e31ac43ea37862e244a69f177694ea6d22"
+dependencies = [
+ "base64 0.13.0",
+ "bytes 1.0.1",
+ "encoding_rs",
+ "futures-core",
+ "futures-util",
+ "http",
+ "http-body 0.4.3",
+ "hyper 0.14.11",
+ "hyper-tls 0.5.0",
+ "ipnet",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "mime",
+ "native-tls",
+ "percent-encoding",
+ "pin-project-lite 0.2.7",
+ "serde",
+ "serde_urlencoded 0.7.0",
+ "tokio 1.10.0",
+ "tokio-native-tls 0.3.0",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",

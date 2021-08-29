@@ -7,6 +7,10 @@ pub struct PointercratePool {
 }
 
 impl PointercratePool {
+    pub fn clone_inner(&self) -> Pool<Postgres> {
+        self.connection_pool.clone()
+    }
+
     pub async fn init() -> Self {
         PointercratePool {
             connection_pool: PgPoolOptions::default()

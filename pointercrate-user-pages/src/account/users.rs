@@ -1,15 +1,21 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::permission::PermissionsManager;
+use pointercrate_core::permission::{Permission, PermissionsManager};
 use pointercrate_core_pages::{util::filtered_paginator, Script};
 use pointercrate_user::{sqlx::PgConnection, User, ADMINISTRATOR, MODERATOR};
 
-pub struct UsersTab;
+pub struct UsersTab(pub Vec<Permission>);
 
 #[async_trait::async_trait]
 impl AccountPageTab for UsersTab {
     fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool {
-        permissions.require_permission(user.permissions, MODERATOR).is_ok()
+        for perm in &self.0 {
+            if permissions.require_permission(user.permissions, *perm).is_ok() {
+                return true
+            }
+        }
+
+        false
     }
 
     fn additional_scripts(&self) -> Vec<Script> {
