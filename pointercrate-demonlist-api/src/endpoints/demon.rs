@@ -1,4 +1,4 @@
-use pointercrate_core::pool::PointercratePool;
+use pointercrate_core::{audit::AuditLogEntry, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
@@ -8,9 +8,10 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     creator::{Creator, PostCreator},
-    demon::{Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon},
+    demon::{audit::DemonModificationData, Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon},
+    error::DemonlistError,
     player::DatabasePlayer,
-    LIST_MODERATOR,
+    LIST_ADMINISTRATOR, LIST_MODERATOR,
 };
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::{http::Status, serde::json::Json, State};
@@ -51,6 +52,19 @@ pub async fn paginate_listed(
 #[rocket::get("/<demon_id>")]
 pub async fn get(demon_id: i32, pool: &State<PointercratePool>) -> Result<Tagged<FullDemon>> {
     Ok(Tagged(FullDemon::by_id(demon_id, &mut *pool.connection().await?).await?))
+}
+
+#[rocket::get("/<demon_id>/audit")]
+pub async fn audit(demon_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditLogEntry<DemonModificationData>>>> {
+    auth.require_permission(LIST_ADMINISTRATOR)?;
+
+    let log = pointercrate_demonlist::demon::audit::audit_log_for_demon(demon_id, &mut auth.connection).await?;
+
+    if log.is_empty() {
+        return Err(DemonlistError::DemonNotFound { demon_id }.into())
+    }
+
+    Ok(Json(log))
 }
 
 #[rocket::post("/", data = "<data>")]

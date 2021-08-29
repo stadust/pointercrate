@@ -31,8 +31,8 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
     if let Some(addition) = addition_row {
         entries.push(AuditLogEntry {
             time: addition.time,
-            audit_id: addition.audit_id,
-            record_id,
+            entry_id: addition.audit_id,
+            id: record_id,
             user: NamedId {
                 name: addition.name,
                 id: addition.userid,
@@ -69,8 +69,8 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
 
             entries.push(AuditLogEntry {
                 time: modification.time,
-                audit_id: modification.audit_id,
-                record_id,
+                entry_id: modification.audit_id,
+                id: record_id,
                 r#type: AuditLogEntryType::Modification(RecordModificationData {
                     progress: modification.progress,
                     status: modification.status_.as_deref().map(RecordStatus::from_sql),
@@ -113,8 +113,8 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
     if let Some(deletion) = deletion_row {
         entries.push(AuditLogEntry {
             time: deletion.time,
-            audit_id: deletion.audit_id,
-            record_id,
+            entry_id: deletion.audit_id,
+            id: record_id,
             user: NamedId {
                 name: deletion.name,
                 id: deletion.userid,

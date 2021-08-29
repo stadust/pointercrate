@@ -17,8 +17,8 @@ use url::Url;
 
 #[derive(Debug)]
 pub struct DemonMovement {
-    from_position: i16,
-    at: NaiveDateTime,
+    pub from_position: i16,
+    pub at: NaiveDateTime,
 }
 
 pub struct DemonPage {
@@ -49,6 +49,7 @@ impl PageFragment for DemonPage {
 
     fn additional_scripts(&self) -> Vec<Script> {
         vec![
+            Script::new("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"),
             Script::module("/static/js/modules/formv2.js"),
             Script::module("/static/js/modules/demonlistv2.js"),
             Script::module("/static/js/demonlist.v2.2.js"),
@@ -56,7 +57,11 @@ impl PageFragment for DemonPage {
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/demonlist.v2.1.css".to_string(), "/static/css/sidebar.css".to_string()]
+        vec![
+            "https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css".to_string(),
+            "/static/css/demonlist.v2.1.css".to_string(),
+            "/static/css/sidebar.css".to_string(),
+        ]
     }
 
     fn head_fragment(&self) -> Markup {
@@ -105,8 +110,6 @@ impl PageFragment for DemonPage {
                     window.extended_list_length = {1}
                 </script>", list_config::list_size(), list_config::extended_list_size()
             )))
-               (PreEscaped("<link rel='stylesheet' href='//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css'>
-                <script src='//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js'></script>"))
         }
     }
 

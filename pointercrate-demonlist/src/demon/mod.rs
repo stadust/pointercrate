@@ -21,6 +21,7 @@ use std::{
 
 #[macro_use]
 mod get;
+pub mod audit;
 mod paginate;
 mod patch;
 mod post;

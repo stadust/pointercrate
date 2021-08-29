@@ -1,16 +1,19 @@
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone};
-use pointercrate_core::pool::PointercratePool;
+use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{error::Result, response::Page};
 use pointercrate_demonlist::{
-    demon::{current_list, list_at, FullDemon, MinimalDemon},
+    demon::{
+        audit::{audit_log_for_demon, DemonModificationData},
+        current_list, list_at, FullDemon, MinimalDemon,
+    },
     nationality::Nationality,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_demonlist_pages::{
     components::{submitter::RecordSubmitter, team::Team, time_machine::Tardis},
-    demon_page::DemonPage,
+    demon_page::{DemonMovement, DemonPage},
     overview::OverviewPage,
     statsviewer::{individual::IndividualStatsViewer, national::NationBasedStatsViewer},
 };
@@ -70,6 +73,45 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>) -> Result<Page<DemonPage>> {
     let mut connection = pool.connection().await?;
 
+    let full_demon = FullDemon::by_position(position, &mut connection).await?;
+
+    let audit_log = audit_log_for_demon(full_demon.demon.base.id, &mut connection).await?;
+
+    let mut addition_time = None;
+
+    let mut modifications = audit_log
+        .iter()
+        .filter_map(|entry| {
+            match entry.r#type {
+                AuditLogEntryType::Modification(ref modification) =>
+                    match modification.position {
+                        Some(old_position) if old_position > 0 =>
+                            Some(DemonMovement {
+                                from_position: old_position,
+                                at: entry.time,
+                            }),
+                        _ => None,
+                    },
+                AuditLogEntryType::Addition => {
+                    addition_time = Some(entry.time);
+
+                    None
+                },
+                _ => None,
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if let Some(addition) = addition_time {
+        modifications.insert(0, DemonMovement {
+            from_position: modifications
+                .first()
+                .map(|m| m.from_position)
+                .unwrap_or(full_demon.demon.base.position),
+            at: addition,
+        });
+    }
+
     Ok(Page(DemonPage {
         team: Team {
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
@@ -77,8 +119,8 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>) -> Result
             helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
         },
         demonlist: current_list(&mut connection).await?,
-        data: FullDemon::by_position(position, &mut connection).await?,
-        movements: vec![],
+        movements: modifications,
+        data: full_demon,
         integration: GDIntegrationResult::DemonNotFoundByName,
     }))
 }

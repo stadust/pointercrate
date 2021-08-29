@@ -1,6 +1,6 @@
 use crate::ratelimits::DemonlistRatelimits;
 use log::{debug, error, warn};
-use pointercrate_core::{error::CoreError, pool::PointercratePool};
+use pointercrate_core::{audit::AuditLogEntry, error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
@@ -11,7 +11,7 @@ use pointercrate_core_api::{
 use pointercrate_demonlist::{
     error::DemonlistError,
     record::{
-        audit::RecordEntry,
+        audit::RecordModificationData,
         note::{NewNote, Note, PatchNote},
         FullRecord, MinimalRecordPD, PatchRecord, RecordPagination, RecordStatus, Submission,
     },
@@ -158,7 +158,7 @@ pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<Pointercr
 }
 
 #[rocket::get("/<record_id>/audit")]
-pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<RecordEntry>>> {
+pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditLogEntry<RecordModificationData>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
     let log = pointercrate_demonlist::record::audit::audit_log_for_record(record_id, &mut auth.connection).await?;

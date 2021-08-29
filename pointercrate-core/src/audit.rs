@@ -12,8 +12,8 @@ pub struct NamedId {
 #[derive(Serialize)]
 pub struct AuditLogEntry<T> {
     pub time: NaiveDateTime,
-    pub audit_id: i32,
-    pub record_id: i32,
+    pub entry_id: i32,
+    pub id: i32,
     pub user: NamedId,
     pub r#type: AuditLogEntryType<T>,
 }
