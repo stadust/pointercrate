@@ -153,6 +153,9 @@ pub enum DemonlistError {
     /// Error Code `42230`
     #[display(fmt = "Notes mustn't be empty!")]
     NoteEmpty,
+
+    #[display(fmt = "This player already have a verified claim associated with them")]
+    AlreadyClaimed,
 }
 
 impl std::error::Error for DemonlistError {}
@@ -192,6 +195,7 @@ impl PointercrateError for DemonlistError {
             Non100Extended => 42220,
             UnsupportedVideoHost => 42224,
             DemonNameNotUnique { .. } => 42228,
+            AlreadyClaimed => 42230,
         }
     }
 }

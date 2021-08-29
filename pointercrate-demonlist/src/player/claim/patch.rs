@@ -15,10 +15,17 @@ impl PlayerClaim {
             self.player_id,
             verified
         )
-        .execute(connection)
+        .execute(&mut *connection)
         .await?;
 
         self.verified = verified;
+
+        if verified {
+            // remove all other claims (verified or not) on that player
+            sqlx::query!("DELETE FROM player_claims WHERE player_id = $1", self.player_id)
+                .execute(connection)
+                .await?;
+        }
 
         Ok(self)
     }
