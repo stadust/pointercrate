@@ -1,9 +1,10 @@
 -- Your SQL goes here
 
 CREATE TABLE player_claims(
+    id SERIAL PRIMARY KEY, -- only used for pagination
     member_id INTEGER NOT NULL REFERENCES members(member_id),
     player_id INTEGER NOT NULL REFERENCES players(id),
-    verified BOOLEAN DEFAULT FALSE
+    verified BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 INSERT INTO player_claims (member_id, player_id)

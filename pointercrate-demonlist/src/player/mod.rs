@@ -12,6 +12,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+pub mod claim;
 mod get;
 mod paginate;
 mod patch;

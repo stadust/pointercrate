@@ -54,6 +54,9 @@ pub enum DemonlistError {
     #[display(fmt = "No record with id {} found", record_id)]
     RecordNotFound { record_id: i32 },
 
+    #[display(fmt = "No claim by user {} on player {} found", member_id, player_id)]
+    ClaimNotFound { member_id: i32, player_id: i32 },
+
     #[display(fmt = "This player is already registered as a creator on this demon")]
     CreatorExists,
 
@@ -171,6 +174,7 @@ impl PointercrateError for DemonlistError {
             DemonNotFoundName { .. } => 40401,
             DemonNotFoundPosition { .. } => 40401,
             RecordNotFound { .. } => 40401,
+            ClaimNotFound { .. } => 40401,
             DuplicateVideo { .. } => 40906,
             NoNationSet => 40907,
             InvalidProgress { .. } => 42215,

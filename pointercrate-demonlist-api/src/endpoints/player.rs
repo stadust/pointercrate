@@ -7,11 +7,15 @@ use pointercrate_core_api::{
     response::Response2,
 };
 use pointercrate_demonlist::{
-    player::{FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination},
+    player::{
+        claim::{ListedClaim, PatchVerified, PlayerClaim, PlayerClaimPagination},
+        DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
+    },
     LIST_HELPER,
 };
+use pointercrate_user::MODERATOR;
 use pointercrate_user_api::auth::TokenAuth;
-use rocket::{serde::json::Json, State};
+use rocket::{http::Status, serde::json::Json, State};
 
 #[rocket::get("/")]
 pub async fn paginate(mut auth: TokenAuth, query: Query<PlayerPagination>) -> Result<Response2<Json<Vec<Player>>>> {
@@ -99,4 +103,46 @@ pub async fn patch(
     auth.commit().await?;
 
     Ok(Tagged(player))
+}
+
+#[rocket::put("/<player_id>/claims")]
+pub async fn put_claim(player_id: i32, mut auth: TokenAuth) -> Result<Response2<Json<PlayerClaim>>> {
+    let player = DatabasePlayer::by_id(player_id, &mut auth.connection).await?;
+    let claim = player.initiate_claim(auth.user.inner().id, &mut auth.connection).await?;
+
+    Ok(Response2::json(claim).status(Status::Created).with_header(
+        "Location",
+        format!("/api/v1/players/{}/claims/{}/", player.id, auth.user.inner().id),
+    ))
+}
+
+#[rocket::patch("/<player_id>/claims/<user_id>", data = "<data>")]
+pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data: Json<PatchVerified>) -> Result<Json<PlayerClaim>> {
+    auth.require_permission(MODERATOR)?;
+
+    let claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await?;
+    let claim = claim.set_verified(data.verified, &mut auth.connection).await?;
+
+    Ok(Json(claim))
+}
+
+#[rocket::get("/claims")]
+pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimPagination>) -> Result<Response2<Json<Vec<ListedClaim>>>> {
+    auth.require_permission(MODERATOR)?;
+
+    let mut pagination = pagination.0;
+
+    let mut claims = pagination.page(&mut auth.connection).await?;
+    let (max_id, min_id) = ListedClaim::extremal_ids(&mut auth.connection).await?;
+
+    pagination_response!(
+        "/api/v1/players/claims/",
+        claims,
+        pagination,
+        min_id,
+        max_id,
+        before_id,
+        after_id,
+        id
+    )
 }

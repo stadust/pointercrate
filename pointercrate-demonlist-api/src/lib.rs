@@ -39,7 +39,10 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::player::paginate,
             endpoints::player::unauthed_paginate,
             endpoints::player::patch,
-            endpoints::player::ranking
+            endpoints::player::ranking,
+            endpoints::player::put_claim,
+            endpoints::player::patch_claim,
+            endpoints::player::paginate_claims,
         ])
         .mount("/api/v1/nationalities/", rocket::routes![
             endpoints::nationality::subdivisions,
