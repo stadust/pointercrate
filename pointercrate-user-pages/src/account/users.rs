@@ -79,19 +79,21 @@ impl AccountPageTab for UsersTab {
                                 p.info-red.output {}
                                 p.info-green.output {}
 
-                                div.stats-container.flex.space.col style = "align-items: center" {
-                                    b {
-                                        "Permissions:"
-                                    }
-                                    @for permission in assignable_permissions {
-                                        @let name_in_snake_case = permission.name().to_lowercase().replace(" ", "-");
+                                @if !assignable_permissions.is_empty() {
+                                    div.stats-container.flex.space.col style = "align-items: center" {
+                                        b {
+                                            "Permissions:"
+                                        }
+                                        @for permission in assignable_permissions {
+                                            @let name_in_snake_case = permission.name().to_lowercase().replace(" ", "-");
 
-                                        label.cb-container.form-input#(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
-                                            i {
-                                                (permission.name())
+                                            label.cb-container.form-input#(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
+                                                i {
+                                                    (permission.name())
+                                                }
+                                                input type = "checkbox" name = (name_in_snake_case);
+                                                span.checkmark {}
                                             }
-                                            input type = "checkbox" name = (name_in_snake_case);
-                                            span.checkmark {}
                                         }
                                     }
                                 }
