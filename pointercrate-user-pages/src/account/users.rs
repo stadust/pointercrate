@@ -86,11 +86,11 @@ impl AccountPageTab for UsersTab {
                                     @for permission in assignable_permissions {
                                         @let name_in_snake_case = permission.name().to_lowercase().replace(" ", "-");
 
-                                        label.cb-container.form-input for = (name_in_snake_case) {
+                                        label.cb-container.form-input#(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
                                             i {
                                                 (permission.name())
                                             }
-                                            input type = "checkbox" name = (name_in_snake_case) bit = (permission.bit());
+                                            input type = "checkbox" name = (name_in_snake_case);
                                             span.checkmark {}
                                         }
                                     }

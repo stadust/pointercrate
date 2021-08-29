@@ -5,7 +5,7 @@ use pointercrate_core::{
     permission::Permission,
 };
 use serde::Serialize;
-
+use std::collections::HashSet;
 
 pub type Result<T> = std::result::Result<T, UserError>;
 
@@ -32,7 +32,7 @@ pub enum UserError {
     PatchSelf,
 
     #[display(fmt = "You cannot assign the following permissions: {:?}", non_assignable)]
-    PermissionNotAssignable { non_assignable: Vec<Permission> },
+    PermissionNotAssignable { non_assignable: HashSet<Permission> },
 
     #[display(fmt = "No user with id {} found", user_id)]
     UserNotFound { user_id: i32 },

@@ -1,10 +1,7 @@
 use crate::error::CoreError;
 use derive_more::Display;
 use serde::Serialize;
-use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
-};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Debug, Display, Eq, PartialEq, Clone, Copy, Hash)]
 #[serde(transparent)]
@@ -38,57 +35,58 @@ impl Into<u16> for Permission {
 
 #[derive(Clone)]
 pub struct PermissionsManager {
-    permissions: Arc<RwLock<Vec<Permission>>>,
-    implication_map: Arc<RwLock<HashMap<Permission, Vec<Permission>>>>,
-    assignable_map: Arc<RwLock<HashMap<Permission, Vec<Permission>>>>,
+    permissions: HashSet<Permission>,
+    implication_map: HashMap<Permission, HashSet<Permission>>,
+    assignable_map: HashMap<Permission, HashSet<Permission>>,
 }
 
 impl PermissionsManager {
     pub fn new(permissions: Vec<Permission>) -> Self {
+        let mut permission_set = HashSet::new();
+
+        for perm in permissions {
+            permission_set.insert(perm);
+        }
+
         PermissionsManager {
-            permissions: Arc::new(RwLock::new(permissions)),
-            implication_map: Arc::new(RwLock::new(HashMap::new())),
-            assignable_map: Arc::new(RwLock::new(HashMap::new())),
+            permissions: permission_set,
+            implication_map: HashMap::new(),
+            assignable_map: HashMap::new(),
         }
     }
 
     // we should probably verify that added permissions are all part of what was in the constructor but
     // wherhaklsrödj
-    pub fn assigns(self, perm1: Permission, perm2: Permission) -> Self {
-        {
-            let mut lock = self.assignable_map.write().unwrap();
-            lock.entry(perm1).or_insert(Vec::new()).push(perm2);
-        }
+    pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {
+        self.assignable_map.entry(perm1).or_insert(HashSet::new()).insert(perm2);
         self
     }
 
-    pub fn implies(self, perm1: Permission, perm2: Permission) -> Self {
-        {
-            let mut lock = self.implication_map.write().unwrap();
-            lock.entry(perm1).or_insert(Vec::new()).push(perm2);
-        }
+    pub fn implies(mut self, perm1: Permission, perm2: Permission) -> Self {
+        self.implication_map.entry(perm1).or_insert(HashSet::new()).insert(perm2);
         self
     }
 
-    pub fn implied_by(&self, permission: Permission) -> Vec<Permission> {
-        let mut implied = vec![permission];
+    pub fn implied_by(&self, permission: Permission) -> HashSet<Permission> {
+        let mut implied = HashSet::new();
+        implied.insert(permission);
 
-        if let Some(vec) = self.implication_map.read().unwrap().get(&permission) {
-            for perm in vec {
-                implied.append(&mut self.implied_by(*perm));
+        if let Some(set) = self.implication_map.get(&permission) {
+            for perm in set {
+                implied.extend(self.implied_by(*perm));
             }
         }
 
         implied
     }
 
-    pub fn assignable_by(&self, permission: Permission) -> Vec<Permission> {
-        let mut assignable = Vec::new();
+    pub fn assignable_by(&self, permission: Permission) -> HashSet<Permission> {
+        let mut assignable = HashSet::new();
 
         for perm in self.implied_by(permission) {
-            if let Some(vec) = self.assignable_map.read().unwrap().get(&perm) {
-                for perm in vec {
-                    assignable.push(*perm);
+            if let Some(set) = self.assignable_map.get(&perm) {
+                for perm in set {
+                    assignable.insert(*perm);
                 }
             }
         }
@@ -96,8 +94,8 @@ impl PermissionsManager {
         assignable
     }
 
-    pub fn implied_by_bits(&self, permission_bits: u16) -> Vec<Permission> {
-        let mut implied = Vec::new();
+    pub fn implied_by_bits(&self, permission_bits: u16) -> HashSet<Permission> {
+        let mut implied = HashSet::new();
 
         for perm in self.bits_to_permissions(permission_bits) {
             if perm.bit & permission_bits == perm.bit {
@@ -108,8 +106,8 @@ impl PermissionsManager {
         implied
     }
 
-    pub fn assignable_by_bits(&self, permission_bits: u16) -> Vec<Permission> {
-        let mut assignable = Vec::new();
+    pub fn assignable_by_bits(&self, permission_bits: u16) -> HashSet<Permission> {
+        let mut assignable = HashSet::new();
 
         for perm in self.bits_to_permissions(permission_bits) {
             assignable.extend(self.assignable_by(perm));
@@ -118,12 +116,12 @@ impl PermissionsManager {
         assignable
     }
 
-    pub fn bits_to_permissions(&self, bits: u16) -> Vec<Permission> {
-        let mut perms = Vec::new();
+    pub fn bits_to_permissions(&self, bits: u16) -> HashSet<Permission> {
+        let mut perms = HashSet::new();
 
-        for perm in &*self.permissions.read().unwrap() {
+        for perm in &self.permissions {
             if perm.bit() & bits == perm.bit() {
-                perms.push(*perm);
+                perms.insert(*perm);
             }
         }
 

@@ -11,6 +11,7 @@ use rocket::{
     Request, State,
 };
 use sqlx::{Postgres, Transaction};
+use std::collections::HashSet;
 
 pub struct Auth<const IsToken: bool> {
     pub user: AuthenticatedUser,
@@ -36,7 +37,7 @@ impl<const IsToken: bool> Auth<IsToken> {
         self.require_permission(permission).is_ok()
     }
 
-    pub fn assignable_permissions(&self) -> Vec<Permission> {
+    pub fn assignable_permissions(&self) -> HashSet<Permission> {
         self.permissions.assignable_by_bits(self.user.inner().permissions)
     }
 }
