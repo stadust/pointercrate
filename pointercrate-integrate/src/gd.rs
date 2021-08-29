@@ -51,7 +51,7 @@ impl PgCache {
                     .search_filters(SearchFilters::default().rated());
 
                 let entry = match self.lookup_levels_request(&request).await {
-                    Err(CacheError::Db(err)) => return Err(()),
+                    Err(CacheError::Db(_err)) => return Err(()),
                     Err(_) => return Err(()), // shouldn't be reachable
                     Ok(entry) => entry,
                 };
@@ -68,7 +68,7 @@ impl PgCache {
             },
             Some(level_id) => {
                 let entry = match self.lookup_level(level_id).await {
-                    Err(CacheError::Db(err)) => return Err(()),
+                    Err(CacheError::Db(_err)) => return Err(()),
                     Err(_) => return Err(()), // shouldn't be reachable
                     Ok(entry) => entry,
                 };
@@ -93,7 +93,7 @@ impl PgCache {
                 };
 
                 let level_data = match self.lookup_level_data(level_id).await {
-                    Err(CacheError::Db(err)) => return Err(()),
+                    Err(CacheError::Db(_err)) => return Err(()),
                     Err(_) => return Err(()), // shouldn't be reachable
                     Ok(CacheEntry::Missing) => return Ok(GDIntegrationResult::LevelDataNotCached),
                     Ok(CacheEntry::Absent) => return Ok(GDIntegrationResult::LevelDataNotFound),

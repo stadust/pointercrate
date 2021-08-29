@@ -1393,6 +1393,7 @@ checksum = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
 name = "pointercrate-core"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "derive_more",
  "log",
  "serde",

@@ -1,11 +1,11 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{error::PointercrateError, etag::Taggable, permission::PermissionsManager};
+use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
 use pointercrate_core_pages::{PageFragment, Script};
 use pointercrate_user::{
-    sqlx::{PgConnection, Postgres, Transaction},
+    sqlx::{PgConnection},
     User,
 };
-use std::sync::{Arc, RwLock};
+
 
 pub mod profile;
 pub mod users;

@@ -141,7 +141,21 @@ impl PermissionsManager {
 
 #[cfg(test)]
 mod test {
+    // copied from https://riptutorial.com/rust/example/4149/create-a-hashset-macro because im lazy as fuck
+    macro_rules! set {
+        ( $( $x:expr ),* $(,)? ) => {  // Match zero or more comma delimited items
+            {
+                let mut temp_set = HashSet::new();  // Create a mutable HashSet
+                $(
+                    temp_set.insert($x); // Insert each item matched into the HashSet
+                )*
+                temp_set // Return the populated HashSet
+            }
+        };
+    }
+
     use crate::permission::{Permission, PermissionsManager};
+    use std::collections::HashSet;
 
     const PERM1: Permission = Permission::new("1", 0x1);
     const PERM2: Permission = Permission::new("2", 0x2);
@@ -163,16 +177,16 @@ mod test {
 
     #[test]
     fn test_implication() {
-        assert_eq!(permission_manager().implied_by(PERM1), vec![PERM1, PERM2, PERM3]);
-        assert_eq!(permission_manager().implied_by(PERM4), vec![PERM4, PERM5]);
+        assert_eq!(permission_manager().implied_by(PERM1), set![PERM1, PERM2, PERM3]);
+        assert_eq!(permission_manager().implied_by(PERM4), set![PERM4, PERM5]);
 
-        assert_eq!(permission_manager().implied_by_bits(0x1 | 0x8), vec![
+        assert_eq!(permission_manager().implied_by_bits(0x1 | 0x8), set![
             PERM1, PERM2, PERM3, PERM4, PERM5,
         ]);
     }
 
     #[test]
     fn test_assignment() {
-        assert_eq!(permission_manager().assignable_by(PERM4), vec![PERM2, PERM5, PERM6]);
+        assert_eq!(permission_manager().assignable_by(PERM4), set![PERM2, PERM5, PERM6]);
     }
 }

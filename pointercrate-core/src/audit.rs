@@ -1,7 +1,7 @@
 //! Module containing some basic structures for dealing with audit logs
 
+use chrono::NaiveDateTime;
 use serde::Serialize;
-use sqlx::types::chrono::NaiveDateTime;
 
 #[derive(Serialize)]
 pub struct NamedId {

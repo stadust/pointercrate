@@ -2,7 +2,7 @@ use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::{Permission, PermissionsManager};
 use pointercrate_core_pages::{util::filtered_paginator, Script};
-use pointercrate_user::{sqlx::PgConnection, User, ADMINISTRATOR, MODERATOR};
+use pointercrate_user::{sqlx::PgConnection, User, ADMINISTRATOR};
 
 pub struct UsersTab(pub Vec<Permission>);
 
@@ -36,7 +36,7 @@ impl AccountPageTab for UsersTab {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         let assignable_permissions = permissions.assignable_by_bits(user.permissions);
 
         html! {
