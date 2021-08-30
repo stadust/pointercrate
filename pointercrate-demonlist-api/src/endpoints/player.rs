@@ -136,6 +136,18 @@ pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data
     Ok(Json(claim))
 }
 
+#[rocket::delete("/<player_id>/claims/<user_id>")]
+pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> Result<Status> {
+    auth.require_permission(MODERATOR)?;
+
+    let mut claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await?;
+
+    claim.delete(&mut auth.connection).await?;
+    auth.commit().await?;
+
+    Ok(Status::NoContent)
+}
+
 #[rocket::get("/claims")]
 pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimPagination>) -> Result<Response2<Json<Vec<ListedClaim>>>> {
     auth.require_permission(MODERATOR)?;
