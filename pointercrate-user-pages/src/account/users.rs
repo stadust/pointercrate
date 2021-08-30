@@ -37,7 +37,8 @@ impl AccountPageTab for UsersTab {
     }
 
     async fn content(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
-        let assignable_permissions = permissions.assignable_by_bits(user.permissions);
+        let mut assignable_permissions = permissions.assignable_by_bits(user.permissions).into_iter().collect::<Vec<_>>();
+        assignable_permissions.sort_by_key(|perm| perm.bit());
 
         html! {
             div.left {
