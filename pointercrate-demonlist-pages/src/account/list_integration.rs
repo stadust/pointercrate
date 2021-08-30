@@ -1,3 +1,4 @@
+use crate::components::player_selection_dialog;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
 use pointercrate_core_pages::{error::ErrorFragment, util::paginator, PageFragment, Script};
@@ -5,7 +6,7 @@ use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_user::{sqlx::PgConnection, User, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
 
-pub struct ListIntegrationTab;
+pub struct ListIntegrationTab(/* discord invite url */ pub &'static str);
 
 #[async_trait::async_trait]
 impl AccountPageTab for ListIntegrationTab {
@@ -42,6 +43,7 @@ impl AccountPageTab for ListIntegrationTab {
                 }
                 .body_fragment(),
         };
+        let is_moderator = permissions.require_permission(user.permissions, MODERATOR).is_ok();
 
         html! {
             div.left {
@@ -73,7 +75,8 @@ impl AccountPageTab for ListIntegrationTab {
                                     }
                                     span.arrow.hover {}
                                 },
-                                _ => i{"Unverified"}
+                                Some(_) => i{"Unverified"},
+                                _ => {}
                             }
                         }
                     }
@@ -97,7 +100,7 @@ impl AccountPageTab for ListIntegrationTab {
                         }
                     }
                 }
-                @if permissions.require_permission(user.permissions, MODERATOR).is_ok() {
+                @if is_moderator {
                     div.panel.fade {
                         h2.pad.underlined {
                             "Manage Claims"
@@ -105,7 +108,7 @@ impl AccountPageTab for ListIntegrationTab {
                         p {
                             "Manage claims using the interface below. The list can be filtered by player and user using the panels on the right. Invalid claims should be deleted using the trash icon. "
                             br;
-                            "To verify a claim, click the checkmark. Only verify claims you have verified to be correct (this will probably mean talking to the player that's being claimed, and asking if they initiated the claim themselves, or if the claim is malicious."
+                            "To verify a claim, click the checkmark. Only verify claims you have verified to be correct (this will probably mean talking to the player that's being claimed, and asking if they initiated the claim themselves, or if the claim is malicious)."
                             br;
                             "Once a claim on a player is verified, all other unverified claims on that player are auto-deleted. Users cannot put new, unverified claims on players that have a verified claim on them."
                             br;
@@ -117,8 +120,65 @@ impl AccountPageTab for ListIntegrationTab {
             }
             div.right {
                 div.panel.fade {
-
+                    h2.underlined.pad {
+                        "Claiming 101"
+                    }
+                    p {
+                        "Player claiming is the process of associated a demonlist player with a pointercrate user account. A verified claim allows you to to modify some of the player's properties, such as nationality. "
+                        br;
+                        "To initiate a claim, click the pen left of the 'Claimed Player' heading. Once initiated, you have an unverified claim on a player. These claims will then be manually verified by members of the pointercrate team. You can request verification in " a.link href=(self.0) {"this discord server"} "."
+                        br;
+                        "You cannot initiate a claim on a player that already has a verified claim by a different user on it. "
+                    }
                 }
+                @if is_moderator {
+                    (player_selector())
+                    (user_selector())
+                }
+            }
+        }
+    }
+}
+
+fn player_selector() -> Markup {
+    html! {
+        div.panel.fade {
+            h2.underlined.pad {
+                "Filter by player"
+            }
+            p {
+                "Filter the claims list by claims on a given player. Leave blank to reset filter"
+            }
+            form.flex.col#claims-filter-by-player-name-form novalidate = "" {
+                p.info-red.output {}
+                span.form-input#claims-player-name {
+                    label for = "name" {"Player name:"}
+                    input type = "text" name = "name";
+                    p.error {}
+                }
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Filter";
+            }
+        }
+    }
+}
+
+fn user_selector() -> Markup {
+    html! {
+        div.panel.fade {
+            h2.underlined.pad {
+                "Filter by user"
+            }
+            p {
+                "Only show claim by given user, if one exists. Leave blank to reset filter"
+            }
+            form.flex.col#claims-filter-by-user-name-form novalidate = "" {
+                p.info-red.output {}
+                span.form-input#claims-user-name {
+                    label for = "name" {"Username:"}
+                    input type = "text" name = "name";
+                    p.error {}
+                }
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Filter";
             }
         }
     }

@@ -26,6 +26,9 @@ pub struct PlayerClaimPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     user_name: Option<String>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    verified: Option<bool>,
 }
 
 #[derive(Serialize)]
@@ -75,6 +78,7 @@ impl PlayerClaimPagination {
             .bind(self.after_id)
             .bind(self.player_name.as_ref())
             .bind(self.user_name.as_ref())
+            .bind(self.verified)
             .fetch(connection);
 
         let mut claims = Vec::new();

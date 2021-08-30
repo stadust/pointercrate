@@ -22,9 +22,13 @@ impl PlayerClaim {
 
         if verified {
             // remove all other claims (verified or not) on that player
-            sqlx::query!("DELETE FROM player_claims WHERE player_id = $1", self.player_id)
-                .execute(connection)
-                .await?;
+            sqlx::query!(
+                "DELETE FROM player_claims WHERE player_id = $1 AND member_id <> $2",
+                self.player_id,
+                self.user_id
+            )
+            .execute(connection)
+            .await?;
         }
 
         Ok(self)
