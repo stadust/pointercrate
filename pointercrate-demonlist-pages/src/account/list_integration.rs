@@ -1,7 +1,11 @@
 use crate::components::player_selection_dialog;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
-use pointercrate_core_pages::{error::ErrorFragment, util::paginator, PageFragment, Script};
+use pointercrate_core_pages::{
+    error::ErrorFragment,
+    util::{filtered_paginator, paginator},
+    PageFragment, Script,
+};
 use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_user::{sqlx::PgConnection, User, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
@@ -121,6 +125,15 @@ impl AccountPageTab for ListIntegrationTab {
                 }
             }
             div.right {
+                div.panel.fade style = "display: none;"{
+                    h2.underlined.pad {
+                        "Initiate Claim"
+                    }
+                    p {
+                        "Select the player you wish to claim below"
+                    }
+                    (filtered_paginator("claims-initiate-claim-pagination", "/api/v1/players/"))
+                }
                 div.panel.fade {
                     h2.underlined.pad {
                         "Claiming 101"

@@ -1,6 +1,6 @@
 use crate::{config, ratelimits::DemonlistRatelimits};
 use log::error;
-use pointercrate_core::{error::CoreError, pool::PointercratePool};
+use pointercrate_core::{config::database_url, error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
@@ -155,7 +155,10 @@ pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimP
     let mut pagination = pagination.0;
 
     let mut claims = pagination.page(&mut auth.connection).await?;
-    let (max_id, min_id) = ListedClaim::extremal_ids(&mut auth.connection).await?;
+    let (max_id, min_id) = match ListedClaim::extremal_ids(&mut auth.connection).await {
+        Err(_) => return Ok(Response2::json(Vec::new())), // handle empty table case!
+        Ok(data) => data,
+    };
 
     pagination_response!(
         "/api/v1/players/claims/",
