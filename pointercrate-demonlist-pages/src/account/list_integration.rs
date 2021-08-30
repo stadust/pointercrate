@@ -56,8 +56,8 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i#claimed-player {
-                                        (claim.player_id)
+                                    i#claimed-player data-id = (claim.player.id){
+                                        (claim.player.name)
                                     }
                                 },
                                 None => {
@@ -82,12 +82,14 @@ impl AccountPageTab for ListIntegrationTab {
                     }
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
-                            div.overlined.pad.js-collapse-content style="display:none" {
+                            div.overlined.pad.js-collapse-content#claims-claim-panel style="display:none" {
+                                p.info-red.output style = "margin: 10px 0" {}
+                                p.info-green.output style = "margin: 10px 0" {}
                                 div.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
                                         "Geolocate nationality:"
                                     }
-                                    a.button.blue.hover {
+                                    a.button.blue.hover#claims-geolocate-nationality {
                                         "Go"
                                     }
                                 }

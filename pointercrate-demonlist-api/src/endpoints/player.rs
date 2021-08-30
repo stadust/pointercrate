@@ -1,4 +1,4 @@
-use crate::config;
+use crate::{config, ratelimits::DemonlistRatelimits};
 use log::error;
 use pointercrate_core::{error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
@@ -169,20 +169,22 @@ pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimP
     )
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Security {
     is_vpn: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct GeolocationResponse {
     security: Security,
     country_code: String,
-    region_code: Option<String>,
+    region_iso_code: Option<String>,
 }
 
 #[rocket::post("/<player_id>/geolocate")]
-pub async fn geolocate_nationality(player_id: i32, ip: IpAddr, mut auth: TokenAuth) -> Result<Json<Nationality>> {
+pub async fn geolocate_nationality(
+    player_id: i32, ip: IpAddr, mut auth: TokenAuth, ratelimits: &State<DemonlistRatelimits>,
+) -> Result<Json<Nationality>> {
     let mut player = Player::by_id(player_id, &mut auth.connection).await?;
     let claim = PlayerClaim::get(auth.user.inner().id, player_id, &mut auth.connection).await?;
 
@@ -190,8 +192,10 @@ pub async fn geolocate_nationality(player_id: i32, ip: IpAddr, mut auth: TokenAu
         return Err(DemonlistError::ClaimUnverified.into())
     }
 
+    ratelimits.geolocate(ip)?;
+
     let response = reqwest::get(format!(
-        "https://ipgeolocation.abstractapi.com/v1/?api_key={}&ip_address={}",
+        "https://ipgeolocation.abstractapi.com/v1/?api_key={}&ip_address={}&fields=security,country_code,region_iso_code",
         config::abstract_api_key().ok_or(CoreError::InternalServerError)?,
         ip
     ))
@@ -217,7 +221,7 @@ pub async fn geolocate_nationality(player_id: i32, ip: IpAddr, mut auth: TokenAu
     player.set_nationality(nationality, &mut auth.connection).await?;
 
     if ["US", "CA", "GB", "AU"].map(ToString::to_string).contains(&data.country_code) {
-        if let Some(region) = data.region_code {
+        if let Some(region) = data.region_iso_code {
             player.set_subdivision(region, &mut auth.connection).await?;
         }
     }
