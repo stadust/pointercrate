@@ -1,4 +1,5 @@
 use crate::auth::TokenAuth;
+use log::info;
 use pointercrate_core::error::CoreError;
 use pointercrate_core_api::{
     error::Result,
@@ -84,10 +85,14 @@ pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id
             .into())
         }
 
+        info!("assignable permissions are {:b}", assignable_bitmask);
+        info!("assigned permissions are {:b}", permissions);
+        info!("User currently has permissions {:b}", user.permissions);
+
         // we clear all the assignable bits in the user's permissions bitstring. Since we already verified
         // that permissions is a subset of assignable_permissions, we can then set the new permissions via
         // simple OR
-        *permissions = (auth.user.inner().permissions & !assignable_bitmask) | *permissions;
+        *permissions = (user.permissions & !assignable_bitmask) | *permissions;
     }
 
     if user_id == auth.user.inner().id {
