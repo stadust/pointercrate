@@ -56,7 +56,7 @@ pub async fn get_user(mut auth: TokenAuth, user_id: i32) -> Result<Tagged<User>>
 }
 
 #[rocket::patch("/<user_id>", data = "<patch>")]
-pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id: i32, patch: Json<PatchUser>) -> Result<Tagged<User>> {
+pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id: i32, mut patch: Json<PatchUser>) -> Result<Tagged<User>> {
     let user = User::by_id(user_id, &mut auth.connection).await?;
 
     if !auth.has_permission(MODERATOR) && !auth.has_permission(ADMINISTRATOR) {
@@ -72,17 +72,22 @@ pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id
         auth.require_permission(MODERATOR)?;
     }
 
-    if let Some(permissions) = patch.permissions {
+    if let Some(ref mut permissions) = patch.permissions {
         let assignable_bitmask = auth.assignable_permissions().iter().fold(0x0, |mask, perm| mask | perm.bit());
 
-        if permissions & assignable_bitmask != permissions {
-            let unassignable_permissions = (permissions & assignable_bitmask) ^ permissions;
+        if *permissions & assignable_bitmask != *permissions {
+            let unassignable_permissions = (*permissions & assignable_bitmask) ^ *permissions;
 
             return Err(UserError::PermissionNotAssignable {
                 non_assignable: auth.permissions.bits_to_permissions(unassignable_permissions),
             }
             .into())
         }
+
+        // we clear all the assignable bits in the user's permissions bitstring. Since we already verified
+        // that permissions is a subset of assignable_permissions, we can then set the new permissions via
+        // simple OR
+        *permissions = (auth.user.inner().permissions & !assignable_bitmask) | *permissions;
     }
 
     if user_id == auth.user.inner().id {
