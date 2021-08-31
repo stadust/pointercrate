@@ -79,10 +79,10 @@ pub async fn register(
 
 #[rocket::get("/account")]
 pub async fn account_page(
-    auth: Result<TokenAuth, UserError>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
+    auth: Option<TokenAuth>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page<AccountPage>, Redirect> {
     match auth {
-        Ok(mut auth) => {
+        Some(mut auth) => {
             let csrf_token = auth.user.generate_csrf_token(&config::secret());
 
             Ok(Page(
@@ -90,6 +90,6 @@ pub async fn account_page(
                     .await,
             ))
         },
-        Err(_) => Err(Redirect::to(rocket::uri!(login_page))),
+        None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }
