@@ -79,6 +79,7 @@ impl PlayerClaimPagination {
             .bind(self.player_name.as_ref())
             .bind(self.user_name.as_ref())
             .bind(self.verified)
+            .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
         let mut claims = Vec::new();

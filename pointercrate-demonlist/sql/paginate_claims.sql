@@ -8,3 +8,4 @@ WHERE (player_claims.id < $1 OR $1 IS NULL)
   AND (members.name = $4 OR $4 IS NULL)
   AND (verified = $5 OR $5 IS NULL)
 ORDER BY id {}
+LIMIT $8
