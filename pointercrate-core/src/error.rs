@@ -260,7 +260,11 @@ impl From<sqlx::Error> for CoreError {
 
                 CoreError::DatabaseError
             },
-            sqlx::Error::PoolClosed | sqlx::Error::PoolTimedOut => CoreError::DatabaseConnectionError,
+            sqlx::Error::PoolClosed | sqlx::Error::PoolTimedOut => {
+                error!("Failed to acquire database connection");
+
+                CoreError::DatabaseConnectionError
+            },
             sqlx::Error::ColumnNotFound(column) => {
                 error!("Invalid access to column {}, which does not exist", column);
 

@@ -1,4 +1,5 @@
-use log::warn;
+use crate::response::Page;
+use log::{error, warn};
 use pointercrate_core::error::PointercrateError;
 use pointercrate_core_pages::error::ErrorFragment;
 use rocket::{
@@ -10,11 +11,9 @@ use rocket::{
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::response::Page;
-
 pub type Result<T> = std::result::Result<T, ErrorResponder>;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ErrorResponder {
     message: String,
     error_code: u16,
@@ -33,6 +32,10 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
         };
 
         let status = Status::from_code(self.error_code / 100).unwrap_or(Status::InternalServerError);
+
+        if status.code >= 500 {
+            error!("Encountered an internal server error: {:?}", self);
+        }
 
         if accept == MediaType::HTML {
             Response::build_from(
