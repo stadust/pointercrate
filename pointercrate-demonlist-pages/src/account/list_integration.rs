@@ -146,6 +146,17 @@ impl AccountPageTab for ListIntegrationTab {
                         "You cannot initiate a claim on a player that already has a verified claim by a different user on it. "
                     }
                 }
+                @if is_moderator {
+                    div.panel.fade {
+                        h2.underlined.pad {
+                            "Record video"
+                        }
+                        p {
+                            "Clicking a claim in the 'Manage Claims' panel will pull up a random video of an approved record by the claimed player."
+                        }
+                        iframe."ratio-16-9"#claim-video style="width:100%;" allowfullscreen="" {}
+                    }
+                }
             }
         }
     }
