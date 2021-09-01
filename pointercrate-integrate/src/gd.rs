@@ -173,12 +173,20 @@ impl PgCache {
                                     let hardest = demons
                                         .into_iter()
                                         .filter(|demon| demon.name.to_lowercase() == demon_name.to_lowercase())
-                                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
-                                        .unwrap();
+                                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty));
 
-                                    trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
+                                    match hardest {
+                                        Some(hardest) => {
+                                            trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
 
-                                    self.download_demon(http_client, hardest.level_id.into(), demon).await
+                                            self.download_demon(http_client, hardest.level_id.into(), demon).await
+                                        },
+                                        None => {
+                                            error!("Could not find a level whose name matches '{}'", demon_name);
+
+                                            Err(())
+                                        },
+                                    }
                                 },
                             Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
                         },
