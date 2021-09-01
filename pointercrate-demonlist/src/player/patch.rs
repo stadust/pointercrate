@@ -67,7 +67,7 @@ impl FullPlayer {
         // Nothing to be done
         if name == self.player.base.name.as_ref() {
             return Ok(())
-        } else if name.to_lowercase() == self.player.base.name.to_lowercase() {
+        } else if name.to_lowercase() != self.player.base.name.to_lowercase() {
             // If they are equal case insensitively, we're only doing a cosmetic rename, which won't
             // even require a merge
 
