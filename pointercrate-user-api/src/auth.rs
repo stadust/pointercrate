@@ -67,16 +67,31 @@ impl<'r> FromRequest<'r> for Auth<true> {
         let pool = request.guard::<&State<PointercratePool>>().await;
         let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
             Outcome::Success(manager) => manager.inner().clone(),
-            _ => return Outcome::Failure((Status::InternalServerError, CoreError::InternalServerError.into())),
+            Outcome::Failure(err) =>
+                return Outcome::Failure((
+                    Status::InternalServerError,
+                    CoreError::InternalServerError {
+                        message: format!("PermissionManager not retrievable from rocket state: {:?}", err),
+                    }
+                    .into(),
+                )),
+            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
         };
 
         let mut connection = match pool {
             Outcome::Success(pool) => try_outcome!(pool.transaction().await),
-            _ => {
+            Outcome::Failure(err) => {
                 error!("Could not retrieve database pool from shared state. Did you correctly configure rocket state?");
 
-                return Outcome::Failure((Status::InternalServerError, CoreError::InternalServerError.into()))
+                return Outcome::Failure((
+                    Status::InternalServerError,
+                    CoreError::InternalServerError {
+                        message: format!("PointercratePool not retrievable from rocket state: {:?}", err),
+                    }
+                    .into(),
+                ))
             },
+            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
         };
 
         for authorization in request.headers().get("Authorization") {
@@ -162,16 +177,31 @@ impl<'r> FromRequest<'r> for Auth<false> {
         let pool = request.guard::<&State<PointercratePool>>().await;
         let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
             Outcome::Success(manager) => manager.inner().clone(),
-            _ => return Outcome::Failure((Status::InternalServerError, CoreError::InternalServerError.into())),
+            Outcome::Failure(err) =>
+                return Outcome::Failure((
+                    Status::InternalServerError,
+                    CoreError::InternalServerError {
+                        message: format!("PermissionManager not retrievable from rocket state: {:?}", err),
+                    }
+                    .into(),
+                )),
+            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
         };
 
         let mut connection = match pool {
             Outcome::Success(pool) => try_outcome!(pool.transaction().await),
-            _ => {
+            Outcome::Failure(err) => {
                 error!("Could not retrieve database pool from shared state. Did you correctly configure rocket state?");
 
-                return Outcome::Failure((Status::InternalServerError, CoreError::InternalServerError.into()))
+                return Outcome::Failure((
+                    Status::InternalServerError,
+                    CoreError::InternalServerError {
+                        message: format!("PointercratePool not retrievable from rocket state: {:?}", err),
+                    }
+                    .into(),
+                ))
             },
+            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
         };
 
         for authorization in request.headers().get("Authorization") {

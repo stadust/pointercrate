@@ -194,10 +194,10 @@ pub enum CoreError {
         fmt = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there \
                is an error in the application. Please notify a server administrator and have them look at the server logs!"
     )]
-    InternalServerError,
-
-    #[display(fmt = "The server internally entered an invalid state: {}", cause)]
-    InvalidInternalStateError { cause: &'static str },
+    InternalServerError {
+        #[serde(skip)]
+        message: String,
+    },
 
     /// `500 INTERNAL SERVER ERROR`
     ///
@@ -242,8 +242,7 @@ impl PointercrateError for CoreError {
             CoreError::MutuallyExclusive => 42229,
             CoreError::PreconditionRequired => 42800,
             CoreError::Ratelimited { .. } => 42900,
-            CoreError::InternalServerError => 50000,
-            CoreError::InvalidInternalStateError { .. } => 50001,
+            CoreError::InternalServerError { .. } => 50000,
             CoreError::DatabaseError => 50003,
             CoreError::DatabaseConnectionError => 50005,
         }
@@ -266,14 +265,14 @@ impl From<sqlx::Error> for CoreError {
                 CoreError::DatabaseConnectionError
             },
             sqlx::Error::ColumnNotFound(column) => {
-                error!("Invalid access to column {}, which does not exist", column);
+                format!("Invalid access to column {}, which does not exist", column);
 
-                CoreError::InternalServerError
+                CoreError::DatabaseError
             },
             sqlx::Error::RowNotFound => {
                 error!("Unhandled 'NotFound', this is a logic or data consistency error");
 
-                CoreError::InternalServerError
+                CoreError::DatabaseError
             },
             _ => {
                 error!("Database error: {:?}", error);
