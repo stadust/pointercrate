@@ -78,6 +78,13 @@ pub enum DemonlistError {
     #[display(fmt = "Attempt to set subdivision without nation")]
     NoNationSet,
 
+    #[display(
+        fmt = "The players '{}' and '{}' have verified claims by different pointercrate users",
+        player1,
+        player2
+    )]
+    ConflictingClaims { player1: String, player2: String },
+
     /// `422 UNPROCESSABLE ENTITY` variant returned if attempted to create a demon with a record
     /// requirements outside of [0, 100]
     ///
@@ -188,6 +195,7 @@ impl PointercrateError for DemonlistError {
             ClaimNotFound { .. } => 40401,
             DuplicateVideo { .. } => 40906,
             NoNationSet => 40907,
+            ConflictingClaims { .. } => 40908,
             InvalidProgress { .. } => 42215,
             SubmissionExists { .. } => 42217,
             PlayerBanned => 42218,

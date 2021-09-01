@@ -1,7 +1,7 @@
 use crate::{
     error::{DemonlistError, Result},
     nationality::{Nationality, Subdivision},
-    player::{DatabasePlayer, FullPlayer, Player},
+    player::{claim::PlayerClaim, DatabasePlayer, FullPlayer, Player},
     record::{approved_records_by, FullRecord},
 };
 use log::info;
@@ -98,7 +98,42 @@ impl FullPlayer {
     pub async fn merge(&mut self, with: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
         info!("Merging player {} with player {}", self, with);
 
-        // TODO: deal with claim conflicts :(
+        let claim_on_self = PlayerClaim::verified_claim_on(self.player.base.id, &mut *connection).await?;
+        let claim_on_with = PlayerClaim::verified_claim_on(with.id, &mut *connection).await?;
+
+        match (claim_on_self, claim_on_with) {
+            (Some(_), Some(_)) =>
+                return Err(DemonlistError::ConflictingClaims {
+                    player1: self.player.base.name.clone(),
+                    player2: with.name.clone(),
+                }),
+            (Some(_), None) => {
+                sqlx::query!("DELETE FROM player_claims WHERE player_id = $1", with.id)
+                    .execute(&mut *connection)
+                    .await?;
+            },
+            (None, Some(_)) => {
+                sqlx::query!("DELETE FROM player_claims WHERE player_id = $1", self.player.base.id)
+                    .execute(&mut *connection)
+                    .await?;
+                sqlx::query!(
+                    "UPDATE player_claims SET player_id = $1 WHERE player_id = $2",
+                    self.player.base.id,
+                    with.id
+                )
+                .execute(&mut *connection)
+                .await?;
+            },
+            (None, None) => {
+                sqlx::query!(
+                    "UPDATE player_claims SET player_id = $1 WHERE player_id = $2",
+                    self.player.base.id,
+                    with.id
+                )
+                .execute(&mut *connection)
+                .await?;
+            },
+        }
 
         // First, delete duplicate creator entries
         let deleted = sqlx::query!(
