@@ -120,7 +120,7 @@ impl AccountPageTab for ListIntegrationTab {
                             br;
                             "A claim with a green background is verified, a claim with a blue background is unverified/unchecked"
                         }
-                        (paginator("claim-pagination", "/api/v1/players/claims/"))
+                        (filtered_paginator("claim-pagination", "/api/v1/players/claims/"))
                     }
                 }
             }
@@ -146,54 +146,6 @@ impl AccountPageTab for ListIntegrationTab {
                         "You cannot initiate a claim on a player that already has a verified claim by a different user on it. "
                     }
                 }
-                @if is_moderator {
-                    (player_selector())
-                    (user_selector())
-                }
-            }
-        }
-    }
-}
-
-fn player_selector() -> Markup {
-    html! {
-        div.panel.fade {
-            h2.underlined.pad {
-                "Filter by player"
-            }
-            p {
-                "Filter the claims list by claims on a given player. Leave blank to reset filter"
-            }
-            form.flex.col#claims-filter-by-player-name-form novalidate = "" {
-                p.info-red.output {}
-                span.form-input#claims-player-name {
-                    label for = "name" {"Player name:"}
-                    input type = "text" name = "name";
-                    p.error {}
-                }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Filter";
-            }
-        }
-    }
-}
-
-fn user_selector() -> Markup {
-    html! {
-        div.panel.fade {
-            h2.underlined.pad {
-                "Filter by user"
-            }
-            p {
-                "Only show claim by given user, if one exists. Leave blank to reset filter"
-            }
-            form.flex.col#claims-filter-by-user-name-form novalidate = "" {
-                p.info-red.output {}
-                span.form-input#claims-user-name {
-                    label for = "name" {"Username:"}
-                    input type = "text" name = "name";
-                    p.error {}
-                }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Filter";
             }
         }
     }

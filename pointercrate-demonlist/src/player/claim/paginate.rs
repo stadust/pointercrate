@@ -22,10 +22,7 @@ pub struct PlayerClaimPagination {
     pub limit: Option<u8>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    player_name: Option<String>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    user_name: Option<String>,
+    any_name_contains: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     verified: Option<bool>,
@@ -76,8 +73,7 @@ impl PlayerClaimPagination {
         let mut stream = sqlx::query(&query)
             .bind(self.before_id)
             .bind(self.after_id)
-            .bind(self.player_name.as_ref())
-            .bind(self.user_name.as_ref())
+            .bind(self.any_name_contains.as_ref())
             .bind(self.verified)
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
