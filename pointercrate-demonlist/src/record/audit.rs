@@ -59,7 +59,8 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
                   LEFT OUTER JOIN members ON members.member_id = userid
                   LEFT OUTER JOIN players ON players.id = player
                   LEFT OUTER JOIN demons ON demons.id = demon
-                  WHERE record_modifications.id = $1"#,
+                  WHERE record_modifications.id = $1
+                  ORDER BY time"#,
             record_id
         )
         .fetch(&mut *connection);

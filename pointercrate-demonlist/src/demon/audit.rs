@@ -22,7 +22,7 @@ pub async fn audit_log_for_demon(demon_id: i32, connection: &mut PgConnection) -
         r#"SELECT time, audit_id, 
                   userid,
                   members.name AS "name?"
-                  FROM demon_additions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"#,
+           FROM demon_additions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"#,
         demon_id
     )
     .fetch_optional(&mut *connection)
@@ -54,11 +54,12 @@ pub async fn audit_log_for_demon(demon_id: i32, connection: &mut PgConnection) -
                 verifiers.name::text as verifier_name,
                 publisher,
                 publishers.name::text as publisher_name
-                FROM demon_modifications
-                LEFT OUTER JOIN members ON members.member_id = userid
-                LEFT OUTER JOIN players AS verifiers ON verifier=verifiers.id
-                LEFT OUTER JOIN players AS publishers ON publisher=publishers.id
-                WHERE demon_modifications.id = $1
+           FROM demon_modifications
+           LEFT OUTER JOIN members ON members.member_id = userid
+           LEFT OUTER JOIN players AS verifiers ON verifier=verifiers.id
+           LEFT OUTER JOIN players AS publishers ON publisher=publishers.id
+           WHERE demon_modifications.id = $1
+           ORDER BY time
                 "#,
         demon_id
     )
