@@ -154,37 +154,56 @@ pub async fn nation_stats_viewer() -> Page<NationBasedStatsViewer> {
     Page(NationBasedStatsViewer)
 }
 
+macro_rules! heatmap_query {
+    ($connection: expr, $query: expr, $($param:expr),*) => {
+        {
+            let mut css = String::new();
+            let mut stream = sqlx::query!($query, $($param),*).fetch(&mut $connection);
+
+            if let Some(firstrow) = stream.next().await {
+                // first one is the one with most score
+                let firstrow = firstrow.map_err(DemonlistError::from)?;
+                let highest_score = firstrow.score * 1.5;
+
+                css.push_str(&make_css_rule(&firstrow.code, firstrow.score, highest_score));
+
+                while let Some(row) = stream.next().await {
+                    let row = row.map_err(DemonlistError::from)?;
+
+                    css.push_str(&make_css_rule(&row.code, row.score, highest_score));
+                }
+            }
+
+            css
+        }
+    };
+}
+
 #[rocket::get("/statsviewer/heatmap.css")]
 pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<String>> {
     let mut connection = pool.connection().await?;
-    let mut css = String::new();
+    let mut css = heatmap_query!(
+        connection,
+        r#"SELECT LOWER(iso_country_code) as "code!", score as "score!" from nations_with_score order by score desc"#,
+    );
 
-    let mut stream = sqlx::query!(r#"SELECT iso_country_code as "code!", score as "score!" from nations_with_score order by score desc"#)
-        .fetch(&mut connection);
-
-    if let Some(firstrow) = stream.next().await {
-        // first one is the one with most score
-        let firstrow = firstrow.map_err(DemonlistError::from)?;
-        let highest_score = firstrow.score * 1.5;
-
-        let make_css_rule = |code: &str, score: f64| -> String {
-            format!(
-                ".heatmapped #{} path:not(.state) {{ fill: rgb({}, {}, {}); }}",
-                code.to_lowercase(),
-                0xda as f64 + (0x08 - 0xda) as f64 * (score / highest_score),
-                0xdc as f64 + (0x81 - 0xdc) as f64 * (score / highest_score),
-                0xe0 as f64 + (0xc6 - 0xe0) as f64 * (score / highest_score),
-            )
-        };
-
-        css.push_str(&make_css_rule(&firstrow.code, highest_score));
-
-        while let Some(row) = stream.next().await {
-            let row = row.map_err(DemonlistError::from)?;
-
-            css.push_str(&make_css_rule(&row.code, row.score));
-        }
+    for nation in ["AU", "CA", "US", "GB"] {
+        css.push_str(&heatmap_query!(
+            connection,
+            r#"SELECT CONCAT($1, '-', UPPER(subdivision_code)) AS "code!", score AS "score!" FROM subdivision_ranking_of($1) ORDER BY score DESC"#,
+            nation
+        ));
     }
 
     Ok(Response2::new(css).with_header("Content-Type", "text/css"))
+}
+
+fn make_css_rule(code: &str, score: f64, highest_score: f64) -> String {
+    format!(
+        ".heatmapped #{0}, .heatmapped #{0} > path {{ fill: rgb({1}, {2}, {3}); }}",
+        code,
+        0xda as f64 + (0x08 - 0xda) as f64 * (score / highest_score),
+        0xdc as f64 + (0x81 - 0xdc) as f64 * (score / highest_score),
+        0xe0 as f64 + (0xc6 - 0xe0) as f64 * (score / highest_score),
+    )
 }
