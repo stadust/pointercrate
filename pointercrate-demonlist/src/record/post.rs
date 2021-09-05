@@ -53,7 +53,6 @@ impl Submission {
 
         // Resolve player and demon name against the database
         let player = DatabasePlayer::by_name_or_create(self.player.as_ref(), connection).await?;
-        // TODO: handle the ambiguous case
         let demon = MinimalDemon::by_id(self.demon, connection).await?;
 
         // Banned player can't have records on the list
