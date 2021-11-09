@@ -1,3 +1,4 @@
+use crate::ratelimits::DemonlistRatelimits;
 use pointercrate_core::{audit::AuditLogEntry, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
@@ -68,8 +69,12 @@ pub async fn audit(demon_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditL
 }
 
 #[rocket::post("/", data = "<data>")]
-pub async fn post(mut auth: TokenAuth, data: Json<PostDemon>) -> Result<Response2<Tagged<FullDemon>>> {
+pub async fn post(
+    mut auth: TokenAuth, data: Json<PostDemon>, ratelimits: &State<DemonlistRatelimits>,
+) -> Result<Response2<Tagged<FullDemon>>> {
     auth.require_permission(LIST_MODERATOR)?;
+
+    ratelimits.add_demon()?;
 
     let demon = FullDemon::create_from(data.0, &mut auth.connection).await?;
 

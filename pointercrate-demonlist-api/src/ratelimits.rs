@@ -9,5 +9,7 @@ ratelimits! {
         new_submitters[7u32 per 3600] => "DDoS protection ratelimit",
 
         geolocate[1u32 per 2_678_4000 per ip] => "You can only geolocate once per month!",
+
+        add_demon[1u32 per 60] => "Please don't spam the button, rSteel",
     }
 }
