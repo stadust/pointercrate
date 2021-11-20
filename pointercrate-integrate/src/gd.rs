@@ -24,6 +24,7 @@ pub use dash_rs::{
     model::level::{DemonRating, LevelRating},
     Thunk,
 };
+use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub enum GDIntegrationResult {
@@ -172,8 +173,8 @@ impl PgCache {
 
                                     let hardest = demons
                                         .into_iter()
-                                        .filter(|demon| demon.name.to_lowercase() == demon_name.to_lowercase())
-                                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty));
+                                        .filter(|demon| demon.name.to_lowercase().trim() == demon_name.to_lowercase().trim())
+                                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty).then(Ordering::Greater));
 
                                     match hardest {
                                         Some(hardest) => {
