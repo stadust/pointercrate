@@ -1,0 +1,19 @@
+[package]
+name = "pointercrate-user-api"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = {version = "0.5.0-rc.1", features = ["json"]}
+sqlx = { version = "0.5", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
+pointercrate-user = {path = "../pointercrate-user"}
+pointercrate-user-pages = {path = "../pointercrate-user-pages"}
+pointercrate-core = {path = "../pointercrate-core"}
+pointercrate-core-api = {path = "../pointercrate-core-api"}
+log = "0.4.11"
+base64 = "0.13.0"
+ratelimit_meter = "5.0.0"
+nonzero_ext = "0.2.0"
+serde_urlencoded = "0.7.0"

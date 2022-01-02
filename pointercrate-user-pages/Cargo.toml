@@ -1,0 +1,13 @@
+[package]
+name = "pointercrate-user-pages"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+maud = "0.22.1"
+pointercrate-core = {path = "../pointercrate-core"}
+pointercrate-user = {path = "../pointercrate-user"}
+pointercrate-core-pages = {path = "../pointercrate-core-pages"}
+async-trait = "0.1.42"

@@ -9,7 +9,8 @@
 !/README.md
 !/static2
 !/doc
-!/sql
+!/pointercrate-user/sql
 !/robots.txt
 !/demonlist-guidelines
 !/.gitmodules
+!/pointercrate-**
