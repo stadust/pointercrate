@@ -9,7 +9,10 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     creator::{Creator, PostCreator},
-    demon::{audit::DemonModificationData, Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon},
+    demon::{
+        audit::{DemonModificationData, MovementLogEntry},
+        Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon,
+    },
     error::DemonlistError,
     player::DatabasePlayer,
     LIST_ADMINISTRATOR, LIST_MODERATOR,
@@ -60,6 +63,17 @@ pub async fn audit(demon_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditL
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
     let log = pointercrate_demonlist::demon::audit::audit_log_for_demon(demon_id, &mut auth.connection).await?;
+
+    if log.is_empty() {
+        return Err(DemonlistError::DemonNotFound { demon_id }.into())
+    }
+
+    Ok(Json(log))
+}
+
+#[rocket::get("/<demon_id>/audit/movement")]
+pub async fn movement_log(demon_id: i32, pool: &State<PointercratePool>) -> Result<Json<Vec<MovementLogEntry>>> {
+    let log = pointercrate_demonlist::demon::audit::movement_log_for_demon(demon_id, &mut *pool.connection().await?).await?;
 
     if log.is_empty() {
         return Err(DemonlistError::DemonNotFound { demon_id }.into())
