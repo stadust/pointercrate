@@ -3,7 +3,7 @@
 use chrono::NaiveDateTime;
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct NamedId {
     pub id: i32,
     pub name: Option<String>,

@@ -1,11 +1,12 @@
 use crate::error::Result;
 
 use crate::demon::MinimalDemon;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, NaiveTime};
 use futures::StreamExt;
 use pointercrate_core::audit::{AuditLogEntry, AuditLogEntryType, NamedId};
 use serde::Serialize;
 use sqlx::PgConnection;
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 pub struct DemonModificationData {
@@ -31,14 +32,52 @@ pub struct MovementLogEntry {
     reason: MovementReason,
     time: NaiveDateTime,
 
-    #[serde(skip_serializing_if = "Option::is_none")]
-    old_position: Option<i16>,
+    // only `None` for the last entry in case the demon has been deleted
+    new_position: Option<i16>,
 }
 
 pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection) -> Result<Vec<MovementLogEntry>> {
     let audit_log = audit_log_for_demon(demon_id, connection).await?;
 
     let mut movement_log = Vec::new();
+    // map time -> NamedId keeping track of all additions
+    let mut additions = HashMap::new();
+    // map time -> NamedId keeping track when movements to -1 happened
+    let mut all_moves = HashMap::new();
+
+    {
+        // non-lexical lifetimes working amazingly I see >.>
+        let mut addition_stream = sqlx::query!(
+            "SELECT time, demon_additions.id, demons.name::text FROM demon_additions LEFT OUTER JOIN demons ON demons.id = \
+             demon_additions.id"
+        )
+        .fetch(&mut *connection);
+
+        while let Some(row) = addition_stream.next().await {
+            let row = row?;
+            additions.insert(row.time, NamedId {
+                id: row.id,
+                name: row.name,
+            });
+        }
+    }
+
+    {
+        // non-lexical lifetimes working amazingly I see >.>
+        let mut move_stream = sqlx::query!(
+            "SELECT time, demon_modifications.id, demons.name::TEXT FROM demon_modifications LEFT OUTER JOIN demons ON demons.id = \
+             demon_modifications.id WHERE demon_modifications.position = -1"
+        )
+        .fetch(&mut *connection);
+
+        while let Some(row) = move_stream.next().await {
+            let row = row?;
+            all_moves.insert(row.time, NamedId {
+                id: row.id,
+                name: row.name,
+            });
+        }
+    }
 
     for log_entry in audit_log {
         let time = log_entry.time;
@@ -47,7 +86,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
             AuditLogEntryType::Addition =>
                 movement_log.push(MovementLogEntry {
                     time,
-                    old_position: None,
+                    new_position: None,
                     reason: MovementReason::Added,
                 }),
             AuditLogEntryType::Modification(data) =>
@@ -60,66 +99,52 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                         continue
                     }
 
-                    let id_of_moved = sqlx::query!("SELECT id FROM demon_modifications WHERE time = $1 AND position = -1", time)
-                        .fetch_optional(&mut *connection)
-                        .await?;
+                    // update the previous entry's "new_position" field
+                    movement_log.last_mut().map(|entry| entry.new_position = Some(old_position));
 
-                    match id_of_moved {
+                    // if the time part of the datetime object is just zeros, the log entry was generated from deltas,
+                    // meaning we can't figure out reasons accurately
+                    if time.time() == NaiveTime::from_hms(12, 0, 0) {
+                        movement_log.push(MovementLogEntry {
+                            reason: MovementReason::Unknown,
+                            time,
+                            new_position: None,
+                        });
+
+                        continue
+                    }
+
+                    let moved = all_moves.get(&time);
+
+                    match moved {
                         Some(id) if id.id == demon_id =>
                             movement_log.push(MovementLogEntry {
                                 reason: MovementReason::Moved,
                                 time,
-                                old_position: Some(old_position),
+                                new_position: None,
                             }),
                         Some(id) =>
-                            match MinimalDemon::by_id(id.id, &mut *connection).await {
-                                Ok(moved_demon) =>
-                                    movement_log.push(MovementLogEntry {
-                                        reason: MovementReason::OtherMoved {
-                                            other: NamedId {
-                                                id: id.id,
-                                                name: Some(moved_demon.name),
-                                            },
-                                        },
-                                        old_position: Some(old_position),
-                                        time,
-                                    }),
-                                Err(_) =>
-                                    movement_log.push(MovementLogEntry {
-                                        reason: MovementReason::OtherMoved {
-                                            other: NamedId { id: id.id, name: None },
-                                        },
-                                        old_position: Some(old_position),
-                                        time,
-                                    }),
-                            },
+                            movement_log.push(MovementLogEntry {
+                                reason: MovementReason::OtherMoved { other: id.clone() },
+                                new_position: Some(old_position),
+                                time,
+                            }),
                         None => {
-                            // inner join because apparently some demons got deleted from the database >.>
-                            let added_demon = sqlx::query!(
-                                "SELECT demons.id, name::text FROM demon_additions INNER JOIN demons ON demon_additions.id = demons.id \
-                                 WHERE time=$1",
-                                time
-                            )
-                            .fetch_optional(&mut *connection)
-                            .await?;
+                            let added_demon = additions.get(&time);
 
                             match added_demon {
                                 Some(added_demon) =>
                                     movement_log.push(MovementLogEntry {
                                         reason: MovementReason::OtherAddedAbove {
-                                            other: NamedId {
-                                                name: added_demon.name, /* for once the sqlx fuckup of interpreting cases as optionals
-                                                                         * works in our favor */
-                                                id: added_demon.id,
-                                            },
+                                            other: added_demon.clone(),
                                         },
-                                        old_position: Some(old_position),
+                                        new_position: None,
                                         time,
                                     }),
                                 None =>
                                     movement_log.push(MovementLogEntry {
                                         reason: MovementReason::Unknown,
-                                        old_position: Some(old_position),
+                                        new_position: None,
                                         time,
                                     }),
                             }
@@ -140,6 +165,13 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
             AuditLogEntryType::Deletion => unreachable!(),
         }
     }
+
+    // update the last entry with the current position
+    MinimalDemon::by_id(demon_id, &mut *connection).await.map(|minimal_demon| {
+        movement_log
+            .last_mut()
+            .map(|entry| entry.new_position = Some(minimal_demon.position));
+    });
 
     Ok(movement_log)
 }
