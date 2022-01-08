@@ -9,6 +9,7 @@ use derive_more::Display;
 use log::{debug, info};
 use serde::Deserialize;
 use sqlx::{PgConnection, Row};
+use url::Url;
 
 #[derive(Deserialize, Debug, Display)]
 #[display(fmt = "{}% on {} by {} [status: {}]", progress, demon, player, status)]
@@ -18,6 +19,8 @@ pub struct Submission {
     pub demon: i32,
     #[serde(default)]
     pub video: Option<String>,
+    #[serde(default)]
+    pub raw_footage: Option<String>,
     #[serde(default)]
     pub status: RecordStatus,
 
@@ -29,6 +32,7 @@ pub struct Submission {
 pub struct ValidatedSubmission {
     progress: i16,
     video: Option<String>,
+    raw_footage: Option<String>,
     status: RecordStatus,
     player: DatabasePlayer,
     demon: MinimalDemon,
@@ -112,9 +116,27 @@ impl Submission {
             })
         }
 
+        match self.raw_footage {
+            Some(ref raw) => {
+                let _ = Url::parse(raw).map_err(|_| DemonlistError::MalformedRawUrl)?;
+            },
+            None if self.status == RecordStatus::Submitted => {
+                // list mods can submit without raw
+                let has_records = sqlx::query!(r#"SELECT EXISTS(SELECT 1 FROM records WHERE player = $1) AS "value!""#, player.id)
+                    .fetch_one(&mut *connection)
+                    .await?;
+
+                if !has_records.value {
+                    return Err(DemonlistError::RawRequiredForFirstTime)
+                }
+            },
+            _ => (),
+        }
+
         Ok(ValidatedSubmission {
             progress: self.progress,
             video,
+            raw_footage: self.raw_footage,
             status: self.status,
             player,
             demon,
@@ -163,7 +185,7 @@ impl ValidatedSubmission {
                     record.id,
                     note
                 )
-                .fetch_one(connection)
+                .fetch_one(&mut *connection)
                 .await?
                 .id;
 
@@ -178,20 +200,27 @@ impl ValidatedSubmission {
             }
         }
 
+        if let Some(raw_footage) = self.raw_footage {
+            let note_content = format!("Raw footage: {}", raw_footage);
+            let note_id = sqlx::query!(
+                "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
+                record.id,
+                note_content
+            )
+            .fetch_one(&mut *connection)
+            .await?
+            .id;
+
+            record.notes.push(Note {
+                id: note_id,
+                record: id,
+                content: note_content,
+                transferred: false,
+                author: None,
+                editors: Vec::new(),
+            })
+        }
+
         Ok(record)
     }
 }
-/*
-impl FullRecord {
-    pub async fn create_from(
-        submitter: Submitter, submission: Submission, connection: &mut PgConnection, ratelimits: Option<PreparedRatelimits<'_>>,
-    ) -> Result<FullRecord> {
-        // Check ratelimits before any change is made to the database so that the transaction rollback is
-        // easier.
-        if let Some(ratelimits) = ratelimits {
-            ratelimits.check(RatelimitScope::RecordSubmissionGlobal)?;
-            ratelimits.check(RatelimitScope::RecordSubmission)?;
-        }
-    }
-}
-*/

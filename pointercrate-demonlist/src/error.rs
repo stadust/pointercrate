@@ -7,6 +7,7 @@ use serde::Serialize;
 pub type Result<T> = std::result::Result<T, DemonlistError>;
 
 #[derive(Serialize, Display, Debug, Eq, PartialEq, Clone)]
+#[serde(untagged)]
 pub enum DemonlistError {
     #[display(fmt = "{}", _0)]
     Core(CoreError),
@@ -161,8 +162,23 @@ pub enum DemonlistError {
     #[display(fmt = "Notes mustn't be empty!")]
     NoteEmpty,
 
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42231`
     #[display(fmt = "This player already have a verified claim associated with them")]
     AlreadyClaimed,
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42232`
+    #[display(fmt = "Since this is a first submission, raw footage is required")]
+    RawRequiredForFirstTime, //hehe
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42233`
+    #[display(fmt = "Raw footage needs to be a valid URL")]
+    MalformedRawUrl,
 }
 
 impl std::error::Error for DemonlistError {}
@@ -203,7 +219,9 @@ impl PointercrateError for DemonlistError {
             Non100Extended => 42220,
             UnsupportedVideoHost => 42224,
             DemonNameNotUnique { .. } => 42228,
-            AlreadyClaimed => 42230,
+            AlreadyClaimed => 42231,
+            RawRequiredForFirstTime => 42232,
+            MalformedRawUrl => 42233,
         }
     }
 }
