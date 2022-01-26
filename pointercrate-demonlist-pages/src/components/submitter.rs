@@ -78,10 +78,26 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     h3 {
+                        "Raw footage: "
+                    }
+                    p {
+                        "The unedited and untrimmed video for this completion, uploaded to a non-compressing (e.g. not YouTube) file-sharing service such as google drive. If the record was achieved on stream (meaning there is no recording), please provide a link to the stream VOD"
+                    }
+                    p {
+                        "Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator."
+                    }
+                    p {
+                        i {"Note: "} "This is required for every first record and recommended for big jumps!"
+                    }
+                    span.form-input.flex.col#submit-raw-footage {
+                        input type = "url"  name = "raw_footage" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
+                        p.error {}
+                    }
+                    h3 {
                         "Notes or comments: "
                     }
                     p {
-                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission. In particular, any required " b { "raw footage"} " goes here. Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator."
+                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission."
                     }
                     span.form-input.flex.col#submit-note {
                         textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}

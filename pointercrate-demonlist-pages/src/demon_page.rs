@@ -7,7 +7,7 @@ use crate::{
 };
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped, Render};
-use pointercrate_core_pages::{config as page_config, PageFragment, Script};
+use pointercrate_core_pages::{config as page_config, util::simple_dropdown, PageFragment, Script};
 use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, FullDemon},
@@ -107,8 +107,9 @@ impl PageFragment for DemonPage {
             (PreEscaped(format!("
                 <script>
                     window.list_length = {0};
-                    window.extended_list_length = {1}
-                </script>", list_config::list_size(), list_config::extended_list_size()
+                    window.extended_list_length = {1};
+                    window.demon_id = {2};
+                </script>", list_config::list_size(), list_config::extended_list_size(), self.data.demon.base.id
             )))
         }
     }
@@ -166,9 +167,30 @@ impl PageFragment for DemonPage {
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
                             "Position History"
-                            span.arrow.hover {}
+                            span.arrow.hover#history-trigger {}
                         }
-                        div.ct-chart.ct-perfect-fourth.js-collapse-content#position-chart style="display:none" {}
+                        div.js-collapse-content style="display:none"  {
+                            div.ct-chart.ct-perfect-fourth#position-chart style="display:none"{}
+
+                            table#history-table{
+                                tbody#history-table-body {
+                                    tr {
+                                        th.blue {
+                                            "Date"
+                                        }
+                                        th.blue {
+                                            "Change"
+                                        }
+                                        th.blue {
+                                            "New Position"
+                                        }
+                                        th.blue {
+                                            "Reason"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     (self.records_panel())
                     (PreEscaped(format!("

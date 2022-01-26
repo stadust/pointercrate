@@ -149,6 +149,7 @@ impl Taggable for FullRecord {
         self.demon.id.hash(&mut hasher);
         // notes have sub-endpoint -> no hash
         // submitter cannot be patched -> no hash
+        // raw footage cannot be patched -> no hash
         hasher.finish()
     }
 }

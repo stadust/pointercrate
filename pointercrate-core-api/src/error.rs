@@ -16,6 +16,7 @@ pub type Result<T> = std::result::Result<T, ErrorResponder>;
 #[derive(Debug, Serialize)]
 pub struct ErrorResponder {
     message: String,
+    #[serde(rename = "code")]
     error_code: u16,
     data: Value,
 }

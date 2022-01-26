@@ -56,6 +56,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::demon::paginate,
             endpoints::demon::paginate_listed,
             endpoints::demon::audit,
+            endpoints::demon::movement_log,
             endpoints::demon::patch,
             endpoints::demon::post,
             endpoints::demon::post_creator,

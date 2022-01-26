@@ -3,13 +3,13 @@
 use chrono::NaiveDateTime;
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug, Clone)]
 pub struct NamedId {
     pub id: i32,
     pub name: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct AuditLogEntry<T> {
     pub time: NaiveDateTime,
     pub entry_id: i32,
@@ -18,7 +18,7 @@ pub struct AuditLogEntry<T> {
     pub r#type: AuditLogEntryType<T>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub enum AuditLogEntryType<T> {
     Addition,
     Modification(T),
