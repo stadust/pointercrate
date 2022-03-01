@@ -13,8 +13,8 @@ impl AccountPageTab for SubmittersPage {
         permissions.require_permission(user.permissions, LIST_MODERATOR).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/submitter.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/submitter.js".into()
     }
 
     fn tab_id(&self) -> u8 {

@@ -9,7 +9,10 @@ pub mod users;
 #[async_trait::async_trait]
 pub trait AccountPageTab {
     fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool;
-    fn additional_scripts(&self) -> Vec<Script>;
+    fn initialization_script(&self) -> String;
+    fn additional_scripts(&self) -> Vec<Script> {
+        vec![]
+    }
 
     fn tab_id(&self) -> u8;
     fn tab(&self) -> Markup;
@@ -46,7 +49,9 @@ impl AccountPageConfig {
                 let content = tab_config.content(&page.user, permissions, connection).await;
 
                 page.scripts.extend(tab_config.additional_scripts());
-                page.tabs.push((tab, content, tab_config.tab_id()));
+                page.scripts.push(Script::module(tab_config.initialization_script()));
+                page.tabs
+                    .push((tab, content, tab_config.initialization_script(), tab_config.tab_id()));
             }
         }
 
@@ -57,7 +62,7 @@ impl AccountPageConfig {
 pub struct AccountPage {
     user: User,
     scripts: Vec<Script>,
-    tabs: Vec<(Markup, Markup, u8)>,
+    tabs: Vec<(Markup, Markup, String, u8)>,
     csrf_token: String,
 }
 
@@ -71,19 +76,20 @@ impl PageFragment for AccountPage {
     }
 
     fn additional_scripts(&self) -> Vec<Script> {
-        let mut scripts = self.scripts.clone();
-        scripts.push(Script::module("/static/js/staff.js"));
-        scripts
+        self.scripts.clone()
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/account.css".to_string(), "/static/css/sidebar.css".to_string()]
+        vec![
+            "/static/user/css/account.css".to_string(),
+            "/static/core/css/sidebar.css".to_string(),
+        ]
     }
 
     fn head_fragment(&self) -> Markup {
         html! {
             (PreEscaped(
-                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script>"#, self.user.name, self.user.etag_string(), self.user.permissions)
+                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script><script type="module">{}</script>"#, self.user.name, self.user.etag_string(), self.user.permissions, self.initialization_script())
             ))
         }
     }
@@ -93,7 +99,7 @@ impl PageFragment for AccountPage {
             span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
-                    @for (i, (tab, _, id)) in self.tabs.iter().enumerate() {
+                    @for (i, (tab, _, _, id)) in self.tabs.iter().enumerate() {
                         @if i == 0 {
                             div.tab.tab-active.button.white.hover.no-shadow data-tab-id=(id) {
                                 (*tab)
@@ -107,7 +113,7 @@ impl PageFragment for AccountPage {
                     }
                 }
 
-                @for (i, (_, content, id)) in self.tabs.iter().enumerate() {
+                @for (i, (_, content, _, id)) in self.tabs.iter().enumerate() {
                     @if i == 0 {
                         div.m-center.flex.tab-content.tab-content-active.container data-tab-id = (id){
                             (*content)
@@ -121,5 +127,56 @@ impl PageFragment for AccountPage {
                 }
             }
         }
+    }
+}
+
+impl AccountPage {
+    fn initialization_script(&self) -> String {
+        let mut imports = r#"
+import { TabbedPane } from "/static/core/js/modules/tab.js";
+        "#
+        .to_owned();
+        let mut initialization_states = String::new();
+        let mut initializations = String::new();
+
+        for (_, _, script, i) in &self.tabs {
+            imports.push_str(&format!(r#"import {{ initialize as initialize{} }} from "{}";"#, i, script));
+
+            initialization_states.push_str(&format!("let initialized{} = false;", i));
+            initializations.push_str(&format!(
+                r#"
+accountTabber.addSwitchListener("{0}", () => {{
+if (!initialized{0}) {{
+  initialize{0}(csrfToken, accountTabber);
+
+  initialized{0} = true;
+}}
+}});
+            "#,
+                i
+            ));
+        }
+
+        format!(
+            r#"
+        {}
+        {}
+        
+$(document).ready(function () {{
+    var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
+    var csrfToken = csrfTokenSpan.innerHTML;
+    
+    csrfTokenSpan.remove();
+    
+    let accountTabber = new TabbedPane(
+    document.getElementById("account-tabber"),
+    "account-tab-selection"
+    );
+    
+    {}
+}});
+        "#,
+            imports, initialization_states, initializations
+        )
     }
 }

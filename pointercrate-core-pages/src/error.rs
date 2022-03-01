@@ -21,7 +21,7 @@ impl PageFragment for ErrorFragment {
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/error.css".to_string()]
+        vec!["/static/core/css/error.css".to_string()]
     }
 
     fn head_fragment(&self) -> Markup {

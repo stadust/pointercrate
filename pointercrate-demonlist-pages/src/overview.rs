@@ -126,14 +126,17 @@ impl PageFragment for OverviewPage {
 
     fn additional_scripts(&self) -> Vec<Script> {
         vec![
-            Script::module("/static/js/modules/formv2.js"),
-            Script::module("/static/js/modules/demonlistv2.js"),
-            Script::module("/static/js/demonlist.v2.2.js"),
+            Script::module("/static/core/js/modules/form.js"),
+            Script::module("/static/demonlist/js/modules/demonlist.js"),
+            Script::module("/static/demonlist/js/demonlist.js"),
         ]
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/demonlist.v2.1.css".to_string(), "/static/css/sidebar.css".to_string()]
+        vec![
+            "/static/demonlist/css/demonlist.css".to_string(),
+            "/static/core/css/sidebar.css".to_string(),
+        ]
     }
 
     fn head_fragment(&self) -> Markup {

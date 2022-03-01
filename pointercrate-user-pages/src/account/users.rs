@@ -18,8 +18,8 @@ impl AccountPageTab for UsersTab {
         false
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/users.js")]
+    fn initialization_script(&self) -> String {
+        "/static/user/js/account/users.js".into()
     }
 
     fn tab_id(&self) -> u8 {

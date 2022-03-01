@@ -14,13 +14,13 @@ impl PageFragment for LoginPage {
 
     fn additional_scripts(&self) -> Vec<Script> {
         vec![
-            Script::module("/static/js/login.js"),
-            Script::module("/static/js/modules/formv2.js"),
+            Script::module("/static/user/js/login.js"),
+            Script::module("/static/core/js/modules/form.js"),
         ]
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/login.css".to_string()]
+        vec!["/static/user/css/login.css".to_string()]
     }
 
     fn head_fragment(&self) -> Markup {

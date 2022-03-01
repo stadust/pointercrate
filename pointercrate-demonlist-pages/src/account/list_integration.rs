@@ -18,8 +18,8 @@ impl AccountPageTab for ListIntegrationTab {
         true
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/integration.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/integration.js".into()
     }
 
     fn tab_id(&self) -> u8 {

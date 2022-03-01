@@ -12,8 +12,8 @@ impl AccountPageTab for ProfileTab {
         true
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/profile.js")]
+    fn initialization_script(&self) -> String {
+        "/static/user/js/account/profile.js".into()
     }
 
     fn tab_id(&self) -> u8 {

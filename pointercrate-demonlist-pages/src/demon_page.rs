@@ -50,24 +50,23 @@ impl PageFragment for DemonPage {
     fn additional_scripts(&self) -> Vec<Script> {
         vec![
             Script::new("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"),
-            Script::module("/static/js/modules/formv2.js"),
-            Script::module("/static/js/modules/demonlistv2.js"),
-            Script::module("/static/js/demonlist.v2.2.js"),
+            Script::module("/static/core/js/modules/form.js"),
+            Script::module("/static/demonlist/js/modules/demonlist.js"),
+            Script::module("/static/demonlist/js/demonlist.js"),
         ]
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
         vec![
             "https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css".to_string(),
-            "/static/css/demonlist.v2.1.css".to_string(),
-            "/static/css/sidebar.css".to_string(),
+            "/static/demonlist/css/demonlist.css".to_string(),
+            "/static/core/css/sidebar.css".to_string(),
         ]
     }
 
     fn head_fragment(&self) -> Markup {
         html! {
             (PreEscaped(format!(r##"
-                <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet">
                 <script type="application/ld+json">
                 {{
                     "@context": "http://schema.org",
@@ -458,7 +457,7 @@ impl DemonPage {
                                     tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
                                         td {
                                             @if let Some(ref nationality) = record.nationality {
-                                                span.flag-icon.{"flag-icon-"(nationality.iso_country_code.to_lowercase())} title = (nationality.nation) {}
+                                                span.flag-icon style={"background-image: url(/static/demonlist/images/flags/" (nationality.iso_country_code.to_lowercase()) ".svg"} title = (nationality.nation) {}
                                             }
                                         }
                                         td {

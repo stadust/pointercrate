@@ -7,7 +7,6 @@
 !/migrations
 !/build_documentation.rs
 !/README.md
-!/static2
 !/doc
 !/pointercrate-user/sql
 !/robots.txt

@@ -13,8 +13,8 @@ impl AccountPageTab for PlayersPage {
         permissions.require_permission(user.permissions, LIST_MODERATOR).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/players.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/player.js".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -102,7 +102,7 @@ impl AccountPageTab for PlayersPage {
                                                     li.white.hover.underlined data-value = "None" {"None"}
                                                     @for nation in nationalities {
                                                         li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                                                            span class = "flag-icon" style={"background-image: url(/static2/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
+                                                            span class = "flag-icon" style={"background-image: url(/static/demonlist/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
                                                             (PreEscaped("&nbsp;"))
                                                             b {(nation.iso_country_code)}
                                                             br;

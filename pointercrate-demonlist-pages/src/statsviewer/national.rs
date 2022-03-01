@@ -18,13 +18,16 @@ impl PageFragment for NationBasedStatsViewer {
 
     fn additional_scripts(&self) -> Vec<Script> {
         vec![
-            Script::module("/static/js/statsviewer.js"),
-            Script::module("/static/js/statsviewer/nation.js"),
+            Script::module("/static/demonlist/js/modules/statsviewer.js"),
+            Script::module("/static/demonlist/js/statsviewer/nation.js"),
         ]
     }
 
     fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/statsviewer.css".to_string(), "/static/css/sidebar.css".to_string()]
+        vec![
+            "/static/demonlist/css/statsviewer.css".to_string(),
+            "/static/core/css/sidebar.css".to_string(),
+        ]
     }
 
     fn head_fragment(&self) -> Markup {
@@ -47,7 +50,7 @@ impl PageFragment for NationBasedStatsViewer {
                 }
             }
             div#world-map-wrapper {
-                object#world-map data="/static/images/world.svg" type="image/svg+xml" {}
+                object#world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" {}
             }
             div.flex.m-center.container {
                 main.left {

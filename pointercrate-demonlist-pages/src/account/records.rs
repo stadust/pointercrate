@@ -24,8 +24,8 @@ impl AccountPageTab for RecordsPage {
         permissions.require_permission(user.permissions, LIST_HELPER).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/records.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/records.js".into()
     }
 
     fn tab_id(&self) -> u8 {

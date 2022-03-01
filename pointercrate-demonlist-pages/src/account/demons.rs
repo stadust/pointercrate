@@ -14,8 +14,8 @@ impl AccountPageTab for DemonsTab {
         permissions.require_permission(user.permissions, LIST_MODERATOR).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/demon.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/demon.js".into()
     }
 
     fn tab_id(&self) -> u8 {

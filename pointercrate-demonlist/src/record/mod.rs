@@ -73,7 +73,7 @@ impl RecordStatus {
             "APPROVED" => RecordStatus::Approved,
             "REJECTED" => RecordStatus::Rejected,
             "UNDER_CONSIDERATION" => RecordStatus::UnderConsideration,
-            _ => unreachable!(),
+            _ => panic!("invalid record state: {}", sql),
         }
     }
 }
