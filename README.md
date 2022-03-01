@@ -6,8 +6,6 @@ As of March 2nd 2019 this is the official repository for pointercrate. It does n
 - various assets such as graphics used by pointercrate
 - code specific to pointercrate that has no place on custom copies of pointercrate (such as the pointercrate homepage)
 
-Currently, this repository also does not contain any static files, or a database scheme, since I could not figure out a nice way to include them in the relevant crates. 
-
 This has both upsides and downsides. Since you'll have to write those components yourself, it will be very complicated to run custom pointercrate copies (especially since we do not actually support such endeavours). However, there are various advantages:
 
 - No code in this repository explicitly references pointercrate. Everything from the logo in the navigation bar to the site metadata in the headers is configurable. This means I wont have to shout at you 7 times for failing to remove references to pointercrate on your website
