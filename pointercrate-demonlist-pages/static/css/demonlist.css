@@ -216,10 +216,3 @@ tr:nth-child(even) {
 .ct-series-a .ct-point {
   stroke: #0881c6;
 }
-
-
-/*
- Flag styles, taken from https://github.com/lipis/flag-icon-css
- */
-
-.flag-icon-background{background-size:contain;background-position:50%;background-repeat:no-repeat}.flag-icon{background-size:contain;background-position:50%;background-repeat:no-repeat;position:relative;display:inline-block;width:1.33333333em;line-height:1em}.flag-icon:before{content:'\00a0'}

@@ -94,8 +94,8 @@ data-ad-slot="2819150519"></ins>
                 "#, page_config::adsense_publisher_id())))
             }
         }
-        // Place ad every 20th demon
-        @if demon.base.position % 20 == 0 {
+        // Place ad every 10th demon
+        @if demon.base.position % 10 == 0 {
             section.panel.fade {
             (PreEscaped(format!(r#"
                 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
