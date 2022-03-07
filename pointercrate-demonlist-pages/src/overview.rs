@@ -128,7 +128,6 @@ impl PageFragment for OverviewPage {
         vec![
             Script::module("/static/core/js/modules/form.js"),
             Script::module("/static/demonlist/js/modules/demonlist.js"),
-            Script::module("/static/demonlist/js/demonlist.js"),
         ]
     }
 
