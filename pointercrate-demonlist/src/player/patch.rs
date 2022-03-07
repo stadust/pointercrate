@@ -289,7 +289,7 @@ impl Player {
                     Err(err) => Err(err.into()),
                 }
             },
-            None => return Err(DemonlistError::NoNationSet),
+            None => Err(DemonlistError::NoNationSet),
         }
     }
 }

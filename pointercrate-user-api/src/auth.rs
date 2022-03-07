@@ -95,7 +95,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
         };
 
         for authorization in request.headers().get("Authorization") {
-            if let &["Bearer", token] = &authorization.split(' ').collect::<Vec<_>>()[..] {
+            if let ["Bearer", token] = authorization.split(' ').collect::<Vec<_>>()[..] {
                 let user =
                     try_outcome!(AuthenticatedUser::token_auth(token, None, &pointercrate_core::config::secret(), &mut connection).await);
 
@@ -205,7 +205,7 @@ impl<'r> FromRequest<'r> for Auth<false> {
         };
 
         for authorization in request.headers().get("Authorization") {
-            if let &["Basic", basic_auth] = &authorization.split(' ').collect::<Vec<_>>()[..] {
+            if let ["Basic", basic_auth] = authorization.split(' ').collect::<Vec<_>>()[..] {
                 let decoded = try_outcome!(base64::decode(basic_auth)
                     .map_err(|_| ())
                     .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))

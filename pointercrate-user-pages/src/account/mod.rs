@@ -23,11 +23,13 @@ pub struct AccountPageConfig {
     tabs: Vec<Box<dyn AccountPageTab + Send + Sync + 'static>>,
 }
 
-impl AccountPageConfig {
-    pub fn new() -> Self {
+impl Default for AccountPageConfig {
+    fn default() -> Self {
         AccountPageConfig { tabs: Vec::new() }
     }
+}
 
+impl AccountPageConfig {
     pub fn with_page(mut self, page: impl AccountPageTab + Send + Sync + 'static) -> Self {
         self.tabs.push(Box::new(page));
         self
@@ -44,7 +46,7 @@ impl AccountPageConfig {
         };
 
         for tab_config in &self.tabs {
-            if tab_config.should_display_for(&page.user, &permissions) {
+            if tab_config.should_display_for(&page.user, permissions) {
                 let tab = tab_config.tab();
                 let content = tab_config.content(&page.user, permissions, connection).await;
 

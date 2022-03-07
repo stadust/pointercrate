@@ -171,7 +171,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
         movement_log
             .last_mut()
             .map(|entry| entry.new_position = Some(minimal_demon.position));
-    });
+    })?;
 
     Ok(movement_log)
 }

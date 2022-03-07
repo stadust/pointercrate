@@ -75,14 +75,14 @@ impl RecordPagination {
     /// (the additional object stays the last)
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
             if after < before {
-                Err(CoreError::AfterSmallerBefore)?
+                return Err(CoreError::AfterSmallerBefore.into())
             }
         }
 
@@ -106,7 +106,7 @@ impl RecordPagination {
             .bind(self.demon_position_lt)
             .bind(self.demon_position_gt)
             .bind(self.status.map(|s| s.to_sql()))
-            .bind(self.demon.as_ref().map(|s| s.as_str()))
+            .bind(self.demon.as_deref())
             .bind(self.demon_id)
             .bind(&self.video)
             .bind(self.video == Some(None))

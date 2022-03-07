@@ -1,6 +1,6 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
-use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator, PageFragment, Script};
+use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator, PageFragment};
 use pointercrate_demonlist::{nationality::Nationality, LIST_MODERATOR};
 use pointercrate_user::{sqlx::PgConnection, User};
 use pointercrate_user_pages::account::AccountPageTab;

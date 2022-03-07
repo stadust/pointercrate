@@ -92,7 +92,7 @@ pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id
         // we clear all the assignable bits in the user's permissions bitstring. Since we already verified
         // that permissions is a subset of assignable_permissions, we can then set the new permissions via
         // simple OR
-        *permissions = (user.permissions & !assignable_bitmask) | *permissions;
+        *permissions |= (user.permissions & !assignable_bitmask);
     }
 
     if user_id == auth.user.inner().id {

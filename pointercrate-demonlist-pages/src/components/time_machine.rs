@@ -36,6 +36,9 @@ impl Tardis {
 }
 
 impl Render for Tardis {
+    // maud does not support @if let for complex patterns such as "@if let Tardis::Activated
+    // {destination,..} = self". If errors out on the comma.
+    #[allow(clippy::single_match)]
     fn render(&self) -> Markup {
         let current_year = FixedOffset::east(3600 * 23 + 3599)
             .from_utc_datetime(&Utc::now().naive_utc())

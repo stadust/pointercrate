@@ -7,7 +7,7 @@ use crate::{
 };
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped, Render};
-use pointercrate_core_pages::{config as page_config, util::simple_dropdown, PageFragment, Script};
+use pointercrate_core_pages::{config as page_config, PageFragment, Script};
 use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, FullDemon},

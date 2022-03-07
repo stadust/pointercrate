@@ -1,6 +1,5 @@
 use crate::{config, ratelimits::DemonlistRatelimits};
-use log::error;
-use pointercrate_core::{config::database_url, error::CoreError, pool::PointercratePool};
+use pointercrate_core::{error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
@@ -140,7 +139,7 @@ pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data
 pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> Result<Status> {
     auth.require_permission(MODERATOR)?;
 
-    let mut claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await?;
+    let claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await?;
 
     claim.delete(&mut auth.connection).await?;
     auth.commit().await?;

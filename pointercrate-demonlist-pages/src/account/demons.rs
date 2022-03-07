@@ -1,7 +1,7 @@
 use crate::components::player_selection_dialog;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_pages::{util::filtered_paginator, Script};
+use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
 use pointercrate_user::{sqlx::PgConnection, User};
 use pointercrate_user_pages::account::AccountPageTab;

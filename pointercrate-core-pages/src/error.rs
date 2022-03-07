@@ -13,7 +13,7 @@ impl PageFragment for ErrorFragment {
     }
 
     fn description(&self) -> String {
-        format!("{}", self.message)
+        self.message.to_string()
     }
 
     fn additional_scripts(&self) -> Vec<Script> {

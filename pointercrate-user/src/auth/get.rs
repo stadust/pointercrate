@@ -22,7 +22,7 @@ impl AuthenticatedUser {
 
         // Well this is reassuring. Also we directly deconstruct it and only save the ID
         // so we don't accidentally use unsafe values later on
-        let Claims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<Claims>(&access_token)
+        let Claims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<Claims>(access_token)
             .map_err(|_| CoreError::Unauthorized)?
             .claims;
 
@@ -33,9 +33,9 @@ impl AuthenticatedUser {
         // identify, so we need to retrieve that.
         let user = Self::by_id(id, connection)
             .await?
-            .validate_token(&access_token, application_secret)?;
+            .validate_token(access_token, application_secret)?;
 
-        if let Some(ref csrf_token) = csrf_token {
+        if let Some(csrf_token) = csrf_token {
             user.validate_csrf_token(csrf_token, application_secret)?
         }
 

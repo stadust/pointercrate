@@ -1,7 +1,6 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_pages::Script;
 use pointercrate_user::{sqlx::PgConnection, User};
 
 pub struct ProfileTab;

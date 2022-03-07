@@ -1,4 +1,4 @@
-//! Account/Authentification related user action
+//! Account/Authentication related user action
 //!
 //! Includes:
 //! * Registration
@@ -71,8 +71,10 @@ impl AuthenticatedUser {
 
     pub fn validate_token(self, token: &str, application_secret: &[u8]) -> Result<Self> {
         // TODO: maybe one day do something with this
-        let mut validation = jsonwebtoken::Validation::default();
-        validation.validate_exp = false;
+        let validation = jsonwebtoken::Validation {
+            validate_exp: false,
+            ..Default::default()
+        };
 
         jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(&self.jwt_secret(application_secret)), &validation)
             .map_err(|err| {
@@ -153,8 +155,6 @@ impl AuthenticatedUser {
 // with slight modifications (removal of `encode` and error handling)
 mod b64 {
     use std::collections::HashMap;
-
-    use base64;
 
     use lazy_static::lazy_static;
 
@@ -245,7 +245,7 @@ mod b64 {
         if hash.len() % 4 > 0 {
             let padding = 4 - hash.len() % 4;
             for _ in 0..padding {
-                res.push_str("=");
+                res.push('=');
             }
         }
 

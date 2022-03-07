@@ -270,7 +270,7 @@ async fn validate(record_id: i32, video: String, body: serde_json::Value, mut co
         Ok(response) => {
             let status = response.status().as_u16();
 
-            if status >= 200 && status < 400 {
+            if (200..400).contains(&status) {
                 debug!("GET request yielded some sort of successful response, executing webhook");
 
                 execute_webhook(body).await;

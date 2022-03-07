@@ -43,7 +43,7 @@ static LEGACY_SECTION: ListSection = ListSection {
 
 fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < config::list_size() as usize {
-        (&all_demons[..], Default::default(), Default::default())
+        (all_demons, Default::default(), Default::default())
     } else {
         let (extended, legacy) = if all_demons.len() < config::extended_list_size() as usize {
             (&all_demons[config::list_size() as usize..], Default::default())

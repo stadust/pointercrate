@@ -166,7 +166,7 @@ impl FullDemon {
 
 impl Demon {
     pub fn validate_requirement(requirement: i16) -> Result<()> {
-        if requirement < 0 || requirement > 100 {
+        if !(0..=100).contains(&requirement) {
             return Err(DemonlistError::InvalidRequirement)
         }
 
@@ -213,7 +213,7 @@ impl Demon {
             .fetch_one(connection)
             .await?
             .max_position
-            .ok_or(CoreError::NotFound.into())
+            .ok_or_else(|| CoreError::NotFound.into())
     }
 
     /// Gets the maximal and minimal submitter id currently in use

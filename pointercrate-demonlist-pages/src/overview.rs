@@ -205,7 +205,7 @@ impl PageFragment for OverviewPage {
                         Tardis::Activated { demons, ..} => {
                             @for TimeShiftedDemon {current_demon, position_now} in demons {
                                 @if current_demon.base.position <= list_config::extended_list_size() {
-                                    (demon_panel(&current_demon, Some(*position_now)))
+                                    (demon_panel(current_demon, Some(*position_now)))
                                 }
                             }
                         },
