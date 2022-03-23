@@ -24,6 +24,10 @@ impl PatchMe {
     pub fn changes_password(&self) -> bool {
         self.password.is_some()
     }
+
+    pub fn initiates_email_change(&self) -> bool {
+        matches!(self.email_address, Some(Some(_)))
+    }
 }
 
 // manual debug impl to ensure that the password field is never printed anywhere
@@ -74,7 +78,7 @@ impl AuthenticatedUser {
         // TODO: actually mail out the token
 
         println!(
-            "https://pointercrate.com/api/v1/auth/verifiy_email/?token={}",
+            "https://pointercrate.com/api/v1/auth/verify_email/?token={}",
             self.generate_change_email_token(email)
         );
 

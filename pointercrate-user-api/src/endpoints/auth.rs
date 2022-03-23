@@ -62,16 +62,30 @@ pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
     Ok(Status::NoContent)
 }
 
+#[rocket::get("/verify_email?<token>")]
+pub async fn verify_email(mut auth: TokenAuth, token: &str) -> Result<()> {
+    let email = auth.user.validate_change_email_token(token)?;
+    auth.user.set_email_address(email, &mut auth.connection).await?;
+
+    Ok(())
+}
+
 #[rocket::get("/me")]
 pub fn get_me(auth: TokenAuth) -> Tagged<User> {
     Tagged(auth.user.into_inner())
 }
 
 #[rocket::patch("/me", data = "<patch>")]
-pub async fn patch_me(mut auth: BasicAuth, patch: Json<PatchMe>, pred: Precondition) -> Result<std::result::Result<Tagged<User>, Status>> {
+pub async fn patch_me(
+    mut auth: BasicAuth, patch: Json<PatchMe>, pred: Precondition, ip: IpAddr, ratelimits: &State<UserRatelimits>,
+) -> Result<std::result::Result<Tagged<User>, Status>> {
     pred.require_etag_match(auth.user.inner())?;
 
     let changes_password = patch.changes_password();
+
+    if patch.initiates_email_change() {
+        ratelimits.change_email(ip)?;
+    }
 
     let updated_user = auth.user.apply_patch(patch.0, &mut auth.connection).await?;
 
