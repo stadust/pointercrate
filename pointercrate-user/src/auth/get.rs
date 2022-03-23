@@ -1,5 +1,5 @@
 use crate::{
-    auth::{AuthenticatedUser, Claims},
+    auth::{AccessClaims, AuthenticatedUser},
     error::Result,
     User,
 };
@@ -20,7 +20,7 @@ impl AuthenticatedUser {
 
         // Well this is reassuring. Also we directly deconstruct it and only save the ID
         // so we don't accidentally use unsafe values later on
-        let Claims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<Claims>(access_token)
+        let AccessClaims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<AccessClaims>(access_token)
             .map_err(|_| CoreError::Unauthorized)?
             .claims;
 

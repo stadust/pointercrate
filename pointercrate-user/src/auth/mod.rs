@@ -26,7 +26,7 @@ pub struct AuthenticatedUser {
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
-pub struct Claims {
+pub struct AccessClaims {
     pub id: i32,
 }
 
@@ -63,7 +63,7 @@ impl AuthenticatedUser {
     pub fn generate_access_token(&self) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
-            &Claims { id: self.user.id },
+            &AccessClaims { id: self.user.id },
             &EncodingKey::from_secret(&self.jwt_secret()),
         )
         .unwrap()
@@ -76,7 +76,7 @@ impl AuthenticatedUser {
             ..Default::default()
         };
 
-        jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
+        jsonwebtoken::decode::<AccessClaims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
             .map_err(|err| {
                 warn!("Token validation FAILED for account {}: {}", self.user, err);
 
