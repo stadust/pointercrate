@@ -15,6 +15,9 @@ pub struct PatchMe {
 
     #[serde(default, deserialize_with = "nullable")]
     pub(super) youtube_channel: Option<Option<String>>,
+
+    #[serde(default, deserialize_with = "nullable")]
+    pub(super) email_address: Option<Option<String>>,
 }
 
 impl PatchMe {
@@ -39,6 +42,13 @@ impl AuthenticatedUser {
             self.set_password(password, connection).await?;
         }
 
+        if let Some(email) = patch.email_address {
+            match email {
+                Some(email) => self.initiate_email_change(email).await?,
+                None => self.reset_email(connection).await?,
+            }
+        }
+
         self.user = self
             .user
             .apply_patch(
@@ -52,6 +62,47 @@ impl AuthenticatedUser {
             .await?;
 
         Ok(self)
+    }
+
+    /// Initiates a change of email address
+    ///
+    /// generates a change-email token and mails it to the given email address in the form of a
+    /// verification link
+    ///
+    /// does not make any changes to the database
+    pub async fn initiate_email_change(&self, email: String) -> Result<()> {
+        // TODO: actually mail out the token
+
+        println!(
+            "https://pointercrate.com/api/v1/auth/verifiy_email/?token={}",
+            self.generate_change_email_token(email)
+        );
+
+        Ok(())
+    }
+
+    pub async fn set_email_address(&mut self, email: String, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!(
+            "UPDATE members SET email_address = ($1::text)::email WHERE member_id = $2",
+            email,
+            self.user.id,
+        )
+        .execute(connection)
+        .await?;
+
+        self.email_address = Some(email);
+
+        Ok(())
+    }
+
+    pub async fn reset_email(&mut self, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!("UPDATE members SET email_address = NULL WHERE member_id = $1", self.user.id)
+            .execute(connection)
+            .await?;
+
+        self.email_address = None;
+
+        Ok(())
     }
 
     pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {

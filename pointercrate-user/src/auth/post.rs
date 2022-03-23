@@ -35,10 +35,6 @@ impl AuthenticatedUser {
 
                 info!("Newly registered user with name {} has been assigned ID {}", registration.name, id);
 
-                /*if let Some(ratelimits) = ratelimits {
-                    ratelimits.check(RatelimitScope::Registration)?;
-                }*/
-
                 Ok(AuthenticatedUser {
                     user: User {
                         id,
@@ -48,6 +44,7 @@ impl AuthenticatedUser {
                         youtube_channel: None,
                     },
                     password_hash: hash,
+                    email_address: None,
                 })
             },
             Err(err) => Err(err),
@@ -59,9 +56,10 @@ impl AuthenticatedUser {
             password: Some(password.to_string()),
             display_name: None,
             youtube_channel: None,
+            email_address: None,
         };
 
-        warn!("Invalidating all access tokens for user {}", self.inner());
+        warn!("Invalidating all tokens for user {}", self.inner());
 
         self.apply_patch(patch, connection).await?;
 

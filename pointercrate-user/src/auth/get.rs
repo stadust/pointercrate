@@ -40,7 +40,7 @@ impl AuthenticatedUser {
 
     async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query!(
-            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE member_id = $1"#,
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE member_id = $1"#,
             id
         )
         .fetch_one(connection)
@@ -53,13 +53,14 @@ impl AuthenticatedUser {
                 Ok(AuthenticatedUser {
                     user: construct_from_row!(row),
                     password_hash: row.password_hash,
+                    email_address: row.email_address,
                 }),
         }
     }
 
     async fn by_name(name: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query!(
-            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE members.name = $1"#,
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE members.name = $1"#,
             name.to_string()
         )
         .fetch_one(connection)
@@ -72,6 +73,7 @@ impl AuthenticatedUser {
                 Ok(AuthenticatedUser {
                     user: construct_from_row!(row),
                     password_hash: row.password_hash,
+                    email_address: row.email_address,
                 }),
         }
     }

@@ -24,6 +24,7 @@ mod post;
 pub struct AuthenticatedUser {
     user: User,
     password_hash: String,
+    email_address: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -130,7 +131,7 @@ impl AuthenticatedUser {
             // sanity check, should never fail
             if token_data.claims.id != self.user.id {
                 log::error!(
-                    "Token for user {} decoded successfully even though use {} is logged in",
+                    "Token for user {} decoded successfully even though user {} is logged in",
                     token_data.claims.id,
                     self.inner()
                 );
@@ -230,7 +231,7 @@ mod tests {
                 display_name: None,
                 youtube_channel: None,
             },
-            password_hash: bcrypt::hash("worse password", bcrypt::DEFAULT_COST).unwrap(),
+            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
         };
 
         let token = patrick.generate_change_email_token("patrick@pointercrate.com".to_string());
