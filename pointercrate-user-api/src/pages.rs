@@ -30,7 +30,7 @@ pub async fn login(
 
     let auth = auth?;
 
-    let mut cookie = Cookie::build("access_token", auth.user.generate_token())
+    let mut cookie = Cookie::build("access_token", auth.user.generate_access_token())
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -62,7 +62,7 @@ pub async fn register(
 
     connection.commit().await.map_err(UserError::from)?;
 
-    let mut cookie = Cookie::build("access_token", user.generate_token())
+    let mut cookie = Cookie::build("access_token", user.generate_access_token())
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");

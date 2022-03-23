@@ -60,7 +60,7 @@ impl AuthenticatedUser {
         key
     }
 
-    pub fn generate_token(&self) -> String {
+    pub fn generate_access_token(&self) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             &Claims { id: self.user.id },
@@ -69,7 +69,7 @@ impl AuthenticatedUser {
         .unwrap()
     }
 
-    pub fn validate_token(self, token: &str) -> Result<Self> {
+    pub fn validate_access_token(self, token: &str) -> Result<Self> {
         // TODO: maybe one day do something with this
         let validation = jsonwebtoken::Validation {
             validate_exp: false,

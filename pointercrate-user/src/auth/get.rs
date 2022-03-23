@@ -29,7 +29,7 @@ impl AuthenticatedUser {
         // Note that at this point we haven't validated the access token OR the csrf token yet.
         // However, the key they are signed with encompasses the password salt for the user they supposedly
         // identify, so we need to retrieve that.
-        let user = Self::by_id(id, connection).await?.validate_token(access_token)?;
+        let user = Self::by_id(id, connection).await?.validate_access_token(access_token)?;
 
         if let Some(csrf_token) = csrf_token {
             user.validate_csrf_token(csrf_token)?
