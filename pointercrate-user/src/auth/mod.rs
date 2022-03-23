@@ -14,6 +14,7 @@ use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use pointercrate_core::error::CoreError;
 use serde::{Deserialize, Serialize};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 mod delete;
 mod get;
@@ -28,6 +29,14 @@ pub struct AuthenticatedUser {
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
 pub struct AccessClaims {
     pub id: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ChangeEmailClaims {
+    pub id: i32,
+    pub email: String,
+    pub exp: u64,
+    pub iat: u64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -85,9 +94,55 @@ impl AuthenticatedUser {
             .map(move |_| self)
     }
 
-    pub fn generate_csrf_token(&self) -> String {
-        use std::time::{Duration, SystemTime, UNIX_EPOCH};
+    pub fn generate_change_email_token(&self, email: String) -> String {
+        let start = SystemTime::now();
+        let since_epoch = start
+            .duration_since(UNIX_EPOCH)
+            .expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
 
+        let claim = ChangeEmailClaims {
+            id: self.user.id,
+            email,
+            iat: since_epoch.as_secs(),
+            exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
+        };
+
+        jsonwebtoken::encode(
+            &jsonwebtoken::Header::default(),
+            &claim,
+            &EncodingKey::from_secret(&self.jwt_secret()),
+        )
+        .unwrap()
+    }
+
+    pub fn validate_change_email_token(&self, token: &str) -> Result<String> {
+        jsonwebtoken::decode::<ChangeEmailClaims>(
+            token,
+            &DecodingKey::from_secret(&self.jwt_secret()),
+            &jsonwebtoken::Validation::default(),
+        )
+        .map_err(|err| {
+            warn!("Change email token validation FAILED for account {}: {}", self.user, err);
+
+            CoreError::Unauthorized.into()
+        })
+        .and_then(|token_data| {
+            // sanity check, should never fail
+            if token_data.claims.id != self.user.id {
+                log::error!(
+                    "Token for user {} decoded successfully even though use {} is logged in",
+                    token_data.claims.id,
+                    self.inner()
+                );
+
+                Err(CoreError::Unauthorized.into())
+            } else {
+                Ok(token_data.claims.email)
+            }
+        })
+    }
+
+    pub fn generate_csrf_token(&self) -> String {
         let start = SystemTime::now();
         let since_epoch = start
             .duration_since(UNIX_EPOCH)
@@ -114,7 +169,7 @@ impl AuthenticatedUser {
             &jsonwebtoken::Validation::default(),
         )
         .map_err(|err| {
-            warn!("Token validation FAILED for account {}: {}", self.user, err);
+            warn!("Access token validation FAILED for account {}: {}", self.user, err);
 
             CoreError::Unauthorized.into()
         })
@@ -148,6 +203,42 @@ impl AuthenticatedUser {
 
             Err(CoreError::Unauthorized.into())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{AuthenticatedUser, User};
+
+    #[test]
+    fn test_change_password_token() {
+        let patrick = AuthenticatedUser {
+            user: User {
+                id: 0,
+                name: "Patrick".to_string(),
+                permissions: 0,
+                display_name: None,
+                youtube_channel: None,
+            },
+            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+        };
+        let jacob = AuthenticatedUser {
+            user: User {
+                id: 1,
+                name: "Jacob".to_string(),
+                permissions: 0,
+                display_name: None,
+                youtube_channel: None,
+            },
+            password_hash: bcrypt::hash("worse password", bcrypt::DEFAULT_COST).unwrap(),
+        };
+
+        let token = patrick.generate_change_email_token("patrick@pointercrate.com".to_string());
+        let validation_result = patrick.validate_change_email_token(&token);
+
+        assert!(validation_result.is_ok());
+        assert_eq!(validation_result.unwrap(), "patrick@pointercrate.com".to_string());
+        assert!(jacob.validate_change_email_token(&token).is_err())
     }
 }
 
