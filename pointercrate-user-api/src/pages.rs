@@ -2,7 +2,7 @@ use crate::{
     auth::{BasicAuth, TokenAuth},
     ratelimits::UserRatelimits,
 };
-use pointercrate_core::{config, permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
 use pointercrate_core_api::response::Page;
 use pointercrate_user::{error::UserError, AuthenticatedUser, Registration, User};
 use pointercrate_user_pages::{
@@ -30,7 +30,7 @@ pub async fn login(
 
     let auth = auth?;
 
-    let mut cookie = Cookie::build("access_token", auth.user.generate_token(&config::secret()))
+    let mut cookie = Cookie::build("access_token", auth.user.generate_token())
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -62,7 +62,7 @@ pub async fn register(
 
     connection.commit().await.map_err(UserError::from)?;
 
-    let mut cookie = Cookie::build("access_token", user.generate_token(&config::secret()))
+    let mut cookie = Cookie::build("access_token", user.generate_token())
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -82,7 +82,7 @@ pub async fn account_page(
 ) -> Result<Page<AccountPage>, Redirect> {
     match auth {
         Some(mut auth) => {
-            let csrf_token = auth.user.generate_csrf_token(&config::secret());
+            let csrf_token = auth.user.generate_csrf_token();
 
             Ok(Page(
                 tabs.account_page(csrf_token, auth.user.into_inner(), permissions, &mut auth.connection)

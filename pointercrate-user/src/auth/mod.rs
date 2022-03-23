@@ -54,29 +54,29 @@ impl AuthenticatedUser {
         Ok(())
     }
 
-    fn jwt_secret(&self, application_secret: &[u8]) -> Vec<u8> {
-        let mut key: Vec<u8> = application_secret.into();
+    fn jwt_secret(&self) -> Vec<u8> {
+        let mut key: Vec<u8> = pointercrate_core::config::secret();
         key.extend(self.password_salt());
         key
     }
 
-    pub fn generate_token(&self, application_secret: &[u8]) -> String {
+    pub fn generate_token(&self) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             &Claims { id: self.user.id },
-            &EncodingKey::from_secret(&self.jwt_secret(application_secret)),
+            &EncodingKey::from_secret(&self.jwt_secret()),
         )
         .unwrap()
     }
 
-    pub fn validate_token(self, token: &str, application_secret: &[u8]) -> Result<Self> {
+    pub fn validate_token(self, token: &str) -> Result<Self> {
         // TODO: maybe one day do something with this
         let validation = jsonwebtoken::Validation {
             validate_exp: false,
             ..Default::default()
         };
 
-        jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(&self.jwt_secret(application_secret)), &validation)
+        jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
             .map_err(|err| {
                 warn!("Token validation FAILED for account {}: {}", self.user, err);
 
@@ -85,7 +85,7 @@ impl AuthenticatedUser {
             .map(move |_| self)
     }
 
-    pub fn generate_csrf_token(&self, application_secret: &[u8]) -> String {
+    pub fn generate_csrf_token(&self) -> String {
         use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
         let start = SystemTime::now();
@@ -102,15 +102,15 @@ impl AuthenticatedUser {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             &claim,
-            &EncodingKey::from_secret(application_secret),
+            &EncodingKey::from_secret(&pointercrate_core::config::secret()),
         )
         .unwrap()
     }
 
-    pub fn validate_csrf_token(&self, token: &str, application_secret: &[u8]) -> Result<()> {
+    pub fn validate_csrf_token(&self, token: &str) -> Result<()> {
         jsonwebtoken::decode::<CSRFClaims>(
             token,
-            &DecodingKey::from_secret(application_secret),
+            &DecodingKey::from_secret(&pointercrate_core::config::secret()),
             &jsonwebtoken::Validation::default(),
         )
         .map_err(|err| {

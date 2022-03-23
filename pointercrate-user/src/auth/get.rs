@@ -15,9 +15,7 @@ impl AuthenticatedUser {
         Self::by_name(username, connection).await?.verify_password(password)
     }
 
-    pub async fn token_auth(
-        access_token: &str, csrf_token: Option<&str>, application_secret: &[u8], connection: &mut PgConnection,
-    ) -> Result<AuthenticatedUser> {
+    pub async fn token_auth(access_token: &str, csrf_token: Option<&str>, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform token authentication");
 
         // Well this is reassuring. Also we directly deconstruct it and only save the ID
@@ -31,12 +29,10 @@ impl AuthenticatedUser {
         // Note that at this point we haven't validated the access token OR the csrf token yet.
         // However, the key they are signed with encompasses the password salt for the user they supposedly
         // identify, so we need to retrieve that.
-        let user = Self::by_id(id, connection)
-            .await?
-            .validate_token(access_token, application_secret)?;
+        let user = Self::by_id(id, connection).await?.validate_token(access_token)?;
 
         if let Some(csrf_token) = csrf_token {
-            user.validate_csrf_token(csrf_token, application_secret)?
+            user.validate_csrf_token(csrf_token)?
         }
 
         Ok(user)
