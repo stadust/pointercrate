@@ -28,6 +28,16 @@ pub enum DemonlistError {
     #[display(fmt = "IP Geolocation attempt through VPS detected")]
     VpsDetected,
 
+    /// `403 FORBIDDEN` variant returned when someone tries to submit a records for a player who
+    /// does not permit others to submit their records.
+    ///
+    /// This means only the pointercrate user who has a claim on the given player, while logged in,
+    /// can submit records for this player.
+    ///
+    /// Error Code `40308`
+    #[display(fmt = "This player has requested that only they themselves can submit their records")]
+    NoThirdPartySubmissions,
+
     #[display(fmt = "No submitter with id {} found", id)]
     SubmitterNotFound { id: i32 },
 
@@ -200,6 +210,7 @@ impl PointercrateError for DemonlistError {
             BannedFromSubmissions => 40304,
             ClaimUnverified => 40306,
             VpsDetected => 40307,
+            NoThirdPartySubmissions => 40308,
             NationalityNotFound { .. } => 40401,
             SubdivisionNotFound { .. } => 40401,
             PlayerNotFound { .. } => 40401,

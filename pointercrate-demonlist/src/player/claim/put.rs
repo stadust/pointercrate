@@ -40,6 +40,7 @@ impl DatabasePlayer {
             user_id: claimed_by,
             player_id: self.id,
             verified: false,
+            lock_submissions: false,
         })
     }
 }
