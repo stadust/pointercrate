@@ -222,6 +222,7 @@ mod tests {
                 youtube_channel: None,
             },
             password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            email_address: None,
         };
         let jacob = AuthenticatedUser {
             user: User {
@@ -232,6 +233,7 @@ mod tests {
                 youtube_channel: None,
             },
             password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            email_address: None,
         };
 
         let token = patrick.generate_change_email_token("patrick@pointercrate.com".to_string());
@@ -239,7 +241,7 @@ mod tests {
 
         assert!(validation_result.is_ok());
         assert_eq!(validation_result.unwrap(), "patrick@pointercrate.com".to_string());
-        assert!(jacob.validate_change_email_token(&token).is_err())
+        assert!(jacob.validate_change_email_token(&token).is_err());
     }
 }
 

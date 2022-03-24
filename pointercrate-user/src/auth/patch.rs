@@ -71,14 +71,15 @@ impl AuthenticatedUser {
     /// Initiates a change of email address
     ///
     /// generates a change-email token and mails it to the given email address in the form of a
-    /// verification link
+    /// verification link.
     ///
-    /// does not make any changes to the database
+    /// does not make any changes to the database, email is only changed when verification link is
+    /// clicked.
     pub async fn initiate_email_change(&self, email: String) -> Result<()> {
         // TODO: actually mail out the token
 
         println!(
-            "https://pointercrate.com/api/v1/auth/verify_email/?token={}",
+            "https://pointercrate.com/api/v1/auth/verify_email?token={}",
             self.generate_change_email_token(email)
         );
 

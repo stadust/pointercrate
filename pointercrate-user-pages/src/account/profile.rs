@@ -85,7 +85,7 @@ impl AccountPageTab for ProfileTab {
                             }
                             (permission_string)
                             p {
-                                "The permissions you have on pointercrate. 'Extended Access' means you can retrieve more data from the API if you authorize yourself, 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
+                                "The permissions you have on pointercrate. 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
                             }
                         }
                     }
