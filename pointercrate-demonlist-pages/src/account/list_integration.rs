@@ -55,7 +55,7 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i#claimed-player data-id = (claim.player.id){
+                                    i#claimed-player data-id = (claim.player.id) {
                                         (claim.player.name)
                                     }
                                 },
@@ -96,6 +96,21 @@ impl AccountPageTab for ListIntegrationTab {
                                     "Clicking the above button let's you set your claimed player's nationality via IP Geolocation. To offer this functionality, pointercrate uses "
                                     a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
                                     ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
+                                }
+                                div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
+                                    b {
+                                        "Lock Submissions:"
+                                    }
+                                    @if claim.lock_submissions {
+                                        input#lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
+                                    }
+                                    @else {
+                                        input#lock-submissions-checkbox type = "checkbox" name = "lock_submissions";
+                                    }
+                                    span.checkmark {}
+                                }
+                                p {
+                                    "Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)"
                                 }
                             }
                         }

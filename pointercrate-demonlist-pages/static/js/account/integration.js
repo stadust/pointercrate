@@ -140,9 +140,9 @@ export function initialize(csrfToken) {
         let geolocationButton = document.getElementById("claims-geolocate-nationality");
         let output = new Output(claimPanel);
 
-        geolocationButton.addEventListener("click", () => {
-            let playerId = claimedPlayer.dataset.id;
+        let playerId = claimedPlayer.dataset.id;
 
+        geolocationButton.addEventListener("click", () => {
             post("/api/v1/players/" + playerId + "/geolocate", {'X-CSRF-TOKEN': csrfToken})
                 .then(response => {
                     let nationality = response.data;
@@ -152,6 +152,13 @@ export function initialize(csrfToken) {
                         output.setSuccess("Set nationality to " + nationality.nation);
                     }
                 }).catch(displayError(output))
+        })
+
+        let lockSubmissionsCheckbox = document.getElementById("lock-submissions-checkbox");
+        lockSubmissionsCheckbox.addEventListener("change", () => {
+            patch("/api/v1/players/" + playerId + "/claims/" + window.userId + "/", {'X-CSRF-TOKEN': csrfToken}, {"lock_submissions": lockSubmissionsCheckbox.checked}).then(_ => {
+                output.setSuccess("Successfully applied changed")
+            }).catch(displayError(output))
         })
     }
 }

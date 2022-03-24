@@ -91,7 +91,7 @@ impl PageFragment for AccountPage {
     fn head_fragment(&self) -> Markup {
         html! {
             (PreEscaped(
-                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script><script type="module">{}</script>"#, self.user.inner().name, self.user.inner().etag_string(), self.user.inner().permissions, self.initialization_script())
+                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'; window.userId={}</script><script type="module">{}</script>"#, self.user.inner().name, self.user.inner().etag_string(), self.user.inner().permissions, self.user.inner().id, self.initialization_script())
             ))
         }
     }
