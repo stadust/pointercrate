@@ -65,7 +65,9 @@ pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
 #[rocket::get("/verify_email?<token>")]
 pub async fn verify_email(mut auth: TokenAuth, token: &str) -> Result<&'static str> {
     let email = auth.user.validate_change_email_token(token)?;
+
     auth.user.set_email_address(email, &mut auth.connection).await?;
+    auth.connection.commit().await.map_err(UserError::from)?;
 
     Ok("Success! You can close this tab/window now")
 }
