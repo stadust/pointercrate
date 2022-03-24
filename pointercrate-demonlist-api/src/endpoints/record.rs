@@ -10,7 +10,6 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     error::DemonlistError,
-    player::claim::PlayerClaim,
     record::{
         audit::RecordModificationData,
         note::{NewNote, Note, PatchNote},
