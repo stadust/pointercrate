@@ -11,7 +11,7 @@ use pointercrate_demonlist::{
     error::DemonlistError,
     nationality::Nationality,
     player::{
-        claim::{ListedClaim, PatchVerified, PlayerClaim, PlayerClaimPagination},
+        claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
         DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
     },
     LIST_HELPER,
@@ -123,12 +123,35 @@ pub async fn put_claim(player_id: i32, mut auth: TokenAuth) -> Result<Response2<
         .with_header("Location", format!("/api/v1/players/{}/claims/{}/", player.id, user_id)))
 }
 
+/// The `verified` attribute can only be changed by moderator. All other attributes can only be
+/// changed by the person holding the claim, but only if the claim is verified (to claim a different
+/// player, put in a new `PUT` request)
 #[rocket::patch("/<player_id>/claims/<user_id>", data = "<data>")]
-pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data: Json<PatchVerified>) -> Result<Json<PlayerClaim>> {
-    auth.require_permission(MODERATOR)?;
+pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data: Json<PatchPlayerClaim>) -> Result<Json<PlayerClaim>> {
+    let claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await;
 
-    let claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await?;
-    let claim = claim.set_verified(data.verified, &mut auth.connection).await?;
+    if data.verified.is_some() {
+        auth.require_permission(MODERATOR)?;
+    }
+
+    let claim = match claim {
+        Ok(claim) if claim.user_id != auth.user.inner().id =>
+            return Err(DemonlistError::ClaimNotFound {
+                member_id: user_id,
+                player_id,
+            }
+            .into()),
+        Ok(claim) if !claim.verified => return Err(DemonlistError::ClaimUnverified.into()),
+        Ok(claim) => claim,
+        Err(_) =>
+            return Err(DemonlistError::ClaimNotFound {
+                member_id: user_id,
+                player_id,
+            }
+            .into()),
+    };
+
+    let claim = claim.apply_patch(data.0, &mut auth.connection).await?;
 
     auth.commit().await?;
 

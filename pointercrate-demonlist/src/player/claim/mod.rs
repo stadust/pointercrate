@@ -1,5 +1,5 @@
 pub use paginate::{ListedClaim, PlayerClaimPagination};
-pub use patch::PatchVerified;
+pub use patch::PatchPlayerClaim;
 use serde::Serialize;
 
 mod delete;
