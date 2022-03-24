@@ -56,6 +56,10 @@ impl AuthenticatedUser {
         &self.user
     }
 
+    pub fn email_address(&self) -> Option<&str> {
+        self.email_address.as_deref()
+    }
+
     pub fn validate_password(password: &str) -> Result<()> {
         if password.len() < 10 {
             return Err(UserError::InvalidPassword)

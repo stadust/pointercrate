@@ -85,6 +85,20 @@ impl AccountPageTab for ProfileTab {
                         }
                         span {
                             b {
+                                i.fa.fa-pencil-alt.clickable#email-pen aria-hidden = "true" {} " E-Mail Address: "
+                            }
+                            i#profile-email_address {
+                                @match authenticated_user.email_address() {
+                                    Some(ref email) => (email),
+                                    None => "-"
+                                }
+                            }
+                            p {
+                                "The E-Mail address associated with your pointercrate account. Only you can see this, and it is by default only used for password recovery. Note that if you do not provide an e-mail address, you will not be able to reset your password if you forget it."
+                            }
+                        }
+                        span {
+                            b {
                                 "Permissions: "
                             }
                             (permission_string)
@@ -153,6 +167,7 @@ impl AccountPageTab for ProfileTab {
             }
             (edit_display_name_dialog())
             (edit_youtube_link_dialog())
+            (edit_email_address_dialog())
             (change_password_dialog())
             (delete_account_dialog())
         }
@@ -210,6 +225,37 @@ fn edit_youtube_link_dialog() -> Markup {
                         p.error {}
                     }
                     span.overlined.pad.form-input#auth-yt {
+                        label {"Authenticate:"}
+                        input type = "password" minlength = "10" required = "";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                }
+            }
+        }
+    }
+}
+
+fn edit_email_address_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#edit-email-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change E-Mail Address:"
+                }
+                p {
+                    "To make profile related edits, re-entering your password below is required. Note that you will have to validate your e-mail address by clicking a link we will mail to you from " i{ "noreply@pointercrate.com"} "."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#edit-email {
+                        label for = "email_address" {"New E-Mail Address:"}
+                        input type = "email" name = "email_address";
+                        p.error {}
+                    }
+                    span.overlined.pad.form-input#auth-email {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}
