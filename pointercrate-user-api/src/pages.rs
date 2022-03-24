@@ -85,8 +85,7 @@ pub async fn account_page(
             let csrf_token = auth.user.generate_csrf_token();
 
             Ok(Page(
-                tabs.account_page(csrf_token, auth.user.into_inner(), permissions, &mut auth.connection)
-                    .await,
+                tabs.account_page(csrf_token, auth.user, permissions, &mut auth.connection).await,
             ))
         },
         None => Err(Redirect::to(rocket::uri!(login_page))),

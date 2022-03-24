@@ -13,15 +13,15 @@ use pointercrate_demonlist::{
     demon::{current_list, Demon},
     LIST_HELPER,
 };
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 use pointercrate_user_pages::account::AccountPageTab;
 
 pub struct RecordsPage;
 
 #[async_trait::async_trait]
 impl AccountPageTab for RecordsPage {
-    fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool {
-        permissions.require_permission(user.permissions, LIST_HELPER).is_ok()
+    fn should_display_for(&self, permissions_we_have: u16, permissions: &PermissionsManager) -> bool {
+        permissions.require_permission(permissions_we_have, LIST_HELPER).is_ok()
     }
 
     fn initialization_script(&self) -> String {
@@ -42,7 +42,7 @@ impl AccountPageTab for RecordsPage {
         }
     }
 
-    async fn content(&self, _user: &User, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &AuthenticatedUser, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
         let demons = match current_list(connection).await {
             Ok(demons) => demons,
             Err(err) =>

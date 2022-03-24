@@ -1,13 +1,13 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, User};
 
 pub struct ProfileTab;
 
 #[async_trait::async_trait]
 impl AccountPageTab for ProfileTab {
-    fn should_display_for(&self, _user: &User, _permissions: &PermissionsManager) -> bool {
+    fn should_display_for(&self, _permissions_we_have: u16, _permissions: &PermissionsManager) -> bool {
         true
     }
 
@@ -29,7 +29,11 @@ impl AccountPageTab for ProfileTab {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
+    async fn content(
+        &self, authenticated_user: &AuthenticatedUser, permissions: &PermissionsManager, _connection: &mut PgConnection,
+    ) -> Markup {
+        let user = authenticated_user.inner();
+
         let permissions = permissions.bits_to_permissions(user.permissions);
         let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");
 

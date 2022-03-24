@@ -1,14 +1,14 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
 use pointercrate_core_pages::{PageFragment, Script};
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, User};
 
 pub mod profile;
 pub mod users;
 
 #[async_trait::async_trait]
 pub trait AccountPageTab {
-    fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool;
+    fn should_display_for(&self, permissions_we_have: u16, permission_manager: &PermissionsManager) -> bool;
     fn initialization_script(&self) -> String;
     fn additional_scripts(&self) -> Vec<Script> {
         vec![]
@@ -16,7 +16,7 @@ pub trait AccountPageTab {
 
     fn tab_id(&self) -> u8;
     fn tab(&self) -> Markup;
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup;
+    async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup;
 }
 
 pub struct AccountPageConfig {
@@ -36,7 +36,7 @@ impl AccountPageConfig {
     }
 
     pub async fn account_page(
-        &self, csrf_token: String, user: User, permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, csrf_token: String, user: AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> AccountPage {
         let mut page = AccountPage {
             user,
@@ -46,7 +46,7 @@ impl AccountPageConfig {
         };
 
         for tab_config in &self.tabs {
-            if tab_config.should_display_for(&page.user, permissions) {
+            if tab_config.should_display_for(page.user.inner().permissions, permissions) {
                 let tab = tab_config.tab();
                 let content = tab_config.content(&page.user, permissions, connection).await;
 
@@ -62,7 +62,7 @@ impl AccountPageConfig {
 }
 
 pub struct AccountPage {
-    user: User,
+    user: AuthenticatedUser,
     scripts: Vec<Script>,
     tabs: Vec<(Markup, Markup, String, u8)>,
     csrf_token: String,
@@ -70,7 +70,7 @@ pub struct AccountPage {
 
 impl PageFragment for AccountPage {
     fn title(&self) -> String {
-        format!("Account - {}", self.user.name)
+        format!("Account - {}", self.user.inner().name)
     }
 
     fn description(&self) -> String {
@@ -91,7 +91,7 @@ impl PageFragment for AccountPage {
     fn head_fragment(&self) -> Markup {
         html! {
             (PreEscaped(
-                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script><script type="module">{}</script>"#, self.user.name, self.user.etag_string(), self.user.permissions, self.initialization_script())
+                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script><script type="module">{}</script>"#, self.user.inner().name, self.user.inner().etag_string(), self.user.inner().permissions, self.initialization_script())
             ))
         }
     }

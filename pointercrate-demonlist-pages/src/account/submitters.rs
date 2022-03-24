@@ -2,15 +2,15 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_pages::util::paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 use pointercrate_user_pages::account::AccountPageTab;
 
 pub struct SubmittersPage;
 
 #[async_trait::async_trait]
 impl AccountPageTab for SubmittersPage {
-    fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool {
-        permissions.require_permission(user.permissions, LIST_MODERATOR).is_ok()
+    fn should_display_for(&self, permissions_we_have: u16, permissions: &PermissionsManager) -> bool {
+        permissions.require_permission(permissions_we_have, LIST_MODERATOR).is_ok()
     }
 
     fn initialization_script(&self) -> String {
@@ -31,7 +31,7 @@ impl AccountPageTab for SubmittersPage {
         }
     }
 
-    async fn content(&self, _user: &User, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &AuthenticatedUser, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         html! {
             div.left {
                 div.panel.fade {

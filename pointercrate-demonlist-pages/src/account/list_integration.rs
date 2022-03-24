@@ -2,14 +2,14 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
 use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator, PageFragment};
 use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_user::{sqlx::PgConnection, User, MODERATOR};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
 
 pub struct ListIntegrationTab(/* discord invite url */ pub &'static str);
 
 #[async_trait::async_trait]
 impl AccountPageTab for ListIntegrationTab {
-    fn should_display_for(&self, _user: &User, _permissions: &PermissionsManager) -> bool {
+    fn should_display_for(&self, _permissions_we_have: u16, _permissions: &PermissionsManager) -> bool {
         true
     }
 
@@ -31,8 +31,8 @@ impl AccountPageTab for ListIntegrationTab {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
-        let player_claim = match PlayerClaim::by_user(user.id, connection).await {
+    async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+        let player_claim = match PlayerClaim::by_user(user.inner().id, connection).await {
             Ok(player_claim) => player_claim,
             Err(err) =>
                 return ErrorFragment {
@@ -42,7 +42,7 @@ impl AccountPageTab for ListIntegrationTab {
                 }
                 .body_fragment(),
         };
-        let is_moderator = permissions.require_permission(user.permissions, MODERATOR).is_ok();
+        let is_moderator = permissions.require_permission(user.inner().permissions, MODERATOR).is_ok();
 
         html! {
             div.left {
