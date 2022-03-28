@@ -1,6 +1,6 @@
 name: coverage
 
-# Runs `cargo check` whenever code is pushed or pr'd into master. 
+# Runs tests with coverage and reports the results
 
 on: 
   push:
@@ -22,7 +22,7 @@ jobs:
           config: grcov.yml
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2021-07-31
           override: true
       - uses: actions-rs/cargo@v1
         with:
