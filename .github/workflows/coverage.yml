@@ -1,0 +1,36 @@
+name: coverage
+
+# Runs `cargo check` whenever code is pushed or pr'd into master. 
+
+on: 
+  push:
+    branches: 
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - uses: codecov/codecov-action@v2
+        with:
+          config: grcov.yml
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+      - uses: actions-rs/cargo@v1
+          with:
+            command: test
+          env:
+            CARGO_INCREMENTAL: '0'
+            RUSTFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+            RUSTDOCFLAGS: '-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests'
+      - uses: actions-rs/grcov@v0.1
+      - uses: codecov/codecov-action@v2
+          with:
+            files: ./pointercrate.lcov
