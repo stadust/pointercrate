@@ -96,7 +96,20 @@ impl AuthenticatedUser {
 
                 CoreError::Unauthorized.into()
             })
-            .map(move |_| self)
+            .and_then(move |token_data| {
+                // sanity check, should never fail
+                if token_data.claims.id != self.user.id {
+                    log::error!(
+                        "Access token for user {} decoded successfully even though user {} is logged in",
+                        token_data.claims.id,
+                        self.inner()
+                    );
+
+                    Err(CoreError::Unauthorized.into())
+                } else {
+                    Ok(self)
+                }
+            })
     }
 
     pub fn generate_change_email_token(&self, email: String) -> String {
@@ -178,7 +191,18 @@ impl AuthenticatedUser {
 
             CoreError::Unauthorized.into()
         })
-        .map(|_| ())
+        .and_then(|token_data| {
+            if token_data.claims.id != self.user.id {
+                warn!(
+                    "User {} attempt to authenticate using CSRF token generated for user {}",
+                    self.user, token_data.claims.id
+                );
+
+                Err(CoreError::Unauthorized.into())
+            } else {
+                Ok(())
+            }
+        })
     }
 
     fn password_salt(&self) -> Vec<u8> {
@@ -215,9 +239,8 @@ impl AuthenticatedUser {
 mod tests {
     use crate::{AuthenticatedUser, User};
 
-    #[test]
-    fn test_change_password_token() {
-        let patrick = AuthenticatedUser {
+    fn patrick() -> AuthenticatedUser {
+        AuthenticatedUser {
             user: User {
                 id: 0,
                 name: "Patrick".to_string(),
@@ -227,8 +250,11 @@ mod tests {
             },
             password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
             email_address: None,
-        };
-        let jacob = AuthenticatedUser {
+        }
+    }
+
+    fn jacob() -> AuthenticatedUser {
+        AuthenticatedUser {
             user: User {
                 id: 1,
                 name: "Jacob".to_string(),
@@ -238,7 +264,13 @@ mod tests {
             },
             password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
             email_address: None,
-        };
+        }
+    }
+
+    #[test]
+    fn test_change_password_token() {
+        let patrick = patrick();
+        let jacob = jacob();
 
         let token = patrick.generate_change_email_token("patrick@pointercrate.com".to_string());
         let validation_result = patrick.validate_change_email_token(&token);
@@ -246,6 +278,43 @@ mod tests {
         assert!(validation_result.is_ok());
         assert_eq!(validation_result.unwrap(), "patrick@pointercrate.com".to_string());
         assert!(jacob.validate_change_email_token(&token).is_err());
+    }
+
+    #[test]
+    fn test_password() {
+        assert!(patrick().verify_password("bad password").is_ok());
+        assert!(patrick().verify_password("lksafdölksad").is_err());
+        assert!(patrick().verify_password("bad password with suffix").is_err());
+    }
+
+    #[test]
+    fn test_csrf_token() {
+        let patrick = patrick();
+        let jacob = jacob();
+
+        let patricks_csrf_token = patrick.generate_csrf_token();
+
+        // make sure only the correct user can decode them
+        assert!(patrick.validate_csrf_token(&patricks_csrf_token).is_ok());
+        assert!(jacob.validate_csrf_token(&patricks_csrf_token).is_err());
+
+        // make sure they arent usable in other places that require tokens
+        assert!(patrick.validate_change_email_token(&patricks_csrf_token).is_err());
+        assert!(jacob.validate_change_email_token(&patricks_csrf_token).is_err());
+
+        assert!(patrick.validate_access_token(&patricks_csrf_token).is_err());
+        assert!(jacob.validate_access_token(&patricks_csrf_token).is_err());
+    }
+
+    #[test]
+    fn test_access_token() {
+        let patrick = patrick();
+        let jacob = jacob();
+
+        let patricks_access_token = patrick.generate_access_token();
+
+        assert!(patrick.validate_access_token(&patricks_access_token).is_ok());
+        assert!(jacob.validate_access_token(&patricks_access_token).is_err());
     }
 }
 
