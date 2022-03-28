@@ -40,7 +40,7 @@ impl AccountPageTab for PlayersPage {
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body_fragment(),
+                .body(),
         };
 
         html! {

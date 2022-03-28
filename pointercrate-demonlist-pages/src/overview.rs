@@ -7,7 +7,7 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core_pages::{config as page_config, PageFragment, Script};
+use pointercrate_core_pages::{config as page_config, head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, TimeShiftedDemon},
@@ -115,31 +115,21 @@ data-ad-slot="5157884729"></ins>
     }
 }
 
-impl PageFragment for OverviewPage {
-    fn title(&self) -> String {
-        "Geometry Dash Demonlist".to_string()
+impl From<OverviewPage> for PageFragment {
+    fn from(page: OverviewPage) -> Self {
+        PageFragment::new("Geometry Dash Demonlist", "The official pointercrate Demonlist!")
+            .module("/static/core/js/modules/form.js")
+            .module("/static/demonlist/js/modules/demonlist.js")
+            .module("/static/demonlist/js/demonlist.js")
+            .stylesheet("/static/demonlist/css/demonlist.css")
+            .stylesheet("/static/core/css/sidebar.css")
+            .head(page.head())
+            .body(page.body())
     }
+}
 
-    fn description(&self) -> String {
-        "The official pointercrate Demonlist!".to_string()
-    }
-
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![
-            Script::module("/static/core/js/modules/form.js"),
-            Script::module("/static/demonlist/js/modules/demonlist.js"),
-            Script::module("/static/demonlist/js/demonlist.js"),
-        ]
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        vec![
-            "/static/demonlist/css/demonlist.css".to_string(),
-            "/static/core/css/sidebar.css".to_string(),
-        ]
-    }
-
-    fn head_fragment(&self) -> Markup {
+impl OverviewPage {
+    fn head(&self) -> Markup {
         html! {
             (PreEscaped(r#"
                 <script type="application/ld+json">
@@ -184,7 +174,7 @@ impl PageFragment for OverviewPage {
         }
     }
 
-    fn body_fragment(&self) -> Markup {
+    fn body(&self) -> Markup {
         let demons_for_dropdown: Vec<&Demon> = match self.time_machine {
             Tardis::Activated { ref demons, .. } => demons.iter().map(|demon| &demon.current_demon).collect(),
             _ => self.demonlist.iter().collect(),

@@ -5,10 +5,7 @@ use crate::{
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
 use pointercrate_core_api::response::Page;
 use pointercrate_user::{error::UserError, AuthenticatedUser, Registration, User};
-use pointercrate_user_pages::{
-    account::{AccountPage, AccountPageConfig},
-    login::LoginPage,
-};
+use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{
     http::{Cookie, CookieJar, SameSite, Status},
     response::Redirect,
@@ -18,8 +15,9 @@ use rocket::{
 use std::net::IpAddr;
 
 #[rocket::get("/login")]
-pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page<LoginPage>> {
-    auth.map(|_| Redirect::to(rocket::uri!(account_page))).ok_or(Page(LoginPage))
+pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page> {
+    auth.map(|_| Redirect::to(rocket::uri!(account_page)))
+        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
 }
 
 #[rocket::post("/login")]
@@ -79,12 +77,12 @@ pub async fn register(
 #[rocket::get("/account")]
 pub async fn account_page(
     auth: Option<TokenAuth>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
-) -> Result<Page<AccountPage>, Redirect> {
+) -> Result<Page, Redirect> {
     match auth {
         Some(mut auth) => {
             let csrf_token = auth.user.generate_csrf_token();
 
-            Ok(Page(
+            Ok(Page::new(
                 tabs.account_page(csrf_token, auth.user, permissions, &mut auth.connection).await,
             ))
         },

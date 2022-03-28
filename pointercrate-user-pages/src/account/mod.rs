@@ -1,6 +1,9 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
-use pointercrate_core_pages::{PageFragment, Script};
+use pointercrate_core_pages::{
+    head::{HeadLike, Script},
+    PageFragment,
+};
 use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, User};
 
 pub mod profile;
@@ -68,35 +71,26 @@ pub struct AccountPage {
     csrf_token: String,
 }
 
-impl PageFragment for AccountPage {
-    fn title(&self) -> String {
-        format!("Account - {}", self.user.inner().name)
-    }
-
-    fn description(&self) -> String {
-        String::new()
-    }
-
-    fn additional_scripts(&self) -> Vec<Script> {
-        self.scripts.clone()
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        vec![
-            "/static/user/css/account.css".to_string(),
-            "/static/core/css/sidebar.css".to_string(),
-        ]
-    }
-
-    fn head_fragment(&self) -> Markup {
-        html! {
-            (PreEscaped(
-                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'; window.userId={}</script><script type="module">{}</script>"#, self.user.inner().name, self.user.inner().etag_string(), self.user.inner().permissions, self.user.inner().id, self.initialization_script())
+impl From<AccountPage> for PageFragment {
+    fn from(account: AccountPage) -> Self {
+        let mut fragment = PageFragment::new(format!("Account - {}", account.user.inner().name), "")
+            .stylesheet("/static/user/css/account.css")
+            .stylesheet("/static/core/css/sidebar.css")
+            .head(PreEscaped(
+                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'; window.userId={}</script><script type="module">{}</script>"#, account.user.inner().name, account.user.inner().etag_string(), account.user.inner().permissions, account.user.inner().id, account.initialization_script())
             ))
-        }
-    }
+            .body(account.body());
 
-    fn body_fragment(&self) -> Markup {
+        for script in account.scripts {
+            fragment = fragment.with_script(script);
+        }
+
+        fragment
+    }
+}
+
+impl AccountPage {
+    fn body(&self) -> Markup {
         html! {
             span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
@@ -130,9 +124,7 @@ impl PageFragment for AccountPage {
             }
         }
     }
-}
 
-impl AccountPage {
     fn initialization_script(&self) -> String {
         let mut imports = r#"
 import { TabbedPane } from "/static/core/js/modules/tab.js";

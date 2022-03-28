@@ -1,6 +1,6 @@
 use crate::statsviewer::stats_viewer_html;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core_pages::{config, PageFragment, Script};
+use pointercrate_core_pages::{config, head::HeadLike, PageFragment};
 use pointercrate_demonlist::nationality::Nationality;
 
 #[derive(Debug)]
@@ -8,36 +8,23 @@ pub struct IndividualStatsViewer {
     pub nationalities_in_use: Vec<Nationality>,
 }
 
-impl PageFragment for IndividualStatsViewer {
-    fn title(&self) -> String {
-        "Individual Stats Viewer".to_owned()
+impl From<IndividualStatsViewer> for PageFragment {
+    fn from(stats_viewer: IndividualStatsViewer) -> Self {
+        PageFragment::new(
+            "Individual Stats Viewer",
+            "The pointercrate individual stats viewer, a ranking of the worlds best Geometry Dash players. Now more local than ever, \
+             allowing you to see who's the best in your state!",
+        )
+        .module("/static/demonlist/js/modules/statsviewer.js")
+        .module("/static/demonlist/js/statsviewer/individual.js")
+        .stylesheet("/static/demonlist/css/statsviewer.css")
+        .stylesheet("/static/core/css/sidebar.css")
+        .body(stats_viewer.body())
     }
+}
 
-    fn description(&self) -> String {
-        "The pointercrate individual stats viewer, a ranking of the worlds best Geometry Dash players. Now more local than ever, allowing \
-         you to see who's the best in your state!"
-            .to_owned()
-    }
-
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![
-            Script::module("/static/demonlist/js/modules/statsviewer.js"),
-            Script::module("/static/demonlist/js/statsviewer/individual.js"),
-        ]
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        vec![
-            "/static/demonlist/css/statsviewer.css".to_string(),
-            "/static/core/css/sidebar.css".to_string(),
-        ]
-    }
-
-    fn head_fragment(&self) -> Markup {
-        html! {}
-    }
-
-    fn body_fragment(&self) -> Markup {
+impl IndividualStatsViewer {
+    fn body(&self) -> Markup {
         html! {
             nav.flex.wrap.m-center.fade#statsviewers style="text-align: center;" {
                 a.button.white.hover.no-shadow href="/demonlist/statsviewer/"{

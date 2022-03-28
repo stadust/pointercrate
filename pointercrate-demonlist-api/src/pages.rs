@@ -30,7 +30,7 @@ pub fn stats_viewer_redirect() -> Redirect {
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
-) -> Result<Page<OverviewPage>> {
+) -> Result<Page> {
     // should be const, but chrono aint const :(
     let beginning_of_time: DateTime<FixedOffset> =
         FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 1, 4).and_hms(0, 0, 0));
@@ -55,7 +55,7 @@ pub async fn overview(
         _ => Tardis::new(timemachine.unwrap_or(false)),
     };
 
-    Ok(Page(OverviewPage {
+    Ok(Page::new(OverviewPage {
         team: Team {
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
@@ -77,7 +77,7 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[rocket::get("/<position>")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>) -> Result<Page<DemonPage>> {
+pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut connection).await?;
@@ -119,7 +119,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         });
     }
 
-    Ok(Page(DemonPage {
+    Ok(Page::new(DemonPage {
         team: Team {
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
@@ -141,17 +141,17 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 }
 
 #[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page<IndividualStatsViewer>> {
+pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
-    Ok(Page(IndividualStatsViewer {
+    Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut connection).await?,
     }))
 }
 
 #[rocket::get("/statsviewer/nations")]
-pub async fn nation_stats_viewer() -> Page<NationBasedStatsViewer> {
-    Page(NationBasedStatsViewer)
+pub async fn nation_stats_viewer() -> Page {
+    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
 }
 
 macro_rules! heatmap_query {

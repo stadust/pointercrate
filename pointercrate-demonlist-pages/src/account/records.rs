@@ -51,7 +51,7 @@ impl AccountPageTab for RecordsPage {
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body_fragment(),
+                .body(),
         };
 
         html! {

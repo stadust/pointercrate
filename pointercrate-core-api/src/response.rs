@@ -1,6 +1,10 @@
 use crate::etag::Tagged;
+use maud::{html, DOCTYPE};
 use pointercrate_core::etag::Taggable;
-use pointercrate_core_pages::{PageConfiguration, PageFragment};
+use pointercrate_core_pages::{
+    head::{Head, HeadLike},
+    PageConfiguration, PageFragment,
+};
 use rocket::{
     http::{ContentType, Header, Status},
     response::Responder,
@@ -10,12 +14,43 @@ use rocket::{
 use serde::Serialize;
 use std::{borrow::Cow, io::Cursor};
 
-pub struct Page<T: PageFragment>(pub T);
+pub struct Page(PageFragment);
 
-impl<'r, 'o: 'r, T: PageFragment> Responder<'r, 'o> for Page<T> {
+impl Page {
+    pub fn new(fragment: impl Into<PageFragment>) -> Self {
+        Page(fragment.into())
+    }
+}
+
+impl HeadLike for Page {
+    fn head_mut(&mut self) -> &mut Head {
+        self.0.head_mut()
+    }
+}
+
+impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
         let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
-        let rendered_fragment = page_config.render_fragment(&self.0).0;
+
+        let fragment = self.0;
+
+        let rendered_fragment = html! {
+            (DOCTYPE)
+            html lang="en" prefix="og: http://opg.me/ns#" {
+                head {
+                    (page_config.head)
+                    (fragment.head)
+                }
+                body style="z-index:-10" {
+                    // target this element to get background image
+                    div style={"width: 100%;height: 100%;position: fixed;top: 0;left: 0;background-size: cover;background-repeat: repeat-y;pointer-events: none; z-index:-1"} {}
+
+                    (page_config.nav_bar)
+                    (fragment.body)
+                    (page_config.footer)
+                }
+            }
+        }.0;
 
         Response::build()
             .status(Status::Ok)
