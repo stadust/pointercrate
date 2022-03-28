@@ -13,3 +13,4 @@
 !/demonlist-guidelines
 !/.gitmodules
 !/pointercrate-**
+!/sqlx_prepare_all.sh

@@ -4,7 +4,7 @@ use pointercrate_core_pages::{
     head::{HeadLike, Script},
     PageFragment,
 };
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 
 pub mod profile;
 pub mod users;

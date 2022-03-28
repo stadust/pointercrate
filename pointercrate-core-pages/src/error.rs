@@ -1,7 +1,4 @@
-use crate::{
-    head::{HeadLike, Script},
-    PageFragment,
-};
+use crate::{head::HeadLike, PageFragment};
 use maud::{html, Markup, PreEscaped};
 
 pub struct ErrorFragment {

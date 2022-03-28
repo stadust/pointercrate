@@ -7,7 +7,6 @@ use pointercrate_core::{error::PointercrateError, permission::PermissionsManager
 use pointercrate_core_pages::{
     error::ErrorFragment,
     util::{dropdown, paginator},
-    PageFragment,
 };
 use pointercrate_demonlist::{
     demon::{current_list, Demon},

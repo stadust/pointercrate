@@ -2,9 +2,6 @@ use crate::statsviewer::{stats_viewer_html, StatsViewerRow};
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core_pages::{config, head::HeadLike, PageFragment};
 
-#[derive(Debug)]
-pub struct NationBasedStatsViewer;
-
 pub fn nation_based_stats_viewer() -> PageFragment {
     PageFragment::new(
         "Nation Stats Viewer",

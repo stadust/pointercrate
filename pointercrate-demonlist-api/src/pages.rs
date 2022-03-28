@@ -17,7 +17,7 @@ use pointercrate_demonlist_pages::{
     components::{team::Team, time_machine::Tardis},
     demon_page::{DemonMovement, DemonPage},
     overview::OverviewPage,
-    statsviewer::{individual::IndividualStatsViewer, national::NationBasedStatsViewer},
+    statsviewer::individual::IndividualStatsViewer,
 };
 use pointercrate_integrate::gd::{GDIntegrationResult, PgCache};
 use pointercrate_user::User;

@@ -1,7 +1,7 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 
 pub struct ProfileTab;
 
