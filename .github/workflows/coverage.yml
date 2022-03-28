@@ -24,6 +24,7 @@ jobs:
         with:
           toolchain: nightly-2021-07-31
           override: true
+      - run: echo '0000000000' > .secret
       - uses: actions-rs/cargo@v1
         with:
           command: test
