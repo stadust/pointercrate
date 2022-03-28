@@ -1410,6 +1410,7 @@ dependencies = [
  "nonzero_ext 0.2.0",
  "pointercrate-core",
  "pointercrate-core-api",
+ "pointercrate-core-pages",
  "pointercrate-demonlist",
  "pointercrate-demonlist-pages",
  "pointercrate-integrate",
