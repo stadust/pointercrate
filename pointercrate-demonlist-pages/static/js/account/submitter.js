@@ -32,7 +32,7 @@ function generateSubmitter(submitter) {
 }
 
 class SubmitterManager extends Paginator {
-  constructor(csrfToken) {
+  constructor() {
     super("submitter-pagination", {}, generateSubmitter);
 
     this.output = new Viewer(
@@ -42,7 +42,7 @@ class SubmitterManager extends Paginator {
 
     this._id = document.getElementById("submitter-submitter-id");
     this._banned = setupDropdownEditor(
-      new PaginatorEditorBackend(this, csrfToken, true),
+      new PaginatorEditorBackend(this, true),
       "edit-submitter-banned",
       "banned",
       this.output,
@@ -76,10 +76,10 @@ function setupSubmitterSearchSubmitterIdForm() {
   });
 }
 
-export function initialize(csrfToken, tabber) {
+export function initialize(tabber) {
   setupSubmitterSearchSubmitterIdForm();
 
-  submitterManager = new SubmitterManager(csrfToken);
+  submitterManager = new SubmitterManager();
   submitterManager.initialize();
 
   document
@@ -87,7 +87,7 @@ export function initialize(csrfToken, tabber) {
     .addEventListener("click", () => {
       if (recordManager == null) {
         // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
-        initRecords(csrfToken).then(() => {
+        initRecords().then(() => {
           recordManager.updateQueryData(
             "submitter",
             submitterManager.currentObject.id

@@ -14,7 +14,7 @@ import { recordManager, initialize as initRecords } from "./records.js";
 export let playerManager;
 
 class PlayerManager extends FilteredPaginator {
-  constructor(csrfToken) {
+  constructor() {
     super("player-pagination", generatePlayer, "name_contains");
 
     this.output = new Viewer(
@@ -26,7 +26,7 @@ class PlayerManager extends FilteredPaginator {
     this._name = document.getElementById("player-player-name");
 
     this._banned = setupDropdownEditor(
-      new PaginatorEditorBackend(this, csrfToken, true),
+      new PaginatorEditorBackend(this, true),
       "edit-player-banned",
       "banned",
       this.output,
@@ -34,7 +34,7 @@ class PlayerManager extends FilteredPaginator {
     );
 
     this._nationality = setupDropdownEditor(
-      new PaginatorEditorBackend(this, csrfToken, true),
+      new PaginatorEditorBackend(this, true),
       "edit-player-nationality",
       "nationality",
       this.output,
@@ -42,14 +42,14 @@ class PlayerManager extends FilteredPaginator {
     );
 
     this._subdivision = setupDropdownEditor(
-        new PaginatorEditorBackend(this, csrfToken, true),
+        new PaginatorEditorBackend(this, true),
         "edit-player-subdivision",
         "subdivision",
         this.output,
         { None: null }
     );
 
-    this.initNameDialog(csrfToken);
+    this.initNameDialog();
   }
 
   onReceive(response) {
@@ -82,9 +82,9 @@ class PlayerManager extends FilteredPaginator {
     }
   }
 
-  initNameDialog(csrfToken) {
+  initNameDialog() {
     let form = setupFormDialogEditor(
-      new PaginatorEditorBackend(this, csrfToken, true),
+      new PaginatorEditorBackend(this, true),
       "player-name-dialog",
       "player-name-pen",
       this.output
@@ -112,10 +112,10 @@ function setupPlayerSearchPlayerIdForm() {
   });
 }
 
-export function initialize(csrfToken, tabber) {
+export function initialize(tabber) {
   setupPlayerSearchPlayerIdForm();
 
-  playerManager = new PlayerManager(csrfToken);
+  playerManager = new PlayerManager();
   playerManager.initialize();
 
   document
@@ -123,7 +123,7 @@ export function initialize(csrfToken, tabber) {
     .addEventListener("click", () => {
       if (recordManager == null) {
         // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
-        initRecords(csrfToken).then(() => {
+        initRecords().then(() => {
           recordManager.updateQueryData(
             "player",
             playerManager.currentObject.id

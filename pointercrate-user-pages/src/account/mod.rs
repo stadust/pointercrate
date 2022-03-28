@@ -39,13 +39,12 @@ impl AccountPageConfig {
     }
 
     pub async fn account_page(
-        &self, csrf_token: String, user: AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, user: AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> AccountPage {
         let mut page = AccountPage {
             user,
             scripts: vec![],
             tabs: vec![],
-            csrf_token,
         };
 
         for tab_config in &self.tabs {
@@ -68,7 +67,6 @@ pub struct AccountPage {
     user: AuthenticatedUser,
     scripts: Vec<Script>,
     tabs: Vec<(Markup, Markup, String, u8)>,
-    csrf_token: String,
 }
 
 impl From<AccountPage> for PageFragment {
@@ -92,7 +90,6 @@ impl From<AccountPage> for PageFragment {
 impl AccountPage {
     fn body(&self) -> Markup {
         html! {
-            span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
                     @for (i, (tab, _, _, id)) in self.tabs.iter().enumerate() {
@@ -141,7 +138,7 @@ import { TabbedPane } from "/static/core/js/modules/tab.js";
                 r#"
 accountTabber.addSwitchListener("{0}", () => {{
 if (!initialized{0}) {{
-  initialize{0}(csrfToken, accountTabber);
+  initialize{0}(accountTabber);
 
   initialized{0} = true;
 }}
@@ -156,12 +153,7 @@ if (!initialized{0}) {{
         {}
         {}
         
-$(document).ready(function () {{
-    var csrfTokenSpan = document.getElementById("chicken-salad-red-fish");
-    var csrfToken = csrfTokenSpan.innerHTML;
-    
-    csrfTokenSpan.remove();
-    
+$(document).ready(function () {{        
     let accountTabber = new TabbedPane(
     document.getElementById("account-tabber"),
     "account-tab-selection"

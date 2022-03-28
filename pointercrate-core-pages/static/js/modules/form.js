@@ -191,20 +191,17 @@ export class PaginatorEditorBackend extends EditorBackend {
   /**
    *
    * @param {Paginator} paginator
-   * @param {String} csrf
    * @param {boolean} shouldRefresh
    */
-  constructor(paginator, csrf, shouldRefresh) {
+  constructor(paginator, shouldRefresh) {
     super();
 
     this._paginator = paginator;
-    this._csrf = csrf;
     this._shouldRefresh = shouldRefresh;
   }
 
   headers() {
     return {
-      "X-CSRF-TOKEN": this._csrf,
       "If-Match": this._paginator.currentEtag,
     };
   }
@@ -1191,6 +1188,11 @@ const UNEXPECTED_REDIRECT = {
 function mkReq(method, endpoint, headers = {}, data = null) {
   headers["Content-Type"] = "application/json";
   headers["Accept"] = "application/json";
+
+  let csrf_meta = document.querySelector('meta[name="csrf_token"]');
+
+  if(csrf_meta)
+    headers["X-CSRF-TOKEN"] = csrf_meta.content;
 
   return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();

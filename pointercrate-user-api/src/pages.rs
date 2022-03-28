@@ -4,6 +4,7 @@ use crate::{
 };
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
 use pointercrate_core_api::response::Page;
+use pointercrate_core_pages::head::HeadLike;
 use pointercrate_user::{error::UserError, AuthenticatedUser, Registration, User};
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{
@@ -82,9 +83,7 @@ pub async fn account_page(
         Some(mut auth) => {
             let csrf_token = auth.user.generate_csrf_token();
 
-            Ok(Page::new(
-                tabs.account_page(csrf_token, auth.user, permissions, &mut auth.connection).await,
-            ))
+            Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await).meta("csrf_token", csrf_token))
         },
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }

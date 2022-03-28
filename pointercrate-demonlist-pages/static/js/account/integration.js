@@ -4,8 +4,8 @@ import {embedVideo, generatePlayer} from "/static/demonlist/js/modules/demonlist
 export let claimManager;
 
 class ClaimManager extends FilteredPaginator {
-    constructor(token) {
-        super("claim-pagination", claim => generate_claim(token, claim), "any_name_contains");
+    constructor() {
+        super("claim-pagination", claim => generate_claim(claim), "any_name_contains");
     }
 
     onSelect(selected) {
@@ -19,7 +19,7 @@ class ClaimManager extends FilteredPaginator {
     }
 }
 
-function generate_claim(csrfToken, claim) {
+function generate_claim(claim) {
     let li = document.createElement("li");
 
     li.classList.add("flex", "no-stretch");
@@ -60,7 +60,7 @@ function generate_claim(csrfToken, claim) {
 
         button.addEventListener("click", event => {
             event.stopPropagation();
-            patch("/api/v1/players/" + claim.player.id + "/claims/" + claim.user.id, {"X-CSRF-TOKEN": csrfToken}, {"verified": true}).then(() => claimManager.refresh());
+            patch("/api/v1/players/" + claim.player.id + "/claims/" + claim.user.id, {}, {"verified": true}).then(() => claimManager.refresh());
         })
 
         rightDiv.appendChild(button);
@@ -70,7 +70,7 @@ function generate_claim(csrfToken, claim) {
 
     deleteButton.addEventListener("click", event => {
         event.stopPropagation();
-        del("/api/v1/players/" + claim.player.id + "/claims/" + claim.user.id, {"X-CSRF-TOKEN": csrfToken}).then(() => claimManager.refresh());
+        del("/api/v1/players/" + claim.player.id + "/claims/" + claim.user.id, {}).then(() => claimManager.refresh());
     })
 
     rightDiv.appendChild(deleteButton);
@@ -113,9 +113,9 @@ class ClaimPlayerPaginator extends FilteredPaginator {
     }
 }
 
-export function initialize(csrfToken) {
+export function initialize() {
     if (document.getElementById("claim-pagination")) {
-        claimManager = new ClaimManager(csrfToken);
+        claimManager = new ClaimManager();
         claimManager.initialize();
     }
 
@@ -124,7 +124,7 @@ export function initialize(csrfToken) {
     let playerPaginator = new ClaimPlayerPaginator();
     playerPaginator.initialize();
     playerPaginator.addSelectionListener(selected => {
-        put("/api/v1/players/" + selected.id + "/claims/", {"X-CSRF-TOKEN": csrfToken})
+        put("/api/v1/players/" + selected.id + "/claims/")
             .then(() => {
                 window.location.reload();
             }).catch(displayError(playerPaginator));
@@ -143,7 +143,7 @@ export function initialize(csrfToken) {
         let playerId = claimedPlayer.dataset.id;
 
         geolocationButton.addEventListener("click", () => {
-            post("/api/v1/players/" + playerId + "/geolocate", {'X-CSRF-TOKEN': csrfToken})
+            post("/api/v1/players/" + playerId + "/geolocate")
                 .then(response => {
                     let nationality = response.data;
                     if (nationality.subdivision) {
@@ -156,7 +156,7 @@ export function initialize(csrfToken) {
 
         let lockSubmissionsCheckbox = document.getElementById("lock-submissions-checkbox");
         lockSubmissionsCheckbox.addEventListener("change", () => {
-            patch("/api/v1/players/" + playerId + "/claims/" + window.userId + "/", {'X-CSRF-TOKEN': csrfToken}, {"lock_submissions": lockSubmissionsCheckbox.checked}).then(_ => {
+            patch("/api/v1/players/" + playerId + "/claims/" + window.userId + "/", {}, {"lock_submissions": lockSubmissionsCheckbox.checked}).then(_ => {
                 output.setSuccess("Successfully applied changed")
             }).catch(displayError(output))
         })

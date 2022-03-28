@@ -80,7 +80,7 @@ export function initializeTimeMachine() {
   })
 }
 
-export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
+export function initializeRecordSubmitter(submitApproved = false) {
   var submissionForm = new Form(document.getElementById("submission-form"));
 
   var demon = submissionForm.input("id_demon");
@@ -124,7 +124,6 @@ export function initializeRecordSubmitter(csrf = null, submitApproved = false) {
 
     if (submitApproved) {
       data.status = "approved";
-      headers["X-CSRF-TOKEN"] = csrf;
     }
     post("/api/v1/records/", headers, data)
       .then(() => {

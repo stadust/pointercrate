@@ -1481,6 +1481,7 @@ dependencies = [
  "nonzero_ext 0.2.0",
  "pointercrate-core",
  "pointercrate-core-api",
+ "pointercrate-core-pages",
  "pointercrate-user",
  "pointercrate-user-pages",
  "ratelimit_meter",

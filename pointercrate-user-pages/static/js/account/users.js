@@ -14,13 +14,12 @@ let selectedUser;
 let userPaginator;
 let editForm;
 
-function setupPatchUserPermissionsForm(csrfToken) {
+function setupPatchUserPermissionsForm() {
   editForm = new Form(document.getElementById("patch-permissions"));
   editForm.onSubmit(function () {
     patch(
       "/api/v1/users/" + selectedUser.id + "/",
       {
-        "X-CSRF-TOKEN": csrfToken,
         "If-Match": selectedUser.etag,
       },
       {
@@ -46,7 +45,6 @@ function setupPatchUserPermissionsForm(csrfToken) {
     // The button isn't generated server sided for people who don't have permissions to delete users (aka aren't pointercrate admins)
     deleteUserButton.addEventListener("click", () => {
       del("/api/v1/users/" + selectedUser.id + "/", {
-        "X-CSRF-TOKEN": csrfToken,
         "If-Match": selectedUser.etag,
       })
         .then(() => editForm.setSuccess("Successfully deleted user!"))
@@ -144,8 +142,8 @@ class UserPaginator extends FilteredPaginator {
   }
 }
 
-export function initialize(csrfToken) {
-  setupPatchUserPermissionsForm(csrfToken);
+export function initialize() {
+  setupPatchUserPermissionsForm();
   setupUserByIdForm();
 
   userPaginator = new UserPaginator();
