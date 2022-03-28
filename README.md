@@ -1,4 +1,5 @@
-# Pointercrate
+# Pointercrate ![build](https://github.com/stadust/pointercrate/actions/workflows/check.yml/badge.svg)
+
 
 As of March 2nd 2019 this is the official repository for pointercrate. It does not contain all the code required to run a local copy of pointercrate, however, as parts of the code remain private. In particular, this repository does not contain
 
