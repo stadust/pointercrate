@@ -4,10 +4,10 @@ use crate::{
     User,
 };
 use log::{info, trace, warn};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Registration {
     pub name: String,
     pub password: String,
