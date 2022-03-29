@@ -27,7 +27,7 @@ impl Render for Team {
                 div.underlined {
                     h2 {
                         "List Editors"
-                    }R
+                    }
                 }
                 p {
                     "Contact any of these people if you have problems with the list or want to see a specific thing changed."
