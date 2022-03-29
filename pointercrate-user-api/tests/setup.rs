@@ -6,11 +6,11 @@ use sqlx::{pool::PoolConnection, Pool, Postgres};
 
 pub async fn setup() -> (Client, PoolConnection<Postgres>) {
     let pool = PointercratePool::init().await;
-    let connection = pool.connection().await.unwrap();
+    let mut connection = pool.connection().await.unwrap();
 
     // reset test database
     sqlx::query!("TRUNCATE TABLE members CASCADE")
-        .execute(&mut pool.connection().await.unwrap())
+        .execute(&mut connection)
         .await
         .unwrap();
 
