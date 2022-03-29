@@ -169,7 +169,7 @@ fn rules_panel() -> Markup {
     html! {
         section#rules.panel.fade.js-scroll-anim data-anim = "fade" {
             h2.underlined.pad.clickable {
-                "Guidelines:"
+                "Guidelines"
             }
             p {
                 "All demonlist operations are carried out in accordance to our guidelines. Be sure to check them before submitting a record to ensure a flawless experience!"

@@ -124,7 +124,7 @@ pub(crate) fn submit_panel() -> Markup {
         section#submit.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "Submit Records:"
+                    "Submit Records"
                 }
             }
             p {
