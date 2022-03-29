@@ -16,21 +16,6 @@ macro_rules! construct_from_row {
     };
 }
 
-macro_rules! query_user {
-    ($connection: expr, $query:expr, $id: expr, $($param: expr),*) => {{
-        let row = sqlx::query!($query, $id, $($param),*).fetch_one($connection).await;
-
-        match row {
-            Err(Error::RowNotFound) =>
-                Err(UserError::UserNotFound {
-                    user_id: $id,
-                }),
-            Err(err) => Err(err.into()),
-            Ok(row) => Ok(construct_from_row!(row)),
-        }
-    }};
-}
-
 impl User {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<User> {
         let row = sqlx::query!(
