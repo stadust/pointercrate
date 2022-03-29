@@ -1490,6 +1490,7 @@ dependencies = [
  "pointercrate-user-pages",
  "ratelimit_meter",
  "rocket",
+ "serde_json",
  "serde_urlencoded",
  "serial_test",
  "sqlx",

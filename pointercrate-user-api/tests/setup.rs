@@ -1,8 +1,8 @@
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
-use pointercrate_user::{AuthenticatedUser, Registration, User, ADMINISTRATOR, MODERATOR};
+use pointercrate_user::{AuthenticatedUser, Registration, ADMINISTRATOR, MODERATOR};
 use pointercrate_user_pages::account::AccountPageConfig;
-use rocket::{local::asynchronous::Client, Build, Rocket};
-use sqlx::{pool::PoolConnection, Pool, Postgres};
+use rocket::local::asynchronous::Client;
+use sqlx::{pool::PoolConnection, Postgres};
 
 pub async fn setup() -> (Client, PoolConnection<Postgres>) {
     let pool = PointercratePool::init().await;

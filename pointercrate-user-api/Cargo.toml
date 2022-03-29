@@ -21,3 +21,4 @@ serde_urlencoded = "0.7.0"
 
 [dev-dependencies]
 serial_test = "0.5.1"
+serde_json = "1.0.79"

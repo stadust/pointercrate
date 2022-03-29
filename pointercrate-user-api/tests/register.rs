@@ -4,7 +4,6 @@ use rocket::http::{ContentType, Header, Status};
 mod setup;
 
 #[rocket::async_test]
-#[serial_test::serial]
 pub async fn register_new() {
     let (client, _) = setup::setup().await;
 
@@ -23,7 +22,6 @@ pub async fn register_new() {
 }
 
 #[rocket::async_test]
-#[serial_test::serial]
 pub async fn register_taken_username() {
     let (client, ..) = setup::setup_with_admin_user().await;
 
