@@ -268,7 +268,7 @@ mod tests {
     }
 
     #[test]
-    fn test_change_password_token() {
+    fn test_change_email_token() {
         let patrick = patrick();
         let jacob = jacob();
 
