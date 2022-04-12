@@ -10,6 +10,9 @@ use sqlx::PgConnection;
 pub struct PatchNote {
     #[serde(default, deserialize_with = "non_nullable")]
     pub content: Option<String>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    pub is_public: Option<bool>,
 }
 
 impl Note {
@@ -20,10 +23,18 @@ impl Note {
             }
 
             sqlx::query!("UPDATE record_notes SET content = $1 WHERE id = $2", content, self.id)
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
 
             self.content = content;
+        }
+
+        if let Some(is_public) = patch.is_public {
+            sqlx::query!("UPDATE record_notes SET is_public = $1 WHERE id = $2", is_public, self.id)
+                .execute(connection)
+                .await?;
+
+            self.is_public = is_public;
         }
 
         Ok(self)

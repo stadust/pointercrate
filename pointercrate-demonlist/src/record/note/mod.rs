@@ -20,6 +20,8 @@ pub struct Note {
 
     pub content: String,
 
+    pub is_public: bool,
+
     /// Whether this note was originally made on a different record and later transferred to this
     /// one due to deletion.
     pub transferred: bool,

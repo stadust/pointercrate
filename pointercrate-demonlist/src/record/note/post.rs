@@ -8,6 +8,9 @@ use sqlx::PgConnection;
 #[derive(Deserialize, Debug)]
 pub struct NewNote {
     content: String,
+
+    #[serde(default)]
+    is_public: bool,
 }
 
 impl Note {
@@ -21,9 +24,10 @@ impl Note {
         }
 
         let note_id = sqlx::query!(
-            "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
+            "INSERT INTO record_notes (record, content, is_public) VALUES ($1, $2, $3) RETURNING id",
             record.id,
-            new_note.content
+            new_note.content,
+            new_note.is_public
         )
         .fetch_one(connection)
         .await?
@@ -33,6 +37,7 @@ impl Note {
             id: note_id,
             record: record.id,
             content: new_note.content,
+            is_public: new_note.is_public,
             transferred: false,
             author: None,
             editors: vec![],
