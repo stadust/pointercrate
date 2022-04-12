@@ -1,25 +1,27 @@
 import {del, displayError, FilteredPaginator, get, Output, patch, post, put} from "/static/core/js/modules/form.js";
 import {embedVideo, generatePlayer} from "/static/demonlist/js/modules/demonlist.js";
+import {Paginator} from "/static/core/js/modules/form.js";;
+import {generateRecord} from "/static/demonlist/js/modules/demonlist.js";
 
 export let claimManager;
 
 class ClaimManager extends FilteredPaginator {
     constructor() {
-        super("claim-pagination", claim => generate_claim(claim), "any_name_contains");
+        super("claim-pagination", claim => generateClaim(claim), "any_name_contains");
     }
 
     onSelect(selected) {
         get("/api/v1/records/?limit=1&status=APPROVED&player=" + selected.dataset.playerId, {})
             .then(response => {
                 if (response.data.length === 0)
-                    this.setError("The claimed player does not have an approved records on the list")
+                    this.setError("The claimed player does not have an approved record on the list")
                 else
                     document.getElementById("claim-video").src = embedVideo(response.data[0].video);
             })
     }
 }
 
-function generate_claim(claim) {
+function generateClaim(claim) {
     let li = document.createElement("li");
 
     li.classList.add("flex", "no-stretch");
@@ -159,6 +161,9 @@ export function initialize() {
             patch("/api/v1/players/" + playerId + "/claims/" + window.userId + "/", {}, {"lock_submissions": lockSubmissionsCheckbox.checked}).then(_ => {
                 output.setSuccess("Successfully applied changed")
             }).catch(displayError(output))
-        })
+        });
+
+        let recordPaginator = new Paginator("claims-record-pagination", {player: playerId}, generateRecord);
+        recordPaginator.initialize();
     }
 }

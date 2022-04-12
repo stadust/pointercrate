@@ -1,11 +1,15 @@
+use log::error;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
-use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator};
+use pointercrate_core_pages::{
+    error::ErrorFragment,
+    util::{filtered_paginator, paginator},
+};
 use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
 
-pub struct ListIntegrationTab(/* discord invite url */ pub &'static str);
+pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
 
 #[async_trait::async_trait]
 impl AccountPageTab for ListIntegrationTab {
@@ -34,13 +38,16 @@ impl AccountPageTab for ListIntegrationTab {
     async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
         let player_claim = match PlayerClaim::by_user(user.inner().id, connection).await {
             Ok(player_claim) => player_claim,
-            Err(err) =>
+            Err(err) => {
+                error!("Error retrieving player claim of user {}: {:?}", user.inner(), err);
+
                 return ErrorFragment {
                     status: err.status_code(),
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body(),
+                .body()
+            },
         };
         let is_moderator = permissions.require_permission(user.inner().permissions, MODERATOR).is_ok();
 
@@ -113,6 +120,19 @@ impl AccountPageTab for ListIntegrationTab {
                                     "Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)"
                                 }
                             }
+                        }
+                    }
+                }
+                @if let Some(claim) = player_claim {
+                    @if claim.verified {
+                        div.panel.fade {
+                            h2.pad.underlined {
+                                "Your claimed player's records"
+                            }
+                            p {
+                                "A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record."
+                            }
+                            (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
                     }
                 }
