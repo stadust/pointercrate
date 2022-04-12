@@ -1,6 +1,6 @@
 pub use paginate::{ListedClaim, PlayerClaimPagination};
 pub use patch::PatchPlayerClaim;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 mod delete;
 mod get;
@@ -8,7 +8,7 @@ mod paginate;
 mod patch;
 mod put;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct PlayerClaim {
     pub user_id: i32,
     pub player_id: i32,

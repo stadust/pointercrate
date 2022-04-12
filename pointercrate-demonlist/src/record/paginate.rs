@@ -65,7 +65,7 @@ pub struct RecordPagination {
 }
 
 impl RecordPagination {
-    /// Retries the page of records matching the pagination data in here
+    /// Retrieves the page of records matching the pagination data in here
     ///
     /// Note that this method returns _one more record than requested_. This is used as a quick and
     /// dirty way to determine if further pages exist: If the additional record was returned, more

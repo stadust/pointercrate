@@ -10,6 +10,7 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     error::DemonlistError,
+    player::claim::PlayerClaim,
     record::{
         audit::RecordModificationData,
         note::{NewNote, Note, PatchNote},
@@ -23,6 +24,15 @@ use rocket::{http::Status, serde::json::Json, tokio, State};
 use sqlx::{pool::PoolConnection, Postgres};
 use std::net::IpAddr;
 
+/// Pagination endpoint for records in case authentication is provided
+///
+/// Subject to the following constraints
+/// + Only users with `LIST_MODERATOR` permissions can filter by submitter.
+/// + Only users with `LIST_HELPER` permissions can filter by record status. For all other users,
+/// the `status` property defaults to `APPROVED` (although explicitly setting the status to
+/// `APPROVED` is allowed, UNLESS we also filter by player and the player we filter by match a
+/// verified claim of the user making the request, in which case access to all records is allowed
+/// (the `status` property does not get defaulted, and filtering on it is allowed)
 #[rocket::get("/")]
 pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Result<Response2<Json<Vec<MinimalRecordPD>>>> {
     let mut pagination = query.0;
@@ -31,9 +41,13 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
         auth.require_permission(LIST_MODERATOR)?;
     }
 
-    if !auth.has_permission(LIST_HELPER) {
+    let claim = PlayerClaim::by_user(auth.user.inner().id, &mut auth.connection)
+        .await?
+        .filter(|c| c.verified);
+
+    if (claim.is_none() || claim.map(|c| c.player.id) != pagination.player) && !auth.has_permission(LIST_HELPER) {
         if pagination.status.is_some() && pagination.status != Some(RecordStatus::Approved) {
-            return Err(CoreError::Unauthorized.into())
+            return Err(CoreError::MissingPermissions { required: LIST_HELPER }.into())
         }
 
         pagination.status = Some(RecordStatus::Approved);

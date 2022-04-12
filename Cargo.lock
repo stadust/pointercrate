@@ -1419,6 +1419,7 @@ dependencies = [
  "pointercrate-integrate",
  "pointercrate-user",
  "pointercrate-user-api",
+ "pointercrate-user-pages",
  "ratelimit_meter",
  "reqwest",
  "rocket",
