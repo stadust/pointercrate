@@ -238,7 +238,11 @@ function createNoteHtml(note) {
   }
 
   if (note.transferred) {
-    furtherInfo.innerHTML += "This not was not originally left on this record.";
+    furtherInfo.innerHTML += "This not was not originally left on this record. ";
+  }
+
+  if(note.is_public) {
+    furtherInfo.innerHTML += "This note is public. ";
   }
 
   if (isAdmin) noteDiv.appendChild(closeX);
@@ -254,12 +258,13 @@ function setupAddNote() {
   let output = new Output(adder);
   let textArea = adder.getElementsByTagName("textarea")[0];
   let add = adder.getElementsByClassName("button")[0];
+  let isPublic = document.getElementById("add-note-is-public-checkbox");
 
   add.addEventListener("click", () => {
     post(
       "/api/v1/records/" + recordManager.currentObject.id + "/notes/",
       {},
-      { content: textArea.value }
+      { content: textArea.value, is_public: isPublic.checked }
     )
       .then((noteResponse) => {
         let newNote = createNoteHtml(noteResponse.data.data);

@@ -301,8 +301,17 @@ fn note_adder() -> Markup {
     html! {
         div.panel.fade.closable#add-record-note style = "display: none" {
             span.plus.cross.hover {}
-            div.button.blue.hover.small style = "width: 100px; margin-bottom: 10px"{
-                "Add"
+            div style="display: flex;align-items: center;justify-content: space-between;" {
+                div.button.blue.hover.small style = "width: 100px; margin-bottom: 10px"{
+                    "Add"
+                }
+                div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
+                    b {
+                        "Public note:"
+                    }
+                    input#add-note-is-public-checkbox type = "checkbox" name = "is_public";
+                    span.checkmark {}
+                }
             }
             p.info-red.output {}
             textarea style = "width: 100%" placeholder = "Add note here. Click 'Add' above when done!"{}
