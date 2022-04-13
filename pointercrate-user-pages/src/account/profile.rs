@@ -83,18 +83,20 @@ impl AccountPageTab for ProfileTab {
                                 "A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it."
                             }
                         }
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable#email-pen aria-hidden = "true" {} " E-Mail Address: "
-                            }
-                            i#profile-email_address {
-                                @match authenticated_user.email_address() {
-                                    Some(ref email) => (email),
-                                    None => "-"
+                        @if cfg!(debug_assertions) {
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable#email-pen aria-hidden = "true" {} " E-Mail Address: "
                                 }
-                            }
-                            p {
-                                "The E-Mail address associated with your pointercrate account. Only you can see this, and it is by default only used for password recovery. Note that if you do not provide an e-mail address, you will not be able to reset your password if you forget it."
+                                i#profile-email_address {
+                                    @match authenticated_user.email_address() {
+                                        Some(ref email) => (email),
+                                        None => "-"
+                                    }
+                                }
+                                p {
+                                    "The E-Mail address associated with your pointercrate account. Only you can see this, and it is by default only used for password recovery. Note that if you do not provide an e-mail address, you will not be able to reset your password if you forget it."
+                                }
                             }
                         }
                         span {
