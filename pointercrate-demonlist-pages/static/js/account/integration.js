@@ -1,4 +1,4 @@
-import {del, displayError, FilteredPaginator, get, Output, patch, post, put} from "/static/core/js/modules/form.js";
+import {del, displayError, FilteredPaginator, Output, patch, post, put, get} from "/static/core/js/modules/form.js";
 import {embedVideo, generatePlayer} from "/static/demonlist/js/modules/demonlist.js";
 import {Paginator} from "/static/core/js/modules/form.js";;
 import {generateRecord} from "/static/demonlist/js/modules/demonlist.js";
@@ -115,6 +115,46 @@ class ClaimPlayerPaginator extends FilteredPaginator {
     }
 }
 
+class ClaimedPlayerRecordPaginator extends Paginator {
+    constructor(playerId) {
+        super("claims-record-pagination", {player: playerId}, generateRecord);
+    }
+
+    onSelect(selected) {
+        let recordId = selected.dataset.id;
+
+        get("/api/v1/records/" + recordId + "/notes/")
+            .then(response => {
+                if(Array.isArray(response.data) && response.data.length > 0) {
+                    this.setSuccess(null);
+
+                    while(this.successOutput.lastChild) {
+                        this.successOutput.removeChild(this.successOutput.lastChild);
+                    }
+
+                    let title = document.createElement("b");
+                    title.innerText = "Notes for record " + recordId + ":";
+
+                    this.successOutput.appendChild(title);
+                    this.successOutput.appendChild(document.createElement("br"));
+
+                    for (let note of response.data) {
+                        let noteAuthor = document.createElement("i");
+                        noteAuthor.innerText = "(" + note.author + ") ";
+
+                        this.successOutput.appendChild(noteAuthor);
+                        this.successOutput.appendChild(document.createTextNode(note.content));
+                    }
+
+                    this.successOutput.style.display = "block";
+                }else {
+                    this.setSuccess("No public notes on this record!");
+                }
+            })
+            .catch(displayError(this));
+    }
+}
+
 export function initialize() {
     if (document.getElementById("claim-pagination")) {
         claimManager = new ClaimManager();
@@ -163,7 +203,7 @@ export function initialize() {
             }).catch(displayError(output))
         });
 
-        let recordPaginator = new Paginator("claims-record-pagination", {player: playerId}, generateRecord);
+        let recordPaginator = new ClaimedPlayerRecordPaginator(playerId);
         recordPaginator.initialize();
     }
 }
