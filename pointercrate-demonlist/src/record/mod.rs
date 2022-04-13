@@ -135,7 +135,6 @@ pub struct FullRecord {
     pub player: DatabasePlayer,
     pub demon: MinimalDemon,
     pub submitter: Option<Submitter>,
-    pub notes: Vec<Note>,
 }
 
 impl Taggable for FullRecord {

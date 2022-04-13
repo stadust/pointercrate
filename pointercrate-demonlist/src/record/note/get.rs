@@ -62,13 +62,13 @@ impl Note {
     }
 }
 
-pub async fn notes_on(record_id: i32, connection: &mut PgConnection) -> Result<Vec<Note>> {
+pub async fn notes_on(record_id: i32, public_only: bool, connection: &mut PgConnection) -> Result<Vec<Note>> {
     let partials = sqlx::query_as!(
         PartialNote,
         r#"SELECT id, record, content, is_public, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND 
          id = $1) AS "transferred!: bool"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = 
-         record_notes_additions.userid WHERE record = $1"#,
-        record_id
+         record_notes_additions.userid WHERE record = $1 AND (NOT $2 OR is_public)"#,
+        record_id, public_only
     )
         .fetch_all(&mut *connection)
         .await?;

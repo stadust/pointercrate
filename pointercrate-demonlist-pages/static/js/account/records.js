@@ -169,16 +169,19 @@ class RecordManager extends Paginator {
     this._progress.innerHTML = this.currentObject.progress + "%";
     this._submitter.innerHTML = this.currentObject.submitter.id;
 
-    // clear notes
-    while (this._notes.firstChild) {
-      this._notes.removeChild(this._notes.firstChild);
-    }
+    // this is introducing race conditions. Oh well.
+    return get("/api/v1/records/" + this.currentObject.id + "/notes").then(response => {
+      // clear notes
+      while (this._notes.firstChild) {
+        this._notes.removeChild(this._notes.firstChild);
+      }
 
-    for (let note of this.currentObject.notes) {
-      this._notes.appendChild(createNoteHtml(note));
-    }
+      for (let note of response.data) {
+        this._notes.appendChild(createNoteHtml(note));
+      }
 
-    $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
+      $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
+    })
   }
 }
 

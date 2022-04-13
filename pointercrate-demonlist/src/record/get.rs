@@ -51,7 +51,6 @@ impl FullRecord {
                         id: row.submitter_id,
                         banned: row.submitter_banned,
                     }),
-                    notes: notes_on(id, connection).await?,
                 }),
 
             Err(Error::RowNotFound) => Err(DemonlistError::RecordNotFound { record_id: id }),

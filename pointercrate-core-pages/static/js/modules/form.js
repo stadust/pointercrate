@@ -433,7 +433,7 @@ export class Paginator extends Output {
    */
   onSelect(selected) {
     this.currentlySelected = selected;
-    this.selectArbitrary(selected.dataset.id).catch(displayError(this));
+    return this.selectArbitrary(selected.dataset.id).catch(displayError(this));
   }
 
   /**

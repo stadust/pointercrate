@@ -723,56 +723,6 @@
     },
     "query": "UPDATE demons SET position = position + 1 WHERE position >= $1 AND position < $2"
   },
-  "34842a9c4a3a2d6b0e787f3ebf9a21afa87404d3b899ae4658ec255fe70bf07a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "record",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "content",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "is_public",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "author?: String",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "transferred!: bool",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT id, record, content, is_public, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND \n         id = $1) AS \"transferred!: bool\"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = \n         record_notes_additions.userid WHERE record = $1"
-  },
   "3644d1f3ef88bc21585bc7ff18dd44ef7fd4b31c717d0886d56f1ea8745e36f0": {
     "describe": {
       "columns": [],
@@ -2049,6 +1999,57 @@
     },
     "query": "SELECT time, audit_id, \n                  userid,\n                  members.name AS \"name?\"\n           FROM demon_additions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"
   },
+  "aecdb918877dcf6cbe25cf7c19672f0852513d33eefaedf847cc3fe919fc665b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "record",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_public",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "author?: String",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "transferred!: bool",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Bool"
+        ]
+      }
+    },
+    "query": "SELECT id, record, content, is_public, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND \n         id = $1) AS \"transferred!: bool\"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = \n         record_notes_additions.userid WHERE record = $1 AND (NOT $2 OR is_public)"
+  },
   "af513f64c783eb80253a5772724179b40e3f22043f38157bebaacd031765ca1f": {
     "describe": {
       "columns": [
@@ -3008,18 +3009,10 @@
     },
     "query": "SELECT MAX(id) AS \"max_id!: i32\", MIN(id) AS \"min_id!: i32\" FROM records"
   },
-  "f693f9e0f1c4ef5de57a11e8441f431f586a921600c53fa44d88fb73499c6ece": {
+  "f355f156266909a0aba3b14baa3c49c415ec786f6005994ff512b55b82f594f3": {
     "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Int4",
@@ -3027,7 +3020,7 @@
         ]
       }
     },
-    "query": "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id"
+    "query": "INSERT INTO record_notes (record, content) VALUES ($1, $2)"
   },
   "f7f7862732ed3b42e2e2eeeab76a70ac18887c6bcb51983b71a616d79964e5ae": {
     "describe": {

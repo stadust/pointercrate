@@ -181,7 +181,6 @@ impl ValidatedSubmission {
             player: self.player,
             demon: self.demon,
             submitter: Some(self.submitter),
-            notes: Vec::new(),
         };
 
         // Dealing with different status and upholding their invariant is complicated, we should not
@@ -192,47 +191,21 @@ impl ValidatedSubmission {
 
         if let Some(note) = self.note {
             if !note.trim().is_empty() {
-                let note_id = sqlx::query!(
-                    "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
-                    record.id,
-                    note
-                )
-                .fetch_one(&mut *connection)
-                .await?
-                .id;
-
-                record.notes.push(Note {
-                    id: note_id,
-                    record: id,
-                    content: note,
-                    is_public: true,
-                    transferred: false,
-                    author: None,
-                    editors: Vec::new(),
-                })
+                let note_id = sqlx::query!("INSERT INTO record_notes (record, content) VALUES ($1, $2)", record.id, note)
+                    .fetch_one(&mut *connection)
+                    .await?;
             }
         }
 
         if let Some(raw_footage) = self.raw_footage {
             let note_content = format!("Raw footage: {}", raw_footage);
             let note_id = sqlx::query!(
-                "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id",
+                "INSERT INTO record_notes (record, content) VALUES ($1, $2)",
                 record.id,
                 note_content
             )
             .fetch_one(&mut *connection)
-            .await?
-            .id;
-
-            record.notes.push(Note {
-                id: note_id,
-                record: id,
-                content: note_content,
-                is_public: true,
-                transferred: false,
-                author: None,
-                editors: Vec::new(),
-            })
+            .await?;
         }
 
         Ok(record)

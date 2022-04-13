@@ -13,7 +13,7 @@ use pointercrate_demonlist::{
     player::claim::PlayerClaim,
     record::{
         audit::RecordModificationData,
-        note::{NewNote, Note, PatchNote},
+        note::{notes_on, NewNote, Note, PatchNote},
         FullRecord, MinimalRecordPD, PatchRecord, RecordPagination, RecordStatus, Submission,
     },
     submitter::Submitter,
@@ -160,12 +160,8 @@ pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<Pointercr
 
     let mut record = FullRecord::by_id(record_id, &mut connection).await?;
 
-    if !is_helper {
-        record.notes.clear();
-
-        if record.status != RecordStatus::Approved {
-            return Err(DemonlistError::RecordNotFound { record_id }.into())
-        }
+    if !is_helper && record.status != RecordStatus::Approved {
+        return Err(DemonlistError::RecordNotFound { record_id }.into())
     }
 
     Ok(Tagged(record))
@@ -188,7 +184,7 @@ pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<Audit
 pub async fn patch(
     record_id: i32, mut auth: TokenAuth, precondition: Precondition, patch: Json<PatchRecord>,
 ) -> Result<Tagged<FullRecord>> {
-    let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
+    let mut record = FullRecord::by_id(record_id, &mut auth.connection).await?;
 
     if record.demon.position > pointercrate_demonlist::config::extended_list_size() {
         auth.require_permission(LIST_MODERATOR)?;
@@ -222,6 +218,33 @@ pub async fn delete(record_id: i32, mut auth: TokenAuth, precondition: Precondit
     auth.commit().await?;
 
     Ok(Status::NoContent)
+}
+
+#[rocket::get("/<record_id>/notes")]
+pub async fn get_notes(record_id: i32, mut auth: TokenAuth) -> Result<Response2<Json<Vec<Note>>>> {
+    let record_holder_id = sqlx::query!("SELECT player FROM records WHERE id = $1", record_id)
+        .fetch_one(&mut auth.connection)
+        .await
+        .map_err(|err| {
+            if let sqlx::Error::RowNotFound = err {
+                DemonlistError::RecordNotFound { record_id }
+            } else {
+                err.into()
+            }
+        })?
+        .player;
+
+    let notes = if auth.has_permission(LIST_HELPER) {
+        notes_on(record_id, false, &mut auth.connection).await?
+    } else {
+        match PlayerClaim::get(auth.user.inner().id, record_holder_id, &mut auth.connection).await {
+            Ok(claim) if claim.verified => notes_on(record_id, true, &mut auth.connection).await?,
+            Ok(_) | Err(DemonlistError::ClaimNotFound { .. }) => return Err(DemonlistError::RecordNotFound { record_id }.into()),
+            Err(err) => return Err(err.into()),
+        }
+    };
+
+    Ok(Response2::json(notes))
 }
 
 #[rocket::post("/<record_id>/notes", data = "<data>")]

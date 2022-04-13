@@ -23,6 +23,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             endpoints::submitter::patch
         ])
         .mount("/api/v1/records/", rocket::routes![
+            endpoints::record::get_notes,
             endpoints::record::add_note,
             endpoints::record::audit,
             endpoints::record::delete,
