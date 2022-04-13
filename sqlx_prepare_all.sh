@@ -3,6 +3,6 @@
 for f in pointercrate-*
 do
   (
-    cd "$f" && cargo sqlx prepare --check;
+    cd "$f" && cargo sqlx prepare;
   )
 done;

@@ -522,18 +522,6 @@
     },
     "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\"\nFROM demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position"
   },
-  "13a21e415b76afc6824ca6565e10649514fed1b79ece2794ac744fd9bebf235c": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "INSERT INTO active_user (id) VALUES ($1)"
-  },
   "156a4fb58b1d03beb94c9789eeccb0b098dc1162b5198a301c4c80cef0eff854": {
     "describe": {
       "columns": [],
@@ -545,6 +533,19 @@
       }
     },
     "query": "UPDATE demons SET position = position + 1 WHERE position >= $1"
+  },
+  "195463c6671115eb637393262ba43b5040d7b7741c4849e8847a36c367b75838": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET is_public = $1 WHERE id = $2"
   },
   "1a94a648c895472859460cb7fa1c2b527f4ce0127adcc1d0467b534e3f8b84c8": {
     "describe": {
@@ -722,15 +723,55 @@
     },
     "query": "UPDATE demons SET position = position + 1 WHERE position >= $1 AND position < $2"
   },
-  "33e7fa0719772085ee25e5a1fdcb293bdd5725bf5947733ca7fd21050610b7a5": {
+  "34842a9c4a3a2d6b0e787f3ebf9a21afa87404d3b899ae4658ec255fe70bf07a": {
     "describe": {
-      "columns": [],
-      "nullable": [],
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "record",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_public",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "author?: String",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "transferred!: bool",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Int4"
+        ]
       }
     },
-    "query": "DELETE FROM active_user"
+    "query": "SELECT id, record, content, is_public, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND \n         id = $1) AS \"transferred!: bool\"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = \n         record_notes_additions.userid WHERE record = $1"
   },
   "3644d1f3ef88bc21585bc7ff18dd44ef7fd4b31c717d0886d56f1ea8745e36f0": {
     "describe": {
@@ -919,61 +960,6 @@
       }
     },
     "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND records.player = $3 AND (records.status_ = 'REJECTED' OR records.progress <= $4)"
-  },
-  "54338f69a0ad67aa78c35eb2f106815764907605268d051ec78c58a1bb5ddf3d": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "record",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "content",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "author?: String",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "transferred!: bool",
-          "ordinal": 4,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT id, record, content, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL \n             AND id = $1) AS \"transferred!: bool\" FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on \n             members.member_id = record_notes_additions.userid WHERE id = $1 and record = $2"
-  },
-  "54e79bd4ffa9356fb9efdd83a863b637f772aac32b9a157d134c9b0d259a3cb2": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)"
   },
   "55044c6852d4f4c3beb15f7fd8787efa38c0303c606cc558e348c9bcf47f03e1": {
     "describe": {
@@ -1357,6 +1343,28 @@
       }
     },
     "query": "INSERT INTO submitters (ip_address) VALUES (cast($1::text as inet)) RETURNING submitter_id"
+  },
+  "7d6e162b7960d83b8a80ba368b652a9b2151dcb3abfda2af85c5a8265eeb517b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO record_notes (record, content, is_public) VALUES ($1, $2, $3) RETURNING id"
   },
   "7d8437e225355a22ea0a0a004d69da01cca83e8b4db95cce5df46c4dfb924ec0": {
     "describe": {
@@ -2426,6 +2434,57 @@
     },
     "query": "UPDATE players SET banned = false WHERE id=$1"
   },
+  "c94b83dae421d0de0a283bf0aefc992148d617aabf900a505643c32b82998eed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "record",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_public",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "author?: String",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "transferred!: bool",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, record, content, is_public, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL \n             AND id = $1) AS \"transferred!: bool\" FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on \n             members.member_id = record_notes_additions.userid WHERE id = $1 and record = $2"
+  },
   "ca96a5b7c473010df9f190ef3cb52d65ec0b45ffd7b547907c973de45cc51848": {
     "describe": {
       "columns": [
@@ -2969,50 +3028,6 @@
       }
     },
     "query": "INSERT INTO record_notes (record, content) VALUES ($1, $2) RETURNING id"
-  },
-  "f7a4e9f5f21a296cf5eee1d7ec67e32d7d1579862ce2f137b5d2c837b50a30e6": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "record",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "content",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "author?: String",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "transferred!: bool",
-          "ordinal": 4,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT id, record, content, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND \n         id = $1) AS \"transferred!: bool\"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = \n         record_notes_additions.userid WHERE record = $1"
   },
   "f7f7862732ed3b42e2e2eeeab76a70ac18887c6bcb51983b71a616d79964e5ae": {
     "describe": {
