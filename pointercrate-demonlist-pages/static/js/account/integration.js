@@ -147,7 +147,7 @@ class ClaimedPlayerRecordPaginator extends Paginator {
                     }
 
                     this.successOutput.style.display = "block";
-                }else {
+                } else {
                     this.setSuccess("No public notes on this record!");
                 }
             })

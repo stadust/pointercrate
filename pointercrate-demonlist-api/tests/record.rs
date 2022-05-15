@@ -9,16 +9,7 @@ async fn paginate_records_unauthorized() {
 
     setup::add_dummy_records(&mut connection).await;
 
-    let response = clnt
-        .get("/api/v1/records/?player=1")
-        .header(Header::new("X-Real-IP", "127.0.0.1"))
-        .dispatch()
-        .await;
-
-    assert_eq!(response.status(), Status::Ok);
-
-    let body_text = response.into_string().await.unwrap();
-    let json: Vec<serde_json::Value> = serde_json::from_str(&body_text).unwrap();
+    let json: Vec<serde_json::Value> = clnt.get("/api/v1/records/?player=1").expect_status(Status::Ok).get_result().await;
 
     assert_eq!(json.into_iter().map(|record| record["id"].as_i64()).collect::<Vec<_>>(), vec![
         Some(1)
@@ -33,17 +24,7 @@ async fn paginate_records_with_verified_claim() {
     let user = setup::add_normal_user(&mut connection).await;
     setup::put_claim(user.inner().id, 1, true, false, &mut connection).await;
 
-    let response = clnt
-        .get("/api/v1/records/?player=1")
-        .header(Header::new("Authorization", format!("Bearer {}", user.generate_access_token())))
-        .header(Header::new("X-Real-IP", "127.0.0.1"))
-        .dispatch()
-        .await;
-
-    assert_eq!(response.status(), Status::Ok);
-
-    let body_text = response.into_string().await.unwrap();
-    let json: Vec<serde_json::Value> = serde_json::from_str(&body_text).unwrap();
+    let json: Vec<serde_json::Value> = clnt.get("/api/v1/records/?player=1").authorize_as(&user).get_result().await;
 
     assert_eq!(json.into_iter().map(|record| record["id"].as_i64()).collect::<Vec<_>>(), vec![
         Some(1),
@@ -59,17 +40,7 @@ async fn paginate_records_with_unverified_claim() {
     let user = setup::add_normal_user(&mut connection).await;
     setup::put_claim(user.inner().id, 1, false, false, &mut connection).await;
 
-    let response = clnt
-        .get("/api/v1/records/?player=1")
-        .header(Header::new("Authorization", format!("Bearer {}", user.generate_access_token())))
-        .header(Header::new("X-Real-IP", "127.0.0.1"))
-        .dispatch()
-        .await;
-
-    assert_eq!(response.status(), Status::Ok);
-
-    let body_text = response.into_string().await.unwrap();
-    let json: Vec<serde_json::Value> = serde_json::from_str(&body_text).unwrap();
+    let json: Vec<serde_json::Value> = clnt.get("/api/v1/records/?player=1").authorize_as(&user).get_result().await;
 
     assert_eq!(json.into_iter().map(|record| record["id"].as_i64()).collect::<Vec<_>>(), vec![
         Some(1)
@@ -84,17 +55,7 @@ async fn paginate_records_with_verified_claim_wrong_player() {
     let user = setup::add_normal_user(&mut connection).await;
     setup::put_claim(user.inner().id, 1, true, false, &mut connection).await;
 
-    let response = clnt
-        .get("/api/v1/records/?player=2")
-        .header(Header::new("Authorization", format!("Bearer {}", user.generate_access_token())))
-        .header(Header::new("X-Real-IP", "127.0.0.1"))
-        .dispatch()
-        .await;
-
-    assert_eq!(response.status(), Status::Ok);
-
-    let body_text = response.into_string().await.unwrap();
-    let json: Vec<serde_json::Value> = serde_json::from_str(&body_text).unwrap();
+    let json: Vec<serde_json::Value> = clnt.get("/api/v1/records/?player=2").authorize_as(&user).get_result().await;
 
     assert_eq!(json.into_iter().map(|record| record["id"].as_i64()).collect::<Vec<_>>(), vec![])
 }
