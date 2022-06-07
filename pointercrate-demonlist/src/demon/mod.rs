@@ -231,7 +231,7 @@ impl Demon {
 
         let beaten_score = if 55 < position && position <= 150 {
             let b = 6.273f64;
-            56.191f64 * (2f64.powf((54.147f64 - (position + 3.2f64) as f64) * ((50f64.ln()) / 99f64))) + b
+            56.191f64 * (2f64.powf((54.147f64 - (position as f64 + 3.2f64) as f64) * ((50f64.ln()) / 99f64))) + b
         } else if 35 < position && position <= 55 {
             let g = 1.036f64;
             let h = 25.071f64;
