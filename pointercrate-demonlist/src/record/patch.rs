@@ -64,7 +64,7 @@ impl FullRecord {
                 self.set_demon(MinimalDemon::by_name(demon_name.as_ref(), connection).await?, connection)
                     .await?,
             (None, Some(demon_id)) => self.set_demon(MinimalDemon::by_id(demon_id, connection).await?, connection).await?,
-            (Some(_), Some(_)) => Err(CoreError::MutuallyExclusive)?,
+            (Some(_), Some(_)) => return Err(CoreError::MutuallyExclusive.into()),
             _ => (),
         }
 

@@ -10,7 +10,7 @@ pub(crate) fn stats_viewer_panel() -> Markup {
         section#stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "Stats Viewer:"
+                    "Stats Viewer"
                 }
             }
             p {
@@ -90,7 +90,7 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
                         },
                         nations.iter().map(|nation| html! {
                             li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                                span class = "flag-icon" style={"background-image: url(/static2/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
+                                span class = "flag-icon" style={"background-image: url(/static/demonlist/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
                                 (PreEscaped("&nbsp;"))
                                 b {(nation.iso_country_code)}
                                 br;

@@ -1,52 +1,61 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
-use pointercrate_core_pages::{PageFragment, Script};
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_core_pages::{
+    head::{HeadLike, Script},
+    PageFragment,
+};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 
 pub mod profile;
 pub mod users;
 
 #[async_trait::async_trait]
 pub trait AccountPageTab {
-    fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool;
-    fn additional_scripts(&self) -> Vec<Script>;
+    fn should_display_for(&self, permissions_we_have: u16, permission_manager: &PermissionsManager) -> bool;
+    fn initialization_script(&self) -> String;
+    fn additional_scripts(&self) -> Vec<Script> {
+        vec![]
+    }
 
     fn tab_id(&self) -> u8;
     fn tab(&self) -> Markup;
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup;
+    async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup;
 }
 
 pub struct AccountPageConfig {
     tabs: Vec<Box<dyn AccountPageTab + Send + Sync + 'static>>,
 }
 
-impl AccountPageConfig {
-    pub fn new() -> Self {
+impl Default for AccountPageConfig {
+    fn default() -> Self {
         AccountPageConfig { tabs: Vec::new() }
     }
+}
 
+impl AccountPageConfig {
     pub fn with_page(mut self, page: impl AccountPageTab + Send + Sync + 'static) -> Self {
         self.tabs.push(Box::new(page));
         self
     }
 
     pub async fn account_page(
-        &self, csrf_token: String, user: User, permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, user: AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> AccountPage {
         let mut page = AccountPage {
             user,
             scripts: vec![],
             tabs: vec![],
-            csrf_token,
         };
 
         for tab_config in &self.tabs {
-            if tab_config.should_display_for(&page.user, &permissions) {
+            if tab_config.should_display_for(page.user.inner().permissions, permissions) {
                 let tab = tab_config.tab();
                 let content = tab_config.content(&page.user, permissions, connection).await;
 
                 page.scripts.extend(tab_config.additional_scripts());
-                page.tabs.push((tab, content, tab_config.tab_id()));
+                page.scripts.push(Script::module(tab_config.initialization_script()));
+                page.tabs
+                    .push((tab, content, tab_config.initialization_script(), tab_config.tab_id()));
             }
         }
 
@@ -55,45 +64,35 @@ impl AccountPageConfig {
 }
 
 pub struct AccountPage {
-    user: User,
+    user: AuthenticatedUser,
     scripts: Vec<Script>,
-    tabs: Vec<(Markup, Markup, u8)>,
-    csrf_token: String,
+    tabs: Vec<(Markup, Markup, String, u8)>,
 }
 
-impl PageFragment for AccountPage {
-    fn title(&self) -> String {
-        format!("Account - {}", self.user.name)
-    }
-
-    fn description(&self) -> String {
-        String::new()
-    }
-
-    fn additional_scripts(&self) -> Vec<Script> {
-        let mut scripts = self.scripts.clone();
-        scripts.push(Script::module("/static/js/staff.js"));
-        scripts
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/account.css".to_string(), "/static/css/sidebar.css".to_string()]
-    }
-
-    fn head_fragment(&self) -> Markup {
-        html! {
-            (PreEscaped(
-                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'</script>"#, self.user.name, self.user.etag_string(), self.user.permissions)
+impl From<AccountPage> for PageFragment {
+    fn from(account: AccountPage) -> Self {
+        let mut fragment = PageFragment::new(format!("Account - {}", account.user.inner().name), "")
+            .stylesheet("/static/user/css/account.css")
+            .stylesheet("/static/core/css/sidebar.css")
+            .head(PreEscaped(
+                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'; window.userId={}</script><script type="module">{}</script>"#, account.user.inner().name, account.user.inner().etag_string(), account.user.inner().permissions, account.user.inner().id, account.initialization_script())
             ))
-        }
-    }
+            .body(account.body());
 
-    fn body_fragment(&self) -> Markup {
+        for script in account.scripts {
+            fragment = fragment.with_script(script);
+        }
+
+        fragment
+    }
+}
+
+impl AccountPage {
+    fn body(&self) -> Markup {
         html! {
-            span#chicken-salad-red-fish style = "display:none" {(self.csrf_token)}
             div.tab-display#account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
-                    @for (i, (tab, _, id)) in self.tabs.iter().enumerate() {
+                    @for (i, (tab, _, _, id)) in self.tabs.iter().enumerate() {
                         @if i == 0 {
                             div.tab.tab-active.button.white.hover.no-shadow data-tab-id=(id) {
                                 (*tab)
@@ -107,7 +106,7 @@ impl PageFragment for AccountPage {
                     }
                 }
 
-                @for (i, (_, content, id)) in self.tabs.iter().enumerate() {
+                @for (i, (_, content, _, id)) in self.tabs.iter().enumerate() {
                     @if i == 0 {
                         div.m-center.flex.tab-content.tab-content-active.container data-tab-id = (id){
                             (*content)
@@ -121,5 +120,49 @@ impl PageFragment for AccountPage {
                 }
             }
         }
+    }
+
+    fn initialization_script(&self) -> String {
+        let mut imports = r#"
+import { TabbedPane } from "/static/core/js/modules/tab.js";
+        "#
+        .to_owned();
+        let mut initialization_states = String::new();
+        let mut initializations = String::new();
+
+        for (_, _, script, i) in &self.tabs {
+            imports.push_str(&format!(r#"import {{ initialize as initialize{} }} from "{}";"#, i, script));
+
+            initialization_states.push_str(&format!("let initialized{} = false;", i));
+            initializations.push_str(&format!(
+                r#"
+accountTabber.addSwitchListener("{0}", () => {{
+if (!initialized{0}) {{
+  initialize{0}(accountTabber);
+
+  initialized{0} = true;
+}}
+}});
+            "#,
+                i
+            ));
+        }
+
+        format!(
+            r#"
+        {}
+        {}
+        
+$(document).ready(function () {{        
+    let accountTabber = new TabbedPane(
+    document.getElementById("account-tabber"),
+    "account-tab-selection"
+    );
+    
+    {}
+}});
+        "#,
+            imports, initialization_states, initializations
+        )
     }
 }

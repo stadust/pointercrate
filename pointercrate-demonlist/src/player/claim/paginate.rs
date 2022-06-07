@@ -1,10 +1,6 @@
 use crate::error::Result;
 use futures::StreamExt;
-use pointercrate_core::{
-    audit::NamedId,
-    error::CoreError,
-    util::{non_nullable, nullable},
-};
+use pointercrate_core::{audit::NamedId, error::CoreError, util::non_nullable};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
 
@@ -49,18 +45,16 @@ impl ListedClaim {
 impl PlayerClaimPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<ListedClaim>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
             if after < before {
-                Err(CoreError::AfterSmallerBefore)?
+                return Err(CoreError::AfterSmallerBefore.into())
             }
         }
-
-        let limit = self.limit.unwrap_or(50) as i32;
 
         let order = if self.after_id.is_none() && self.before_id.is_some() {
             "DESC"

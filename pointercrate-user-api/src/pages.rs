@@ -2,13 +2,11 @@ use crate::{
     auth::{BasicAuth, TokenAuth},
     ratelimits::UserRatelimits,
 };
-use pointercrate_core::{config, permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
 use pointercrate_core_api::response::Page;
+use pointercrate_core_pages::head::HeadLike;
 use pointercrate_user::{error::UserError, AuthenticatedUser, Registration, User};
-use pointercrate_user_pages::{
-    account::{AccountPage, AccountPageConfig},
-    login::LoginPage,
-};
+use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{
     http::{Cookie, CookieJar, SameSite, Status},
     response::Redirect,
@@ -18,9 +16,9 @@ use rocket::{
 use std::net::IpAddr;
 
 #[rocket::get("/login")]
-pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page<LoginPage>> {
+pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page(LoginPage))
+        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
 }
 
 #[rocket::post("/login")]
@@ -31,7 +29,7 @@ pub async fn login(
 
     let auth = auth?;
 
-    let mut cookie = Cookie::build("access_token", auth.user.generate_token(&config::secret()))
+    let mut cookie = Cookie::build("access_token", auth.user.generate_access_token())
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -63,7 +61,7 @@ pub async fn register(
 
     connection.commit().await.map_err(UserError::from)?;
 
-    let mut cookie = Cookie::build("access_token", user.generate_token(&config::secret()))
+    let mut cookie = Cookie::build("access_token", user.generate_access_token())
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -80,15 +78,12 @@ pub async fn register(
 #[rocket::get("/account")]
 pub async fn account_page(
     auth: Option<TokenAuth>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
-) -> Result<Page<AccountPage>, Redirect> {
+) -> Result<Page, Redirect> {
     match auth {
         Some(mut auth) => {
-            let csrf_token = auth.user.generate_csrf_token(&config::secret());
+            let csrf_token = auth.user.generate_csrf_token();
 
-            Ok(Page(
-                tabs.account_page(csrf_token, auth.user.into_inner(), permissions, &mut auth.connection)
-                    .await,
-            ))
+            Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await).meta("csrf_token", csrf_token))
         },
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }

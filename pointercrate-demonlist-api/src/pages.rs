@@ -6,6 +6,7 @@ use pointercrate_core_api::{
     error::Result,
     response::{Page, Response2},
 };
+use pointercrate_core_pages::head::HeadLike;
 use pointercrate_demonlist::{
     demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
     error::DemonlistError,
@@ -16,10 +17,11 @@ use pointercrate_demonlist_pages::{
     components::{team::Team, time_machine::Tardis},
     demon_page::{DemonMovement, DemonPage},
     overview::OverviewPage,
-    statsviewer::{individual::IndividualStatsViewer, national::NationBasedStatsViewer},
+    statsviewer::individual::IndividualStatsViewer,
 };
 use pointercrate_integrate::gd::{GDIntegrationResult, PgCache};
 use pointercrate_user::User;
+use pointercrate_user_api::auth::TokenAuth;
 use rocket::{futures::StreamExt, http::CookieJar};
 
 #[rocket::get("/?statsviewer=true")]
@@ -29,8 +31,8 @@ pub fn stats_viewer_redirect() -> Redirect {
 
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
-) -> Result<Page<OverviewPage>> {
+    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>, auth: Option<TokenAuth>,
+) -> Result<Page> {
     // should be const, but chrono aint const :(
     let beginning_of_time: DateTime<FixedOffset> =
         FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 1, 4).and_hms(0, 0, 0));
@@ -55,7 +57,7 @@ pub async fn overview(
         _ => Tardis::new(timemachine.unwrap_or(false)),
     };
 
-    Ok(Page(OverviewPage {
+    let mut page = Page::new(OverviewPage {
         team: Team {
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
@@ -64,7 +66,13 @@ pub async fn overview(
         demonlist,
         time_machine: tardis,
         submitter_initially_visible: submitter.unwrap_or(false),
-    }))
+    });
+
+    if let Some(token_auth) = auth {
+        page = page.meta("csrf_token", token_auth.user.generate_csrf_token());
+    }
+
+    Ok(page)
 }
 
 #[rocket::get("/permalink/<demon_id>")]
@@ -77,7 +85,7 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[rocket::get("/<position>")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>) -> Result<Page<DemonPage>> {
+pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>, auth: Option<TokenAuth>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut connection).await?;
@@ -119,7 +127,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         });
     }
 
-    Ok(Page(DemonPage {
+    let mut page = Page::new(DemonPage {
         team: Team {
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
@@ -137,21 +145,27 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
             .await
             .unwrap_or(GDIntegrationResult::LevelDataNotFound),
         data: full_demon,
-    }))
+    });
+
+    if let Some(token_auth) = auth {
+        page = page.meta("csrf_token", token_auth.user.generate_csrf_token());
+    }
+
+    Ok(page)
 }
 
 #[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page<IndividualStatsViewer>> {
+pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
-    Ok(Page(IndividualStatsViewer {
+    Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut connection).await?,
     }))
 }
 
 #[rocket::get("/statsviewer/nations")]
-pub async fn nation_stats_viewer() -> Page<NationBasedStatsViewer> {
-    Page(NationBasedStatsViewer)
+pub async fn nation_stats_viewer() -> Page {
+    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
 }
 
 macro_rules! heatmap_query {

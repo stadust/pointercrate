@@ -1,4 +1,4 @@
-use crate::{PageFragment, Script};
+use crate::{head::HeadLike, PageFragment};
 use maud::{html, Markup, PreEscaped};
 
 pub struct ErrorFragment {
@@ -7,28 +7,18 @@ pub struct ErrorFragment {
     pub message: String,
 }
 
-impl PageFragment for ErrorFragment {
-    fn title(&self) -> String {
-        format!("{} - {}", self.status, self.reason)
-    }
+impl From<ErrorFragment> for PageFragment {
+    fn from(error: ErrorFragment) -> Self {
+        let body = error.body();
 
-    fn description(&self) -> String {
-        format!("{}", self.message)
+        PageFragment::new(format!("{} - {}", error.status, error.reason), error.message)
+            .stylesheet("/static/core/css/error.css")
+            .body(body)
     }
+}
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![]
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        vec!["/static/css/error.css".to_string()]
-    }
-
-    fn head_fragment(&self) -> Markup {
-        html! {}
-    }
-
-    fn body_fragment(&self) -> Markup {
+impl ErrorFragment {
+    pub fn body(&self) -> Markup {
         html! {
             div.m-center.flex.col.cen.no-stretch#error style = "height: calc(100% - 60px)"{
                 div.flex.cen style="width: 100%" {

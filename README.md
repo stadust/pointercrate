@@ -1,12 +1,11 @@
-# Pointercrate
+# Pointercrate ![build](https://github.com/stadust/pointercrate/actions/workflows/check.yml/badge.svg) [![codecov](https://codecov.io/gh/stadust/pointercrate/branch/master/graph/badge.svg?token=C7B5LU2IF5)](https://codecov.io/gh/stadust/pointercrate)
+
 
 As of March 2nd 2019 this is the official repository for pointercrate. It does not contain all the code required to run a local copy of pointercrate, however, as parts of the code remain private. In particular, this repository does not contain
 
 - a `main.rs` file stitching together the code in the different libraries
 - various assets such as graphics used by pointercrate
 - code specific to pointercrate that has no place on custom copies of pointercrate (such as the pointercrate homepage)
-
-Currently, this repository also does not contain any static files, or a database scheme, since I could not figure out a nice way to include them in the relevant crates. 
 
 This has both upsides and downsides. Since you'll have to write those components yourself, it will be very complicated to run custom pointercrate copies (especially since we do not actually support such endeavours). However, there are various advantages:
 

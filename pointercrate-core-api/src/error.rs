@@ -40,7 +40,7 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
 
         if accept == MediaType::HTML {
             Response::build_from(
-                Page(ErrorFragment {
+                Page::new(ErrorFragment {
                     status: self.error_code / 100,
                     reason: status.reason_lossy().to_string(),
                     message: self.message,

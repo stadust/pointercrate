@@ -40,8 +40,8 @@ pub struct PlayerPagination {
 impl PlayerPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Player>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
@@ -57,8 +57,8 @@ impl PlayerPagination {
         let mut stream = sqlx::query(&query)
             .bind(self.before_id)
             .bind(self.after_id)
-            .bind(self.name.as_ref().map(|s| s.as_str()))
-            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
+            .bind(self.name.as_deref())
+            .bind(self.name_contains.as_deref())
             .bind(self.banned)
             .bind(&self.nation)
             .bind(self.nation == Some(None))
@@ -123,8 +123,8 @@ pub struct RankingPagination {
 impl RankingPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
@@ -139,7 +139,7 @@ impl RankingPagination {
         let mut stream = sqlx::query(&query)
             .bind(self.before_index)
             .bind(self.after_index)
-            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
+            .bind(self.name_contains.as_deref())
             .bind(&self.nation)
             .bind(self.nation == Some(None))
             .bind(self.continent.as_ref().map(|c| c.to_sql()))

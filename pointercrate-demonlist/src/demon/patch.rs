@@ -110,7 +110,7 @@ impl Demon {
     }
 
     pub async fn set_requirement(&mut self, requirement: i16, connection: &mut PgConnection) -> Result<()> {
-        if requirement < 0 || requirement > 100 {
+        if !(0..=100).contains(&requirement) {
             return Err(DemonlistError::InvalidRequirement)
         }
 

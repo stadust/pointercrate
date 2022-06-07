@@ -38,7 +38,7 @@ pub struct UserPagination {
 impl UserPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<User>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
+            if !(1..=100).contains(&limit) {
                 return Err(CoreError::InvalidPaginationLimit.into())
             }
         }

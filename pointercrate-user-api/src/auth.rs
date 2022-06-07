@@ -95,9 +95,8 @@ impl<'r> FromRequest<'r> for Auth<true> {
         };
 
         for authorization in request.headers().get("Authorization") {
-            if let &["Bearer", token] = &authorization.split(' ').collect::<Vec<_>>()[..] {
-                let user =
-                    try_outcome!(AuthenticatedUser::token_auth(token, None, &pointercrate_core::config::secret(), &mut connection).await);
+            if let ["Bearer", token] = authorization.split(' ').collect::<Vec<_>>()[..] {
+                let user = try_outcome!(AuthenticatedUser::token_auth(token, None, &mut connection).await);
 
                 try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
@@ -117,9 +116,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
             if request.method() == Method::Get {
                 debug!("GET request, the cookie is enough");
 
-                let user = try_outcome!(
-                    AuthenticatedUser::token_auth(access_token, None, &pointercrate_core::config::secret(), &mut connection).await
-                );
+                let user = try_outcome!(AuthenticatedUser::token_auth(access_token, None, &mut connection).await);
 
                 try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
@@ -137,15 +134,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
             // :tm:
 
             if let Some(csrf_token) = request.headers().get_one("X-CSRF-TOKEN") {
-                let user = try_outcome!(
-                    AuthenticatedUser::token_auth(
-                        access_token,
-                        Some(csrf_token),
-                        &pointercrate_core::config::secret(),
-                        &mut connection
-                    )
-                    .await
-                );
+                let user = try_outcome!(AuthenticatedUser::token_auth(access_token, Some(csrf_token), &mut connection).await);
 
                 try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 
@@ -205,7 +194,7 @@ impl<'r> FromRequest<'r> for Auth<false> {
         };
 
         for authorization in request.headers().get("Authorization") {
-            if let &["Basic", basic_auth] = &authorization.split(' ').collect::<Vec<_>>()[..] {
+            if let ["Basic", basic_auth] = authorization.split(' ').collect::<Vec<_>>()[..] {
                 let decoded = try_outcome!(base64::decode(basic_auth)
                     .map_err(|_| ())
                     .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))

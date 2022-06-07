@@ -52,14 +52,14 @@ pub struct DemonIdPagination {
 impl DemonIdPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
             if after < before {
-                Err(CoreError::AfterSmallerBefore)?
+                return Err(CoreError::AfterSmallerBefore.into())
             }
         }
 
@@ -75,15 +75,15 @@ impl DemonIdPagination {
         let mut stream = sqlx::query(&query)
             .bind(self.before_id)
             .bind(self.after_id)
-            .bind(self.name.as_ref().map(|s| s.as_str()))
+            .bind(self.name.as_deref())
             .bind(self.requirement)
             .bind(self.requirement_lt)
             .bind(self.requirement_gt)
             .bind(self.verifier_id)
-            .bind(self.verifier_name.as_ref().map(|s| s.as_str()))
+            .bind(self.verifier_name.as_deref())
             .bind(self.publisher_id)
-            .bind(self.publisher_name.as_ref().map(|s| s.as_str()))
-            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
+            .bind(self.publisher_name.as_deref())
+            .bind(self.name_contains.as_deref())
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 
@@ -164,14 +164,14 @@ pub struct DemonPositionPagination {
 impl DemonPositionPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_position, self.after_position) {
             if after < before {
-                Err(CoreError::AfterSmallerBefore)?
+                return Err(CoreError::AfterSmallerBefore.into())
             }
         }
 
@@ -187,15 +187,15 @@ impl DemonPositionPagination {
         let mut stream = sqlx::query(&query)
             .bind(self.before_position)
             .bind(self.after_position)
-            .bind(self.name.as_ref().map(|s| s.as_str()))
+            .bind(self.name.as_deref())
             .bind(self.requirement)
             .bind(self.requirement_lt)
             .bind(self.requirement_gt)
             .bind(self.verifier_id)
-            .bind(self.verifier_name.as_ref().map(|s| s.as_str()))
+            .bind(self.verifier_name.as_deref())
             .bind(self.publisher_id)
-            .bind(self.publisher_name.as_ref().map(|s| s.as_str()))
-            .bind(self.name_contains.as_ref().map(|s| s.as_str()))
+            .bind(self.publisher_name.as_deref())
+            .bind(self.name_contains.as_deref())
             .bind(self.limit.unwrap_or(50) as i32 + 1)
             .fetch(connection);
 

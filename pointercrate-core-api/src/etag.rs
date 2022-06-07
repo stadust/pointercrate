@@ -20,7 +20,8 @@ impl Precondition {
             .0
             .iter()
             .filter_map(|if_match| if_match.split(';').next())
-            .any(|e| e == &patch_etag)
+            .filter(|etag_fragment| etag_fragment.len() > 3)
+            .any(|e| e[3..] == patch_etag)
         {
             Ok(())
         } else {

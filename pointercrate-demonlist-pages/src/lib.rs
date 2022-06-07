@@ -43,7 +43,7 @@ static LEGACY_SECTION: ListSection = ListSection {
 
 fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < config::list_size() as usize {
-        (&all_demons[..], Default::default(), Default::default())
+        (all_demons, Default::default(), Default::default())
     } else {
         let (extended, legacy) = if all_demons.len() < config::extended_list_size() as usize {
             (&all_demons[config::list_size() as usize..], Default::default())
@@ -169,7 +169,7 @@ fn rules_panel() -> Markup {
     html! {
         section#rules.panel.fade.js-scroll-anim data-anim = "fade" {
             h2.underlined.pad.clickable {
-                "Guidelines:"
+                "Guidelines"
             }
             p {
                 "All demonlist operations are carried out in accordance to our guidelines. Be sure to check them before submitting a record to ensure a flawless experience!"

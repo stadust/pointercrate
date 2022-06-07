@@ -1,20 +1,20 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
-use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator, PageFragment, Script};
+use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator};
 use pointercrate_demonlist::{nationality::Nationality, LIST_MODERATOR};
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 use pointercrate_user_pages::account::AccountPageTab;
 
 pub struct PlayersPage;
 
 #[async_trait::async_trait]
 impl AccountPageTab for PlayersPage {
-    fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool {
-        permissions.require_permission(user.permissions, LIST_MODERATOR).is_ok()
+    fn should_display_for(&self, permissions_we_have: u16, permissions: &PermissionsManager) -> bool {
+        permissions.require_permission(permissions_we_have, LIST_MODERATOR).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/players.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/player.js".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -31,7 +31,7 @@ impl AccountPageTab for PlayersPage {
         }
     }
 
-    async fn content(&self, _user: &User, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &AuthenticatedUser, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
         let nationalities = match Nationality::all(connection).await {
             Ok(nationalities) => nationalities,
             Err(err) =>
@@ -40,7 +40,7 @@ impl AccountPageTab for PlayersPage {
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body_fragment(),
+                .body(),
         };
 
         html! {
@@ -102,7 +102,7 @@ impl AccountPageTab for PlayersPage {
                                                     li.white.hover.underlined data-value = "None" {"None"}
                                                     @for nation in nationalities {
                                                         li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
-                                                            span class = "flag-icon" style={"background-image: url(/static2/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
+                                                            span class = "flag-icon" style={"background-image: url(/static/demonlist/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
                                                             (PreEscaped("&nbsp;"))
                                                             b {(nation.iso_country_code)}
                                                             br;

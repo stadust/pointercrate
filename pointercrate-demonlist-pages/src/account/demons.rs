@@ -1,21 +1,21 @@
 use crate::components::player_selection_dialog;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_pages::{util::filtered_paginator, Script};
+use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 use pointercrate_user_pages::account::AccountPageTab;
 
 pub struct DemonsTab;
 
 #[async_trait::async_trait]
 impl AccountPageTab for DemonsTab {
-    fn should_display_for(&self, user: &User, permissions: &PermissionsManager) -> bool {
-        permissions.require_permission(user.permissions, LIST_MODERATOR).is_ok()
+    fn should_display_for(&self, permissions_we_have: u16, permissions: &PermissionsManager) -> bool {
+        permissions.require_permission(permissions_we_have, LIST_MODERATOR).is_ok()
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/demon.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/demon.js".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -32,7 +32,7 @@ impl AccountPageTab for DemonsTab {
         }
     }
 
-    async fn content(&self, _user: &User, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
+    async fn content(&self, _user: &AuthenticatedUser, _permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         html! {
             div.left {
                 (demon_submitter())

@@ -1,4 +1,4 @@
-//! Account/Authentification related user action
+//! Account/Authentication related user action
 //!
 //! Includes:
 //! * Registration
@@ -14,6 +14,7 @@ use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use pointercrate_core::error::CoreError;
 use serde::{Deserialize, Serialize};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 mod delete;
 mod get;
@@ -23,11 +24,20 @@ mod post;
 pub struct AuthenticatedUser {
     user: User,
     password_hash: String,
+    email_address: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
-pub struct Claims {
+pub struct AccessClaims {
     pub id: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ChangeEmailClaims {
+    pub id: i32,
+    pub email: String,
+    pub exp: u64,
+    pub iat: u64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -46,6 +56,10 @@ impl AuthenticatedUser {
         &self.user
     }
 
+    pub fn email_address(&self) -> Option<&str> {
+        self.email_address.as_deref()
+    }
+
     pub fn validate_password(password: &str) -> Result<()> {
         if password.len() < 10 {
             return Err(UserError::InvalidPassword)
@@ -54,38 +68,99 @@ impl AuthenticatedUser {
         Ok(())
     }
 
-    fn jwt_secret(&self, application_secret: &[u8]) -> Vec<u8> {
-        let mut key: Vec<u8> = application_secret.into();
+    fn jwt_secret(&self) -> Vec<u8> {
+        let mut key: Vec<u8> = pointercrate_core::config::secret();
         key.extend(self.password_salt());
         key
     }
 
-    pub fn generate_token(&self, application_secret: &[u8]) -> String {
+    pub fn generate_access_token(&self) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
-            &Claims { id: self.user.id },
-            &EncodingKey::from_secret(&self.jwt_secret(application_secret)),
+            &AccessClaims { id: self.user.id },
+            &EncodingKey::from_secret(&self.jwt_secret()),
         )
         .unwrap()
     }
 
-    pub fn validate_token(self, token: &str, application_secret: &[u8]) -> Result<Self> {
+    pub fn validate_access_token(self, token: &str) -> Result<Self> {
         // TODO: maybe one day do something with this
-        let mut validation = jsonwebtoken::Validation::default();
-        validation.validate_exp = false;
+        let validation = jsonwebtoken::Validation {
+            validate_exp: false,
+            ..Default::default()
+        };
 
-        jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(&self.jwt_secret(application_secret)), &validation)
+        jsonwebtoken::decode::<AccessClaims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
             .map_err(|err| {
                 warn!("Token validation FAILED for account {}: {}", self.user, err);
 
                 CoreError::Unauthorized.into()
             })
-            .map(move |_| self)
+            .and_then(move |token_data| {
+                // sanity check, should never fail
+                if token_data.claims.id != self.user.id {
+                    log::error!(
+                        "Access token for user {} decoded successfully even though user {} is logged in",
+                        token_data.claims.id,
+                        self.inner()
+                    );
+
+                    Err(CoreError::Unauthorized.into())
+                } else {
+                    Ok(self)
+                }
+            })
     }
 
-    pub fn generate_csrf_token(&self, application_secret: &[u8]) -> String {
-        use std::time::{Duration, SystemTime, UNIX_EPOCH};
+    pub fn generate_change_email_token(&self, email: String) -> String {
+        let start = SystemTime::now();
+        let since_epoch = start
+            .duration_since(UNIX_EPOCH)
+            .expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
 
+        let claim = ChangeEmailClaims {
+            id: self.user.id,
+            email,
+            iat: since_epoch.as_secs(),
+            exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
+        };
+
+        jsonwebtoken::encode(
+            &jsonwebtoken::Header::default(),
+            &claim,
+            &EncodingKey::from_secret(&self.jwt_secret()),
+        )
+        .unwrap()
+    }
+
+    pub fn validate_change_email_token(&self, token: &str) -> Result<String> {
+        jsonwebtoken::decode::<ChangeEmailClaims>(
+            token,
+            &DecodingKey::from_secret(&self.jwt_secret()),
+            &jsonwebtoken::Validation::default(),
+        )
+        .map_err(|err| {
+            warn!("Change email token validation FAILED for account {}: {}", self.user, err);
+
+            CoreError::Unauthorized.into()
+        })
+        .and_then(|token_data| {
+            // sanity check, should never fail
+            if token_data.claims.id != self.user.id {
+                log::error!(
+                    "Token for user {} decoded successfully even though user {} is logged in",
+                    token_data.claims.id,
+                    self.inner()
+                );
+
+                Err(CoreError::Unauthorized.into())
+            } else {
+                Ok(token_data.claims.email)
+            }
+        })
+    }
+
+    pub fn generate_csrf_token(&self) -> String {
         let start = SystemTime::now();
         let since_epoch = start
             .duration_since(UNIX_EPOCH)
@@ -100,23 +175,34 @@ impl AuthenticatedUser {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             &claim,
-            &EncodingKey::from_secret(application_secret),
+            &EncodingKey::from_secret(&pointercrate_core::config::secret()),
         )
         .unwrap()
     }
 
-    pub fn validate_csrf_token(&self, token: &str, application_secret: &[u8]) -> Result<()> {
+    pub fn validate_csrf_token(&self, token: &str) -> Result<()> {
         jsonwebtoken::decode::<CSRFClaims>(
             token,
-            &DecodingKey::from_secret(application_secret),
+            &DecodingKey::from_secret(&pointercrate_core::config::secret()),
             &jsonwebtoken::Validation::default(),
         )
         .map_err(|err| {
-            warn!("Token validation FAILED for account {}: {}", self.user, err);
+            warn!("Access token validation FAILED for account {}: {}", self.user, err);
 
             CoreError::Unauthorized.into()
         })
-        .map(|_| ())
+        .and_then(|token_data| {
+            if token_data.claims.id != self.user.id {
+                warn!(
+                    "User {} attempt to authenticate using CSRF token generated for user {}",
+                    self.user, token_data.claims.id
+                );
+
+                Err(CoreError::Unauthorized.into())
+            } else {
+                Ok(())
+            }
+        })
     }
 
     fn password_salt(&self) -> Vec<u8> {
@@ -149,12 +235,93 @@ impl AuthenticatedUser {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::{AuthenticatedUser, User};
+
+    fn patrick() -> AuthenticatedUser {
+        AuthenticatedUser {
+            user: User {
+                id: 0,
+                name: "Patrick".to_string(),
+                permissions: 0,
+                display_name: None,
+                youtube_channel: None,
+            },
+            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            email_address: None,
+        }
+    }
+
+    fn jacob() -> AuthenticatedUser {
+        AuthenticatedUser {
+            user: User {
+                id: 1,
+                name: "Jacob".to_string(),
+                permissions: 0,
+                display_name: None,
+                youtube_channel: None,
+            },
+            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            email_address: None,
+        }
+    }
+
+    #[test]
+    fn test_change_email_token() {
+        let patrick = patrick();
+        let jacob = jacob();
+
+        let token = patrick.generate_change_email_token("patrick@pointercrate.com".to_string());
+        let validation_result = patrick.validate_change_email_token(&token);
+
+        assert!(validation_result.is_ok());
+        assert_eq!(validation_result.unwrap(), "patrick@pointercrate.com".to_string());
+        assert!(jacob.validate_change_email_token(&token).is_err());
+    }
+
+    #[test]
+    fn test_password() {
+        assert!(patrick().verify_password("bad password").is_ok());
+        assert!(patrick().verify_password("lksafdölksad").is_err());
+        assert!(patrick().verify_password("bad password with suffix").is_err());
+    }
+
+    #[test]
+    fn test_csrf_token() {
+        let patrick = patrick();
+        let jacob = jacob();
+
+        let patricks_csrf_token = patrick.generate_csrf_token();
+
+        // make sure only the correct user can decode them
+        assert!(patrick.validate_csrf_token(&patricks_csrf_token).is_ok());
+        assert!(jacob.validate_csrf_token(&patricks_csrf_token).is_err());
+
+        // make sure they arent usable in other places that require tokens
+        assert!(patrick.validate_change_email_token(&patricks_csrf_token).is_err());
+        assert!(jacob.validate_change_email_token(&patricks_csrf_token).is_err());
+
+        assert!(patrick.validate_access_token(&patricks_csrf_token).is_err());
+        assert!(jacob.validate_access_token(&patricks_csrf_token).is_err());
+    }
+
+    #[test]
+    fn test_access_token() {
+        let patrick = patrick();
+        let jacob = jacob();
+
+        let patricks_access_token = patrick.generate_access_token();
+
+        assert!(patrick.validate_access_token(&patricks_access_token).is_ok());
+        assert!(jacob.validate_access_token(&patricks_access_token).is_err());
+    }
+}
+
 // This code is copied from https://github.com/Keats/rust-bcrypt/blob/master/src/b64.rs
 // with slight modifications (removal of `encode` and error handling)
 mod b64 {
     use std::collections::HashMap;
-
-    use base64;
 
     use lazy_static::lazy_static;
 
@@ -245,7 +412,7 @@ mod b64 {
         if hash.len() % 4 > 0 {
             let padding = 4 - hash.len() % 4;
             for _ in 0..padding {
-                res.push_str("=");
+                res.push('=');
             }
         }
 

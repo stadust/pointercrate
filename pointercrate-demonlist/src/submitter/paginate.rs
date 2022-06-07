@@ -22,14 +22,14 @@ pub struct SubmitterPagination {
 impl SubmitterPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Submitter>> {
         if let Some(limit) = self.limit {
-            if limit < 1 || limit > 100 {
-                Err(CoreError::InvalidPaginationLimit)?
+            if !(1..=100).contains(&limit) {
+                return Err(CoreError::InvalidPaginationLimit.into())
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
             if after < before {
-                Err(CoreError::AfterSmallerBefore)?
+                return Err(CoreError::AfterSmallerBefore.into())
             }
         }
 

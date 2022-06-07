@@ -1,7 +1,7 @@
 use crate::{
     demon::MinimalDemon,
     error::{DemonlistError, Result},
-    player::DatabasePlayer,
+    player::{claim::PlayerClaim, DatabasePlayer},
     record::{note::Note, FullRecord, RecordStatus},
     submitter::Submitter,
 };
@@ -80,6 +80,18 @@ impl Submission {
         // Check if the record meets the record requirement for this demon
         if self.progress > 100 || self.progress < requirement {
             return Err(DemonlistError::InvalidProgress { requirement })
+        }
+
+        // check if the player is claimed with submissions locked
+        if let Some(claim) = PlayerClaim::verified_claim_on(player.id, &mut *connection).await? {
+            if claim.lock_submissions {
+                // FIXME: horrible hack
+                let active_user = sqlx::query!("SELECT id FROM active_user").fetch_one(&mut *connection).await?;
+
+                if active_user.id != claim.user_id {
+                    return Err(DemonlistError::NoThirdPartySubmissions)
+                }
+            }
         }
 
         debug!("Submission is valid, checking for duplicates!");

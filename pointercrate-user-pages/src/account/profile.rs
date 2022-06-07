@@ -1,19 +1,18 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_pages::Script;
-use pointercrate_user::{sqlx::PgConnection, User};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
 
 pub struct ProfileTab;
 
 #[async_trait::async_trait]
 impl AccountPageTab for ProfileTab {
-    fn should_display_for(&self, _user: &User, _permissions: &PermissionsManager) -> bool {
+    fn should_display_for(&self, _permissions_we_have: u16, _permissions: &PermissionsManager) -> bool {
         true
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/profile.js")]
+    fn initialization_script(&self) -> String {
+        "/static/user/js/account/profile.js".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -30,7 +29,11 @@ impl AccountPageTab for ProfileTab {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
+    async fn content(
+        &self, authenticated_user: &AuthenticatedUser, permissions: &PermissionsManager, _connection: &mut PgConnection,
+    ) -> Markup {
+        let user = authenticated_user.inner();
+
         let permissions = permissions.bits_to_permissions(user.permissions);
         let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");
 
@@ -82,11 +85,25 @@ impl AccountPageTab for ProfileTab {
                         }
                         span {
                             b {
+                                i.fa.fa-pencil-alt.clickable#email-pen aria-hidden = "true" {} " E-Mail Address: "
+                            }
+                            i#profile-email_address {
+                                @match authenticated_user.email_address() {
+                                    Some(ref email) => (email),
+                                    None => "-"
+                                }
+                            }
+                            p {
+                                "The E-Mail address associated with your pointercrate account. Only you can see this, and it is by default only used for password recovery. Note that if you do not provide an e-mail address, you will not be able to reset your password if you forget it."
+                            }
+                        }
+                        span {
+                            b {
                                 "Permissions: "
                             }
                             (permission_string)
                             p {
-                                "The permissions you have on pointercrate. 'Extended Access' means you can retrieve more data from the API if you authorize yourself, 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
+                                "The permissions you have on pointercrate. 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
                             }
                         }
                     }
@@ -150,6 +167,7 @@ impl AccountPageTab for ProfileTab {
             }
             (edit_display_name_dialog())
             (edit_youtube_link_dialog())
+            (edit_email_address_dialog())
             (change_password_dialog())
             (delete_account_dialog())
         }
@@ -207,6 +225,37 @@ fn edit_youtube_link_dialog() -> Markup {
                         p.error {}
                     }
                     span.overlined.pad.form-input#auth-yt {
+                        label {"Authenticate:"}
+                        input type = "password" minlength = "10" required = "";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                }
+            }
+        }
+    }
+}
+
+fn edit_email_address_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#edit-email-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change E-Mail Address:"
+                }
+                p {
+                    "To make profile related edits, re-entering your password below is required. Note that you will have to validate your e-mail address by clicking a link we will mail to you from " i{ "noreply@pointercrate.com"} "."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#edit-email {
+                        label for = "email_address" {"New E-Mail Address:"}
+                        input type = "email" name = "email_address";
+                        p.error {}
+                    }
+                    span.overlined.pad.form-input#auth-email {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}

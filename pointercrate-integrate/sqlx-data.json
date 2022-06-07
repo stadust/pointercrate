@@ -1,0 +1,846 @@
+{
+  "db": "PostgreSQL",
+  "00d9527e33ea33707c03c29666e30cfbbb822c12d6ab19ea2dcc842bc181fa13": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_request_results(level_id, request_hash) VALUES ($1, $2)"
+  },
+  "0b809cd2c39cdecf321e0a17df3f0f6005c6f4b3dd0546c39617d6c30675f515": {
+    "describe": {
+      "columns": [
+        {
+          "name": "song_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "song_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_3",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "song_artist",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "filesize",
+          "ordinal": 4,
+          "type_info": "Float8"
+        },
+        {
+          "name": "index_6",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_7",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_8",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "song_link",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * from gj_newgrounds_song WHERE song_id = $1"
+  },
+  "0db2848bf8c041d6d0d0d7f3c1a74dd4e187abbd6e2f00e8207cbcf3fb618f9b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent"
+  },
+  "11d4267277a7c1498d9447368d4b73b837dcb46c644ac86e745bc4caac3d9950": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "DELETE FROM download_lock WHERE level_id = $1"
+  },
+  "2d0582526976be425c6c429e216968db3007b033ff20399de86cfaac116bc3f5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Int4",
+          "Int8",
+          "Int2",
+          "Bool",
+          "Int4",
+          "Int2",
+          "Int2",
+          "Int4",
+          "Int2",
+          "Int2",
+          "Int4",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int2",
+          "Bool",
+          "Int2",
+          "Bool",
+          "Int4",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level(level_id,level_name,description,level_version,creator_id,difficulty,is_demon,downloads,main_song,gd_version,likes,level_length,stars,featured,copy_of,two_player,custom_song_id,coin_amount,coins_verified,stars_requested,is_epic,object_amount,index_46,index_47) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) ON CONFLICT(level_id) DO UPDATE SET level_id=EXCLUDED.level_id,level_name=EXCLUDED.level_name,description=EXCLUDED.description,level_version=EXCLUDED.level_version,creator_id=EXCLUDED.creator_id,difficulty=EXCLUDED.difficulty,is_demon=EXCLUDED.is_demon,downloads=EXCLUDED.downloads,main_song=EXCLUDED.main_song,gd_version=EXCLUDED.gd_version,likes=EXCLUDED.likes,level_length=EXCLUDED.level_length,stars=EXCLUDED.stars,featured=EXCLUDED.featured,copy_of=EXCLUDED.copy_of,two_player=EXCLUDED.two_player,custom_song_id=EXCLUDED.custom_song_id,coin_amount=EXCLUDED.coin_amount,coins_verified=EXCLUDED.coins_verified,stars_requested=EXCLUDED.stars_requested,is_epic=EXCLUDED.is_epic,object_amount=EXCLUDED.object_amount,index_46=EXCLUDED.index_46,index_47=EXCLUDED.index_47"
+  },
+  "3ce8d6f7026b8bec8be7f74cab55f3ae0de3ca97527ca3227871fcb1dc923691": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_newgrounds_song_meta (song_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (song_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING song_id AS key, cached_at AS made, absent"
+  },
+  "48b4dfaa256d556abf54631a547cd7760c596a2730d649d060387f88b2c9c9c3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Bytea",
+          "Int4",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_data(level_id,level_data,level_password,time_since_upload,time_since_update,index_36) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(level_id) DO UPDATE SET level_id=EXCLUDED.level_id,level_data=EXCLUDED.level_data,level_password=EXCLUDED.level_password,time_since_upload=EXCLUDED.time_since_upload,time_since_update=EXCLUDED.time_since_update,index_36=EXCLUDED.index_36"
+  },
+  "4e5d3c05d70c3eac59ad932bf407bf2169d1b3874dd880f5c5b0a4b26243b14c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent"
+  },
+  "58c06eb32f37eeb555a6ab3c8386aa30f68985d43f4d9561a91f62d05ad602ba": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (request_hash) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING request_hash AS key, cached_at AS made, absent"
+  },
+  "63f826d2cf0c1a7a96acb8c867dd97474d7283c8e75d9fabf8e0d2ad00c8a072": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET level_id = $1 WHERE id = $2"
+  },
+  "6e8f92da8be544839119f4224fd9190c5b568c7f8d016d490c3ad198cbf5755a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "level_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "level_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "level_version",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "creator_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "difficulty",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_demon",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "downloads",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "main_song",
+          "ordinal": 8,
+          "type_info": "Int2"
+        },
+        {
+          "name": "gd_version",
+          "ordinal": 9,
+          "type_info": "Int2"
+        },
+        {
+          "name": "likes",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "level_length",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "stars",
+          "ordinal": 12,
+          "type_info": "Int2"
+        },
+        {
+          "name": "featured",
+          "ordinal": 13,
+          "type_info": "Int4"
+        },
+        {
+          "name": "copy_of",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "two_player",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "custom_song_id",
+          "ordinal": 16,
+          "type_info": "Int8"
+        },
+        {
+          "name": "coin_amount",
+          "ordinal": 17,
+          "type_info": "Int2"
+        },
+        {
+          "name": "coins_verified",
+          "ordinal": 18,
+          "type_info": "Bool"
+        },
+        {
+          "name": "stars_requested",
+          "ordinal": 19,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_epic",
+          "ordinal": 20,
+          "type_info": "Bool"
+        },
+        {
+          "name": "object_amount",
+          "ordinal": 21,
+          "type_info": "Int4"
+        },
+        {
+          "name": "index_46",
+          "ordinal": 22,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_47",
+          "ordinal": 23,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gj_level WHERE level_id = $1"
+  },
+  "77698ffabdc5a3fe83d9c455020160dc134a3e0af3cbe4b38ef8deffeb7a5b62": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_creator_meta (user_id, cached_at, absent) VALUES($1, $2, FALSE) ON CONFLICT (user_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING user_id AS key, cached_at AS made, absent"
+  },
+  "7863110105cd6f7a474fe14533a4cc9aed850f0af1295c9ab3c474dfaa38231c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "level_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT level_id from gj_level_request_results WHERE request_hash = $1"
+  },
+  "83a3ac2a248c07dbdfe3b3194c67b5307e016f10dd25a762845b2ab872e86c21": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT request_hash AS key, cached_at AS made, absent FROM gj_level_request_meta WHERE request_hash = $1"
+  },
+  "8af7e76af789f83405d89b8ce2eda411528db0da85053b31c880d45eb71886a4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (request_hash) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING request_hash AS key, cached_at AS made, absent"
+  },
+  "9581ad2f298d4e345a24a5432e673b4979caa09e83d9ac277f6efe2a71960ab9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gj_creator WHERE user_id = $1"
+  },
+  "a3040336ffe8ccfb1cca6b7e3c1307b272a97c19fc58081d4e55949a9ca9641a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_meta WHERE level_id = $1"
+  },
+  "a8f52c82f189d2a96dba2a415033027705232ebe84e67c24fa4897f5511da6e7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_data_meta WHERE level_id = $1"
+  },
+  "bc3aebea681611b9036b64574f68f313c523183d24f5666d7ebfe8b52e037a4f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT user_id AS key, cached_at AS made, absent FROM gj_creator_meta WHERE user_id = $1"
+  },
+  "c46019cb06e9fa165e41912d45a807d5d0b2dca197e5cbe128a726e60e434de2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "level_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "level_data",
+          "ordinal": 1,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "level_password",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "time_since_upload",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "time_since_update",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_36",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gj_level_data WHERE level_id = $1"
+  },
+  "cc45e8829a641c79d909d2f98a69b839923351ae3eed7b2433e4ebeab81b1f43": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT song_id AS key, cached_at AS made, absent FROM gj_newgrounds_song_meta WHERE song_id = $1"
+  },
+  "dc057f86857f7d23011e7d97a3223dcc986f1535a82ab2b2c47f90e7aa768fec": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Float8",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_newgrounds_song (song_id, song_name, index_3, song_artist, filesize, index_6, index_7, index_8, song_link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (song_id) DO UPDATE SET song_id = $1, song_name = $2, index_3 = $3, song_artist = $4, filesize = $5, index_6 = $6, index_7 = $7, index_8 = $8, song_link = $9"
+  },
+  "dc0ca3b5cca4e99967a7f57b905f211462295d80c0dcefb2217f25f3aae75182": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_creator (user_id, name, account_id) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET name = EXCLUDED.name, account_id = EXCLUDED.account_id"
+  },
+  "e6f74a030c495638f1f72b1724ceea0cc46f87aa1b3c9346c41900137e224613": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (level_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING level_id AS key, cached_at AS made, absent"
+  }
+}

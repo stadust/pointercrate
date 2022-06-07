@@ -19,7 +19,7 @@ impl Permission {
     }
 
     pub fn name(&self) -> &str {
-        &self.name
+        self.name
     }
 
     pub fn bit(&self) -> u16 {
@@ -27,9 +27,9 @@ impl Permission {
     }
 }
 
-impl Into<u16> for Permission {
-    fn into(self) -> u16 {
-        self.bit
+impl From<Permission> for u16 {
+    fn from(perm: Permission) -> Self {
+        perm.bit
     }
 }
 
@@ -56,14 +56,14 @@ impl PermissionsManager {
     }
 
     // we should probably verify that added permissions are all part of what was in the constructor but
-    // wherhaklsrödj
+    // whatever
     pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {
-        self.assignable_map.entry(perm1).or_insert(HashSet::new()).insert(perm2);
+        self.assignable_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
         self
     }
 
     pub fn implies(mut self, perm1: Permission, perm2: Permission) -> Self {
-        self.implication_map.entry(perm1).or_insert(HashSet::new()).insert(perm2);
+        self.implication_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
         self
     }
 

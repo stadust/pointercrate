@@ -7,7 +7,7 @@ use crate::{
 };
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped, Render};
-use pointercrate_core_pages::{config as page_config, util::simple_dropdown, PageFragment, Script};
+use pointercrate_core_pages::{config as page_config, head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, FullDemon},
@@ -29,7 +29,22 @@ pub struct DemonPage {
     pub integration: GDIntegrationResult,
 }
 
-impl PageFragment for DemonPage {
+impl From<DemonPage> for PageFragment {
+    fn from(page: DemonPage) -> Self {
+        PageFragment::new(page.title(), page.description())
+            .script("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js")
+            .module("/static/core/js/modules/form.js")
+            .module("/static/demonlist/js/modules/demonlist.js")
+            .module("/static/demonlist/js/demonlist.js")
+            .stylesheet("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css")
+            .stylesheet("/static/demonlist/css/demonlist.css")
+            .stylesheet("/static/core/css/sidebar.css")
+            .head(page.head())
+            .body(page.body())
+    }
+}
+
+impl DemonPage {
     fn title(&self) -> String {
         format!(
             "#{} - {} - Geometry Dash Demonlist",
@@ -47,27 +62,9 @@ impl PageFragment for DemonPage {
         format!("{}: <No Description Provided>", self.title())
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![
-            Script::new("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"),
-            Script::module("/static/js/modules/formv2.js"),
-            Script::module("/static/js/modules/demonlistv2.js"),
-            Script::module("/static/js/demonlist.v2.2.js"),
-        ]
-    }
-
-    fn additional_stylesheets(&self) -> Vec<String> {
-        vec![
-            "https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css".to_string(),
-            "/static/css/demonlist.v2.1.css".to_string(),
-            "/static/css/sidebar.css".to_string(),
-        ]
-    }
-
-    fn head_fragment(&self) -> Markup {
+    fn head(&self) -> Markup {
         html! {
             (PreEscaped(format!(r##"
-                <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.4.3/css/flag-icon.min.css" rel="stylesheet">
                 <script type="application/ld+json">
                 {{
                     "@context": "http://schema.org",
@@ -82,7 +79,7 @@ impl PageFragment for DemonPage {
                                     "name": "pointercrate"
                                 }}
                             }},{{
-                                "@type": "ListItem",<
+                                "@type": "ListItem",
                                 "position": 2,
                                 "item": {{
                                     "@id": "https://pointercrate.com/demonlist/",
@@ -114,7 +111,7 @@ impl PageFragment for DemonPage {
         }
     }
 
-    fn body_fragment(&self) -> Markup {
+    fn body(&self) -> Markup {
         let dropdowns = super::dropdowns(&self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
 
         let mut labels = Vec::new();
@@ -213,9 +210,7 @@ impl PageFragment for DemonPage {
             }
         }
     }
-}
 
-impl DemonPage {
     fn demon_panel(&self) -> Markup {
         let position = self.data.demon.base.position;
         let name = &self.data.demon.base.name;
@@ -458,7 +453,7 @@ impl DemonPage {
                                     tr style = { @if record.progress == 100 {"font-weight: bold"} @else {""} } {
                                         td {
                                             @if let Some(ref nationality) = record.nationality {
-                                                span.flag-icon.{"flag-icon-"(nationality.iso_country_code.to_lowercase())} title = (nationality.nation) {}
+                                                span.flag-icon style={"background-image: url(/static/demonlist/images/flags/" (nationality.iso_country_code.to_lowercase()) ".svg"} title = (nationality.nation) {}
                                             }
                                         }
                                         td {

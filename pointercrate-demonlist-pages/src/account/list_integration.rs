@@ -1,25 +1,20 @@
-use crate::components::player_selection_dialog;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
-use pointercrate_core_pages::{
-    error::ErrorFragment,
-    util::{filtered_paginator, paginator},
-    PageFragment, Script,
-};
+use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator};
 use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_user::{sqlx::PgConnection, User, MODERATOR};
+use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
 
 pub struct ListIntegrationTab(/* discord invite url */ pub &'static str);
 
 #[async_trait::async_trait]
 impl AccountPageTab for ListIntegrationTab {
-    fn should_display_for(&self, _user: &User, _permissions: &PermissionsManager) -> bool {
+    fn should_display_for(&self, _permissions_we_have: u16, _permissions: &PermissionsManager) -> bool {
         true
     }
 
-    fn additional_scripts(&self) -> Vec<Script> {
-        vec![Script::module("/static/js/account/integration.js")]
+    fn initialization_script(&self) -> String {
+        "/static/demonlist/js/account/integration.js".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -36,8 +31,8 @@ impl AccountPageTab for ListIntegrationTab {
         }
     }
 
-    async fn content(&self, user: &User, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
-        let player_claim = match PlayerClaim::by_user(user.id, connection).await {
+    async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+        let player_claim = match PlayerClaim::by_user(user.inner().id, connection).await {
             Ok(player_claim) => player_claim,
             Err(err) =>
                 return ErrorFragment {
@@ -45,9 +40,9 @@ impl AccountPageTab for ListIntegrationTab {
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body_fragment(),
+                .body(),
         };
-        let is_moderator = permissions.require_permission(user.permissions, MODERATOR).is_ok();
+        let is_moderator = permissions.require_permission(user.inner().permissions, MODERATOR).is_ok();
 
         html! {
             div.left {
@@ -60,7 +55,7 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i#claimed-player data-id = (claim.player.id){
+                                    i#claimed-player data-id = (claim.player.id) {
                                         (claim.player.name)
                                     }
                                 },
@@ -101,6 +96,21 @@ impl AccountPageTab for ListIntegrationTab {
                                     "Clicking the above button let's you set your claimed player's nationality via IP Geolocation. To offer this functionality, pointercrate uses "
                                     a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
                                     ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
+                                }
+                                div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
+                                    b {
+                                        "Lock Submissions:"
+                                    }
+                                    @if claim.lock_submissions {
+                                        input#lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
+                                    }
+                                    @else {
+                                        input#lock-submissions-checkbox type = "checkbox" name = "lock_submissions";
+                                    }
+                                    span.checkmark {}
+                                }
+                                p {
+                                    "Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)"
                                 }
                             }
                         }

@@ -35,6 +35,6 @@ pub trait Taggable: Hash + Serialize {
     }
 
     fn etag_string(&self) -> String {
-        format!("{};{}", self.patch_part(), self.get_part())
+        format!("W/\"{};{}\"", self.patch_part(), self.get_part())
     }
 }
