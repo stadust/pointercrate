@@ -1,5 +1,5 @@
 use pointercrate_demonlist::config;
-use rocket::response::content::Json;
+use rocket::serde::json::Json;
 use serde_json::json;
 
 #[rocket::get("/")]
