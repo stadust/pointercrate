@@ -522,6 +522,18 @@
     },
     "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\"\nFROM demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position"
   },
+  "13a21e415b76afc6824ca6565e10649514fed1b79ece2794ac744fd9bebf235c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO active_user (id) VALUES ($1)"
+  },
   "156a4fb58b1d03beb94c9789eeccb0b098dc1162b5198a301c4c80cef0eff854": {
     "describe": {
       "columns": [],
@@ -723,6 +735,16 @@
     },
     "query": "UPDATE demons SET position = position + 1 WHERE position >= $1 AND position < $2"
   },
+  "33e7fa0719772085ee25e5a1fdcb293bdd5725bf5947733ca7fd21050610b7a5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "DELETE FROM active_user"
+  },
   "3644d1f3ef88bc21585bc7ff18dd44ef7fd4b31c717d0886d56f1ea8745e36f0": {
     "describe": {
       "columns": [],
@@ -910,6 +932,16 @@
       }
     },
     "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND records.player = $3 AND (records.status_ = 'REJECTED' OR records.progress <= $4)"
+  },
+  "54e79bd4ffa9356fb9efdd83a863b637f772aac32b9a157d134c9b0d259a3cb2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)"
   },
   "55044c6852d4f4c3beb15f7fd8787efa38c0303c606cc558e348c9bcf47f03e1": {
     "describe": {

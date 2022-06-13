@@ -1,3 +1,437 @@
 {
-  "db": "PostgreSQL"
+  "db": "PostgreSQL",
+  "0dd078e613f07a2c8d4b0f7893950d0cf7e0a6d6ed7a234f2fe2762bd23c120b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(member_id) AS \"max_id!: i32\", MIN(member_id) AS \"min_id!: i32\" FROM members"
+  },
+  "13a21e415b76afc6824ca6565e10649514fed1b79ece2794ac744fd9bebf235c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO active_user (id) VALUES ($1)"
+  },
+  "1ddc8745a084f33b3b8d158b815f4eebdfc4bd595b7fc1225215fbaa7fb03b1b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET email_address = NULL WHERE member_id = $1"
+  },
+  "33e7fa0719772085ee25e5a1fdcb293bdd5725bf5947733ca7fd21050610b7a5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "DELETE FROM active_user"
+  },
+  "4cdbaa4240f4b3715d31dc0cd9ef959c6b5b2f00cbdb645823b602c46e20ac6e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE permissions & CAST($1::INTEGER AS BIT(16)) = CAST($1::INTEGER AS BIT(16))"
+  },
+  "52e389480e3f20b14ebc8fcaa283ccb042fbb1c04f10b03a8d715eec57858fce": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET email_address = ($1::text)::email WHERE member_id = $2"
+  },
+  "54e79bd4ffa9356fb9efdd83a863b637f772aac32b9a157d134c9b0d259a3cb2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)"
+  },
+  "57dec28742cd33e0084d41c5d3e69e937159b307ca6f8cc3c77fa5e0289330ee": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO members (name, password_hash) VALUES ($1, $2) RETURNING member_id"
+  },
+  "60487970529b740eacd8e34039c8006587c742d5350b2957d1a041eeb14630b0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "email_address",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null,
+        null,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE members.name = $1"
+  },
+  "8a8b67c3e5d31d666a48ae02b3d33b291929ab5a609dd311bc1faffae89c0810": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET youtube_channel = $1::text WHERE member_id = $2"
+  },
+  "99aa0e5bfb50f02afb985533d512df1c901cd7617bf868884074ceaa7b76bc37": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET youtube_channel = NULL WHERE member_id = $1"
+  },
+  "9d52c2ee44ee70311327d2c1256f142c5e2e8410e762e0f0cc0684cf4b7eefca": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET permissions = cast($1::integer as BIT(16)) WHERE member_id = $2"
+  },
+  "a6379dce69849ba3f736eb812af738efedb7fe73adbf44aa2c4db42c4db7ffa3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET display_name = NULL WHERE member_id = $1"
+  },
+  "b7c28d094942552f43ea525b8ebc978b48862814a46218d260466fd3867df4f6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text FROM members WHERE member_id = $1"
+  },
+  "c49a444b5a1c1f2219b01a43ef25bf823a26653c4fe71dd2f30c1268df144077": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "email_address",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null,
+        null,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE member_id = $1"
+  },
+  "cedcef9ac0422668cff239d38ebd0b6898a21b3c78c9e46947fba6882012a01b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM members WHERE member_id = $1"
+  },
+  "d7f953a9e6a1616597b47c78190a768f795d63dc326ad284b17c908530a6b89e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET display_name = $1 WHERE member_id = $2"
+  },
+  "f06131c97dc68afb31002fed5e9ba4a596d519d76a7b7508ec35dcc296f0db5f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET password_hash = $1 WHERE member_id = $2"
+  },
+  "f5607b329c4e6100eddb7c7dfcf6e621fcd15cf7ea56272e84cee68c31da82cf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, CAST(permissions AS integer), display_name, youtube_channel::text FROM members WHERE members.name = $1"
+  }
 }

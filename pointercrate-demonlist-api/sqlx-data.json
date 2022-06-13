@@ -1,5 +1,3066 @@
 {
   "db": "PostgreSQL",
+  "00d9527e33ea33707c03c29666e30cfbbb822c12d6ab19ea2dcc842bc181fa13": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_request_results(level_id, request_hash) VALUES ($1, $2)"
+  },
+  "018853717028c30688b107c173b328b05a35f231a6e0d6edf9b4ba8beb5530d5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE id = $1"
+  },
+  "02c9ad275f03af8692ef85dfbb799a07cd1a34ce0c7394745a2827670bf07ff6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "player_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "select demons.id as demon, demons.name::text as \"demon_name!\", demons.position, players.name::text as \"player_name!\" from demons inner join players on players.id=publisher where nationality=$1"
+  },
+  "05c1ae6fd6a5546910874ab2c6b94f66dc6205504412d666144fae3cdbf6fae3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "verifier_id",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name: String",
+          "ordinal": 7,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name: String",
+          "ordinal": 10,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned",
+          "ordinal": 11,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position, demons.requirement, demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END,\n       verifiers.id AS verifier_id, verifiers.name AS \"verifier_name: String\", verifiers.banned AS verifier_banned,\n       publishers.id AS publisher_id, publishers.name AS \"publisher_name: String\", publishers.banned AS publisher_banned\nFROM demons\nINNER JOIN players AS verifiers ON verifiers.id=demons.verifier\nINNER JOIN players AS publishers ON publishers.id=demons.publisher\nWHERE demons.id=$1"
+  },
+  "06c84acd396c1c9ea52f31fe1243008a9229f8e81d508be9ede77f43393881fd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "submitter_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "banned",
+          "ordinal": 1,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT submitter_id, banned FROM submitters WHERE submitter_id = $1"
+  },
+  "0b5e38bc74dbb3c4f21cba76b5955bc60e1fec59b77cb67f8149c86f2142e131": {
+    "describe": {
+      "columns": [
+        {
+          "name": "progress!",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "demon_id!",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!: String",
+          "ordinal": 2,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position!",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "player_name!: String",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar"
+        ]
+      }
+    },
+    "query": "SELECT progress as \"progress!\", demons.id AS \"demon_id!\", demons.name as \"demon_name!: String\", demons.position as \"position!\", players.name as \"player_name!: String\" FROM best_records_in($1) as records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id = records.player"
+  },
+  "0b809cd2c39cdecf321e0a17df3f0f6005c6f4b3dd0546c39617d6c30675f515": {
+    "describe": {
+      "columns": [
+        {
+          "name": "song_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "song_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_3",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "song_artist",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "filesize",
+          "ordinal": 4,
+          "type_info": "Float8"
+        },
+        {
+          "name": "index_6",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_7",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_8",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "song_link",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * from gj_newgrounds_song WHERE song_id = $1"
+  },
+  "0b80b32a17532edd54d712eb84e53d3fabd56cfe24527363f1eec79edc01f9a3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "progress",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "video",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "SELECT id, progress, video::TEXT FROM records WHERE status_ = 'APPROVED' AND demon = $1 AND player = $2 AND progress > $3"
+  },
+  "0b896b6ea47c08dc84de8002cdc137ab30eae47ab176dd9d629b69c2810f7152": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET subdivision = NULL WHERE id = $1"
+  },
+  "0db2848bf8c041d6d0d0d7f3c1a74dd4e187abbd6e2f00e8207cbcf3fb618f9b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent"
+  },
+  "0dd078e613f07a2c8d4b0f7893950d0cf7e0a6d6ed7a234f2fe2762bd23c120b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(member_id) AS \"max_id!: i32\", MIN(member_id) AS \"min_id!: i32\" FROM members"
+  },
+  "0e7c090ee37a2b0462de319f55e37fe04d998c11d0b19d8fbb59c636f9efbdbc": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "verifier_id",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name: String",
+          "ordinal": 7,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name: String",
+          "ordinal": 10,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned",
+          "ordinal": 11,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "SELECT demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position, demons.requirement, demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video END,\n       verifiers.id AS verifier_id, verifiers.name AS \"verifier_name: String\", verifiers.banned AS verifier_banned,\n       publishers.id AS publisher_id, publishers.name AS \"publisher_name: String\", publishers.banned AS publisher_banned\nFROM demons\nINNER JOIN players AS verifiers ON verifiers.id=demons.verifier\nINNER JOIN players AS publishers ON publishers.id=demons.publisher\nWHERE demons.position=$1"
+  },
+  "1013236c84b12cef3976f15f972fc28d56a7a59a3672de8e92fca2a82201f044": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE id <> $1 AND player = $2 AND demon = $3"
+  },
+  "110990248b7a678630c5eb36ad653c8dc22496260cbe62ad2ca937b297233c64": {
+    "describe": {
+      "columns": [
+        {
+          "name": "iso_code: String",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT iso_code as \"iso_code: String\", name as \"name: String\" FROM subdivisions WHERE nation = $1 ORDER BY name"
+  },
+  "11d4267277a7c1498d9447368d4b73b837dcb46c644ac86e745bc4caac3d9950": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "DELETE FROM download_lock WHERE level_id = $1"
+  },
+  "1364dc88667d04dcba36caab72b1381ba06db0bdded1acf8c91d750459385d4a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon_id!",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position!",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement!",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "verifier_id!",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name!: String",
+          "ordinal": 7,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned!",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id!",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name!: String",
+          "ordinal": 10,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned!",
+          "ordinal": 11,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\"\nFROM demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position"
+  },
+  "13a21e415b76afc6824ca6565e10649514fed1b79ece2794ac744fd9bebf235c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO active_user (id) VALUES ($1)"
+  },
+  "156a4fb58b1d03beb94c9789eeccb0b098dc1162b5198a301c4c80cef0eff854": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET position = position + 1 WHERE position >= $1"
+  },
+  "195463c6671115eb637393262ba43b5040d7b7741c4849e8847a36c367b75838": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET is_public = $1 WHERE id = $2"
+  },
+  "1a94a648c895472859460cb7fa1c2b527f4ce0127adcc1d0467b534e3f8b84c8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET video = NULL WHERE id = $1"
+  },
+  "1ddc8745a084f33b3b8d158b815f4eebdfc4bd595b7fc1225215fbaa7fb03b1b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET email_address = NULL WHERE member_id = $1"
+  },
+  "21c66a6faad451e0ad4512e185697a2eddb912f5165e224fe738d98a2b68e90d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, name as \"name: String\", position FROM demons WHERE id = $1"
+  },
+  "255c832ee158ca38a0eb713f8a0973fac6b37d7d5239e3176399c834a9be0f90": {
+    "describe": {
+      "columns": [
+        {
+          "name": "rank!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "score!",
+          "ordinal": 1,
+          "type_info": "Float8"
+        },
+        {
+          "name": "nation!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "iso_country_code!",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        true,
+        true,
+        null,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT rank as \"rank!\", score as \"score!\", nation::text as \"nation!\", iso_country_code as \"iso_country_code!\" FROM nations_with_score WHERE (STRPOS(nation, CAST($1::TEXT AS CITEXT)) > \n             0 OR $1 is NULL) AND (continent = CAST($2::TEXT AS continent) OR $2 IS NULL)"
+  },
+  "2576c08064dcfa533562a97bccd4bfe5a7cce8dd3c4dedb414d710ca91a6ddfb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_index!: i64",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(index) AS \"max_index!: i64\" FROM players_with_score"
+  },
+  "2d0582526976be425c6c429e216968db3007b033ff20399de86cfaac116bc3f5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Int4",
+          "Int8",
+          "Int2",
+          "Bool",
+          "Int4",
+          "Int2",
+          "Int2",
+          "Int4",
+          "Int2",
+          "Int2",
+          "Int4",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int2",
+          "Bool",
+          "Int2",
+          "Bool",
+          "Int4",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level(level_id,level_name,description,level_version,creator_id,difficulty,is_demon,downloads,main_song,gd_version,likes,level_length,stars,featured,copy_of,two_player,custom_song_id,coin_amount,coins_verified,stars_requested,is_epic,object_amount,index_46,index_47) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) ON CONFLICT(level_id) DO UPDATE SET level_id=EXCLUDED.level_id,level_name=EXCLUDED.level_name,description=EXCLUDED.description,level_version=EXCLUDED.level_version,creator_id=EXCLUDED.creator_id,difficulty=EXCLUDED.difficulty,is_demon=EXCLUDED.is_demon,downloads=EXCLUDED.downloads,main_song=EXCLUDED.main_song,gd_version=EXCLUDED.gd_version,likes=EXCLUDED.likes,level_length=EXCLUDED.level_length,stars=EXCLUDED.stars,featured=EXCLUDED.featured,copy_of=EXCLUDED.copy_of,two_player=EXCLUDED.two_player,custom_song_id=EXCLUDED.custom_song_id,coin_amount=EXCLUDED.coin_amount,coins_verified=EXCLUDED.coins_verified,stars_requested=EXCLUDED.stars_requested,is_epic=EXCLUDED.is_epic,object_amount=EXCLUDED.object_amount,index_46=EXCLUDED.index_46,index_47=EXCLUDED.index_47"
+  },
+  "2d0aed3bca3d35e346391460e3dd981842d62c04c660c6ee59327d7256f2c0d4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE player = $1 AND demon = $2 AND status_='SUBMITTED'"
+  },
+  "2d7c72534f92f17291a63f6cf73b6ebf43a59b643f28814cc7420fff1d32c8c2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "verified",
+          "ordinal": 0,
+          "type_info": "Bool"
+        },
+        {
+          "name": "lock_submissions",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "player_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "banned",
+          "ordinal": 4,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT verified, lock_submissions, player_id, players.name::text as \"name!\", players.banned FROM player_claims INNER JOIN players ON player_id=players.id\n             WHERE member_id = $1"
+  },
+  "2f32e7273013ee10953dc472e3ba5f355916e346648569d972fb36fb36c03a02": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET position = position + 1 WHERE position >= $1 AND position < $2"
+  },
+  "33e7fa0719772085ee25e5a1fdcb293bdd5725bf5947733ca7fd21050610b7a5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "DELETE FROM active_user"
+  },
+  "3644d1f3ef88bc21585bc7ff18dd44ef7fd4b31c717d0886d56f1ea8745e36f0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE demon = $1 AND progress < $2"
+  },
+  "3ce8d6f7026b8bec8be7f74cab55f3ae0de3ca97527ca3227871fcb1dc923691": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_newgrounds_song_meta (song_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (song_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING song_id AS key, cached_at AS made, absent"
+  },
+  "3e72646f5e6c20310ee5856dd1b3cff01383d301f84a808127fa8178062f1b2e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO player_claims (member_id, player_id) VALUES ($1, $2)"
+  },
+  "3f71d1a194be99a2ed19fbc36486902843f23b8a53428235dfe10a1b4aba166f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE player = $1 AND demon = $2"
+  },
+  "3fc18de3c600277f482ce6cd21bfd803289950645fba0996b899f8f06236a52c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_position",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(position) as max_position FROM demons"
+  },
+  "4518403fe84bbfff351bd18f5b1455f09e318cf59a45c9f47c6b198ee1e103e5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET video = NULL WHERE id = $1"
+  },
+  "48b4dfaa256d556abf54631a547cd7760c596a2730d649d060387f88b2c9c9c3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Bytea",
+          "Int4",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_data(level_id,level_data,level_password,time_since_upload,time_since_update,index_36) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT(level_id) DO UPDATE SET level_id=EXCLUDED.level_id,level_data=EXCLUDED.level_data,level_password=EXCLUDED.level_password,time_since_upload=EXCLUDED.time_since_upload,time_since_update=EXCLUDED.time_since_update,index_36=EXCLUDED.index_36"
+  },
+  "4c1c992b7758e81bb0b1693f6958b4a7930e97fb39a8bbb869df10009e6c20cd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Int2",
+          "Text",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO demons (name, position, requirement, video, verifier, publisher) VALUES ($1::text,$2,$3,$4::text,$5,$6) RETURNING id"
+  },
+  "4cdbaa4240f4b3715d31dc0cd9ef959c6b5b2f00cbdb645823b602c46e20ac6e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, name, permissions::integer, display_name, youtube_channel::text FROM members WHERE permissions & CAST($1::INTEGER AS BIT(16)) = CAST($1::INTEGER AS BIT(16))"
+  },
+  "4e4309fd6f5695903cf5fc5bf9544cb6c4d04257ce6c7ccdc11795132ec74a8d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "player_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "select demons.id as demon, demons.name::text as \"demon_name!\", demons.position, players.name::text as \"player_name!\" from demons inner join players on players.id=verifier where nationality=$1"
+  },
+  "4e5d3c05d70c3eac59ad932bf407bf2169d1b3874dd880f5c5b0a4b26243b14c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent"
+  },
+  "5103fe58a8435f5b69872f7060c9ef8dd3340ce431c068104546e176fd5a7bfb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET publisher = $1 WHERE publisher = $2"
+  },
+  "51ac7926e4ba75e49b3ebc7ce899d7b306e16824ebfeac7b8ef077faf516b3b0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET verifier = $1 WHERE verifier = $2"
+  },
+  "52e389480e3f20b14ebc8fcaa283ccb042fbb1c04f10b03a8d715eec57858fce": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET email_address = ($1::text)::email WHERE member_id = $2"
+  },
+  "535bea2e11777c8f025d35561c80f3a40571f6bad1673158d342b3a313ff7c62": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND player = $2 AND demon = $3 AND progress < $4 AND status_='SUBMITTED'"
+  },
+  "538daee25a021c711f5cea9cc3915aa5f5c821054f3f6bf7f915743d799fbd6b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND records.player = $3 AND (records.status_ = 'REJECTED' OR records.progress <= $4)"
+  },
+  "54e79bd4ffa9356fb9efdd83a863b637f772aac32b9a157d134c9b0d259a3cb2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)"
+  },
+  "55044c6852d4f4c3beb15f7fd8787efa38c0303c606cc558e348c9bcf47f03e1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "iso_code",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT iso_code, name::TEXT FROM subdivisions WHERE iso_code = $1 AND nation = $2"
+  },
+  "564e63a9c1742ee1e5e6d2dce040d63c047723d8b3fee046f19e832f50feb3de": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE submitters SET banned = true WHERE submitter_id = $1"
+  },
+  "57dec28742cd33e0084d41c5d3e69e937159b307ca6f8cc3c77fa5e0289330ee": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO members (name, password_hash) VALUES ($1, $2) RETURNING member_id"
+  },
+  "58c06eb32f37eeb555a6ab3c8386aa30f68985d43f4d9561a91f62d05ad602ba": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (request_hash) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING request_hash AS key, cached_at AS made, absent"
+  },
+  "5b44b84843da5493cce1a0af40bbc7c7a5084beaa5289c9b8d656e5e573598d0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, name AS \"name: String\", position FROM demons WHERE publisher = $1"
+  },
+  "5d07508357ba315a05db87bb211169d8c9f8aba1b4b2507d6e7d4fa34ef8211f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, name as \"name: String\", position FROM demons WHERE name = cast($1::text as citext)"
+  },
+  "6022017fd293d37bd31859f8a7954a916178e24cc4c06cd08d4b3b31e0a9c2f1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND records.player = $3"
+  },
+  "60487970529b740eacd8e34039c8006587c742d5350b2957d1a041eeb14630b0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "email_address",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null,
+        null,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE members.name = $1"
+  },
+  "625d3b5149d48bfdca64d3d9e3c18b9a5067f41c5d9145d0d1df30216ac3328e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET name = $1::text WHERE id = $2"
+  },
+  "63f826d2cf0c1a7a96acb8c867dd97474d7283c8e75d9fabf8e0d2ad00c8a072": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET level_id = $1 WHERE id = $2"
+  },
+  "69c47194ed8f006f83021dcdd6c25a041731b74bee89607b98f46a0822ab71a7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "banned",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, name::text, banned FROM players WHERE name = cast($1::text as citext)"
+  },
+  "6b2b0b3bac65f4cd693b92b8cb39da9be18b9cd4c00a188434c8fdf339da893e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET verifier = $1 WHERE id = $2"
+  },
+  "6e8f92da8be544839119f4224fd9190c5b568c7f8d016d490c3ad198cbf5755a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "level_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "level_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "level_version",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "creator_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "difficulty",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_demon",
+          "ordinal": 6,
+          "type_info": "Bool"
+        },
+        {
+          "name": "downloads",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "main_song",
+          "ordinal": 8,
+          "type_info": "Int2"
+        },
+        {
+          "name": "gd_version",
+          "ordinal": 9,
+          "type_info": "Int2"
+        },
+        {
+          "name": "likes",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "level_length",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "stars",
+          "ordinal": 12,
+          "type_info": "Int2"
+        },
+        {
+          "name": "featured",
+          "ordinal": 13,
+          "type_info": "Int4"
+        },
+        {
+          "name": "copy_of",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "two_player",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "custom_song_id",
+          "ordinal": 16,
+          "type_info": "Int8"
+        },
+        {
+          "name": "coin_amount",
+          "ordinal": 17,
+          "type_info": "Int2"
+        },
+        {
+          "name": "coins_verified",
+          "ordinal": 18,
+          "type_info": "Bool"
+        },
+        {
+          "name": "stars_requested",
+          "ordinal": 19,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_epic",
+          "ordinal": 20,
+          "type_info": "Bool"
+        },
+        {
+          "name": "object_amount",
+          "ordinal": 21,
+          "type_info": "Int4"
+        },
+        {
+          "name": "index_46",
+          "ordinal": 22,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_47",
+          "ordinal": 23,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gj_level WHERE level_id = $1"
+  },
+  "6ea61f895e75930d048a355666806a86b87238e7762b9c1c573b72056affe774": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(id) AS \"max_id!: i32\", MIN(id) AS \"min_id!: i32\" FROM players"
+  },
+  "6fb8edc812b93f5d695cdfab094f4135635b63fd58d8cb85ea62e11533b4e0ca": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "audit_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "userid",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name?",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT time, audit_id, \n                  userid,\n                  members.name AS \"name?\"\n                  FROM record_additions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"
+  },
+  "718f84d40124ef7dbd5a6b37979dcf30670be2cda27a0ae4cc9dfebeec90971a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "value!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS(SELECT 1 FROM records WHERE player = $1) AS \"value!\""
+  },
+  "7275631caf454036d3950af691ad34f7f5a7e2cb209ab25c5e459bb2ca8ade4c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "result!: bool",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT FROM creators WHERE creator=$1 AND demon = $2) AS \"result!: bool\""
+  },
+  "753d89d58fb45b419b6a88dc653cb0b186df058fb672e04e72baba821f7902bd": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO creators (creator, demon) VALUES ($1, $2)"
+  },
+  "765871c9dabf6edc35816c28e117e1917e052adccc3894241a857eb8f01cef08": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "status_!: String",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, status_::text as \"status_!: String\" FROM records WHERE video = $1"
+  },
+  "77650595ce5f79f58d21bdd9192f46fa452edc6f66407fef71843e51c94b5110": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM player_claims WHERE member_id = $1"
+  },
+  "77698ffabdc5a3fe83d9c455020160dc134a3e0af3cbe4b38ef8deffeb7a5b62": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_creator_meta (user_id, cached_at, absent) VALUES($1, $2, FALSE) ON CONFLICT (user_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING user_id AS key, cached_at AS made, absent"
+  },
+  "7856a9daec9157a537ee58964ff839c4c3a69e54578fdc3b9efd4c9bf5bfca3c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET banned = true WHERE id = $1"
+  },
+  "7863110105cd6f7a474fe14533a4cc9aed850f0af1295c9ab3c474dfaa38231c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "level_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT level_id from gj_level_request_results WHERE request_hash = $1"
+  },
+  "7a589d2bfa09ee608ab6be607facbeecc68d8f3223fb463bb5de4b29f78f2b9c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET nationality = NULL, subdivision = NULL WHERE id = $1"
+  },
+  "7ab6e2b4593bae3851200617282d61e99462af80904bf720349479f2ba8c610a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "submitter_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO submitters (ip_address) VALUES (cast($1::text as inet)) RETURNING submitter_id"
+  },
+  "7d6e162b7960d83b8a80ba368b652a9b2151dcb3abfda2af85c5a8265eeb517b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO record_notes (record, content, is_public) VALUES ($1, $2, $3) RETURNING id"
+  },
+  "7d8437e225355a22ea0a0a004d69da01cca83e8b4db95cce5df46c4dfb924ec0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "nation: String",
+          "ordinal": 0,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "iso_country_code: String",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT DISTINCT nation as \"nation: String\", iso_country_code as \"iso_country_code: String\" FROM players INNER JOIN nationalities ON nationality=iso_country_code ORDER BY nation"
+  },
+  "83638db1f3b4e787c2e0928b5fdda5e9275fb2702dfa61e7b51167edd2df3b99": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET video = $1::text WHERE id = $2"
+  },
+  "838ff3277798d0d63e57eb6cbc5c921b36ce8fa8e34cc8b415c43f4163793a3a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM players WHERE id = $1"
+  },
+  "83a3ac2a248c07dbdfe3b3194c67b5307e016f10dd25a762845b2ab872e86c21": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT request_hash AS key, cached_at AS made, absent FROM gj_level_request_meta WHERE request_hash = $1"
+  },
+  "861ba199b0ff3a8ef8b2c6450081fef25af3e2074ece8e2ddd498b86a253f1af": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE submitters SET banned = false WHERE submitter_id = $1"
+  },
+  "864d8015a73b6c671dab799baa63ec4b9d63bc1e1d07e8fff252050ec63a371f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE creators SET creator = $1 WHERE creator = $2"
+  },
+  "87d4fe958dd0eeecda9ef05d7c019ac4ccee6207da884bc37795986f3dc3fe55": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "audit_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "username?",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "userid",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "progress",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "status_",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "player_name",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "player_id",
+          "ordinal": 8,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "demon_id",
+          "ordinal": 10,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        null,
+        null,
+        true,
+        null,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT time, \n                  audit_id,\n                  members.name AS \"username?\",\n                  userid,\n                  progress,\n                  record_modifications.video,\n                  status_::TEXT,\n                  players.name::TEXT AS player_name,\n                  player AS player_id,\n                  demons.name::TEXT AS demon_name,\n                  demon AS demon_id\n                  FROM record_modifications \n                  LEFT OUTER JOIN members ON members.member_id = userid\n                  LEFT OUTER JOIN players ON players.id = player\n                  LEFT OUTER JOIN demons ON demons.id = demon\n                  WHERE record_modifications.id = $1\n                  ORDER BY time"
+  },
+  "8a013411dca034426584c5052ebf6fe23fd14e5f299fbcd7700c3248f3510107": {
+    "describe": {
+      "columns": [
+        {
+          "name": "submitter_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "banned",
+          "ordinal": 1,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT submitter_id, banned FROM submitters WHERE ip_address = cast($1::text as inet)"
+  },
+  "8a8b67c3e5d31d666a48ae02b3d33b291929ab5a609dd311bc1faffae89c0810": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET youtube_channel = $1::text WHERE member_id = $2"
+  },
+  "8af7e76af789f83405d89b8ce2eda411528db0da85053b31c880d45eb71886a4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (request_hash) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING request_hash AS key, cached_at AS made, absent"
+  },
+  "8d33dc3171ee956c2a67fa0da8bb1552451c80428a179cd6bd70d7d270c153c5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET requirement = $1 WHERE id = $2"
+  },
+  "8d776086df036d3877d0dcef26d3342a63a3f53cb33ac66f2f8bc73ba3dcf369": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE id <> $1 AND records.player = $2 AND records.demon = $3 AND progress <= $4"
+  },
+  "8e66228b10726b507dd6f5c64cff03e02440cae1702fde9b45bbfb14dd82e0d9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "audit_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "userid",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name?",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT time, audit_id, \n                  userid,\n                  members.name AS \"name?\"\n                  FROM record_deletions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"
+  },
+  "8f099845a585810b70da7e940cb1017946ba4f9bf61fbd8c86a5d21f52c909ad": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(submitter_id) AS \"max_id!: i32\", MIN(submitter_id) AS \"min_id!: i32\" FROM submitters"
+  },
+  "8f851ac86a4021f950cf77ca37204e01453b545b82885c57aae6cf8f42897e10": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO players (name) VALUES ($1::text) RETURNING id"
+  },
+  "8fad892e2beaa94b938fcb2848f2e14b164b79a1dca5eb0a6b76fcfb2611c281": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(id) AS \"max_id!: i32\", MIN(id) AS \"min_id!: i32\" FROM demons"
+  },
+  "9581ad2f298d4e345a24a5432e673b4979caa09e83d9ac277f6efe2a71960ab9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gj_creator WHERE user_id = $1"
+  },
+  "9589702ec5e82be747d38872030335bed79e45e82ec604419978636a4419d804": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM creators AS c1 WHERE c1.creator = $2 AND EXISTS (SELECT 1 FROM creators AS c2 WHERE c2.demon = c1.demon AND c2.creator = $1)"
+  },
+  "95dd03b3e8e32cda11cb794c1ab2d2ea3a2cef3b3c7cb6c6b315d900947b8816": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM player_claims WHERE player_id = $1"
+  },
+  "95fa4fffa5d5e11c79b6a0e271508ac601e46bf6b578e5eefc2dfd235c78ce99": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET position = position - 1 WHERE position <= $1"
+  },
+  "96079a4bff7edededb5b9ff193b1b84ef82327a812f18fd2850d35c3182079e6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "banned",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT players.id, players.name AS \"name: String\", players.banned FROM players INNER JOIN creators ON players.id = creators.creator WHERE \n         creators.demon = $1"
+  },
+  "99671f0ab94a44afe3b98827a581e3bf5d04f65838de2258c70ffebd3af8d8c6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET status_ = cast($1::text as record_status) WHERE id = $2"
+  },
+  "99aa0e5bfb50f02afb985533d512df1c901cd7617bf868884074ceaa7b76bc37": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET youtube_channel = NULL WHERE member_id = $1"
+  },
+  "9a77b4050c6da376334d08e473882a9060c76262df6a9d77e0bd9d8a013c85f6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET name = $1::text WHERE id = $2"
+  },
+  "9ac50d31b74e5c05ca14decaf7c22c18dc4735133b182232f7c8a81865d72cce": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET publisher = $1 WHERE id = $2"
+  },
+  "9d52c2ee44ee70311327d2c1256f142c5e2e8410e762e0f0cc0684cf4b7eefca": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET permissions = cast($1::integer as BIT(16)) WHERE member_id = $2"
+  },
+  "9fd5c79e38355767a4569f1a6c3952df136aeec9ca272a2fc386ec318f1850c1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET position = $2 WHERE id = $1"
+  },
+  "a2a10e5dafecb82ca6323826670529b83ef01984e80cdc9fda355c6e0ddf567d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "status_!: String",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "SELECT id, status_::text as \"status_!: String\" FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR status_ = \n             'UNDER_CONSIDERATION' OR (status_ = 'APPROVED' AND progress >= $3)) LIMIT 1"
+  },
+  "a3040336ffe8ccfb1cca6b7e3c1307b272a97c19fc58081d4e55949a9ca9641a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_meta WHERE level_id = $1"
+  },
+  "a421614fd262655926c07317f6027126a6f374df1770aff041eaa161e1850ec3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "banned",
+          "ordinal": 2,
+          "type_info": "Bool"
+        },
+        {
+          "name": "nation",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "iso_country_code",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "subdivision_code",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "subdivision_name",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, players.name AS \"name: String\", banned, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON \n             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"
+  },
+  "a5b6d4fcb9be22eb7756e1941df051c94e94ffa21d2fcd232a2577bcc4113d97": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.player = $2 AND records.demon = $3 AND progress <= $4"
+  },
+  "a5ce51075c082af46024f24f4a1371b710c5cf247eb401969eb29a351281781c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(id) AS \"max_id!: i32\", MIN(id) AS \"min_id!: i32\" FROM player_claims"
+  },
+  "a60382a20835e5c5df304217c40994f62da15c920bae4610be9f0e33f6e62750": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET player = $1 WHERE id = $2"
+  },
+  "a6379dce69849ba3f736eb812af738efedb7fe73adbf44aa2c4db42c4db7ffa3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET display_name = NULL WHERE member_id = $1"
+  },
+  "a772a3be58bf98c357ccc50e68060aae3ea62bf04f1510c6da7dd88f58fcf6b3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET demon = $1 WHERE id = $2"
+  },
+  "a8518a35c1a446dc5dfd21b6cb822e814ccd0e7bb15e91f9199b4887f9262123": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "id!",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "position!",
+          "ordinal": 2,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Text"
+        ]
+      }
+    },
+    "query": "select name::text as \"name!\", id as \"id!\", position as \"position!\" from demons where position <= $1 except (select demons.name, demons.id, position from records inner join players on \n         players.id=records.player inner join demons on demons.id=records.demon where status_='APPROVED' and nationality=$2 and progress=100 union select demons.name, demons.id, demons.position from demons inner join players on players.id=verifier where players.nationality=$2)"
+  },
+  "a8be00e930a5ae2dc8bbf9c2bc53e88c464705067da43ccb6892f5e685ca5ffe": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM player_claims WHERE player_id = $1 AND member_id <> $2"
+  },
+  "a8f52c82f189d2a96dba2a415033027705232ebe84e67c24fa4897f5511da6e7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_data_meta WHERE level_id = $1"
+  },
+  "aabf7f39265d75a41c462eeb565a27b16af52e870a6b72d3dfb1e1797c27aa7d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "audit_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "userid",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name?",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT time, audit_id, \n                  userid,\n                  members.name AS \"name?\"\n           FROM demon_additions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"
+  },
+  "aecdb918877dcf6cbe25cf7c19672f0852513d33eefaedf847cc3fe919fc665b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "record",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_public",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "author?: String",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "transferred!: bool",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Bool"
+        ]
+      }
+    },
+    "query": "SELECT id, record, content, is_public, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND \n         id = $1) AS \"transferred!: bool\"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = \n         record_notes_additions.userid WHERE record = $1 AND (NOT $2 OR is_public)"
+  },
+  "af513f64c783eb80253a5772724179b40e3f22043f38157bebaacd031765ca1f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id FROM records WHERE video = $1"
+  },
+  "b1ecd5a4c2c12e5a72f58efffcf5aa8ff082327d8be0ac40edb1b1bf9aef491e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT time, demon_additions.id, demons.name::text FROM demon_additions LEFT OUTER JOIN demons ON demons.id = demon_additions.id"
+  },
+  "b2436a0a985145df4c26ae4f9950f191ed839b2bdcd65506a03f22653df970c7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "player",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT player FROM records WHERE id = $1"
+  },
+  "b2f4dede0c58732f02949515ff1711315dcb8ae76bc7d6ea67869ad4d761f832": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Bool"
+        ]
+      }
+    },
+    "query": "UPDATE player_claims SET verified = $3 WHERE member_id = $1 AND player_id = $2"
+  },
+  "b33f40f87fd8332b984ca71c1b2eabb9a1e744bc4de063c0af114d545034817f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM creators WHERE creator = $1 AND demon = $2"
+  },
   "b35cbfe578b55651b574f59d60cbe0af5ffe0d6bdb9d658d80ee19d8cdabf16f": {
     "describe": {
       "columns": [
@@ -26,6 +3087,365 @@
     },
     "query": "SELECT CONCAT($1, '-', UPPER(subdivision_code)) AS \"code!\", score AS \"score!\" FROM subdivision_ranking_of($1) ORDER BY score DESC"
   },
+  "b63a3851d17d9cd9c563878eb1f87e3b0c99c2555cf679c8b0ce853bde0521b5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "nation: String",
+          "ordinal": 0,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "iso_country_code: String",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT nation as \"nation: String\", iso_country_code as \"iso_country_code: String\" FROM nationalities"
+  },
+  "b7b2baabd98b926cffb09e1d72bb62064a04a26cbe3e2bda67efe5c8826e6dec": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "progress",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "video",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "player_id",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "banned",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "nation",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "iso_country_code",
+          "ordinal": 7,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        false,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, \n         players.name AS \"name: String\", players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND \n         records.demon = $1 ORDER BY progress DESC, id ASC"
+  },
+  "b7c28d094942552f43ea525b8ebc978b48862814a46218d260466fd3867df4f6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text FROM members WHERE member_id = $1"
+  },
+  "b846e50efd1ee0ba7dd9505cb8e2277fc457b1eef5a02278c4ec29c6b4222678": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "audit_id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "username?",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "userid",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "position",
+          "ordinal": 5,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement",
+          "ordinal": 6,
+          "type_info": "Int2"
+        },
+        {
+          "name": "video",
+          "ordinal": 7,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "verifier",
+          "ordinal": 8,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name",
+          "ordinal": 9,
+          "type_info": "Text"
+        },
+        {
+          "name": "publisher",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name",
+          "ordinal": 11,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        true,
+        true,
+        true,
+        true,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT time,\n                audit_id,\n                members.name as \"username?\",\n                userid,\n                demon_modifications.name::text,\n                position,\n                requirement,\n                video,\n                verifier,\n                verifiers.name::text as verifier_name,\n                publisher,\n                publishers.name::text as publisher_name\n           FROM demon_modifications\n           LEFT OUTER JOIN members ON members.member_id = userid\n           LEFT OUTER JOIN players AS verifiers ON verifier=verifiers.id\n           LEFT OUTER JOIN players AS publishers ON publisher=publishers.id\n           WHERE demon_modifications.id = $1\n           ORDER BY time\n                "
+  },
+  "bc3aebea681611b9036b64574f68f313c523183d24f5666d7ebfe8b52e037a4f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT user_id AS key, cached_at AS made, absent FROM gj_creator_meta WHERE user_id = $1"
+  },
+  "bc3d79b5b87aca85349e25714549d551b9bc40d5c9c1fd8db0c3d51c12464ae7": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET progress = $1 WHERE id = $2"
+  },
+  "bd5ba65500787e78792911282dedf8539b35fec3ce69447de75976e808f5eb76": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "banned",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, name as \"name: String\", banned FROM players WHERE id = $1"
+  },
+  "be014f838e7058b8635c6cfc3c49aa041652ff15b4760831700daf3e66a74107": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int2"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR progress <= $3)"
+  },
+  "c0691260e5773a7243375bcddaa4b5e9e2ba0e687c6e7091db279910aab93c39": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT demons.id, demons.name as \"name: String\", demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE\n         creators.creator=$1"
+  },
   "c0d14d088f319ed2497aaabc21c24c6b63fee1d690fe9da982f61500ce8f6e45": {
     "describe": {
       "columns": [
@@ -49,5 +3469,1116 @@
       }
     },
     "query": "SELECT LOWER(iso_country_code) as \"code!\", score as \"score!\" from nations_with_score order by score desc"
+  },
+  "c296614bda5c2368543eae7156571fc5508773d7b697c808fc44d6c0f67cd3ce": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM player_claims WHERE player_id = $1 AND member_id = $2"
+  },
+  "c46019cb06e9fa165e41912d45a807d5d0b2dca197e5cbe128a726e60e434de2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "level_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "level_data",
+          "ordinal": 1,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "level_password",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "time_since_upload",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "time_since_update",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "index_36",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT * FROM gj_level_data WHERE level_id = $1"
+  },
+  "c49a444b5a1c1f2219b01a43ef25bf823a26653c4fe71dd2f30c1268df144077": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "email_address",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "password_hash",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null,
+        null,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE member_id = $1"
+  },
+  "c585745cedaf1e4896a8c6d76c656016e85662e27c2b22ad40af7cc510e68bb2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET banned = false WHERE id=$1"
+  },
+  "c94b83dae421d0de0a283bf0aefc992148d617aabf900a505643c32b82998eed": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "record",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "content",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_public",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "author?: String",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "transferred!: bool",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, record, content, is_public, members.name AS \"author?: String\", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL \n             AND id = $1) AS \"transferred!: bool\" FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on \n             members.member_id = record_notes_additions.userid WHERE id = $1 and record = $2"
+  },
+  "ca96a5b7c473010df9f190ef3cb52d65ec0b45ffd7b547907c973de45cc51848": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "player_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "select distinct on (demon) demon, demons.name::text as \"demon_name!\", demons.position, players.name::text as \"player_name!\" from creators inner join demons on demons.id=demon inner join players on players.id=creator where nationality=$1"
+  },
+  "cbdde521fa5fede32fdd7998ea2014e55c61c4bebc745afd7bb7a85d6690d746": {
+    "describe": {
+      "columns": [
+        {
+          "name": "nation: String",
+          "ordinal": 0,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "iso_country_code: String",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT nation as \"nation: String\", iso_country_code as \"iso_country_code: String\" FROM nationalities WHERE iso_country_code = $1 or nation = $1"
+  },
+  "cc45e8829a641c79d909d2f98a69b839923351ae3eed7b2433e4ebeab81b1f43": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT song_id AS key, cached_at AS made, absent FROM gj_newgrounds_song_meta WHERE song_id = $1"
+  },
+  "cd70367b1194c6659b0ce8c1ba57671d5ee874c8b023a749579dbc7f24ccb4cc": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "id",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT time, demon_modifications.id, demons.name::TEXT FROM demon_modifications LEFT OUTER JOIN demons ON demons.id = demon_modifications.id WHERE demon_modifications.position = -1"
+  },
+  "cedcef9ac0422668cff239d38ebd0b6898a21b3c78c9e46947fba6882012a01b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM members WHERE member_id = $1"
+  },
+  "d1414c3c349a2571a34b4a1d0a50bb022929189c690b105bab0bee8e5e8d72a8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET position = -1 WHERE id = $1"
+  },
+  "d25e26294e82cddaafaf082159e6c3610f37dcaffb9723d696687f3fa57efd36": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET nationality = $1::text, subdivision = NULL WHERE id = $2"
+  },
+  "d26f7a916963539b71fd90a48d76f9f7a1374dcf6c453f4f631a3cbc6e32b4b4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE player = $1 AND (status_ = 'SUBMITTED' OR status_ = 'UNDER_CONSIDERATION')"
+  },
+  "d63d06f22bab6ea14f2b1bab59ab013d7d990deca34962c8b64b6f0916a06c04": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT members.name AS name FROM record_notes_modifications AS rnm INNER JOIN members ON members.member_id = rnm.userid WHERE id = $1 AND content IS NOT NULL"
+  },
+  "d7f953a9e6a1616597b47c78190a768f795d63dc326ad284b17c908530a6b89e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET display_name = $1 WHERE member_id = $2"
+  },
+  "d933c9eba040af5ed1435ea51e286bd4bb1ad5b74e7c07f5fd60b5ed0366ea30": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET status_ = 'REJECTED' WHERE player = $1"
+  },
+  "d9f8594f1d4999b087d7058ed100de6f8b2ac0e62a8a23299091aaf5a5e2589e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon_id!",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position!",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement!",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "verifier_id!",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name!: String",
+          "ordinal": 7,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned!",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id!",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name!: String",
+          "ordinal": 10,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned!",
+          "ordinal": 11,
+          "type_info": "Bool"
+        },
+        {
+          "name": "current_position!",
+          "ordinal": 12,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position_ as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\", demons.current_position as \"current_position!\"\nFROM list_at($1) AS demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position_"
+  },
+  "dc057f86857f7d23011e7d97a3223dcc986f1535a82ab2b2c47f90e7aa768fec": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Float8",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_newgrounds_song (song_id, song_name, index_3, song_artist, filesize, index_6, index_7, index_8, song_link) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (song_id) DO UPDATE SET song_id = $1, song_name = $2, index_3 = $3, song_artist = $4, filesize = $5, index_6 = $6, index_7 = $7, index_8 = $8, song_link = $9"
+  },
+  "dc0ca3b5cca4e99967a7f57b905f211462295d80c0dcefb2217f25f3aae75182": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_creator (user_id, name, account_id) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET name = EXCLUDED.name, account_id = EXCLUDED.account_id"
+  },
+  "de12c925deeaf62a0ca084a6cce3971151afebf35e765bbd0bdf31256903c8e2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET content = $1 WHERE id = $2"
+  },
+  "df375aad68b44fe12f85efdaf763082c7e5c004b6bba30ea1981c2541304b5d9": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET position = position - 1 WHERE position > $1 AND position <= $2"
+  },
+  "e36e519db284c4f658a9f04f273c25fd06edf08896b01407e08d9981363de942": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, name as \"name: String\", position FROM demons WHERE verifier = $1"
+  },
+  "e4d3a4eb1997cc8037b0a4fc92f23a9004d289277bf64c5e97de53be5849babf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "progress",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "video",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "demon_id",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name: String",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 5,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, demons.id AS demon_id, \n         demons.name as \"name: String\", demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id \n         = $1 WHERE status_ = 'APPROVED' AND records.player = $1"
+  },
+  "e580431ed9676cc060c9433058a4f71fc6c0ea888a80fed0747dbe6e1a822fb9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "lock_submissions",
+          "ordinal": 1,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT member_id, lock_submissions FROM player_claims WHERE player_id = $1 AND verified"
+  },
+  "e6f74a030c495638f1f72b1724ceea0cc46f87aa1b3c9346c41900137e224613": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "made",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "absent",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (level_id) DO UPDATE SET cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING level_id AS key, cached_at AS made, absent"
+  },
+  "e7f7e37286fb5e813c6511861ec9a02526f1169824fcc537c19cb93da803e5ba": {
+    "describe": {
+      "columns": [
+        {
+          "name": "requirement",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT requirement FROM demons WHERE id = $1"
+  },
+  "eb930c86a24486403002160abc18d39d84e7073c0588b27b15c7cb1ccf10ec4e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET video = $1::text WHERE id = $2"
+  },
+  "ebc3361b9a266bd9f4ea51fc820d96b0d5e78803f2acedd5222f0ae7c0c1f02a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE players SET subdivision = $1::TEXT where id = $2"
+  },
+  "eeac69c31febfecf2d40ded5ade831b6a49477a59ca428e8f3959e4c24fc7009": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Bool"
+        ]
+      }
+    },
+    "query": "UPDATE player_claims SET lock_submissions = $3 WHERE member_id = $1 AND player_id = $2"
+  },
+  "efece359965a3608816370d130b737bf7236380cd7f64f5af7bc6125f4defe84": {
+    "describe": {
+      "columns": [
+        {
+          "name": "is_claimed!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS(SELECT 1 FROM player_claims WHERE player_id = $1 AND verified) AS \"is_claimed!\""
+  },
+  "f06131c97dc68afb31002fed5e9ba4a596d519d76a7b7508ec35dcc296f0db5f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE members SET password_hash = $1 WHERE member_id = $2"
+  },
+  "f2c05ac914024f3c97ffb81e6b1e707dcc27d1f8440662df821885d97b20b944": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max_id!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "min_id!: i32",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT MAX(id) AS \"max_id!: i32\", MIN(id) AS \"min_id!: i32\" FROM records"
+  },
+  "f355f156266909a0aba3b14baa3c49c415ec786f6005994ff512b55b82f594f3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO record_notes (record, content) VALUES ($1, $2)"
+  },
+  "f5607b329c4e6100eddb7c7dfcf6e621fcd15cf7ea56272e84cee68c31da82cf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "member_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "permissions",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "youtube_channel",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null,
+        true,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT member_id, members.name, CAST(permissions AS integer), display_name, youtube_channel::text FROM members WHERE members.name = $1"
+  },
+  "f7f7862732ed3b42e2e2eeeab76a70ac18887c6bcb51983b71a616d79964e5ae": {
+    "describe": {
+      "columns": [
+        {
+          "name": "was_modified!: bool",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS (SELECT 1 FROM record_modifications WHERE id = $1 AND status_ IS NOT NULL) AS \"was_modified!: bool\""
+  },
+  "f838967a04ffa63df372d5c198d7458b812e299d563ed17f2cf2b13d402c3851": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET player = $1 WHERE player = $2"
+  },
+  "f85b8a1fd9df928797c692dd6038e05c3a3ee27a1e47060b592bf8df3b81520d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE player_claims SET player_id = $1 WHERE player_id = $2"
+  },
+  "f912869ff8805ea1d80ddc713889e9f5b268f8941192a68deed369b20f892553": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM records WHERE submitter = $1 AND status_ = 'SUBMITTED'"
+  },
+  "f9c0932207f5f8abed6540066b57fda4783623bb7a94eb4a84dab465d6475afb": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE from record_notes WHERE id = $1"
+  },
+  "fd684c16db98170e86db92aa8ff69cb1a4b24f49b4a142e406b827554bc89522": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id FROM active_user"
+  },
+  "fdf4b8d077815ed50054a781cc83357b0f226888f6977d10d27c7fa3a618727d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "progress",
+          "ordinal": 0,
+          "type_info": "Int2"
+        },
+        {
+          "name": "video",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "status!: String",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "player_id",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "player_name: String",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "player_banned",
+          "ordinal": 5,
+          "type_info": "Bool"
+        },
+        {
+          "name": "demon_id",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name: String",
+          "ordinal": 7,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 8,
+          "type_info": "Int2"
+        },
+        {
+          "name": "submitter_id",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "submitter_banned",
+          "ordinal": 10,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, status_::text AS \"status!: String\" ,\n       players.id AS player_id, players.name AS \"player_name: String\", players.banned AS player_banned,\n       demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position,\n       submitters.submitter_id AS submitter_id, submitters.banned AS submitter_banned\nFROM records\nINNER JOIN players ON records.player = players.id\nINNER JOIN demons ON records.demon = demons.id\nINNER JOIN submitters ON records.submitter = submitters.submitter_id\nWHERE records.id = $1"
+  },
+  "fe3cbd72e0feae54b8df338d3cb18dca4616fe0875b0cceaf5877dfa39a5113f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id FROM records WHERE player = $1"
+  },
+  "fec88e6882d7269743eddf4d3718d8baad94a4dc7b29404164a1c17ed06e0980": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.player = $2 AND records.demon = $3"
   }
 }
