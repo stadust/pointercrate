@@ -191,20 +191,19 @@ impl ValidatedSubmission {
 
         if let Some(note) = self.note {
             if !note.trim().is_empty() {
-                let note_id = sqlx::query!("INSERT INTO record_notes (record, content) VALUES ($1, $2)", record.id, note)
-                    .fetch_one(&mut *connection)
+                sqlx::query!("INSERT INTO record_notes (record, content) VALUES ($1, $2)", record.id, note)
+                    .execute(&mut *connection)
                     .await?;
             }
         }
 
         if let Some(raw_footage) = self.raw_footage {
-            let note_content = format!("Raw footage: {}", raw_footage);
-            let note_id = sqlx::query!(
+            sqlx::query!(
                 "INSERT INTO record_notes (record, content) VALUES ($1, $2)",
                 record.id,
-                note_content
+                format!("Raw footage: {}", raw_footage)
             )
-            .fetch_one(&mut *connection)
+            .execute(&mut *connection)
             .await?;
         }
 
