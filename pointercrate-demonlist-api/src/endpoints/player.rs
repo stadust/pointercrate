@@ -135,20 +135,26 @@ pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data
     }
 
     let claim = match claim {
-        Ok(claim) if claim.user_id != auth.user.inner().id =>
-            return Err(DemonlistError::ClaimNotFound {
-                member_id: user_id,
-                player_id,
+        Ok(claim) if data.lock_submissions.is_some() => {
+            if claim.user_id != auth.user.inner().id {
+                return Err(DemonlistError::ClaimNotFound {
+                    member_id: user_id,
+                    player_id,
+                }
+                .into())
             }
-            .into()),
-        Ok(claim) if !claim.verified => return Err(DemonlistError::ClaimUnverified.into()),
+
+            if !claim.verified {
+                return Err(DemonlistError::ClaimUnverified.into())
+            }
+            
+            claim
+        },
         Ok(claim) => claim,
-        Err(_) =>
-            return Err(DemonlistError::ClaimNotFound {
-                member_id: user_id,
-                player_id,
-            }
-            .into()),
+        Err(_) => return Err(DemonlistError::ClaimNotFound {
+            member_id: user_id,
+            player_id,
+        }.into())
     };
 
     let claim = claim.apply_patch(data.0, &mut auth.connection).await?;
