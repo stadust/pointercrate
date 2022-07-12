@@ -93,14 +93,14 @@ impl AccountPageTab for ListIntegrationTab {
                                 p.info-green.output style = "margin: 10px 0" {}
                                 div.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        "Geolocate nationality:"
+                                        "Geolocate statsviewer flag:"
                                     }
                                     a.button.blue.hover#claims-geolocate-nationality {
                                         "Go"
                                     }
                                 }
                                 p {
-                                    "Clicking the above button let's you set your claimed player's nationality via IP Geolocation. To offer this functionality, pointercrate uses "
+                                    "Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses "
                                     a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
                                     ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
                                 }
