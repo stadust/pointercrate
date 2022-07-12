@@ -1,4 +1,7 @@
-use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core::{
+    permission::{Permission, PermissionsManager},
+    pool::PointercratePool,
+};
 use pointercrate_demonlist::{
     demon::{FullDemon, MinimalDemon, PostDemon},
     player::claim::PlayerClaim,
@@ -131,7 +134,7 @@ pub async fn setup() -> (TestClient, PoolConnection<Postgres>) {
     (TestClient::new(Client::tracked(rocket).await.unwrap()), connection)
 }
 
-pub async fn add_list_admin(connection: &mut PgConnection) -> AuthenticatedUser {
+pub async fn system_user_with_perms(perm: Permission, connection: &mut PgConnection) -> AuthenticatedUser {
     let user = AuthenticatedUser::register(
         Registration {
             name: "Patrick".to_string(),
@@ -145,7 +148,7 @@ pub async fn add_list_admin(connection: &mut PgConnection) -> AuthenticatedUser 
     sqlx::query!(
         "UPDATE members SET permissions = $2::INTEGER::BIT(16) WHERE member_id = $1",
         user.inner().id,
-        LIST_ADMINISTRATOR.bit() as i16
+        perm.bit() as i16
     )
     .execute(connection)
     .await
