@@ -15,7 +15,7 @@ use rocket::{
     http::{Header, Status},
     local::asynchronous::{Client, LocalRequest, LocalResponse},
 };
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 use sqlx::{pool::PoolConnection, PgConnection, Postgres};
 use std::{collections::HashMap, net::IpAddr, str::FromStr};
 
@@ -40,6 +40,10 @@ impl TestClient {
 
     pub fn put(&self, url: impl Into<String>) -> TestRequest {
         TestRequest::new(self.0.put(url.into()))
+    }
+
+    pub fn post(&self, url: impl Into<String>, body: &impl Serialize) -> TestRequest {
+        TestRequest::new(self.0.post(url.into()).json(body))
     }
 }
 

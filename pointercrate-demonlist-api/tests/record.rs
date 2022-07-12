@@ -1,4 +1,6 @@
+use pointercrate_core::error::PointercrateError;
 use pointercrate_demonlist::{
+    error::DemonlistError,
     player::DatabasePlayer,
     record::{FullRecord, RecordStatus, Submission},
     submitter::Submitter,
@@ -90,4 +92,29 @@ async fn setup_pagination_tests(connection: &mut PgConnection) -> (i32, i32, i32
     let r3 = setup::add_simple_record(100, player2.id, demon2, RecordStatus::Rejected, connection).await;
 
     (player1.id, r1, r2, r3)
+}
+
+#[rocket::async_test]
+async fn unauthed_submit_for_player_with_locked_submission() {
+    let (clnt, mut connection) = setup::setup().await;
+
+    let user = setup::add_normal_user(&mut connection).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
+    let demon1 = setup::add_demon("Bloodbath", 1, 87, player1.id, player1.id, &mut connection).await;
+
+    setup::put_claim(user.inner().id, player1.id, true, true, &mut connection).await;
+
+    let submission =
+        serde_json::json! {{"progress": 100, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890"}};
+
+    let json: serde_json::Value = clnt
+        .post("/api/v1/records/", &submission)
+        .expect_status(Status::Forbidden)
+        .get_result()
+        .await;
+
+    assert_eq!(
+        json["code"].as_i64(),
+        Some(DemonlistError::NoThirdPartySubmissions.error_code() as i64)
+    )
 }
