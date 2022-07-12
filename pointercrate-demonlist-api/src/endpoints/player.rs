@@ -23,33 +23,19 @@ use serde::Deserialize;
 use std::net::IpAddr;
 
 #[rocket::get("/")]
-pub async fn paginate(mut auth: TokenAuth, query: Query<PlayerPagination>) -> Result<Response2<Json<Vec<Player>>>> {
-    let mut pagination = query.0;
-
-    if !auth.has_permission(LIST_HELPER) {
-        pagination.banned = Some(false);
-    }
-
-    let mut players = pagination.page(&mut auth.connection).await?;
-    let (max_id, min_id) = Player::extremal_player_ids(&mut auth.connection).await?;
-
-    pagination_response!(
-        "/api/v1/players/",
-        players,
-        pagination,
-        min_id,
-        max_id,
-        before_id,
-        after_id,
-        base.id
-    )
-}
-#[rocket::get("/", rank = 1)]
-pub async fn unauthed_paginate(pool: &State<PointercratePool>, query: Query<PlayerPagination>) -> Result<Response2<Json<Vec<Player>>>> {
+pub async fn paginate(
+    pool: &State<PointercratePool>, query: Query<PlayerPagination>, auth: Option<TokenAuth>,
+) -> Result<Response2<Json<Vec<Player>>>> {
     let mut pagination = query.0;
     let mut connection = pool.connection().await?;
 
-    pagination.banned = Some(false);
+    if let Some(auth) = auth {
+        if !auth.has_permission(LIST_HELPER) {
+            pagination.banned = Some(false);
+        }
+    } else {
+        pagination.banned = Some(false);
+    }
 
     let mut players = pagination.page(&mut connection).await?;
     let (max_id, min_id) = Player::extremal_player_ids(&mut connection).await?;

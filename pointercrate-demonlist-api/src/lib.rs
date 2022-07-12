@@ -38,7 +38,6 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
         .mount("/api/v1/players/", rocket::routes![
             endpoints::player::get,
             endpoints::player::paginate,
-            endpoints::player::unauthed_paginate,
             endpoints::player::patch,
             endpoints::player::ranking,
             endpoints::player::put_claim,

@@ -48,7 +48,7 @@ async fn test_authenticated_pagination() {
 
 #[rocket::async_test]
 async fn test_list_helper_pagination() {
-    let (client, mut connection) = setup::seatup().await;
+    let (client, mut connection) = setup::setup().await;
 
     let (banned, unbanned) = create_players(&mut connection).await;
     let user = setup::system_user_with_perms(LIST_HELPER, &mut *connection).await;
