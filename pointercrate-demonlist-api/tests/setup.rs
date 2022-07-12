@@ -1,5 +1,11 @@
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
-use pointercrate_demonlist::{player::claim::PlayerClaim, LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR};
+use pointercrate_demonlist::{
+    demon::{FullDemon, MinimalDemon, PostDemon},
+    player::claim::PlayerClaim,
+    record::{FullRecord, RecordStatus, Submission},
+    submitter::Submitter,
+    LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
+};
 use pointercrate_user::{AuthenticatedUser, Registration};
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{
@@ -8,7 +14,7 @@ use rocket::{
 };
 use serde::de::DeserializeOwned;
 use sqlx::{pool::PoolConnection, PgConnection, Postgres};
-use std::collections::HashMap;
+use std::{collections::HashMap, net::IpAddr, str::FromStr};
 
 macro_rules! truncate {
     ($conn: expr, $($table: expr),+) => {
@@ -92,6 +98,8 @@ impl<'c> TestRequest<'c> {
 }
 
 pub async fn setup() -> (TestClient, PoolConnection<Postgres>) {
+    dotenv::dotenv().unwrap();
+
     let pool = PointercratePool::init().await;
     let mut connection = pool.connection().await.unwrap();
 
@@ -116,24 +124,7 @@ pub async fn setup() -> (TestClient, PoolConnection<Postgres>) {
         .manage(AccountPageConfig::default());
 
     // generate some data
-    sqlx::query!("INSERT INTO submitters VALUES (0, '127.0.0.1'::INET)")
-        .execute(&mut connection)
-        .await
-        .unwrap();
-    sqlx::query!("INSERT INTO players (id, name) VALUES (1, 'stadust')")
-        .execute(&mut connection)
-        .await
-        .unwrap();
-    sqlx::query!("INSERT INTO players (id, name) VALUES (2, 'Ryder')")
-        .execute(&mut connection)
-        .await
-        .unwrap();
-    sqlx::query!("INSERT INTO demons (name, position, requirement, verifier, publisher, id) VALUES ('Bloodbath', 1, 87, 1, 1, 1)")
-        .execute(&mut connection)
-        .await
-        .unwrap();
-    sqlx::query!("INSERT INTO demons (name, position, requirement, verifier, publisher, id) VALUES ('Bloodlust', 2, 53, 1, 1, 2)")
-        .execute(&mut connection)
+    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut connection)
         .await
         .unwrap();
 
@@ -175,9 +166,26 @@ pub async fn add_normal_user(connection: &mut PgConnection) -> AuthenticatedUser
     .unwrap()
 }
 
+pub async fn add_demon(
+    name: impl Into<String>, position: i16, requirement: i16, verifier_id: i32, publisher_id: i32, connection: &mut PgConnection,
+) -> i32 {
+    sqlx::query!(
+        "INSERT INTO demons (name, position, requirement, verifier, publisher) VALUES ($1::TEXT::CITEXT, $2, $3, $4, $5) RETURNING id",
+        name.into(),
+        position,
+        requirement,
+        verifier_id,
+        publisher_id
+    )
+    .fetch_one(&mut *connection)
+    .await
+    .unwrap()
+    .id
+}
+
 pub async fn put_claim(user_id: i32, player_id: i32, verified: bool, lock_submissions: bool, connection: &mut PgConnection) -> PlayerClaim {
     sqlx::query!(
-        "INSERT INTO player_claims VALUES (1, $1, $2, $3, $4)",
+        "INSERT INTO player_claims (member_id, player_id, verified, lock_submissions) VALUES ($1, $2, $3, $4)",
         user_id,
         player_id,
         verified,
@@ -195,17 +203,23 @@ pub async fn put_claim(user_id: i32, player_id: i32, verified: bool, lock_submis
     }
 }
 
-pub async fn add_dummy_records(connection: &mut PgConnection) {
-    sqlx::query!("INSERT INTO records (id, progress, status_, player, submitter, demon) VALUES (1, 100, 'APPROVED', 1, 0, 1)")
-        .execute(&mut *connection)
+pub async fn add_simple_record(progress: i16, player: i32, demon: i32, status: RecordStatus, connection: &mut PgConnection) -> i32 {
+    let system_sub = Submitter::by_ip(IpAddr::from_str("127.0.0.1").unwrap(), &mut *connection)
         .await
+        .unwrap()
         .unwrap();
-    sqlx::query!("INSERT INTO records (id, progress, status_, player, submitter, demon) VALUES (2, 70, 'REJECTED', 1, 0, 2)")
-        .execute(&mut *connection)
-        .await
-        .unwrap();
-    sqlx::query!("INSERT INTO records (id, progress, status_, player, submitter, demon) VALUES (3, 71, 'REJECTED', 2, 0, 2)")
-        .execute(connection)
-        .await
-        .unwrap();
+
+    sqlx::query!(
+        "INSERT INTO records (progress, status_, player, submitter, demon, video) VALUES ($1, $2::text::record_status, $3, $4, $5, NULL) \
+         RETURNING id",
+        progress,
+        status.to_sql(),
+        player,
+        system_sub.id,
+        demon
+    )
+    .fetch_one(&mut *connection)
+    .await
+    .unwrap()
+    .id
 }

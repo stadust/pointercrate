@@ -49,6 +49,8 @@ pub async fn unauthed_paginate(pool: &State<PointercratePool>, query: Query<Play
     let mut pagination = query.0;
     let mut connection = pool.connection().await?;
 
+    pagination.banned = Some(false);
+
     let mut players = pagination.page(&mut connection).await?;
     let (max_id, min_id) = Player::extremal_player_ids(&mut connection).await?;
 

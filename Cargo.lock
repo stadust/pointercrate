@@ -1497,6 +1497,7 @@ name = "pointercrate-demonlist-api"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "dotenv",
  "log",
  "nonzero_ext 0.2.0",
  "pointercrate-core",

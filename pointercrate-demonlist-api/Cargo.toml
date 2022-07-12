@@ -27,3 +27,4 @@ serde = "1.0.118"
 
 [dev-dependencies]
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
+dotenv = "0.15.0"

@@ -5,7 +5,7 @@ pub use self::{
 use crate::{demon::MinimalDemon, error::Result, nationality::Nationality, record::MinimalRecordD};
 use derive_more::Display;
 use pointercrate_core::etag::Taggable;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -17,7 +17,7 @@ mod get;
 mod paginate;
 mod patch;
 
-#[derive(Debug, Hash, Eq, PartialEq, Serialize, Display, Clone)]
+#[derive(Debug, Hash, Eq, PartialEq, Serialize, Display, Clone, Deserialize)]
 #[display(fmt = "{} (ID: {})", name, id)]
 pub struct DatabasePlayer {
     pub id: i32,
@@ -48,7 +48,7 @@ pub struct RankedPlayer {
     pub index: i64,
 }
 
-#[derive(Debug, Eq, Hash, PartialEq, Serialize, Display)]
+#[derive(Debug, Eq, Hash, PartialEq, Serialize, Display, Deserialize)]
 #[display(fmt = "{}", base)]
 pub struct Player {
     #[serde(flatten)]

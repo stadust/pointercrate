@@ -7,7 +7,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 mod get;
 mod paginate;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor)]
+#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor, Deserialize)]
 pub struct Nationality {
     #[serde(rename = "country_code")]
     pub iso_country_code: String,
@@ -54,7 +54,7 @@ pub struct NationalityRecord {
 
 impl Taggable for NationalityRecord {}
 
-#[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Constructor)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Constructor, Deserialize)]
 pub struct Subdivision {
     pub iso_code: String,
     pub name: String,
