@@ -14,21 +14,34 @@ use url::Url;
 #[derive(Deserialize, Debug, Display)]
 #[display(fmt = "{}% on {} by {} [status: {}]", progress, demon, player, status)]
 pub struct Submission {
-    pub progress: i16,
-    pub player: String,
-    pub demon: i32,
+    progress: i16,
+    player: String,
+    demon: i32,
     #[serde(default)]
-    pub video: Option<String>,
+    video: Option<String>,
     #[serde(default)]
-    pub raw_footage: Option<String>,
+    raw_footage: Option<String>,
     #[serde(default)]
-    pub status: RecordStatus,
+    status: RecordStatus,
 
     /// An initial, submitter provided note for the demon.
     #[serde(default)]
-    pub note: Option<String>,
+    note: Option<String>,
 }
 
+#[derive(Debug)]
+pub struct NormalizedSubmission {
+    progress: i16,
+    player: DatabasePlayer,
+    demon: MinimalDemon,
+    status: RecordStatus,
+
+    video: Option<String>,
+    raw_footage: Option<String>,
+    note: Option<String>,
+}
+
+#[derive(Debug)]
 pub struct ValidatedSubmission {
     progress: i16,
     video: Option<String>,
@@ -36,19 +49,19 @@ pub struct ValidatedSubmission {
     status: RecordStatus,
     player: DatabasePlayer,
     demon: MinimalDemon,
-    submitter: Submitter,
     note: Option<String>,
 }
 
 impl Submission {
-    pub async fn validate(self, submitter: Submitter, connection: &mut PgConnection) -> Result<ValidatedSubmission> {
-        info!("Processing record addition '{}' by {}", self, submitter);
+    pub fn has_video(&self) -> bool {
+        self.video.is_some()
+    }
 
-        // Banned submitters cannot submit records
-        if submitter.banned {
-            return Err(DemonlistError::BannedFromSubmissions)
-        }
+    pub fn status(&self) -> RecordStatus {
+        self.status
+    }
 
+    pub async fn normalize(self, connection: &mut PgConnection) -> Result<NormalizedSubmission> {
         // validate video
         let video = match self.video {
             Some(ref video) => Some(crate::video::validate(video)?),
@@ -59,39 +72,45 @@ impl Submission {
         let player = DatabasePlayer::by_name_or_create(self.player.as_ref(), connection).await?;
         let demon = MinimalDemon::by_id(self.demon, connection).await?;
 
+        Ok(NormalizedSubmission {
+            progress: self.progress,
+            player,
+            demon,
+            status: self.status,
+            video,
+            raw_footage: self.raw_footage,
+            note: self.note,
+        })
+    }
+}
+
+impl NormalizedSubmission {
+    pub async fn verified_player_claim(&self, connection: &mut PgConnection) -> Result<Option<PlayerClaim>> {
+        PlayerClaim::verified_claim_on(self.player.id, connection).await
+    }
+
+    pub async fn validate(self, connection: &mut PgConnection) -> Result<ValidatedSubmission> {
         // Banned player can't have records on the list
-        if player.banned {
+        if self.player.banned {
             return Err(DemonlistError::PlayerBanned)
         }
 
         // Cannot submit records for the legacy list (it is possible to directly add them for list mods)
-        if demon.position > crate::config::extended_list_size() && self.status == RecordStatus::Submitted {
+        if self.demon.position > crate::config::extended_list_size() && self.status == RecordStatus::Submitted {
             return Err(DemonlistError::SubmitLegacy)
         }
 
         // Can only submit 100% records for the extended list (it is possible to directly add them for list
         // mods)
-        if demon.position > crate::config::list_size() && self.progress != 100 && self.status == RecordStatus::Submitted {
+        if self.demon.position > crate::config::list_size() && self.progress != 100 && self.status == RecordStatus::Submitted {
             return Err(DemonlistError::Non100Extended)
         }
 
-        let requirement = demon.requirement(&mut *connection).await?;
+        let requirement = self.demon.requirement(&mut *connection).await?;
 
         // Check if the record meets the record requirement for this demon
         if self.progress > 100 || self.progress < requirement {
             return Err(DemonlistError::InvalidProgress { requirement })
-        }
-
-        // check if the player is claimed with submissions locked
-        if let Some(claim) = PlayerClaim::verified_claim_on(player.id, &mut *connection).await? {
-            if claim.lock_submissions {
-                // FIXME: horrible hack
-                let active_user = sqlx::query!("SELECT id FROM active_user").fetch_one(&mut *connection).await?;
-
-                if active_user.id != claim.user_id {
-                    return Err(DemonlistError::NoThirdPartySubmissions)
-                }
-            }
         }
 
         debug!("Submission is valid, checking for duplicates!");
@@ -99,7 +118,7 @@ impl Submission {
         // Search for existing records. If a video exists, we also check if a record with
         // exactly that video exists.
 
-        if let Some(ref video) = video {
+        if let Some(ref video) = self.video {
             if let Some(row) = sqlx::query!(r#"SELECT id, status_::text as "status_!: String" FROM records WHERE video = $1"#, video.to_string())
                 .fetch_optional(&mut *connection) // FIXME(sqlx)
                 .await?
@@ -114,8 +133,8 @@ impl Submission {
         let existing = sqlx::query!(
             r#"SELECT id, status_::text as "status_!: String" FROM records WHERE demon = $1 AND player = $2 AND (status_ = 'REJECTED' OR status_ = 
              'UNDER_CONSIDERATION' OR (status_ = 'APPROVED' AND progress >= $3)) LIMIT 1"#,
-            demon.id,
-            player.id,
+            self.demon.id,
+            self.player.id,
             self.progress
         )
             .fetch_optional(&mut *connection)
@@ -134,9 +153,12 @@ impl Submission {
             },
             None if self.status == RecordStatus::Submitted => {
                 // list mods can submit without raw
-                let has_records = sqlx::query!(r#"SELECT EXISTS(SELECT 1 FROM records WHERE player = $1) AS "value!""#, player.id)
-                    .fetch_one(&mut *connection)
-                    .await?;
+                let has_records = sqlx::query!(
+                    r#"SELECT EXISTS(SELECT 1 FROM records WHERE player = $1) AS "value!""#,
+                    self.player.id
+                )
+                .fetch_one(&mut *connection)
+                .await?;
 
                 if !has_records.value {
                     return Err(DemonlistError::RawRequiredForFirstTime)
@@ -147,19 +169,18 @@ impl Submission {
 
         Ok(ValidatedSubmission {
             progress: self.progress,
-            video,
+            video: self.video,
             raw_footage: self.raw_footage,
             status: self.status,
-            player,
-            demon,
-            submitter,
+            player: self.player,
+            demon: self.demon,
             note: self.note,
         })
     }
 }
 
 impl ValidatedSubmission {
-    pub async fn create(self, connection: &mut PgConnection) -> Result<FullRecord> {
+    pub async fn create(self, submitter: Submitter, connection: &mut PgConnection) -> Result<FullRecord> {
         let id = sqlx::query(
             "INSERT INTO records (progress, video, status_, player, submitter, demon) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4,$5) \
              RETURNING id",
@@ -167,7 +188,7 @@ impl ValidatedSubmission {
         .bind(self.progress)
         .bind(&self.video)
         .bind(self.player.id)
-        .bind(self.submitter.id)
+        .bind(submitter.id)
         .bind(self.demon.id)
         .fetch_one(&mut *connection)
         .await?
@@ -180,7 +201,7 @@ impl ValidatedSubmission {
             status: RecordStatus::Submitted,
             player: self.player,
             demon: self.demon,
-            submitter: Some(self.submitter),
+            submitter: Some(submitter),
         };
 
         // Dealing with different status and upholding their invariant is complicated, we should not
@@ -208,5 +229,51 @@ impl ValidatedSubmission {
         }
 
         Ok(record)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        demon::MinimalDemon,
+        error::DemonlistError,
+        player::DatabasePlayer,
+        record::{post::NormalizedSubmission, RecordStatus},
+    };
+    use pointercrate_core::pool::PointercratePool;
+    use sqlx::{Postgres, Transaction};
+
+    async fn connection() -> Transaction<'static, Postgres> {
+        dotenv::dotenv().unwrap();
+
+        PointercratePool::init().await.transaction().await.unwrap()
+    }
+
+    #[tokio::test]
+    async fn test_banned_cannot_submit() {
+        let mut conn = connection().await;
+
+        let result = NormalizedSubmission {
+            progress: 100,
+            player: DatabasePlayer {
+                id: 1,
+                name: "stardust1971".to_string(),
+                banned: true,
+            },
+            demon: MinimalDemon {
+                id: 1,
+                position: 1,
+                name: "Bloodbath".to_string(),
+            },
+            status: RecordStatus::Submitted,
+            video: None,
+            raw_footage: None,
+            note: None,
+        }
+        .validate(&mut conn)
+        .await;
+
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), DemonlistError::PlayerBanned)
     }
 }

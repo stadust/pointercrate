@@ -48,8 +48,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
     {
         // non-lexical lifetimes working amazingly I see >.>
         let mut addition_stream = sqlx::query!(
-            "SELECT time, demon_additions.id, demons.name::text FROM demon_additions LEFT OUTER JOIN demons ON demons.id = \
-             demon_additions.id"
+            r#"SELECT time AS "time!", demon_additions.id AS "id!", demons.name::text FROM demon_additions LEFT OUTER JOIN demons ON demons.id = demon_additions.id"#
         )
         .fetch(&mut *connection);
 

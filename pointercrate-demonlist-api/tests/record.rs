@@ -118,3 +118,24 @@ async fn unauthed_submit_for_player_with_locked_submission() {
         Some(DemonlistError::NoThirdPartySubmissions.error_code() as i64)
     )
 }
+
+#[rocket::async_test]
+async fn submit_existing_record() {
+    let (clnt, mut connection) = setup::setup().await;
+
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
+    let demon1 = setup::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut connection).await;
+    let existing = setup::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
+
+    let submission =
+        serde_json::json! {{"progress": 60, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890"}};
+
+    let json: serde_json::Value = clnt
+        .post("/api/v1/records/", &submission)
+        .expect_status(Status::UnprocessableEntity)
+        .get_result()
+        .await;
+
+    assert_eq!(json["code"].as_i64(), Some(42217i64));
+    assert_eq!(json["data"]["existing"].as_i64(), Some(existing as i64));
+}
