@@ -2984,36 +2984,6 @@
     },
     "query": "SELECT id FROM records WHERE video = $1"
   },
-  "b1ecd5a4c2c12e5a72f58efffcf5aa8ff082327d8be0ac40edb1b1bf9aef491e": {
-    "describe": {
-      "columns": [
-        {
-          "name": "time",
-          "ordinal": 0,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "id",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "name",
-          "ordinal": 2,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT time, demon_additions.id, demons.name::text FROM demon_additions LEFT OUTER JOIN demons ON demons.id = demon_additions.id"
-  },
   "b2f4dede0c58732f02949515ff1711315dcb8ae76bc7d6ea67869ad4d761f832": {
     "describe": {
       "columns": [],
@@ -3725,6 +3695,36 @@
     },
     "query": "DELETE FROM members WHERE member_id = $1"
   },
+  "d0629142611f88a0ab515868071da4842e3385ba28b30490bbcdbc983c04768c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "time!",
+          "ordinal": 0,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "id!",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT time AS \"time!\", demon_additions.id AS \"id!\", demons.name::text FROM demon_additions LEFT OUTER JOIN demons ON demons.id = demon_additions.id"
+  },
   "d1414c3c349a2571a34b4a1d0a50bb022929189c690b105bab0bee8e5e8d72a8": {
     "describe": {
       "columns": [],
@@ -4368,24 +4368,6 @@
       }
     },
     "query": "DELETE from record_notes WHERE id = $1"
-  },
-  "fd684c16db98170e86db92aa8ff69cb1a4b24f49b4a142e406b827554bc89522": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT id FROM active_user"
   },
   "fdf4b8d077815ed50054a781cc83357b0f226888f6977d10d27c7fa3a618727d": {
     "describe": {
