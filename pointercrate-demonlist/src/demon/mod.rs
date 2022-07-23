@@ -174,7 +174,9 @@ impl Demon {
     }
 
     pub async fn validate_position(position: i16, connection: &mut PgConnection) -> Result<()> {
-        let maximal_position = Demon::max_position(connection).await?;
+        // To prevent holes from being created in the list, the new position must lie between 1 and (current
+        // last position + 1), inclusive
+        let maximal_position = Demon::max_position(connection).await.unwrap_or(0) + 1;
 
         if position > maximal_position || position < 1 {
             return Err(DemonlistError::InvalidPosition { maximal: maximal_position })
@@ -207,7 +209,8 @@ impl Demon {
         Ok(())
     }
 
-    /// Gets the current max position a demon has
+    /// Gets the current max position a demon has, or `CoreError::NotFound` if there are no demons
+    /// in the database
     pub async fn max_position(connection: &mut PgConnection) -> Result<i16> {
         sqlx::query!("SELECT MAX(position) as max_position FROM demons")
             .fetch_one(connection)
