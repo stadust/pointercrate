@@ -9,17 +9,6 @@ pub struct Head {
     pub(crate) other: Markup,
 }
 
-impl Default for Head {
-    fn default() -> Self {
-        Head {
-            scripts: vec![],
-            stylesheets: vec![],
-            meta_tags: vec![],
-            other: html! {},
-        }
-    }
-}
-
 impl Head {
     pub fn new(other: Markup) -> Head {
         Head {

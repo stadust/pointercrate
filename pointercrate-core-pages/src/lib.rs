@@ -91,7 +91,10 @@ impl PageFragment {
     }
 
     pub fn head(mut self, head: Markup) -> Self {
-        self.head.other = head;
+        self.head.other = html! {
+            (self.head.other)
+            (head)
+        };
         self
     }
 
