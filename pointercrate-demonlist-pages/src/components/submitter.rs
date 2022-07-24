@@ -90,7 +90,7 @@ impl Render for RecordSubmitter<'_> {
                         i {"Note: "} "This is required for every record submitted to the list!"
                     }
                     span.form-input.flex.col#submit-raw-footage {
-                        input type = "url"  name = "raw_footage" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
+                        input type = "url"  name = "raw_footage" required = "" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
                         p.error {}
                     }
                     h3 {
