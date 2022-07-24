@@ -181,8 +181,8 @@ pub enum DemonlistError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42232`
-    #[display(fmt = "Since this is a first submission, raw footage is required")]
-    RawRequiredForFirstTime, //hehe
+    #[display(fmt = "Raw footage much be provided to submit this record")]
+    RawRequired, //hehe
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
