@@ -87,7 +87,7 @@ impl Render for RecordSubmitter<'_> {
                         "Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator."
                     }
                     p {
-                        i {"Note: "} "This is required for every first record and recommended for big jumps!"
+                        i {"Note: "} "This is required for every record submitted to the list!"
                     }
                     span.form-input.flex.col#submit-raw-footage {
                         input type = "url"  name = "raw_footage" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
