@@ -231,7 +231,7 @@ impl PointercrateError for DemonlistError {
             UnsupportedVideoHost => 42224,
             DemonNameNotUnique { .. } => 42228,
             AlreadyClaimed => 42231,
-            RawRequiredForFirstTime => 42232,
+            RawRequired => 42232,
             MalformedRawUrl => 42233,
         }
     }
