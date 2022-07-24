@@ -153,16 +153,7 @@ impl NormalizedSubmission {
             },
             None if self.status == RecordStatus::Submitted => {
                 // list mods can submit without raw
-                let has_records = sqlx::query!(
-                    r#"SELECT EXISTS(SELECT 1 FROM records WHERE player = $1) AS "value!""#,
-                    self.player.id
-                )
-                .fetch_one(&mut *connection)
-                .await?;
-
-                if !has_records.value {
-                    return Err(DemonlistError::RawRequiredForFirstTime)
-                }
+                return Err(DemonlistError::RawRequired)
             },
             _ => (),
         }
