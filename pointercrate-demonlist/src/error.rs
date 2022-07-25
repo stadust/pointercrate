@@ -181,8 +181,8 @@ pub enum DemonlistError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42232`
-    #[display(fmt = "Since this is a first submission, raw footage is required")]
-    RawRequiredForFirstTime, //hehe
+    #[display(fmt = "Raw footage much be provided to submit this record")]
+    RawRequired, //hehe
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
@@ -231,7 +231,7 @@ impl PointercrateError for DemonlistError {
             UnsupportedVideoHost => 42224,
             DemonNameNotUnique { .. } => 42228,
             AlreadyClaimed => 42231,
-            RawRequiredForFirstTime => 42232,
+            RawRequired => 42232,
             MalformedRawUrl => 42233,
         }
     }
