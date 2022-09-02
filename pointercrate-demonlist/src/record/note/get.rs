@@ -10,6 +10,7 @@ struct PartialNote {
     record: i32,
     content: String,
     is_public: bool,
+    is_raw_footage: bool,
     author: Option<String>,
     transferred: bool,
 }
@@ -34,6 +35,7 @@ impl PartialNote {
             record: self.record,
             content: self.content,
             is_public: self.is_public,
+            is_raw_footage: self.is_raw_footage,
             author: self.author,
             transferred: self.transferred,
             editors,
