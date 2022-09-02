@@ -21,7 +21,7 @@ pub struct Note {
     pub content: String,
 
     pub is_public: bool,
-    
+
     pub is_raw_footage: bool,
 
     /// Whether this note was originally made on a different record and later transferred to this
