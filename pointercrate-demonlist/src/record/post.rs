@@ -211,9 +211,11 @@ impl ValidatedSubmission {
 
         if let Some(raw_footage) = self.raw_footage {
             sqlx::query!(
-                "INSERT INTO record_notes (record, content) VALUES ($1, $2)",
+                "INSERT INTO record_notes (record, content, is_public, is_raw_footage) VALUES ($1, $2, $3, $4)",
                 record.id,
-                format!("{}", raw_footage)
+                format!("{}", raw_footage),
+                false,
+                true
             )
             .execute(&mut *connection)
             .await?;
