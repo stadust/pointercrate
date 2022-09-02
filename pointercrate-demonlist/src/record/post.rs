@@ -213,7 +213,7 @@ impl ValidatedSubmission {
             sqlx::query!(
                 "INSERT INTO record_notes (record, content) VALUES ($1, $2)",
                 record.id,
-                format!("Raw footage: {}", raw_footage)
+                format!("{}", raw_footage)
             )
             .execute(&mut *connection)
             .await?;
