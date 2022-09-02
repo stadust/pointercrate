@@ -247,6 +247,10 @@ function createNoteHtml(note) {
   if(note.is_public) {
     furtherInfo.innerHTML += "This note is public. ";
   }
+  
+  if(note.is_raw_footage) {
+    furtherInfo.innerHTML += "This note contains a raw footage link. ";
+  }
 
   if (isAdmin) noteDiv.appendChild(closeX);
   noteDiv.appendChild(b);
