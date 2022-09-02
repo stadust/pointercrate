@@ -13,6 +13,9 @@ pub struct PatchNote {
 
     #[serde(default, deserialize_with = "non_nullable")]
     pub is_public: Option<bool>,
+    
+    #[serde(default, deserialize_with = "non_nullable")]
+    pub is_raw_footage: Option<bool>,
 }
 
 impl Note {
@@ -35,6 +38,14 @@ impl Note {
                 .await?;
 
             self.is_public = is_public;
+        }
+        
+        if let Some(is_raw_footage) = patch.is_raw_footage {
+            sqlx::query!("UPDATE record_notes SET is_raw_footage = $1 WHERE id = $2", is_raw_footage, self.id)
+                .execute(connection)
+                .await?;
+
+            self.is_raw_footage = is_raw_footage;
         }
 
         Ok(self)
