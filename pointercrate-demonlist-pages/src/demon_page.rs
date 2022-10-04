@@ -145,19 +145,21 @@ impl DemonPage {
 
             div.flex.m-center.container {
                 main.left {
-                    div.panel.fade style = "padding: 0px; height: 90px" {
-                        (PreEscaped(format!(r#"
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-     crossorigin="anonymous"></script>
-<!-- Demonpage Banner ad -->
-<ins class="adsbygoogle"
-     style="display:inline-block;width:728px;height:90px"
-     data-ad-client="{0}"
-     data-ad-slot="4829214686"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({{}});
-</script>
-                        "#, page_config::adsense_publisher_id())))
+                    @if let Some(publisher_id) = page_config::adsense_publisher_id() {
+                        div.panel.fade style = "padding: 0px; height: 90px" {
+                            (PreEscaped(format!(r#"
+                            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+         crossorigin="anonymous"></script>
+    <!-- Demonpage Banner ad -->
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="{0}"
+         data-ad-slot="4829214686"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({{}});
+    </script>
+                            "#, publisher_id)))
+                        }
                     }
                     (RecordSubmitter::new(false, &self.demonlist))
                     (self.demon_panel())

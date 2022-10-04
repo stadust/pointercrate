@@ -78,38 +78,40 @@ fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
             }
         }
         // Gotta put the ads in this method although they dont belong here, yikes
-        @if demon.base.position == 1 {
-            section.panel.fade style = "padding: 0px; height: 90px"{
-            (PreEscaped(format!(r#"
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-crossorigin="anonymous"></script>
-<!-- Demonlist Responsive Feed Ad -->
-<ins class="adsbygoogle"
-style="display:inline-block;width:728px;height:90px"
-data-ad-client="{0}"
-data-ad-slot="2819150519"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({{}});
-</script>
-                "#, page_config::adsense_publisher_id())))
+        @if let Some(publisher_id) = page_config::adsense_publisher_id() {
+            @if demon.base.position == 1 {
+                section.panel.fade style = "padding: 0px; height: 90px"{
+                    (PreEscaped(format!(r#"
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+    crossorigin="anonymous"></script>
+    <!-- Demonlist Responsive Feed Ad -->
+    <ins class="adsbygoogle"
+    style="display:inline-block;width:728px;height:90px"
+    data-ad-client="{0}"
+    data-ad-slot="2819150519"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({{}});
+    </script>
+                    "#, publisher_id)))
+                }
             }
-        }
-        // Place ad every 10th demon
-        @if demon.base.position % 10 == 0 {
-            section.panel.fade {
-            (PreEscaped(format!(r#"
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-crossorigin="anonymous"></script>
-<ins class="adsbygoogle"
-style="display:block"
-data-ad-format="fluid"
-data-ad-layout-key="-h1+40+4u-93+n"
-data-ad-client="{0}"
-data-ad-slot="5157884729"></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({{}});
-</script>
-                "#, page_config::adsense_publisher_id())))
+            // Place ad every 10th demon
+            @if demon.base.position % 10 == 0 {
+                section.panel.fade {
+                (PreEscaped(format!(r#"
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+    crossorigin="anonymous"></script>
+    <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-format="fluid"
+    data-ad-layout-key="-h1+40+4u-93+n"
+    data-ad-client="{0}"
+    data-ad-slot="5157884729"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({{}});
+    </script>
+                    "#, publisher_id)))
+                }
             }
         }
     }
