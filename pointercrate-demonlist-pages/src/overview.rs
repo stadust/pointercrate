@@ -29,7 +29,8 @@ fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
                 div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {
                     @if let Some(video) = &demon.video {
                         a.play href = (video) {}
-                    } else {
+                    }
+                    @else {
                         a.play href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" {}
                     }
                 }
