@@ -155,6 +155,7 @@ struct FetchedDemon {
     position: i16,
     requirement: i16,
     video: Option<String>,
+    thumbnail: String,
     publisher_id: i32,
     publisher_name: String,
     publisher_banned: bool,
@@ -174,6 +175,7 @@ impl From<FetchedDemon> for Demon {
             },
             requirement: fetched.requirement,
             video: fetched.video,
+            thumbnail: fetched.thumbnail,
             publisher: DatabasePlayer {
                 id: fetched.publisher_id,
                 name: fetched.publisher_name,
@@ -214,6 +216,7 @@ pub async fn list_at(connection: &mut PgConnection, at: DateTime<FixedOffset>) -
                 },
                 requirement: row.requirement,
                 video: row.video,
+                thumbnail: row.thumbnail,
                 publisher: DatabasePlayer {
                     id: row.publisher_id,
                     name: row.publisher_name,

@@ -25,42 +25,21 @@ pub struct OverviewPage {
 fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
     html! {
         section.panel.fade style="overflow:hidden" {
-            @if let Some(ref video) = demon.video {
-                div.flex style = "align-items: center" {
-                    div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (thumbnail(video)) "')"} {
+            div.flex style = "align-items: center" {
+                div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {
+                    @if let Some(video) = &demon.video {
                         a.play href = (video) {}
-                    }
-                    div style = "padding-left: 15px" {
-                        h2 style = "text-align: left; margin-bottom: 0px" {
-                            a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
-                                "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
-                            }
-                        }
-                        h3 style = "text-align: left" {
-                            i {
-                                (demon.publisher.name)
-                            }
-                            @if let Some(current_position) = current_position {
-                                br;
-                                @if current_position > list_config::extended_list_size() {
-                                    "Currently Legacy"
-                                }
-                                @else {
-                                    "Currently #"(current_position)
-                                }
-                            }
-                        }
+                    } else {
+                        a.play href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" {}
                     }
                 }
-            }
-            @else {
-                div.flex.col style = "align-items: center" {
-                    h2 style = "margin-bottom: 0px"{
+                div style = "padding-left: 15px" {
+                    h2 style = "text-align: left; margin-bottom: 0px" {
                         a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
                             "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
                         }
                     }
-                    h3 {
+                    h3 style = "text-align: left" {
                         i {
                             (demon.publisher.name)
                         }
@@ -222,15 +201,4 @@ impl OverviewPage {
             }
         }
     }
-}
-
-fn thumbnail(video: &str) -> String {
-    // Videos need to be well formed once we get here!
-    let url = Url::parse(video).unwrap();
-    let video_id = url
-        .query_pairs()
-        .find_map(|(key, value)| if key == "v" { Some(value) } else { None })
-        .unwrap_or(Cow::Borrowed("dQw4w9WgXcQ"));
-
-    format!("https://i.ytimg.com/vi/{}/mqdefault.jpg", video_id)
 }

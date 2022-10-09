@@ -102,6 +102,7 @@ impl DemonIdPagination {
                 },
                 requirement: row.get("requirement"),
                 video,
+                thumbnail: row.get("thumbnail"),
                 publisher: DatabasePlayer {
                     id: row.get("publisher_id"),
                     name: row.get("publisher_name"),
@@ -214,6 +215,7 @@ impl DemonPositionPagination {
                 },
                 requirement: row.get("requirement"),
                 video,
+                thumbnail: row.get("thumbnail"),
                 publisher: DatabasePlayer {
                     id: row.get("publisher_id"),
                     name: row.get("publisher_name"),

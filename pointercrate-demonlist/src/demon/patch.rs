@@ -20,6 +20,9 @@ pub struct PatchDemon {
     pub video: Option<Option<String>>,
 
     #[serde(default, deserialize_with = "non_nullable")]
+    pub thumbnail: Option<String>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
     pub requirement: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
@@ -64,6 +67,10 @@ impl Demon {
                 None => self.remove_video(connection).await?,
                 Some(video) => self.set_video(video, connection).await?,
             }
+        }
+
+        if let Some(thumbnail) = patch.thumbnail {
+            self.set_thumbnail(thumbnail, connection).await?;
         }
 
         if let Some(verifier) = patch.verifier {
@@ -146,6 +153,16 @@ impl Demon {
             .await?;
 
         self.video = None;
+
+        Ok(())
+    }
+
+    pub async fn set_thumbnail(&mut self, thumbnail: String, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!("UPDATE demons SET thumbnail = $1::text WHERE id = $2", thumbnail, self.base.id)
+            .execute(connection)
+            .await?;
+
+        self.thumbnail = thumbnail;
 
         Ok(())
     }
