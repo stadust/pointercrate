@@ -50,107 +50,6 @@
     },
     "query": "select demons.id as demon, demons.name::text as \"demon_name!\", demons.position, players.name::text as \"player_name!\" from demons inner join players on players.id=publisher where nationality=$1"
   },
-  "05c1ae6fd6a5546910874ab2c6b94f66dc6205504412d666144fae3cdbf6fae3": {
-    "describe": {
-      "columns": [
-        {
-          "name": "demon_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "demon_name: String",
-          "ordinal": 1,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "position",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "requirement",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "level_id",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "video",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "verifier_id",
-          "ordinal": 6,
-          "type_info": "Int4"
-        },
-        {
-          "name": "verifier_name: String",
-          "ordinal": 7,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "verifier_banned",
-          "ordinal": 8,
-          "type_info": "Bool"
-        },
-        {
-          "name": "publisher_id",
-          "ordinal": 9,
-          "type_info": "Int4"
-        },
-        {
-          "name": "publisher_name: String",
-          "ordinal": 10,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "publisher_banned",
-          "ordinal": 11,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position, demons.requirement, demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END,\n       verifiers.id AS verifier_id, verifiers.name AS \"verifier_name: String\", verifiers.banned AS verifier_banned,\n       publishers.id AS publisher_id, publishers.name AS \"publisher_name: String\", publishers.banned AS publisher_banned\nFROM demons\nINNER JOIN players AS verifiers ON verifiers.id=demons.verifier\nINNER JOIN players AS publishers ON publishers.id=demons.publisher\nWHERE demons.id=$1"
-  },
   "06c84acd396c1c9ea52f31fe1243008a9229f8e81d508be9ede77f43393881fd": {
     "describe": {
       "columns": [
@@ -277,107 +176,6 @@
     },
     "query": "UPDATE players SET subdivision = NULL WHERE id = $1"
   },
-  "0e7c090ee37a2b0462de319f55e37fe04d998c11d0b19d8fbb59c636f9efbdbc": {
-    "describe": {
-      "columns": [
-        {
-          "name": "demon_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "demon_name: String",
-          "ordinal": 1,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "position",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "requirement",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "level_id",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "video",
-          "ordinal": 5,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "verifier_id",
-          "ordinal": 6,
-          "type_info": "Int4"
-        },
-        {
-          "name": "verifier_name: String",
-          "ordinal": 7,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "verifier_banned",
-          "ordinal": 8,
-          "type_info": "Bool"
-        },
-        {
-          "name": "publisher_id",
-          "ordinal": 9,
-          "type_info": "Int4"
-        },
-        {
-          "name": "publisher_name: String",
-          "ordinal": 10,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "publisher_banned",
-          "ordinal": 11,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int2"
-        ]
-      }
-    },
-    "query": "SELECT demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position, demons.requirement, demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video END,\n       verifiers.id AS verifier_id, verifiers.name AS \"verifier_name: String\", verifiers.banned AS verifier_banned,\n       publishers.id AS publisher_id, publishers.name AS \"publisher_name: String\", publishers.banned AS publisher_banned\nFROM demons\nINNER JOIN players AS verifiers ON verifiers.id=demons.verifier\nINNER JOIN players AS publishers ON publishers.id=demons.publisher\nWHERE demons.position=$1"
-  },
   "1013236c84b12cef3976f15f972fc28d56a7a59a3672de8e92fca2a82201f044": {
     "describe": {
       "columns": [],
@@ -422,117 +220,6 @@
       }
     },
     "query": "SELECT iso_code as \"iso_code: String\", name as \"name: String\" FROM subdivisions WHERE nation = $1 ORDER BY name"
-  },
-  "1364dc88667d04dcba36caab72b1381ba06db0bdded1acf8c91d750459385d4a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "demon_id!",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "demon_name!: String",
-          "ordinal": 1,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "position!",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "requirement!",
-          "ordinal": 3,
-          "type_info": "Int2"
-        },
-        {
-          "name": "level_id",
-          "ordinal": 4,
-          "type_info": "Int8"
-        },
-        {
-          "name": "video",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "verifier_id!",
-          "ordinal": 6,
-          "type_info": "Int4"
-        },
-        {
-          "name": "verifier_name!: String",
-          "ordinal": 7,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "verifier_banned!",
-          "ordinal": 8,
-          "type_info": "Bool"
-        },
-        {
-          "name": "publisher_id!",
-          "ordinal": 9,
-          "type_info": "Int4"
-        },
-        {
-          "name": "publisher_name!: String",
-          "ordinal": 10,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "publisher_banned!",
-          "ordinal": 11,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        null,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\"\nFROM demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position"
-  },
-  "13a21e415b76afc6824ca6565e10649514fed1b79ece2794ac744fd9bebf235c": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "INSERT INTO active_user (id) VALUES ($1)"
   },
   "156a4fb58b1d03beb94c9789eeccb0b098dc1162b5198a301c4c80cef0eff854": {
     "describe": {
@@ -735,16 +422,6 @@
     },
     "query": "UPDATE demons SET position = position + 1 WHERE position >= $1 AND position < $2"
   },
-  "33e7fa0719772085ee25e5a1fdcb293bdd5725bf5947733ca7fd21050610b7a5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "DELETE FROM active_user"
-  },
   "3644d1f3ef88bc21585bc7ff18dd44ef7fd4b31c717d0886d56f1ea8745e36f0": {
     "describe": {
       "columns": [],
@@ -814,30 +491,112 @@
     },
     "query": "UPDATE records SET video = NULL WHERE id = $1"
   },
-  "4c1c992b7758e81bb0b1693f6958b4a7930e97fb39a8bbb869df10009e6c20cd": {
+  "451a593cf24cc7a155550b32ad03d9000a03041a73371d9985bf8554629b30a5": {
     "describe": {
       "columns": [
         {
-          "name": "id",
+          "name": "demon_id",
           "ordinal": 0,
           "type_info": "Int4"
+        },
+        {
+          "name": "demon_name: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "thumbnail",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "verifier_id",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name: String",
+          "ordinal": 8,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name: String",
+          "ordinal": 11,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned",
+          "ordinal": 12,
+          "type_info": "Bool"
         }
       ],
       "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         false
       ],
       "parameters": {
         "Left": [
-          "Text",
-          "Int2",
-          "Int2",
-          "Text",
-          "Int4",
-          "Int4"
+          "Int2"
         ]
       }
     },
-    "query": "INSERT INTO demons (name, position, requirement, video, verifier, publisher) VALUES ($1::text,$2,$3,$4::text,$5,$6) RETURNING id"
+    "query": "SELECT demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position, demons.requirement, demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video END, demons.thumbnail,\n       verifiers.id AS verifier_id, verifiers.name AS \"verifier_name: String\", verifiers.banned AS verifier_banned,\n       publishers.id AS publisher_id, publishers.name AS \"publisher_name: String\", publishers.banned AS publisher_banned\nFROM demons\nINNER JOIN players AS verifiers ON verifiers.id=demons.verifier\nINNER JOIN players AS publishers ON publishers.id=demons.publisher\nWHERE demons.position=$1"
   },
   "4e4309fd6f5695903cf5fc5bf9544cb6c4d04257ce6c7ccdc11795132ec74a8d": {
     "describe": {
@@ -933,16 +692,6 @@
     },
     "query": "UPDATE record_notes SET record = $1 FROM records WHERE record_notes.record = records.id AND records.demon = $2 AND records.player = $3 AND (records.status_ = 'REJECTED' OR records.progress <= $4)"
   },
-  "54e79bd4ffa9356fb9efdd83a863b637f772aac32b9a157d134c9b0d259a3cb2": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)"
-  },
   "55044c6852d4f4c3beb15f7fd8787efa38c0303c606cc558e348c9bcf47f03e1": {
     "describe": {
       "columns": [
@@ -969,6 +718,119 @@
       }
     },
     "query": "SELECT iso_code, name::TEXT FROM subdivisions WHERE iso_code = $1 AND nation = $2"
+  },
+  "5575631648baa6d9c246f9117c2f90b7c199423da5578e91d404d4d217ca6046": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon_id!",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position!",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement!",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "thumbnail!",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "verifier_id!",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name!: String",
+          "ordinal": 8,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id!",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name!: String",
+          "ordinal": 11,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned!",
+          "ordinal": 12,
+          "type_info": "Bool"
+        },
+        {
+          "name": "current_position!",
+          "ordinal": 13,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position_ as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, demons.thumbnail AS \"thumbnail!\", verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\", demons.current_position as \"current_position!\"\nFROM list_at($1) AS demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position_"
   },
   "564e63a9c1742ee1e5e6d2dce040d63c047723d8b3fee046f19e832f50feb3de": {
     "describe": {
@@ -1189,26 +1051,6 @@
       }
     },
     "query": "SELECT time, audit_id, \n                  userid,\n                  members.name AS \"name?\"\n                  FROM record_additions LEFT OUTER JOIN members ON members.member_id = userid WHERE id = $1"
-  },
-  "718f84d40124ef7dbd5a6b37979dcf30670be2cda27a0ae4cc9dfebeec90971a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "value!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT EXISTS(SELECT 1 FROM records WHERE player = $1) AS \"value!\""
   },
   "7275631caf454036d3950af691ad34f7f5a7e2cb209ab25c5e459bb2ca8ade4c": {
     "describe": {
@@ -1740,6 +1582,37 @@
       }
     },
     "query": "SELECT players.id, players.name AS \"name: String\", players.banned FROM players INNER JOIN creators ON players.id = creators.creator WHERE \n         creators.demon = $1"
+  },
+  "96ea9f86eb5ee8396508dd46ef99058f024757d9bdd74643c56cdfb26ec01e1e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "thumbnail",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Int2",
+          "Text",
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO demons (name, position, requirement, video, verifier, publisher) VALUES ($1::text,$2,$3,$4::text,$5,$6) RETURNING id, thumbnail"
   },
   "99671f0ab94a44afe3b98827a581e3bf5d04f65838de2258c70ffebd3af8d8c6": {
     "describe": {
@@ -2629,6 +2502,19 @@
     },
     "query": "UPDATE demons SET position = -1 WHERE id = $1"
   },
+  "d141ce0254973be1a59e03be5a1c1e6d581d9dd9dd26b116ff20edbcc5f49c08": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE demons SET thumbnail = $1::text WHERE id = $2"
+  },
   "d25e26294e82cddaafaf082159e6c3610f37dcaffb9723d696687f3fa57efd36": {
     "describe": {
       "columns": [],
@@ -2674,28 +2560,16 @@
     },
     "query": "SELECT members.name AS name FROM record_notes_modifications AS rnm INNER JOIN members ON members.member_id = rnm.userid WHERE id = $1 AND content IS NOT NULL"
   },
-  "d933c9eba040af5ed1435ea51e286bd4bb1ad5b74e7c07f5fd60b5ed0366ea30": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "UPDATE records SET status_ = 'REJECTED' WHERE player = $1"
-  },
-  "d9f8594f1d4999b087d7058ed100de6f8b2ac0e62a8a23299091aaf5a5e2589e": {
+  "d82ceb2c485608c394d8a0e97fbcd4847b3cb9e68ed74b92eb7a6c33443d0270": {
     "describe": {
       "columns": [
         {
-          "name": "demon_id!",
+          "name": "demon_id",
           "ordinal": 0,
           "type_info": "Int4"
         },
         {
-          "name": "demon_name!: String",
+          "name": "demon_name: String",
           "ordinal": 1,
           "type_info": {
             "Custom": {
@@ -2705,12 +2579,12 @@
           }
         },
         {
-          "name": "position!",
+          "name": "position",
           "ordinal": 2,
           "type_info": "Int2"
         },
         {
-          "name": "requirement!",
+          "name": "requirement",
           "ordinal": 3,
           "type_info": "Int2"
         },
@@ -2725,33 +2599,18 @@
           "type_info": "Text"
         },
         {
-          "name": "verifier_id!",
+          "name": "thumbnail",
           "ordinal": 6,
-          "type_info": "Int4"
+          "type_info": "Text"
         },
         {
-          "name": "verifier_name!: String",
+          "name": "verifier_id",
           "ordinal": 7,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "verifier_banned!",
-          "ordinal": 8,
-          "type_info": "Bool"
-        },
-        {
-          "name": "publisher_id!",
-          "ordinal": 9,
           "type_info": "Int4"
         },
         {
-          "name": "publisher_name!: String",
-          "ordinal": 10,
+          "name": "verifier_name: String",
+          "ordinal": 8,
           "type_info": {
             "Custom": {
               "kind": "Simple",
@@ -2760,22 +2619,37 @@
           }
         },
         {
-          "name": "publisher_banned!",
-          "ordinal": 11,
+          "name": "verifier_banned",
+          "ordinal": 9,
           "type_info": "Bool"
         },
         {
-          "name": "current_position!",
+          "name": "publisher_id",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name: String",
+          "ordinal": 11,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned",
           "ordinal": 12,
-          "type_info": "Int2"
+          "type_info": "Bool"
         }
       ],
       "nullable": [
-        null,
-        null,
-        null,
-        null,
-        null,
+        false,
+        false,
+        false,
+        false,
+        true,
         null,
         false,
         false,
@@ -2783,15 +2657,27 @@
         false,
         false,
         false,
-        null
+        false
       ],
       "parameters": {
         "Left": [
-          "Timestamp"
+          "Int4"
         ]
       }
     },
-    "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position_ as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\", demons.current_position as \"current_position!\"\nFROM list_at($1) AS demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position_"
+    "query": "SELECT demons.id AS demon_id, demons.name AS \"demon_name: String\", demons.position, demons.requirement, demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, demons.thumbnail,\n       verifiers.id AS verifier_id, verifiers.name AS \"verifier_name: String\", verifiers.banned AS verifier_banned,\n       publishers.id AS publisher_id, publishers.name AS \"publisher_name: String\", publishers.banned AS publisher_banned\nFROM demons\nINNER JOIN players AS verifiers ON verifiers.id=demons.verifier\nINNER JOIN players AS publishers ON publishers.id=demons.publisher\nWHERE demons.id=$1"
+  },
+  "d933c9eba040af5ed1435ea51e286bd4bb1ad5b74e7c07f5fd60b5ed0366ea30": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE records SET status_ = 'REJECTED' WHERE player = $1"
   },
   "de12c925deeaf62a0ca084a6cce3971151afebf35e765bbd0bdf31256903c8e2": {
     "describe": {
@@ -2936,6 +2822,111 @@
       }
     },
     "query": "SELECT member_id, lock_submissions FROM player_claims WHERE player_id = $1 AND verified"
+  },
+  "e7567710b3bb7cea640f04f8b8d9cc1c157957f5c07ea297b564ff869c082472": {
+    "describe": {
+      "columns": [
+        {
+          "name": "demon_id!",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "demon_name!: String",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "position!",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "requirement!",
+          "ordinal": 3,
+          "type_info": "Int2"
+        },
+        {
+          "name": "level_id",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "video",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "thumbnail",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "verifier_id!",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "verifier_name!: String",
+          "ordinal": 8,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "verifier_banned!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "publisher_id!",
+          "ordinal": 10,
+          "type_info": "Int4"
+        },
+        {
+          "name": "publisher_name!: String",
+          "ordinal": 11,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "publisher_banned!",
+          "ordinal": 12,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        null,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT demons.id AS \"demon_id!\", demons.name AS \"demon_name!: String\", demons.position as \"position!\", demons.requirement as \"requirement!\", demons.level_id, CASE WHEN verifiers.link_banned THEN NULL ElSE demons.video::text END, demons.thumbnail, verifiers.id AS \"verifier_id!\", verifiers.name AS \"verifier_name!: String\", verifiers.banned AS \"verifier_banned!\", publishers.id AS \"publisher_id!\", publishers.name AS \"publisher_name!: String\", publishers.banned AS \"publisher_banned!\"\nFROM demons\n    INNER JOIN players as publishers\n        ON demons.publisher = publishers.id\n    INNER JOIN players AS verifiers\n        ON demons.verifier = verifiers.id\nORDER BY position"
   },
   "e7f7e37286fb5e813c6511861ec9a02526f1169824fcc537c19cb93da803e5ba": {
     "describe": {
