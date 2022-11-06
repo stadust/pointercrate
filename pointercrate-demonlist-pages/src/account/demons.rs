@@ -70,6 +70,15 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
+                                            i.fa.fa-pencil-alt.clickable#demon-thumbnail-pen aria-hidden = "true" {} " Thumbnail:"
+                                        }
+                                        br;
+                                        a.link#demon-thumbnail-link target = "_blank" {}
+                                    }
+                                }
+                                div.stats-container.flex.space  {
+                                    span{
+                                        b {
                                             i.fa.fa-pencil-alt.clickable#demon-position-pen aria-hidden = "true" {} " Position:"
                                         }
                                         br;
@@ -122,6 +131,7 @@ impl AccountPageTab for DemonsTab {
             (change_position_dialog())
             (change_requirement_dialog())
             (change_video_dialog())
+            (change_thumbnail_dialog())
             (change_verifier_dialog())
             (change_publisher_dialog())
             (add_creator_dialog())
@@ -231,7 +241,7 @@ fn change_video_dialog() -> Markup {
                     "Change verification video link:"
                 }
                 p style = "max-width: 400px"{
-                    "Change the verification video link for this record. Leave empty to remove the verification video. ."
+                    "Change the verification video link for this record. Leave empty to remove the verification video."
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
@@ -239,6 +249,36 @@ fn change_video_dialog() -> Markup {
                     span.form-input#demon-video-edit {
                         label for = "video" {"Video link:"}
                         input name = "video" type = "url";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                }
+            }
+        }
+    }
+}
+
+fn change_thumbnail_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog#demon-thumbnail-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change thumbnail link:"
+                }
+                p style = "max-width: 400px"{
+                    "Change the thumbnail link for this record. To link it to the thumbnail of a youtube video, set it to "
+                    i {
+                        "https://i.ytimg.com/vi/" b{"VIDEO_ID"} "/mqdefault.jpg"
+                    }
+                    "."
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input#demon-thumbnail-edit {
+                        label for = "thumbnail" {"Thumbnail link:"}
+                        input required="" name = "thumbnail" type = "url";
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";

@@ -24,18 +24,6 @@
     },
     "query": "SELECT MAX(member_id) AS \"max_id!: i32\", MIN(member_id) AS \"min_id!: i32\" FROM members"
   },
-  "13a21e415b76afc6824ca6565e10649514fed1b79ece2794ac744fd9bebf235c": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "INSERT INTO active_user (id) VALUES ($1)"
-  },
   "1ddc8745a084f33b3b8d158b815f4eebdfc4bd595b7fc1225215fbaa7fb03b1b": {
     "describe": {
       "columns": [],
@@ -47,16 +35,6 @@
       }
     },
     "query": "UPDATE members SET email_address = NULL WHERE member_id = $1"
-  },
-  "33e7fa0719772085ee25e5a1fdcb293bdd5725bf5947733ca7fd21050610b7a5": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "DELETE FROM active_user"
   },
   "4cdbaa4240f4b3715d31dc0cd9ef959c6b5b2f00cbdb645823b602c46e20ac6e": {
     "describe": {
@@ -114,16 +92,6 @@
       }
     },
     "query": "UPDATE members SET email_address = ($1::text)::email WHERE member_id = $2"
-  },
-  "54e79bd4ffa9356fb9efdd83a863b637f772aac32b9a157d134c9b0d259a3cb2": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "CREATE TEMPORARY TABLE IF NOT EXISTS active_user (id INTEGER)"
   },
   "57dec28742cd33e0084d41c5d3e69e937159b307ca6f8cc3c77fa5e0289330ee": {
     "describe": {

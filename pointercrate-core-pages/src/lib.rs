@@ -27,7 +27,9 @@ impl HeadLike for PageConfiguration {
 impl PageConfiguration {
     pub fn new(site_name: impl Into<String>, nav_bar: NavigationBar, footer: Footer) -> Self {
         let default_head_html = html! {
-            (PreEscaped(format!(r#"<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={}" crossorigin="anonymous"></script>"#, config::adsense_publisher_id())))
+            @if let Some(publisher_id) = config::adsense_publisher_id() {
+                (PreEscaped(format!(r#"<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={}" crossorigin="anonymous"></script>"#, publisher_id)))
+            }
 
             (PreEscaped(format!(r#"
             <!-- Global site tag (gtag.js) - Google Analytics -->

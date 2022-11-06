@@ -44,6 +44,8 @@ pub struct Demon {
 
     pub video: Option<String>,
 
+    pub thumbnail: String,
+
     /// This [`Demon`]'s publisher
     pub publisher: DatabasePlayer,
 

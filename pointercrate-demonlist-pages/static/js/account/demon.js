@@ -39,6 +39,8 @@ export class DemonManager extends FilteredPaginator {
     this._video = document.getElementById("demon-video");
     this._video_link = document.getElementById("demon-video-link");
 
+    this._thumbnail_link = document.getElementById("demon-thumbnail-link");
+
     this._position = document.getElementById("demon-position");
     this._requirement = document.getElementById("demon-requirement");
 
@@ -54,9 +56,17 @@ export class DemonManager extends FilteredPaginator {
       this.output
     );
 
-    videoForm.addValidators({
-      "demon-video-edit": {
+    let thumbnailForm = setupFormDialogEditor(
+        new PaginatorEditorBackend(this, false),
+        "demon-thumbnail-dialog",
+        "demon-thumbnail-pen",
+        this.output
+    );
+
+    thumbnailForm.addValidators({
+      "demon-thumbnail-edit": {
         "Please enter a valid URL": typeMismatch,
+        "Please enter a URL": valueMissing,
       },
     });
 
@@ -147,6 +157,9 @@ export class DemonManager extends FilteredPaginator {
     } else {
       this._video_link.style.display = "none";
     }
+
+    this._thumbnail_link.href = this.currentObject.thumbnail;
+    this._thumbnail_link.innerText = this.currentObject.thumbnail;
 
     this._publisher.innerHTML =
       this.currentObject.publisher.name +

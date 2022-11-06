@@ -35,39 +35,43 @@ fn nation_based_stats_viewer_html() -> Markup {
         }
         div.flex.m-center.container {
             main.left {
-                section.panel.fade style = "padding: 0px; height: 90px"{
-                (PreEscaped(format!(r#"
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-                             crossorigin="anonymous"></script>
-                        <!-- Statsviewer Banner Ad -->
-                        <ins class="adsbygoogle"
-                             style="display:inline-block;width:728px;height:90px"
-                             data-ad-client="{}"
-                             data-ad-slot="5855948132"></ins>
-                        <script>
-                             (adsbygoogle = window.adsbygoogle || []).push({{}});
-                        </script>
-                        "#, config::adsense_publisher_id())))
+                @if let Some(publisher_id) = config::adsense_publisher_id() {
+                    section.panel.fade style = "padding: 0px; height: 90px"{
+                        (PreEscaped(format!(r#"
+                            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+                                 crossorigin="anonymous"></script>
+                            <!-- Statsviewer Banner Ad -->
+                            <ins class="adsbygoogle"
+                                 style="display:inline-block;width:728px;height:90px"
+                                 data-ad-client="{}"
+                                 data-ad-slot="5855948132"></ins>
+                            <script>
+                                 (adsbygoogle = window.adsbygoogle || []).push({{}});
+                            </script>
+                            "#, publisher_id)))
+                    }
                 }
                 (stats_viewer_html(None, rows))
             }
             aside.right {
                 (super::continent_panel())
-                section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
-                    (PreEscaped(format!(r#"
-                        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-                             crossorigin="anonymous"></script>
-                        <!-- Statsviewer Sidebar Ad -->
-                        <ins class="adsbygoogle"
-                             style="display:block"
-                             data-ad-client="{0}"
-                             data-ad-slot="2211027222"
-                             data-ad-format="auto"
-                             data-full-width-responsive="true"></ins>
-                        <script>
-                             (adsbygoogle = window.adsbygoogle || []).push({{}});
-                        </script>
-                        "#, config::adsense_publisher_id())))
+                @if let Some(publisher_id) = config::adsense_publisher_id() {
+                    section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
+                        (PreEscaped(format!(r#"
+                            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
+                                 crossorigin="anonymous"></script>
+                            <!-- Statsviewer Sidebar Ad -->
+                            <ins class="adsbygoogle"
+                                 style="display:block"
+                                 data-ad-client="{0}"
+                                 data-ad-slot="2211027222"
+                                 data-ad-format="auto"
+                                 data-full-width-responsive="true"></ins>
+                            <script>
+                                 (adsbygoogle = window.adsbygoogle || []).push({{}});
+                            </script>
+                            "#, publisher_id)))
+                    }
                 }
             }
         }
