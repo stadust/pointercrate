@@ -1,7 +1,7 @@
-use std::fmt::Pointer;
 use crate::{config, error::Result};
 use log::trace;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
+use std::fmt::Pointer;
 
 pub struct PointercratePool {
     connection_pool: Pool<Postgres>,
@@ -13,15 +13,46 @@ impl PointercratePool {
     }
 
     pub async fn init() -> Self {
-        PointercratePool {
+        let pool = PointercratePool {
             connection_pool: PgPoolOptions::default()
                 .max_connections(20)
-                .max_lifetime(Some(std::time::Duration::from_secs(60 * 60 * 24)))
-                .idle_timeout(Some(std::time::Duration::from_secs(60 * 5)))
                 .connect(&config::database_url())
                 .await
                 .expect("Failed to connect to pointercrate database"),
+        };
+
+        pool.run_migrations().await;
+
+        pool
+    }
+
+    async fn run_migrations(&self) {
+        let row = sqlx::query!(
+            r#"
+SELECT EXISTS (
+    SELECT FROM pg_tables
+    WHERE schemaname = 'public'
+      AND tablename  = '__diesel_schema_migrations'
+    )
+AND NOT EXISTS (
+    SELECT FROM pg_tables
+    WHERE schemaname = 'public'
+      AND tablename = '_sqlx_migrations'
+) AS "unsupported_db_config!"
+        "#,
+        )
+        .fetch_one(&self.connection_pool)
+        .await
+        .unwrap();
+
+        if row.unsupported_db_config {
+            panic!("Database has not been switched from diesel migrations to sqlx migrations. Please run the final migration from https://github.com/stadust/pointercrate-migration to switch")
         }
+
+        sqlx::migrate!("../migrations")
+            .run(&self.connection_pool)
+            .await
+            .expect("Failed to run migrations");
     }
 
     /// Gets a connection from the connection pool
