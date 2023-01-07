@@ -1,4 +1,4 @@
-name: Run test suite
+name: Tests
 on:
   pull_request:
   push:
