@@ -5,7 +5,7 @@ use rocket::local::asynchronous::Client;
 use sqlx::{pool::PoolConnection, Pool, Postgres};
 
 pub async fn setup(pool: Pool<Postgres>) -> Client {
-    dotenv::dotenv().unwrap();
+    let _ = dotenv::dotenv();
 
     let permissions = PermissionsManager::new(vec![MODERATOR, ADMINISTRATOR])
         .assigns(ADMINISTRATOR, MODERATOR)
