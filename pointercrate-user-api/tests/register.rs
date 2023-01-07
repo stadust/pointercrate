@@ -1,11 +1,13 @@
 use pointercrate_user::Registration;
 use rocket::http::{ContentType, Header, Status};
+use sqlx::pool::PoolConnection;
+use sqlx::{Pool, Postgres};
 
 mod setup;
 
-#[rocket::async_test]
-pub async fn register_new() {
-    let (client, _) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn register_new(pool: Pool<Postgres>) {
+    let client = setup::setup(pool).await;
 
     let response = client
         .post("/api/v1/auth/register/")
@@ -21,9 +23,9 @@ pub async fn register_new() {
     assert_eq!(response.status(), Status::Created)
 }
 
-#[rocket::async_test]
-pub async fn register_taken_username() {
-    let (client, ..) = setup::setup_with_admin_user().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn register_taken_username(pool: Pool<Postgres>) {
+    let (client, _) = setup::setup_with_admin_user(pool).await;
 
     let response = client
         .post("/api/v1/auth/register/")

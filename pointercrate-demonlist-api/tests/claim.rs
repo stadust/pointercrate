@@ -1,11 +1,12 @@
 use pointercrate_demonlist::player::{claim::PlayerClaim, DatabasePlayer};
 use rocket::http::Status;
+use sqlx::{Pool, Postgres};
 
 mod setup;
 
-#[rocket::async_test]
-async fn test_put_claim() {
-    let (client, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_put_claim(pool: Pool<Postgres>) {
+    let (client, mut connection) = setup::setup_rocket(pool).await;
     let user = setup::add_normal_user(&mut connection).await;
 
     let player_id = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap().id;

@@ -1,13 +1,14 @@
 use pointercrate_demonlist::LIST_MODERATOR;
 use rocket::http::Status;
+use sqlx::{Pool, Postgres};
 
 mod setup;
 
 const DEFAULT_THUMBNAIL: &'static str = "https://i.ytimg.com/vi/zebrafishes/mqdefault.jpg";
 
-#[rocket::async_test]
-async fn test_add_demon_ratelimits() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let user = setup::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
@@ -31,9 +32,9 @@ async fn test_add_demon_ratelimits() {
     assert_eq!(result["code"].as_i64(), Some(42900))
 }
 
-#[rocket::async_test]
-async fn test_default_thumbnail_no_video() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_default_thumbnail_no_video(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let user = setup::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
@@ -52,9 +53,9 @@ async fn test_default_thumbnail_no_video() {
     assert_eq!(result["data"]["thumbnail"].as_str(), Some(DEFAULT_THUMBNAIL))
 }
 
-#[rocket::async_test]
-async fn test_default_thumbnail_linked_banned() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_default_thumbnail_linked_banned(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let user = setup::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
@@ -78,9 +79,9 @@ async fn test_default_thumbnail_linked_banned() {
     assert_eq!(result["data"]["thumbnail"].as_str(), Some(DEFAULT_THUMBNAIL))
 }
 
-#[rocket::async_test]
-async fn test_default_thumbnail_with_video() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_default_thumbnail_with_video(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let user = setup::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 

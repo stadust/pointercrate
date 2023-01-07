@@ -2,32 +2,26 @@ use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
 use pointercrate_user::{AuthenticatedUser, Registration, ADMINISTRATOR, MODERATOR};
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::local::asynchronous::Client;
-use sqlx::{pool::PoolConnection, Postgres};
+use sqlx::{Pool, pool::PoolConnection, Postgres};
 
-pub async fn setup() -> (Client, PoolConnection<Postgres>) {
-    let pool = PointercratePool::init().await;
-    let mut connection = pool.connection().await.unwrap();
-
-    // reset test database
-    sqlx::query!("TRUNCATE TABLE members CASCADE")
-        .execute(&mut connection)
-        .await
-        .unwrap();
+pub async fn setup(pool: Pool<Postgres>) -> Client {
+    dotenv::dotenv().unwrap();
 
     let permissions = PermissionsManager::new(vec![MODERATOR, ADMINISTRATOR])
         .assigns(ADMINISTRATOR, MODERATOR)
         .implies(ADMINISTRATOR, MODERATOR);
 
     let rocket = pointercrate_user_api::setup(rocket::build())
-        .manage(pool)
+        .manage(PointercratePool::from(pool))
         .manage(permissions)
         .manage(AccountPageConfig::default());
 
-    (Client::tracked(rocket).await.unwrap(), connection)
+    Client::tracked(rocket).await.unwrap()
 }
 
-pub async fn setup_with_admin_user() -> (Client, AuthenticatedUser, PoolConnection<Postgres>) {
-    let (client, mut connection) = setup().await;
+pub async fn setup_with_admin_user(pool: Pool<Postgres>) -> (Client, AuthenticatedUser) {
+    let mut connection = pool.acquire().await.unwrap();
+    let client = setup(pool).await;
 
     let user = AuthenticatedUser::register(
         Registration {
@@ -48,5 +42,5 @@ pub async fn setup_with_admin_user() -> (Client, AuthenticatedUser, PoolConnecti
     .await
     .unwrap();
 
-    (client, user, connection)
+    (client, user)
 }
