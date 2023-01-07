@@ -1,4 +1,4 @@
-# Pointercrate ![build](https://github.com/stadust/pointercrate/actions/workflows/check.yml/badge.svg) [![codecov](https://codecov.io/gh/stadust/pointercrate/branch/master/graph/badge.svg?token=C7B5LU2IF5)](https://codecov.io/gh/stadust/pointercrate)
+# Pointercrate ![build](https://github.com/stadust/pointercrate/actions/workflows/test.yml/badge.svg) [![codecov](https://codecov.io/gh/stadust/pointercrate/branch/master/graph/badge.svg?token=C7B5LU2IF5)](https://codecov.io/gh/stadust/pointercrate)
 
 
 As of March 2nd 2019 this is the official repository for pointercrate. It does not contain all the code required to run a local copy of pointercrate, however, as parts of the code remain private. In particular, this repository does not contain
