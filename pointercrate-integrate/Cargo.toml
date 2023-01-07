@@ -7,7 +7,7 @@ edition = "2018"
 
 [dependencies]
 
-sqlx = { version = "0.5", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "offline" ] }
+sqlx = { version = "0.6", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "offline" ] }
 bincode = "1.3.1"
 reqwest = "0.11.*"
 futures = "0.3.8"
