@@ -3,7 +3,7 @@ use pointercrate_demonlist::{
     LIST_HELPER,
 };
 use rocket::http::Status;
-use sqlx::PgConnection;
+use sqlx::{PgConnection, Pool, Postgres};
 
 mod setup;
 
@@ -16,9 +16,9 @@ async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, Datab
     )
 }
 
-#[rocket::async_test]
-async fn test_unauthenticated_pagination() {
-    let (client, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_unauthenticated_pagination(pool: Pool<Postgres>) {
+    let (client, mut connection) = setup::setup_rocket(pool).await;
 
     let (_, unbanned) = create_players(&mut connection).await;
 
@@ -28,9 +28,9 @@ async fn test_unauthenticated_pagination() {
     assert_eq!(json[0].base.id, unbanned.id);
 }
 
-#[rocket::async_test]
-async fn test_authenticated_pagination() {
-    let (client, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_authenticated_pagination(pool: Pool<Postgres>) {
+    let (client, mut connection) = setup::setup_rocket(pool).await;
 
     let (_, unbanned) = create_players(&mut connection).await;
     let user = setup::add_normal_user(&mut *connection).await;
@@ -46,9 +46,9 @@ async fn test_authenticated_pagination() {
     assert_eq!(json[0].base.id, unbanned.id);
 }
 
-#[rocket::async_test]
-async fn test_list_helper_pagination() {
-    let (client, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn test_list_helper_pagination(pool: Pool<Postgres>) {
+    let (client, mut connection) = setup::setup_rocket(pool).await;
 
     let (banned, unbanned) = create_players(&mut connection).await;
     let user = setup::system_user_with_perms(LIST_HELPER, &mut *connection).await;

@@ -16,7 +16,7 @@ use rocket::{
     local::asynchronous::{Client, LocalRequest, LocalResponse},
 };
 use serde::{de::DeserializeOwned, Serialize};
-use sqlx::{pool::PoolConnection, PgConnection, Postgres};
+use sqlx::{pool::PoolConnection, PgConnection, Postgres, Pool};
 use std::{collections::HashMap, net::IpAddr, str::FromStr};
 
 macro_rules! truncate {
@@ -104,29 +104,18 @@ impl<'c> TestRequest<'c> {
     }
 }
 
-pub async fn setup() -> (TestClient, PoolConnection<Postgres>) {
+pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
     dotenv::dotenv().unwrap();
 
-    let pool = PointercratePool::init().await;
-    let mut connection = pool.connection().await.unwrap();
-
-    // reset test database
-    truncate!(
-        &mut connection,
-        "records",
-        "demons",
-        "player_claims",
-        "players",
-        "members",
-        "submitters"
-    );
+    let mut connection = pool.acquire().await.unwrap();
 
     let permissions = PermissionsManager::new(vec![LIST_HELPER, LIST_MODERATOR, LIST_ADMINISTRATOR])
         .assigns(LIST_ADMINISTRATOR, LIST_MODERATOR)
         .implies(LIST_ADMINISTRATOR, LIST_MODERATOR)
         .implies(LIST_MODERATOR, LIST_HELPER);
 
-    let rocket = pointercrate_demonlist_api::setup(rocket::build().manage(pool))
+    let rocket = pointercrate_demonlist_api::setup(rocket::build()
+        .manage(PointercratePool::from(pool)))
         .manage(permissions)
         .manage(AccountPageConfig::default());
 

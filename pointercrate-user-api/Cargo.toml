@@ -7,7 +7,7 @@ edition = "2018"
 
 [dependencies]
 rocket = {version = "0.5.0-rc.1", features = ["json"]}
-sqlx = { version = "0.6", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "offline" ] }
+sqlx = { version = "0.6", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "offline", "migrate" ] }
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
 pointercrate-core = {path = "../pointercrate-core"}

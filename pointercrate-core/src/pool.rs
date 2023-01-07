@@ -1,3 +1,4 @@
+use std::fmt::Pointer;
 use crate::{config, error::Result};
 use log::trace;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
@@ -38,6 +39,13 @@ impl PointercratePool {
         audit_connection(&mut *connection, 0).await?;
 
         Ok(connection)
+    }
+}
+
+// Used for integration tests, when sqlx::test sets up a pool for us
+impl From<Pool<Postgres>> for PointercratePool {
+    fn from(connection_pool: Pool<Postgres>) -> Self {
+        PointercratePool { connection_pool }
     }
 }
 

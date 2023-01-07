@@ -1,10 +1,12 @@
 use rocket::http::{ContentType, Header, Status};
+use sqlx::pool::PoolConnection;
+use sqlx::{Pool, Postgres};
 
 mod setup;
 
-#[rocket::async_test]
-pub async fn test_login() {
-    let (client, user, _) = setup::setup_with_admin_user().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_login(pool: Pool<Postgres>) {
+    let (client, user) = setup::setup_with_admin_user(pool).await;
 
     let response = client
         .post("/api/v1/auth/")
@@ -22,9 +24,9 @@ pub async fn test_login() {
     assert!(user.validate_access_token(json["token"].as_str().unwrap()).is_ok());
 }
 
-#[rocket::async_test]
-pub async fn test_login_malformed_auth_header() {
-    let (client, ..) = setup::setup_with_admin_user().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_login_malformed_auth_header(pool: Pool<Postgres>) {
+    let (client, _) = setup::setup_with_admin_user(pool).await;
 
     let response = client
         .post("/api/v1/auth/")
@@ -36,9 +38,9 @@ pub async fn test_login_malformed_auth_header() {
     assert_eq!(response.status(), Status::BadRequest)
 }
 
-#[rocket::async_test]
-pub async fn test_login_wrong_password() {
-    let (client, ..) = setup::setup_with_admin_user().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_login_wrong_password(pool: Pool<Postgres>) {
+    let (client, _) = setup::setup_with_admin_user(pool).await;
 
     let response = client
         .post("/api/v1/auth/")
@@ -50,9 +52,9 @@ pub async fn test_login_wrong_password() {
     assert_eq!(response.status(), Status::Unauthorized)
 }
 
-#[rocket::async_test]
-pub async fn test_login_wrong_username() {
-    let (client, ..) = setup::setup_with_admin_user().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_login_wrong_username(pool: Pool<Postgres>) {
+    let (client, _) = setup::setup_with_admin_user(pool).await;
 
     let response = client
         .post("/api/v1/auth/")
@@ -64,9 +66,9 @@ pub async fn test_login_wrong_username() {
     assert_eq!(response.status(), Status::Unauthorized)
 }
 
-#[rocket::async_test]
-pub async fn test_login_no_header() {
-    let (client, ..) = setup::setup_with_admin_user().await;
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_login_no_header(pool: Pool<Postgres>) {
+    let (client, _) = setup::setup_with_admin_user(pool).await;
 
     let response = client
         .post("/api/v1/auth/")

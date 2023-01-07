@@ -6,14 +6,14 @@ use pointercrate_demonlist::{
     submitter::Submitter,
 };
 use rocket::http::{Header, Status};
-use sqlx::PgConnection;
+use sqlx::{PgConnection, Pool, Postgres};
 use std::{net::IpAddr, str::FromStr};
 
 mod setup;
 
-#[rocket::async_test]
-async fn paginate_records_unauthorized() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
 
@@ -27,9 +27,9 @@ async fn paginate_records_unauthorized() {
     assert_eq!(json[0]["id"].as_i64(), Some(r1 as i64));
 }
 
-#[rocket::async_test]
-async fn paginate_records_with_verified_claim() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn paginate_records_with_verified_claim(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
     let user = setup::add_normal_user(&mut connection).await;
@@ -47,9 +47,9 @@ async fn paginate_records_with_verified_claim() {
     assert_eq!(json[1]["id"].as_i64(), Some(r2 as i64));
 }
 
-#[rocket::async_test]
-async fn paginate_records_with_unverified_claim() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn paginate_records_with_unverified_claim(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
     let user = setup::add_normal_user(&mut connection).await;
@@ -66,9 +66,9 @@ async fn paginate_records_with_unverified_claim() {
     assert_eq!(json[0]["id"].as_i64(), Some(r1 as i64));
 }
 
-#[rocket::async_test]
-async fn paginate_records_with_verified_claim_wrong_player() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn paginate_records_with_verified_claim_wrong_player(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
     let user = setup::add_normal_user(&mut connection).await;
@@ -94,9 +94,9 @@ async fn setup_pagination_tests(connection: &mut PgConnection) -> (i32, i32, i32
     (player1.id, r1, r2, r3)
 }
 
-#[rocket::async_test]
-async fn unauthed_submit_for_player_with_locked_submission() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn unauthed_submit_for_player_with_locked_submission(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let user = setup::add_normal_user(&mut connection).await;
     let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
@@ -119,9 +119,9 @@ async fn unauthed_submit_for_player_with_locked_submission() {
     )
 }
 
-#[rocket::async_test]
-async fn submit_existing_record() {
-    let (clnt, mut connection) = setup::setup().await;
+#[sqlx::test(migrations = "../migrations")]
+async fn submit_existing_record(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = setup::setup_rocket(pool).await;
 
     let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
     let demon1 = setup::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut connection).await;
