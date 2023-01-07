@@ -105,7 +105,7 @@ impl<'c> TestRequest<'c> {
 }
 
 pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
-    dotenv::dotenv().unwrap();
+    let _ = dotenv::dotenv();
 
     let mut connection = pool.acquire().await.unwrap();
 

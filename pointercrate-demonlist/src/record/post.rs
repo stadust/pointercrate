@@ -235,7 +235,7 @@ mod tests {
     use sqlx::{Postgres, Transaction};
 
     async fn connection() -> Transaction<'static, Postgres> {
-        dotenv::dotenv().unwrap();
+        let _ = dotenv::dotenv();
 
         PointercratePool::init().await.transaction().await.unwrap()
     }
