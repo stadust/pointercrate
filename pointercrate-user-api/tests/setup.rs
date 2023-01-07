@@ -5,6 +5,7 @@ use rocket::local::asynchronous::Client;
 use sqlx::{pool::PoolConnection, Postgres};
 
 pub async fn setup() -> (Client, PoolConnection<Postgres>) {
+    dotenv::dotenv().unwrap();
     let pool = PointercratePool::init().await;
     let mut connection = pool.connection().await.unwrap();
 
