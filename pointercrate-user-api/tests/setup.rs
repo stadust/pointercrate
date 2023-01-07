@@ -2,7 +2,7 @@ use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
 use pointercrate_user::{AuthenticatedUser, Registration, ADMINISTRATOR, MODERATOR};
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::local::asynchronous::Client;
-use sqlx::{Pool, pool::PoolConnection, Postgres};
+use sqlx::{pool::PoolConnection, Pool, Postgres};
 
 pub async fn setup(pool: Pool<Postgres>) -> Client {
     dotenv::dotenv().unwrap();

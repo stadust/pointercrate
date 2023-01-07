@@ -1,6 +1,5 @@
 use rocket::http::{ContentType, Header, Status};
-use sqlx::pool::PoolConnection;
-use sqlx::{Pool, Postgres};
+use sqlx::{pool::PoolConnection, Pool, Postgres};
 
 mod setup;
 

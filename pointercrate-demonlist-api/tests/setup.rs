@@ -16,7 +16,7 @@ use rocket::{
     local::asynchronous::{Client, LocalRequest, LocalResponse},
 };
 use serde::{de::DeserializeOwned, Serialize};
-use sqlx::{pool::PoolConnection, PgConnection, Postgres, Pool};
+use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
 use std::{collections::HashMap, net::IpAddr, str::FromStr};
 
 macro_rules! truncate {
@@ -114,8 +114,7 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .implies(LIST_ADMINISTRATOR, LIST_MODERATOR)
         .implies(LIST_MODERATOR, LIST_HELPER);
 
-    let rocket = pointercrate_demonlist_api::setup(rocket::build()
-        .manage(PointercratePool::from(pool)))
+    let rocket = pointercrate_demonlist_api::setup(rocket::build().manage(PointercratePool::from(pool)))
         .manage(permissions)
         .manage(AccountPageConfig::default());
 
