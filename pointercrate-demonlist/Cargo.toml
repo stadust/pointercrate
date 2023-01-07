@@ -17,4 +17,4 @@ url = "2.2.0"
 
 [dev-dependencies]
 dotenv = "0.15.0"
-tokio = "1.19.1"
+tokio = "1.20.3"
