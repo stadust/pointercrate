@@ -9,5 +9,8 @@ members = [
     "pointercrate-user",
     "pointercrate-user-api",
     "pointercrate-user-pages",
-    "pointercrate-integrate"
+    "pointercrate-integrate",
+
+    # Create only containing integration tests
+    "pointercrate-test"
 ]
