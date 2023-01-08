@@ -7,6 +7,23 @@ use pointercrate_user::{ADMINISTRATOR, AuthenticatedUser, MODERATOR, Registratio
 use pointercrate_user_pages::account::AccountPageConfig;
 use crate::TestClient;
 
+pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
+    let _ = dotenv::dotenv();
+
+    let mut connection = pool.acquire().await.unwrap();
+
+    let permissions = PermissionsManager::new(vec![MODERATOR, ADMINISTRATOR])
+        .assigns(ADMINISTRATOR, MODERATOR)
+        .implies(ADMINISTRATOR, MODERATOR);
+
+    let rocket = pointercrate_user_api::setup(rocket::build())
+        .manage(PointercratePool::from(pool))
+        .manage(permissions)
+        .manage(AccountPageConfig::default());
+
+    (TestClient::new(Client::tracked(rocket).await.unwrap()), connection)
+}
+
 pub async fn system_user_with_perms(perm: Permission, connection: &mut PgConnection) -> AuthenticatedUser {
     let user = AuthenticatedUser::register(
         Registration {

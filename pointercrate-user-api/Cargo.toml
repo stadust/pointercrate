@@ -18,8 +18,3 @@ base64 = "0.13.0"
 nonzero_ext = "0.2.0"
 serde_urlencoded = "0.7.0"
 governor = "0.4.2"
-
-[dev-dependencies]
-serial_test = "0.5.1"
-serde_json = "1.0.79"
-dotenv = "0.15.0"
