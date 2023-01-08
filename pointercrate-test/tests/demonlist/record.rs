@@ -1,12 +1,7 @@
 use pointercrate_core::error::PointercrateError;
-use pointercrate_demonlist::{
-    error::DemonlistError,
-    player::DatabasePlayer,
-    record::{RecordStatus},
-};
-use rocket::http::{Status};
+use pointercrate_demonlist::{error::DemonlistError, player::DatabasePlayer, record::RecordStatus};
+use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
-
 
 #[sqlx::test(migrations = "../migrations")]
 async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
@@ -82,11 +77,11 @@ async fn setup_pagination_tests(connection: &mut PgConnection) -> (i32, i32, i32
     let player2 = DatabasePlayer::by_name_or_create("stardust1972", connection).await.unwrap();
 
     let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, connection).await;
-    let demon2 =  pointercrate_test::demonlist::add_demon("Bloodlust", 2, 53, player1.id, player1.id, connection).await;
+    let demon2 = pointercrate_test::demonlist::add_demon("Bloodlust", 2, 53, player1.id, player1.id, connection).await;
 
-    let r1 =  pointercrate_test::demonlist::add_simple_record(100, player1.id, demon1, RecordStatus::Approved, connection).await;
-    let r2 =  pointercrate_test::demonlist::add_simple_record(70, player1.id, demon2, RecordStatus::Rejected, connection).await;
-    let r3 =  pointercrate_test::demonlist::add_simple_record(100, player2.id, demon2, RecordStatus::Rejected, connection).await;
+    let r1 = pointercrate_test::demonlist::add_simple_record(100, player1.id, demon1, RecordStatus::Approved, connection).await;
+    let r2 = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon2, RecordStatus::Rejected, connection).await;
+    let r3 = pointercrate_test::demonlist::add_simple_record(100, player2.id, demon2, RecordStatus::Rejected, connection).await;
 
     (player1.id, r1, r2, r3)
 }
@@ -95,9 +90,9 @@ async fn setup_pagination_tests(connection: &mut PgConnection) -> (i32, i32, i32
 async fn unauthed_submit_for_player_with_locked_submission(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user =  pointercrate_test::user::add_normal_user(&mut connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
     let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
-    let demon1 =  pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, &mut connection).await;
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, &mut connection).await;
 
     pointercrate_test::demonlist::put_claim(user.inner().id, player1.id, true, true, &mut connection).await;
 
@@ -121,8 +116,8 @@ async fn submit_existing_record(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
-    let demon1 =  pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut connection).await;
-    let existing =  pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut connection).await;
+    let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
 
     let submission =
         serde_json::json! {{"progress": 60, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890"}};

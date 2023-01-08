@@ -1,6 +1,6 @@
-use rocket::http::{Status};
-use sqlx::{Pool, Postgres};
 use pointercrate_user::ADMINISTRATOR;
+use rocket::http::Status;
+use sqlx::{Pool, Postgres};
 
 #[sqlx::test(migrations = "../migrations")]
 pub async fn test_login(pool: Pool<Postgres>) {

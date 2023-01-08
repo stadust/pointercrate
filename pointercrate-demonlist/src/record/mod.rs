@@ -27,9 +27,7 @@ pub use self::{
     patch::PatchRecord,
     post::Submission,
 };
-use crate::{
-    demon::MinimalDemon, error::Result, nationality::Nationality, player::DatabasePlayer, submitter::Submitter,
-};
+use crate::{demon::MinimalDemon, error::Result, nationality::Nationality, player::DatabasePlayer, submitter::Submitter};
 use derive_more::Display;
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};

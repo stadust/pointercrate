@@ -6,7 +6,7 @@ use crate::{
     submitter::Submitter,
 };
 use derive_more::Display;
-use log::{debug};
+use log::debug;
 use serde::Deserialize;
 use sqlx::{PgConnection, Row};
 use url::Url;

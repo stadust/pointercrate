@@ -1,16 +1,12 @@
-use std::net::IpAddr;
-use std::str::FromStr;
-use rocket::local::asynchronous::Client;
-use sqlx::{PgConnection, Pool, Postgres};
-use sqlx::pool::PoolConnection;
-use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core::pool::PointercratePool;
-use pointercrate_demonlist::{LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR};
-use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_demonlist::record::RecordStatus;
-use pointercrate_demonlist::submitter::Submitter;
-use pointercrate_user_pages::account::AccountPageConfig;
 use crate::TestClient;
+use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_demonlist::{
+    player::claim::PlayerClaim, record::RecordStatus, submitter::Submitter, LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
+};
+use pointercrate_user_pages::account::AccountPageConfig;
+use rocket::local::asynchronous::Client;
+use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
+use std::{net::IpAddr, str::FromStr};
 
 pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
     let _ = dotenv::dotenv();
@@ -34,7 +30,6 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
     (TestClient::new(Client::tracked(rocket).await.unwrap()), connection)
 }
 
-
 pub async fn add_demon(
     name: impl Into<String>, position: i16, requirement: i16, verifier_id: i32, publisher_id: i32, connection: &mut PgConnection,
 ) -> i32 {
@@ -46,10 +41,10 @@ pub async fn add_demon(
         verifier_id,
         publisher_id
     )
-        .fetch_one(&mut *connection)
-        .await
-        .unwrap()
-        .id
+    .fetch_one(&mut *connection)
+    .await
+    .unwrap()
+    .id
 }
 
 pub async fn put_claim(user_id: i32, player_id: i32, verified: bool, lock_submissions: bool, connection: &mut PgConnection) -> PlayerClaim {
@@ -60,9 +55,9 @@ pub async fn put_claim(user_id: i32, player_id: i32, verified: bool, lock_submis
         verified,
         lock_submissions
     )
-        .execute(connection)
-        .await
-        .unwrap();
+    .execute(connection)
+    .await
+    .unwrap();
 
     PlayerClaim {
         user_id,
@@ -87,8 +82,8 @@ pub async fn add_simple_record(progress: i16, player: i32, demon: i32, status: R
         system_sub.id,
         demon
     )
-        .fetch_one(&mut *connection)
-        .await
-        .unwrap()
-        .id
+    .fetch_one(&mut *connection)
+    .await
+    .unwrap()
+    .id
 }

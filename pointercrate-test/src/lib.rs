@@ -1,8 +1,6 @@
 //! Utilities for pointercrate integration tests
 
-
-
-use pointercrate_user::{AuthenticatedUser};
+use pointercrate_user::AuthenticatedUser;
 
 use rocket::{
     http::{Header, Status},
@@ -10,7 +8,7 @@ use rocket::{
 };
 use serde::{de::DeserializeOwned, Serialize};
 
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 pub mod demonlist;
 pub mod user;
@@ -48,7 +46,7 @@ impl<'c> TestRequest<'c> {
             expected_status: Status::Ok,
             expected_headers: HashMap::new(),
         }
-            .header("X-Real-Ip", "127.0.0.1")
+        .header("X-Real-Ip", "127.0.0.1")
     }
 
     pub fn header(mut self, header_name: impl Into<String>, header_value: impl Into<String>) -> Self {
@@ -91,4 +89,3 @@ impl<'c> TestRequest<'c> {
         response
     }
 }
-

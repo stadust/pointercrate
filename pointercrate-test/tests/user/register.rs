@@ -1,5 +1,5 @@
 use pointercrate_user::Registration;
-use rocket::http::{Status};
+use rocket::http::Status;
 use sqlx::{Pool, Postgres};
 
 #[sqlx::test(migrations = "../migrations")]
@@ -15,7 +15,6 @@ pub async fn register_new(pool: Pool<Postgres>) {
         .expect_status(Status::Created)
         .execute()
         .await;
-
 }
 
 #[sqlx::test(migrations = "../migrations")]

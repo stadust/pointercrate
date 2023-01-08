@@ -112,15 +112,12 @@ impl PgCache {
 
                 let song = match level.custom_song {
                     Some(id) =>
-                        self.lookup_newgrounds_song(id)
-                            .await
-                            .ok()
-                            .and_then(|entry| {
-                                match entry {
-                                    CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
-                                    _ => None,
-                                }
-                            }),
+                        self.lookup_newgrounds_song(id).await.ok().and_then(|entry| {
+                            match entry {
+                                CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
+                                _ => None,
+                            }
+                        }),
                     None => None,
                 };
 

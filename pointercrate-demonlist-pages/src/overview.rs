@@ -13,8 +13,6 @@ use pointercrate_demonlist::{
     demon::{Demon, TimeShiftedDemon},
 };
 
-
-
 pub struct OverviewPage {
     pub team: Team,
     pub demonlist: Vec<Demon>,

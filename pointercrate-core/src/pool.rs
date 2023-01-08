@@ -2,7 +2,6 @@ use crate::{config, error::Result};
 use log::trace;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
 
-
 pub struct PointercratePool {
     connection_pool: Pool<Postgres>,
 }
