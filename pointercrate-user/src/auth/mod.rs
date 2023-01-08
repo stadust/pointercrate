@@ -217,7 +217,7 @@ impl AuthenticatedUser {
     pub fn verify_password(self, password: &str) -> Result<Self> {
         debug!("Verifying a password!");
 
-        let valid = bcrypt::verify(&password, &self.password_hash).map_err(|err| {
+        let valid = bcrypt::verify(password, &self.password_hash).map_err(|err| {
             warn!("Password verification FAILED for account {}: {}", self.user, err);
 
             UserError::Core(CoreError::Unauthorized)

@@ -28,7 +28,7 @@ pub use self::{
     post::Submission,
 };
 use crate::{
-    demon::MinimalDemon, error::Result, nationality::Nationality, player::DatabasePlayer, record::note::Note, submitter::Submitter,
+    demon::MinimalDemon, error::Result, nationality::Nationality, player::DatabasePlayer, submitter::Submitter,
 };
 use derive_more::Display;
 use pointercrate_core::etag::Taggable;

@@ -1,0 +1,19 @@
+[package]
+name = "pointercrate-test"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+pointercrate-demonlist = {path = "../pointercrate-demonlist"}
+pointercrate-demonlist-api = {path = "../pointercrate-demonlist-api"}
+pointercrate-core = {path = "../pointercrate-core"}
+pointercrate-user = {path = "../pointercrate-user"}
+pointercrate-user-api = {path = "../pointercrate-user-api"}
+pointercrate-user-pages = {path = "../pointercrate-user-pages"}
+serde = "1.0.152"
+sqlx = { version = "0.6", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
+rocket = "0.5.0-rc.1"
+serde_json = "1.0.91"
+dotenv = "0.15.0"

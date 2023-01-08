@@ -89,7 +89,7 @@ impl AccountPageTab for UsersTab {
                                             "Permissions:"
                                         }
                                         @for permission in assignable_permissions {
-                                            @let name_in_snake_case = permission.name().to_lowercase().replace(" ", "-");
+                                            @let name_in_snake_case = permission.name().to_lowercase().replace(' ', "-");
 
                                             label.cb-container.form-input#(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
                                                 i {

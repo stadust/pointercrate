@@ -115,13 +115,12 @@ impl PgCache {
                         self.lookup_newgrounds_song(id)
                             .await
                             .ok()
-                            .map(|entry| {
+                            .and_then(|entry| {
                                 match entry {
                                     CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
                                     _ => None,
                                 }
-                            })
-                            .flatten(),
+                            }),
                     None => None,
                 };
 
@@ -159,7 +158,7 @@ impl PgCache {
                                     .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
                                     .map(|_| ()),
                             Ok(demons) =>
-                                if demons.len() == 0 {
+                                if demons.is_empty() {
                                     self.mark_levels_request_result_as_absent(&request)
                                         .await
                                         .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))

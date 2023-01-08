@@ -24,7 +24,3 @@ reqwest = {version = "0.11.*", features = ["json"]}
 chrono = "0.4.19"
 serde = "1.0.118"
 governor = "0.4.2"
-
-[dev-dependencies]
-pointercrate-user-pages = {path = "../pointercrate-user-pages"}
-dotenv = "0.15.0"
