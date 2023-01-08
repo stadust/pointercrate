@@ -10,7 +10,7 @@ use crate::TestClient;
 pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
     let _ = dotenv::dotenv();
 
-    let mut connection = pool.acquire().await.unwrap();
+    let connection = pool.acquire().await.unwrap();
 
     let permissions = PermissionsManager::new(vec![MODERATOR, ADMINISTRATOR])
         .assigns(ADMINISTRATOR, MODERATOR)

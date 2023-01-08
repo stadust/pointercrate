@@ -1,5 +1,5 @@
-use rocket::http::{ContentType, Header, Status};
-use sqlx::{pool::PoolConnection, Pool, Postgres};
+use rocket::http::{Status};
+use sqlx::{Pool, Postgres};
 use pointercrate_user::ADMINISTRATOR;
 
 #[sqlx::test(migrations = "../migrations")]

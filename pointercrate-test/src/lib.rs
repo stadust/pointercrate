@@ -1,25 +1,16 @@
 //! Utilities for pointercrate integration tests
 
-use pointercrate_core::{
-    permission::{Permission, PermissionsManager},
-    pool::PointercratePool,
-};
-use pointercrate_demonlist::{
-    demon::{FullDemon, MinimalDemon, PostDemon},
-    player::claim::PlayerClaim,
-    record::{FullRecord, RecordStatus, Submission},
-    submitter::Submitter,
-    LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
-};
-use pointercrate_user::{AuthenticatedUser, Registration};
-use pointercrate_user_pages::account::AccountPageConfig;
+
+
+use pointercrate_user::{AuthenticatedUser};
+
 use rocket::{
     http::{Header, Status},
     local::asynchronous::{Client, LocalRequest, LocalResponse},
 };
 use serde::{de::DeserializeOwned, Serialize};
-use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
-use std::{collections::HashMap, net::IpAddr, str::FromStr};
+
+use std::{collections::HashMap};
 
 pub mod demonlist;
 pub mod user;
@@ -65,7 +56,7 @@ impl<'c> TestRequest<'c> {
         self
     }
 
-    pub fn authorize_as(mut self, user: &AuthenticatedUser) -> Self {
+    pub fn authorize_as(self, user: &AuthenticatedUser) -> Self {
         self.header("Authorization", format!("Bearer {}", user.generate_access_token()))
     }
 

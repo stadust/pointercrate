@@ -12,8 +12,8 @@ use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, TimeShiftedDemon},
 };
-use std::borrow::Cow;
-use url::Url;
+
+
 
 pub struct OverviewPage {
     pub team: Team,

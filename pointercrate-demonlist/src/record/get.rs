@@ -3,7 +3,7 @@ use crate::{
     error::{DemonlistError, Result},
     nationality::Nationality,
     player::DatabasePlayer,
-    record::{note::notes_on, FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
+    record::{FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
     submitter::Submitter,
 };
 use futures::stream::StreamExt;

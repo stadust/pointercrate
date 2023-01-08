@@ -205,7 +205,7 @@ impl<'r> FromRequest<'r> for Auth<false> {
                     }));
 
                 if let [username, password] = &decoded.splitn(2, ':').collect::<Vec<_>>()[..] {
-                    let user = try_outcome!(AuthenticatedUser::basic_auth(*username, *password, &mut connection).await);
+                    let user = try_outcome!(AuthenticatedUser::basic_auth(username, password, &mut connection).await);
 
                     try_outcome!(audit_connection(&mut connection, user.inner().id).await);
 

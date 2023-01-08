@@ -2,11 +2,11 @@ use crate::{
     demon::MinimalDemon,
     error::{DemonlistError, Result},
     player::{claim::PlayerClaim, DatabasePlayer},
-    record::{note::Note, FullRecord, RecordStatus},
+    record::{FullRecord, RecordStatus},
     submitter::Submitter,
 };
 use derive_more::Display;
-use log::{debug, info};
+use log::{debug};
 use serde::Deserialize;
 use sqlx::{PgConnection, Row};
 use url::Url;

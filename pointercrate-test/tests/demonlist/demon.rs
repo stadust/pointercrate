@@ -2,7 +2,7 @@ use pointercrate_demonlist::LIST_MODERATOR;
 use rocket::http::Status;
 use sqlx::{Pool, Postgres};
 
-const DEFAULT_THUMBNAIL: &'static str = "https://i.ytimg.com/vi/zebrafishes/mqdefault.jpg";
+const DEFAULT_THUMBNAIL: &str = "https://i.ytimg.com/vi/zebrafishes/mqdefault.jpg";
 
 #[sqlx::test(migrations = "../migrations")]
 async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {

@@ -1,6 +1,6 @@
 use pointercrate_user::Registration;
-use rocket::http::{ContentType, Header, Status};
-use sqlx::{pool::PoolConnection, Pool, Postgres};
+use rocket::http::{Status};
+use sqlx::{Pool, Postgres};
 
 #[sqlx::test(migrations = "../migrations")]
 pub async fn register_new(pool: Pool<Postgres>) {
@@ -24,7 +24,7 @@ pub async fn register_taken_username(pool: Pool<Postgres>) {
 
     let _ = pointercrate_test::user::add_normal_user(&mut connection).await;
 
-    let response = client
+    let _response = client
         .post("/api/v1/auth/register/", &Registration {
             name: "Patrick".to_string(),
             password: "bad password".to_string(),

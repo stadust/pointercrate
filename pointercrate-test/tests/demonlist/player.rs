@@ -31,7 +31,7 @@ async fn test_authenticated_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     let (_, unbanned) = create_players(&mut connection).await;
-    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     let json: Vec<Player> = client
         .get("/api/v1/players")
@@ -49,7 +49,7 @@ async fn test_list_helper_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     let (banned, unbanned) = create_players(&mut connection).await;
-    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
 
     let json: Vec<Player> = client
         .get("/api/v1/players")

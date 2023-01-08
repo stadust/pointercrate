@@ -2,18 +2,17 @@ use pointercrate_core::error::PointercrateError;
 use pointercrate_demonlist::{
     error::DemonlistError,
     player::DatabasePlayer,
-    record::{FullRecord, RecordStatus, Submission},
-    submitter::Submitter,
+    record::{RecordStatus},
 };
-use rocket::http::{Header, Status};
+use rocket::http::{Status};
 use sqlx::{PgConnection, Pool, Postgres};
-use std::{net::IpAddr, str::FromStr};
+
 
 #[sqlx::test(migrations = "../migrations")]
 async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
+    let (p1, r1, _r2, _r3) = setup_pagination_tests(&mut connection).await;
 
     let json: Vec<serde_json::Value> = clnt
         .get(format!("/api/v1/records/?player={}", p1))
@@ -29,7 +28,7 @@ async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
 async fn paginate_records_with_verified_claim(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
+    let (p1, r1, r2, _r3) = setup_pagination_tests(&mut connection).await;
     let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     pointercrate_test::demonlist::put_claim(user.inner().id, p1, true, false, &mut connection).await;
@@ -49,7 +48,7 @@ async fn paginate_records_with_verified_claim(pool: Pool<Postgres>) {
 async fn paginate_records_with_unverified_claim(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
+    let (p1, r1, _r2, _r3) = setup_pagination_tests(&mut connection).await;
     let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     pointercrate_test::demonlist::put_claim(user.inner().id, p1, false, false, &mut connection).await;
@@ -68,7 +67,7 @@ async fn paginate_records_with_unverified_claim(pool: Pool<Postgres>) {
 async fn paginate_records_with_verified_claim_wrong_player(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, r2, r3) = setup_pagination_tests(&mut connection).await;
+    let (p1, _r1, _r2, _r3) = setup_pagination_tests(&mut connection).await;
     let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     pointercrate_test::demonlist::put_claim(user.inner().id, p1, true, false, &mut connection).await;
