@@ -25,6 +25,7 @@ pub use dash_rs::{
     Thunk,
 };
 use std::cmp::Ordering;
+use reqwest::header::HeaderMap;
 
 #[derive(Debug)]
 pub enum GDIntegrationResult {
@@ -137,6 +138,7 @@ impl PgCache {
 
         let request_result = http_client
             .post(&request.to_url())
+            .headers(HeaderMap::new())  // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
             .body(request.to_string())
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .send()
@@ -198,6 +200,7 @@ impl PgCache {
 
         let request_result = http_client
             .post(&request.to_url())
+            .headers(HeaderMap::new())  // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
             .body(request.to_string())
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .send()
