@@ -24,8 +24,8 @@ pub use dash_rs::{
     model::level::{DemonRating, LevelRating},
     Thunk,
 };
-use std::cmp::Ordering;
 use reqwest::header::HeaderMap;
+use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub enum GDIntegrationResult {
