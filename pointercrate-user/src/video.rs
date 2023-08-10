@@ -4,7 +4,7 @@ use url::Url;
 
 const SCHEMES: [&str; 2] = ["http", "https"];
 const YOUTUBE_CHANNEL_FORMAT: &str =
-    "'youtube.com/channel/{channel_id}' or 'youtube.com/c/{custom_channel_id}/' or 'youtube.com/user/{username}/";
+    "'youtube.com/channel/{channel_id}' or 'youtube.com/c/{custom_channel_id}/' or 'youtube.com/user/{username}/' or 'youtube.com/@{handle}'";
 
 pub fn validate_channel(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| UserError::MalformedChannelUrl)?;
