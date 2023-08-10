@@ -22,7 +22,7 @@ pub fn validate_channel(url: &str) -> Result<String> {
             "www.youtube.com" | "youtube.com" =>
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
-                        ["channel", _] | ["user", _] | ["c", _] => Ok(url.to_string()),
+                        ["channel", _] | ["user", _] | ["c", _] | ["@", _] => Ok(url.to_string()),
                         _ =>
                             Err(CoreError::InvalidUrlFormat {
                                 expected: YOUTUBE_CHANNEL_FORMAT,
