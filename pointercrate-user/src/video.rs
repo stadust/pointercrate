@@ -3,8 +3,8 @@ use pointercrate_core::error::CoreError;
 use url::Url;
 
 const SCHEMES: [&str; 2] = ["http", "https"];
-const YOUTUBE_CHANNEL_FORMAT: &str =
-    "'youtube.com/channel/{channel_id}' or 'youtube.com/c/{custom_channel_id}/' or 'youtube.com/user/{username}/' or 'youtube.com/@{handle}'";
+const YOUTUBE_CHANNEL_FORMAT: &str = "'youtube.com/channel/{channel_id}' or 'youtube.com/c/{custom_channel_id}/' or \
+                                      'youtube.com/user/{username}/' or 'youtube.com/@{handle}'";
 
 pub fn validate_channel(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| UserError::MalformedChannelUrl)?;
@@ -23,7 +23,7 @@ pub fn validate_channel(url: &str) -> Result<String> {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["channel", _] | ["user", _] | ["c", _] => Ok(url.to_string()),
-                        [handle] => {
+                        [handle] =>
                             if handle.starts_with("@") {
                                 Ok(url.to_string())
                             } else {
@@ -31,8 +31,7 @@ pub fn validate_channel(url: &str) -> Result<String> {
                                     expected: YOUTUBE_CHANNEL_FORMAT,
                                 }
                                 .into())
-                            }
-                        }
+                            },
                         _ =>
                             Err(CoreError::InvalidUrlFormat {
                                 expected: YOUTUBE_CHANNEL_FORMAT,
