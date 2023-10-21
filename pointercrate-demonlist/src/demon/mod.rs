@@ -12,7 +12,7 @@ use crate::{
 use derive_more::Display;
 use log::info;
 use pointercrate_core::{error::CoreError, etag::Taggable};
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use sqlx::PgConnection;
 use std::{
     collections::hash_map::DefaultHasher,
@@ -60,7 +60,7 @@ pub struct Demon {
 }
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
-#[derive(Debug, Hash, Serialize, Display, PartialEq, Eq, Clone)]
+#[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq, Clone)]
 #[display(fmt = "{} (at {})", name, position)]
 pub struct MinimalDemon {
     /// The [`Demon`]'s unique internal pointercrate ID

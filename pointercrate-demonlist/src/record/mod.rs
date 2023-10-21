@@ -162,7 +162,7 @@ pub struct MinimalRecordPD {
     pub player: DatabasePlayer,
 }
 
-#[derive(Debug, Hash, Serialize, Display, PartialEq, Eq)]
+#[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq)]
 #[display(fmt = "{}% on {} (ID: {})", progress, demon, id)]
 pub struct MinimalRecordD {
     pub id: i32,
