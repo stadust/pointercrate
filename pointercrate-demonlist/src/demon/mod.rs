@@ -12,7 +12,7 @@ use crate::{
 use derive_more::Display;
 use log::info;
 use pointercrate_core::{error::CoreError, etag::Taggable};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use std::{
     collections::hash_map::DefaultHasher,

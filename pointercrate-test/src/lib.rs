@@ -89,7 +89,7 @@ impl<'c> TestRequest<'c> {
         let deserialized = serde_json::from_str(&body_text);
 
         assert!(deserialized.is_ok(), "{:?}: {}", deserialized.unwrap_err(), body_text);
-        
+
         deserialized.unwrap()
     }
 
