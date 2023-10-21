@@ -2,5 +2,4 @@
 .env
 .secret
 .idea
-run_coverage.sh
-codecov
+.vscode
