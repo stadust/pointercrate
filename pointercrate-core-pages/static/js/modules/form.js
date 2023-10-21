@@ -1184,6 +1184,11 @@ const UNEXPECTED_REDIRECT = {
   code: 50000,
   data: null,
 };
+const RATELIMITED = {
+  message: "You have hit a Cloudflare ratelimit. Please wait a short time and try again.",
+  code: 42900,
+  data: null
+}
 
 function mkReq(method, endpoint, headers = {}, data = null) {
   headers["Content-Type"] = "application/json";
@@ -1219,7 +1224,7 @@ function mkReq(method, endpoint, headers = {}, data = null) {
           var jsonError = JSON.parse(xhr.responseText);
         } catch (e) {
           return reject({
-            data: SEVERE_ERROR,
+            data: xhr.status == 429 ? RATELIMITED : SEVERE_ERROR,
             headers: parseHeaders(xhr),
             status: xhr.status,
           });
