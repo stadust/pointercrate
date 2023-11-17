@@ -130,7 +130,17 @@ impl AccountPageTab for ListIntegrationTab {
                                 "Your claimed player's records"
                             }
                             p {
-                                "A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record represents different record states. Each color means the following: Green = Approved, Blue = Under Consideration, Yellow = Unchecked, and Red = Rejected."
+                                "A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. "
+                                br;
+                                "The background color of each record represents different record states. Each color means the following: "
+                                br;
+                                "Green = Approved"
+                                br;
+                                "Blue = Under Consideration"
+                                br;
+                                "Yellow = Unchecked"
+                                br;
+                                "Red = Rejected"
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
@@ -151,7 +161,7 @@ impl AccountPageTab for ListIntegrationTab {
                             "A claim with a green background is verified, a claim with a blue background is unverified/unchecked"
                         }
                         (filtered_paginator("claim-pagination", "/api/v1/players/claims/"))
-                    }
+                    }src
                 }
             }
             div.right {
