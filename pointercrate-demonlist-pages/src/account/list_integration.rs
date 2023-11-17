@@ -134,13 +134,21 @@ impl AccountPageTab for ListIntegrationTab {
                                 br;
                                 "The background color of each record represents different record states. Each color means the following: "
                                 br;
-                                "Green = Approved"
+                                span style = "background-color: #E9FAE3" {
+                                    "Green = Approved"
+                                }
                                 br;
-                                "Blue = Under Consideration"
+                                span style = "background-color: #D8EFF3" {
+                                    "Blue = Under Consideration"
+                                }
                                 br;
-                                "Yellow = Unchecked"
+                                span style = "background-color: #F7F7E0" {
+                                    "Yellow = Unchecked"
+                                }
                                 br;
-                                "Red = Rejected"
+                                span style = "background-color: #F8DCE4" {
+                                    "Red = Rejected"
+                                }
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
