@@ -161,7 +161,7 @@ impl AccountPageTab for ListIntegrationTab {
                             "A claim with a green background is verified, a claim with a blue background is unverified/unchecked"
                         }
                         (filtered_paginator("claim-pagination", "/api/v1/players/claims/"))
-                    }src
+                    }
                 }
             }
             div.right {
