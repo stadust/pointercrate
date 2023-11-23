@@ -112,13 +112,10 @@ impl PgCache {
                 };
 
                 let song = match level.custom_song {
-                    Some(id) =>
-                        self.lookup_newgrounds_song(id).await.ok().and_then(|entry| {
-                            match entry {
-                                CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
-                                _ => None,
-                            }
-                        }),
+                    Some(id) => self.lookup_newgrounds_song(id).await.ok().and_then(|entry| match entry {
+                        CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
+                        _ => None,
+                    }),
                     None => None,
                 };
 
@@ -147,50 +144,49 @@ impl PgCache {
         trace!("Request result is {:?}", request_result);
 
         match request_result {
-            Ok(response) =>
-                match response.text().await {
-                    Ok(text) =>
-                        match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
-                            Err(ResponseError::NotFound) =>
-                                self.mark_levels_request_result_as_absent(&request)
-                                    .await
-                                    .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
-                                    .map(|_| ()),
-                            Ok(demons) =>
-                                if demons.is_empty() {
-                                    self.mark_levels_request_result_as_absent(&request)
-                                        .await
-                                        .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
-                                        .map(|_| ())
-                                } else {
-                                    trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
+            Ok(response) => match response.text().await {
+                Ok(text) => match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
+                    Err(ResponseError::NotFound) => self
+                        .mark_levels_request_result_as_absent(&request)
+                        .await
+                        .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
+                        .map(|_| ()),
+                    Ok(demons) => {
+                        if demons.is_empty() {
+                            self.mark_levels_request_result_as_absent(&request)
+                                .await
+                                .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
+                                .map(|_| ())
+                        } else {
+                            trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
 
-                                    self.store_levels_request(&request, &demons)
-                                        .await
-                                        .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
+                            self.store_levels_request(&request, &demons)
+                                .await
+                                .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
 
-                                    let hardest = demons
-                                        .into_iter()
-                                        .filter(|demon| demon.name.to_lowercase().trim() == demon_name.to_lowercase().trim())
-                                        .max_by(|x, y| x.difficulty.cmp(&y.difficulty).then(Ordering::Greater));
+                            let hardest = demons
+                                .into_iter()
+                                .filter(|demon| demon.name.to_lowercase().trim() == demon_name.to_lowercase().trim())
+                                .max_by(|x, y| x.difficulty.cmp(&y.difficulty).then(Ordering::Greater));
 
-                                    match hardest {
-                                        Some(hardest) => {
-                                            trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
+                            match hardest {
+                                Some(hardest) => {
+                                    trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
 
-                                            self.download_demon(http_client, hardest.level_id.into(), demon).await
-                                        },
-                                        None => {
-                                            error!("Could not find a level whose name matches '{}'", demon_name);
-
-                                            Err(())
-                                        },
-                                    }
+                                    self.download_demon(http_client, hardest.level_id.into(), demon).await
                                 },
-                            Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
-                        },
-                    Err(error) => Err(error!("Error reading server response: {:?}", error)),
+                                None => {
+                                    error!("Could not find a level whose name matches '{}'", demon_name);
+
+                                    Err(())
+                                },
+                            }
+                        }
+                    },
+                    Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
                 },
+                Err(error) => Err(error!("Error reading server response: {:?}", error)),
+            },
             Err(error) => Err(error!("Error making request: {:?}", error)),
         }
     }
@@ -211,32 +207,31 @@ impl PgCache {
                 let content = response.text().await;
 
                 match content {
-                    Ok(text) =>
-                        match dash_rs::response::parse_download_gj_level_response(&text[..]) {
-                            Ok(demon) => {
-                                self.store_level_data(demon.level_id, &demon.level_data)
-                                    .await
-                                    .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
+                    Ok(text) => match dash_rs::response::parse_download_gj_level_response(&text[..]) {
+                        Ok(demon) => {
+                            self.store_level_data(demon.level_id, &demon.level_data)
+                                .await
+                                .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
 
-                                sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
-                                    .execute(&self.pool)
-                                    .await
-                                    .map_err(|err| error!("Error updating level_id: {:?}", err))?;
+                            sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
+                                .execute(&self.pool)
+                                .await
+                                .map_err(|err| error!("Error updating level_id: {:?}", err))?;
 
-                                sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
-                                    .execute(&self.pool)
-                                    .await
-                                    .map_err(|err| error!("Error freeing download lock: {:?}", err))?;
+                            sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
+                                .execute(&self.pool)
+                                .await
+                                .map_err(|err| error!("Error freeing download lock: {:?}", err))?;
 
-                                Ok(info!("Successfully retrieved demon data!"))
-                            },
-                            Err(ResponseError::NotFound) =>
-                                self.mark_level_data_as_absent(request.level_id)
-                                    .await
-                                    .map_err(|err| error!("Error marking level as absent: {:?}", err))
-                                    .map(|_| ()),
-                            Err(err) => Err(error!("Error processing response: {:?}", err)),
+                            Ok(info!("Successfully retrieved demon data!"))
                         },
+                        Err(ResponseError::NotFound) => self
+                            .mark_level_data_as_absent(request.level_id)
+                            .await
+                            .map_err(|err| error!("Error marking level as absent: {:?}", err))
+                            .map(|_| ()),
+                        Err(err) => Err(error!("Error processing response: {:?}", err)),
+                    },
                     Err(err) => Err(error!("Error making http request: {:?}", err)),
                 }
             },
@@ -344,7 +339,7 @@ impl PgCache {
             creator.user_id as i64,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         sqlx::query!(
@@ -354,7 +349,7 @@ impl PgCache {
             creator.name.to_string(), // FIXME: figure out why it doesnt accept a reference
             creator.account_id.map(|id| id as i64)
         )
-        .execute(&mut connection)
+        .execute(&mut *connection)
         .await?;
 
         connection.commit().await?;
@@ -409,7 +404,7 @@ impl PgCache {
             song.song_id as i64,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         // FIXME: this
@@ -432,7 +427,7 @@ impl PgCache {
             &song.index_8.as_ref(),
             song_link
         )
-        .execute(&mut connection)
+        .execute(&mut *connection)
         .await?;
 
         connection.commit().await?;
@@ -450,7 +445,7 @@ impl PgCache {
             level_id as i64,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         connection.commit().await?;
@@ -505,7 +500,7 @@ impl PgCache {
             level_id as i64,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         // FIXME: this
@@ -571,7 +566,7 @@ impl PgCache {
             hash,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         connection.commit().await?;
@@ -636,7 +631,7 @@ impl PgCache {
             hash,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         for level in levels {
@@ -691,7 +686,7 @@ impl PgCache {
         };
 
         let row = sqlx::query!("SELECT * FROM gj_level WHERE level_id = $1", level_id as i64)
-            .fetch_one(&mut connection)
+            .fetch_one(&mut *connection)
             .await?;
 
         let level = Level {
@@ -739,7 +734,7 @@ impl PgCache {
             level.level_id as i64,
             Utc::now().naive_utc()
         )
-        .fetch_one(&mut connection)
+        .fetch_one(&mut *connection)
         .await?;
 
         sqlx::query!(
@@ -788,7 +783,7 @@ impl PgCache {
             level.index_46.as_deref(),
             level.index_47.as_deref()
         )
-        .execute(&mut connection)
+        .execute(&mut *connection)
         .await?;
 
         connection.commit().await?;
@@ -807,24 +802,23 @@ fn level_rating_to_i16(level_rating: LevelRating) -> i16 {
         LevelRating::Harder => 5,
         LevelRating::Insane => 6,
         LevelRating::NotAvailable => 7,
-        LevelRating::Demon(demon_rating) =>
-            match demon_rating {
-                DemonRating::Unknown(unknown) => (unknown as i16) * 100,
-                DemonRating::Easy => 1,
-                DemonRating::Medium => 2,
-                DemonRating::Hard => 3,
-                DemonRating::Insane => 4,
-                DemonRating::Extreme => 5,
-            },
+        LevelRating::Demon(demon_rating) => match demon_rating {
+            DemonRating::Unknown(unknown) => (unknown as i16) * 100,
+            DemonRating::Easy => 1,
+            DemonRating::Medium => 2,
+            DemonRating::Hard => 3,
+            DemonRating::Insane => 4,
+            DemonRating::Extreme => 5,
+        },
     }
 }
 
 fn i16_to_level_rating(value: i16, is_demon: bool) -> LevelRating {
     if value.abs() >= 100 || value == 0 {
         if is_demon {
-            return LevelRating::Demon(DemonRating::Unknown((value / 100) as i32))
+            return LevelRating::Demon(DemonRating::Unknown((value / 100) as i32));
         } else {
-            return LevelRating::Unknown((value / 100) as i32)
+            return LevelRating::Unknown((value / 100) as i32);
         }
     }
 
@@ -864,7 +858,7 @@ fn level_length_to_i16(length: LevelLength) -> i16 {
 
 fn i16_to_level_length(value: i16) -> LevelLength {
     if value.abs() >= 100 || value == 0 {
-        return LevelLength::Unknown((value / 100) as i32)
+        return LevelLength::Unknown((value / 100) as i32);
     }
 
     match value {

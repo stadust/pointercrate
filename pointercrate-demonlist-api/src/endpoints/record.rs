@@ -47,7 +47,7 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
 
     if (claim.is_none() || claim.map(|c| c.player.id) != pagination.player) && !auth.has_permission(LIST_HELPER) {
         if pagination.status.is_some() && pagination.status != Some(RecordStatus::Approved) {
-            return Err(CoreError::MissingPermissions { required: LIST_HELPER }.into())
+            return Err(CoreError::MissingPermissions { required: LIST_HELPER }.into());
         }
 
         pagination.status = Some(RecordStatus::Approved);
@@ -68,18 +68,18 @@ pub async fn unauthed_pagination(
     let mut pagination = query.0;
 
     if pagination.submitter.is_some() {
-        return Err(CoreError::Unauthorized.into())
+        return Err(CoreError::Unauthorized.into());
     }
 
     if pagination.status.is_some() && pagination.status != Some(RecordStatus::Approved) {
-        return Err(CoreError::Unauthorized.into())
+        return Err(CoreError::Unauthorized.into());
     }
 
     pagination.status = Some(RecordStatus::Approved);
 
-    let mut records = pagination.page(&mut connection).await?;
+    let mut records = pagination.page(&mut *connection).await?;
 
-    let (max_id, min_id) = FullRecord::extremal_record_ids(&mut connection).await?;
+    let (max_id, min_id) = FullRecord::extremal_record_ids(&mut *connection).await?;
 
     pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, before_id, after_id, id)
 }
@@ -107,24 +107,24 @@ pub async fn submit(
         None => pool.transaction().await?,
     };
 
-    let submitter = match Submitter::by_ip(ip, &mut connection).await? {
+    let submitter = match Submitter::by_ip(ip, &mut *connection).await? {
         Some(submitter) => submitter,
         None => {
             ratelimits.new_submitters()?;
 
-            Submitter::create_submitter(ip, &mut connection).await?
+            Submitter::create_submitter(ip, &mut *connection).await?
         },
     };
 
     // Banned submitters cannot submit records
     if submitter.banned {
-        return Err(DemonlistError::BannedFromSubmissions.into())
+        return Err(DemonlistError::BannedFromSubmissions.into());
     }
 
-    let normalized = submission.normalize(&mut connection).await?;
+    let normalized = submission.normalize(&mut *connection).await?;
 
     // check if the player is claimed with submissions locked
-    if let Some(claim) = normalized.verified_player_claim(&mut connection).await? {
+    if let Some(claim) = normalized.verified_player_claim(&mut *connection).await? {
         if claim.lock_submissions {
             match user_id {
                 Some(user_id) if user_id == claim.user_id => (),
@@ -133,7 +133,7 @@ pub async fn submit(
         }
     }
 
-    let validated = normalized.validate(&mut connection).await?;
+    let validated = normalized.validate(&mut *connection).await?;
 
     if !is_team_member {
         // Check ratelimits before any change is made to the database so that the transaction rollback is
@@ -144,7 +144,7 @@ pub async fn submit(
         ratelimits.record_submission_global()?;
     }
 
-    let mut record = validated.create(submitter, &mut connection).await?;
+    let mut record = validated.create(submitter, &mut *connection).await?;
 
     connection.commit().await.map_err(DemonlistError::from)?;
 
@@ -179,11 +179,11 @@ pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<Pointercr
         None => pool.transaction().await?,
     };
 
-    let record = FullRecord::by_id(record_id, &mut connection).await?;
+    let record = FullRecord::by_id(record_id, &mut *connection).await?;
 
     // TODO: allow access if auth is provided and a verified claim on the record's player is given
     if !is_helper && record.status != RecordStatus::Approved {
-        return Err(DemonlistError::RecordNotFound { record_id }.into())
+        return Err(DemonlistError::RecordNotFound { record_id }.into());
     }
 
     Ok(Tagged(record))
@@ -196,7 +196,7 @@ pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<Audit
     let log = pointercrate_demonlist::record::audit::audit_log_for_record(record_id, &mut auth.connection).await?;
 
     if log.is_empty() {
-        return Err(DemonlistError::RecordNotFound { record_id }.into())
+        return Err(DemonlistError::RecordNotFound { record_id }.into());
     }
 
     Ok(Json(log))
@@ -245,7 +245,7 @@ pub async fn delete(record_id: i32, mut auth: TokenAuth, precondition: Precondit
 #[rocket::get("/<record_id>/notes")]
 pub async fn get_notes(record_id: i32, mut auth: TokenAuth) -> Result<Response2<Json<Vec<Note>>>> {
     let record_holder_id = sqlx::query!("SELECT player FROM records WHERE id = $1", record_id)
-        .fetch_one(&mut auth.connection)
+        .fetch_one(&mut *auth.connection)
         .await
         .map_err(|err| {
             if let sqlx::Error::RowNotFound = err {
@@ -336,7 +336,7 @@ async fn validate(record_id: i32, video: String, body: serde_json::Value, mut co
             } else {
                 warn!("Server response to 'GET {}' was {:?}, deleting submission!", video, response);
 
-                match FullRecord::delete_by_id(record_id, &mut connection).await {
+                match FullRecord::delete_by_id(record_id, &mut *connection).await {
                     Ok(_) => (),
                     Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                 }
@@ -348,7 +348,7 @@ async fn validate(record_id: i32, video: String, body: serde_json::Value, mut co
                 error
             );
 
-            match FullRecord::delete_by_id(record_id, &mut connection).await {
+            match FullRecord::delete_by_id(record_id, &mut *connection).await {
                 Ok(_) => (),
                 Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
             }

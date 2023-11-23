@@ -25,8 +25,8 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
     let mut pagination = pagination.0;
     let mut connection = pool.connection().await?;
 
-    let mut demons = pagination.page(&mut connection).await?;
-    let (max_id, min_id) = Demon::extremal_demon_ids(&mut connection).await?;
+    let mut demons = pagination.page(&mut *connection).await?;
+    let (max_id, min_id) = Demon::extremal_demon_ids(&mut *connection).await?;
 
     pagination_response!("/api/v2/demons/", demons, pagination, min_id, max_id, before_id, after_id, base.id)
 }
@@ -38,8 +38,8 @@ pub async fn paginate_listed(
     let mut pagination = pagination.0;
     let mut connection = pool.connection().await?;
 
-    let mut demons = pagination.page(&mut connection).await?;
-    let max_position = Demon::max_position(&mut connection).await?;
+    let mut demons = pagination.page(&mut *connection).await?;
+    let max_position = Demon::max_position(&mut *connection).await?;
 
     pagination_response!(
         "/api/v2/demons/listed/",
@@ -65,7 +65,7 @@ pub async fn audit(demon_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditL
     let log = pointercrate_demonlist::demon::audit::audit_log_for_demon(demon_id, &mut auth.connection).await?;
 
     if log.is_empty() {
-        return Err(DemonlistError::DemonNotFound { demon_id }.into())
+        return Err(DemonlistError::DemonNotFound { demon_id }.into());
     }
 
     Ok(Json(log))
@@ -76,7 +76,7 @@ pub async fn movement_log(demon_id: i32, pool: &State<PointercratePool>) -> Resu
     let log = pointercrate_demonlist::demon::audit::movement_log_for_demon(demon_id, &mut *pool.connection().await?).await?;
 
     if log.is_empty() {
-        return Err(DemonlistError::DemonNotFound { demon_id }.into())
+        return Err(DemonlistError::DemonNotFound { demon_id }.into());
     }
 
     Ok(Json(log))

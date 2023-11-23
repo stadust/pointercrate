@@ -57,7 +57,7 @@ pub async fn register(
 
     ratelimits.registrations(ip)?;
 
-    let user = AuthenticatedUser::register(registration.0, &mut connection).await?;
+    let user = AuthenticatedUser::register(registration.0, &mut *connection).await?;
 
     connection.commit().await.map_err(UserError::from)?;
 

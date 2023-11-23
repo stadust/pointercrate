@@ -23,7 +23,7 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .manage(AccountPageConfig::default());
 
     // generate some data
-    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut connection)
+    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut *connection)
         .await
         .unwrap();
 
