@@ -17,7 +17,7 @@ impl<'r, T: DeserializeOwned> FromRequest<'r> for Query<T> {
             Some(query) =>
                 match serde_urlencoded::from_str(query.as_str()) {
                     Ok(t) => Outcome::Success(Query(t)),
-                    Err(err) => Outcome::Failure((Status::BadRequest, err)),
+                    Err(err) => Outcome::Error((Status::BadRequest, err)),
                 },
         }
     }

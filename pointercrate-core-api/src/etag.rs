@@ -37,7 +37,7 @@ impl<'r> FromRequest<'r> for Precondition {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("if-match") {
             Some(if_match) => Outcome::Success(Precondition(if_match.split(',').map(ToString::to_string).collect())),
-            None => Outcome::Failure((Status::PreconditionRequired, CoreError::PreconditionRequired)),
+            None => Outcome::Error((Status::PreconditionRequired, CoreError::PreconditionRequired)),
         }
     }
 }

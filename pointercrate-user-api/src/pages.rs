@@ -29,7 +29,7 @@ pub async fn login(
 
     let auth = auth?;
 
-    let mut cookie = Cookie::build("access_token", auth.user.generate_access_token())
+    let mut cookie = Cookie::build(("access_token", auth.user.generate_access_token()))
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -38,7 +38,7 @@ pub async fn login(
         cookie = cookie.secure(true)
     }
 
-    cookies.add(cookie.finish());
+    cookies.add(cookie);
 
     Ok(Status::NoContent)
 }
@@ -61,7 +61,7 @@ pub async fn register(
 
     connection.commit().await.map_err(UserError::from)?;
 
-    let mut cookie = Cookie::build("access_token", user.generate_access_token())
+    let mut cookie = Cookie::build(("access_token", user.generate_access_token()))
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");
@@ -70,7 +70,7 @@ pub async fn register(
         cookie = cookie.secure(true)
     }
 
-    cookies.add(cookie.finish());
+    cookies.add(cookie);
 
     Ok(Status::Created)
 }
