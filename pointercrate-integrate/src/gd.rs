@@ -291,7 +291,7 @@ impl PgCache {
     }
 
     fn make_cache_entry<T>(&self, meta: CacheEntryMeta, t: T) -> CacheEntry<T> {
-        if DateTime::<Utc>::from_utc(meta.made, Utc) - Utc::now() < self.expire_after {
+        if DateTime::from_naive_utc_and_offset(meta.made, Utc) - Utc::now() < self.expire_after {
             CacheEntry::Live(t, meta)
         } else {
             CacheEntry::Expired(t, meta)

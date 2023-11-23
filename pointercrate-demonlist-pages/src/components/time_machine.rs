@@ -40,7 +40,7 @@ impl Render for Tardis {
     // {destination,..} = self". If errors out on the comma.
     #[allow(clippy::single_match)]
     fn render(&self) -> Markup {
-        let current_year = FixedOffset::east(3600 * 23 + 3599)
+        let current_year = FixedOffset::east_opt(3600 * 23 + 3599).unwrap()
             .from_utc_datetime(&Utc::now().naive_utc())
             .year();
 
