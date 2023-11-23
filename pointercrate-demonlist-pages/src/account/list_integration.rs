@@ -131,10 +131,10 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             p {
                                 "A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record tells you whether the record is " 
-                                span  style = "background-color: #E9FAE3" { "Green = Approved"  } ", " 
-                                span style = "background-color: #F7F7E0" {"Yellow = Unchecked" } ", "  
-                                span style = "background-color: #F8DCE4" {  "Red = Rejected" } " or " 
-                                span style = "background-color: #D8EFF3" { "Blue = Under Consideration" } "."
+                                span  style = "background-color: #E9FAE3" { "Approved"  } ", " 
+                                span style = "background-color: #F7F7E0" { "Unchecked" } ", "  
+                                span style = "background-color: #F8DCE4" { "Rejected" } " or " 
+                                span style = "background-color: #D8EFF3" { "Under Consideration" } "."
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
