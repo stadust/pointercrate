@@ -1726,7 +1726,7 @@ dependencies = [
 name = "pointercrate-user"
 version = "0.1.0"
 dependencies = [
- "base64 0.13.0",
+ "base64 0.21.5",
  "bcrypt",
  "derive_more",
  "futures",
@@ -1744,7 +1744,7 @@ dependencies = [
 name = "pointercrate-user-api"
 version = "0.1.0"
 dependencies = [
- "base64 0.13.0",
+ "base64 0.21.5",
  "governor",
  "log",
  "nonzero_ext",
