@@ -103,7 +103,7 @@ impl Script {
     }
 }
 
-impl Render for &Script {
+impl Render for Script {
     fn render(&self) -> Markup {
         html! {
             @if self.module {
@@ -136,11 +136,5 @@ impl Render for &Meta {
         html! {
             meta name=(self.name) property=(self.name) content=(self.content);
         }
-    }
-}
-
-impl Render for Script {
-    fn render(&self) -> Markup {
-        (&self).render()
     }
 }
