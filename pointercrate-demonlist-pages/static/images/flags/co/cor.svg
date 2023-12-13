@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 9 6">
+<rect id="blue_stripe"	fill="#00639C"	width="9" height="6"/>
+<rect id="white_stripe"	fill="#FFF"	width="9" height="4" y="2"/>
+<rect id="green_stripe"	fill="#009C31"	width="9" height="2" y="4"/>
+</svg>

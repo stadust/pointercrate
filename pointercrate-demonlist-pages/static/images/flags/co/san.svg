@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="2700"
+   height="1800"
+   version="1.1"
+   id="svg23"
+   sodipodi:docname="Flag_of_Santander_Department.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata29">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs27" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     id="namedview25"
+     showgrid="false"
+     inkscape:zoom="0.3471825"
+     inkscape:cx="1028.6787"
+     inkscape:cy="906.74725"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg23"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <path
+     fill="#078930"
+     d="M 0,0 H 2700 V 1800 H 0 Z"
+     id="path2"
+     style="fill:#00873a;fill-opacity:1;stroke-width:4.5" />
+  <path
+     fill="#fcdd09"
+     d="m 0,600 h 2700 v 600 H 0 Z"
+     id="path4"
+     style="fill:#ffd113;fill-opacity:1;stroke-width:4.24264" />
+  <path
+     d="m 0,800 h 2700 v 200 H 0 Z"
+     id="path6"
+     style="fill:#252629;fill-opacity:1;stroke-width:4.24264" />
+  <path
+     fill="#dc121a"
+     d="M 0,0 H 675 V 1800 H 0 Z"
+     id="path8"
+     style="fill:#cd2428;fill-opacity:1;stroke-width:4.5" />
+  <path
+     id="use11"
+     d="M 337.5,300 402.48525,500 232.35443,376.3958 H 442.64557 L 272.51475,500 Z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+  <path
+     id="use13"
+     d="m 337.5,550.00002 64.98525,200 -170.13082,-123.6042 h 210.29114 l -170.13082,123.6042 z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+  <path
+     id="use15"
+     d="M 337.5,800 402.48526,1000 232.35443,876.3958 H 442.64557 L 272.51474,1000 Z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+  <path
+     id="use17"
+     d="m 337.5,1050 64.98525,200 -170.13082,-123.6042 H 442.64556 L 272.51474,1250 Z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+  <path
+     id="use19"
+     d="m 337.5,1300 64.98526,200 -170.13083,-123.6042 H 442.64557 L 272.51474,1500 Z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+  <path
+     id="use21"
+     d="m 337.5,1550 64.98526,200 -170.13083,-123.6042 H 442.64557 L 272.51474,1750 Z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+  <path
+     id="a"
+     d="M 337.5,50 402.48526,250 232.35443,126.3958 H 442.64557 L 272.51474,250 Z"
+     fill="#fff"
+     style="fill:#f1f4ff;fill-opacity:1;stroke-width:4.6066" />
+</svg>
