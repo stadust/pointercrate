@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="1000"
+   height="600"
+   viewBox="0 0 100 60"
+   id="svg2"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="Flag_of_Berlin.svg">
+  <metadata
+     id="metadata37">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs35">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 300 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1000 : 300 : 1"
+       inkscape:persp3d-origin="500 : 200 : 1"
+       id="perspective39" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="1004"
+     id="namedview33"
+     showgrid="false"
+     inkscape:zoom="0.78666667"
+     inkscape:cx="388.99423"
+     inkscape:cy="332.26905"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Baer" />
+  <title
+     id="title4">Flagge von Berlin</title>
+  <desc
+     id="desc6">die Flagge von Berlin</desc>
+  <g
+     id="Flagge">
+    <rect
+       fill="red"
+       width="100"
+       height="60"
+       id="rect9"
+       style="fill:#e2001a;fill-opacity:1" />
+    <rect
+       fill="white"
+       y="12"
+       width="100"
+       height="36"
+       id="rect11" />
+  </g>
+  <svg
+     id="Baer"
+     x="30"
+     y="13"
+     width="20.5"
+     height="34"
+     viewBox="0 0 2500 4140"
+     version="1.1">
+    <path
+       id="Koerper"
+       d="M 1522,109 L 1278,118 C 1266,119 1257,125 1257,139 1258,227 1275,284 1338,330 1330,379 1335,404 1386,445 1391,405 1407,387 1432,370 1434,371 1436,371 1437,372 1434,390 1434,409 1438,420 1448,448 1497,449 1510,429 1522,458 1547,459 1567,459 1588,459 1598,444 1605,430 1617,440 1629,451 1640,465 1675,513 1681,575 1681,634 1670,635 1659,636 1648,637 L 1648,613 C 1647,579 1568,573 1550,602 1530,580 1468,584 1468,619 L 1468,630 C 1454,612 1443,593 1434,574 1409,590 1394,602 1398,659 1387,660 1376,661 1366,662 1367,728 1396,746 1632,741 1638,807 1572,844 1523,875 1395,948 1260,1028 1187,1162 1126,1268 1111,1394 1118,1516 L 1188,1485 1196,1523 C 1070,1583 840,1705 689,1775 652,1792 556,1816 536,1782 467,1663 412,1573 332,1482 189,1545 123,1603 69,1736 182,1909 369,2157 679,2159 1000,2161 1279,2043 1340,2025 L 1353,2066 C 1312,2084 1276,2097 1233,2111 1289,2331 1354,2417 1505,2551 L 1474,2574 C 1447,2558 1401,2507 1376,2483 1055,2635 935,2787 858,2944 773,3133 789,3348 825,3547 832,3580 796,3596 769,3586 695,3569 654,3495 583,3468 551,3454 512,3441 477,3446 395,3563 405,3622 416,3769 524,3822 640,3835 760,3897 839,3929 915,3981 1005,3967 1056,3962 1107,3927 1112,3873 1157,3679 1220,3473 1368,3333 1439,3263 1531,3207 1622,3164 1586,3026 1559,2888 1562,2744 L 1606,2742 C 1638,3290 1784,3405 2041,3660 2067,3686 2065,3735 2027,3750 1977,3775 1918,3777 1861,3779 1851,3921 1884,4060 1936,4117 2094,4114 2258,3989 2353,3868 2393,3818 2441,3768 2479,3719 2526,3658 2475,3587 2461,3531 2422,3371 2404,2911 2402,2847 L 2458,2848 2466,2732 C 2299,2525 2326,2201 2257,1992 2230,1907 2200,1819 2200,1729 2200,1607 2338,1378 2335,1174 2334,1088 2286,976 2287,925 2288,777 2373,809 2371,501 2370,416 2360,353 2338,266 2487,109 2282,-48 2164,50 2069,25 2057,0 1871,0 1712,0 1621,43 1522,109 z M 1234,1026 C 942,940 735,901 619,813 502,724 550,533 413,424 286,420 210,477 156,548 375,885 83,967 1074,1533 1070,1220 1129,1155 1234,1026 z M 1839,299 C 1824,299 1797,291 1789,280 1702,147 1680,195 1667,241 1656,282 1608,283 1622,228 1657,93 1752,112 1870,299 z M 2116,164 C 2140,132 2177,101 2217,88 2276,68 2300,116 2253,132 2214,146 2181,173 2153,201 z M 1349,337 C 1364,346 1385,357 1416,366 1399,380 1383,400 1378,422 1351,403 1340,368 1349,337 z M 1509,390 C 1509,403 1506,416 1502,422 1492,438 1455,437 1447,415 1444,406 1444,390 1448,375 1468,380 1489,384 1509,390 z M 1521,393 C 1548,401 1574,410 1597,425 1592,437 1583,449 1565,449 1549,449 1531,448 1521,429 1516,419 1518,405 1521,393 z M 1467,653 L 1408,658 C 1405,630 1408,606 1430,590 1441,610 1453,629 1467,646 z M 1477,652.5 V 621 C 1477,588 1547,590 1548,621 V 646 z M 1557,645 V 617 C 1557,584 1638,586 1638,616 V 638 z" />
+    <g
+       id="rote_Elemente"
+       fill="red"
+       style="fill:#e2001a;fill-opacity:1">
+      <path
+         id="Zunge"
+         d="M 1178,378 c 1,256 379,130 499,191 -2,-16 -5,-32 -10,-48 -61,-22 -148,-7 -241,-22 -187,-30 -210,-83 -210,-122 -1,-41 -38,-43 -38,1"
+         style="fill:#e2001a;fill-opacity:1" />
+      <g
+         id="Krallen"
+         style="fill:#e2001a;fill-opacity:1">
+        <path
+           id="Kralle"
+           d="M 329,3474 s 35,-13 110,26 c 36,18 58,-51 28,-60 -92,-29 -138,34 -138,34"
+           style="fill:#e2001a;fill-opacity:1" />
+        <use
+           xlink:href="#Kralle"
+           transform="translate(-25,63)"
+           id="use19"
+           style="fill:#e2001a;fill-opacity:1" />
+        <use
+           xlink:href="#Kralle"
+           transform="translate(-44,128)"
+           id="use21"
+           style="fill:#e2001a;fill-opacity:1" />
+        <use
+           xlink:href="#Kralle"
+           transform="translate(-46,197)"
+           id="use23"
+           style="fill:#e2001a;fill-opacity:1" />
+        <use
+           xlink:href="#Kralle"
+           transform="translate(-37,267)"
+           id="use25"
+           style="fill:#e2001a;fill-opacity:1" />
+      </g>
+      <use
+         xlink:href="#Krallen"
+         transform="matrix(0.98585,-0.362747,0.362747,0.98585,152.8742,556.3228)"
+         id="use27"
+         style="fill:#e2001a;fill-opacity:1" />
+      <use
+         xlink:href="#Krallen"
+         transform="matrix(0.662705,0.948407,-0.717713,0.895796,2492.198,-2039.701)"
+         id="use29"
+         style="fill:#e2001a;fill-opacity:1" />
+      <use
+         xlink:href="#Krallen"
+         transform="matrix(0.500922,0.739494,-0.739494,0.500922,2724.41,-1655.876)"
+         id="use31"
+         style="fill:#e2001a;fill-opacity:1" />
+    </g>
+  </svg>
+</svg>

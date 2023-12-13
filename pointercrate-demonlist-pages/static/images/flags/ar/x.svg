@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg id="svg2" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="630" viewBox="-910 -585 1820 1170" width="980" version="1.0" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+ <metadata id="metadata2836">
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs id="defs57"></defs>
+ <g id="g3592">
+  <rect id="blue" height="390" width="1820" y="-585" x="-910" fill="#b43232"/>
+  <rect id="white" height="390" width="1820" y="-195" x="-910" fill="#FFF"/>
+  <rect id="rect2676" height="390" width="1820" y="195" x="-910" fill="#75aadb"/>
+ </g>
+</svg>

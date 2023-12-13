@@ -1,0 +1,459 @@
+Note: All SVG's have been minimized using `scour`:
+
+> find flags -name "*.svg" -type f -exec scour -i {} -o {}.min \; -exec mv {}.min {} \;
+
+Argentina:
+Ciudad Autónomae Buenos Aires - TBA
+Buenos Aires - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Buenos_Aires.svg
+Catamarca - https://commons.wikimedia.org/wiki/File:Escudo_de_la_Provincia_de_Catamarca.svg
+Chaco - TBA
+Chubut - TBA
+Cordoba - modified version of https://commons.wikimedia.org/wiki/File:Flag_of_C%C3%B3rdoba_1815.svg
+Corrientes - https://commons.wikimedia.org/wiki/File:Flag_of_Corrientes_(1822).svg
+Entre Rios - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Entre_R%C3%ADos.svg
+Formosa - TBA
+Jujuy - https://commons.wikimedia.org/wiki/File:Flag_of_the_Civil_Freedom_of_Argentina.svg
+La Pampa - TBA 
+La Rioja - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_La_Rioja.svg
+Mendoza - modified version of https://commons.wikimedia.org/wiki/File:Flag_of_the_Army_of_the_Andes.svg
+Misiones - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Misiones.svg
+Neuquen - https://commons.wikimedia.org/wiki/File:Escudo_de_la_Provincia_de_Neuqu%C3%A9n.svg
+Rio Negro - TBA
+Salta - TBA
+San Juan - https://commons.wikimedia.org/wiki/File:Flag_of_the_San_Juan_Province.svg
+San Luis - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_San_Luis.svg
+Santa Cruz - TBA
+Santa Fe - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Santa_Fe.svg
+Santiagoel Estero - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Santiago_del_Estero.svg
+Tierrael Fuego - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Tierra_del_Fuego.svg
+Tucuman - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Tucum%C3%A1n.svg
+
+Brazil:
+Acre - https://commons.wikimedia.org/wiki/File:Bandeira_do_Acre.svg
+Alagoas - TBA
+Amapa - https://commons.wikimedia.org/wiki/File:Bandeira_do_Amap%C3%A1.svg
+Amazonas - https://commons.wikimedia.org/wiki/File:Bandeira_do_Amazonas.svg
+Bahia - https://commons.wikimedia.org/wiki/File:Bandeira_da_Bahia.svg
+Ceara - https://openclipart.org/detail/305363/flag-of-the-state-of-ceara-br
+Distrito Federal - https://commons.wikimedia.org/wiki/File:Bandeira_do_Distrito_Federal_(Brasil).svg
+Espirito Santo - https://commons.wikimedia.org/wiki/File:Bandeira_do_Esp%C3%ADrito_Santo.svg
+Goias - https://commons.wikimedia.org/wiki/File:Flag_of_Goi%C3%A1s.svg
+Maranhao - https://commons.wikimedia.org/wiki/File:Bandeira_do_Maranh%C3%A3o.svg
+Mato Grosso - https://commons.wikimedia.org/wiki/File:Bandeira_de_Mato_Grosso.svg
+Mato Grosso Do Sul - https://commons.wikimedia.org/wiki/File:Bandeira_de_Mato_Grosso_do_Sul.svg
+Minas Gerais - https://commons.wikimedia.org/wiki/File:Bandeira_de_Minas_Gerais.svg
+Para - https://commons.wikimedia.org/wiki/File:Bandeira_do_Par%C3%A1.svg
+Paraiba - https://commons.wikimedia.org/wiki/File:Bandeira_da_Para%C3%ADba.svg
+Parana - https://commons.wikimedia.org/wiki/File:Bandeira_do_Paran%C3%A1.svg
+Pernambuco - https://commons.wikimedia.org/wiki/File:Bandeira_de_Pernambuco.svg
+Piaui - https://commons.wikimedia.org/wiki/File:Bandeira_do_Piau%C3%AD.svg
+Rio de Janeiro - TBA
+Rio Grande Do Norte - TBA
+Rio Grande Do Sul - TBA
+Rondonia - https://commons.wikimedia.org/wiki/File:Bandeira_de_Rond%C3%B4nia.svg
+Roraima - https://commons.wikimedia.org/wiki/File:Bandeira_de_Roraima.svg
+Santa Catarina - https://commons.wikimedia.org/wiki/File:Bandeira_de_Santa_Catarina.svg
+Sao Paulo - https://openclipart.org/detail/305382/flag-of-sao-paulo 
+Sergipe - https://commons.wikimedia.org/wiki/File:Bandeira_de_Sergipe.svg
+Tocantins - https://commons.wikimedia.org/wiki/File:Bandeira_do_Tocantins.svg
+
+Chile:
+Arica y Parinacota - TBA
+Tarapaca - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Tarapaca,_Chile.svg
+Antofagasta - https://commons.wikimedia.org/wiki/File:Logo_del_Gobierno_Regional_de_Antofagasta.svg
+Atacama - https://commons.wikimedia.org/wiki/File:Flag_of_Atacama,_Chile.svg
+Coquimbo - https://commons.wikimedia.org/wiki/File:Flag_of_Coquimbo_Region,_Chile.svg
+Valrapaiso - TBA 
+Metropolitan - TBA 
+O'Higgins - TBA 
+Maule - TBA 
+Nuble - TBA 
+Biobio - TBA 
+Araucania - TBA
+Los Rios - TBA 
+Los Lagos - TBA 
+Aysen - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Aysen,_Chile.svg
+Magallanes - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Magallanes,_Chile.svg 
+
+Colombia:
+Bogota - https://commons.wikimedia.org/wiki/File:Flag_of_Bogot%C3%A1.svg
+Amazonas - TBA
+Antioquia - https://commons.wikimedia.org/wiki/File:Flag_of_Antioquia_Department.svg
+Arauca - https://commons.wikimedia.org/wiki/File:Flag_of_Arauca.svg
+Atlantico - https://commons.wikimedia.org/wiki/File:Flag_of_Atl%C3%A1ntico.svg
+Bolivar - https://commons.wikimedia.org/wiki/File:Flag_of_Bol%C3%ADvar_(Colombia).svg
+Boyaca - https://commons.wikimedia.org/wiki/File:Flag_of_Boyac%C3%A1_Department.svg
+Caldas - https://commons.wikimedia.org/wiki/File:Flag_of_Caldas.svg
+Caqueta - own work
+Casanare - own work
+Cauca - https://commons.wikimedia.org/wiki/File:Flag_of_Cauca.svg
+Cesar - https://commons.wikimedia.org/wiki/File:Flag_of_Cesar.svg
+Choco - https://commons.wikimedia.org/wiki/File:Flag_of_Choc%C3%B3.svg
+Cordoba - https://commons.wikimedia.org/wiki/File:Flag_of_C%C3%B3rdoba.svg
+Cundinamarca - own work (no emblem sorry)
+Guainia - https://commons.wikimedia.org/wiki/File:Flag_of_Guain%C3%ADa.svg
+Guaviare - own work (no emblem again :p)
+Huila - https://commons.wikimedia.org/wiki/File:Flag_of_Huila.svg
+La Guajira - https://commons.wikimedia.org/wiki/File:Flag_of_La_Guajira.svg
+Magdalena - own work (looks good enough) 
+Meta - https://commons.wikimedia.org/wiki/File:Flag_of_Meta.svg
+Narino - https://commons.wikimedia.org/wiki/File:Flag_of_Nari%C3%B1o.svg
+Norte de Santander - own work
+Putumayo - https://commons.wikimedia.org/wiki/File:Flag_of_Putumayo.svg
+Quindio - https://commons.wikimedia.org/wiki/File:Flag_of_Quind%C3%ADo.svg
+Risaralda - own work 
+San Andres y Providencia - https://commons.wikimedia.org/wiki/File:Flag_of_San_Andr%C3%A9s_y_Providencia.svg
+Santander - own work 
+Sucre - TBA
+Tolima - https://commons.wikimedia.org/wiki/File:Flag_of_Tolima.svg
+Valleel Cauca - https://commons.wikimedia.org/wiki/File:Flag_of_Ansermanuevo.svg
+Vaupes - TBA 
+Vichada - https://commons.wikimedia.org/wiki/File:Flag_of_Vichada.svg
+
+Finland:
+Lappi - https://commons.wikimedia.org/wiki/File:Lapin_maakunnan_vaakuna.svg
+Pohjois-Pohjanmaa - https://commons.wikimedia.org/wiki/File:Pohjois-Pohjanmaan_vaakuna.svg
+Kainuu - https://commons.wikimedia.org/wiki/File:Kainuu.vaakuna.svg
+Pohjois-Karjala - https://commons.wikimedia.org/wiki/File:Pohjois-Karjala.vaakuna.svg
+Pohjois-Savo - https://commons.wikimedia.org/wiki/File:Pohjois-Savo.vaakuna.svg
+Etela-Savo - https://commons.wikimedia.org/wiki/File:Etel%C3%A4-Savo.vaakuna.svg
+Etela-Karjala - https://commons.wikimedia.org/wiki/File:Etel%C3%A4-Karjala.vaakuna.svg
+Keski-Suomi - https://commons.wikimedia.org/wiki/File:Keski-Suomi_Coat_of_Arms.svg
+Etela-Pohjanmaa - https://commons.wikimedia.org/wiki/File:Etel%C3%A4-Pohjanmaan_maakunnan_vaakuna.svg
+Pohjanmaa - https://commons.wikimedia.org/wiki/File:Pohjanmaan_maakunnan_vaakuna.svg
+Keski-Pohjanmaa - https://commons.wikimedia.org/wiki/File:Keski-Pohjanmaa.vaakuna.svg
+Pirkanmaa - https://commons.wikimedia.org/wiki/File:Pirkanmaa.vaakuna.svg
+Satakunta - https://commons.wikimedia.org/wiki/File:Satakunta.vaakuna.svg
+Paijat-Hame - https://commons.wikimedia.org/wiki/File:P%C3%A4ij%C3%A4t-H%C3%A4me.vaakuna.svg
+Kanta-Hame - https://commons.wikimedia.org/wiki/File:Kanta-H%C3%A4me.vaakuna.svg
+Kymenlaakso - https://commons.wikimedia.org/wiki/File:Kymenlaakson_maakunnan_vaakuna.svg
+Uusimaa - https://commons.wikimedia.org/wiki/File:Uusimaa.vaakuna.svg
+Varsinais-Suomi - https://commons.wikimedia.org/wiki/File:Varsinais-Suomen.vaakuna.svg
+Ahvenanmaa - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_%C3%85land_3.svg
+
+France:
+Auvergne-Rhone-Alpes - https://commons.wikimedia.org/wiki/File:Flag_of_the_region_Auvergne-Rh%C3%B4ne-Alpes.svg
+Bourgogne-Franche-Comte - https://commons.wikimedia.org/wiki/File:Flag_of_the_region_Bourgogne-Franche-Comt%C3%A9_(fixed).svg
+Bretagne - https://commons.wikimedia.org/wiki/File:Flag_of_Brittany_(Gwenn_ha_du).svg
+Centre-Vale Loire - https://commons.wikimedia.org/wiki/File:Flag_of_Centre-Val_de_Loire.svg
+Corse - https://commons.wikimedia.org/wiki/File:Flag_of_Corsica.svg
+Grand Est - https://commons.wikimedia.org/wiki/File:Logo_R%C3%A9gion_Grand_Est_-_2016.svg
+Hauts-de-France - https://commons.wikimedia.org/wiki/File:Flag_of_the_Region_of_Hauts-de-France.svg
+ile-de-France - https://commons.wikimedia.org/wiki/File:Proposed_flag_of_%C3%8Ele-de-France.svg
+Normandie - https://commons.wikimedia.org/wiki/File:Flag_of_Normandie.svg
+Nouvelle-Aqutaine - https://commons.wikimedia.org/wiki/File:Flag_of_Nouvelle-Aquitaine.svg
+Occitanie - https://commons.wikimedia.org/wiki/File:Flag_of_Occitania.svg
+Payse la Loire - https://commons.wikimedia.org/wiki/File:Unofficial_flag_of_Pays-de-la-Loire.svg
+Provence-Alpes-Cote d'Azur - https://openclipart.org/detail/61081/france-provence-alpes-cote-d-azur
+Guadeloupe - https://en.wikipedia.org/wiki/File:Guadaloupe_logo.svg
+Guyane - https://commons.wikimedia.org/wiki/File:Flag_of_French_Guiana.svg
+La Reunion - https://commons.wikimedia.org/wiki/File:Proposed_flag_of_R%C3%A9union_(ARF).svg
+Martinique - https://commons.wikimedia.org/wiki/File:Flag-of-Martinique.svg
+Mayotte - https://commons.wikimedia.org/wiki/File:Coat_of_Arms_of_Mayotte.svg
+French Polynesia - https://commons.wikimedia.org/wiki/File:Flag_of_French_Polynesia.svg
+Saint-Barthelemy - TBA (this will go unused anyway)
+Saint-Martin - https://commons.wikimedia.org/wiki/File:Flag_of_France.svg
+Saint-Pierre-et-Miquelon - TBA
+Wallis-et-Futuna - https://commons.wikimedia.org/wiki/File:Flag_of_Wallis_and_Futuna.svg
+Nouvelle-Calédonie - https://commons.wikimedia.org/wiki/File:Flags_of_New_Caledonia.svg
+
+Germany:
+Baden-Wurttemberg - https://commons.wikimedia.org/wiki/File:Flag_of_Baden-W%C3%BCrttemberg.svg
+Bayern - https://commons.wikimedia.org/wiki/File:Flag_of_Bavaria_(striped).svg
+Berlin - https://commons.wikimedia.org/wiki/File:Flag_of_Berlin.svg
+Brandenburg - https://commons.wikimedia.org/wiki/File:Flag_of_Brandenburg.svg
+Bremen - https://commons.wikimedia.org/wiki/File:Flag_of_Bremen.svg
+Hamburg - https://commons.wikimedia.org/wiki/File:Flag_of_Hamburg.svg
+Hessen - https://commons.wikimedia.org/wiki/File:Flag_of_Hesse.svg
+Niedersachsen - https://commons.wikimedia.org/wiki/File:Flag_of_Lower_Saxony.svg
+Mercklenburg-Vorpommern - https://commons.wikimedia.org/wiki/File:Flag_of_Mecklenburg-Western_Pomerania.svg
+Nordrhein-Westfalen - https://commons.wikimedia.org/wiki/File:Flag_of_North_Rhine-Westphalia.svg
+Rheinland-Pfalz - https://commons.wikimedia.org/wiki/File:Flag_of_Rhineland-Palatinate.svg
+Saarland - https://commons.wikimedia.org/wiki/File:Flag_of_Saarland.svg
+Sachsen - https://commons.wikimedia.org/wiki/File:Flag_of_Saxony.svg
+Sachsen-Anhalt - https://commons.wikimedia.org/wiki/File:Flag_of_Saxony-Anhalt_(state).svg
+Schleswig-Holstein - https://commons.wikimedia.org/wiki/File:Flag_of_Schleswig-Holstein.svg
+Thuringen - https://commons.wikimedia.org/wiki/File:Flag_of_Thuringia.svg
+
+Italy:
+Abruzzo - https://commons.wikimedia.org/wiki/File:Flag_of_Abruzzo.svg
+Valle'Aosta - https://commons.wikimedia.org/wiki/File:Flag_of_Valle_d%27Aosta.svg
+Puglia - TBA
+Basilicata - https://commons.wikimedia.org/wiki/File:Flag_of_Basilicata.svg
+Calabria - https://commons.wikimedia.org/wiki/File:Flag_of_Calabria.svg
+Campania - https://commons.wikimedia.org/wiki/File:Flag_of_Campania.svg
+Emilia-Romagna - TBA
+Friuli-Venezia Giulia - https://commons.wikimedia.org/wiki/File:Flag_of_Friuli-Venezia_Giulia.svg
+Lazio - https://commons.wikimedia.org/wiki/File:Flag_of_Lazio.svg
+Liguria - https://commons.wikimedia.org/wiki/File:Flag_of_Liguria.svg
+Lombardia - https://commons.wikimedia.org/wiki/File:Flag_of_Lombardy.svg
+Marche - https://commons.wikimedia.org/wiki/File:Flag_of_Marche.svg
+Molise - https://commons.wikimedia.org/wiki/File:Flag_of_Molise.svg
+Piemonte - https://commons.wikimedia.org/wiki/File:Flag_of_Piedmont.svg
+Sardegna - TBA
+Sicilia - https://commons.wikimedia.org/wiki/File:Sicilian_Flag.svg
+Trentino-Alto Adige - https://commons.wikimedia.org/wiki/File:Flag_of_Trentino-South_Tyrol.svg
+Toscana - TBA
+Umbria - https://commons.wikimedia.org/wiki/File:Flag_of_Umbria.svg
+Veneto - TBA
+
+Mexico:
+Aguascalientes - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Aguascalientes.svg
+Baja California - TBA
+Baja California Sur - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Baja_California_Sur.svg
+Campeche - TBA 
+Chiapas - TBA 
+Chihuahua - modified version of https://commons.wikimedia.org/wiki/File:Flag_of_Chihuahua,_Chihuahua.svg 
+Coahuila - TBA 
+Colima - TBA
+Durango - TBA 
+Guanajuato - TBA 
+Guerrero - TBA 
+Hidalgo - TBA 
+Jalisco - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Jalisco.svg
+Mexico - TBA
+Ciudad de Mexico - https://upload.wikimedia.org/wikipedia/commons/6/69/Flag_of_Mexico_City_%28variant%29.svg 
+Michoacan - TBA 
+Morelos - TBA 
+Nayarit - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Nayarit.svg
+Nuevo Leon - TBA 
+Oaxaca - TBA 
+Puebla - TBA 
+Queretaro - https://commons.wikimedia.org/wiki/File:Flag_of_Queretaro.svg
+Quintana Roo - https://commons.wikimedia.org/wiki/File:Flag_of_Quintana_Roo.svg 
+San Luis Potosi - TBA 
+Sinaloa - TBA 
+Sonora - https://commons.wikimedia.org/wiki/File:Flag_of_Sonora.svg 
+Tabasco - TBA 
+Tamaulipas - https://commons.wikimedia.org/wiki/File:Flag_of_Tamaulipas.svg 
+Tlaxcala - https://commons.wikimedia.org/wiki/File:Flag_of_Tlaxcala.svg
+Veracruz - https://commons.wikimedia.org/wiki/File:Flag_of_Veracruz_City.svg 
+Yucatan - TBA 
+Zacatecas - https://commons.wikimedia.org/wiki/File:Escudo_de_armas_de_la_Ciudad_y_Estado_de_Zacatecas.svg
+
+Netherlands:
+Drenthe - https://commons.wikimedia.org/wiki/File:Flag_of_Drenthe.svg
+Flevoland - https://commons.wikimedia.org/wiki/File:Flag_of_Flevoland.svg
+Friesland - https://commons.wikimedia.org/wiki/File:Frisian_flag.svg
+Gelderland - https://commons.wikimedia.org/wiki/File:Flag_of_Gelderland.svg
+Groningen - https://commons.wikimedia.org/wiki/File:Flag_of_Groningen.svg
+Limburg - https://commons.wikimedia.org/wiki/File:Flag_of_Limburg_(Netherlands).svg
+Noord-Brabant - https://commons.wikimedia.org/wiki/File:North_Brabant-Flag.svg
+Noord-Holland - https://commons.wikimedia.org/wiki/File:Flag_of_North_Holland.svg
+Overijssel - https://commons.wikimedia.org/wiki/File:Flag_of_Overijssel.svg
+Zuid-Holland - https://commons.wikimedia.org/wiki/File:Flag_of_Zuid-Holland.svg
+Utrecht - https://commons.wikimedia.org/wiki/File:Utrecht_(province)-Flag.svg
+Zeeland - https://commons.wikimedia.org/wiki/File:Flag_of_Zeeland.svg
+
+Norway:
+Troms - https://commons.wikimedia.org/wiki/File:Troms_v%C3%A5pen.svg
+Finnmark - https://commons.wikimedia.org/wiki/File:Finnmark_v%C3%A5pen.svg
+Nordland - https://commons.wikimedia.org/wiki/File:Nordland_v%C3%A5pen.svg
+Trondelag - https://commons.wikimedia.org/wiki/File:Tr%C3%B8ndelag_v%C3%A5pen.svg
+More og Romsdal - https://commons.wikimedia.org/wiki/File:M%C3%B8re_og_Romsdal_v%C3%A5pen.svg
+Vestland - https://commons.wikimedia.org/wiki/File:Vestland_v%C3%A5pen.svg
+Rogaland - https://commons.wikimedia.org/wiki/File:Rogaland_v%C3%A5pen.svg
+Agder - https://commons.wikimedia.org/wiki/File:Agder_v%C3%A5pen.svg
+Vestland - https://commons.wikimedia.org/wiki/File:Vestfold_v%C3%A5pen_2024.svg
+Telemark - https://commons.wikimedia.org/wiki/File:Telemark_v%C3%A5pen_2024.svg
+Buskerud - TBA
+Akershus - https://commons.wikimedia.org/wiki/File:Akershus_v%C3%A5pen.svg
+Ostfold - https://commons.wikimedia.org/wiki/File:%C3%98stfold_v%C3%A5pen.svg
+Innlandet - https://commons.wikimedia.org/wiki/File:Innlandet_v%C3%A5pen.svg
+Oslo - https://commons.wikimedia.org/wiki/File:Oslo_komm.svg
+
+Peru:
+Amazonas - TBA
+Ancash - https://commons.wikimedia.org/wiki/File:Bandera_Ancash.svg
+Apurimac - TBA
+Arequipa - TBA
+Ayacucho - TBA
+Cajamarca - https://commons.wikimedia.org/wiki/File:Bandera_de_Cajamarca.svg
+Cuzco - own work (no emblem)
+Huancavelica - TBA
+Huanuco - https://commons.wikimedia.org/wiki/File:Flag_of_Hu%C3%A1nuco.svg
+Ica - https://commons.wikimedia.org/wiki/File:Bandera_Regi%C3%B3n_Ica.svg
+Junin - own work
+La Libertad - TBA
+Lambayeque - https://commons.wikimedia.org/wiki/File:Flag_of_Lambayeque_Department.svg
+Lima - https://commons.wikimedia.org/wiki/File:Coat_of_arms_of_Lima,_Lima_region.svg
+Loreto - https://commons.wikimedia.org/wiki/File:Bandera_Regi%C3%B3n_Loreto.svg
+Madre de Dios - https://commons.wikimedia.org/wiki/File:Flag_of_Madre_de_Dios_Department.svg
+Moquegua - own work
+Pasco - https://commons.wikimedia.org/wiki/File:Flag_of_Pasco_Department.svg
+Piura - own work
+Puno - own work
+San Martin - https://commons.wikimedia.org/wiki/File:Bandera_Regi%C3%B3n_San_Mart%C3%ADn.svg (nuked the CoA because it was 700kb)
+Tacna - TBA
+Tumbes - traced from https://commons.wikimedia.org/wiki/File:Bandera_de_Tumbes.png
+Ucayali - TBA
+
+Poland:
+Województwo wielkopolskie - TBA
+Województwo kujawsko-pomorskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_kujawsko-pomorskie_flag.svg
+Województwo małopolskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_ma%C5%82opolskie_flag_incorrect.svg
+Województwo łódzkie - own work
+Województwo dolnośląskie - eagle from https://commons.wikimedia.org/wiki/File:Dolny_%C5%9Al%C4%85sk.svg
+Województwo lubelskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_lubelskie_COA.svg + lesser poland's flag as a base
+Województwo lubuskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_lubuskie_flag.svg
+Województwo mazowieckie - TBA
+Województwo opolskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_opolskie_flag.svg
+Województwo podlaskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_podlaskie_flag.svg
+Województwo pomorskie - TBA
+Województwo śląskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_%C5%9Bl%C4%85skie_flag.svg
+Województwo podkarpackie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_podkarpackie_flag.svg
+Województwo świętokrzyskie - TBA
+Województwo warmińsko-mazurskie - https://commons.wikimedia.org/wiki/File:POL_wojew%C3%B3dztwo_warmi%C5%84sko-mazurskie_COA.svg
+Województwo zachodniopomorskie - TBA
+
+Russian Federation:
+Adygea - https://commons.wikimedia.org/wiki/File:Flag_of_Adygea.svg
+Bashkortostan - https://commons.wikimedia.org/wiki/File:Flag_of_Bashkortostan.svg
+Buryatia - https://commons.wikimedia.org/wiki/File:Flag_of_Buryatia.svg
+Altai Republic - https://commons.wikimedia.org/wiki/File:Flag_of_Altai_Republic.svg
+Dagestan - https://commons.wikimedia.org/wiki/File:Flag_of_Dagestan.svg
+Ingushetia - https://commons.wikimedia.org/wiki/File:Flag_of_Ingushetia.svg
+Kabardino-Balkaria - https://commons.wikimedia.org/wiki/File:Flag_of_Kabardino-Balkaria.svg
+Kalmykia - https://commons.wikimedia.org/wiki/File:Flag_of_Kalmykia.svg
+Karachay-Cherkessia - https://commons.wikimedia.org/wiki/File:Flag_of_Karachay-Cherkessia.svg
+Karelia - https://commons.wikimedia.org/wiki/File:Flag_of_Karelia.svg
+Komi - https://commons.wikimedia.org/wiki/File:Flag_of_Komi.svg
+Mari El - https://commons.wikimedia.org/wiki/File:Flag_of_Mari_El.svg
+Mordovia - https://commons.wikimedia.org/wiki/File:Flag_of_Mordovia.svg
+Sakha - https://commons.wikimedia.org/wiki/File:Flag_of_Sakha.svg
+Severnaya Ossetia - https://commons.wikimedia.org/wiki/File:Flag_of_North_Ossetia.svg
+Tatarstan - https://commons.wikimedia.org/wiki/File:Flag_of_Tatarstan.svg
+Tuva - https://commons.wikimedia.org/wiki/File:Flag_of_Tuva.svg
+Udmurtia - https://commons.wikimedia.org/wiki/File:Flag_of_Udmurtia.svg
+Khakassia - modified version of https://commons.wikimedia.org/wiki/File:Flag_of_Khakassia_(2002%E2%80%932003).svg
+Chechnya - https://commons.wikimedia.org/wiki/File:Flag_of_the_Chechen_Republic.svg
+Chuvashia - https://commons.wikimedia.org/wiki/File:Flag_of_Chuvashia.svg
+Altai Krai - TBA
+Krasnodar Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Krasnodar_Krai.svg
+Krasnoyarsk Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Krasnoyarsk_Krai.svg
+Primorsky Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Primorsky_Krai.svg
+Stavropol Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Stavropol_Krai.svg
+Khabarovsk Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Khabarovsk_Krai.svg
+Amur Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Amur_Oblast.svg
+Arkhangelsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Arkhangelsk_Oblast.svg
+Astrakhan Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Astrakhan_Oblast.svg
+Belgorod Oblast - TBA
+Bryansk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Bryansk_Oblast.svg
+Vladimir Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Vladimir_Oblast.svg
+Volgograd Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Volgograd_Oblast.svg
+Vologda Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Vologda_oblast.svg
+Voronezh Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Voronezh_Oblast.svg
+Ivanovo Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Ivanovo_Oblast.svg
+Irkutsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Irkutsk_Oblast.svg
+Kaliningrad Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kaliningrad_Oblast.svg
+Kaluga Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kaluga_Oblast.svg
+Kamchatka Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Kamchatka_Krai.svg
+Kemerovo Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kemerovo_Oblast.svg
+Kirov Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kirov_Oblast.svg
+Kostroma Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kostroma_Oblast.svg
+Kurgan Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kurgan_Oblast.svg
+Kursk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kursk_Oblast.svg
+Leningrad Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Leningrad_Oblast.svg
+Lipetsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Lipetsk_Oblast.svg
+Magadan Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Magadan_Oblast.svg
+Moscow Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Moscow_oblast.svg
+Murmansk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Murmansk_Oblast.svg
+Nizhny Novgorod Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Nizhny_Novgorod.svg
+Novgorod Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Novgorod_Oblast.svg
+Novosibirsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Novosibirsk_oblast.svg
+Omsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Omsk_Oblast.svg
+Orenburg Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Orenburg_Oblast.svg
+Oryol Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Oryol_Oblast.svg
+Penza Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Penza_Oblast.svg
+Perm Krai - https://commons.wikimedia.org/wiki/File:Flag_of_Perm_Krai.svg
+Pskov Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Pskov_Oblast.svg
+Rostov Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Rostov_Oblast.svg
+Ryazan Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Ryazan_Oblast.svg
+Samara Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Samara_Oblast.svg
+Saratov Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Saratov_Oblast.svg
+Sakhalin Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Sakhalin_Oblast.svg
+Sverdlovsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Sverdlovsk_Oblast.svg
+Smolensk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Smolensk_Oblast.svg
+Tambov Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Tambov_Oblast.svg
+Tver Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Tver_Oblast.svg
+Tomsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Tomsk_Oblast.svg
+Tula Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Tula_Oblast.svg
+Tyumen Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Tyumen_Oblast.svg
+Ulyanovsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Ulyanovsk_Oblast.svg
+Chelyabinsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Chelyabinsk_Oblast.svg
+Zabaykalsky Krai - modified version of https://commons.wikimedia.org/wiki/File:Flag_of_Ononsky_rayon_(Zabaykalsky_Krai)_(2011).svg
+Yaroslavl Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Yaroslavl_Oblast.svg
+Moscow - https://commons.wikimedia.org/wiki/File:Flag_of_Moscow,_Russia.svg
+Saint Petersburg - https://commons.wikimedia.org/wiki/File:Flag_of_Saint_Petersburg.svg
+Jewish Autonomous Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_the_Jewish_Autonomous_Oblast.svg
+Nenets Autonomous Okrug - https://commons.wikimedia.org/wiki/File:Flag_of_Nenets_Autonomous_District.svg
+Khanty-Mansi Autonomous Okrug - https://commons.wikimedia.org/wiki/File:Flag_of_Yugra.svg
+Chukotka - modified version of https://commons.wikimedia.org/wiki/File:Flag_of_Chukotka_(1994-1997).svg
+Yamalo-Nenets Autonomous Okrug - https://commons.wikimedia.org/wiki/File:Flag_of_Yamal-Nenets_Autonomous_District.svg
+
+South Korea:
+Seoul - https://commons.wikimedia.org/wiki/File:Logo_of_Seoul,_South_Korea.svg
+Busan - https://commons.wikimedia.org/wiki/File:Symbol_of_Busan.svg
+Daegu - https://commons.wikimedia.org/wiki/File:Symbol_of_Daegu.svg
+Incheon - https://commons.wikimedia.org/wiki/File:Emblem_of_Incheon.svg
+Gwangju - https://commons.wikimedia.org/wiki/File:Emblem_of_Gwangju.svg
+Daejeon - https://commons.wikimedia.org/wiki/File:Emblem_of_Daejeon.svg
+Ulsan - https://commons.wikimedia.org/wiki/File:Symbol_of_Ulsan.svg
+Sejong - https://commons.wikimedia.org/wiki/File:Flag_of_Sejong_City.svg
+Gyeonggi-do - https://commons.wikimedia.org/wiki/File:Emblem_of_Gyeonggi_Province_(2021).svg
+Gangwon - https://commons.wikimedia.org/wiki/File:Emblem_of_Gangwon_State.svg
+Chungcheongnam-do - https://commons.wikimedia.org/wiki/File:Emblem_of_North_Chungcheong_Province.svg
+Chungcheongbuk-do - https://commons.wikimedia.org/wiki/File:Seal_of_South_Chungcheong.svg
+Jeonbuk - https://commons.wikimedia.org/wiki/File:Emblem_of_Jeonbuk_State.svg
+Jeonnam - https://commons.wikimedia.org/wiki/File:Emblem_of_South_Jeolla_Province.svg
+Gyeongsangbuk-do - https://commons.wikimedia.org/wiki/File:Seal_of_North_Gyeongsang.svg
+Gyeongsangnam-do - https://en.wikipedia.org/wiki/File:Seal_of_South_Gyeongsang.svg
+Jeju - https://en.wikipedia.org/wiki/File:Logo_of_Jeju_Province,_South_Korea.svg
+
+Spain:
+Andalucia - https://commons.wikimedia.org/wiki/File:Escudo_de_Andaluc%C3%ADa_(oficial2).svg + 3 stripes
+Aragon - https://commons.wikimedia.org/wiki/File:Bandera_de_Arag%C3%B3n.svg
+Asturias - https://commons.wikimedia.org/wiki/File:Flag_of_Asturias.svg
+Islas Baleares - https://commons.wikimedia.org/wiki/File:Flag_of_the_Balearic_Islands.svg
+País Vasco - modified version of https://openclipart.org/detail/27802/flag-basque-country
+Canarias - https://commons.wikimedia.org/wiki/File:Flag_of_the_Canary_Islands.svg
+Cantabria - https://commons.wikimedia.org/wiki/File:Escudo_de_Cantabria_(oficial).svg + flag of poland XD
+Castilla y Leon - https://commons.wikimedia.org/wiki/File:Escudo_de_Castilla_y_Le%C3%B3n_-_Versi%C3%B3n_her%C3%A1ldica_oficial.svg
+Castilla–La Mancha - https://commons.wikimedia.org/wiki/File:Flag_of_Castile-La_Mancha.svg
+Cataluña - https://commons.wikimedia.org/wiki/File:Flag_of_Catalonia.svg
+Galicia - https://commons.wikimedia.org/wiki/File:Flag_of_Galicia.svg
+Extremadura - https://commons.wikimedia.org/wiki/File:Flag_of_Extremadura,_Spain.svg (no emblem tho)
+La Rioja - own work (no CoA sorry)
+Comunidad de Madrid - https://commons.wikimedia.org/wiki/File:Flag_of_the_Community_of_Madrid.svg
+Región de Murcia - https://commons.wikimedia.org/wiki/File:Flag_of_the_Region_of_Murcia.svg
+Navarra - https://commons.wikimedia.org/wiki/File:Bandera_de_Navarra.svg
+Comunidad Valenciana - https://commons.wikimedia.org/wiki/File:Flag_of_the_Land_of_Valencia_(official).svg
+ 
+Ukraine:
+Crimea - https://commons.wikimedia.org/wiki/File:Flag_of_Crimea.svg
+Vinnytsia Oblast - https://commons.wikimedia.org/wiki/File:Prapor_Vinnytskoyi_oblasti.svg
+Volyn Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Volyn_Oblast.svg
+Dnipropetrovsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Dnipropetrovsk_Oblast.svg
+Donetsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Donetsk_Oblast.svg
+Zhytomyr Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Zhytomyr_Oblast.svg
+Zakarpattia Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Zakarpattia_Oblast.svg
+Zaporizhzhia Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Zaporizhia_Oblast.svg
+Ivano-Frankivsk Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Ivano-Frankivsk_Oblast2.svg
+Kyiv Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kyiv_Oblast.svg
+Kirovohrad Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kirovohrad_Oblast.svg
+Luhansk Oblast - TBA
+Lviv Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Lviv_Oblast.svg
+Mykolaiv Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Mykolaiv_Oblast.svg
+Poltava Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Poltava_Oblast.svg
+Rivne Oblast - modified version of https://en.wikipedia.org/wiki/Rivne_Oblast#/media/File:Coat_of_Arms_of_Rivne_Oblast.svg
+Sumy Oblast - modified version of https://commons.wikimedia.org/wiki/File:Coat_of_Arms_of_Sumy_Oblast.svg
+Ternopil Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Ternopil_Oblast.svg
+Kharkiv Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Kharkiv_Oblast.svg
+Kherson Oblast - TBA
+Khmelnytskyi Oblast - modified version of https://en.wikipedia.org/wiki/Khmelnytskyi_Oblast#/media/File:Coat_of_Arms_of_Khmelnytskyi_Oblast.svg
+Cherkasy Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Cherkasy_Oblast.svg
+Chernivtsi Oblast - TBA
+Chernihiv Oblast - https://commons.wikimedia.org/wiki/File:Flag_of_Chernihiv_Oblast.svg
+Kyiv - https://commons.wikimedia.org/wiki/File:Flag_of_Kyiv_Kurovskyi.svg
+Sevastopol - https://commons.wikimedia.org/wiki/File:COA_of_Sevastopol.svg
+

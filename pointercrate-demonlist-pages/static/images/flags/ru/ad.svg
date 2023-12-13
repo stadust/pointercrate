@@ -1,0 +1,17 @@
+<svg width="1000" height="500" viewBox="-1966 0 3932 1966" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect x="-1966" width="3932" height="1966" fill="#296912"/>
+<g fill="#FDFC02">
+<path id="star" d="M0 488l22.96 70.67h74.3L37.15 602.34 60.11 673 0 629.33-60.11 673l22.96-70.66-60.11-43.67h74.3Z"/>
+<path id="arrow" d="M0 781 32 963 11 983v687l22 23v171L0 1831l-33 33V1693l22-23V983l-21-20Z"/>
+<use xlink:href="#star" y="-392"/>
+<g id="half">
+<use xlink:href="#star" x="486"/>
+<use xlink:href="#star" x="486" y="-314"/>
+<use xlink:href="#star" x="923" y="-93"/>
+<use xlink:href="#star" x="1271" y="255"/>
+<use xlink:href="#star" x="1494" y="693"/>
+<use xlink:href="#arrow" transform="rotate(40,0,1326)"/>
+</g>
+<use xlink:href="#half" transform="scale(-1,1)"/>
+</g>
+</svg>
