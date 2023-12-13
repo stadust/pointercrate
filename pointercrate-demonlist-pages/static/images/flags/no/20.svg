@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="1280" height="1280" version="1.1" viewBox="0 0 1280 1280" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect width="1280" height="1280"/>
+<g fill="#fce300">
+  <rect id="rect994" x="382.5" y="80" width="115" height="260"/>
+  <use transform="translate(400)" xlink:href="#rect994"/>
+  <use transform="translate(200)" xlink:href="#rect994"/>
+   <rect x="292.5" y="705" width="695" height="475"/>
+   <rect x="467.5" y="230" width="345" height="700"/>
+   <rect id="rect994-5" x="252.5" y="600" width="115" height="180"/>
+  <use transform="translate(660)" xlink:href="#rect994-5"/>
+</g>
+<g fill="#fff" stroke="#000" stroke-width="5">
+  <path d="m620 420 20-30 20 30v95h-40z"/>
+  <path d="m617.5 965 22.5-45 22.5 45v165h-45z"/>
+</g>
+</svg>

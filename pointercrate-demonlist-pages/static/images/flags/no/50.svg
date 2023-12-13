@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="985"
+   height="800"
+   version="1.1"
+   id="svg13"
+   sodipodi:docname="Flag_of_Nord-Trøndelag2.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs17" />
+  <sodipodi:namedview
+     id="namedview15"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="1"
+     inkscape:cx="460.5"
+     inkscape:cy="267"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg13" />
+  <rect
+     width="800"
+     height="985"
+     fill="#ffffff"
+     id="rect2"
+     x="-800.00342"
+     y="0.0025968552"
+     transform="rotate(-90)" />
+  <g
+     fill="#fbdf40"
+     id="g11"
+     transform="rotate(-90,400.00301,400.00041)">
+    <path
+       id="leg"
+       d="m 330,0 c 20,40 35,100 35,160 v 240 h 70 V 160 C 435,100 450,40 470,0 Z" />
+    <use
+       xlink:href="#leg"
+       transform="rotate(-90,400,400)"
+       id="use5" />
+    <use
+       xlink:href="#leg"
+       transform="rotate(90,400,400)"
+       id="use7" />
+    <path
+       d="m 365,400 v 425 c 0,60 -15,120 -35,160 H 470 C 450,950 435,885 435,825 V 400 Z"
+       id="path9" />
+  </g>
+</svg>
