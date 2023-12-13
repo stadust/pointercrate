@@ -87,7 +87,7 @@ impl IndividualStatsViewer {
                             div.tooltip {
                                 "following countries"
                                 div.tooltiptext.fade {
-                                    "United States of America, United Kingdom, Australia, Canada, South Korea, Russian Federation, Mexico, France, Spain, Germany, Argentina, Norway, Chile, Colombia, Sweden, Portugal, Brazil, Romania, Finland, Poland, Italy, China, Philippines, Peru, Ukraine, Netherlands"
+                                    "Argentina, Australia, Brazil, Canada, Chile, China, Colombia, Finland, France, Germany, Italy, Mexico, Netherlands, Norway, Peru, Philippines, Poland, Portugal, Romania, Russian Federation, South Korea, Spain, Sweden, Ukraine, United Kingdom, United States"
                                 }
                             } 
                             " you can select a state/province from the dropdown below to focus the stats viewer to that state/province."
