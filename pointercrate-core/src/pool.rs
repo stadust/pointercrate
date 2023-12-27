@@ -58,7 +58,7 @@ AND NOT EXISTS (
     pub async fn connection(&self) -> Result<PoolConnection<Postgres>> {
         let mut connection = self.connection_pool.acquire().await?;
 
-        audit_connection(&mut connection, 0).await?;
+        audit_connection(&mut *connection, 0).await?;
 
         Ok(connection)
     }
@@ -66,7 +66,7 @@ AND NOT EXISTS (
     pub async fn transaction(&self) -> Result<Transaction<'static, Postgres>> {
         let mut connection = self.connection_pool.begin().await?;
 
-        audit_connection(&mut connection, 0).await?;
+        audit_connection(&mut *connection, 0).await?;
 
         Ok(connection)
     }

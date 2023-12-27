@@ -34,12 +34,12 @@ pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>, auth: Option<TokenAuth>,
 ) -> Result<Page> {
     // should be const, but chrono aint const :(
-    let beginning_of_time: DateTime<FixedOffset> =
-        FixedOffset::east(0).from_utc_datetime(&NaiveDate::from_ymd(2017, 1, 4).and_hms(0, 0, 0));
+    let beginning_of_time: DateTime<FixedOffset> = 
+        FixedOffset::east_opt(0).unwrap().from_utc_datetime(&NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap());
 
     let mut connection = pool.connection().await?;
 
-    let demonlist = current_list(&mut connection).await?;
+    let demonlist = current_list(&mut *connection).await?;
 
     let specified_when = cookies
         .get("when")
@@ -53,15 +53,15 @@ pub async fn overview(
     };
 
     let tardis = match specified_when {
-        Some(destination) => Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut connection, destination).await?),
+        Some(destination) => Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut *connection, destination).await?),
         _ => Tardis::new(timemachine.unwrap_or(false)),
     };
 
     let mut page = Page::new(OverviewPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
         },
         demonlist,
         time_machine: tardis,
@@ -79,7 +79,7 @@ pub async fn overview(
 pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> Result<Redirect> {
     let mut connection = pool.connection().await?;
 
-    let position = MinimalDemon::by_id(demon_id, &mut connection).await?.position;
+    let position = MinimalDemon::by_id(demon_id, &mut *connection).await?.position;
 
     Ok(Redirect::to(rocket::uri!("/demonlist", demon_page(position))))
 }
@@ -88,52 +88,51 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>, auth: Option<TokenAuth>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
-    let full_demon = FullDemon::by_position(position, &mut connection).await?;
+    let full_demon = FullDemon::by_position(position, &mut *connection).await?;
 
-    let audit_log = audit_log_for_demon(full_demon.demon.base.id, &mut connection).await?;
+    let audit_log = audit_log_for_demon(full_demon.demon.base.id, &mut *connection).await?;
 
     let mut addition_time = None;
 
     let mut modifications = audit_log
         .iter()
-        .filter_map(|entry| {
-            match entry.r#type {
-                AuditLogEntryType::Modification(ref modification) =>
-                    match modification.position {
-                        Some(old_position) if old_position > 0 =>
-                            Some(DemonMovement {
-                                from_position: old_position,
-                                at: entry.time,
-                            }),
-                        _ => None,
-                    },
-                AuditLogEntryType::Addition => {
-                    addition_time = Some(entry.time);
-
-                    None
-                },
+        .filter_map(|entry| match entry.r#type {
+            AuditLogEntryType::Modification(ref modification) => match modification.position {
+                Some(old_position) if old_position > 0 => Some(DemonMovement {
+                    from_position: old_position,
+                    at: entry.time,
+                }),
                 _ => None,
-            }
+            },
+            AuditLogEntryType::Addition => {
+                addition_time = Some(entry.time);
+
+                None
+            },
+            _ => None,
         })
         .collect::<Vec<_>>();
 
     if let Some(addition) = addition_time {
-        modifications.insert(0, DemonMovement {
-            from_position: modifications
-                .first()
-                .map(|m| m.from_position)
-                .unwrap_or(full_demon.demon.base.position),
-            at: addition,
-        });
+        modifications.insert(
+            0,
+            DemonMovement {
+                from_position: modifications
+                    .first()
+                    .map(|m| m.from_position)
+                    .unwrap_or(full_demon.demon.base.position),
+                at: addition,
+            },
+        );
     }
 
     let mut page = Page::new(DemonPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
         },
-        demonlist: current_list(&mut connection).await?,
+        demonlist: current_list(&mut *connection).await?,
         movements: modifications,
         integration: gd
             .data_for_demon(
@@ -159,7 +158,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
-        nationalities_in_use: Nationality::used(&mut connection).await?,
+        nationalities_in_use: Nationality::used(&mut *connection).await?,
     }))
 }
 
@@ -172,7 +171,7 @@ macro_rules! heatmap_query {
     ($connection: expr, $query: expr, $($param:expr),*) => {
         {
             let mut css = String::new();
-            let mut stream = sqlx::query!($query, $($param),*).fetch(&mut $connection);
+            let mut stream = sqlx::query!($query, $($param),*).fetch(&mut *$connection);
 
             if let Some(firstrow) = stream.next().await {
                 // first one is the one with most score

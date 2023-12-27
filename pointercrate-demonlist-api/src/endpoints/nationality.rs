@@ -8,9 +8,9 @@ pub async fn subdivisions(pool: &State<PointercratePool>, iso_code: String) -> R
     let mut connection = pool.connection().await?;
 
     // good code
-    let nationality = Nationality::by_country_code_or_name(iso_code.to_uppercase().as_ref(), &mut connection).await?;
+    let nationality = Nationality::by_country_code_or_name(iso_code.to_uppercase().as_ref(), &mut *connection).await?;
 
-    Ok(Json(nationality.subdivisions(&mut connection).await?))
+    Ok(Json(nationality.subdivisions(&mut *connection).await?))
 }
 
 #[rocket::get("/ranking")]
@@ -23,7 +23,7 @@ pub async fn nation(pool: &State<PointercratePool>, iso_code: String) -> Result<
     let mut connection = pool.connection().await?;
 
     // good code
-    let nationality = Nationality::by_country_code_or_name(iso_code.to_uppercase().as_ref(), &mut connection).await?;
+    let nationality = Nationality::by_country_code_or_name(iso_code.to_uppercase().as_ref(), &mut *connection).await?;
 
-    Ok(Tagged(nationality.upgrade(&mut connection).await?))
+    Ok(Tagged(nationality.upgrade(&mut *connection).await?))
 }

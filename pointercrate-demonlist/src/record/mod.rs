@@ -114,11 +114,10 @@ impl<'de> Deserialize<'de> for RecordStatus {
             "submitted" => Ok(RecordStatus::Submitted),
             "rejected" => Ok(RecordStatus::Rejected),
             "under consideration" => Ok(RecordStatus::UnderConsideration),
-            _ =>
-                Err(serde::de::Error::invalid_value(
-                    serde::de::Unexpected::Str(&string),
-                    &"'approved', 'submitted', 'under consideration' or 'rejected'",
-                )),
+            _ => Err(serde::de::Error::invalid_value(
+                serde::de::Unexpected::Str(&string),
+                &"'approved', 'submitted', 'under consideration' or 'rejected'",
+            )),
         }
     }
 }
@@ -241,7 +240,7 @@ impl FullRecord {
                                 err
                             );
 
-                            match self.delete(&mut connection).await {
+                            match self.delete(&mut *connection).await {
                                 Ok(_) => (),
                                 Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                             }
@@ -254,7 +253,7 @@ impl FullRecord {
                 } else {
                     warn!("Server response to 'HEAD {}' was {:?}, deleting submission!", video, response);
 
-                    match self.delete(&mut connection).await {
+                    match self.delete(&mut *connection).await {
                         Ok(_) => (),
                         Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                     }
@@ -266,7 +265,7 @@ impl FullRecord {
                     error
                 );
 
-                match self.delete(&mut connection).await {
+                match self.delete(&mut *connection).await {
                     Ok(_) => (),
                     Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                 }

@@ -103,7 +103,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
 
                     // if the time part of the datetime object is just zeros, the log entry was generated from deltas,
                     // meaning we can't figure out reasons accurately
-                    if time.time() == NaiveTime::from_hms(12, 0, 0) {
+                    if time.time() == NaiveTime::from_hms_opt(12, 0, 0).unwrap() {
                         movement_log.push(MovementLogEntry {
                             reason: MovementReason::Unknown,
                             time,

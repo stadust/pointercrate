@@ -37,8 +37,8 @@ pub async fn paginate(
         pagination.banned = Some(false);
     }
 
-    let mut players = pagination.page(&mut connection).await?;
-    let (max_id, min_id) = Player::extremal_player_ids(&mut connection).await?;
+    let mut players = pagination.page(&mut *connection).await?;
+    let (max_id, min_id) = Player::extremal_player_ids(&mut *connection).await?;
 
     pagination_response!(
         "/api/v1/players/",
@@ -57,8 +57,8 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
     let mut pagination = query.0;
     let mut connection = pool.connection().await?;
 
-    let mut players = pagination.page(&mut connection).await?;
-    let max_index = RankedPlayer::max_index(&mut connection).await?;
+    let mut players = pagination.page(&mut *connection).await?;
+    let max_index = RankedPlayer::max_index(&mut *connection).await?;
 
     pagination_response!(
         "/api/v1/players/ranking/",
@@ -77,7 +77,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
     let mut connection = pool.connection().await?;
 
     Ok(Tagged(
-        Player::by_id(player_id, &mut connection).await?.upgrade(&mut connection).await?,
+        Player::by_id(player_id, &mut *connection).await?.upgrade(&mut *connection).await?,
     ))
 }
 
@@ -129,22 +129,23 @@ pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data
                     member_id: user_id,
                     player_id,
                 }
-                .into())
+                .into());
             }
 
             if !claim.verified {
-                return Err(DemonlistError::ClaimUnverified.into())
+                return Err(DemonlistError::ClaimUnverified.into());
             }
 
             claim
         },
         Ok(claim) => claim,
-        Err(_) =>
+        Err(_) => {
             return Err(DemonlistError::ClaimNotFound {
                 member_id: user_id,
                 player_id,
             }
-            .into()),
+            .into())
+        },
     };
 
     let claim = claim.apply_patch(data.0, &mut auth.connection).await?;
@@ -210,7 +211,7 @@ pub async fn geolocate_nationality(
     let claim = PlayerClaim::get(auth.user.inner().id, player_id, &mut auth.connection).await?;
 
     if !claim.verified {
-        return Err(DemonlistError::ClaimUnverified.into())
+        return Err(DemonlistError::ClaimUnverified.into());
     }
 
     ratelimits.geolocate(ip)?;
@@ -223,20 +224,19 @@ pub async fn geolocate_nationality(
         ip
     ))
     .await
-    .map_err(|err| {
-        CoreError::InternalServerError {
-            message: format!("Ip Geolocation failed: {}", err),
-        }
+    .map_err(|err| CoreError::InternalServerError {
+        message: format!("Ip Geolocation failed: {}", err),
     })?;
 
-    let data = response.json::<GeolocationResponse>().await.map_err(|err| {
-        CoreError::InternalServerError {
+    let data = response
+        .json::<GeolocationResponse>()
+        .await
+        .map_err(|err| CoreError::InternalServerError {
             message: format!("Ip Geolocation succeeded, but we could not deserialize the response: {}", err),
-        }
-    })?;
+        })?;
 
     if data.security.is_vpn {
-        return Err(DemonlistError::VpsDetected.into())
+        return Err(DemonlistError::VpsDetected.into());
     }
 
     let nationality = Nationality::by_country_code_or_name(&data.country_code, &mut auth.connection).await?;
