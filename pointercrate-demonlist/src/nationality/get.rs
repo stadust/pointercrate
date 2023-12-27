@@ -137,13 +137,12 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
 
         match creations.last_mut() {
             Some(mini_demon) if mini_demon.demon == row.demon_name => mini_demon.players.push(row.player_name),
-            _ =>
-                creations.push(MiniDemonWithPlayers {
-                    id: row.demon,
-                    demon: row.demon_name,
-                    position: row.position,
-                    players: vec![row.player_name],
-                }),
+            _ => creations.push(MiniDemonWithPlayers {
+                id: row.demon,
+                demon: row.demon_name,
+                position: row.position,
+                players: vec![row.player_name],
+            }),
         }
     }
 
@@ -204,14 +203,13 @@ pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection
 
         match records.last_mut() {
             Some(record) if record.demon == row.demon_name => record.players.push(row.player_name),
-            _ =>
-                records.push(BestRecord {
-                    id: row.demon_id,
-                    demon: row.demon_name,
-                    position: row.position,
-                    progress: row.progress,
-                    players: vec![row.player_name],
-                }),
+            _ => records.push(BestRecord {
+                id: row.demon_id,
+                demon: row.demon_name,
+                position: row.position,
+                progress: row.progress,
+                players: vec![row.player_name],
+            }),
         }
     }
 

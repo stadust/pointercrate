@@ -46,7 +46,7 @@ impl AccountPageTab for ListIntegrationTab {
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body()
+                .body();
             },
         };
         let is_moderator = permissions.require_permission(user.inner().permissions, MODERATOR).is_ok();

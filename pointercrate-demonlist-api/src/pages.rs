@@ -34,8 +34,9 @@ pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>, auth: Option<TokenAuth>,
 ) -> Result<Page> {
     // should be const, but chrono aint const :(
-    let beginning_of_time: DateTime<FixedOffset> = 
-        FixedOffset::east_opt(0).unwrap().from_utc_datetime(&NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap());
+    let beginning_of_time: DateTime<FixedOffset> = FixedOffset::east_opt(0)
+        .unwrap()
+        .from_utc_datetime(&NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap());
 
     let mut connection = pool.connection().await?;
 

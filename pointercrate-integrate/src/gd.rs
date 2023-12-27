@@ -686,9 +686,7 @@ impl PgCache {
         let level = Level {
             level_id,
             name: Cow::Owned(row.level_name),
-            description: row
-                .description
-                .map(|description| Thunk::Processed(Cow::Owned(description))),
+            description: row.description.map(|description| Thunk::Processed(Cow::Owned(description))),
             version: row.level_version as u32,
             creator: row.creator_id as u64,
             difficulty: i16_to_level_rating(row.difficulty, row.is_demon),

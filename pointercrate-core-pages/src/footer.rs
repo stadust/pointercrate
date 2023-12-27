@@ -58,23 +58,21 @@ impl Render for &Link {
 impl Render for &FooterColumn {
     fn render(&self) -> Markup {
         match self {
-            FooterColumn::LinkList { heading, links } =>
-                html! {
-                    nav {
-                        h2 {(heading)}
-                        @for link in links {
-                            (link)
-                            br;
-                        }
+            FooterColumn::LinkList { heading, links } => html! {
+                nav {
+                    h2 {(heading)}
+                    @for link in links {
+                        (link)
+                        br;
                     }
-                },
-            FooterColumn::Arbitrary { heading, content } =>
-                html! {
-                    div {
-                        h2 {(heading)}
-                        (*content)
-                    }
-                },
+                }
+            },
+            FooterColumn::Arbitrary { heading, content } => html! {
+                div {
+                    h2 {(heading)}
+                    (*content)
+                }
+            },
         }
     }
 }

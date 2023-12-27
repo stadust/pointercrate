@@ -132,7 +132,7 @@ impl PermissionsManager {
         if !self.implied_by_bits(permissions_we_have).contains(&permission_required) {
             return Err(CoreError::MissingPermissions {
                 required: permission_required,
-            })
+            });
         }
 
         Ok(())
@@ -180,9 +180,10 @@ mod test {
         assert_eq!(permission_manager().implied_by(PERM1), set![PERM1, PERM2, PERM3]);
         assert_eq!(permission_manager().implied_by(PERM4), set![PERM4, PERM5]);
 
-        assert_eq!(permission_manager().implied_by_bits(0x1 | 0x8), set![
-            PERM1, PERM2, PERM3, PERM4, PERM5,
-        ]);
+        assert_eq!(
+            permission_manager().implied_by_bits(0x1 | 0x8),
+            set![PERM1, PERM2, PERM3, PERM4, PERM5,]
+        );
     }
 
     #[test]

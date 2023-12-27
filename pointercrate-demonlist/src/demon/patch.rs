@@ -118,7 +118,7 @@ impl Demon {
 
     pub async fn set_requirement(&mut self, requirement: i16, connection: &mut PgConnection) -> Result<()> {
         if !(0..=100).contains(&requirement) {
-            return Err(DemonlistError::InvalidRequirement)
+            return Err(DemonlistError::InvalidRequirement);
         }
 
         // Delete associated notes
@@ -189,13 +189,13 @@ impl MinimalDemon {
         let maximal_position = Demon::max_position(connection).await?;
 
         if to > maximal_position || to < 1 {
-            return Err(DemonlistError::InvalidPosition { maximal: maximal_position })
+            return Err(DemonlistError::InvalidPosition { maximal: maximal_position });
         }
 
         if to == self.position {
             warn!("No-op move of demon {}", self);
 
-            return Ok(())
+            return Ok(());
         }
 
         // FIXME: Temporarily move the demon somewhere else because otherwise the unique constraints

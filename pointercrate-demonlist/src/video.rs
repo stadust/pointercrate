@@ -19,11 +19,11 @@ pub fn validate(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| DemonlistError::MalformedVideoUrl)?;
 
     if !SCHEMES.contains(&url.scheme()) {
-        return Err(CoreError::InvalidUrlScheme.into())
+        return Err(CoreError::InvalidUrlScheme.into());
     }
 
     if !url.username().is_empty() || url.password().is_some() {
-        return Err(CoreError::UrlAuthenticated.into())
+        return Err(CoreError::UrlAuthenticated.into());
     }
 
     if let Some(host) = url.domain() {
@@ -37,26 +37,26 @@ pub fn validate(url: &str) -> Result<String> {
                         return Ok(format!(
                             "https://www.youtube.com/watch?v={}",
                             video_id.chars().take(11).collect::<String>()
-                        ))
+                        ));
                     }
                 }
 
                 Err(CoreError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }.into())
             },
-            "youtu.be" =>
+            "youtu.be" => {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
-                        [video_id] =>
-                            Ok(format!(
-                                "https://www.youtube.com/watch?v={}",
-                                video_id.chars().take(11).collect::<String>()
-                            )),
+                        [video_id] => Ok(format!(
+                            "https://www.youtube.com/watch?v={}",
+                            video_id.chars().take(11).collect::<String>()
+                        )),
                         _ => Err(CoreError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }.into()),
                     }
                 } else {
                     Err(CoreError::InvalidUrlFormat { expected: YOUTUBE_FORMAT }.into())
-                },
-            "www.twitch.tv" | "twitch.tv" =>
+                }
+            },
+            "www.twitch.tv" | "twitch.tv" => {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["videos", video_id] => Ok(format!("https://www.twitch.tv/videos/{}", video_id)),
@@ -65,24 +65,25 @@ pub fn validate(url: &str) -> Result<String> {
                     }
                 } else {
                     Err(CoreError::InvalidUrlFormat { expected: TWITCH_FORMAT }.into())
-                },
-            "everyplay.com" | "www.everyplay.com" =>
+                }
+            },
+            "everyplay.com" | "www.everyplay.com" => {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["videos", video_id] => Ok(format!("https://everyplay.com/videos/{}", video_id)),
-                        _ =>
-                            Err(CoreError::InvalidUrlFormat {
-                                expected: EVERYPLAY_FORMAT,
-                            }
-                            .into()),
+                        _ => Err(CoreError::InvalidUrlFormat {
+                            expected: EVERYPLAY_FORMAT,
+                        }
+                        .into()),
                     }
                 } else {
                     Err(CoreError::InvalidUrlFormat {
                         expected: EVERYPLAY_FORMAT,
                     }
                     .into())
-                },
-            "www.bilibili.com" | "bilibili.com" =>
+                }
+            },
+            "www.bilibili.com" | "bilibili.com" => {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["video", video_id] => Ok(format!("https://www.bilibili.com/video/{}", video_id)),
@@ -90,8 +91,9 @@ pub fn validate(url: &str) -> Result<String> {
                     }
                 } else {
                     Err(CoreError::InvalidUrlFormat { expected: BILIBILI_FORMAT }.into())
-                },
-            "vimeo.com" | "www.vimeo.com" =>
+                }
+            },
+            "vimeo.com" | "www.vimeo.com" => {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         [video_id] => Ok(format!("https://vimeo.com/{}", video_id)),
@@ -99,7 +101,8 @@ pub fn validate(url: &str) -> Result<String> {
                     }
                 } else {
                     Err(CoreError::InvalidUrlFormat { expected: VIMEO_FORMAT }.into())
-                },
+                }
+            },
             _ => Err(DemonlistError::UnsupportedVideoHost),
         }
     } else {

@@ -11,7 +11,7 @@ impl AccountPageTab for UsersTab {
     fn should_display_for(&self, permissions_we_have: u16, permissions: &PermissionsManager) -> bool {
         for perm in &self.0 {
             if permissions.require_permission(permissions_we_have, *perm).is_ok() {
-                return true
+                return true;
             }
         }
 

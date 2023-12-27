@@ -17,7 +17,7 @@ impl DatabasePlayer {
         .is_claimed;
 
         if is_claimed {
-            return Err(DemonlistError::AlreadyClaimed)
+            return Err(DemonlistError::AlreadyClaimed);
         }
 
         // first, clear all claims by the given user

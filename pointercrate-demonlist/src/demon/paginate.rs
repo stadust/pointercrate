@@ -53,13 +53,13 @@ impl DemonIdPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
         if let Some(limit) = self.limit {
             if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into())
+                return Err(CoreError::InvalidPaginationLimit.into());
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
             if after < before {
-                return Err(CoreError::AfterSmallerBefore.into())
+                return Err(CoreError::AfterSmallerBefore.into());
             }
         }
 
@@ -166,13 +166,13 @@ impl DemonPositionPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
         if let Some(limit) = self.limit {
             if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into())
+                return Err(CoreError::InvalidPaginationLimit.into());
             }
         }
 
         if let (Some(after), Some(before)) = (self.before_position, self.after_position) {
             if after < before {
-                return Err(CoreError::AfterSmallerBefore.into())
+                return Err(CoreError::AfterSmallerBefore.into());
             }
         }
 

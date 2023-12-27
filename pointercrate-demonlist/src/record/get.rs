@@ -31,27 +31,26 @@ impl FullRecord {
             .await;
 
         match result {
-            Ok(row) =>
-                Ok(FullRecord {
-                    id,
-                    progress: row.progress,
-                    video: row.video,
-                    status: RecordStatus::from_sql(&row.status),
-                    player: DatabasePlayer {
-                        id: row.player_id,
-                        name: row.player_name,
-                        banned: row.player_banned,
-                    },
-                    demon: MinimalDemon {
-                        id: row.demon_id,
-                        position: row.position,
-                        name: row.demon_name,
-                    },
-                    submitter: Some(Submitter {
-                        id: row.submitter_id,
-                        banned: row.submitter_banned,
-                    }),
+            Ok(row) => Ok(FullRecord {
+                id,
+                progress: row.progress,
+                video: row.video,
+                status: RecordStatus::from_sql(&row.status),
+                player: DatabasePlayer {
+                    id: row.player_id,
+                    name: row.player_name,
+                    banned: row.player_banned,
+                },
+                demon: MinimalDemon {
+                    id: row.demon_id,
+                    position: row.position,
+                    name: row.demon_name,
+                },
+                submitter: Some(Submitter {
+                    id: row.submitter_id,
+                    banned: row.submitter_banned,
                 }),
+            }),
 
             Err(Error::RowNotFound) => Err(DemonlistError::RecordNotFound { record_id: id }),
             Err(err) => Err(err.into()),
@@ -126,12 +125,11 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
                 banned: row.banned,
             },
             nationality: match (row.nation, row.iso_country_code) {
-                (Some(nation), Some(code)) =>
-                    Some(Nationality {
-                        iso_country_code: code,
-                        nation,
-                        subdivision: None, // don't display states in the records list
-                    }),
+                (Some(nation), Some(code)) => Some(Nationality {
+                    iso_country_code: code,
+                    nation,
+                    subdivision: None, // don't display states in the records list
+                }),
                 _ => None,
             },
         })

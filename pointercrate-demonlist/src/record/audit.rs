@@ -76,19 +76,17 @@ pub async fn audit_log_for_record(record_id: i32, connection: &mut PgConnection)
                     progress: modification.progress,
                     status: modification.status_.as_deref().map(RecordStatus::from_sql),
                     player: match modification.player_id {
-                        Some(id) =>
-                            Some(NamedId {
-                                name: modification.player_name,
-                                id,
-                            }),
+                        Some(id) => Some(NamedId {
+                            name: modification.player_name,
+                            id,
+                        }),
                         _ => None,
                     },
                     demon: match modification.demon_id {
-                        Some(id) =>
-                            Some(NamedId {
-                                name: modification.demon_name,
-                                id,
-                            }),
+                        Some(id) => Some(NamedId {
+                            name: modification.demon_name,
+                            id,
+                        }),
                         _ => None,
                     },
                     video: modification.video,

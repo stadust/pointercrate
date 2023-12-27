@@ -80,7 +80,7 @@ impl User {
 
     pub fn validate_name(name: &str) -> Result<()> {
         if name.len() < 3 || name != name.trim() {
-            return Err(UserError::InvalidUsername)
+            return Err(UserError::InvalidUsername);
         }
 
         Ok(())

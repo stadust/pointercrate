@@ -28,10 +28,11 @@ impl FullPlayer {
     pub async fn apply_patch(mut self, patch: PatchPlayer, connection: &mut PgConnection) -> Result<Self> {
         if let Some(nationality) = patch.nationality {
             match nationality {
-                Some(ident) =>
+                Some(ident) => {
                     self.player
                         .set_nationality(Nationality::by_country_code_or_name(ident.as_ref(), connection).await?, connection)
-                        .await?,
+                        .await?
+                },
                 None => self.player.reset_nationality(connection).await?,
             }
         }
@@ -66,7 +67,7 @@ impl FullPlayer {
 
         // Nothing to be done
         if name == self.player.base.name.as_ref() {
-            return Ok(())
+            return Ok(());
         } else if name.to_lowercase() != self.player.base.name.to_lowercase() {
             // If they are equal case insensitively, we're only doing a cosmetic rename, which won't
             // even require a merge
@@ -102,11 +103,12 @@ impl FullPlayer {
         let claim_on_with = PlayerClaim::verified_claim_on(with.id, &mut *connection).await?;
 
         match (claim_on_self, claim_on_with) {
-            (Some(_), Some(_)) =>
+            (Some(_), Some(_)) => {
                 return Err(DemonlistError::ConflictingClaims {
                     player1: self.player.base.name.clone(),
                     player2: with.name.clone(),
-                }),
+                })
+            },
             (Some(_), None) => {
                 sqlx::query!("DELETE FROM player_claims WHERE player_id = $1", with.id)
                     .execute(&mut *connection)
@@ -281,11 +283,10 @@ impl Player {
 
                         Ok(())
                     },
-                    Err(sqlx::Error::RowNotFound) =>
-                        Err(DemonlistError::SubdivisionNotFound {
-                            nation_code: nationality.iso_country_code.clone(),
-                            subdivision_code,
-                        }),
+                    Err(sqlx::Error::RowNotFound) => Err(DemonlistError::SubdivisionNotFound {
+                        nation_code: nationality.iso_country_code.clone(),
+                        subdivision_code,
+                    }),
                     Err(err) => Err(err.into()),
                 }
             },

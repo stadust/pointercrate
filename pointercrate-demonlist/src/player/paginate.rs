@@ -41,7 +41,7 @@ impl PlayerPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Player>> {
         if let Some(limit) = self.limit {
             if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into())
+                return Err(CoreError::InvalidPaginationLimit.into());
             }
         }
 
@@ -71,12 +71,11 @@ impl PlayerPagination {
             let row = row?;
 
             let nationality = match (row.get("nation"), row.get("iso_country_code")) {
-                (Some(nation), Some(country_code)) =>
-                    Some(Nationality {
-                        iso_country_code: country_code,
-                        nation,
-                        subdivision: None, // dont include subdivision in pagination data
-                    }),
+                (Some(nation), Some(country_code)) => Some(Nationality {
+                    iso_country_code: country_code,
+                    nation,
+                    subdivision: None, // dont include subdivision in pagination data
+                }),
                 _ => None,
             };
 
@@ -124,7 +123,7 @@ impl RankingPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>> {
         if let Some(limit) = self.limit {
             if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into())
+                return Err(CoreError::InvalidPaginationLimit.into());
             }
         }
 
@@ -153,12 +152,11 @@ impl RankingPagination {
             let row = row?;
 
             let nationality = match (row.get("nation"), row.get("iso_country_code")) {
-                (Some(nation), Some(country_code)) =>
-                    Some(Nationality {
-                        iso_country_code: country_code,
-                        nation,
-                        subdivision: None, // dont include subdivision in pagination data
-                    }),
+                (Some(nation), Some(country_code)) => Some(Nationality {
+                    iso_country_code: country_code,
+                    nation,
+                    subdivision: None, // dont include subdivision in pagination data
+                }),
                 _ => None,
             };
 

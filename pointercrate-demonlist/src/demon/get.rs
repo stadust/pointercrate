@@ -51,10 +51,9 @@ impl MinimalDemon {
         if further_demons.is_empty() {
             match demon {
                 Some(demon) => Ok(demon),
-                None =>
-                    Err(DemonlistError::DemonNotFoundName {
-                        demon_name: name.to_string(),
-                    }),
+                None => Err(DemonlistError::DemonNotFoundName {
+                    demon_name: name.to_string(),
+                }),
             }
         } else {
             further_demons.extend(demon);
@@ -92,11 +91,9 @@ impl Demon {
             .fetch_one(connection)
             .await
             .map(Into::into)
-            .map_err(|err| {
-                match err {
-                    Error::RowNotFound => DemonlistError::DemonNotFound { demon_id: id },
-                    _ => err.into(),
-                }
+            .map_err(|err| match err {
+                Error::RowNotFound => DemonlistError::DemonNotFound { demon_id: id },
+                _ => err.into(),
             })
     }
 
@@ -105,11 +102,9 @@ impl Demon {
             .fetch_one(connection)
             .await
             .map(Into::into)
-            .map_err(|err| {
-                match err {
-                    Error::RowNotFound => DemonlistError::DemonNotFoundPosition { demon_position: position },
-                    _ => err.into(),
-                }
+            .map_err(|err| match err {
+                Error::RowNotFound => DemonlistError::DemonNotFoundPosition { demon_position: position },
+                _ => err.into(),
             })
     }
 }
