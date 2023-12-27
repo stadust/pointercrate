@@ -8,7 +8,7 @@ use dash_rs::{
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
     response::ResponseError,
-    Base64Decoded, PercentDecoded, ProcessError, ThunkContent,
+    ProcessError,
 };
 use futures::{FutureExt, StreamExt};
 use log::{error, info, trace};
@@ -151,7 +151,7 @@ impl PgCache {
                         .await
                         .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
                         .map(|_| ()),
-                    Ok(demons) => {
+                    Ok(mut demons) => {
                         if demons.is_empty() {
                             self.mark_levels_request_result_as_absent(&request)
                                 .await
@@ -160,7 +160,7 @@ impl PgCache {
                         } else {
                             trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
 
-                            self.store_levels_request(&request, &demons)
+                            self.store_levels_request(&request, &mut demons)
                                 .await
                                 .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
 
@@ -208,8 +208,8 @@ impl PgCache {
 
                 match content {
                     Ok(text) => match dash_rs::response::parse_download_gj_level_response(&text[..]) {
-                        Ok(demon) => {
-                            self.store_level_data(demon.level_id, &demon.level_data)
+                        Ok(mut demon) => {
+                            self.store_level_data(demon.level_id, &mut demon.level_data)
                                 .await
                                 .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
 
@@ -388,13 +388,13 @@ impl PgCache {
             index_6: song_row.index_6.map(Cow::Owned),
             index_7: song_row.index_7.map(Cow::Owned),
             index_8: Cow::Owned(song_row.index_8),
-            link: Thunk::Processed(PercentDecoded(Cow::Owned(song_row.song_link))),
+            link: Thunk::Processed(Cow::Owned(song_row.song_link)),
         };
 
         Ok(self.make_cache_entry(meta, song))
     }
 
-    pub async fn store_newgrounds_song<'a>(&self, song: &NewgroundsSong<'a>) -> Result<CacheEntryMeta, CacheError> {
+    pub async fn store_newgrounds_song<'a>(&self, song: &mut NewgroundsSong<'a>) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
         let meta = sqlx::query_as!(
@@ -408,10 +408,7 @@ impl PgCache {
         .await?;
 
         // FIXME: this
-        let song_link = match song.link {
-            Thunk::Unprocessed(unprocessed) => PercentDecoded::from_unprocessed(unprocessed)?.0.to_string(),
-            Thunk::Processed(ref link) => link.0.to_string(),
-        };
+        let song_link = song.link.process()?;
 
         sqlx::query!(
             "INSERT INTO gj_newgrounds_song (song_id, song_name, index_3, song_artist, filesize, index_6, index_7, index_8, song_link) \
@@ -425,7 +422,7 @@ impl PgCache {
             song.index_6.as_deref(),
             song.index_7.as_deref(),
             &song.index_8.as_ref(),
-            song_link
+            song_link.as_ref()
         )
         .execute(&mut *connection)
         .await?;
@@ -477,20 +474,24 @@ impl PgCache {
 
         let level = LevelData {
             level_data: Thunk::Processed(bincode::deserialize(&row.level_data[..]).unwrap()),
-            password: match row.level_password {
+            password: Thunk::Processed(match row.level_password {
                 None => Password::NoCopy,
                 Some(-1) => Password::FreeCopy,
                 Some(number) => Password::PasswordCopy(number as u32),
-            },
+            }),
             time_since_upload: Cow::Owned(row.time_since_upload),
             time_since_update: Cow::Owned(row.time_since_update),
-            index_36: row.index_36.map(Cow::Owned),
+            index_36: Cow::Owned(row.index_36.unwrap_or(String::new())),
+            index_40: Cow::Owned(String::new()), // TODO: maybe one day we'll care about these
+            index_52: Cow::Owned(String::new()),
+            index_53: Cow::Owned(String::new()),
+            index_57: Cow::Owned(String::new()),
         };
 
         Ok(self.make_cache_entry(meta, level))
     }
 
-    pub async fn store_level_data<'a>(&self, level_id: u64, data: &LevelData<'a>) -> Result<CacheEntryMeta, CacheError> {
+    pub async fn store_level_data<'a>(&self, level_id: u64, data: &mut LevelData<'a>) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
         let meta = sqlx::query_as!(
@@ -505,19 +506,12 @@ impl PgCache {
 
         // FIXME: this
         trace!("Starting to parse level data");
-        let objects = match data.level_data {
-            Thunk::Unprocessed(unprocessed) => {
-                let processed = Objects::from_unprocessed(unprocessed).map_err(|err| {
-                    error!("Error processing level data: {:?}", err);
+        let objects = data.level_data.process().map_err(|err| {
+            error!("Error processing level data: {:?}", err);
 
-                    CacheError::MalformedLevelData
-                })?;
-
-                bincode::serialize(&processed)
-            },
-            Thunk::Processed(ref proc) => bincode::serialize(proc),
-        }
-        .map_err(|err| {
+            CacheError::MalformedLevelData
+        })?;
+        let serialized_objects = bincode::serialize(&objects).map_err(|err| {
             error!("Error binary serializing level data: {:?}", err);
 
             CacheError::MalformedLevelData
@@ -530,15 +524,15 @@ impl PgCache {
              level_id=EXCLUDED.level_id,level_data=EXCLUDED.level_data,level_password=EXCLUDED.level_password,time_since_upload=EXCLUDED.\
              time_since_upload,time_since_update=EXCLUDED.time_since_update,index_36=EXCLUDED.index_36",
             level_id as i64,
-            objects,
-            match data.password {
+            serialized_objects,
+            match data.password.process()? {
                 Password::NoCopy => None,
                 Password::FreeCopy => Some(-1),
-                Password::PasswordCopy(pw) => Some(pw as i32),
+                Password::PasswordCopy(pw) => Some(*pw as i32),
             },
             data.time_since_upload.as_ref(),
             data.time_since_update.as_ref(),
-            data.index_36.as_deref()
+            data.index_36.as_ref()
         )
         .execute(&mut *connection)
         .await?;
@@ -614,7 +608,7 @@ impl PgCache {
     }
 
     pub async fn store_levels_request<'a, 'b>(
-        &self, request: &LevelsRequest<'a>, levels: &Vec<ListedLevel<'b>>,
+        &self, request: &LevelsRequest<'a>, levels: &mut Vec<ListedLevel<'b>>,
     ) -> Result<CacheEntryMeta, CacheError> {
         let hash = {
             let mut hasher = DefaultHasher::new();
@@ -649,7 +643,7 @@ impl PgCache {
                 self.store_creator(creator).await?;
             }
 
-            if let Some(ref song) = level.custom_song {
+            if let Some(ref mut song) = level.custom_song {
                 self.store_newgrounds_song(song).await?;
             }
 
@@ -694,7 +688,7 @@ impl PgCache {
             name: Cow::Owned(row.level_name),
             description: row
                 .description
-                .map(|description| Thunk::Processed(Base64Decoded(Cow::Owned(description)))),
+                .map(|description| Thunk::Processed(Cow::Owned(description))),
             version: row.level_version as u32,
             creator: row.creator_id as u64,
             difficulty: i16_to_level_rating(row.difficulty, row.is_demon),
@@ -723,7 +717,7 @@ impl PgCache {
 
     // This must be the most horrifying piece of code I have ever written.
     async fn store_level<'a, T, U, V>(
-        &self, level: &Level<'a, T, U, V>, creator_id: u64, custom_song_id: Option<u64>,
+        &self, level: &mut Level<'a, T, U, V>, creator_id: u64, custom_song_id: Option<u64>,
     ) -> Result<CacheEntryMeta, CacheError> {
         let mut connection = self.pool.begin().await?;
 
@@ -752,12 +746,9 @@ impl PgCache {
              index_46,index_47=EXCLUDED.index_47",
             level.level_id as i64,
             level.name.as_ref(),
-            match &level.description {
-                Some(thunk) => {
-                    Some(match thunk {
-                        Thunk::Processed(processed) => processed.0.to_string(),
-                        Thunk::Unprocessed(unproc) => Base64Decoded::from_unprocessed(unproc)?.0.to_string(),
-                    })
+            match level.description {
+                Some(ref mut thunk) => {
+                    Some(thunk.process()?.to_string())
                 },
                 None => None,
             },
@@ -853,6 +844,7 @@ fn level_length_to_i16(length: LevelLength) -> i16 {
         LevelLength::Medium => 3,
         LevelLength::Long => 4,
         LevelLength::ExtraLong => 5,
+        LevelLength::Platformer => 6,
     }
 }
 
@@ -867,6 +859,7 @@ fn i16_to_level_length(value: i16) -> LevelLength {
         3 => LevelLength::Medium,
         4 => LevelLength::Long,
         5 => LevelLength::ExtraLong,
+        6 => LevelLength::Platformer,
         _ => unreachable!(),
     }
 }

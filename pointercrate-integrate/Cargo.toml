@@ -16,4 +16,4 @@ tokio = {version = "1.20.4", features = ["rt"]}
 
 [dependencies.dash-rs]
 git = "https://github.com/stadust/dash-rs"
-rev = "b4d6045ab978dfa2ef225b78f61d315ee7d114d4"
+rev = "b01eb4cf9ff0a001cdfe07755a52843ff93b9002"
