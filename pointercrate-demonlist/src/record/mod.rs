@@ -122,7 +122,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
     }
 }
 
-#[derive(Debug, Serialize, Display, Hash)]
+#[derive(Debug, Deserialize, Serialize, Display, Hash)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct FullRecord {
     pub id: i32,

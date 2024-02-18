@@ -1,6 +1,7 @@
 use crate::error::Result;
 use derive_more::Display;
 use serde::Serialize;
+use serde::Deserialize;
 use sqlx::PgConnection;
 
 pub use paginate::SubmitterPagination;
@@ -12,7 +13,7 @@ mod paginate;
 mod patch;
 mod post;
 
-#[derive(Debug, Serialize, Hash, Display, Copy, Clone)]
+#[derive(Debug, Deserialize, Serialize, Hash, Display, Copy, Clone, PartialEq, Eq)]
 #[display(fmt = "{} (Banned: {})", id, banned)]
 pub struct Submitter {
     pub id: i32,

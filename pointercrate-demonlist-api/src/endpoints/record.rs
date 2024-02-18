@@ -179,11 +179,14 @@ pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<Pointercr
         None => pool.transaction().await?,
     };
 
-    let record = FullRecord::by_id(record_id, &mut *connection).await?;
+    let mut record = FullRecord::by_id(record_id, &mut *connection).await?;
 
     // TODO: allow access if auth is provided and a verified claim on the record's player is given
-    if !is_helper && record.status != RecordStatus::Approved {
-        return Err(DemonlistError::RecordNotFound { record_id }.into());
+    if !is_helper {
+        if record.status != RecordStatus::Approved {
+            return Err(DemonlistError::RecordNotFound { record_id }.into());
+        }
+        record.submitter = None;
     }
 
     Ok(Tagged(record))

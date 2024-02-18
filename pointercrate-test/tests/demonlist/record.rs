@@ -1,5 +1,5 @@
 use pointercrate_core::error::PointercrateError;
-use pointercrate_demonlist::{error::DemonlistError, player::DatabasePlayer, record::RecordStatus};
+use pointercrate_demonlist::{error::DemonlistError, player::DatabasePlayer, record::{FullRecord, RecordStatus}};
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
@@ -130,4 +130,19 @@ async fn submit_existing_record(pool: Pool<Postgres>) {
 
     assert_eq!(json["code"].as_i64(), Some(42217i64));
     assert_eq!(json["data"]["existing"].as_i64(), Some(existing as i64));
+}
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+    let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
+
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing))
+        .get_success_result()
+        .await;
+
+    assert_eq!(record.submitter, None);
 }
