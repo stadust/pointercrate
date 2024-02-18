@@ -1,5 +1,9 @@
 use pointercrate_core::error::PointercrateError;
-use pointercrate_demonlist::{error::DemonlistError, player::DatabasePlayer, record::{FullRecord, RecordStatus}};
+use pointercrate_demonlist::{
+    error::DemonlistError,
+    player::DatabasePlayer,
+    record::{FullRecord, RecordStatus},
+};
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
@@ -140,9 +144,7 @@ async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
     let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
     let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
 
-    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing))
-        .get_success_result()
-        .await;
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing)).get_success_result().await;
 
     assert_eq!(record.submitter, None);
 }

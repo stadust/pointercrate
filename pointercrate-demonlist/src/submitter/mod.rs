@@ -1,7 +1,7 @@
 use crate::error::Result;
 use derive_more::Display;
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 use sqlx::PgConnection;
 
 pub use paginate::SubmitterPagination;

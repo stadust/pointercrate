@@ -2,7 +2,6 @@ use pointercrate_user::ADMINISTRATOR;
 use rocket::http::Status;
 use sqlx::{Pool, Postgres};
 
-
 #[sqlx::test(migrations = "../migrations")]
 pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
@@ -31,7 +30,7 @@ pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
         .header("X-Real-IP", "127.0.0.1")
         .expect_status(Status::TooManyRequests)
         .execute()
-        .await; 
+        .await;
 
     client
         .post("/api/v1/auth/", &())
@@ -39,7 +38,7 @@ pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
         .header("X-Real-IP", "127.0.0.1")
         .expect_status(Status::TooManyRequests)
         .execute()
-        .await; 
+        .await;
 }
 
 #[sqlx::test(migrations = "../migrations")]
