@@ -2,8 +2,13 @@ use pointercrate_core::error::PointercrateError;
 use pointercrate_demonlist::{
     error::DemonlistError,
     player::DatabasePlayer,
-    record::{FullRecord, RecordStatus},
+    record::{
+        note::Note,
+        FullRecord, RecordStatus,
+    },
+    LIST_HELPER,
 };
+use pointercrate_test::{demonlist::add_simple_record, user::system_user_with_perms};
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
@@ -147,4 +152,37 @@ async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
     let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing)).get_success_result().await;
 
     assert_eq!(record.submitter, None);
+}
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_record_note_creation_and_deletion(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let helper = system_user_with_perms(LIST_HELPER, &mut *connection).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+    let record = add_simple_record(100, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
+
+    // Create a record note whose author is `helper`.
+    let note: Note = clnt
+        .post(
+            format!("/api/v1/records/{}/notes", record),
+            &serde_json::json! {{
+                "content": "My Note",
+                "is_public": false,
+            }},
+        )
+        .authorize_as(&helper)
+        .expect_status(Status::Created)
+        .get_success_result()
+        .await;
+
+    // Check that the author was set correctly.
+    assert_eq!(note.author.as_ref(), Some(&helper.inner().name));
+
+    clnt.delete(format!("/api/v1/records/{}/notes/{}", record, note.id))
+        .authorize_as(&helper)
+        .expect_status(Status::NoContent)
+        .execute()
+        .await;
 }
