@@ -5,8 +5,8 @@ mod post;
 
 pub use self::{get::notes_on, patch::PatchNote, post::NewNote};
 use pointercrate_core::etag::Taggable;
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},

@@ -2,10 +2,7 @@ use pointercrate_core::error::PointercrateError;
 use pointercrate_demonlist::{
     error::DemonlistError,
     player::DatabasePlayer,
-    record::{
-        note::Note,
-        FullRecord, RecordStatus,
-    },
+    record::{note::Note, FullRecord, RecordStatus},
     LIST_HELPER,
 };
 use pointercrate_test::{demonlist::add_simple_record, user::system_user_with_perms};
