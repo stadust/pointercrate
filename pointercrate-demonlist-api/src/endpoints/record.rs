@@ -295,7 +295,7 @@ pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) 
 pub async fn patch_note(record_id: i32, note_id: i32, mut auth: TokenAuth, patch: Json<PatchNote>) -> Result<Tagged<Note>> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
-    if note.author.as_ref() == Some(&auth.user.inner().name) {
+    if note.author.as_ref() != Some(&auth.user.inner().name) {
         auth.require_permission(LIST_ADMINISTRATOR)?;
     } else {
         auth.require_permission(LIST_HELPER)?;
@@ -312,7 +312,7 @@ pub async fn patch_note(record_id: i32, note_id: i32, mut auth: TokenAuth, patch
 pub async fn delete_note(record_id: i32, note_id: i32, mut auth: TokenAuth) -> Result<Status> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
-    if note.author.as_ref() == Some(&auth.user.inner().name) {
+    if note.author.as_ref() != Some(&auth.user.inner().name) {
         auth.require_permission(LIST_ADMINISTRATOR)?;
     } else {
         auth.require_permission(LIST_HELPER)?;
