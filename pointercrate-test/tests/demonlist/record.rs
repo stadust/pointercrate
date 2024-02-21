@@ -1,5 +1,11 @@
 use pointercrate_core::error::PointercrateError;
-use pointercrate_demonlist::{error::DemonlistError, player::DatabasePlayer, record::RecordStatus};
+use pointercrate_demonlist::{
+    error::DemonlistError,
+    player::DatabasePlayer,
+    record::{note::Note, FullRecord, RecordStatus},
+    LIST_HELPER,
+};
+use pointercrate_test::{demonlist::add_simple_record, user::system_user_with_perms};
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
@@ -7,7 +13,7 @@ use sqlx::{PgConnection, Pool, Postgres};
 async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, _r2, _r3) = setup_pagination_tests(&mut connection).await;
+    let (p1, r1, _r2, _r3) = setup_pagination_tests(&mut *connection).await;
 
     let json: Vec<serde_json::Value> = clnt
         .get(format!("/api/v1/records/?player={}", p1))
@@ -23,10 +29,10 @@ async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
 async fn paginate_records_with_verified_claim(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, r2, _r3) = setup_pagination_tests(&mut connection).await;
-    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
+    let (p1, r1, r2, _r3) = setup_pagination_tests(&mut *connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
 
-    pointercrate_test::demonlist::put_claim(user.inner().id, p1, true, false, &mut connection).await;
+    pointercrate_test::demonlist::put_claim(user.inner().id, p1, true, false, &mut *connection).await;
 
     let json: Vec<serde_json::Value> = clnt
         .get(format!("/api/v1/records/?player={}", p1))
@@ -43,10 +49,10 @@ async fn paginate_records_with_verified_claim(pool: Pool<Postgres>) {
 async fn paginate_records_with_unverified_claim(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, r1, _r2, _r3) = setup_pagination_tests(&mut connection).await;
-    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
+    let (p1, r1, _r2, _r3) = setup_pagination_tests(&mut *connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
 
-    pointercrate_test::demonlist::put_claim(user.inner().id, p1, false, false, &mut connection).await;
+    pointercrate_test::demonlist::put_claim(user.inner().id, p1, false, false, &mut *connection).await;
 
     let json: Vec<serde_json::Value> = clnt
         .get(format!("/api/v1/records/?player={}", p1))
@@ -62,10 +68,10 @@ async fn paginate_records_with_unverified_claim(pool: Pool<Postgres>) {
 async fn paginate_records_with_verified_claim_wrong_player(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (p1, _r1, _r2, _r3) = setup_pagination_tests(&mut connection).await;
-    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
+    let (p1, _r1, _r2, _r3) = setup_pagination_tests(&mut *connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
 
-    pointercrate_test::demonlist::put_claim(user.inner().id, p1, true, false, &mut connection).await;
+    pointercrate_test::demonlist::put_claim(user.inner().id, p1, true, false, &mut *connection).await;
 
     let json: Vec<serde_json::Value> = clnt.get("/api/v1/records/?player=2").authorize_as(&user).get_result().await;
 
@@ -90,11 +96,11 @@ async fn setup_pagination_tests(connection: &mut PgConnection) -> (i32, i32, i32
 async fn unauthed_submit_for_player_with_locked_submission(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
-    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
-    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, &mut connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, &mut *connection).await;
 
-    pointercrate_test::demonlist::put_claim(user.inner().id, player1.id, true, true, &mut connection).await;
+    pointercrate_test::demonlist::put_claim(user.inner().id, player1.id, true, true, &mut *connection).await;
 
     let submission =
         serde_json::json! {{"progress": 100, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890"}};
@@ -115,9 +121,9 @@ async fn unauthed_submit_for_player_with_locked_submission(pool: Pool<Postgres>)
 async fn submit_existing_record(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
-    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut connection).await;
-    let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+    let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
 
     let submission =
         serde_json::json! {{"progress": 60, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890"}};
@@ -130,4 +136,50 @@ async fn submit_existing_record(pool: Pool<Postgres>) {
 
     assert_eq!(json["code"].as_i64(), Some(42217i64));
     assert_eq!(json["data"]["existing"].as_i64(), Some(existing as i64));
+}
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+    let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
+
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing)).get_success_result().await;
+
+    assert_eq!(record.submitter, None);
+}
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_record_note_creation_and_deletion(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let helper = system_user_with_perms(LIST_HELPER, &mut *connection).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+    let record = add_simple_record(100, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
+
+    // Create a record note whose author is `helper`.
+    let note: Note = clnt
+        .post(
+            format!("/api/v1/records/{}/notes", record),
+            &serde_json::json! {{
+                "content": "My Note",
+                "is_public": false,
+            }},
+        )
+        .authorize_as(&helper)
+        .expect_status(Status::Created)
+        .get_success_result()
+        .await;
+
+    // Check that the author was set correctly.
+    assert_eq!(note.author.as_ref(), Some(&helper.inner().name));
+
+    clnt.delete(format!("/api/v1/records/{}/notes/{}", record, note.id))
+        .authorize_as(&helper)
+        .expect_status(Status::NoContent)
+        .execute()
+        .await;
 }

@@ -21,7 +21,7 @@ async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, Datab
 async fn test_unauthenticated_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (_, unbanned) = create_players(&mut connection).await;
+    let (_, unbanned) = create_players(&mut *connection).await;
 
     let json: Vec<Player> = client.get("/api/v1/players").expect_status(Status::Ok).get_result().await;
 
@@ -33,8 +33,8 @@ async fn test_unauthenticated_pagination(pool: Pool<Postgres>) {
 async fn test_authenticated_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (_, unbanned) = create_players(&mut connection).await;
-    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
+    let (_, unbanned) = create_players(&mut *connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
 
     let json: Vec<Player> = client
         .get("/api/v1/players")
@@ -51,8 +51,8 @@ async fn test_authenticated_pagination(pool: Pool<Postgres>) {
 async fn test_list_helper_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (banned, unbanned) = create_players(&mut connection).await;
-    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
+    let (banned, unbanned) = create_players(&mut *connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
 
     let json: Vec<Player> = client
         .get("/api/v1/players")
@@ -70,7 +70,7 @@ async fn test_list_helper_pagination(pool: Pool<Postgres>) {
 async fn test_patch_player_nationality(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
     let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
-    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
 
     let etag = Player::by_id(player.id, &mut *connection)
         .await

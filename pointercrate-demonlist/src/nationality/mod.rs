@@ -101,11 +101,10 @@ impl<'de> Deserialize<'de> for Continent {
             "north america" => Ok(Continent::NorthAmerica),
             "south america" => Ok(Continent::SouthAmerica),
             "central america" => Ok(Continent::MiddleAmerica),
-            _ =>
-                Err(serde::de::Error::invalid_value(
-                    serde::de::Unexpected::Str(&string),
-                    &"'Asia', 'Europe', 'Australia', 'Africa', 'North America', 'South America' or 'Central America'",
-                )),
+            _ => Err(serde::de::Error::invalid_value(
+                serde::de::Unexpected::Str(&string),
+                &"'Asia', 'Europe', 'Australia', 'Africa', 'North America', 'South America' or 'Central America'",
+            )),
         }
     }
 }

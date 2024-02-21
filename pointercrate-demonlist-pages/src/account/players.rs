@@ -34,13 +34,14 @@ impl AccountPageTab for PlayersPage {
     async fn content(&self, _user: &AuthenticatedUser, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
         let nationalities = match Nationality::all(connection).await {
             Ok(nationalities) => nationalities,
-            Err(err) =>
+            Err(err) => {
                 return ErrorFragment {
                     status: err.status_code(),
                     reason: "Internal Server Error".to_string(),
                     message: err.to_string(),
                 }
-                .body(),
+                .body()
+            },
         };
 
         html! {

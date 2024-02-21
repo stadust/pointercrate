@@ -56,7 +56,7 @@ impl DemonPage {
     fn description(&self) -> String {
         if let GDIntegrationResult::Success(ref level, ..) = self.integration {
             if let Some(Thunk::Processed(ref description)) = level.description {
-                return format!("{}: {}", self.title(), description.0)
+                return format!("{}: {}", self.title(), description);
             }
         }
         format!("{}: <No Description Provided>", self.title())
@@ -261,7 +261,7 @@ impl DemonPage {
                     @if let Some(Thunk::Processed(ref description)) = level.description {
                         div.underlined.pad {
                             q {
-                                (description.0)
+                                (description)
                             }
                         }
                     }
@@ -299,7 +299,7 @@ impl DemonPage {
                                     "Level Password: "
                                 }
                                 br;
-                                (level_data.password)
+                                (level_data.password.as_processed().map(|pw| pw.to_string()).unwrap_or("Unknown".to_string()))
                             }
                             span {
                                 b {
@@ -364,7 +364,7 @@ impl DemonPage {
                                     }
                                     br;
                                     @match song.link {
-                                        Thunk::Processed(ref link) => a.link href = (link.0) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
+                                        Thunk::Processed(ref link) => a.link href = (link) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
                                         _ => "unreachable!()"
                                     }
                                 }

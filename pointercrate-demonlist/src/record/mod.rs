@@ -114,16 +114,15 @@ impl<'de> Deserialize<'de> for RecordStatus {
             "submitted" => Ok(RecordStatus::Submitted),
             "rejected" => Ok(RecordStatus::Rejected),
             "under consideration" => Ok(RecordStatus::UnderConsideration),
-            _ =>
-                Err(serde::de::Error::invalid_value(
-                    serde::de::Unexpected::Str(&string),
-                    &"'approved', 'submitted', 'under consideration' or 'rejected'",
-                )),
+            _ => Err(serde::de::Error::invalid_value(
+                serde::de::Unexpected::Str(&string),
+                &"'approved', 'submitted', 'under consideration' or 'rejected'",
+            )),
         }
     }
 }
 
-#[derive(Debug, Serialize, Display, Hash)]
+#[derive(Debug, Deserialize, Serialize, Display, Hash)]
 #[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct FullRecord {
     pub id: i32,
@@ -241,7 +240,7 @@ impl FullRecord {
                                 err
                             );
 
-                            match self.delete(&mut connection).await {
+                            match self.delete(&mut *connection).await {
                                 Ok(_) => (),
                                 Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                             }
@@ -254,7 +253,7 @@ impl FullRecord {
                 } else {
                     warn!("Server response to 'HEAD {}' was {:?}, deleting submission!", video, response);
 
-                    match self.delete(&mut connection).await {
+                    match self.delete(&mut *connection).await {
                         Ok(_) => (),
                         Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                     }
@@ -266,7 +265,7 @@ impl FullRecord {
                     error
                 );
 
-                match self.delete(&mut connection).await {
+                match self.delete(&mut *connection).await {
                     Ok(_) => (),
                     Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                 }

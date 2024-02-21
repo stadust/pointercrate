@@ -54,10 +54,13 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
 
         while let Some(row) = addition_stream.next().await {
             let row = row?;
-            additions.insert(row.time, NamedId {
-                id: row.id,
-                name: row.name,
-            });
+            additions.insert(
+                row.time,
+                NamedId {
+                    id: row.id,
+                    name: row.name,
+                },
+            );
         }
     }
 
@@ -71,10 +74,13 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
 
         while let Some(row) = move_stream.next().await {
             let row = row?;
-            all_moves.insert(row.time, NamedId {
-                id: row.id,
-                name: row.name,
-            });
+            all_moves.insert(
+                row.time,
+                NamedId {
+                    id: row.id,
+                    name: row.name,
+                },
+            );
         }
     }
 
@@ -82,20 +88,19 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
         let time = log_entry.time;
 
         match log_entry.r#type {
-            AuditLogEntryType::Addition =>
-                movement_log.push(MovementLogEntry {
-                    time,
-                    new_position: None,
-                    reason: MovementReason::Added,
-                }),
-            AuditLogEntryType::Modification(data) =>
+            AuditLogEntryType::Addition => movement_log.push(MovementLogEntry {
+                time,
+                new_position: None,
+                reason: MovementReason::Added,
+            }),
+            AuditLogEntryType::Modification(data) => {
                 if let Some(old_position) = data.position {
                     // whenever a demon is moved, its position is first set to -1, all other demons are shifted, and
                     // then it is moved to its final position however since audit log entries with
                     // the same timestamp are not ordered in any way, trying to use this entry to draw conclusions about
                     // whether the demon we're looking at was moved leads to some very convoluted code .
                     if old_position == -1 {
-                        continue
+                        continue;
                     }
 
                     // update the previous entry's "new_position" field
@@ -103,49 +108,45 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
 
                     // if the time part of the datetime object is just zeros, the log entry was generated from deltas,
                     // meaning we can't figure out reasons accurately
-                    if time.time() == NaiveTime::from_hms(12, 0, 0) {
+                    if time.time() == NaiveTime::from_hms_opt(12, 0, 0).unwrap() {
                         movement_log.push(MovementLogEntry {
                             reason: MovementReason::Unknown,
                             time,
                             new_position: None,
                         });
 
-                        continue
+                        continue;
                     }
 
                     let moved = all_moves.get(&time);
 
                     match moved {
-                        Some(id) if id.id == demon_id =>
-                            movement_log.push(MovementLogEntry {
-                                reason: MovementReason::Moved,
-                                time,
-                                new_position: None,
-                            }),
-                        Some(id) =>
-                            movement_log.push(MovementLogEntry {
-                                reason: MovementReason::OtherMoved { other: id.clone() },
-                                new_position: Some(old_position),
-                                time,
-                            }),
+                        Some(id) if id.id == demon_id => movement_log.push(MovementLogEntry {
+                            reason: MovementReason::Moved,
+                            time,
+                            new_position: None,
+                        }),
+                        Some(id) => movement_log.push(MovementLogEntry {
+                            reason: MovementReason::OtherMoved { other: id.clone() },
+                            new_position: Some(old_position),
+                            time,
+                        }),
                         None => {
                             let added_demon = additions.get(&time);
 
                             match added_demon {
-                                Some(added_demon) =>
-                                    movement_log.push(MovementLogEntry {
-                                        reason: MovementReason::OtherAddedAbove {
-                                            other: added_demon.clone(),
-                                        },
-                                        new_position: None,
-                                        time,
-                                    }),
-                                None =>
-                                    movement_log.push(MovementLogEntry {
-                                        reason: MovementReason::Unknown,
-                                        new_position: None,
-                                        time,
-                                    }),
+                                Some(added_demon) => movement_log.push(MovementLogEntry {
+                                    reason: MovementReason::OtherAddedAbove {
+                                        other: added_demon.clone(),
+                                    },
+                                    new_position: None,
+                                    time,
+                                }),
+                                None => movement_log.push(MovementLogEntry {
+                                    reason: MovementReason::Unknown,
+                                    new_position: None,
+                                    time,
+                                }),
                             }
                         },
                     }
@@ -160,7 +161,8 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                     // then this movement is the shift induced by that addition
                     // otherwise, we do not know (the log entry is from before we kept track of
                     // audit logs accurately) :(
-                },
+                }
+            },
             AuditLogEntryType::Deletion => unreachable!(),
         }
     }
@@ -238,19 +240,17 @@ pub async fn audit_log_for_demon(demon_id: i32, connection: &mut PgConnection) -
                 requirement: row.requirement,
                 video: row.video,
                 verifier: match row.verifier {
-                    Some(id) =>
-                        Some(NamedId {
-                            name: row.verifier_name,
-                            id,
-                        }),
+                    Some(id) => Some(NamedId {
+                        name: row.verifier_name,
+                        id,
+                    }),
                     None => None,
                 },
                 publisher: match row.publisher {
-                    Some(id) =>
-                        Some(NamedId {
-                            name: row.publisher_name,
-                            id,
-                        }),
+                    Some(id) => Some(NamedId {
+                        name: row.publisher_name,
+                        id,
+                    }),
                     None => None,
                 },
             }),

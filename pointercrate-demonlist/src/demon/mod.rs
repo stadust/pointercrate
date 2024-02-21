@@ -169,7 +169,7 @@ impl FullDemon {
 impl Demon {
     pub fn validate_requirement(requirement: i16) -> Result<()> {
         if !(0..=100).contains(&requirement) {
-            return Err(DemonlistError::InvalidRequirement)
+            return Err(DemonlistError::InvalidRequirement);
         }
 
         Ok(())
@@ -181,7 +181,7 @@ impl Demon {
         let maximal_position = Demon::max_position(connection).await.unwrap_or(0) + 1;
 
         if position > maximal_position || position < 1 {
-            return Err(DemonlistError::InvalidPosition { maximal: maximal_position })
+            return Err(DemonlistError::InvalidPosition { maximal: maximal_position });
         }
 
         Ok(())

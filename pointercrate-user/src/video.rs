@@ -10,20 +10,20 @@ pub fn validate_channel(url: &str) -> Result<String> {
     let url = Url::parse(url).map_err(|_| UserError::MalformedChannelUrl)?;
 
     if !SCHEMES.contains(&url.scheme()) {
-        return Err(CoreError::InvalidUrlScheme.into())
+        return Err(CoreError::InvalidUrlScheme.into());
     }
 
     if !url.username().is_empty() || url.password().is_some() {
-        return Err(CoreError::UrlAuthenticated.into())
+        return Err(CoreError::UrlAuthenticated.into());
     }
 
     if let Some(host) = url.domain() {
         match host {
-            "www.youtube.com" | "youtube.com" =>
+            "www.youtube.com" | "youtube.com" => {
                 if let Some(path_segments) = url.path_segments() {
                     match &path_segments.collect::<Vec<_>>()[..] {
                         ["channel", _] | ["user", _] | ["c", _] => Ok(url.to_string()),
-                        [handle] =>
+                        [handle] => {
                             if handle.starts_with("@") {
                                 Ok(url.to_string())
                             } else {
@@ -31,19 +31,20 @@ pub fn validate_channel(url: &str) -> Result<String> {
                                     expected: YOUTUBE_CHANNEL_FORMAT,
                                 }
                                 .into())
-                            },
-                        _ =>
-                            Err(CoreError::InvalidUrlFormat {
-                                expected: YOUTUBE_CHANNEL_FORMAT,
                             }
-                            .into()),
+                        },
+                        _ => Err(CoreError::InvalidUrlFormat {
+                            expected: YOUTUBE_CHANNEL_FORMAT,
+                        }
+                        .into()),
                     }
                 } else {
                     Err(CoreError::InvalidUrlFormat {
                         expected: YOUTUBE_CHANNEL_FORMAT,
                     }
                     .into())
-                },
+                }
+            },
             _ => Err(UserError::NotYouTube),
         }
     } else {

@@ -41,10 +41,9 @@ impl User {
         .await;
 
         match row {
-            Err(Error::RowNotFound) =>
-                Err(UserError::UserNotFoundName {
-                    user_name: name.to_string(),
-                }),
+            Err(Error::RowNotFound) => Err(UserError::UserNotFoundName {
+                user_name: name.to_string(),
+            }),
             Err(err) => Err(err.into()),
             Ok(row) => Ok(construct_from_row!(row)),
         }

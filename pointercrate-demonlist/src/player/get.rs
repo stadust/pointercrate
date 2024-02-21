@@ -90,16 +90,14 @@ impl DatabasePlayer {
         .await;
 
         match result {
-            Ok(row) =>
-                Ok(DatabasePlayer {
-                    id: row.id,
-                    name: row.name.unwrap(), // FIXME(sqlx) casted columns interpreted as nullable
-                    banned: row.banned,
-                }),
-            Err(Error::RowNotFound) =>
-                Err(DemonlistError::PlayerNotFoundName {
-                    player_name: name.to_string(),
-                }),
+            Ok(row) => Ok(DatabasePlayer {
+                id: row.id,
+                name: row.name.unwrap(), // FIXME(sqlx) casted columns interpreted as nullable
+                banned: row.banned,
+            }),
+            Err(Error::RowNotFound) => Err(DemonlistError::PlayerNotFoundName {
+                player_name: name.to_string(),
+            }),
             Err(err) => Err(err.into()),
         }
     }
@@ -110,12 +108,11 @@ impl DatabasePlayer {
             .await;
 
         match result {
-            Ok(row) =>
-                Ok(DatabasePlayer {
-                    id: row.id,
-                    name: row.name,
-                    banned: row.banned,
-                }),
+            Ok(row) => Ok(DatabasePlayer {
+                id: row.id,
+                name: row.name,
+                banned: row.banned,
+            }),
             Err(Error::RowNotFound) => Err(DemonlistError::PlayerNotFound { player_id: id }),
             Err(err) => Err(err.into()),
         }

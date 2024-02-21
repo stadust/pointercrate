@@ -1,8 +1,11 @@
+use std::collections::HashSet;
+
 use crate::{
     auth::{AccessClaims, AuthenticatedUser},
     error::Result,
     User,
 };
+use jsonwebtoken::{DecodingKey, Validation};
 use log::{debug, info};
 use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
@@ -20,7 +23,12 @@ impl AuthenticatedUser {
 
         // Well this is reassuring. Also we directly deconstruct it and only save the ID
         // so we don't accidentally use unsafe values later on
-        let AccessClaims { id, .. } = jsonwebtoken::dangerous_insecure_decode::<AccessClaims>(access_token)
+        let mut no_validation = Validation::default();
+        no_validation.insecure_disable_signature_validation();
+        no_validation.validate_exp = false;
+        no_validation.required_spec_claims = HashSet::new();
+
+        let AccessClaims { id, .. } = jsonwebtoken::decode(access_token, &DecodingKey::from_secret(b""), &no_validation)
             .map_err(|_| CoreError::Unauthorized)?
             .claims;
 
@@ -49,12 +57,11 @@ impl AuthenticatedUser {
         match row {
             Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
             Err(err) => Err(err.into()),
-            Ok(row) =>
-                Ok(AuthenticatedUser {
-                    user: construct_from_row!(row),
-                    password_hash: row.password_hash,
-                    email_address: row.email_address,
-                }),
+            Ok(row) => Ok(AuthenticatedUser {
+                user: construct_from_row!(row),
+                password_hash: row.password_hash,
+                email_address: row.email_address,
+            }),
         }
     }
 
@@ -69,12 +76,11 @@ impl AuthenticatedUser {
         match row {
             Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
             Err(err) => Err(err.into()),
-            Ok(row) =>
-                Ok(AuthenticatedUser {
-                    user: construct_from_row!(row),
-                    password_hash: row.password_hash,
-                    email_address: row.email_address,
-                }),
+            Ok(row) => Ok(AuthenticatedUser {
+                user: construct_from_row!(row),
+                password_hash: row.password_hash,
+                email_address: row.email_address,
+            }),
         }
     }
 }

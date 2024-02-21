@@ -37,7 +37,7 @@ impl<'r> FromRequest<'r> for Precondition {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.headers().get_one("if-match") {
             Some(if_match) => Outcome::Success(Precondition(if_match.split(',').map(ToString::to_string).collect())),
-            None => Outcome::Failure((Status::PreconditionRequired, CoreError::PreconditionRequired)),
+            None => Outcome::Error((Status::PreconditionRequired, CoreError::PreconditionRequired)),
         }
     }
 }
@@ -47,18 +47,20 @@ impl<'r, T: Taggable> Responder<'r, 'static> for Tagged<T> {
         let response_etag = self.0.etag_string();
 
         match request.method() {
-            Method::Get =>
+            Method::Get => {
                 if let Some(if_none_match) = request.headers().get_one("if-none-match") {
                     if if_none_match.contains(&response_etag) {
-                        return Response::build().status(Status::NotModified).ok()
+                        return Response::build().status(Status::NotModified).ok();
                     }
-                },
-            Method::Patch | Method::Delete =>
+                }
+            },
+            Method::Patch | Method::Delete => {
                 if let Some(if_none_match) = request.headers().get_one("if-match") {
                     if if_none_match.contains(&response_etag) {
-                        return Response::build().status(Status::NotModified).ok()
+                        return Response::build().status(Status::NotModified).ok();
                     }
-                },
+                }
+            },
             _ => (),
         }
 

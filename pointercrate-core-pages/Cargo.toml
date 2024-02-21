@@ -6,5 +6,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-maud = "0.22.1"
+maud = "0.25.0"
 pointercrate-core = {path = "../pointercrate-core"}

@@ -35,6 +35,10 @@ impl TestClient {
     pub fn patch(&self, url: impl Into<String>, body: &impl Serialize) -> TestRequest {
         TestRequest::new(self.0.patch(url.into()).json(body))
     }
+
+    pub fn delete(&self, url: impl Into<String>) -> TestRequest {
+        TestRequest::new(self.0.delete(url.into()))
+    }
 }
 
 pub struct TestRequest<'c> {
@@ -51,6 +55,7 @@ impl<'c> TestRequest<'c> {
             expected_headers: HashMap::new(),
         }
         .header("X-Real-Ip", "127.0.0.1")
+        .header("Accept", "application/json")
     }
 
     pub fn header(mut self, header_name: impl Into<String>, header_value: impl Into<String>) -> Self {

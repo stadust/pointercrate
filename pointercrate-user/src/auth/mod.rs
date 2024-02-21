@@ -14,7 +14,10 @@ use jsonwebtoken::{DecodingKey, EncodingKey};
 use log::{debug, warn};
 use pointercrate_core::error::CoreError;
 use serde::{Deserialize, Serialize};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    collections::HashSet,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 mod delete;
 mod get;
@@ -62,7 +65,7 @@ impl AuthenticatedUser {
 
     pub fn validate_password(password: &str) -> Result<()> {
         if password.len() < 10 {
-            return Err(UserError::InvalidPassword)
+            return Err(UserError::InvalidPassword);
         }
 
         Ok(())
@@ -85,10 +88,9 @@ impl AuthenticatedUser {
 
     pub fn validate_access_token(self, token: &str) -> Result<Self> {
         // TODO: maybe one day do something with this
-        let validation = jsonwebtoken::Validation {
-            validate_exp: false,
-            ..Default::default()
-        };
+        let mut validation = jsonwebtoken::Validation::default();
+        validation.validate_exp = false;
+        validation.required_spec_claims = HashSet::default();
 
         jsonwebtoken::decode::<AccessClaims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
             .map_err(|err| {
@@ -181,28 +183,28 @@ impl AuthenticatedUser {
     }
 
     pub fn validate_csrf_token(&self, token: &str) -> Result<()> {
-        jsonwebtoken::decode::<CSRFClaims>(
-            token,
-            &DecodingKey::from_secret(&pointercrate_core::config::secret()),
-            &jsonwebtoken::Validation::default(),
-        )
-        .map_err(|err| {
-            warn!("Access token validation FAILED for account {}: {}", self.user, err);
+        let mut validation = jsonwebtoken::Validation::default();
+        validation.validate_exp = false;
+        validation.required_spec_claims = HashSet::new();
 
-            CoreError::Unauthorized.into()
-        })
-        .and_then(|token_data| {
-            if token_data.claims.id != self.user.id {
-                warn!(
-                    "User {} attempt to authenticate using CSRF token generated for user {}",
-                    self.user, token_data.claims.id
-                );
+        jsonwebtoken::decode::<CSRFClaims>(token, &DecodingKey::from_secret(&pointercrate_core::config::secret()), &validation)
+            .map_err(|err| {
+                warn!("Access token validation FAILED for account {}: {}", self.user, err);
 
-                Err(CoreError::Unauthorized.into())
-            } else {
-                Ok(())
-            }
-        })
+                CoreError::Unauthorized.into()
+            })
+            .and_then(|token_data| {
+                if token_data.claims.id != self.user.id {
+                    warn!(
+                        "User {} attempt to authenticate using CSRF token generated for user {}",
+                        self.user, token_data.claims.id
+                    );
+
+                    Err(CoreError::Unauthorized.into())
+                } else {
+                    Ok(())
+                }
+            })
     }
 
     fn password_salt(&self) -> Vec<u8> {

@@ -27,9 +27,9 @@ pub async fn register(
     AuthenticatedUser::validate_password(&body.password)?;
     User::validate_name(&body.name)?;
 
-    ratelimits.registrations(ip)?;
+    let user = AuthenticatedUser::register(body.0, &mut *connection).await?;
 
-    let user = AuthenticatedUser::register(body.0, &mut connection).await?;
+    ratelimits.registrations(ip)?;
 
     connection.commit().await.map_err(UserError::from)?;
 

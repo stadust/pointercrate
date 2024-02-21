@@ -20,7 +20,7 @@ impl Note {
     /// `author` field!
     pub async fn create_on(record: &FullRecord, new_note: NewNote, connection: &mut PgConnection) -> Result<Note> {
         if new_note.content.trim().is_empty() {
-            return Err(DemonlistError::NoteEmpty)
+            return Err(DemonlistError::NoteEmpty);
         }
 
         let note_id = sqlx::query!(

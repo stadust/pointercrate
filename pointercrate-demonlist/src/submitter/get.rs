@@ -25,11 +25,9 @@ impl Submitter {
         )
         .fetch_optional(&mut *connection)
         .await?
-        .map(|row| {
-            Submitter {
-                id: row.submitter_id,
-                banned: row.banned,
-            }
+        .map(|row| Submitter {
+            id: row.submitter_id,
+            banned: row.banned,
         }))
     }
 }

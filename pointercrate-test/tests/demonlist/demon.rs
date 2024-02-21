@@ -8,7 +8,7 @@ const DEFAULT_THUMBNAIL: &str = "https://i.ytimg.com/vi/zebrafishes/mqdefault.jp
 async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
 
     let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": []}};
 
@@ -34,7 +34,7 @@ async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {
 async fn test_default_thumbnail_no_video(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
 
     let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": []}};
 
@@ -55,12 +55,12 @@ async fn test_default_thumbnail_no_video(pool: Pool<Postgres>) {
 async fn test_default_thumbnail_linked_banned(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
 
     let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": [], "video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}};
 
     sqlx::query!("INSERT INTO players (name, link_banned) VALUES ('Riot', TRUE)")
-        .execute(&mut connection)
+        .execute(&mut *connection)
         .await
         .unwrap();
 
@@ -81,7 +81,7 @@ async fn test_default_thumbnail_linked_banned(pool: Pool<Postgres>) {
 async fn test_default_thumbnail_with_video(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
 
     let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": [], "video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}};
 

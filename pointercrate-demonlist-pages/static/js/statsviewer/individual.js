@@ -55,12 +55,12 @@ class IndividualStatsViewer extends StatsViewer {
     }
 
     formatDemonsInto(element, demons) {
-        formatInto(element, demons.map(demon =>  this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")));
+        formatInto(element, demons.map(demon => this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")));
     }
 
     formatRecordsInto(element, records) {
         formatInto(element, records.map(record => {
-            let demon = this.formatDemon(record.demon, "/demonlist/permalink/" + record.demon.id + "/");
+            let demon = this.formatDemon(record.demon, record.video ?? ("/demonlist/permalink/" + record.demon.id + "/"));
             if (record.progress !== 100) {
                 demon.appendChild(
                     document.createTextNode(" (" + record.progress + "%)")

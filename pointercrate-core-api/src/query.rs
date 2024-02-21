@@ -14,11 +14,10 @@ impl<'r, T: DeserializeOwned> FromRequest<'r> for Query<T> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         match request.uri().query() {
             None => Outcome::Success(Query(serde_urlencoded::from_str("").unwrap())),
-            Some(query) =>
-                match serde_urlencoded::from_str(query.as_str()) {
-                    Ok(t) => Outcome::Success(Query(t)),
-                    Err(err) => Outcome::Failure((Status::BadRequest, err)),
-                },
+            Some(query) => match serde_urlencoded::from_str(query.as_str()) {
+                Ok(t) => Outcome::Success(Query(t)),
+                Err(err) => Outcome::Error((Status::BadRequest, err)),
+            },
         }
     }
 }

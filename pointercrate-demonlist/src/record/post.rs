@@ -92,25 +92,25 @@ impl NormalizedSubmission {
     pub async fn validate(self, connection: &mut PgConnection) -> Result<ValidatedSubmission> {
         // Banned player can't have records on the list
         if self.player.banned {
-            return Err(DemonlistError::PlayerBanned)
+            return Err(DemonlistError::PlayerBanned);
         }
 
         // Cannot submit records for the legacy list (it is possible to directly add them for list mods)
         if self.demon.position > crate::config::extended_list_size() && self.status == RecordStatus::Submitted {
-            return Err(DemonlistError::SubmitLegacy)
+            return Err(DemonlistError::SubmitLegacy);
         }
 
         // Can only submit 100% records for the extended list (it is possible to directly add them for list
         // mods)
         if self.demon.position > crate::config::list_size() && self.progress != 100 && self.status == RecordStatus::Submitted {
-            return Err(DemonlistError::Non100Extended)
+            return Err(DemonlistError::Non100Extended);
         }
 
         let requirement = self.demon.requirement(&mut *connection).await?;
 
         // Check if the record meets the record requirement for this demon
         if self.progress > 100 || self.progress < requirement {
-            return Err(DemonlistError::InvalidProgress { requirement })
+            return Err(DemonlistError::InvalidProgress { requirement });
         }
 
         debug!("Submission is valid, checking for duplicates!");
@@ -126,7 +126,7 @@ impl NormalizedSubmission {
                 return Err(DemonlistError::SubmissionExists {
                     existing: row.id,
                     status: RecordStatus::from_sql(&row.status_),
-                })
+                });
             }
         }
 
@@ -144,7 +144,7 @@ impl NormalizedSubmission {
             return Err(DemonlistError::SubmissionExists {
                 existing: row.id,
                 status: RecordStatus::from_sql(&row.status_),
-            })
+            });
         }
 
         match self.raw_footage {
@@ -153,7 +153,7 @@ impl NormalizedSubmission {
             },
             None if self.status == RecordStatus::Submitted => {
                 // list mods can submit without raw
-                return Err(DemonlistError::RawRequired)
+                return Err(DemonlistError::RawRequired);
             },
             _ => (),
         }

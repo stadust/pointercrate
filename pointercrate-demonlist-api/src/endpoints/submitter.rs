@@ -14,7 +14,7 @@ use rocket::serde::json::Json;
 
 #[rocket::get("/")]
 pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination>) -> Result<Response2<Json<Vec<Submitter>>>> {
-    auth.require_permission(LIST_ADMINISTRATOR)?;
+    auth.require_permission(LIST_MODERATOR)?;
 
     let mut pagination = pagination.0;
 
