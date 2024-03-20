@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="750" height="500">
+  <defs>
+    <g transform="scale(15)" id="c" style="fill:#fff">
+      <g id="b">
+        <path transform="rotate(17.9999993 3.15687581 -.49999998)" id="a" d="M0 0v1h.4z"/>
+        <use transform="scale(-1 1)" width="324" height="216" xlink:href="#a"/>
+      </g>
+      <use transform="rotate(72.0000003)" width="324" height="216" xlink:href="#b"/>
+      <use transform="rotate(-72.0000003)" width="324" height="216" xlink:href="#b"/>
+      <use transform="rotate(143.9999996)" width="324" height="216" xlink:href="#b"/>
+      <use transform="rotate(-143.9999996)" width="324" height="216" xlink:href="#b"/>
+    </g>
+  </defs>
+  <path style="fill:#078930;fill-opacity:1" d="M0 0h750v500H0z"/>
+  <use transform="matrix(2.31481 0 0 2.31481 57.87037 414.3519)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 692.12963 414.3519)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 85.648148 344.9074)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 664.35185 344.9074)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 120.37037 277.7778)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 629.62963 277.7778)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 159.72222 212.963)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 590.27778 212.963)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 208.33333 155.0926)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 541.66667 155.0926)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 266.2037 108.7963)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 483.7963 108.7963)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 335.64815 81.0185)" width="324" height="216" xlink:href="#c"/>
+  <use transform="matrix(2.31481 0 0 2.31481 414.35185 81.0185)" width="324" height="216" xlink:href="#c"/>
+</svg>

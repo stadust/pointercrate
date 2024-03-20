@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="flag_Yucatan" width="1470" height="870" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <rect id="rect1" width="1470" height="870" fill="#ce1126"/>
+ <rect id="rect2" y="290" width="1470" height="290" fill="#ffffff"/>
+ <rect id="rect3" width="514.5" height="870" fill="#006847"/>
+ <g id="s" transform="matrix(2.54516 0 0 2.54516 257.25 441.684)" fill="#ffffff">
+  <path id="t" d="m0-27.5-6.17402 19.0023h-19.9803l16.1642 11.7432-6.17402 19.0023 16.1642-11.744 16.1642 11.744-6.17402-19.0023 16.1642-11.7432h-19.9803z"/>
+ </g>
+ <use id="use1" transform="translate(-152.268 -289.823)" xlink:href="#s"/>
+ <use id="use2" transform="translate(152.308 -289.823)" xlink:href="#s"/>
+ <use id="use3" transform="translate(-152.308 290.174)" xlink:href="#s"/>
+ <use id="use4" transform="translate(152.308 290.18)" xlink:href="#s"/>
+</svg>

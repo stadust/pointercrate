@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   width="312.5"
+   height="312.5"
+   id="svg4166">
+  <defs
+     id="defs4168" />
+<metadata
+   id="metadata1880"><rdf:RDF><cc:Work
+         rdf:about=""><dc:title>Västmanlands läns vapenflagga</dc:title><dc:date>2012-01-19</dc:date><dc:creator><cc:Agent><dc:title>Lokal_Profil</dc:title></cc:Agent></dc:creator><cc:license
+         rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" /><dc:rights><cc:Agent><dc:title>cc-by-sa-2.5</dc:title></cc:Agent></dc:rights><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work><cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/2.5/"><cc:permits
+         rdf:resource="http://web.resource.org/cc/Reproduction" /><cc:permits
+         rdf:resource="http://web.resource.org/cc/Distribution" /><cc:requires
+         rdf:resource="http://web.resource.org/cc/Notice" /><cc:requires
+         rdf:resource="http://web.resource.org/cc/Attribution" /><cc:permits
+         rdf:resource="http://web.resource.org/cc/DerivativeWorks" /><cc:requires
+         rdf:resource="http://web.resource.org/cc/ShareAlike" /></cc:License></rdf:RDF>
+</metadata>
+  <rect
+     width="312.5"
+     height="312.5"
+     x="0"
+     y="0"
+     id="Flaggduk"
+     style="fill:#eeeeee" />
+  <path
+     d="m 156.25,197.816 c -25.07145,0 -52.04362,6.98806 -64.904784,29.99964 C 24.399394,200.46678 1.664499,255.76052 0,257.54 c 0,0 0,54.96 0,54.96 104.16667,0 208.33333,0 312.5,0 0,0 0,-54.96 0,-54.96 -1.6645,-1.77948 -24.39939,-57.07322 -91.34522,-29.72436 C 208.29362,204.80406 181.32145,197.816 156.25,197.816 z"
+     id="use3206"
+     style="fill:#003d8f" />
+  <path
+     d="m 120.60502,144.5694 c -0.99414,-13.23927 2.86546,-18.68008 -0.11696,-31.46591 2.51458,1.90426 4.67829,5.53146 5.78936,8.6146 1.69587,-13.78336 2.7485,-28.473482 1.9298,-41.531323 3.74262,1.450819 6.3157,11.606964 7.89459,16.413013 4.21046,-19.586852 5.32154,-37.269385 2.33915,-47.788272 3.80111,0.634802 6.02331,7.526418 8.59635,15.324878 2.51458,-5.168746 2.10524,-15.86892 2.10524,-26.931907 0.40934,-5.259414 0.99411,-11.153597 3.09935,-13.964638 2.04673,24.755544 9.88287,22.669933 14.26873,50.236573 1.57893,-5.440775 1.87134,-11.334968 1.46198,-18.770679 5.14611,4.62466 9.64896,21.944479 12.04657,46.700075 2.28067,-1.813613 3.33329,-8.795978 4.21049,-16.685055 4.97064,10.972205 6.72499,24.664875 4.21044,40.987235 -1.28652,4.62465 -2.10525,9.33999 -1.69588,14.59943 2.10521,-1.99494 2.80698,-6.80095 4.03502,-10.79091 0.87716,5.89422 1.75434,12.87653 0.99414,17.95461 -2.5146,29.38023 -24.22069,34.35599 -37.93462,34.20753 -7.67841,-0.0864 -30.4749,-6.73245 -33.23376,-37.10925 z"
+     id="Eld"
+     style="fill:#d40000;stroke:none" />
+  <use
+     transform="translate(-105.05245,33.425795)"
+     id="Eld-2"
+     x="0"
+     y="0"
+     width="251"
+     height="304.20001"
+     xlink:href="#Eld" />
+  <use
+     transform="matrix(-1,0,0,1,417.55245,33.425795)"
+     id="Eld-3"
+     x="0"
+     y="0"
+     width="251"
+     height="304.20001"
+     xlink:href="#Eld" />
+</svg>

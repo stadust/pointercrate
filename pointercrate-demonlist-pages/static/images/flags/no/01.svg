@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1e3" height="1e3" version="1.1" viewBox="0 0 1e3 1e3" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Østfolds fylkesflagg</title>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title>Østfolds fylkesflagg</dc:title>
+    <dc:description>På rød bunn en gul tredelt solstråle skrått oppad.</dc:description>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Hallvard Trætteberg</dc:title>
+     </cc:Agent>
+    </dc:creator>
+    <dc:date>26.09.1958</dc:date>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g transform="translate(-2552.5575,-2015.1563)">
+  <g transform="matrix(.48537165 .48537165 -.48537165 .48537165 3208.0216 1247.5268)">
+   <rect transform="rotate(-45)" x="-954.9035" y="1118.3102" width="1456.8357" height="1456.8357" fill="#e3383b"/>
+   <path id="path895-6-8-2-3-6-2-7-2-5" d="m2050.4028 1340.5636-174.6898-174.6896s-1453.5423 18.4439-1477.872 27.668c28.261 21.9195 1268.15 120.6379 1652.5618 147.0216z" fill="#f0f038"/>
+   <use transform="matrix(1,0,0,-1,0,2931.9672)" width="100%" height="100%" xlink:href="#path895-6-8-2-3-6-2-7-2-5"/>
+   <path d="m2050.4028 1591.4036 125.42-125.4202-92.6696-92.6695c-29.2676-9.8698-84.2076-32.8154-153.4315-32.8154-71.3295 0-169.6027 29.0365-213.1768 29.0365-99.1816 0-146.2238-41.7223-240.9161-41.7223-100.3347 0-222.7699 68.8181-298.6125 68.8181-91.7755 0-149.957-42.7397-245.0274-42.7397-94.07857 0-160.86112 77.2171-267.54783 77.2171-71.87408 0-103.53707-27.9621-191.77507-27.9621-109.72156 0-134.17929 60.4057-227.92394 60.4057-35.79567 0-73.73203-10.4484-95.87959 5.5589 30.30545 2.7536 69.12226 40.6284 155.10975 40.6284 61.63246 0 123.39941-18.6283 159.34165-18.6283 95.25868 0 153.37014 74.417 255.23676 74.417 61.9055 0 153.00685-37.9121 221.02575-37.9121 75.90952 0 149.87922 70.0162 250.91612 70.0162 125.7985 0 186.3766-47.1837 291.1581-47.1837 85.7203 0 141.9739 49.7841 275.022 49.7841 69.5363 0 75.4963-17.4072 150.2481-17.4072 79.7368 0 82.0891 8.5785 143.4821 8.5785z" fill="#f0f038"/>
+  </g>
+ </g>
+</svg>

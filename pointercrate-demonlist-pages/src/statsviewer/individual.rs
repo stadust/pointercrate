@@ -83,7 +83,14 @@ impl IndividualStatsViewer {
                             "Political Subdivision:"
                         }
                         p {
-                            "For the " i {"United States of America"} ", " i {"The United Kingdom of Great Britain and Northern Ireland"} ", " i{"Australia"} " and " i{"Canada"} " you can select a state/province from the dropdown below to focus the stats viewer to that state/province."
+                            "For the " 
+                            div.tooltip {
+                                "following countries"
+                                div.tooltiptext.fade {
+                                    "Argentina, Australia, Brazil, Canada, Chile, China, Colombia, Finland, France, Germany, Italy, Mexico, Netherlands, Norway, Peru, Philippines, Poland, Portugal, Romania, Russian Federation, South Korea, Spain, Sweden, Ukraine, United Kingdom, United States"
+                                }
+                            } 
+                            " you can select a state/province from the dropdown below to focus the stats viewer to that state/province."
                         }
                         div.dropdown-menu.js-search#subdivision-dropdown data-default = "None" {
                             div{

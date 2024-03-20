@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="1200" height="600" viewBox="0 0 600 300">
+<defs>
+<path id="big" fill="#FFB000" d="M 0,-23 C 2,-37 3,-44 0,-44 C -3,-44 -2,-37 0,-23 Z" />
+<path id="small" fill="#FFB000" d="M 0,-23 C 1,-33 1.5,-37 0,-37 C -1.5,-37 -1,-33 0,-23 Z" />
+</defs>
+<clipPath id="mid"><circle cx="300" cy="150" r="49" /></clipPath>
+<rect fill="#E02010" width="600" height="300"/>
+<rect fill="#007030" width="600" height="200"/>
+<rect fill="#0090D0" width="600" height="100"/>
+<circle fill="#FFB000" cx="300" cy="150" r="20" />
+<path fill="white" clip-path="url(#mid)" d="M 300,145 C 285,130 222,185 222,185 L 391,189 C 391,189 323,127 301,145 Z" />
+<path fill="#007030" clip-path="url(#mid)" d="M 301,162 C 281,144 263,178 241,166 C 252,216 366,221 356,164 C 338,166 321,139 301,162 Z" />
+<circle cx="300" cy="150" r="48" stroke="#FFB000" stroke-width="4" fill="none" />
+<g id="L">
+<use transform="translate(300,150) rotate(-75)" xlink:href="#small" />
+<use transform="translate(300,150) rotate(-64)" xlink:href="#big" />
+<use transform="translate(300,150) rotate(-56)" xlink:href="#big" />
+</g>
+<use transform="rotate(30 300,150)" xlink:href="#L" />
+<use transform="rotate(60 300,150)" xlink:href="#L" />
+<use transform="rotate(90 300,150)" xlink:href="#L" />
+<use transform="rotate(120 300,150)" xlink:href="#L" />
+<use transform="translate(300,150) rotate(75)" xlink:href="#small" />
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 1575 1050">
+<clipPath id="c">
+<path d="M0 0H1575V1050H0z"/>
+</clipPath>
+<path d="M0 0H1575V1050H0z" fill="#0080ff"/>
+<g clip-path="url(#c)">
+<path d="m0 0h3v-3h1v1h1v2h-1v-1h2v1h1v1h-3v1h1v1h2v-1h-1v2h1v1h1v-3h1v1h1v2h-1v-1h2v1h1v1h-3v1h1v1h2v-1h-1v2h1v1h1v-3h1v1h1v2h-1v-1h2v1h1v1h-3v1h1v1h2v-1h-1v2h1v1h1v-3h1v1h1v2h-1v-1h2v1h1v1h-3v1h1v1h2v-1h-1v2h1v1h1v-3h1v1h1v2h-1v-1h2v1h1v1h-3v1h1v1h2v-1h-1v2h1v1h1v-3h1v1h1v2h-1v-1h2v1h1v1h-3v1h1v1h2v-1h-1v2h1v1h1v-3h1v1h1v2h-1v-1h2v1h1v1h-3v3z" fill="#fff" transform=" rotate(-45 787.5 690) translate(70 217.5) scale(35)" fill-rule="evenodd"/>
+</g>
+<path d="M0 858H1575v30H0z" fill="#0080ff"/>
+<path d="M0 879H1575v21H0z" fill="#f00"/>
+</svg>
