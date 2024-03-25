@@ -22,8 +22,8 @@ use pointercrate_demonlist_pages::{
 use pointercrate_integrate::gd::{GDIntegrationResult, PgCache};
 use pointercrate_user::User;
 use pointercrate_user_api::auth::TokenAuth;
-use rocket::{futures::StreamExt, http::CookieJar};
 use rand::Rng;
+use rocket::{futures::StreamExt, http::CookieJar};
 
 #[rocket::get("/?statsviewer=true")]
 pub fn stats_viewer_redirect() -> Redirect {
@@ -43,7 +43,8 @@ pub async fn overview(
 
     let mut specified_when = cookies
         .get("when")
-        .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()).ok()).flatten();
+        .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()).ok())
+        .flatten();
 
     // On april's fools, ignore the cookie and just pick a random day to display
     let today = Utc::now().naive_utc();
@@ -53,7 +54,7 @@ pub async fn overview(
 
         if let Some(date) = today.checked_sub_signed(go_back_by) {
             // We do not neccessarily know the time zone of the user here (we get it from the 'when' cookie in the normal case).
-            // This however is not a problem, the UI will simply display "GMT+0" instead of the correct local timezone. 
+            // This however is not a problem, the UI will simply display "GMT+0" instead of the correct local timezone.
             specified_when = Some(date.and_utc().fixed_offset());
         }
     }
@@ -66,7 +67,9 @@ pub async fn overview(
     };
 
     let tardis = match specified_when {
-        Some(destination) => Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut *connection, destination.naive_utc()).await?),
+        Some(destination) => {
+            Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut *connection, destination.naive_utc()).await?)
+        },
         _ => Tardis::new(timemachine.unwrap_or(false)),
     };
 
