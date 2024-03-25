@@ -5,7 +5,7 @@ use crate::{
     player::DatabasePlayer,
     record::approved_records_on,
 };
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, NaiveDateTime};
 use futures::StreamExt;
 use sqlx::{Error, PgConnection};
 
@@ -195,8 +195,8 @@ pub async fn current_list(connection: &mut PgConnection) -> Result<Vec<Demon>> {
         .collect())
 }
 
-pub async fn list_at(connection: &mut PgConnection, at: DateTime<FixedOffset>) -> Result<Vec<TimeShiftedDemon>> {
-    let mut stream = sqlx::query_file!("sql/all_demons_at.sql", at.naive_utc()).fetch(connection);
+pub async fn list_at(connection: &mut PgConnection, at: NaiveDateTime) -> Result<Vec<TimeShiftedDemon>> {
+    let mut stream = sqlx::query_file!("sql/all_demons_at.sql", at).fetch(connection);
     let mut demons = Vec::new();
 
     while let Some(row) = stream.next().await {

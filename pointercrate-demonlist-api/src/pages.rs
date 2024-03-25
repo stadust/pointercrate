@@ -1,6 +1,6 @@
 use rocket::{response::Redirect, State};
 
-use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone, Utc};
+use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
 use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
@@ -23,6 +23,7 @@ use pointercrate_integrate::gd::{GDIntegrationResult, PgCache};
 use pointercrate_user::User;
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::{futures::StreamExt, http::CookieJar};
+use rand::Rng;
 
 #[rocket::get("/?statsviewer=true")]
 pub fn stats_viewer_redirect() -> Redirect {
@@ -33,28 +34,39 @@ pub fn stats_viewer_redirect() -> Redirect {
 pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>, auth: Option<TokenAuth>,
 ) -> Result<Page> {
-    // should be const, but chrono aint const :(
-    let beginning_of_time: DateTime<FixedOffset> = FixedOffset::east_opt(0)
-        .unwrap()
-        .from_utc_datetime(&NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap());
+    // A few months before pointercrate first went live - definitely the oldest data we have
+    let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
 
     let mut connection = pool.connection().await?;
 
     let demonlist = current_list(&mut *connection).await?;
 
-    let specified_when = cookies
+    let mut specified_when = cookies
         .get("when")
-        .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()));
+        .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()).ok()).flatten();
+
+    // On april's fools, ignore the cookie and just pick a random day to display
+    let today = Utc::now().naive_utc();
+    if today.day() == 1 && today.month() == 4 {
+        let seconds_since_beginning_of_time = (today - beginning_of_time).num_seconds();
+        let go_back_by = chrono::Duration::seconds(rand::thread_rng().gen_range(0..seconds_since_beginning_of_time));
+
+        if let Some(date) = today.checked_sub_signed(go_back_by) {
+            // We do not neccessarily know the time zone of the user here (we get it from the 'when' cookie in the normal case).
+            // This however is not a problem, the UI will simply display "GMT+0" instead of the correct local timezone. 
+            specified_when = Some(date.and_utc().fixed_offset());
+        }
+    }
 
     let specified_when = match specified_when {
-        Some(Ok(when)) if when < beginning_of_time => Some(beginning_of_time),
-        Some(Ok(when)) if when >= Utc::now() => None,
-        Some(Ok(when)) => Some(when),
+        Some(when) if when.naive_utc() < beginning_of_time => Some(DateTime::from_naive_utc_and_offset(beginning_of_time, *when.offset())),
+        Some(when) if when >= Utc::now() => None,
+        Some(when) => Some(when),
         _ => None,
     };
 
     let tardis = match specified_when {
-        Some(destination) => Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut *connection, destination).await?),
+        Some(destination) => Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut *connection, destination.naive_utc()).await?),
         _ => Tardis::new(timemachine.unwrap_or(false)),
     };
 
