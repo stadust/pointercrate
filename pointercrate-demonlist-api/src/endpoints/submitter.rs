@@ -6,7 +6,8 @@ use pointercrate_core_api::{
     response::Response2,
 };
 use pointercrate_demonlist::{
-    submitter::{PatchSubmitter, Submitter, SubmitterPagination}, LIST_MODERATOR,
+    submitter::{PatchSubmitter, Submitter, SubmitterPagination},
+    LIST_MODERATOR,
 };
 use pointercrate_user_api::auth::TokenAuth;
 use rocket::serde::json::Json;

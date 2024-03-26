@@ -9,7 +9,7 @@ pub enum Tardis {
         /// Whether the time selection panel should be visible.
         show_selector: bool,
         /// Whether the "You are currently looking at the demonlist as it was on ..." panel should be visible.
-        show_destination: bool
+        show_destination: bool,
     },
     Deactivated {
         /// Whether the time selection panel should be visible.
@@ -27,13 +27,15 @@ impl Tardis {
             show_selector: self.visible(),
             demons: demons_then,
             destination,
-            show_destination
+            show_destination,
         };
     }
 
     pub fn visible(&self) -> bool {
         match self {
-            Tardis::Activated { show_selector: visible, .. } => *visible,
+            Tardis::Activated {
+                show_selector: visible, ..
+            } => *visible,
             Tardis::Deactivated { show_selector: visible } => *visible,
         }
     }

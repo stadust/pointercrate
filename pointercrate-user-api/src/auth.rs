@@ -200,8 +200,8 @@ impl<'r> FromRequest<'r> for Auth<false> {
 
         for authorization in request.headers().get("Authorization") {
             if let ["Basic", basic_auth] = authorization.split(' ').collect::<Vec<_>>()[..] {
-                
-                let decoded = try_outcome!(STANDARD.decode(basic_auth)
+                let decoded = try_outcome!(STANDARD
+                    .decode(basic_auth)
                     .map_err(|_| ())
                     .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))
                     .map_err(|_| {
