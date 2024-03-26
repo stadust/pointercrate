@@ -39,39 +39,18 @@ export function initializeTimeMachine() {
     return;
 
   var timeMachineForm = new Form(formHtml);
+  var destination = timeMachineForm.input("time-machine-destination");
 
-  var inputs = ['year', 'month', 'day', 'hour', 'minute', 'second'].map(name => timeMachineForm.input("time-machine-" + name));
-
-  for(let input of inputs) {
-    input.addValidator(input => input.dropdown.selected !== undefined, "Please specify a value");
-  }
+  destination.addValidator(valueMissing, "Please specify a value");
+  destination.addValidator(rangeUnderflow, "You cannot go back in time that far!");
 
   var offset = new Date().getTimezoneOffset();
   var offsetHours = Math.abs(offset) / 60;
   var offsetMinutes = Math.abs(offset) % 60;
 
-  const MONTHS  = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
   timeMachineForm.onSubmit(() => {
-    let when = inputs[0].value + "-"
-        + ("" + (MONTHS.indexOf(inputs[1].value) + 1)).padStart(2, '0') + "-"
-        + ("" + inputs[2].value).padStart(2, '0') + "T"
-        + ("" + inputs[3].value).padStart(2, '0') + ":"
-        + ("" + inputs[4].value).padStart(2, '0') + ":"
-        + ("" + inputs[5].value).padStart(2, '0') + (offsetHours < 0 ? "%2B" : "-") + (offsetHours + "").padStart(2, "0") + ":" + (offsetMinutes + "").padStart(2, "0");
+    // datetime-local gives us a string in the format YYYY-MM-DDThh:mm. Thus, pad it with :ss and timezone information, as the backend expects (aka a rfc3339 date)
+    let when = destination.value + ":00" + (offsetHours < 0 ? "%2B" : "-") + (offsetHours + "").padStart(2, "0") + ":" + (offsetMinutes + "").padStart(2, "0");
 
     document.cookie = "when=" + when;
     gtag('event', 'time-machine-usage', {'event-category': 'demonlist', 'label': when});

@@ -243,6 +243,7 @@ input[type="text"],
 input[type="number"],
 input[type="url"],
 input[type="password"],
+input[type="datetime-local"],
 textarea {
   border: 1px solid #ddd;
   min-width: 0; /* Firefox and Egde need this */
@@ -256,7 +257,8 @@ textarea {
 input[type="text"],
 input[type="number"],
 input[type="url"],
-input[type="password"] {
+input[type="password"],
+input[type="datetime-local"]{
   min-height: 1em;
   height: 2em;
 }
@@ -265,6 +267,7 @@ form input[type="text"]:valid,
 form input[type="number"]:valid,
 form input[type="url"]:valid,
 form input[type="password"]:valid,
+form input[type="datetime-local"]:valid,
 textarea:valid {
   border-bottom: 1px solid lime;
 }
@@ -273,6 +276,7 @@ form input[type="text"]:invalid,
 form input[type="number"]:invalid,
 form input[type="url"]:invalid,
 form input[type="password"]:invalid,
+form input[type="datetime-local"]:invalid,
 textarea:invalid {
   border-bottom: 1px solid coral;
 }
