@@ -48,7 +48,8 @@ pub async fn overview(
 
     // On april's fools, ignore the cookie and just pick a random day to display
     let today = Utc::now().naive_utc();
-    if today.day() == 1 && today.month() == 4 {
+    let is_april_1st = today.day() == 1 && today.month() == 4;
+    if is_april_1st {
         let seconds_since_beginning_of_time = (today - beginning_of_time).num_seconds();
         let go_back_by = chrono::Duration::seconds(rand::thread_rng().gen_range(0..seconds_since_beginning_of_time));
 
@@ -66,12 +67,12 @@ pub async fn overview(
         _ => None,
     };
 
-    let tardis = match specified_when {
-        Some(destination) => {
-            Tardis::new(timemachine.unwrap_or(false)).activate(destination, list_at(&mut *connection, destination.naive_utc()).await?)
-        },
-        _ => Tardis::new(timemachine.unwrap_or(false)),
-    };
+    let mut tardis = Tardis::new(timemachine.unwrap_or(false));
+
+    if let Some(destination) = specified_when {
+        let demons_then = list_at(&mut *connection, destination.naive_utc()).await?;
+        tardis.activate(destination, demons_then, !is_april_1st)
+    }
 
     let mut page = Page::new(OverviewPage {
         team: Team {

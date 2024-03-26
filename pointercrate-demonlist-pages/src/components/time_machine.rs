@@ -7,30 +7,35 @@ pub enum Tardis {
     Activated {
         destination: DateTime<FixedOffset>,
         demons: Vec<TimeShiftedDemon>,
-        visible: bool,
+        /// Whether the time selection panel should be visible.
+        show_selector: bool,
+        /// Whether the "You are currently looking at the demonlist as it was on ..." panel should be visible.
+        show_destination: bool
     },
     Deactivated {
-        visible: bool,
+        /// Whether the time selection panel should be visible.
+        show_selector: bool,
     },
 }
 
 impl Tardis {
     pub fn new(visible: bool) -> Self {
-        Tardis::Deactivated { visible }
+        Tardis::Deactivated { show_selector: visible }
     }
 
-    pub fn activate(self, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>) -> Self {
-        Tardis::Activated {
-            visible: self.visible(),
+    pub fn activate(&mut self, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>, show_destination: bool) {
+        *self = Tardis::Activated {
+            show_selector: self.visible(),
             demons: demons_then,
             destination,
-        }
+            show_destination
+        };
     }
 
     pub fn visible(&self) -> bool {
         match self {
-            Tardis::Activated { visible, .. } => *visible,
-            Tardis::Deactivated { visible } => *visible,
+            Tardis::Activated { show_selector: visible, .. } => *visible,
+            Tardis::Deactivated { show_selector: visible } => *visible,
         }
     }
 }
