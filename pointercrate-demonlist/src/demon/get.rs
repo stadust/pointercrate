@@ -5,7 +5,7 @@ use crate::{
     player::DatabasePlayer,
     record::approved_records_on,
 };
-use chrono::{DateTime, FixedOffset, NaiveDateTime};
+use chrono::NaiveDateTime;
 use futures::StreamExt;
 use sqlx::{Error, PgConnection};
 

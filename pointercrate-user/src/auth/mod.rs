@@ -325,6 +325,7 @@ mod tests {
 mod b64 {
     use std::collections::HashMap;
 
+    use base64::{engine::general_purpose::STANDARD, Engine};
     use lazy_static::lazy_static;
 
     // Decoding table from bcrypt base64 to standard base64 and standard -> bcrypt
@@ -419,6 +420,6 @@ mod b64 {
         }
 
         // if we had non standard chars, it would have errored before
-        base64::decode(&res).unwrap()
+        STANDARD.decode(&res).unwrap()
     }
 }

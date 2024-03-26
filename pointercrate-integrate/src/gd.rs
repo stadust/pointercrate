@@ -2,7 +2,7 @@ use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use dash_rs::{
     model::{
         creator::Creator,
-        level::{Featured, Level, LevelData, LevelLength, ListedLevel, Objects, Password},
+        level::{Featured, Level, LevelData, LevelLength, ListedLevel, Password},
         song::{MainSong, NewgroundsSong},
         GameVersion,
     },

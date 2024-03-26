@@ -1,3 +1,4 @@
+use base64::{engine::general_purpose::STANDARD, Engine};
 use log::{debug, error, warn};
 use pointercrate_core::{
     error::{CoreError, PointercrateError},
@@ -13,6 +14,7 @@ use rocket::{
 use sqlx::{Postgres, Transaction};
 use std::collections::HashSet;
 
+#[allow(non_upper_case_globals)]
 pub struct Auth<const IsToken: bool> {
     pub user: AuthenticatedUser,
     pub connection: Transaction<'static, Postgres>,
@@ -22,6 +24,7 @@ pub struct Auth<const IsToken: bool> {
     pub(crate) secret: String,
 }
 
+#[allow(non_upper_case_globals)]
 impl<const IsToken: bool> Auth<IsToken> {
     pub async fn commit(self) -> Result<(), UserError> {
         self.connection.commit().await.map_err(UserError::from)
@@ -197,7 +200,8 @@ impl<'r> FromRequest<'r> for Auth<false> {
 
         for authorization in request.headers().get("Authorization") {
             if let ["Basic", basic_auth] = authorization.split(' ').collect::<Vec<_>>()[..] {
-                let decoded = try_outcome!(base64::decode(basic_auth)
+                
+                let decoded = try_outcome!(STANDARD.decode(basic_auth)
                     .map_err(|_| ())
                     .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))
                     .map_err(|_| {
