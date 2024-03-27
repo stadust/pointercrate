@@ -214,6 +214,12 @@ pub enum CoreError {
     /// Error Code `50005`
     #[display(fmt = "Failed to retrieve connection to the database. The server might be temporarily overloaded.")]
     DatabaseConnectionError,
+
+    /// `503 SERVICE UNAVAILABLE` variant returned by all non-GET (e.g. all possible mutating) requests if the server is in maintenance mode.
+    /// 
+    /// Error Core `50301`
+    #[display(fmt = "The website is currently in read-only maintenance mode.")]
+    ReadOnlyMaintenance,
 }
 
 impl Error for CoreError {}
@@ -245,6 +251,8 @@ impl PointercrateError for CoreError {
             CoreError::InternalServerError { .. } => 50000,
             CoreError::DatabaseError => 50003,
             CoreError::DatabaseConnectionError => 50005,
+            CoreError::ReadOnlyMaintenance => 50301,
+            
         }
     }
 }
