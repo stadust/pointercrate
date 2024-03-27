@@ -9,11 +9,11 @@ use rocket::{
 };
 
 /// Rocket fairing that causes all mutating requests (aka non-GET requests) to return 503 SERVICE UNAVAILABLE if `.0` is `true`.
-/// 
-/// Works in a very hacky way, as rocket does not allow fairing to terminate requests. Thus we instead rewrite the 
+///
+/// Works in a very hacky way, as rocket does not allow fairing to terminate requests. Thus we instead rewrite the
 /// request on the fly to be a GET /maintenance, which is an endpoint that unconditionally returns a 503 response.
 /// This endpoint only exists when maintainence mode is active (it is dynamically mounted in `on_ignite`).
-/// 
+///
 /// Idea taken from https://stackoverflow.com/questions/70011965/global-authentication-authorization-in-rocket-based-on-a-header
 #[derive(Default)]
 pub struct MaintenanceFairing(bool);
@@ -29,7 +29,7 @@ impl Fairing for MaintenanceFairing {
     fn info(&self) -> Info {
         Info {
             name: "Maintenance",
-            kind: Kind::Ignite | Kind::Request
+            kind: Kind::Ignite | Kind::Request,
         }
     }
 

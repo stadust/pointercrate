@@ -216,7 +216,7 @@ pub enum CoreError {
     DatabaseConnectionError,
 
     /// `503 SERVICE UNAVAILABLE` variant returned by all non-GET (e.g. all possible mutating) requests if the server is in maintenance mode.
-    /// 
+    ///
     /// Error Core `50301`
     #[display(fmt = "The website is currently in read-only maintenance mode.")]
     ReadOnlyMaintenance,
@@ -252,7 +252,6 @@ impl PointercrateError for CoreError {
             CoreError::DatabaseError => 50003,
             CoreError::DatabaseConnectionError => 50005,
             CoreError::ReadOnlyMaintenance => 50301,
-            
         }
     }
 }
