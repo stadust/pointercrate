@@ -45,12 +45,12 @@ export function initializeTimeMachine() {
   destination.addValidator(rangeUnderflow, "You cannot go back in time that far!");
 
   var offset = new Date().getTimezoneOffset();
-  var offsetHours = Math.abs(offset) / 60;
+  var offsetHours = offset / 60;
   var offsetMinutes = Math.abs(offset) % 60;
 
   timeMachineForm.onSubmit(() => {
     // datetime-local gives us a string in the format YYYY-MM-DDThh:mm. Thus, pad it with :ss and timezone information, as the backend expects (aka a rfc3339 date)
-    let when = destination.value + ":00" + (offsetHours < 0 ? "%2B" : "-") + (offsetHours + "").padStart(2, "0") + ":" + (offsetMinutes + "").padStart(2, "0");
+    let when = destination.value + ":00" + (offsetHours < 0 ? "%2B" : "-") + (Math.abs(offsetHours) + "").padStart(2, "0") + ":" + (offsetMinutes + "").padStart(2, "0");
 
     document.cookie = "when=" + when;
     gtag('event', 'time-machine-usage', {'event-category': 'demonlist', 'label': when});
