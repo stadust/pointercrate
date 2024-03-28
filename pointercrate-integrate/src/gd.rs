@@ -133,110 +133,95 @@ impl PgCache {
 
         trace!("Trying to find demon {} via request {:?}", demon_name, request);
 
-        let request_result = self.http_client
-            .post(&request.to_url())
-            .headers(HeaderMap::new())  // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
-            .body(request.to_string())
-            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
-            .send()
-            .await;
+        match self.make_request(request.to_url(), request.to_string()).await {
+            Ok(text) => match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
+                Err(ResponseError::NotFound) => self
+                    .mark_levels_request_result_as_absent(&request)
+                    .await
+                    .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
+                    .map(|_| ()),
+                Ok(mut demons) => {
+                    if demons.is_empty() {
+                        self.mark_levels_request_result_as_absent(&request)
+                            .await
+                            .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
+                            .map(|_| ())
+                    } else {
+                        trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
 
-        trace!("Request result is {:?}", request_result);
+                        self.store_levels_request(&request, &mut demons)
+                            .await
+                            .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
 
-        match request_result {
-            Ok(response) => match response.text().await {
-                Ok(text) => match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
-                    Err(ResponseError::NotFound) => self
-                        .mark_levels_request_result_as_absent(&request)
-                        .await
-                        .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
-                        .map(|_| ()),
-                    Ok(mut demons) => {
-                        if demons.is_empty() {
-                            self.mark_levels_request_result_as_absent(&request)
-                                .await
-                                .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
-                                .map(|_| ())
-                        } else {
-                            trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
+                        let hardest = demons
+                            .into_iter()
+                            .filter(|demon| demon.name.to_lowercase().trim() == demon_name.to_lowercase().trim())
+                            .max_by(|x, y| x.difficulty.cmp(&y.difficulty).then(Ordering::Greater));
 
-                            self.store_levels_request(&request, &mut demons)
-                                .await
-                                .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
+                        match hardest {
+                            Some(hardest) => {
+                                trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
 
-                            let hardest = demons
-                                .into_iter()
-                                .filter(|demon| demon.name.to_lowercase().trim() == demon_name.to_lowercase().trim())
-                                .max_by(|x, y| x.difficulty.cmp(&y.difficulty).then(Ordering::Greater));
+                                self.download_demon(hardest.level_id.into(), demon).await
+                            },
+                            None => {
+                                error!("Could not find a level whose name matches '{}'", demon_name);
 
-                            match hardest {
-                                Some(hardest) => {
-                                    trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
-
-                                    self.download_demon(hardest.level_id.into(), demon).await
-                                },
-                                None => {
-                                    error!("Could not find a level whose name matches '{}'", demon_name);
-
-                                    Err(())
-                                },
-                            }
+                                Err(())
+                            },
                         }
-                    },
-                    Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
+                    }
                 },
-                Err(error) => Err(error!("Error reading server response: {:?}", error)),
+                Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
             },
-            Err(error) => Err(error!("Error making request: {:?}", error)),
+            Err(error) => Err(error!("Error reading server response: {:?}", error)),
         }
     }
 
     async fn download_demon(self, request: LevelRequest<'static>, demon_id: i32) -> Result<(), ()> {
         trace!("Downloading demon with id {}", request.level_id);
 
-        let request_result = self.http_client
-            .post(&request.to_url())
-            .headers(HeaderMap::new())  // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
-            .body(request.to_string())
+        match self.make_request(request.to_url(), request.to_string()).await {
+            Ok(text) => match dash_rs::response::parse_download_gj_level_response(&text[..]) {
+                Ok(mut demon) => {
+                    self.store_level_data(demon.level_id, &mut demon.level_data)
+                        .await
+                        .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
+
+                    sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
+                        .execute(&self.pool)
+                        .await
+                        .map_err(|err| error!("Error updating level_id: {:?}", err))?;
+
+                    sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
+                        .execute(&self.pool)
+                        .await
+                        .map_err(|err| error!("Error freeing download lock: {:?}", err))?;
+
+                    Ok(info!("Successfully retrieved demon data!"))
+                },
+                Err(ResponseError::NotFound) => self
+                    .mark_level_data_as_absent(request.level_id)
+                    .await
+                    .map_err(|err| error!("Error marking level as absent: {:?}", err))
+                    .map(|_| ()),
+                Err(err) => Err(error!("Error processing response: {:?}", err)),
+            },
+            Err(err) => Err(error!("Error making http request: {:?}", err)),     
+        }
+    }
+
+    async fn make_request(&self, url: String, body: String) -> Result<String, reqwest::Error> {
+        let response = self.http_client
+            .post(url)
+              // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
+            .headers(HeaderMap::new())
+            .body(body)
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .send()
-            .await;
+            .await?;
 
-        match request_result {
-            Ok(response) => {
-                let content = response.text().await;
-
-                match content {
-                    Ok(text) => match dash_rs::response::parse_download_gj_level_response(&text[..]) {
-                        Ok(mut demon) => {
-                            self.store_level_data(demon.level_id, &mut demon.level_data)
-                                .await
-                                .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
-
-                            sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
-                                .execute(&self.pool)
-                                .await
-                                .map_err(|err| error!("Error updating level_id: {:?}", err))?;
-
-                            sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
-                                .execute(&self.pool)
-                                .await
-                                .map_err(|err| error!("Error freeing download lock: {:?}", err))?;
-
-                            Ok(info!("Successfully retrieved demon data!"))
-                        },
-                        Err(ResponseError::NotFound) => self
-                            .mark_level_data_as_absent(request.level_id)
-                            .await
-                            .map_err(|err| error!("Error marking level as absent: {:?}", err))
-                            .map(|_| ()),
-                        Err(err) => Err(error!("Error processing response: {:?}", err)),
-                    },
-                    Err(err) => Err(error!("Error making http request: {:?}", err)),
-                }
-            },
-            Err(err) => Err(error!("Error making http request: {:?}", err)),
-        }
+        response.text().await
     }
 }
 
