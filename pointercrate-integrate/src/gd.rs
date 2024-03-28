@@ -193,11 +193,6 @@ impl PgCache {
                         .await
                         .map_err(|err| error!("Error updating level_id: {:?}", err))?;
 
-                    sqlx::query!("DELETE FROM download_lock WHERE level_id = $1", request.level_id as i64)
-                        .execute(&self.pool)
-                        .await
-                        .map_err(|err| error!("Error freeing download lock: {:?}", err))?;
-
                     Ok(info!("Successfully retrieved demon data!"))
                 },
                 Err(ResponseError::NotFound) => self
