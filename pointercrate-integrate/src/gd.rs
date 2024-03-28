@@ -1,209 +1,102 @@
-use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use dash_rs::{
     model::{
         creator::Creator,
-        level::{Featured, Level, LevelData, LevelLength, ListedLevel, Password},
+        level::{Featured, Level, LevelData, LevelLength, Password},
         song::{MainSong, NewgroundsSong},
         GameVersion,
     },
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
-    response::ResponseError,
-    ProcessError,
+    response::{parse_download_gj_level_response, parse_get_gj_levels_response},
 };
-use futures::{FutureExt, StreamExt};
-use log::{error, info, trace};
+use log::{error, trace};
+use pointercrate_core::ratelimits;
+use pointercrate_demonlist::demon::Demon;
 use reqwest::{header::CONTENT_TYPE, Client};
-use sqlx::{Error, Pool, Postgres};
-use std::{
-    borrow::Cow,
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-};
+use sqlx::{Pool, Postgres};
+use std::{borrow::Cow, sync::Arc};
 
 pub use dash_rs::{
     model::level::{DemonRating, LevelRating},
     Thunk,
 };
 use reqwest::header::HeaderMap;
-use std::cmp::Ordering;
 
-#[derive(Debug)]
-pub enum GDIntegrationResult {
-    Success(Level<'static, ()>, LevelData<'static>, Option<NewgroundsSong<'static>>),
-    DemonNotFoundByName,
-    DemonNotYetCached,
-    LevelDataNotFound,
-    LevelDataNotCached,
+ratelimits! {
+    IntegrationRatelimits {
+        demon_refresh[1u32 per 86400 per i32] => "Only one refresh per day per demon",
+    }
 }
 
+pub type IntegrationLevel = Level<'static, LevelData<'static>, Option<NewgroundsSong<'static>>>;
+
 impl PgCache {
-    pub async fn data_for_demon(
-        &self, level_id: Option<u64>, name: String, demon_id: i32,
-    ) -> Result<GDIntegrationResult, ()> {
-        trace!("Retrieving data for demon {:?}", name);
-
-        match level_id {
-            None => {
-                info!("Data for demon {} not cached, trying to download!", demon_id);
-
-                let request = LevelsRequest::default()
-                    .request_type(LevelRequestType::MostLiked)
-                    .search(&name)
-                    .with_rating(LevelRating::Demon(DemonRating::Hard))
-                    .search_filters(SearchFilters::default().rated());
-
-                let entry = match self.lookup_levels_request(&request).await {
-                    Err(CacheError::Db(_err)) => return Err(()),
-                    Err(_) => return Err(()), // shouldn't be reachable
-                    Ok(entry) => entry,
-                };
-
-                match entry {
-                    CacheEntry::Absent => Ok(GDIntegrationResult::DemonNotFoundByName),
-                    // Okay we _could_ do something more elaborate here if we dont have a "Missing" variant, but honestly I dont care
-                    _ => {
-                        tokio::spawn(self.clone().find_demon(name.clone(), demon_id).map(|_| ()));
-
-                        Ok(GDIntegrationResult::DemonNotYetCached)
-                    },
-                }
-            },
-            Some(level_id) => {
-                let entry = match self.lookup_level(level_id).await {
-                    Err(CacheError::Db(_err)) => return Err(()),
-                    Err(_) => return Err(()), // shouldn't be reachable
-                    Ok(entry) => entry,
-                };
-
-                trace!(
-                    "Lookup of level with id {} (associated with demon '{}') yielded: {:?}",
-                    level_id,
-                    name,
-                    entry
-                );
-
-                let level = match entry {
-                    // Something went very wrong
-                    CacheEntry::Missing => return Ok(GDIntegrationResult::LevelDataNotCached),
-                    CacheEntry::Absent => return Ok(GDIntegrationResult::LevelDataNotFound),
-                    CacheEntry::Expired(level, _) => {
-                        tokio::spawn(self.clone().find_demon(name.clone(), demon_id).map(|_| ()));
-
-                        level
-                    },
-                    CacheEntry::Live(level, _) => level,
-                };
-
-                let level_data = match self.lookup_level_data(level_id).await {
-                    Err(CacheError::Db(_err)) => return Err(()),
-                    Err(_) => return Err(()), // shouldn't be reachable
-                    Ok(CacheEntry::Missing) => return Ok(GDIntegrationResult::LevelDataNotCached),
-                    Ok(CacheEntry::Absent) => return Ok(GDIntegrationResult::LevelDataNotFound),
-                    Ok(CacheEntry::Expired(level_data, _)) => {
-                        tokio::spawn(
-                            self.clone()
-                                .download_demon(level.level_id.into(), demon_id)
-                                .map(|_| ()),
-                        );
-
-                        level_data
-                    },
-                    Ok(CacheEntry::Live(level_data, _)) => level_data,
-                };
-
-                let song = match level.custom_song {
-                    Some(id) => self.lookup_newgrounds_song(id).await.ok().and_then(|entry| match entry {
-                        CacheEntry::Expired(song, _) | CacheEntry::Live(song, _) => Some(song),
-                        _ => None,
-                    }),
-                    None => None,
-                };
-
-                Ok(GDIntegrationResult::Success(level, level_data, song))
-            },
+    pub async fn demon_data(&self, demon: &Demon) -> Option<IntegrationLevel> {
+        if self.ratelimits.demon_refresh(demon.base.id).is_ok() {
+            tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
         }
+
+        if let Some(level_id) = demon.level_id {
+            let level = self
+                .lookup_level(level_id)
+                .await?
+                .with_data(self.lookup_level_data(level_id).await?);
+
+            let song = match level.custom_song {
+                Some(id) => self.lookup_newgrounds_song(id).await,
+                None => None,
+            };
+
+            return Some(level.with_custom_song(song));
+        }
+
+        None
     }
 
-    async fn find_demon(self, demon_name: String, demon: i32) -> Result<(), ()> {
+    pub async fn refresh_demon_data(self, name: String, demon_id: i32) {
+        // Lookup demon by name
         let request = LevelsRequest::default()
+            // Heuristic: list level have a lot of likes
             .request_type(LevelRequestType::MostLiked)
-            .search(&demon_name)
+            .search(&name)
+            // passing any `LevelRating::Demon` variant here will result in filtering by arbitrary demon difficulty
             .with_rating(LevelRating::Demon(DemonRating::Hard))
             .search_filters(SearchFilters::default().rated());
 
-        trace!("Trying to find demon {} via request {:?}", demon_name, request);
+        let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
+            return;
+        };
+        let Ok(demons) = parse_get_gj_levels_response(&response) else {
+            return;
+        };
+        let Some(mut hardest) = demons
+            .into_iter()
+            // Geometry Dash servers only do a substring match, so we have to ensure the name is equal to what we're looking for
+            .filter(|demon| demon.name.trim().eq_ignore_ascii_case(name.trim()))
+            .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
+        else {
+            return;
+        };
 
-        match self.make_request(request.to_url(), request.to_string()).await {
-            Ok(text) => match dash_rs::response::parse_get_gj_levels_response(&text[..]) {
-                Err(ResponseError::NotFound) => self
-                    .mark_levels_request_result_as_absent(&request)
-                    .await
-                    .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
-                    .map(|_| ()),
-                Ok(mut demons) => {
-                    if demons.is_empty() {
-                        self.mark_levels_request_result_as_absent(&request)
-                            .await
-                            .map_err(|err| error!("Error marking result to {:?} as absent:  {:?}", request, err))
-                            .map(|_| ())
-                    } else {
-                        trace!("Request to find demon {} yielded result {:?}", demon_name, demons);
+        let request = LevelRequest::new(hardest.level_id);
+        let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
+            return;
+        };
+        let Ok(mut level) = parse_download_gj_level_response(&response) else {
+            return;
+        };
 
-                        self.store_levels_request(&request, &mut demons)
-                            .await
-                            .map_err(|err| error!("Error storing levels request result: {:?}", err))?;
-
-                        let hardest = demons
-                            .into_iter()
-                            .filter(|demon| demon.name.to_lowercase().trim() == demon_name.to_lowercase().trim())
-                            .max_by(|x, y| x.difficulty.cmp(&y.difficulty).then(Ordering::Greater));
-
-                        match hardest {
-                            Some(hardest) => {
-                                trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
-
-                                self.download_demon(hardest.level_id.into(), demon).await
-                            },
-                            None => {
-                                error!("Could not find a level whose name matches '{}'", demon_name);
-
-                                Err(())
-                            },
-                        }
-                    }
-                },
-                Err(err) => Err(error!("Error processing response to request {:?}: {:?}", request, err)),
-            },
-            Err(error) => Err(error!("Error reading server response: {:?}", error)),
+        if let Some(newgrounds_song) = &mut hardest.custom_song {
+            self.store_newgrounds_song(newgrounds_song).await;
         }
-    }
 
-    async fn download_demon(self, request: LevelRequest<'static>, demon_id: i32) -> Result<(), ()> {
-        trace!("Downloading demon with id {}", request.level_id);
-
-        match self.make_request(request.to_url(), request.to_string()).await {
-            Ok(text) => match dash_rs::response::parse_download_gj_level_response(&text[..]) {
-                Ok(mut demon) => {
-                    self.store_level_data(demon.level_id, &mut demon.level_data)
-                        .await
-                        .map_err(|err| error!("Error storing demon '{}': {:?}", demon.name, err))?;
-
-                    sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", request.level_id as i64, demon_id)
-                        .execute(&self.pool)
-                        .await
-                        .map_err(|err| error!("Error updating level_id: {:?}", err))?;
-
-                    Ok(info!("Successfully retrieved demon data!"))
-                },
-                Err(ResponseError::NotFound) => self
-                    .mark_level_data_as_absent(request.level_id)
-                    .await
-                    .map_err(|err| error!("Error marking level as absent: {:?}", err))
-                    .map(|_| ()),
-                Err(err) => Err(error!("Error processing response: {:?}", err)),
-            },
-            Err(err) => Err(error!("Error making http request: {:?}", err)),     
+        if let Some(creator) = &hardest.creator {
+            self.store_creator(creator).await;
         }
+
+        self.store_level(&mut hardest, level.creator, level.custom_song).await;
+        self.store_level_data(level.level_id, &mut level.level_data).await;
+
+        let _ = sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level.level_id as i64, demon_id).execute(&self.pool).await;
     }
 
     async fn make_request(&self, url: String, body: String) -> Result<String, reqwest::Error> {
@@ -222,108 +115,43 @@ impl PgCache {
 
 // FIXME: Right now this implementation always stores processed data. In case of processing failure,
 // it refuses to store the object. In the future, we probably want to store the unprocessed data
-// then with a special flag. However, this is not yet supported by dash-rs, as dash-rs doesnt
-// support owned, unprocessed data.
-
-#[derive(Debug)]
-pub struct CacheEntryMeta {
-    made: NaiveDateTime,
-    key: i64,
-    absent: bool,
-}
-
-#[derive(Debug)]
-pub enum CacheError {
-    Db(Error),
-    Malformed(ProcessError),
-    MalformedLevelData,
-}
-
-impl From<Error> for CacheError {
-    fn from(err: Error) -> Self {
-        CacheError::Db(err)
-    }
-}
-
-impl From<ProcessError> for CacheError {
-    fn from(err: ProcessError) -> Self {
-        CacheError::Malformed(err)
-    }
-}
-
-#[derive(Debug)]
-pub enum CacheEntry<T> {
-    Missing,
-    Absent,
-    Expired(T, CacheEntryMeta),
-    Live(T, CacheEntryMeta),
-}
+// then with a special flag.
 
 #[derive(Clone)]
 pub struct PgCache {
     pool: Pool<Postgres>,
-    expire_after: Duration,
-    http_client: reqwest::Client,
+    http_client: Client,
+    ratelimits: Arc<IntegrationRatelimits>,
 }
 
 impl PgCache {
-    pub fn new(pool: Pool<Postgres>, expire_after: Duration) -> Self {
-        PgCache { pool, expire_after, http_client: reqwest::Client::new() }
-    }
-
-    fn make_cache_entry<T>(&self, meta: CacheEntryMeta, t: T) -> CacheEntry<T> {
-        if DateTime::from_naive_utc_and_offset(meta.made, Utc) - Utc::now() < self.expire_after {
-            CacheEntry::Live(t, meta)
-        } else {
-            CacheEntry::Expired(t, meta)
+    pub fn new(pool: Pool<Postgres>) -> Self {
+        PgCache {
+            pool,
+            http_client: Client::new(),
+            ratelimits: Arc::new(IntegrationRatelimits::new()),
         }
     }
 
-    pub async fn lookup_creator(&self, user_id: u64) -> Result<CacheEntry<Creator<'static>>, CacheError> {
-        let mut connection = self.pool.acquire().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "SELECT user_id AS key, cached_at AS made, absent FROM gj_creator_meta WHERE user_id = $1",
-            user_id as i64
-        )
-        .fetch_one(&mut *connection)
-        .await;
-
-        let meta = match meta {
-            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
-            Err(err) => return Err(err.into()),
-            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
-            Ok(meta) => meta,
-        };
+    pub async fn lookup_creator(&self, user_id: u64) -> Option<Creator<'static>> {
+        let mut connection = self.pool.acquire().await.ok()?;
 
         let creator_row = sqlx::query!("SELECT * FROM gj_creator WHERE user_id = $1", user_id as i64)
             .fetch_one(&mut *connection)
-            .await?;
+            .await
+            .ok()?;
 
-        let creator = Creator {
+        Some(Creator {
             user_id: creator_row.user_id as u64,
             name: Cow::Owned(creator_row.name),
             account_id: creator_row.account_id.map(|id| id as u64),
-        };
-
-        Ok(self.make_cache_entry(meta, creator))
+        })
     }
 
-    pub async fn store_creator<'a>(&self, creator: &Creator<'a>) -> Result<CacheEntryMeta, CacheError> {
-        let mut connection = self.pool.begin().await?;
+    pub async fn store_creator<'a>(&self, creator: &Creator<'a>) {
+        let Ok(mut connection) = self.pool.begin().await else { return };
 
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_creator_meta (user_id, cached_at, absent) VALUES($1, $2, FALSE) ON CONFLICT (user_id) DO UPDATE SET cached_at \
-             = EXCLUDED.cached_at, absent = FALSE RETURNING user_id AS key, cached_at AS made, absent",
-            creator.user_id as i64,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
-
-        sqlx::query!(
+        let _ = sqlx::query!(
             "INSERT INTO gj_creator (user_id, name, account_id) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET name = \
              EXCLUDED.name, account_id = EXCLUDED.account_id",
             creator.user_id as i64,
@@ -331,36 +159,20 @@ impl PgCache {
             creator.account_id.map(|id| id as i64)
         )
         .execute(&mut *connection)
-        .await?;
-
-        connection.commit().await?;
-
-        Ok(meta)
-    }
-
-    pub async fn lookup_newgrounds_song(&self, song_id: u64) -> Result<CacheEntry<NewgroundsSong<'static>>, CacheError> {
-        let mut connection = self.pool.acquire().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "SELECT song_id AS key, cached_at AS made, absent FROM gj_newgrounds_song_meta WHERE song_id = $1",
-            song_id as i64
-        )
-        .fetch_one(&mut *connection)
         .await;
 
-        let meta = match meta {
-            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
-            Err(err) => return Err(err.into()),
-            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
-            Ok(meta) => meta,
-        };
+        let _ = connection.commit().await;
+    }
+
+    pub async fn lookup_newgrounds_song(&self, song_id: u64) -> Option<NewgroundsSong<'static>> {
+        let mut connection = self.pool.acquire().await.ok()?;
 
         let song_row = sqlx::query!("SELECT * from gj_newgrounds_song WHERE song_id = $1", song_id as i64)
             .fetch_one(&mut *connection)
-            .await?;
+            .await
+            .ok()?;
 
-        let song = NewgroundsSong {
+        Some(NewgroundsSong {
             song_id,
             name: Cow::Owned(song_row.song_name),
             index_3: song_row.index_3 as u64,
@@ -370,28 +182,16 @@ impl PgCache {
             index_7: song_row.index_7.map(Cow::Owned),
             index_8: Cow::Owned(song_row.index_8),
             link: Thunk::Processed(Cow::Owned(song_row.song_link)),
-        };
-
-        Ok(self.make_cache_entry(meta, song))
+        })
     }
 
-    pub async fn store_newgrounds_song<'a>(&self, song: &mut NewgroundsSong<'a>) -> Result<CacheEntryMeta, CacheError> {
-        let mut connection = self.pool.begin().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_newgrounds_song_meta (song_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (song_id) DO UPDATE SET \
-             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING song_id AS key, cached_at AS made, absent",
-            song.song_id as i64,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
+    pub async fn store_newgrounds_song<'a>(&self, song: &NewgroundsSong<'a>) {
+        let Ok(mut connection) = self.pool.begin().await else { return };
 
         // FIXME: this
-        let song_link = song.link.process()?;
+        let Ok(song_link) = song.link.as_processed() else { return };
 
-        sqlx::query!(
+        let _ = sqlx::query!(
             "INSERT INTO gj_newgrounds_song (song_id, song_name, index_3, song_artist, filesize, index_6, index_7, index_8, song_link) \
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (song_id) DO UPDATE SET song_id = $1, song_name = $2, index_3 = $3, \
              song_artist = $4, filesize = $5, index_6 = $6, index_7 = $7, index_8 = $8, song_link = $9",
@@ -406,54 +206,20 @@ impl PgCache {
             song_link.as_ref()
         )
         .execute(&mut *connection)
-        .await?;
-
-        connection.commit().await?;
-
-        Ok(meta)
-    }
-
-    pub async fn mark_level_data_as_absent<'a>(&self, level_id: u64) -> Result<CacheEntryMeta, CacheError> {
-        let mut connection = self.pool.begin().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (level_id) DO UPDATE SET \
-             cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING level_id AS key, cached_at AS made, absent",
-            level_id as i64,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
-
-        connection.commit().await?;
-
-        Ok(meta)
-    }
-
-    pub async fn lookup_level_data<'a>(&self, level_id: u64) -> Result<CacheEntry<LevelData<'static>>, CacheError> {
-        let mut connection = self.pool.acquire().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_data_meta WHERE level_id = $1",
-            level_id as i64
-        )
-        .fetch_one(&mut *connection)
         .await;
 
-        let meta = match meta {
-            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
-            Err(err) => return Err(err.into()),
-            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
-            Ok(meta) => meta,
-        };
+        let _ = connection.commit().await;
+    }
+
+    pub async fn lookup_level_data<'a>(&self, level_id: u64) -> Option<LevelData<'static>> {
+        let mut connection = self.pool.acquire().await.ok()?;
 
         let row = sqlx::query!("SELECT * FROM gj_level_data WHERE level_id = $1", level_id as i64)
             .fetch_one(&mut *connection)
-            .await?;
+            .await
+            .ok()?;
 
-        let level = LevelData {
+        Some(LevelData {
             level_data: Thunk::Processed(bincode::deserialize(&row.level_data[..]).unwrap()),
             password: Thunk::Processed(match row.level_password {
                 None => Password::NoCopy,
@@ -467,46 +233,32 @@ impl PgCache {
             index_52: Cow::Owned(String::new()),
             index_53: Cow::Owned(String::new()),
             index_57: Cow::Owned(String::new()),
-        };
-
-        Ok(self.make_cache_entry(meta, level))
+        })
     }
 
-    pub async fn store_level_data<'a>(&self, level_id: u64, data: &mut LevelData<'a>) -> Result<CacheEntryMeta, CacheError> {
-        let mut connection = self.pool.begin().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_level_data_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET \
-             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent",
-            level_id as i64,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
+    pub async fn store_level_data<'a>(&self, level_id: u64, data: &mut LevelData<'a>) {
+        let Ok(mut connection) = self.pool.begin().await else { return };
 
         // FIXME: this
         trace!("Starting to parse level data");
-        let objects = data.level_data.process().map_err(|err| {
-            error!("Error processing level data: {:?}", err);
-
-            CacheError::MalformedLevelData
-        })?;
-        let serialized_objects = bincode::serialize(&objects).map_err(|err| {
-            error!("Error binary serializing level data: {:?}", err);
-
-            CacheError::MalformedLevelData
-        })?;
+        let Ok(objects) = data.level_data.process() else {
+            return error!("Error processing level data for {}", level_id);
+        };
+        let Ok(serialized_objects) = bincode::serialize(&objects) else {
+            return;
+        };
         trace!("Finished parsing level data");
 
-        sqlx::query!(
+        let Ok(password) = data.password.process() else { return };
+
+        let _ = sqlx::query!(
             "INSERT INTO gj_level_data(level_id,level_data,level_password,time_since_upload,time_since_update,index_36) VALUES \
              ($1,$2,$3,$4,$5,$6) ON CONFLICT(level_id) DO UPDATE SET \
              level_id=EXCLUDED.level_id,level_data=EXCLUDED.level_data,level_password=EXCLUDED.level_password,time_since_upload=EXCLUDED.\
              time_since_upload,time_since_update=EXCLUDED.time_since_update,index_36=EXCLUDED.index_36",
             level_id as i64,
             serialized_objects,
-            match data.password.process()? {
+            match password {
                 Password::NoCopy => None,
                 Password::FreeCopy => Some(-1),
                 Password::PasswordCopy(pw) => Some(*pw as i32),
@@ -516,155 +268,20 @@ impl PgCache {
             data.index_36.as_ref()
         )
         .execute(&mut *connection)
-        .await?;
-
-        connection.commit().await?;
-
-        Ok(meta)
-    }
-
-    pub async fn mark_levels_request_result_as_absent<'a>(&self, request: &LevelsRequest<'a>) -> Result<CacheEntryMeta, CacheError> {
-        trace!("Marking result of request {:?} as absent!", request);
-
-        let hash = {
-            let mut hasher = DefaultHasher::new();
-            request.hash(&mut hasher);
-            hasher.finish() as i64
-        };
-
-        let mut connection = self.pool.begin().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, TRUE) ON CONFLICT (request_hash) DO \
-             UPDATE SET cached_at = EXCLUDED.cached_at, absent = TRUE RETURNING request_hash AS key, cached_at AS made, absent",
-            hash,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
-
-        connection.commit().await?;
-
-        Ok(meta)
-    }
-
-    pub async fn lookup_levels_request<'a>(
-        &self, request: &LevelsRequest<'a>,
-    ) -> Result<CacheEntry<Vec<CacheEntry<Level<'static, ()>>>>, CacheError> {
-        let hash = {
-            let mut hasher = DefaultHasher::new();
-            request.hash(&mut hasher);
-            hasher.finish() as i64
-        };
-
-        let mut connection = self.pool.acquire().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "SELECT request_hash AS key, cached_at AS made, absent FROM gj_level_request_meta WHERE request_hash = $1",
-            hash
-        )
-        .fetch_one(&mut *connection)
         .await;
 
-        let meta = match meta {
-            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
-            Err(err) => return Err(err.into()),
-            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
-            Ok(meta) => meta,
-        };
-
-        let mut stream =
-            sqlx::query!("SELECT level_id from gj_level_request_results WHERE request_hash = $1", hash).fetch(&mut *connection);
-        let mut levels = Vec::new();
-
-        while let Some(row) = stream.next().await {
-            let level_id = row?.level_id as u64;
-
-            levels.push(self.lookup_level(level_id).await?);
-        }
-
-        Ok(self.make_cache_entry(meta, levels))
+        let _ = connection.commit().await;
     }
 
-    pub async fn store_levels_request<'a, 'b>(
-        &self, request: &LevelsRequest<'a>, levels: &mut Vec<ListedLevel<'b>>,
-    ) -> Result<CacheEntryMeta, CacheError> {
-        let hash = {
-            let mut hasher = DefaultHasher::new();
-            request.hash(&mut hasher);
-            hasher.finish() as i64
-        };
-
-        let mut connection = self.pool.begin().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_level_request_meta (request_hash, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (request_hash) DO \
-             UPDATE SET cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING request_hash AS key, cached_at AS made, absent",
-            hash,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
-
-        for level in levels {
-            self.store_level(
-                level,
-                level.creator.as_ref().map(|c| c.user_id).unwrap_or(0),
-                level.custom_song.as_ref().map(|n| n.song_id),
-            )
-            .await?;
-
-            // FIXME: We do not correctly handle the case where newgrounds song/creator is absent. For
-            // pointercrate, this should not be a problem however.
-
-            if let Some(ref creator) = level.creator {
-                self.store_creator(creator).await?;
-            }
-
-            if let Some(ref mut song) = level.custom_song {
-                self.store_newgrounds_song(song).await?;
-            }
-
-            sqlx::query!(
-                "INSERT INTO gj_level_request_results(level_id, request_hash) VALUES ($1, $2)",
-                level.level_id as i64,
-                hash
-            )
-            .execute(&mut *connection)
-            .await?;
-        }
-
-        connection.commit().await?;
-
-        Ok(meta)
-    }
-
-    pub async fn lookup_level(&self, level_id: u64) -> Result<CacheEntry<Level<'static, ()>>, CacheError> {
-        let mut connection = self.pool.acquire().await?;
-
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "SELECT level_id AS key, cached_at AS made, absent FROM gj_level_meta WHERE level_id = $1",
-            level_id as i64
-        )
-        .fetch_one(&mut *connection)
-        .await;
-
-        let meta = match meta {
-            Err(sqlx::Error::RowNotFound) => return Ok(CacheEntry::Missing),
-            Err(err) => return Err(err.into()),
-            Ok(meta) if meta.absent => return Ok(CacheEntry::Absent),
-            Ok(meta) => meta,
-        };
+    pub async fn lookup_level(&self, level_id: u64) -> Option<Level<'static, ()>> {
+        let mut connection = self.pool.acquire().await.ok()?;
 
         let row = sqlx::query!("SELECT * FROM gj_level WHERE level_id = $1", level_id as i64)
             .fetch_one(&mut *connection)
-            .await?;
+            .await
+            .ok()?;
 
-        let level = Level {
+        Some(Level {
             level_id,
             name: Cow::Owned(row.level_name),
             description: row.description.map(|description| Thunk::Processed(Cow::Owned(description))),
@@ -689,28 +306,18 @@ impl PgCache {
             index_46: row.index_46.map(Cow::Owned),
             index_47: row.index_47.map(Cow::Owned),
             level_data: (),
-        };
-
-        Ok(self.make_cache_entry(meta, level))
+        })
     }
 
     // This must be the most horrifying piece of code I have ever written.
-    async fn store_level<'a, T, U, V>(
-        &self, level: &mut Level<'a, T, U, V>, creator_id: u64, custom_song_id: Option<u64>,
-    ) -> Result<CacheEntryMeta, CacheError> {
-        let mut connection = self.pool.begin().await?;
+    async fn store_level<'a, T, U, V>(&self, level: &Level<'a, T, U, V>, creator_id: u64, custom_song_id: Option<u64>) {
+        let Ok(mut connection) = self.pool.begin().await else { return };
 
-        let meta = sqlx::query_as!(
-            CacheEntryMeta,
-            "INSERT INTO gj_level_meta (level_id, cached_at, absent) VALUES ($1, $2, FALSE) ON CONFLICT (level_id) DO UPDATE SET \
-             cached_at = EXCLUDED.cached_at, absent = FALSE RETURNING level_id AS key, cached_at AS made, absent",
-            level.level_id as i64,
-            Utc::now().naive_utc()
-        )
-        .fetch_one(&mut *connection)
-        .await?;
+        let Ok(description) = level.description.as_ref().map(|thunk| thunk.as_processed()).transpose() else {
+            return;
+        };
 
-        sqlx::query!(
+        let _ = sqlx::query!(
             "INSERT INTO \
              gj_level(level_id,level_name,description,level_version,creator_id,difficulty,is_demon,downloads,main_song,gd_version,likes,\
              level_length,stars,featured,copy_of,two_player,custom_song_id,coin_amount,coins_verified,stars_requested,is_epic,\
@@ -725,12 +332,7 @@ impl PgCache {
              index_46,index_47=EXCLUDED.index_47",
             level.level_id as i64,
             level.name.as_ref(),
-            match level.description {
-                Some(ref mut thunk) => {
-                    Some(thunk.process()?.to_string())
-                },
-                None => None,
-            },
+            description.map(|cow| cow.to_string()),
             level.version as i32,
             creator_id as i64,
             level_rating_to_i16(level.difficulty),
@@ -754,11 +356,9 @@ impl PgCache {
             level.index_47.as_deref()
         )
         .execute(&mut *connection)
-        .await?;
+        .await;
 
-        connection.commit().await?;
-
-        Ok(meta)
+        let _ = connection.commit().await;
     }
 }
 

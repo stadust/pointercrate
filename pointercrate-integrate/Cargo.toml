@@ -13,7 +13,11 @@ futures = "0.3.8"
 log = "0.4.11"
 chrono = "0.4.19"
 tokio = {version = "1.20.4", features = ["rt"]}
+pointercrate-demonlist = { path = "../pointercrate-demonlist" }
+pointercrate-core = { path = "../pointercrate-core" }
+governor = "0.6.3"
+nonzero_ext = "0.3.0"
 
 [dependencies.dash-rs]
 git = "https://github.com/stadust/dash-rs"
-rev = "b01eb4cf9ff0a001cdfe07755a52843ff93b9002"
+rev = "8cdbb85625b7575b8775e6e28ce6850504bc7397"

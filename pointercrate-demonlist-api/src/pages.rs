@@ -19,7 +19,7 @@ use pointercrate_demonlist_pages::{
     overview::OverviewPage,
     statsviewer::individual::IndividualStatsViewer,
 };
-use pointercrate_integrate::gd::{GDIntegrationResult, PgCache};
+use pointercrate_integrate::gd::{PgCache};
 use pointercrate_user::User;
 use pointercrate_user_api::auth::TokenAuth;
 use rand::Rng;
@@ -151,14 +151,8 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         },
         demonlist: current_list(&mut *connection).await?,
         movements: modifications,
-        integration: gd
-            .data_for_demon(
-                full_demon.demon.level_id,
-                full_demon.demon.base.name.clone(),
-                full_demon.demon.base.id,
-            )
-            .await
-            .unwrap_or(GDIntegrationResult::LevelDataNotFound),
+        integration: gd.demon_data(&full_demon.demon)
+            .await,
         data: full_demon,
     });
 
