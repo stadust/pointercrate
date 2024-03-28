@@ -1,17 +1,6 @@
 #[macro_export]
 macro_rules! ratelimits {
     ($struct_name: ident {$($tokens:tt)*}) => {
-        use nonzero_ext::nonzero;
-        use pointercrate_core::error::CoreError;
-        use std::{
-            time::{Duration, Instant},
-        };
-        use governor::{
-            clock::{Clock, DefaultClock, Reference},
-            state::{direct::NotKeyed, keyed::DefaultKeyedStateStore, InMemoryState},
-            Quota, RateLimiter,
-        };
-
         ratelimits!(@struct@ $struct_name [] $($tokens)*);
 
         impl $struct_name {
@@ -24,7 +13,7 @@ macro_rules! ratelimits {
         ratelimits!(@struct@
             $struct_name [
                 $($field: $type | $init,)*  // already processed fields
-                $name: RateLimiter<NotKeyed, InMemoryState, DefaultClock> | RateLimiter::direct(Quota::new(nonzero!($capacity), Duration::from_secs($seconds)).unwrap())  // new field
+                $name: governor::RateLimiter<governor::state::direct::NotKeyed, governor::state::InMemoryState, governor::clock::DefaultClock> | governor::RateLimiter::direct(governor::Quota::new(nonzero_ext::nonzero!($capacity), std::time::Duration::from_secs($seconds)).unwrap())  // new field
             ] $($remaining)*);  // remaining, unprocessed fields as token stream
     };
 
@@ -32,16 +21,18 @@ macro_rules! ratelimits {
         ratelimits!(@struct@
             $struct_name [
                 $($field: $type | $init,)*
-                $name: RateLimiter<$key_type, DefaultKeyedStateStore<$key_type>, DefaultClock> | RateLimiter::keyed(Quota::new(nonzero!($capacity), Duration::from_secs($seconds)).unwrap())
+                $name: governor::RateLimiter<$key_type, governor::state::keyed::DefaultKeyedStateStore<$key_type>, governor::clock::DefaultClock> | governor::RateLimiter::keyed(governor::Quota::new(nonzero_ext::nonzero!($capacity), std::time::Duration::from_secs($seconds)).unwrap())
             ] $($remaining)*);
     };
 
     (@method@ $name: ident[$capacity: tt per $seconds: tt] => $message: expr, $($remaining: tt)*) => {
-        pub(crate) fn $name(&self) -> Result<(), CoreError> {
-            let now = DefaultClock::default().now();
+        pub(crate) fn $name(&self) -> Result<(), pointercrate_core::error::CoreError> {
+            use governor::clock::{Clock, Reference};
+
+            let now = governor::clock::DefaultClock::default().now();
 
             self.$name.check().map_err(|too_early| {
-                CoreError::Ratelimited {
+                pointercrate_core::error::CoreError::Ratelimited {
                     message: $message.to_string(),
                     remaining: too_early.earliest_possible().duration_since(now).into(),
                 }
@@ -51,11 +42,13 @@ macro_rules! ratelimits {
     };
 
     (@method@ $name: ident[$capacity: tt per $seconds: tt per $key_type: ty] => $message: expr, $($remaining: tt)*) => {
-        pub(crate) fn $name(&self, ip: $key_type) -> Result<(), CoreError> {
-            let now = DefaultClock::default().now();
+        pub(crate) fn $name(&self, ip: $key_type) -> Result<(), pointercrate_core::error::CoreError> {
+            use governor::clock::{Clock, Reference};
+            
+            let now = governor::clock::DefaultClock::default().now();
 
             self.$name.check_key(&ip).map_err(|too_early| {
-                CoreError::Ratelimited {
+                pointercrate_core::error::CoreError::Ratelimited {
                     message: $message.to_string(),
                     remaining: too_early.earliest_possible().duration_since(now).into(),
                 }
