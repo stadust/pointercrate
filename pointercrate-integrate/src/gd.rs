@@ -31,7 +31,7 @@ pub type IntegrationLevel = Level<'static, LevelData<'static>, Option<Newgrounds
 
 impl GeometryDashConnector {
     /// Attempts to pull the Geometry Dash level data for the given [`Demon`] from the database
-    /// 
+    ///
     /// If the last time the data for this demon was sought on the Geomeetry Dash servers was over 24h ago,
     /// re-query them for updated data.
     pub async fn load_level_for_demon(&self, demon: &Demon) -> Option<IntegrationLevel> {

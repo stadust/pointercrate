@@ -44,7 +44,7 @@ macro_rules! ratelimits {
     (@method@ $name: ident[$capacity: tt per $seconds: tt per $key_type: ty] => $message: expr, $($remaining: tt)*) => {
         pub(crate) fn $name(&self, ip: $key_type) -> Result<(), pointercrate_core::error::CoreError> {
             use governor::clock::{Clock, Reference};
-            
+
             let now = governor::clock::DefaultClock::default().now();
 
             self.$name.check_key(&ip).map_err(|too_early| {
