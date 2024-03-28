@@ -38,7 +38,7 @@ pub enum GDIntegrationResult {
 
 impl PgCache {
     pub async fn data_for_demon(
-        &self, http_client: Client, level_id: Option<u64>, name: String, demon_id: i32,
+        &self, level_id: Option<u64>, name: String, demon_id: i32,
     ) -> Result<GDIntegrationResult, ()> {
         trace!("Retrieving data for demon {:?}", name);
 
@@ -62,7 +62,7 @@ impl PgCache {
                     CacheEntry::Absent => Ok(GDIntegrationResult::DemonNotFoundByName),
                     // Okay we _could_ do something more elaborate here if we dont have a "Missing" variant, but honestly I dont care
                     _ => {
-                        tokio::spawn(self.clone().find_demon(http_client, name.clone(), demon_id).map(|_| ()));
+                        tokio::spawn(self.clone().find_demon(name.clone(), demon_id).map(|_| ()));
 
                         Ok(GDIntegrationResult::DemonNotYetCached)
                     },
@@ -87,7 +87,7 @@ impl PgCache {
                     CacheEntry::Missing => return Ok(GDIntegrationResult::LevelDataNotCached),
                     CacheEntry::Absent => return Ok(GDIntegrationResult::LevelDataNotFound),
                     CacheEntry::Expired(level, _) => {
-                        tokio::spawn(self.clone().find_demon(http_client.clone(), name.clone(), demon_id).map(|_| ()));
+                        tokio::spawn(self.clone().find_demon(name.clone(), demon_id).map(|_| ()));
 
                         level
                     },
@@ -102,7 +102,7 @@ impl PgCache {
                     Ok(CacheEntry::Expired(level_data, _)) => {
                         tokio::spawn(
                             self.clone()
-                                .download_demon(http_client, level.level_id.into(), demon_id)
+                                .download_demon(level.level_id.into(), demon_id)
                                 .map(|_| ()),
                         );
 
@@ -124,7 +124,7 @@ impl PgCache {
         }
     }
 
-    async fn find_demon(self, http_client: Client, demon_name: String, demon: i32) -> Result<(), ()> {
+    async fn find_demon(self, demon_name: String, demon: i32) -> Result<(), ()> {
         let request = LevelsRequest::default()
             .request_type(LevelRequestType::MostLiked)
             .search(&demon_name)
@@ -133,7 +133,7 @@ impl PgCache {
 
         trace!("Trying to find demon {} via request {:?}", demon_name, request);
 
-        let request_result = http_client
+        let request_result = self.http_client
             .post(&request.to_url())
             .headers(HeaderMap::new())  // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
             .body(request.to_string())
@@ -173,7 +173,7 @@ impl PgCache {
                                 Some(hardest) => {
                                     trace!("The hardest demon I could find with name '{}' is {:?}", demon_name, hardest);
 
-                                    self.download_demon(http_client, hardest.level_id.into(), demon).await
+                                    self.download_demon(hardest.level_id.into(), demon).await
                                 },
                                 None => {
                                     error!("Could not find a level whose name matches '{}'", demon_name);
@@ -191,10 +191,10 @@ impl PgCache {
         }
     }
 
-    async fn download_demon(self, http_client: Client, request: LevelRequest<'static>, demon_id: i32) -> Result<(), ()> {
+    async fn download_demon(self, request: LevelRequest<'static>, demon_id: i32) -> Result<(), ()> {
         trace!("Downloading demon with id {}", request.level_id);
 
-        let request_result = http_client
+        let request_result = self.http_client
             .post(&request.to_url())
             .headers(HeaderMap::new())  // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
             .body(request.to_string())
@@ -283,11 +283,12 @@ pub enum CacheEntry<T> {
 pub struct PgCache {
     pool: Pool<Postgres>,
     expire_after: Duration,
+    http_client: reqwest::Client,
 }
 
 impl PgCache {
     pub fn new(pool: Pool<Postgres>, expire_after: Duration) -> Self {
-        PgCache { pool, expire_after }
+        PgCache { pool, expire_after, http_client: reqwest::Client::new() }
     }
 
     fn make_cache_entry<T>(&self, meta: CacheEntryMeta, t: T) -> CacheEntry<T> {

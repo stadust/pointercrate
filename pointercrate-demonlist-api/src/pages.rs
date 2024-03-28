@@ -153,7 +153,6 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         movements: modifications,
         integration: gd
             .data_for_demon(
-                reqwest::Client::new(),
                 full_demon.demon.level_id,
                 full_demon.demon.base.name.clone(),
                 full_demon.demon.base.id,
