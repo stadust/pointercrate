@@ -29,8 +29,12 @@ ratelimits! {
 
 pub type IntegrationLevel = Level<'static, LevelData<'static>, Option<NewgroundsSong<'static>>>;
 
-impl PgCache {
-    pub async fn demon_data(&self, demon: &Demon) -> Option<IntegrationLevel> {
+impl GeometryDashConnector {
+    /// Attempts to pull the Geometry Dash level data for the given [`Demon`] from the database
+    /// 
+    /// If the last time the data for this demon was sought on the Geomeetry Dash servers was over 24h ago,
+    /// re-query them for updated data.
+    pub async fn load_level_for_demon(&self, demon: &Demon) -> Option<IntegrationLevel> {
         if self.ratelimits.demon_refresh(demon.base.id).is_ok() {
             tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
         }
@@ -96,7 +100,9 @@ impl PgCache {
         self.store_level(&mut hardest, level.creator, level.custom_song).await;
         self.store_level_data(level.level_id, &mut level.level_data).await;
 
-        let _ = sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level.level_id as i64, demon_id).execute(&self.pool).await;
+        let _ = sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level.level_id as i64, demon_id)
+            .execute(&self.pool)
+            .await;
     }
 
     async fn make_request(&self, url: String, body: String) -> Result<String, reqwest::Error> {
@@ -118,15 +124,15 @@ impl PgCache {
 // then with a special flag.
 
 #[derive(Clone)]
-pub struct PgCache {
+pub struct GeometryDashConnector {
     pool: Pool<Postgres>,
     http_client: Client,
     ratelimits: Arc<IntegrationRatelimits>,
 }
 
-impl PgCache {
+impl GeometryDashConnector {
     pub fn new(pool: Pool<Postgres>) -> Self {
-        PgCache {
+        GeometryDashConnector {
             pool,
             http_client: Client::new(),
             ratelimits: Arc::new(IntegrationRatelimits::new()),

@@ -19,7 +19,7 @@ use pointercrate_demonlist_pages::{
     overview::OverviewPage,
     statsviewer::individual::IndividualStatsViewer,
 };
-use pointercrate_integrate::gd::{PgCache};
+use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::User;
 use pointercrate_user_api::auth::TokenAuth;
 use rand::Rng;
@@ -102,7 +102,9 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[rocket::get("/<position>")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<PgCache>, auth: Option<TokenAuth>) -> Result<Page> {
+pub async fn demon_page(
+    position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>, auth: Option<TokenAuth>,
+) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut *connection).await?;
@@ -151,8 +153,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         },
         demonlist: current_list(&mut *connection).await?,
         movements: modifications,
-        integration: gd.demon_data(&full_demon.demon)
-            .await,
+        integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
     });
 
