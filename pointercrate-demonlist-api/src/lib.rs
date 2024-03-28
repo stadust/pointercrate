@@ -1,7 +1,6 @@
 use crate::{endpoints::misc, ratelimits::DemonlistRatelimits};
-use chrono::Duration;
 use pointercrate_core::pool::PointercratePool;
-use pointercrate_integrate::gd::PgCache;
+use pointercrate_integrate::gd::GeometryDashConnector;
 use rocket::{Build, Rocket};
 
 pub(crate) mod config;
@@ -11,7 +10,7 @@ pub(crate) mod ratelimits;
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
-    let dash_rs = PgCache::new(rocket.state::<PointercratePool>().unwrap().clone_inner(), Duration::minutes(30));
+    let dash_rs = GeometryDashConnector::new(rocket.state::<PointercratePool>().unwrap().clone_inner());
 
     rocket
         .manage(ratelimits)

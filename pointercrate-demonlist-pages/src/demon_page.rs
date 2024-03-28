@@ -12,7 +12,7 @@ use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, FullDemon},
 };
-use pointercrate_integrate::gd::{DemonRating, GDIntegrationResult, LevelRating, Thunk};
+use pointercrate_integrate::gd::{DemonRating, IntegrationLevel, LevelRating, Thunk};
 use url::Url;
 
 #[derive(Debug)]
@@ -26,7 +26,7 @@ pub struct DemonPage {
     pub demonlist: Vec<Demon>,
     pub data: FullDemon,
     pub movements: Vec<DemonMovement>,
-    pub integration: GDIntegrationResult,
+    pub integration: Option<IntegrationLevel>,
 }
 
 impl From<DemonPage> for PageFragment {
@@ -54,7 +54,7 @@ impl DemonPage {
     }
 
     fn description(&self) -> String {
-        if let GDIntegrationResult::Success(ref level, ..) = self.integration {
+        if let Some(ref level) = self.integration {
             if let Some(Thunk::Processed(ref description)) = level.description {
                 return format!("{}: {}", self.title(), description);
             }
@@ -257,7 +257,7 @@ impl DemonPage {
                         }
                     }
                 }
-                @if let GDIntegrationResult::Success(ref level, ..) = self.integration {
+                @if let Some(ref level) = self.integration {
                     @if let Some(Thunk::Processed(ref description)) = level.description {
                         div.underlined.pad {
                             q {
@@ -272,101 +272,79 @@ impl DemonPage {
                     }
                 }
                 div.underlined.pad.flex.wrap#level-info {
-                    @match &self.integration {
-                        GDIntegrationResult::DemonNotFoundByName => {
-                            p.info-red {
-                                "A demon with this name was not found on the Geometry Dash servers. Please notify a list moderator of this, as it means they most likely misspelled the name!"
+                    @if let Some(ref level) = self.integration {
+                        span {
+                            b {
+                                "Level Password: "
                             }
+                            br;
+                            (level.level_data.password.as_processed().map(|pw| pw.to_string()).unwrap_or("Unknown".to_string()))
                         }
-                        GDIntegrationResult::DemonNotYetCached => {
-                            p.info-yellow {
-                                "The data from the Geometry Dash servers has not yet been cached. Please wait a bit and refresh the page."
+                        span {
+                            b {
+                                "Level ID: "
                             }
+                            br;
+                            (level.level_id)
                         }
-                        GDIntegrationResult::LevelDataNotFound => {
-                            p.info-red {
-                                "It seems like this level has been deleted from the Geometry Dash servers"
+                        span {
+                            b {
+                                "Level length: "
                             }
-                        }
-                        GDIntegrationResult::LevelDataNotCached => {
-                            p.info-red {
-                                "This demon's level data is not stored in our database, even though the demon ID was successfully resolved. This either indicates a (hopefully temporary) inconsistent database state, or an error in dash-rs' level data processing. If this error persists, please contact an administrator!"
-                            }
-                        }
-                        GDIntegrationResult::Success(level, level_data, song) => {
-                            span {
-                                b {
-                                    "Level Password: "
-                                }
-                                br;
-                                (level_data.password.as_processed().map(|pw| pw.to_string()).unwrap_or("Unknown".to_string()))
-                            }
-                            span {
-                                b {
-                                    "Level ID: "
-                                }
-                                br;
-                                (level.level_id)
-                            }
-                            span {
-                                b {
-                                    "Level length: "
-                                }
-                                br;
-                                @match level_data.level_data {
-                                    Thunk::Processed(ref objects) => {
-                                        @let length_in_seconds = objects.length_in_seconds();
+                            br;
+                            @match level.level_data.level_data {
+                                Thunk::Processed(ref objects) => {
+                                    @let length_in_seconds = objects.length_in_seconds();
 
-                                        (format!("{}m:{:02}s", (length_in_seconds as i32)/ 60, (length_in_seconds as i32) % 60))
-                                    }
+                                    (format!("{}m:{:02}s", (length_in_seconds as i32)/ 60, (length_in_seconds as i32) % 60))
+                                }
+                                _ => "unreachable!()"
+                            }
+                        }
+                        span {
+                            b {
+                                "Object count: "
+                            }
+                            br;
+                            @match level.level_data.level_data {
+                                Thunk::Processed(ref objects) => (objects.objects.len()),
+                                _ => "unreachable!()"
+                            }
+                        }
+                        span {
+                            b {
+                                "In-Game Difficulty: "
+                            }
+                            br;
+                            @match level.difficulty {
+                                LevelRating::NotAvailable => "Unrated",
+                                LevelRating::Demon(demon_rating) => @match demon_rating {
+                                    DemonRating::Easy => "Easy Demon",
+                                    DemonRating::Medium => "Medium Demon",
+                                    DemonRating::Hard => "Hard Demon",
+                                    DemonRating::Insane => "Insane Demon",
+                                    DemonRating::Extreme => "Extreme Demon",
+                                    _ => "???"
+                                },
+                                _ => "Level not rated demon, list mods fucked up"
+                            }
+                        }
+                        span {
+                            b {
+                                "Created in:"
+                            }
+                            br;
+                            (level.gd_version)
+                        }
+                        @if let Some(ref song) = level.custom_song {
+                            span style = "width: 100%"{
+                                b {
+                                    "Newgrounds Song:"
+                                }
+                                br;
+                                @match song.link {
+                                    Thunk::Processed(ref link) => a.link href = (link) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
                                     _ => "unreachable!()"
-                                }
-                            }
-                            span {
-                                b {
-                                    "Object count: "
-                                }
-                                br;
-                                @match level_data.level_data {
-                                    Thunk::Processed(ref objects) => (objects.objects.len()),
-                                    _ => "unreachable!()"
-                                }
-                            }
-                            span {
-                                b {
-                                    "In-Game Difficulty: "
-                                }
-                                br;
-                                @match level.difficulty {
-                                    LevelRating::NotAvailable => "Unrated",
-                                    LevelRating::Demon(demon_rating) => @match demon_rating {
-                                        DemonRating::Easy => "Easy Demon",
-                                        DemonRating::Medium => "Medium Demon",
-                                        DemonRating::Hard => "Hard Demon",
-                                        DemonRating::Insane => "Insane Demon",
-                                        DemonRating::Extreme => "Extreme Demon",
-                                        _ => "???"
-                                    },
-                                    _ => "Level not rated demon, list mods fucked up"
-                                }
-                            }
-                            span {
-                                b {
-                                    "Created in:"
-                                }
-                                br;
-                                (level.gd_version)
-                            }
-                            @if let Some(song) = song {
-                                span style = "width: 100%"{
-                                    b {
-                                        "Newgrounds Song:"
-                                    }
-                                    br;
-                                    @match song.link {
-                                        Thunk::Processed(ref link) => a.link href = (link) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
-                                        _ => "unreachable!()"
-                                    }
                                 }
                             }
                         }
