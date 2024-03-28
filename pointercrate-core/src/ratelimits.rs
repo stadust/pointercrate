@@ -4,7 +4,6 @@ macro_rules! ratelimits {
         use nonzero_ext::nonzero;
         use pointercrate_core::error::CoreError;
         use std::{
-            net::IpAddr,
             time::{Duration, Instant},
         };
         use governor::{
@@ -29,11 +28,11 @@ macro_rules! ratelimits {
             ] $($remaining)*);  // remaining, unprocessed fields as token stream
     };
 
-    (@struct@ $struct_name: ident [$($field: ident: $type: ty | $init: expr),*] $name: ident[$capacity: tt per $seconds: tt per ip] => $message: expr, $($remaining: tt)*) => {
+    (@struct@ $struct_name: ident [$($field: ident: $type: ty | $init: expr),*] $name: ident[$capacity: tt per $seconds: tt per $key_type: ty] => $message: expr, $($remaining: tt)*) => {
         ratelimits!(@struct@
             $struct_name [
                 $($field: $type | $init,)*
-                $name: RateLimiter<IpAddr, DefaultKeyedStateStore<IpAddr>, DefaultClock> | RateLimiter::keyed(Quota::new(nonzero!($capacity), Duration::from_secs($seconds)).unwrap())
+                $name: RateLimiter<$key_type, DefaultKeyedStateStore<$key_type>, DefaultClock> | RateLimiter::keyed(Quota::new(nonzero!($capacity), Duration::from_secs($seconds)).unwrap())
             ] $($remaining)*);
     };
 
@@ -51,8 +50,8 @@ macro_rules! ratelimits {
         ratelimits!(@method@  $($remaining)*);
     };
 
-    (@method@ $name: ident[$capacity: tt per $seconds: tt per ip] => $message: expr, $($remaining: tt)*) => {
-        pub(crate) fn $name(&self, ip: IpAddr) -> Result<(), CoreError> {
+    (@method@ $name: ident[$capacity: tt per $seconds: tt per $key_type: ty] => $message: expr, $($remaining: tt)*) => {
+        pub(crate) fn $name(&self, ip: $key_type) -> Result<(), CoreError> {
             let now = DefaultClock::default().now();
 
             self.$name.check_key(&ip).map_err(|too_early| {
