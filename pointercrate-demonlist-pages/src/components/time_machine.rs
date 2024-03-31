@@ -48,7 +48,7 @@ impl Render for Tardis {
     fn render(&self) -> Markup {
         html! {
             @match self {
-                Tardis::Activated { destination, ..} => {
+                Tardis::Activated { destination, show_destination, ..} if *show_destination => {
                     div.panel.fade.blue.flex style="align-items: center;" {
                         span style = "text-align: end"{
                             "You are currently looking at the demonlist how it was on"
