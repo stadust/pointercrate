@@ -74,7 +74,7 @@ impl From<Permission> for u16 {
 /// If permissions `C` _implies_ permission `D` then a user with permission `C`
 /// will be able to perform all tasks that a user with permission `D` could
 /// perform (e.g. an endpoint that explicitly checks via
-/// [`PermissionManager::require_permission`] that the requestor has permission
+/// [`PermissionsManager::require_permission`] that the requestor has permission
 /// `D` will allow users with only permission `D` to perform requests). Note
 /// that "tasks" above also includes assignment!
 ///
