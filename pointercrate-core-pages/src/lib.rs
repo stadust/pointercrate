@@ -54,7 +54,19 @@ impl PageConfiguration {
                 .meta("og:site_name", site_name)
                 .meta("og:type", "website")
                 .meta("referrer", "no-referrer")
-                .meta("viewport", "initial-scale=1, maximum-scale=1"),
+                .meta("viewport", "initial-scale=1, maximum-scale=1")
+                .script("https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js")
+                .script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
+                .script("/static/core/js/ui.js")
+                .script("/static/core/js/nav.js")
+                .script("/static/core/js/misc.js")
+                .stylesheet("/static/core/css/icon.css")
+                .stylesheet("/static/core/css/nav.css")
+                .stylesheet("/static/core/css/main.css")
+                .stylesheet("/static/core/css/ui.css")
+                .stylesheet("/static/core/css/core.css")
+                .stylesheet("/static/core/css/fa.all.min.css")
+                .stylesheet("https://fonts.googleapis.com/css?family=Montserrat|Montserrat:light,bold"),
         }
     }
 
