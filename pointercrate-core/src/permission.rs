@@ -109,6 +109,25 @@ impl PermissionsManager {
         }
     }
 
+    pub fn merge_with(&mut self, other: PermissionsManager) {
+        for new_permission in &other.permissions {
+            if let Some(conflict) = self
+                .permissions
+                .iter()
+                .find(|&p| p.bit() == new_permission.bit() && p != new_permission)
+            {
+                panic!(
+                    "Cannot merge permission managers, conflicting permissions {} and {}",
+                    conflict, new_permission
+                )
+            }
+        }
+
+        self.permissions.extend(other.permissions);
+        self.implication_map.extend(other.implication_map);
+        self.assignable_map.extend(other.assignable_map);
+    }
+
     // we should probably verify that added permissions are all part of what was in
     // the constructor but whatever
     pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {

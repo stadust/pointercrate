@@ -1633,6 +1633,7 @@ dependencies = [
  "futures",
  "log",
  "pointercrate-core",
+ "pointercrate-user",
  "serde",
  "sqlx",
  "tokio",
