@@ -119,8 +119,9 @@ async fn rocket() -> _ {
 fn page_configuration() -> PageConfiguration {
     // Define a navigation bar with only two items, a link to the user account page,
     // and a link to your demonlist.
-    let nav_bar = NavigationBar::new("/static/images/path/to/your/logo.png").with_item(
-        TopLevelNavigationBarItem::new(
+    let nav_bar = NavigationBar::new("/static/images/path/to/your/logo.png")
+        .with_item(
+            TopLevelNavigationBarItem::new(
             "/demonlist/",
             // Pointercrate uses the "maud" create as its templating engine. 
             // It allows you to describe HTML via Rust macros that allow you to dynamically generate content using
@@ -136,11 +137,15 @@ fn page_configuration() -> PageConfiguration {
         .with_sub_item("/demonlist/statsviewer/", html! {"Stats Viewer"})
         .with_sub_item("/demonlist/?submitter=true", html! {"Record Submitter"})
         .with_sub_item("/demonlist/?timemachine=true", html! {"Time Machine"}),
-    ).with_item(TopLevelNavigationBarItem::new("/login/", html! {
-            span {
-                "User Area"
-            }
-        }));
+        )
+        .with_item(TopLevelNavigationBarItem::new(
+            "/login/",
+            html! {
+                span {
+                    "User Area"
+                }
+            },
+        ));
 
     // A footer consists of a copyright notice, an arbitrary amount of columns
     // displayed below it, side-by-side, and potentially some social media links to
