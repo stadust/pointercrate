@@ -1633,6 +1633,7 @@ dependencies = [
  "futures",
  "log",
  "pointercrate-core",
+ "pointercrate-user",
  "serde",
  "sqlx",
  "tokio",
@@ -1679,6 +1680,24 @@ dependencies = [
  "pointercrate-user",
  "pointercrate-user-pages",
  "url",
+]
+
+[[package]]
+name = "pointercrate-example"
+version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "maud",
+ "pointercrate-core",
+ "pointercrate-core-api",
+ "pointercrate-core-pages",
+ "pointercrate-demonlist",
+ "pointercrate-demonlist-api",
+ "pointercrate-demonlist-pages",
+ "pointercrate-user",
+ "pointercrate-user-api",
+ "pointercrate-user-pages",
+ "rocket",
 ]
 
 [[package]]

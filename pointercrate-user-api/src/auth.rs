@@ -74,7 +74,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
                 return Outcome::Error((
                     Status::InternalServerError,
                     CoreError::InternalServerError {
-                        message: format!("PermissionManager not retrievable from rocket state: {:?}", err),
+                        message: format!("PermissionsManager not retrievable from rocket state: {:?}", err),
                     }
                     .into(),
                 ))
@@ -174,7 +174,7 @@ impl<'r> FromRequest<'r> for Auth<false> {
                 return Outcome::Error((
                     Status::InternalServerError,
                     CoreError::InternalServerError {
-                        message: format!("PermissionManager not retrievable from rocket state: {:?}", err),
+                        message: format!("PermissionsManager not retrievable from rocket state: {:?}", err),
                     }
                     .into(),
                 ))

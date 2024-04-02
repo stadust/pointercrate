@@ -33,6 +33,60 @@ impl From<Permission> for u16 {
     }
 }
 
+/// Structure containing all information about different [`Permission`] levels
+/// of a pointercrate instance
+///
+/// Pointercrate's permission system is built on two concepts: Assignment and
+/// implication
+///
+/// ## Assignment
+/// If permission `A` _assigns_ permission `B` then a user with permission `A`
+/// can modify the permission bit associated with `B` for _any user they can
+/// access via the API_. The set of users that a user `X`can access via the API
+/// is the set of users that have a permission bit set which `X` has the ability
+/// to assign. The exception are users with the `ADMINISTRATOR` permission,
+/// which can access all other users.
+///
+/// ### Example
+///
+/// Consider three permissions, `A`, `B` and `C`, and two users `X`and `Y`.
+/// Assume the following relations hold:
+/// - Permission `A` can assign permission `B` and `C`
+/// - User `X` has permission `A`
+/// - User `Y` has permission `B`
+///
+/// In this scenario, user `X` can
+/// - access user `Y` via the API (because user `Y` has permission `B`, which
+///   `X` can assign due to having permission `A`)
+/// - grant user `Y` the permission `C` (because `X` can access `Y` and assign
+///   `C`)
+/// - revoke permission `B` from user `Y` (because `X` can access `Y` and assign
+///   `B`)
+///
+/// Note that in the last case, after revoking permission `B` from `Y`, user `X`
+/// will no longer be able to access `Y` (as `Y` no longer has any permissions
+/// that `X` can assign). Particularly, **if you revoke all permissions you can
+/// assign from some user, you will not be able to re-grant that user any
+/// permissions**. Only an Administrator will be able to do so.
+///
+/// ## Implication
+///
+/// If permissions `C` _implies_ permission `D` then a user with permission `C`
+/// will be able to perform all tasks that a user with permission `D` could
+/// perform (e.g. an endpoint that explicitly checks via
+/// [`PermissionsManager::require_permission`] that the requestor has permission
+/// `D` will allow users with only permission `D` to perform requests). Note
+/// that "tasks" above also includes assignment!
+///
+/// ### Example
+///
+/// Extend the above example with a new permission `D` and a new user `Z`, and
+/// the following relations:
+/// - Permission `D` implies permission `A`
+/// - User `Z` has permission `D`
+///
+/// Then, user `Z` will be able to perform the same operations as user `X`
+/// (w.r.t. assigning permissions and accessing users).
 #[derive(Clone)]
 pub struct PermissionsManager {
     permissions: HashSet<Permission>,
@@ -55,8 +109,27 @@ impl PermissionsManager {
         }
     }
 
-    // we should probably verify that added permissions are all part of what was in the constructor but
-    // whatever
+    pub fn merge_with(&mut self, other: PermissionsManager) {
+        for new_permission in &other.permissions {
+            if let Some(conflict) = self
+                .permissions
+                .iter()
+                .find(|&p| p.bit() == new_permission.bit() && p != new_permission)
+            {
+                panic!(
+                    "Cannot merge permission managers, conflicting permissions {} and {}",
+                    conflict, new_permission
+                )
+            }
+        }
+
+        self.permissions.extend(other.permissions);
+        self.implication_map.extend(other.implication_map);
+        self.assignable_map.extend(other.assignable_map);
+    }
+
+    // we should probably verify that added permissions are all part of what was in
+    // the constructor but whatever
     pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {
         self.assignable_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
         self

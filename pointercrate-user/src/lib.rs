@@ -11,7 +11,10 @@ pub use self::{
     patch::PatchUser,
 };
 use crate::error::{Result, UserError};
-use pointercrate_core::{etag::Taggable, permission::Permission};
+use pointercrate_core::{
+    etag::Taggable,
+    permission::{Permission, PermissionsManager},
+};
 use serde::Serialize;
 pub use sqlx;
 use sqlx::PgConnection;
@@ -31,6 +34,12 @@ mod video;
 
 pub const ADMINISTRATOR: Permission = Permission::new("Administrator", 0x4000);
 pub const MODERATOR: Permission = Permission::new("Moderator", 0x2000);
+
+pub fn default_permissions_manager() -> PermissionsManager {
+    PermissionsManager::new(vec![ADMINISTRATOR, MODERATOR])
+        .assigns(ADMINISTRATOR, MODERATOR)
+        .implies(ADMINISTRATOR, MODERATOR)
+}
 
 /// Model representing a user in the database
 #[derive(Debug, Serialize, Hash, Eq, PartialEq)]
