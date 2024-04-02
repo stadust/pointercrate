@@ -32,15 +32,15 @@
   /* center using margin */
   .m-center {
     max-width: 1072px;
-    margin-left: calc(45% - 1072px / 2) !important;
-    margin-right: calc(55% - 1072px / 2) !important;
+    margin-left: calc(50% - 1072px / 2) !important;
+    margin-right: calc(50% - 1072px / 2) !important;
   }
 
   /* center using padding */
   .center {
     max-width: 1072px;
-    padding-left: calc(45% - 1072px / 2);
-    padding-right: calc(55% - 1072px / 2);
+    padding-left: calc(50% - 1072px / 2);
+    padding-right: calc(50% - 1072px / 2);
   }
 }
 
