@@ -13,8 +13,8 @@ pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}
 pointercrate-integrate = {path = "../pointercrate-integrate"}
-maud = "0.25.0"
-chrono = "0.4.19"
+maud = "0.26.0"
+chrono = "0.4.37"
 url = "2.2.0"
-async-trait = "0.1.42"
-log = "0.4.11"
+async-trait = "0.1.76"
+log = "0.4.21"

@@ -10,5 +10,5 @@ edition.workspace = true
 serde = "1.0.118"
 derive_more = "0.99.11"
 sqlx = { version = "0.7", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate"] }
-log = "0.4.8"
-chrono = {version = "0.4.19", features = ["serde"]}
+log = "0.4.21"
+chrono = {version = "0.4.37", features = ["serde"]}

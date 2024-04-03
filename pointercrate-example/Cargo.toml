@@ -8,7 +8,7 @@ edition.workspace = true
 
 [dependencies]
 dotenv = "0.15.0"
-maud = "0.25.0"
+maud = "0.26.0"
 pointercrate-core = { version = "0.1.0", path = "../pointercrate-core" }
 pointercrate-core-api = { version = "0.1.0", path = "../pointercrate-core-api" }
 pointercrate-core-pages = { version = "0.1.0", path = "../pointercrate-core-pages" }

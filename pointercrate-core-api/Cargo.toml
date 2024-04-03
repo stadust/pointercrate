@@ -11,8 +11,8 @@ serde = "1.0.118"
 rocket = {version = "0.5.0", features = ["json"]}
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
-serde_json = "1.0.60"
+serde_json = "1.0.109"
 sqlx = { version = "0.7", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
-log = "0.4.11"
+log = "0.4.21"
 serde_urlencoded = "0.7.0"
-maud = "0.25.0"
+maud = "0.26.0"
