@@ -17,10 +17,11 @@ members = [
     # Crate containing an example setup for a custom list
     "pointercrate-example"
 ]
+resolver = "2"
 
 [workspace.package]
 authors = ["stadust"]
 description = "Libraries for creating pointercrate-like demonlist websites"
 homepage = "https://pointercrate.com"
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/stadust/pointercrate"
