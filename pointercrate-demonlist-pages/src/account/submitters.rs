@@ -47,7 +47,7 @@ impl AccountPageTab for SubmittersPage {
                             div.flex.col{
                                 h3 style = "font-size:1.1em; margin: 10px 0" {
                                     "Submitter #"
-                                    i#submitter-submitter-id {}
+                                    i #submitter-submitter-id {}
                                 }
                                 p {
                                     "Welcome to the submitter manager. Here you can ban or unban submitters with an absolute revolutionary UI that totally isn't a stright up copy of the player UI, just with even more emptiness. "
@@ -63,7 +63,7 @@ impl AccountPageTab for SubmittersPage {
                                             "Banned:"
                                         }
                                         br;
-                                        div.dropdown-menu.js-search#edit-submitter-banned style = "max-width: 50px" {
+                                        div.dropdown-menu.js-search #edit-submitter-banned style = "max-width: 50px" {
                                             div{
                                                 input type="text" style = "color: #444446; font-weight: bold;";
                                             }
@@ -76,7 +76,7 @@ impl AccountPageTab for SubmittersPage {
                                         }
                                     }
                                 }
-                                span.button.blue.hover#submitter-list-records style = "margin: 15px auto 0px" {"Show records in record manager"};
+                                span.button.blue.hover #submitter-list-records style = "margin: 15px auto 0px" {"Show records in record manager"};
                             }
                         }
                     }
@@ -99,9 +99,9 @@ fn submitter_selector() -> Markup {
             p {
                 "Submitters can be uniquely identified by ID. Entering a submitters's ID below will select it on the left (provided the submitter exists)"
             }
-            form.flex.col#submitter-search-by-id-form novalidate = "" {
+            form.flex.col #submitter-search-by-id-form novalidate = "" {
                 p.info-red.output {}
-                span.form-input#search-submitter-id {
+                span.form-input #search-submitter-id {
                     label for = "id" {"Submitter ID:"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%";
                     p.error {}

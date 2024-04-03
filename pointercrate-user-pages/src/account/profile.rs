@@ -43,7 +43,7 @@ impl AccountPageTab for ProfileTab {
                     h1.underlined.pad {
                         "Profile - " (user.name())
                     }
-                    div.flex.space.wrap#things {
+                    div.flex.space.wrap #things {
                         p.info-red.output style = "margin: 10px" {}
                         p.info-green.output style = "margin: 10px" {}
                         span {
@@ -57,9 +57,9 @@ impl AccountPageTab for ProfileTab {
                         }
                         span {
                             b {
-                                i.fa.fa-pencil-alt.clickable#display-name-pen aria-hidden = "true" {} " Display name: "
+                                i.fa.fa-pencil-alt.clickable #display-name-pen aria-hidden = "true" {} " Display name: "
                             }
-                            i#profile-display-name {
+                            i #profile-display-name {
                                 @match user.display_name {
                                     Some(ref dn) => (dn),
                                     None => "-"
@@ -71,9 +71,9 @@ impl AccountPageTab for ProfileTab {
                         }
                         span {
                             b {
-                                i.fa.fa-pencil-alt.clickable#youtube-pen aria-hidden = "true" {} " YouTube channel: "
+                                i.fa.fa-pencil-alt.clickable #youtube-pen aria-hidden = "true" {} " YouTube channel: "
                             }
-                            i#profile-youtube-channel {
+                            i #profile-youtube-channel {
                                 @match user.youtube_channel {
                                     Some(ref yc) => a.link href = (yc) {},
                                     None => "-"
@@ -86,9 +86,9 @@ impl AccountPageTab for ProfileTab {
                         @if cfg!(debug_assertions) {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable#email-pen aria-hidden = "true" {} " E-Mail Address: "
+                                    i.fa.fa-pencil-alt.clickable #email-pen aria-hidden = "true" {} " E-Mail Address: "
                                 }
-                                i#profile-email_address {
+                                i #profile-email_address {
                                     @match authenticated_user.email_address() {
                                         Some(ref email) => (email),
                                         None => "-"
@@ -110,8 +110,8 @@ impl AccountPageTab for ProfileTab {
                         }
                     }
                     div.flex.no-stretch {
-                        input.button.red.hover#delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
-                        input.button.blue.hover#change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                        input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
+                        input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
                     }
                 }
             }
@@ -123,23 +123,23 @@ impl AccountPageTab for ProfileTab {
                     p {
                         "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
                     }
-                    form.flex.col.overlined.pad#login-form novalidate = "" style="display: none" {
+                    form.flex.col.overlined.pad #login-form novalidate = "" style="display: none" {
                         p style = "text-align: center" {
                             "For security reasons, retrieving your access tokens requires you to reenter your password"
                         }
                         p.info-red.output {}
-                        span.form-input#login-password {
+                        span.form-input #login-password {
                             label for = "password" {"Password:"}
                             input required = "" type = "password" name = "password" minlength = "10";
                             p.error {}
                         }
                         input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                     }
-                    div.overlined.pad#token-area style = "display: none" {
+                    div.overlined.pad #token-area style = "display: none" {
                         b {"Your access token is:"}
-                        textarea#access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
+                        textarea #access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                     }
-                    a.blue.hover.button#get-token {
+                    a.blue.hover.button #get-token {
                         "Get access token"
                     }
                 }
@@ -150,19 +150,19 @@ impl AccountPageTab for ProfileTab {
                     p {
                         "If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action"
                     }
-                    form.flex.col.overlined.pad#invalidate-form novalidate = "" style="display: none" {
+                    form.flex.col.overlined.pad #invalidate-form novalidate = "" style="display: none" {
                         p style = "text-align: center" {
                             "For security reasons, invalidating your access tokens requires you to reenter your password"
                         }
                         p.info-red.output {}
-                        span.form-input#invalidate-auth-password {
+                        span.form-input #invalidate-auth-password {
                             label for = "password" {"Password:"}
                             input required = "" type = "password" name = "password" minlength = "10";
                             p.error {}
                         }
                         input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Invalidate";
                     }
-                    a.blue.hover.button#invalidate-token {
+                    a.blue.hover.button #invalidate-token {
                         "Invalidate all access tokens"
                     }
                 }
@@ -179,7 +179,7 @@ impl AccountPageTab for ProfileTab {
 fn edit_display_name_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#edit-dn-dialog {
+            div.dialog #edit-dn-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Edit Display Name:"
@@ -190,12 +190,12 @@ fn edit_display_name_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#edit-dn {
+                    span.form-input #edit-dn {
                         label for = "display_name" {"New display name:"}
                         input type = "text" name = "display_name";
                         p.error {}
                     }
-                    span.overlined.pad.form-input#auth-dn {
+                    span.overlined.pad.form-input #auth-dn {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}
@@ -210,7 +210,7 @@ fn edit_display_name_dialog() -> Markup {
 fn edit_youtube_link_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#edit-yt-dialog {
+            div.dialog #edit-yt-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Edit YouTube Channel Link:"
@@ -221,12 +221,12 @@ fn edit_youtube_link_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#edit-yt {
+                    span.form-input #edit-yt {
                         label for = "youtube_channel" {"New YouTube link:"}
                         input type = "url" name = "youtube_channel";
                         p.error {}
                     }
-                    span.overlined.pad.form-input#auth-yt {
+                    span.overlined.pad.form-input #auth-yt {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}
@@ -241,7 +241,7 @@ fn edit_youtube_link_dialog() -> Markup {
 fn edit_email_address_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#edit-email-dialog {
+            div.dialog #edit-email-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change E-Mail Address:"
@@ -252,12 +252,12 @@ fn edit_email_address_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#edit-email {
+                    span.form-input #edit-email {
                         label for = "email_address" {"New E-Mail Address:"}
                         input type = "email" name = "email_address";
                         p.error {}
                     }
-                    span.overlined.pad.form-input#auth-email {
+                    span.overlined.pad.form-input #auth-email {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}
@@ -272,7 +272,7 @@ fn edit_email_address_dialog() -> Markup {
 fn change_password_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#edit-pw-dialog {
+            div.dialog #edit-pw-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change Password:"
@@ -283,17 +283,17 @@ fn change_password_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#edit-pw {
+                    span.form-input #edit-pw {
                         label for = "password" {"New password:"}
                         input type = "password" name = "password" minlength = "10";
                         p.error {}
                     }
-                    span.form-input#edit-pw-repeat {
+                    span.form-input #edit-pw-repeat {
                         label for = "password2" {"Repeat new password:"}
                         input type = "password"  minlength = "10";
                         p.error {}
                     }
-                    span.overlined.pad.form-input#auth-pw {
+                    span.overlined.pad.form-input #auth-pw {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}
@@ -308,7 +308,7 @@ fn change_password_dialog() -> Markup {
 fn delete_account_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#delete-acc-dialog {
+            div.dialog #delete-acc-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Delete Account:"
@@ -319,7 +319,7 @@ fn delete_account_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#auth-delete {
+                    span.form-input #auth-delete {
                         label {"Authenticate:"}
                         input type = "password" minlength = "10" required = "";
                         p.error {}

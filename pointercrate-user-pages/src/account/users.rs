@@ -62,24 +62,24 @@ impl AccountPageTab for UsersTab {
                                         "Username:"
                                     }
                                     br;
-                                    span#user-user-name {}
+                                    span #user-user-name {}
                                 }
                                 span {
                                     b {
                                         "Display Name:"
                                     }
                                     br;
-                                    span#user-display-name {}
+                                    span #user-display-name {}
                                 }
                                 span {
                                     b {
                                         "User ID:"
                                     }
                                     br;
-                                    span#user-user-id {}
+                                    span #user-user-id {}
                                 }
                             }
-                            form.flex.col.pad#patch-permissions novalidate = "" style="display:none" {
+                            form.flex.col.pad #patch-permissions novalidate = "" style="display:none" {
                                 p.info-red.output {}
                                 p.info-green.output {}
 
@@ -91,7 +91,7 @@ impl AccountPageTab for UsersTab {
                                         @for permission in assignable_permissions {
                                             @let name_in_snake_case = permission.name().to_lowercase().replace(' ', "-");
 
-                                            label.cb-container.form-input#(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
+                                            label.cb-container.form-input #(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
                                                 i {
                                                     (permission.name())
                                                 }
@@ -103,7 +103,7 @@ impl AccountPageTab for UsersTab {
                                 }
                                 div.flex.no-stretch {
                                     @if user.inner().has_permission(ADMINISTRATOR) {
-                                        input.button.red.hover#delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                                        input.button.red.hover #delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
                                     }
                                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
                                 }
@@ -121,9 +121,9 @@ impl AccountPageTab for UsersTab {
                     p {
                         "Users can be uniquely identified by name and ID. To modify a user's account, you need their ID. If you know neither, try looking in the list below"
                     }
-                    form.flex.col.pad#find-id-form novalidate = "" {
+                    form.flex.col.pad #find-id-form novalidate = "" {
                         p.info-red.output {}
-                        span.form-input#find-id {
+                        span.form-input #find-id {
                             label for = "id" {"User ID:"}
                             input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                             p.error {}

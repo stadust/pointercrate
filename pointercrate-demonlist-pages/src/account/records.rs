@@ -59,11 +59,11 @@ impl AccountPageTab for RecordsPage {
                 (RecordSubmitter::new(false, &demons[..]))
                 (record_manager(&demons[..]))
                 (note_adder())
-                div.panel.fade#record-notes-container style = "display:none" {
-                    div.white.hover.clickable#add-record-note-open {
+                div.panel.fade #record-notes-container style = "display:none" {
+                    div.white.hover.clickable #add-record-note-open {
                         b {"Add Note"}
                     }
-                    div#record-notes {} // populated by javascript when a record is clicked
+                    div #record-notes {} // populated by javascript when a record is clicked
                 }
                 (manager_help())
             }
@@ -83,7 +83,7 @@ impl AccountPageTab for RecordsPage {
 
 fn record_manager(demons: &[Demon]) -> Markup {
     html! {
-        div.panel.fade#record-manager {
+        div.panel.fade #record-manager {
             h2.underlined.pad {
                 "Record Manager - "
                 (dropdown("All", html! {
@@ -99,11 +99,11 @@ fn record_manager(demons: &[Demon]) -> Markup {
                 div.viewer-content {
                     div.flex.col {
                         h3 style = "font-size:1.1em; margin-top: 10px" {
-                            i.fa.fa-clipboard.clickable#record-copy-info aria-hidden = "true" {}
+                            i.fa.fa-clipboard.clickable #record-copy-info aria-hidden = "true" {}
                             " Record #"
-                            i#record-id {}
+                            i #record-id {}
                             " - "
-                            div.dropdown-menu.js-search#edit-record-status style = "max-width: 220px" {
+                            div.dropdown-menu.js-search #edit-record-status style = "max-width: 220px" {
                                 div{
                                     input type="text" style = "color: #444446; font-weight: bold;";
                                 }
@@ -124,45 +124,45 @@ fn record_manager(demons: &[Demon]) -> Markup {
                         div.stats-container.flex.space  {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable#record-video-pen aria-hidden = "true" {} " Video Link:"
+                                    i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " Video Link:"
                                 }
                                 br;
-                                a.link#record-video-link target = "_blank" {}
+                                a.link #record-video-link target = "_blank" {}
                             }
                         }
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable#record-demon-pen aria-hidden = "true" {} " Demon:"
+                                    i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " Demon:"
                                 }
                                 br;
-                                span#record-demon {}
+                                span #record-demon {}
                             }
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable#record-holder-pen aria-hidden = "true" {} " Record Holder:"
+                                    i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " Record Holder:"
                                 }
                                 br;
-                                span#record-holder {}
+                                span #record-holder {}
                             }
                         }
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable#record-progress-pen aria-hidden = "true" {} " Progress:"
+                                    i.fa.fa-pencil-alt.clickable #record-progress-pen aria-hidden = "true" {} " Progress:"
                                 }
                                 br;
-                                span#record-progress {}
+                                span #record-progress {}
                             }
                             span {
                                 b {
                                     "Submitter ID:"
                                 }
                                 br;
-                                span#record-submitter {}
+                                span #record-submitter {}
                             }
                         }
-                        span.button.red.hover#record-delete style = "margin: 15px auto 0px" {"Delete Record"};
+                        span.button.red.hover #record-delete style = "margin: 15px auto 0px" {"Delete Record"};
                     }
                 }
 
@@ -231,7 +231,7 @@ fn status_selector() -> Markup {
     ];
 
     html! {
-        div.panel.fade#status-filter-panel style = "overflow: visible" {
+        div.panel.fade #status-filter-panel style = "overflow: visible" {
             h2.underlined.pad {
                 "Filter"
             }
@@ -254,18 +254,18 @@ fn player_selector() -> Markup {
             p {
                 "Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Right now the only way to reset this filter is to reload the page. Sorry!"
             }
-            form.flex.col.underlined.pad#record-filter-by-player-id-form novalidate = "" {
+            form.flex.col.underlined.pad #record-filter-by-player-id-form novalidate = "" {
                 p.info-red.output {}
-                span.form-input#record-player-id {
+                span.form-input #record-player-id {
                     label for = "id" {"Player ID:"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
                 }
                 input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
             }
-            form.flex.col#record-filter-by-player-name-form novalidate = "" {
+            form.flex.col #record-filter-by-player-name-form novalidate = "" {
                 p.info-red.output {}
-                span.form-input#record-player-name {
+                span.form-input #record-player-name {
                     label for = "name" {"Player name:"}
                     input required = "" type = "text" name = "name";
                     p.error {}
@@ -285,9 +285,9 @@ fn record_selector() -> Markup {
             p {
                 "Records can be uniquely identified by ID. Entering a record's ID below will select it on the left (provided the record exists)"
             }
-            form.flex.col#record-search-by-record-id-form novalidate = "" {
+            form.flex.col #record-search-by-record-id-form novalidate = "" {
                 p.info-red.output {}
-                span.form-input#record-record-id {
+                span.form-input #record-record-id {
                     label for = "id" {"Record ID:"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
@@ -300,7 +300,7 @@ fn record_selector() -> Markup {
 
 fn note_adder() -> Markup {
     html! {
-        div.panel.fade.closable#add-record-note style = "display: none" {
+        div.panel.fade.closable #add-record-note style = "display: none" {
             span.plus.cross.hover {}
             div style="display: flex;align-items: center;justify-content: space-between;" {
                 div.button.blue.hover.small style = "width: 100px; margin-bottom: 10px"{
@@ -310,7 +310,7 @@ fn note_adder() -> Markup {
                     b {
                         "Public note:"
                     }
-                    input#add-note-is-public-checkbox type = "checkbox" name = "is_public";
+                    input #add-note-is-public-checkbox type = "checkbox" name = "is_public";
                     span.checkmark {}
                 }
             }
@@ -323,7 +323,7 @@ fn note_adder() -> Markup {
 fn change_progress_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#record-progress-dialog {
+            div.dialog #record-progress-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change record progress:"
@@ -334,7 +334,7 @@ fn change_progress_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#record-progress-edit {
+                    span.form-input #record-progress-edit {
                         label for = "progress" {"Progress:"}
                         input name = "progress" type = "number" min = "0" max="100" required = "";
                         p.error {}
@@ -349,7 +349,7 @@ fn change_progress_dialog() -> Markup {
 fn change_video_dialog() -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#record-video-dialog {
+            div.dialog #record-video-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change video link:"
@@ -360,7 +360,7 @@ fn change_video_dialog() -> Markup {
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
-                    span.form-input#record-video-edit {
+                    span.form-input #record-video-edit {
                         label for = "video" {"Video link:"}
                         input name = "video" type = "url";
                         p.error {}
@@ -386,7 +386,7 @@ fn change_holder_dialog() -> Markup {
 fn change_demon_dialog(demons: &[Demon]) -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#record-demon-dialog style="overflow: initial;" {
+            div.dialog #record-demon-dialog style="overflow: initial;" {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     "Change record demon:"

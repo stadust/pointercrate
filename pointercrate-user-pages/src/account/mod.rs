@@ -90,7 +90,7 @@ impl From<AccountPage> for PageFragment {
 impl AccountPage {
     fn body(&self) -> Markup {
         html! {
-            div.tab-display#account-tabber {
+            div.tab-display #account-tabber {
                 div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
                     @for (i, (tab, _, _, id)) in self.tabs.iter().enumerate() {
                         @if i == 0 {
