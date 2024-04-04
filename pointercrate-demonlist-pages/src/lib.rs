@@ -58,7 +58,7 @@ fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     };
 
     html! {
-        nav.flex.wrap.m-center.fade#lists style="text-align: center;" {
+        nav.flex.wrap.m-center.fade #lists style="text-align: center;" {
             // The drop down for the main list:
             (dropdown(&MAIN_SECTION, main, current))
             // The drop down for the extended list:
@@ -97,7 +97,7 @@ fn dropdown(section: &ListSection, demons: &[&Demon], current: Option<&Demon>) -
                 (section.name)
             }
 
-            div.see-through.fade.dropdown#(section.id) {
+            div.see-through.fade.dropdown #(section.id) {
                 div.search.js-search.seperated style = "margin: 10px" {
                     input placeholder = "Filter..." type = "text" {}
                 }
@@ -149,7 +149,7 @@ fn sidebar_ad() -> Markup {
 fn besides_sidebar_ad() -> Markup {
     html! {
         @if let Some(publisher_id) = pointercrate_core_pages::config::adsense_publisher_id() {
-            div#outofboundsad style="margin-left: calc(45% + 1072px/2);position: fixed;padding-left: 15px;padding-top: 15px; max-width: 200px" {
+            div #outofboundsad style="margin-left: calc(45% + 1072px/2);position: fixed;padding-left: 15px;padding-top: 15px; max-width: 200px" {
                 (PreEscaped(format!(r#"
                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
          crossorigin="anonymous"></script>
@@ -171,7 +171,7 @@ fn besides_sidebar_ad() -> Markup {
 
 fn rules_panel() -> Markup {
     html! {
-        section#rules.panel.fade.js-scroll-anim data-anim = "fade" {
+        section #rules.panel.fade.js-scroll-anim data-anim = "fade" {
             h2.underlined.pad.clickable {
                 "Guidelines"
             }
@@ -187,7 +187,7 @@ fn rules_panel() -> Markup {
 
 fn discord_panel() -> Markup {
     html! {
-        section.panel.fade.js-scroll-anim#discord data-anim = "fade" {
+        section.panel.fade.js-scroll-anim #discord data-anim = "fade" {
             iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
                 "Join the official Demonlist discord server, where you can get in touch with the demonlist team!"

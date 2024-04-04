@@ -66,9 +66,9 @@ impl Render for Tardis {
                 },
                 _ => {}
             }
-            section.panel.fade.closable#time-machine  style=(if !self.visible() {"display:none;overflow: initial"} else {"overflow: initial"}) {
+            section.panel.fade.closable #time-machine  style=(if !self.visible() {"display:none;overflow: initial"} else {"overflow: initial"}) {
                 span.plus.cross.hover {}
-                form#time-machine-form novalidate = "" {
+                form #time-machine-form novalidate = "" {
                     div.underlined {
                         h2 {"Time Machine"}
                     }
@@ -76,7 +76,7 @@ impl Render for Tardis {
                         "Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is January 4th 2017. Note however that data before August 4th 2017 is only provided on a best-effort basis and not guaranteed to be 100% accurate. Particularly data from before April 4th 2017 contains significant errors!"
                     }
                     div.flex {
-                        span.form-input#time-machine-destination data-type = "datetime-local" {
+                        span.form-input #time-machine-destination data-type = "datetime-local" {
                             h3 {"Destination:"}
                             input name="time-machine-destination" type="datetime-local" min="2017-01-04T00:00" required value="1971-06-19T00:00";
                             p.error {}

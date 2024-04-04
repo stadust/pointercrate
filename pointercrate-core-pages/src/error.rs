@@ -20,7 +20,7 @@ impl From<ErrorFragment> for PageFragment {
 impl ErrorFragment {
     pub fn body(&self) -> Markup {
         html! {
-            div.m-center.flex.col.cen.no-stretch#error style = "height: calc(100% - 60px)"{
+            div.m-center.flex.col.cen.no-stretch #error style = "height: calc(100% - 60px)"{
                 div.flex.cen style="width: 100%" {
                     svg width="150.98mm" height="84.667mm" version="1.1" viewBox="0 0 150.98 84.667" xmlns="http://www.w3.org/2000/svg"{
                         g transform="translate(-27.214 -41.488)" {

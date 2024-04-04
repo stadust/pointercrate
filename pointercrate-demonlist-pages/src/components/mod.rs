@@ -10,7 +10,7 @@ pub mod time_machine;
 
 pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Demon>) -> Markup {
     html! {
-        div.dropdown-menu.js-search#(dropdown_id) {
+        div.dropdown-menu.js-search #(dropdown_id) {
             div {
                 input type = "text" name = "demon" required="" autocomplete="off";
             }
@@ -28,7 +28,7 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a De
 pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &str, button_text: &str) -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog#(dialog_id) {
+            div.dialog #(dialog_id) {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     (headline)
@@ -42,7 +42,7 @@ pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &st
                         form.flex.col novalidate = "" {
                             p.info-red.output {}
                             p.info-green.output {}
-                            span.form-input#{(dialog_id)"-input"} {
+                            span.form-input #{(dialog_id)"-input"} {
                                 label for = "player" {"Player name:"}
                                 input name = "player" type="text" required = "";
                                 p.error {}

@@ -19,9 +19,9 @@ impl RecordSubmitter<'_> {
 impl Render for RecordSubmitter<'_> {
     fn render(&self) -> Markup {
         html! {
-            section.panel.fade.closable#submitter style=(if !self.initially_visible {"display:none"} else {""}) {
+            section.panel.fade.closable #submitter style=(if !self.initially_visible {"display:none"} else {""}) {
                 span.plus.cross.hover {}
-                form#submission-form novalidate = "" {
+                form #submission-form novalidate = "" {
                     div.underlined {
                         h2 {"Record Submission"}
                     }
@@ -43,13 +43,13 @@ impl Render for RecordSubmitter<'_> {
                     p {
                         "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
                     }
-                    span.form-input.flex.col#id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
+                    span.form-input.flex.col #id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
                         span {
                             b {
-                                i.fa.fa-pencil-alt.clickable#record-submitter-holder-pen aria-hidden = "true" {}
+                                i.fa.fa-pencil-alt.clickable #record-submitter-holder-pen aria-hidden = "true" {}
                                 " "
                             }
-                            i#selected-holder data-name = "player" {"None Selected"}
+                            i #selected-holder data-name = "player" {"None Selected"}
                         }
                         p.error {}
                     }
@@ -59,7 +59,7 @@ impl Render for RecordSubmitter<'_> {
                     p {
                         "The progress made as percentage. Only values greater than or equal to the demons record requirement and smaller than or equal to 100 are accepted!"
                     }
-                    span.form-input.flex.col#id_progress {
+                    span.form-input.flex.col #id_progress {
                         input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100";
                         p.error {}
                     }
@@ -73,7 +73,7 @@ impl Render for RecordSubmitter<'_> {
                         i { "Note: " }
                         "Please pay attention to only submit well-formed URLs!"
                     }
-                    span.form-input.flex.col#id_video {
+                    span.form-input.flex.col #id_video {
                         input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
                         p.error {}
                     }
@@ -89,7 +89,7 @@ impl Render for RecordSubmitter<'_> {
                     p {
                         i {"Note: "} "This is required for every record submitted to the list!"
                     }
-                    span.form-input.flex.col#submit-raw-footage {
+                    span.form-input.flex.col #submit-raw-footage {
                         input type = "url"  name = "raw_footage" required = "" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
                         p.error {}
                     }
@@ -99,7 +99,7 @@ impl Render for RecordSubmitter<'_> {
                     p {
                         "Provide any additional notes you'd like to pass on to the list moderator receiving your submission."
                     }
-                    span.form-input.flex.col#submit-note {
+                    span.form-input.flex.col #submit-note {
                         textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
                         p.error {}
                     }
@@ -121,7 +121,7 @@ impl Render for RecordSubmitter<'_> {
 
 pub(crate) fn submit_panel() -> Markup {
     html! {
-        section#submit.panel.fade.js-scroll-anim data-anim = "fade" {
+        section #submit.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
                     "Submit Records"

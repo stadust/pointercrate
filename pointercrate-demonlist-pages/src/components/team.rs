@@ -23,7 +23,7 @@ impl Render for Team {
         };
 
         html! {
-            section.panel.fade.js-scroll-anim#editors data-anim = "fade" {
+            section.panel.fade.js-scroll-anim #editors data-anim = "fade" {
                 div.underlined {
                     h2 {
                         "List Editors"

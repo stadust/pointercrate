@@ -56,13 +56,13 @@ impl AccountPageTab for ListIntegrationTab {
                 div.panel.fade.js-collapse style="text-align: left; padding: 10px 20px" {
                     div.flex.no-stretch style="justify-content: space-between; align-items: center; " {
                         span style = "font-size: 1.3em" {
-                            i.fa.fa-pencil-alt.clickable#player-claim-pen aria-hidden = "true" {} (PreEscaped("&nbsp;"))
+                            i.fa.fa-pencil-alt.clickable #player-claim-pen aria-hidden = "true" {} (PreEscaped("&nbsp;"))
                             b {
                                 "Claimed Player: "
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i#claimed-player data-id = (claim.player.id) {
+                                    i #claimed-player data-id = (claim.player.id) {
                                         (claim.player.name)
                                     }
                                 },
@@ -88,14 +88,14 @@ impl AccountPageTab for ListIntegrationTab {
                     }
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
-                            div.overlined.pad.js-collapse-content#claims-claim-panel style="display:none" {
+                            div.overlined.pad.js-collapse-content #claims-claim-panel style="display:none" {
                                 p.info-red.output style = "margin: 10px 0" {}
                                 p.info-green.output style = "margin: 10px 0" {}
                                 div.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
                                         "Geolocate statsviewer flag:"
                                     }
-                                    a.button.blue.hover#claims-geolocate-nationality {
+                                    a.button.blue.hover #claims-geolocate-nationality {
                                         "Go"
                                     }
                                 }
@@ -109,10 +109,10 @@ impl AccountPageTab for ListIntegrationTab {
                                         "Lock Submissions:"
                                     }
                                     @if claim.lock_submissions {
-                                        input#lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
+                                        input #lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
                                     }
                                     @else {
-                                        input#lock-submissions-checkbox type = "checkbox" name = "lock_submissions";
+                                        input #lock-submissions-checkbox type = "checkbox" name = "lock_submissions";
                                     }
                                     span.checkmark {}
                                 }

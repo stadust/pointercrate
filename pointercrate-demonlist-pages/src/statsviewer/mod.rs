@@ -7,7 +7,7 @@ pub mod national;
 
 pub(crate) fn stats_viewer_panel() -> Markup {
     html! {
-        section#stats.panel.fade.js-scroll-anim data-anim = "fade" {
+        section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
                     "Stats Viewer"
@@ -16,7 +16,7 @@ pub(crate) fn stats_viewer_panel() -> Markup {
             p {
                 "Get a detailed overview of who completed the most, created the most demons or beat the hardest demons! There is even a leaderboard to compare yourself to the very best!"
             }
-            a.blue.hover.button#show-stats-viewer href = "/demonlist/statsviewer/ "{
+            a.blue.hover.button #show-stats-viewer href = "/demonlist/statsviewer/ "{
                 "Open the stats viewer!"
             }
         }
@@ -48,7 +48,7 @@ fn hide_subdivision_panel() -> Markup {
             }
             div.cb-container.flex.no-stretch style="margin-bottom:10px" {
                 i {"Show political subdivisions"}
-                input#show-subdivisions-checkbox type = "checkbox" checked="";
+                input #show-subdivisions-checkbox type = "checkbox" checked="";
                 span.checkmark {}
             }
         }
@@ -73,7 +73,7 @@ fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
 
 fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>) -> Markup {
     html! {
-        section.panel.fade#statsviewer style="overflow:initial" {
+        section.panel.fade #statsviewer style="overflow:initial" {
             h2.underlined.pad {
                 "Stats Viewer"
                 @if let Some(nations) = nations {
@@ -108,7 +108,7 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
                 div.viewer-content {
                     div {
                         div.flex.col {
-                            h3#player-name style = "font-size:1.4em; overflow: hidden" {}
+                            h3 #player-name style = "font-size:1.4em; overflow: hidden" {}
                             @for row in rows {
                                 div.stats-container.flex.space {
                                     @for column in row.0 {
@@ -117,7 +117,7 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
                                                 (column.0)
                                             }
                                             br;
-                                            span#(column.1) {}
+                                            span #(column.1) {}
                                         }
                                     }
                                 }

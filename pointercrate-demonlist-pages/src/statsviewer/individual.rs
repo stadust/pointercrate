@@ -26,7 +26,7 @@ impl From<IndividualStatsViewer> for PageFragment {
 impl IndividualStatsViewer {
     fn body(&self) -> Markup {
         html! {
-            nav.flex.wrap.m-center.fade#statsviewers style="text-align: center;" {
+            nav.flex.wrap.m-center.fade #statsviewers style="text-align: center;" {
                 a.button.white.hover.no-shadow href="/demonlist/statsviewer/"{
                     b {"Individual"}
                 }
@@ -34,8 +34,8 @@ impl IndividualStatsViewer {
                     b {"Nations"}
                 }
             }
-            div#world-map-wrapper {
-                object#world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" {}
+            div #world-map-wrapper {
+                object #world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" {}
             }
             div.flex.m-center.container {
                 main.left {
@@ -85,7 +85,7 @@ impl IndividualStatsViewer {
                         p {
                             "For the " i {"United States of America"} ", " i {"The United Kingdom of Great Britain and Northern Ireland"} ", " i{"Australia"} " and " i{"Canada"} " you can select a state/province from the dropdown below to focus the stats viewer to that state/province."
                         }
-                        div.dropdown-menu.js-search#subdivision-dropdown data-default = "None" {
+                        div.dropdown-menu.js-search #subdivision-dropdown data-default = "None" {
                             div{
                                 input type="text" style = "color: #444446; font-weight: bold;";
                             }
