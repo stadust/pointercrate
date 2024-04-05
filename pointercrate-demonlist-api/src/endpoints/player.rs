@@ -46,8 +46,6 @@ pub async fn paginate(
         pagination,
         min_id,
         max_id,
-        before_id,
-        after_id,
         base.id
     )
 }
@@ -66,8 +64,6 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
         pagination,
         1,
         max_index,
-        before_index,
-        after_index,
         index
     )
 }
@@ -185,8 +181,6 @@ pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimP
         pagination,
         min_id,
         max_id,
-        before_id,
-        after_id,
         id
     )
 }

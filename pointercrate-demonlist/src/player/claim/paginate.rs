@@ -1,21 +1,13 @@
 use crate::error::Result;
 use futures::StreamExt;
-use pointercrate_core::{audit::NamedId, error::CoreError, util::non_nullable};
+use pointercrate_core::{audit::NamedId, pagination::PaginationParameters, util::non_nullable};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PlayerClaimPagination {
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "before")]
-    pub before_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "after")]
-    pub after_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    pub limit: Option<u8>,
+    #[serde(flatten)]
+    pub params: PaginationParameters,
 
     #[serde(default, deserialize_with = "non_nullable")]
     any_name_contains: Option<String>,
@@ -44,32 +36,18 @@ impl ListedClaim {
 
 impl PlayerClaimPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<ListedClaim>> {
-        if let Some(limit) = self.limit {
-            if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into());
-            }
-        }
+        self.params.validate()?;
 
-        if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
-            if after < before {
-                return Err(CoreError::AfterSmallerBefore.into());
-            }
-        }
-
-        let order = if self.after_id.is_none() && self.before_id.is_some() {
-            "DESC"
-        } else {
-            "ASC"
-        };
+        let order = self.params.order();
 
         let query = format!(include_str!("../../../sql/paginate_claims.sql"), order);
 
         let mut stream = sqlx::query(&query)
-            .bind(self.before_id)
-            .bind(self.after_id)
+            .bind(self.params.before)
+            .bind(self.params.after)
             .bind(self.any_name_contains.as_ref())
             .bind(self.verified)
-            .bind(self.limit.unwrap_or(50) as i32 + 1)
+            .bind(self.params.limit + 1)
             .fetch(connection);
 
         let mut claims = Vec::new();

@@ -5,24 +5,15 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    error::CoreError,
-    util::{non_nullable, nullable},
-};
+    pagination::PaginationParameters, util::{non_nullable, nullable}}
+;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnection, Row};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PlayerPagination {
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "before")]
-    pub before_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "after")]
-    pub after_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    pub limit: Option<u8>,
+    #[serde(flatten)]
+    pub params: PaginationParameters,
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<String>,
@@ -39,30 +30,22 @@ pub struct PlayerPagination {
 
 impl PlayerPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Player>> {
-        if let Some(limit) = self.limit {
-            if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into());
-            }
-        }
+        self.params.validate()?;
 
-        let order = if self.after_id.is_none() && self.before_id.is_some() {
-            "DESC"
-        } else {
-            "ASC"
-        };
+        let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_players_by_id.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
         let mut stream = sqlx::query(&query)
-            .bind(self.before_id)
-            .bind(self.after_id)
+            .bind(self.params.before)
+            .bind(self.params.after)
             .bind(self.name.as_deref())
             .bind(self.name_contains.as_deref())
             .bind(self.banned)
             .bind(&self.nation)
             .bind(self.nation == Some(None))
-            .bind(self.limit.unwrap_or(50) as i32 + 1)
+            .bind(self.params.limit + 1)
             .fetch(connection);
 
         let mut players = Vec::new();
@@ -95,16 +78,8 @@ impl PlayerPagination {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RankingPagination {
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "before")]
-    pub before_index: Option<i64>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "after")]
-    pub after_index: Option<i64>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    pub limit: Option<u8>,
+    #[serde(flatten)]
+    pub params: PaginationParameters,
 
     #[serde(default, deserialize_with = "nullable")]
     nation: Option<Option<String>>,
@@ -121,29 +96,21 @@ pub struct RankingPagination {
 
 impl RankingPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>> {
-        if let Some(limit) = self.limit {
-            if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into());
-            }
-        }
+        self.params.validate()?;
 
-        let order = if self.before_index.is_some() && self.after_index.is_none() {
-            "DESC"
-        } else {
-            "ASC"
-        };
+        let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);
 
         let mut stream = sqlx::query(&query)
-            .bind(self.before_index)
-            .bind(self.after_index)
+            .bind(self.params.before)
+            .bind(self.params.after)
             .bind(self.name_contains.as_deref())
             .bind(&self.nation)
             .bind(self.nation == Some(None))
             .bind(self.continent.as_ref().map(|c| c.to_sql()))
             .bind(&self.subdivision)
-            .bind(self.limit.unwrap_or(50) as i32 + 1)
+            .bind(self.params.limit + 1)
             .fetch(connection);
 
         let mut players = Vec::new();
