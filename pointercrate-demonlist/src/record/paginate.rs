@@ -6,24 +6,15 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    error::CoreError,
-    util::{non_nullable, nullable},
+    pagination::PaginationParameters, util::{non_nullable, nullable}
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct RecordPagination {
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "before")]
-    pub before_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "after")]
-    pub after_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    pub limit: Option<u8>,
+    #[serde(flatten)]
+    pub params: PaginationParameters,
 
     progress: Option<i16>,
 
@@ -74,31 +65,15 @@ impl RecordPagination {
     /// Additionally, if _before_ is set, but not _after_, the page is returned in reverse order
     /// (the additional object stays the last)
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>> {
-        if let Some(limit) = self.limit {
-            if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into());
-            }
-        }
+        self.params.validate()?;
 
-        if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
-            if after < before {
-                return Err(CoreError::AfterSmallerBefore.into());
-            }
-        }
-
-        let limit = self.limit.unwrap_or(50) as i32;
-
-        let order = if self.after_id.is_none() && self.before_id.is_some() {
-            "DESC"
-        } else {
-            "ASC"
-        };
+        let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_records.sql"), order);
 
         let mut stream = sqlx::query(&query)
-            .bind(self.before_id)
-            .bind(self.after_id)
+            .bind(self.params.before)
+            .bind(self.params.after)
             .bind(self.progress)
             .bind(self.progress_lt)
             .bind(self.progress_gt)
@@ -112,7 +87,7 @@ impl RecordPagination {
             .bind(self.video == Some(None))
             .bind(self.player)
             .bind(self.submitter)
-            .bind(limit + 1)
+            .bind(self.params.limit + 1)
             .fetch(&mut *connection);
 
         let mut records = Vec::new();

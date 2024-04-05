@@ -57,7 +57,7 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut auth.connection).await?;
 
-    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, before_id, after_id, id)
+    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, id)
 }
 
 #[rocket::get("/", rank = 1)]
@@ -81,7 +81,7 @@ pub async fn unauthed_pagination(
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut *connection).await?;
 
-    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, before_id, after_id, id)
+    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, id)
 }
 
 #[rocket::post("/", data = "<submission>")]

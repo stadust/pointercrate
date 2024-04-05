@@ -28,7 +28,7 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
     let mut demons = pagination.page(&mut *connection).await?;
     let (max_id, min_id) = Demon::extremal_demon_ids(&mut *connection).await?;
 
-    pagination_response!("/api/v2/demons/", demons, pagination, min_id, max_id, before_id, after_id, base.id)
+    pagination_response!("/api/v2/demons/", demons, pagination, min_id, max_id, base.id)
 }
 
 #[rocket::get("/listed")]
@@ -47,8 +47,6 @@ pub async fn paginate_listed(
         pagination,
         1,
         max_position,
-        before_position,
-        after_position,
         base.position
     )
 }

@@ -4,22 +4,14 @@ use crate::{
     player::DatabasePlayer,
 };
 use futures::stream::StreamExt;
-use pointercrate_core::{error::CoreError, util::non_nullable};
+use pointercrate_core::{pagination::PaginationParameters, util::non_nullable};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DemonIdPagination {
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "before")]
-    pub before_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "after")]
-    pub after_id: Option<i32>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    pub limit: Option<u8>,
+    #[serde(flatten)]
+    pub params: PaginationParameters,
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<String>,
@@ -51,30 +43,16 @@ pub struct DemonIdPagination {
 
 impl DemonIdPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
-        if let Some(limit) = self.limit {
-            if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into());
-            }
-        }
+        self.params.validate()?;
 
-        if let (Some(after), Some(before)) = (self.before_id, self.after_id) {
-            if after < before {
-                return Err(CoreError::AfterSmallerBefore.into());
-            }
-        }
-
-        let order = if self.after_id.is_none() && self.before_id.is_some() {
-            "DESC"
-        } else {
-            "ASC"
-        };
+        let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_demons_by_id.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
         let mut stream = sqlx::query(&query)
-            .bind(self.before_id)
-            .bind(self.after_id)
+            .bind(self.params.before)
+            .bind(self.params.after)
             .bind(self.name.as_deref())
             .bind(self.requirement)
             .bind(self.requirement_lt)
@@ -84,7 +62,7 @@ impl DemonIdPagination {
             .bind(self.publisher_id)
             .bind(self.publisher_name.as_deref())
             .bind(self.name_contains.as_deref())
-            .bind(self.limit.unwrap_or(50) as i32 + 1)
+            .bind(self.params.limit + 1)
             .fetch(connection);
 
         let mut demons = Vec::new();
@@ -123,16 +101,8 @@ impl DemonIdPagination {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DemonPositionPagination {
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "before")]
-    pub before_position: Option<i16>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    #[serde(rename = "after")]
-    pub after_position: Option<i16>,
-
-    #[serde(default, deserialize_with = "non_nullable")]
-    pub limit: Option<u8>,
+    #[serde(flatten)]
+    pub params: PaginationParameters,
 
     #[serde(default, deserialize_with = "non_nullable")]
     name: Option<String>,
@@ -164,30 +134,16 @@ pub struct DemonPositionPagination {
 
 impl DemonPositionPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
-        if let Some(limit) = self.limit {
-            if !(1..=100).contains(&limit) {
-                return Err(CoreError::InvalidPaginationLimit.into());
-            }
-        }
+        self.params.validate()?;
 
-        if let (Some(after), Some(before)) = (self.before_position, self.after_position) {
-            if after < before {
-                return Err(CoreError::AfterSmallerBefore.into());
-            }
-        }
-
-        let order = if self.after_position.is_none() && self.before_position.is_some() {
-            "DESC"
-        } else {
-            "ASC"
-        };
+        let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_demons_by_position.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
         let mut stream = sqlx::query(&query)
-            .bind(self.before_position)
-            .bind(self.after_position)
+            .bind(self.params.before)
+            .bind(self.params.after)
             .bind(self.name.as_deref())
             .bind(self.requirement)
             .bind(self.requirement_lt)
@@ -197,7 +153,7 @@ impl DemonPositionPagination {
             .bind(self.publisher_id)
             .bind(self.publisher_name.as_deref())
             .bind(self.name_contains.as_deref())
-            .bind(self.limit.unwrap_or(50) as i32 + 1)
+            .bind(self.params.limit + 1)
             .fetch(connection);
 
         let mut demons = Vec::new();

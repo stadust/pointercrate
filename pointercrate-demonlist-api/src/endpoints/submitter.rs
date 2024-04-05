@@ -28,8 +28,6 @@ pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination
         pagination,
         min_id,
         max_id,
-        before_id,
-        after_id,
         id
     )
 }
