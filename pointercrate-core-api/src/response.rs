@@ -15,7 +15,7 @@ use rocket::{
     Request, Response,
 };
 use serde::Serialize;
-use std::{borrow::Cow, io::Cursor};
+use std::{borrow::Cow, collections::BTreeMap, io::Cursor};
 
 pub struct Page(PageFragment);
 
@@ -122,9 +122,26 @@ where
     P: Pagination,
     T: Serialize,
 {
-    let mut rel = String::new();
-
     let parameters = paginate.parameters();
+    // Use a BTreeMap so that we retain insertion order
+    let mut rel = BTreeMap::new();
+
+    rel.insert(
+        "first",
+        paginate.with_parameters(PaginationParameters {
+            before: None,
+            after: Some(min_id - 1),
+            ..parameters
+        }),
+    );
+    rel.insert(
+        "last",
+        paginate.with_parameters(PaginationParameters {
+            before: Some(max_id + 1),
+            after: None,
+            ..parameters
+        }),
+    );
 
     let limit = parameters.limit as usize;
     let next_page_exists = objects.len() > limit;
@@ -143,29 +160,25 @@ where
                 // if 'after' is none, we're on the first page, otherwise we have ot generate a 'prev' link
 
                 if next_page_exists {
-                    rel.push_str(&format!(
-                        ",<{}?{}>; rel=next",
-                        endpoint,
-                        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                    rel.insert(
+                        "next",
+                        paginate.with_parameters(PaginationParameters {
                             before: None,
                             after: Some(last_id),
-                            limit: parameters.limit
-                        }))
-                        .unwrap()
-                    ));
+                            ..parameters
+                        }),
+                    );
                 }
 
                 if after.is_some() {
-                    rel.push_str(&format!(
-                        ",<{}?{}>; rel=prev",
-                        endpoint,
-                        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                    rel.insert(
+                        "prev",
+                        paginate.with_parameters(PaginationParameters {
                             before: Some(first_id),
                             after: None,
-                            limit: parameters.limit
-                        }))
-                        .unwrap()
-                    ));
+                            ..parameters
+                        }),
+                    );
                 }
             },
             (Some(_), None) => {
@@ -173,27 +186,23 @@ where
                 objects.reverse();
 
                 // This means "first" and "last" are actually to opposite of what the variables are named.
-                rel.push_str(&format!(
-                    ",<{}?{}>; rel=next",
-                    endpoint,
-                    serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                rel.insert(
+                    "next",
+                    paginate.with_parameters(PaginationParameters {
                         before: None,
                         after: Some(first_id),
-                        limit: parameters.limit
-                    }))
-                    .unwrap()
-                ));
+                        ..parameters
+                    }),
+                );
 
-                rel.push_str(&format!(
-                    ",<{}?{}>; rel=prev",
-                    endpoint,
-                    serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                rel.insert(
+                    "prev",
+                    paginate.with_parameters(PaginationParameters {
                         before: Some(last_id),
                         after: None,
-                        limit: parameters.limit
-                    }))
-                    .unwrap()
-                ));
+                        ..parameters
+                    }),
+                );
             },
             (Some(_before), Some(_after)) => {
                 // We interpret this as that all objects _up to 'before'_ are supposed to be paginated.
@@ -203,29 +212,12 @@ where
         }
     }
 
-    let mut links = format!(
-        "<{}?{}>; rel=first",
-        endpoint,
-        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
-            before: None,
-            after: Some(min_id - 1),
-            limit: parameters.limit
-        }))
-        .unwrap()
-    );
-
-    links.push_str(&format!(
-        ",<{}?{}>; rel=last",
-        endpoint,
-        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
-            before: Some(max_id + 1),
-            after: None,
-            limit: parameters.limit
-        }))
-        .unwrap()
-    ));
-
-    links.push_str(&rel);
+    // Would love to have Iterator::intersperse here
+    let links = rel
+        .into_iter()
+        .map(|(tag, paginate)| format!("<{}?{}>; rel={}", endpoint, serde_urlencoded::to_string(paginate).unwrap(), tag))
+        .collect::<Vec<_>>()
+        .join(",");
 
     Response2::json(objects).with_header("Links", links)
 }
