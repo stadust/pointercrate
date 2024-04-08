@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{error::CoreError, util::non_nullable};
-use serde::{Deserialize, Serialize, de::Error};
+use serde::{de::Error, Deserialize, Serialize};
 
 /// The maximal number of entries that can be requested per page via the `limit` parameter.
 pub const ENTRIES_PER_PAGE: i32 = 100;
@@ -55,6 +55,11 @@ impl PaginationParameters {
             "ASC"
         }
     }
+}
+
+pub trait Pagination: Serialize {
+    fn parameters(&self) -> PaginationParameters;
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self;
 }
 
 /// Helper function because serde does not allow literals/constants in #[serde(default = ...)] attributes.

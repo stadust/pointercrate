@@ -6,7 +6,8 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    pagination::PaginationParameters, util::{non_nullable, nullable}
+    pagination::{Pagination, PaginationParameters},
+    util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
@@ -53,6 +54,19 @@ pub struct RecordPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     pub submitter: Option<i32>,
+}
+
+impl Pagination for RecordPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 impl RecordPagination {

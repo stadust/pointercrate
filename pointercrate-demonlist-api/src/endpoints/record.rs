@@ -4,8 +4,8 @@ use pointercrate_core::{audit::AuditLogEntry, error::CoreError, pool::Pointercra
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
-    pagination_response,
     query::Query,
+    response::pagination_response,
     response::Response2,
 };
 use pointercrate_demonlist::{
@@ -53,11 +53,18 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
         pagination.status = Some(RecordStatus::Approved);
     }
 
-    let mut records = pagination.page(&mut auth.connection).await?;
+    let records = pagination.page(&mut auth.connection).await?;
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut auth.connection).await?;
 
-    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, id)
+    Ok(pagination_response(
+        "/api/v1/records/",
+        records,
+        pagination,
+        min_id,
+        max_id,
+        |record| record.id,
+    ))
 }
 
 #[rocket::get("/", rank = 1)]
@@ -77,11 +84,18 @@ pub async fn unauthed_pagination(
 
     pagination.status = Some(RecordStatus::Approved);
 
-    let mut records = pagination.page(&mut *connection).await?;
+    let records = pagination.page(&mut *connection).await?;
 
     let (max_id, min_id) = FullRecord::extremal_record_ids(&mut *connection).await?;
 
-    pagination_response!("/api/v1/records/", records, pagination, min_id, max_id, id)
+    Ok(pagination_response(
+        "/api/v1/records/",
+        records,
+        pagination,
+        min_id,
+        max_id,
+        |record| record.id,
+    ))
 }
 
 #[rocket::post("/", data = "<submission>")]

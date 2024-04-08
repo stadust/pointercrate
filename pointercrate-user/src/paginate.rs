@@ -1,7 +1,9 @@
 use crate::{error::Result, User};
 use futures::StreamExt;
 use pointercrate_core::{
-    pagination::PaginationParameters, permission::Permission, util::{non_nullable, nullable}
+    pagination::{Pagination, PaginationParameters},
+    permission::Permission,
+    util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
@@ -25,6 +27,19 @@ pub struct UserPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     pub any_permissions: Option<u16>,
+}
+
+impl Pagination for UserPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 impl UserPagination {

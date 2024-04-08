@@ -1,10 +1,14 @@
 use crate::error::Result;
 use futures::StreamExt;
-use pointercrate_core::{audit::NamedId, pagination::PaginationParameters, util::non_nullable};
+use pointercrate_core::{
+    audit::NamedId,
+    pagination::{Pagination, PaginationParameters},
+    util::non_nullable,
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct PlayerClaimPagination {
     #[serde(flatten)]
     pub params: PaginationParameters,
@@ -14,6 +18,19 @@ pub struct PlayerClaimPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     verified: Option<bool>,
+}
+
+impl Pagination for PlayerClaimPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 #[derive(Serialize)]
