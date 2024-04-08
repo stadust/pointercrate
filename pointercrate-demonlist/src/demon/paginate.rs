@@ -4,7 +4,10 @@ use crate::{
     player::DatabasePlayer,
 };
 use futures::stream::StreamExt;
-use pointercrate_core::{pagination::PaginationParameters, util::non_nullable};
+use pointercrate_core::{
+    pagination::{Pagination, PaginationParameters},
+    util::non_nullable,
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
 
@@ -39,6 +42,19 @@ pub struct DemonIdPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__lt")]
     requirement_lt: Option<i16>,
+}
+
+impl Pagination for DemonIdPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 impl DemonIdPagination {
@@ -130,6 +146,19 @@ pub struct DemonPositionPagination {
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__lt")]
     requirement_lt: Option<i16>,
+}
+
+impl Pagination for DemonPositionPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 impl DemonPositionPagination {

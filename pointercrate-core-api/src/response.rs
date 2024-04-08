@@ -1,6 +1,9 @@
 use crate::etag::Tagged;
 use maud::{html, DOCTYPE};
-use pointercrate_core::etag::Taggable;
+use pointercrate_core::{
+    etag::Taggable,
+    pagination::{Pagination, PaginationParameters},
+};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
     PageConfiguration, PageFragment,
@@ -111,108 +114,118 @@ impl<'r, 'o: 'r, T: Responder<'r, 'o>> Responder<'r, 'o> for Response2<T> {
     }
 }
 
-#[macro_export]
-macro_rules! pagination_response {
-    ($endpoint: expr, $objects:expr, $pagination:expr, $min_id:expr, $max_id:expr, $($id_field:tt)*) => {{
-        use pointercrate_core_api::response::Response2;
+pub fn pagination_response<P, T, F>(
+    endpoint: &'static str, mut objects: Vec<T>, paginate: P, min_id: i32, max_id: i32, id_func: F,
+) -> Response2<Json<Vec<T>>>
+where
+    F: Fn(&T) -> i32,
+    P: Pagination,
+    T: Serialize,
+{
+    let mut rel = String::new();
 
-        log::debug!("Received pagination request {:?}", $pagination);
+    let parameters = paginate.parameters();
 
-        let mut rel = String::new();
+    let limit = parameters.limit as usize;
+    let next_page_exists = objects.len() > limit;
 
-        let limit = $pagination.params.limit as usize;
-        let next_page_exists = $objects.len() > limit;
-
-        if !$objects.is_empty() {
-            if next_page_exists {
-                log::debug!("A new page exists!");
-
-                $objects.pop();  // remove the things from then next page
-            }
-
-            let last = $objects.last().unwrap().$($id_field)*;
-            let first = $objects.first().unwrap().$($id_field)*;
-
-            match ($pagination.params.before, $pagination.params.after) {
-                (None, after) => {
-                    log::debug!("No before value set, assuming result is correctly ordered!");
-
-                    // no 'before' value set.
-                    // if 'after' is none, we're on the first page, otherwise we have ot generate a 'prev' link
-
-                    if next_page_exists {
-
-                        $pagination.params.after = Some(last as i32);
-                        $pagination.params.before = None;
-
-                        rel.push_str(&format!(
-                            ",<{}?{}>; rel=next",
-                            $endpoint, serde_urlencoded::to_string(&$pagination).unwrap()
-                        ));
-                    }
-
-                    if after.is_some() {
-                        $pagination.params.after = None;
-                        $pagination.params.before = Some(first as i32);
-
-                        rel.push_str(&format!(
-                            ",<{}?{}>; rel=prev",
-                            $endpoint, serde_urlencoded::to_string(&$pagination).unwrap()
-                        ));
-                    }
-                }
-                (Some(_), None) => {
-                    log::debug!("Before value set, assuming result is reverse ordered!");
-
-                    // A previous page exists. This means "first" and "last" are actually to opposite of what the variables are named.
-                    $pagination.params.before = Some(last as i32);
-                    $pagination.params.after = None;
-
-                    // In this case, the page was retrieved using 'ORDER BY ... DESC' so we need to reverse list order!
-                    $objects.reverse();
-
-                    if next_page_exists {
-                        rel.push_str(&format!(
-                            ",<{}?{}>; rel=prev",
-                            $endpoint, serde_urlencoded::to_string(&$pagination).unwrap()
-                        ));
-                    }
-                    $pagination.params.after = Some(first as i32);
-                    $pagination.params.before = None;
-
-                    rel.push_str(&format!(
-                        ",<{}?{}>; rel=next",
-                        $endpoint, serde_urlencoded::to_string(&$pagination).unwrap()
-                    ));
-                }
-                (Some(_before), Some(_after)) => {
-                    // We interpret this as that all objects _up to 'before'_ are supposed to be paginated.
-                    // This means we keep the 'before' value and handle the 'after' value just as above.
-                    // tODO: implement
-                }
-            }
+    if !objects.is_empty() {
+        if next_page_exists {
+            objects.pop(); // remove the things from then next page
         }
 
-        $pagination.params.after = Some($min_id - 1);
-        $pagination.params.before = None;
+        let last_id = id_func(objects.last().unwrap());
+        let first_id = id_func(objects.first().unwrap());
 
-        let mut links = format!(
-            "<{}?{}>; rel=first",
-            $endpoint, serde_urlencoded::to_string(&$pagination).unwrap()
-        );
+        match (parameters.before, parameters.after) {
+            (None, after) => {
+                // no 'before' value set.
+                // if 'after' is none, we're on the first page, otherwise we have ot generate a 'prev' link
 
-        $pagination.params.after = None;
-        $pagination.params.before = Some($max_id as i32 + 1);
+                if next_page_exists {
+                    rel.push_str(&format!(
+                        ",<{}?{}>; rel=next",
+                        endpoint,
+                        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                            before: None,
+                            after: Some(last_id),
+                            limit: parameters.limit
+                        }))
+                        .unwrap()
+                    ));
+                }
 
-        links.push_str(&format!(
-            ",<{}?{}>; rel=last",
-            $endpoint, serde_urlencoded::to_string(&$pagination).unwrap()
-        ));
+                if after.is_some() {
+                    rel.push_str(&format!(
+                        ",<{}?{}>; rel=prev",
+                        endpoint,
+                        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                            before: Some(first_id),
+                            after: None,
+                            limit: parameters.limit
+                        }))
+                        .unwrap()
+                    ));
+                }
+            },
+            (Some(_), None) => {
+                // A previous page exists. In this case, the page was retrieved using 'ORDER BY ... DESC' so we need to reverse list order!
+                objects.reverse();
 
-        links.push_str(&rel);
+                // This means "first" and "last" are actually to opposite of what the variables are named.
+                rel.push_str(&format!(
+                    ",<{}?{}>; rel=next",
+                    endpoint,
+                    serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                        before: None,
+                        after: Some(first_id),
+                        limit: parameters.limit
+                    }))
+                    .unwrap()
+                ));
 
-        log::debug!("Links headers has value '{}'", links);
+                rel.push_str(&format!(
+                    ",<{}?{}>; rel=prev",
+                    endpoint,
+                    serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+                        before: Some(last_id),
+                        after: None,
+                        limit: parameters.limit
+                    }))
+                    .unwrap()
+                ));
+            },
+            (Some(_before), Some(_after)) => {
+                // We interpret this as that all objects _up to 'before'_ are supposed to be paginated.
+                // This means we keep the 'before' value and handle the 'after' value just as above.
+                // tODO: implement
+            },
+        }
+    }
 
-        Ok(Response2::json($objects).with_header("Links", links))
-    }};
+    let mut links = format!(
+        "<{}?{}>; rel=first",
+        endpoint,
+        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+            before: None,
+            after: Some(min_id - 1),
+            limit: parameters.limit
+        }))
+        .unwrap()
+    );
+
+    links.push_str(&format!(
+        ",<{}?{}>; rel=last",
+        endpoint,
+        serde_urlencoded::to_string(paginate.with_parameters(PaginationParameters {
+            before: Some(max_id + 1),
+            after: None,
+            limit: parameters.limit
+        }))
+        .unwrap()
+    ));
+
+    links.push_str(&rel);
+
+    Response2::json(objects).with_header("Links", links)
 }

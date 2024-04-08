@@ -4,7 +4,7 @@ use pointercrate_core::error::CoreError;
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, Tagged},
-    pagination_response,
+    response::pagination_response,
     query::Query,
     response::Response2,
 };
@@ -32,11 +32,11 @@ pub async fn paginate(mut auth: TokenAuth, data: Query<UserPagination>) -> Resul
         }
     }
 
-    let mut users = pagination.page(&mut auth.connection).await?;
+    let users = pagination.page(&mut auth.connection).await?;
 
     let (max_id, min_id) = User::extremal_member_ids(&mut auth.connection).await?;
 
-    pagination_response!("/api/v1/users/", users, pagination, min_id, max_id, id)
+    Ok(pagination_response("/api/v1/users", users, pagination, min_id, max_id, |user| user.id))
 }
 
 #[rocket::get("/<user_id>")]

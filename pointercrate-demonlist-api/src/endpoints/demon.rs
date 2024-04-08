@@ -3,7 +3,7 @@ use pointercrate_core::{audit::AuditLogEntry, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
-    pagination_response,
+    response::pagination_response,
     query::Query,
     response::Response2,
 };
@@ -22,33 +22,33 @@ use rocket::{http::Status, serde::json::Json, State};
 
 #[rocket::get("/")]
 pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdPagination>) -> Result<Response2<Json<Vec<Demon>>>> {
-    let mut pagination = pagination.0;
+    let pagination = pagination.0;
     let mut connection = pool.connection().await?;
 
-    let mut demons = pagination.page(&mut *connection).await?;
+    let demons = pagination.page(&mut *connection).await?;
     let (max_id, min_id) = Demon::extremal_demon_ids(&mut *connection).await?;
 
-    pagination_response!("/api/v2/demons/", demons, pagination, min_id, max_id, base.id)
+    Ok(pagination_response("/api/v2/demons/", demons, pagination, min_id, max_id, |demon| demon.base.id))
 }
 
 #[rocket::get("/listed")]
 pub async fn paginate_listed(
     pool: &State<PointercratePool>, pagination: Query<DemonPositionPagination>,
 ) -> Result<Response2<Json<Vec<Demon>>>> {
-    let mut pagination = pagination.0;
+    let pagination = pagination.0;
     let mut connection = pool.connection().await?;
 
-    let mut demons = pagination.page(&mut *connection).await?;
+    let demons = pagination.page(&mut *connection).await?;
     let max_position = Demon::max_position(&mut *connection).await?;
 
-    pagination_response!(
+    Ok(pagination_response(
         "/api/v2/demons/listed/",
         demons,
         pagination,
         1,
-        max_position,
-        base.position
-    )
+        max_position as i32,
+        |demon| demon.base.position as i32
+    ))
 }
 
 #[rocket::get("/<demon_id>")]

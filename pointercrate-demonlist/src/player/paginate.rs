@@ -5,8 +5,9 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    pagination::PaginationParameters, util::{non_nullable, nullable}}
-;
+    pagination::{Pagination, PaginationParameters},
+    util::{non_nullable, nullable},
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnection, Row};
 
@@ -26,6 +27,19 @@ pub struct PlayerPagination {
 
     #[serde(default, deserialize_with = "nullable")]
     nation: Option<Option<String>>,
+}
+
+impl Pagination for PlayerPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 impl PlayerPagination {
@@ -92,6 +106,19 @@ pub struct RankingPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     name_contains: Option<String>,
+}
+
+impl Pagination for RankingPagination {
+    fn parameters(&self) -> PaginationParameters {
+        self.params
+    }
+
+    fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+        Self {
+            params: parameters,
+            ..self.clone()
+        }
+    }
 }
 
 impl RankingPagination {

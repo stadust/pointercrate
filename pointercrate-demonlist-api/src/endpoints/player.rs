@@ -3,8 +3,8 @@ use pointercrate_core::{error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
-    pagination_response,
     query::Query,
+    response::pagination_response,
     response::Response2,
 };
 use pointercrate_demonlist::{
@@ -37,35 +37,35 @@ pub async fn paginate(
         pagination.banned = Some(false);
     }
 
-    let mut players = pagination.page(&mut *connection).await?;
+    let players = pagination.page(&mut *connection).await?;
     let (max_id, min_id) = Player::extremal_player_ids(&mut *connection).await?;
 
-    pagination_response!(
+    Ok(pagination_response(
         "/api/v1/players/",
         players,
         pagination,
         min_id,
         max_id,
-        base.id
-    )
+        |player| player.base.id,
+    ))
 }
 
 #[rocket::get("/ranking")]
 pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPagination>) -> Result<Response2<Json<Vec<RankedPlayer>>>> {
-    let mut pagination = query.0;
+    let pagination = query.0;
     let mut connection = pool.connection().await?;
 
-    let mut players = pagination.page(&mut *connection).await?;
+    let players = pagination.page(&mut *connection).await?;
     let max_index = RankedPlayer::max_index(&mut *connection).await?;
 
-    pagination_response!(
+    Ok(pagination_response(
         "/api/v1/players/ranking/",
         players,
         pagination,
         1,
-        max_index,
-        index
-    )
+        max_index as i32,
+        |player| player.index as i32,
+    ))
 }
 
 #[rocket::get("/<player_id>")]
@@ -167,22 +167,22 @@ pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> 
 pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimPagination>) -> Result<Response2<Json<Vec<ListedClaim>>>> {
     auth.require_permission(MODERATOR)?;
 
-    let mut pagination = pagination.0;
+    let pagination = pagination.0;
 
-    let mut claims = pagination.page(&mut auth.connection).await?;
+    let claims = pagination.page(&mut auth.connection).await?;
     let (max_id, min_id) = match ListedClaim::extremal_ids(&mut auth.connection).await {
         Err(_) => return Ok(Response2::json(Vec::new())), // handle empty table case!
         Ok(data) => data,
     };
 
-    pagination_response!(
+    Ok(pagination_response(
         "/api/v1/players/claims/",
         claims,
         pagination,
         min_id,
         max_id,
-        id
-    )
+        |claim| claim.id,
+    ))
 }
 
 #[derive(Deserialize, Debug)]
