@@ -86,6 +86,10 @@ impl Pagination for PlayerPagination {
 
         Ok(players)
     }
+    
+    fn id_of(item: &Self::Item) -> i32 {
+        item.base.id
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -169,5 +173,9 @@ impl Pagination for RankingPagination {
         }
 
         Ok(players)
+    }
+    
+    fn id_of(item: &Self::Item) -> i32 {
+        item.index as i32
     }
 }

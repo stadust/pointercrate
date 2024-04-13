@@ -127,4 +127,8 @@ impl Pagination for RecordPagination {
 
         Ok(records)
     }
+    
+    fn id_of(item: &Self::Item) -> i32 {
+        item.id
+    }
 }

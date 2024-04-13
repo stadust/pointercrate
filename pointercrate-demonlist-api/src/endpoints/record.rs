@@ -57,7 +57,6 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
         "/api/v1/records/",
         pagination,
         &mut auth.connection,
-        |record| record.id,
     ).await?)
 }
 
@@ -82,7 +81,6 @@ pub async fn unauthed_pagination(
         "/api/v1/records/",
         pagination,
         &mut *connection,
-        |record| record.id,
     ).await?)
 }
 

@@ -8,12 +8,9 @@ use crate::response::Response2;
 
 
 
-pub async fn pagination_response<P, F>(
-    endpoint: &'static str, paginate: P, connection: &mut PgConnection, id_func: F,
+pub async fn pagination_response<P: Pagination>(
+    endpoint: &'static str, paginate: P, connection: &mut PgConnection
 ) -> Result<Response2<Json<Vec<P::Item>>>, CoreError>
-where
-    F: Fn(&P::Item) -> i32,
-    P: Pagination
 {
     paginate.parameters().validate()?;
 
@@ -50,8 +47,8 @@ where
             objects.pop(); // remove the things from then next page
         }
 
-        let last_id = id_func(objects.last().unwrap());
-        let first_id = id_func(objects.first().unwrap());
+        let last_id = P::id_of(objects.last().unwrap());
+        let first_id = P::id_of(objects.first().unwrap());
 
         match (parameters.before, parameters.after) {
             (None, after) => {

@@ -56,4 +56,8 @@ impl Pagination for SubmitterPagination {
 
         Ok(submitters)
     }
+    
+    fn id_of(item: &Self::Item) -> i32 {
+        item.id
+    }
 }
