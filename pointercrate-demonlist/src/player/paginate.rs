@@ -4,7 +4,9 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    first_and_last, pagination::{Pagination, PaginationParameters}, util::{non_nullable, nullable}
+    first_and_last,
+    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnection, Row};
@@ -42,8 +44,8 @@ impl Pagination for PlayerPagination {
     }
 
     first_and_last!("players");
-    
-    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Player>, sqlx::Error> {
+
+    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Player>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_players_by_id.sql"), order);
@@ -84,9 +86,9 @@ impl Pagination for PlayerPagination {
             })
         }
 
-        Ok(players)
+        Ok(__pagination_compat(&self.params, players))
     }
-    
+
     fn id_of(item: &Self::Item) -> i32 {
         item.base.id
     }
@@ -131,8 +133,8 @@ impl Pagination for RankingPagination {
             .max
             .map(|max| (1, max as i32)))
     }
-    
-    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>, sqlx::Error> {
+
+    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<RankedPlayer>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);
@@ -172,9 +174,9 @@ impl Pagination for RankingPagination {
             })
         }
 
-        Ok(players)
+        Ok(__pagination_compat(&self.params, players))
     }
-    
+
     fn id_of(item: &Self::Item) -> i32 {
         item.index as i32
     }
