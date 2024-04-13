@@ -9,7 +9,7 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     error::DemonlistError,
-    nationality::Nationality,
+    nationality::{nations_with_subdivisions, Nationality},
     player::{
         claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
         DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
@@ -237,7 +237,7 @@ pub async fn geolocate_nationality(
 
     player.set_nationality(nationality, &mut auth.connection).await?;
 
-    if ["US", "CA", "GB", "AU"].map(ToString::to_string).contains(&data.country_code) {
+    if nations_with_subdivisions(&mut auth.connection).await?.contains(&data.country_code) {
         if let Some(region) = data.region_iso_code {
             player.set_subdivision(region, &mut auth.connection).await?;
         }

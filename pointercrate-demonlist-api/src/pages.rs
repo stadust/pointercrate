@@ -10,7 +10,7 @@ use pointercrate_core_pages::head::HeadLike;
 use pointercrate_demonlist::{
     demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
     error::DemonlistError,
-    nationality::Nationality,
+    nationality::{nations_with_subdivisions, Nationality},
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_demonlist_pages::{
@@ -211,16 +211,11 @@ pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<Str
         r#"SELECT LOWER(iso_country_code) as "code!", score as "score!" from nations_with_score order by score desc"#,
     );
 
-    let countries_with_subdivisions = sqlx::query!("SELECT DISTINCT nation FROM subdivisions")
-        .fetch_all(&mut *connection)
-        .await
-        .map_err(DemonlistError::from)?;
-
-    for row in countries_with_subdivisions {
+    for nation_iso_code in nations_with_subdivisions(&mut *connection).await? {
         css.push_str(&heatmap_query!(
             connection,
             r#"SELECT CONCAT($1, '-', UPPER(subdivision_code)) AS "code!", score AS "score!" FROM subdivision_ranking_of($1) ORDER BY score DESC"#,
-            row.nation
+            nation_iso_code
         ));
     }
 

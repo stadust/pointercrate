@@ -3,6 +3,7 @@ use derive_more::Constructor;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+pub use get::nations_with_subdivisions;
 
 mod get;
 mod paginate;
