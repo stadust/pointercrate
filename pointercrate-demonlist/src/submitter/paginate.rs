@@ -1,4 +1,4 @@
-use crate::{error::Result, submitter::Submitter};
+use crate::submitter::Submitter;
 use futures::StreamExt;
 use pointercrate_core::{
     first_and_last, pagination::{Pagination, PaginationParameters}, util::non_nullable
@@ -16,6 +16,8 @@ pub struct SubmitterPagination {
 }
 
 impl Pagination for SubmitterPagination {
+    type Item = Submitter; 
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -28,12 +30,8 @@ impl Pagination for SubmitterPagination {
     }
 
     first_and_last!("submitters", "submitter_id");
-}
-
-impl SubmitterPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Submitter>> {
-        self.params.validate()?;
-
+    
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Submitter>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!("SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND (banned = $3 OR $3 IS NULL) ORDER BY submitter_id {} LIMIT $4", order);

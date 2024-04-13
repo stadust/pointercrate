@@ -1,5 +1,4 @@
 use crate::{
-    error::Result,
     nationality::{Continent, Nationality},
     player::{DatabasePlayer, Player, RankedPlayer},
 };
@@ -29,6 +28,8 @@ pub struct PlayerPagination {
 }
 
 impl Pagination for PlayerPagination {
+    type Item = Player;
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -41,12 +42,8 @@ impl Pagination for PlayerPagination {
     }
 
     first_and_last!("players");
-}
-
-impl PlayerPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Player>> {
-        self.params.validate()?;
-
+    
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Player>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_players_by_id.sql"), order);
@@ -110,6 +107,8 @@ pub struct RankingPagination {
 }
 
 impl Pagination for RankingPagination {
+    type Item = RankedPlayer;
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -121,19 +120,15 @@ impl Pagination for RankingPagination {
         }
     }
 
-    async fn first_and_last(connection: &mut PgConnection) -> std::prelude::v1::Result<Option<(i32, i32)>, sqlx::Error> {
+    async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error> {
         Ok(sqlx::query!("SELECT MAX(index) FROM players_with_score")
             .fetch_one(connection)
             .await?
             .max
             .map(|max| (1, max as i32)))
     }
-}
-
-impl RankingPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>> {
-        self.params.validate()?;
-
+    
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedPlayer>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);

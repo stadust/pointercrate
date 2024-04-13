@@ -1,11 +1,12 @@
 use crate::{
     demon::{Demon, MinimalDemon},
-    error::Result,
     player::DatabasePlayer,
 };
 use futures::stream::StreamExt;
 use pointercrate_core::{
-    first_and_last, pagination::{Pagination, PaginationParameters}, util::non_nullable
+    first_and_last,
+    pagination::{Pagination, PaginationParameters},
+    util::non_nullable,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
@@ -44,6 +45,8 @@ pub struct DemonIdPagination {
 }
 
 impl Pagination for DemonIdPagination {
+    type Item = Demon;
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -56,12 +59,8 @@ impl Pagination for DemonIdPagination {
     }
 
     first_and_last!("demons");
-}
 
-impl DemonIdPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
-        self.params.validate()?;
-
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_demons_by_id.sql"), order);
@@ -150,6 +149,8 @@ pub struct DemonPositionPagination {
 }
 
 impl Pagination for DemonPositionPagination {
+    type Item = Demon;
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -162,12 +163,8 @@ impl Pagination for DemonPositionPagination {
     }
 
     first_and_last!("demons", "position");
-}
 
-impl DemonPositionPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>> {
-        self.params.validate()?;
-
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_demons_by_position.sql"), order);

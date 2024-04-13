@@ -2,21 +2,23 @@ use std::collections::BTreeMap;
 
 use pointercrate_core::{error::CoreError, pagination::{Pagination, PaginationParameters}};
 use rocket::serde::json::Json;
-use serde::Serialize;
 use sqlx::PgConnection;
 
 use crate::response::Response2;
 
 
 
-pub async fn pagination_response<P, T, F>(
-    endpoint: &'static str, mut objects: Vec<T>, paginate: P, connection: &mut PgConnection, id_func: F,
-) -> Result<Response2<Json<Vec<T>>>, CoreError>
+pub async fn pagination_response<P, F>(
+    endpoint: &'static str, paginate: P, connection: &mut PgConnection, id_func: F,
+) -> Result<Response2<Json<Vec<P::Item>>>, CoreError>
 where
-    F: Fn(&T) -> i32,
-    P: Pagination,
-    T: Serialize,
+    F: Fn(&P::Item) -> i32,
+    P: Pagination
 {
+    paginate.parameters().validate()?;
+
+    let mut objects = paginate.page(&mut *connection).await?;
+
     let parameters = paginate.parameters();
     // Use a BTreeMap so that we retain insertion order
     let mut rel = BTreeMap::new();

@@ -1,4 +1,3 @@
-use crate::error::Result;
 use futures::StreamExt;
 use pointercrate_core::{
     audit::NamedId, first_and_last, pagination::{Pagination, PaginationParameters}, util::non_nullable
@@ -18,7 +17,18 @@ pub struct PlayerClaimPagination {
     verified: Option<bool>,
 }
 
+#[derive(Serialize)]
+pub struct ListedClaim {
+    #[serde(skip)]
+    pub id: i32,
+    user: NamedId,
+    player: NamedId,
+    verified: bool,
+}
+
 impl Pagination for PlayerClaimPagination {
+    type Item = ListedClaim;
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -31,21 +41,8 @@ impl Pagination for PlayerClaimPagination {
     }
 
     first_and_last!("player_claims");
-}
-
-#[derive(Serialize)]
-pub struct ListedClaim {
-    #[serde(skip)]
-    pub id: i32,
-    user: NamedId,
-    player: NamedId,
-    verified: bool,
-}
-
-impl PlayerClaimPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<ListedClaim>> {
-        self.params.validate()?;
-
+    
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<ListedClaim>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../../sql/paginate_claims.sql"), order);

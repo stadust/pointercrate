@@ -25,11 +25,9 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
     let pagination = pagination.0;
     let mut connection = pool.connection().await?;
 
-    let demons = pagination.page(&mut *connection).await?;
 
     Ok(pagination_response(
         "/api/v2/demons/",
-        demons,
         pagination,
         &mut *connection,
         |demon| demon.base.id,
@@ -43,11 +41,8 @@ pub async fn paginate_listed(
     let pagination = pagination.0;
     let mut connection = pool.connection().await?;
 
-    let demons = pagination.page(&mut *connection).await?;
-
     Ok(pagination_response(
         "/api/v2/demons/listed/",
-        demons,
         pagination,
         &mut *connection,
         |demon| demon.base.position as i32,

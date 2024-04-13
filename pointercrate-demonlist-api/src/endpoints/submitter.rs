@@ -18,11 +18,8 @@ pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination
 
     let pagination = pagination.0;
 
-    let submitters = pagination.page(&mut auth.connection).await?;
-
     Ok(pagination_response(
         "/api/v1/submitters/",
-        submitters,
         pagination,
         &mut auth.connection,
         |submitter| submitter.id,
