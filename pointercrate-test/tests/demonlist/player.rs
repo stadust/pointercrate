@@ -1,10 +1,9 @@
 use pointercrate_core::etag::Taggable;
 use pointercrate_demonlist::{
     nationality::{Nationality, Subdivision},
-    player::{DatabasePlayer, FullPlayer, PatchPlayer, Player},
+    player::{DatabasePlayer, FullPlayer, Player},
     LIST_HELPER,
 };
-use pointercrate_test::TestClient;
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
