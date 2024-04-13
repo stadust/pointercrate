@@ -1,7 +1,7 @@
 use crate::{error::Result, User};
 use futures::StreamExt;
 use pointercrate_core::{
-    first_and_last, pagination::{Pagination, PaginationParameters}, permission::Permission, util::{non_nullable, nullable}
+    first_and_last, pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat}, permission::Permission, util::{non_nullable, nullable}
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
@@ -43,7 +43,7 @@ impl Pagination for UserPagination {
     
     first_and_last!("members", "member_id");
     
-    async fn page(&self, connection: &mut PgConnection) -> std::result::Result<Vec<User>, sqlx::Error> {
+    async fn page(&self, connection: &mut PgConnection) -> std::result::Result<(Vec<User>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../sql/paginate_users.sql"), order);
@@ -76,7 +76,7 @@ impl Pagination for UserPagination {
             })
         }
 
-        Ok(users)
+        Ok(__pagination_compat(&self.params, users))
     }
     
     fn id_of(user: &User) -> i32 {

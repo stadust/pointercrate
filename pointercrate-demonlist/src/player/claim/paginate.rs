@@ -1,6 +1,9 @@
 use futures::StreamExt;
 use pointercrate_core::{
-    audit::NamedId, first_and_last, pagination::{Pagination, PaginationParameters}, util::non_nullable
+    audit::NamedId,
+    first_and_last,
+    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    util::non_nullable,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
@@ -41,8 +44,8 @@ impl Pagination for PlayerClaimPagination {
     }
 
     first_and_last!("player_claims");
-    
-    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<ListedClaim>, sqlx::Error> {
+
+    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<ListedClaim>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../../sql/paginate_claims.sql"), order);
@@ -74,9 +77,9 @@ impl Pagination for PlayerClaimPagination {
             })
         }
 
-        Ok(claims)
+        Ok(__pagination_compat(&self.params, claims))
     }
-    
+
     fn id_of(item: &Self::Item) -> i32 {
         item.id
     }

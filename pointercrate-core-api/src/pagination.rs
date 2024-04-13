@@ -7,17 +7,16 @@ use sqlx::PgConnection;
 use crate::response::Response2;
 
 
-
 pub async fn pagination_response<P: Pagination>(
     endpoint: &'static str, paginate: P, connection: &mut PgConnection
 ) -> Result<Response2<Json<Vec<P::Item>>>, CoreError>
 {
-    paginate.parameters().validate()?;
-
-    let mut objects = paginate.page(&mut *connection).await?;
-
     let parameters = paginate.parameters();
-    // Use a BTreeMap so that we retain insertion order
+
+    parameters.validate()?;
+
+    let (objects, context) = paginate.page(&mut *connection).await?;
+
     let mut rel = BTreeMap::new();
 
     if let Some((min_id, max_id)) = P::first_and_last(connection).await? {
@@ -39,74 +38,52 @@ pub async fn pagination_response<P: Pagination>(
         );
     }
 
-    let limit = parameters.limit as usize;
-    let next_page_exists = objects.len() > limit;
-
-    if !objects.is_empty() {
-        if next_page_exists {
-            objects.pop(); // remove the things from then next page
-        }
-
-        let last_id = P::id_of(objects.last().unwrap());
-        let first_id = P::id_of(objects.first().unwrap());
-
-        match (parameters.before, parameters.after) {
-            (None, after) => {
-                // no 'before' value set.
-                // if 'after' is none, we're on the first page, otherwise we have ot generate a 'prev' link
-
-                if next_page_exists {
-                    rel.insert(
-                        "next",
-                        paginate.with_parameters(PaginationParameters {
-                            before: None,
-                            after: Some(last_id),
-                            ..parameters
-                        }),
-                    );
-                }
-
-                if after.is_some() {
-                    rel.insert(
-                        "prev",
-                        paginate.with_parameters(PaginationParameters {
-                            before: Some(first_id),
-                            after: None,
-                            ..parameters
-                        }),
-                    );
-                }
+    if context.has_next() {
+        let after = match objects.last() {
+            Some(obj) => P::id_of(obj),
+            None => {
+                // If there exists a next page, but this page is empty, then 
+                // we must have had a `before` value set (e.g. this is a page before the first object matching the pagination conditions).
+                parameters.before.ok_or_else(|| {
+                    CoreError::internal_server_error(format!(
+                        "Empty page claims next page exists, yet `before` not set on current request. Caused by {:?}",
+                        paginate
+                    ))
+                })? - 1
             },
-            (Some(_), None) => {
-                // A previous page exists. In this case, the page was retrieved using 'ORDER BY ... DESC' so we need to reverse list order!
-                objects.reverse();
+        };
 
-                // This means "first" and "last" are actually to opposite of what the variables are named.
-                rel.insert(
-                    "next",
-                    paginate.with_parameters(PaginationParameters {
-                        before: None,
-                        after: Some(first_id),
-                        ..parameters
-                    }),
-                );
-
-                rel.insert(
-                    "prev",
-                    paginate.with_parameters(PaginationParameters {
-                        before: Some(last_id),
-                        after: None,
-                        ..parameters
-                    }),
-                );
-            },
-            (Some(_before), Some(_after)) => {
-                // We interpret this as that all objects _up to 'before'_ are supposed to be paginated.
-                // This means we keep the 'before' value and handle the 'after' value just as above.
-                // tODO: implement
-            },
-        }
+        rel.insert("next", paginate.with_parameters(PaginationParameters {
+            // TODO: Figure out the case where both `before` and `after` are set
+            // If `before` is set on this request, then we _could_ support one-way pagination up to `before` by preserving the "before" value here. 
+            // Currently, this scenario cannot happen, as the documentation of `Pagination::page` we treat these pages as "standalone". 
+            before: None,
+            after: Some(after),
+            ..parameters
+        }));
     }
+
+    if context.has_previous() {
+        let before = match objects.first() {
+            Some(obj) => P::id_of(obj),
+            None => {
+                parameters.after.ok_or_else(|| {
+                    CoreError::internal_server_error(format!(
+                        "Empty page claims previous page exists, yet `after` not set on current request. Caused by {:?}",
+                        paginate
+                    ))
+                })? + 1
+            },
+        };
+
+        rel.insert("prev", paginate.with_parameters(PaginationParameters {
+            before: Some(before), 
+            // Either this request had the `after` parameter set, in which case we definitely do not want to preserve it as our "before" variable above is either
+            // the ID of the smallest object greater than `after`, or it is literally `after + 1`.
+            after: None, 
+            ..parameters
+        }));
+    };
 
     // Would love to have Iterator::intersperse here
     let links = rel

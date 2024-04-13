@@ -5,7 +5,9 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    first_and_last, pagination::{Pagination, PaginationParameters}, util::{non_nullable, nullable}
+    first_and_last,
+    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
@@ -69,16 +71,8 @@ impl Pagination for RecordPagination {
     }
 
     first_and_last!("records");
-    
-    /// Retrieves the page of records matching the pagination data in here
-    ///
-    /// Note that this method returns _one more record than requested_. This is used as a quick and
-    /// dirty way to determine if further pages exist: If the additional record was returned, more
-    /// pages obviously exist. This additional object is the last in the returned vector.
-    ///
-    /// Additionally, if _before_ is set, but not _after_, the page is returned in reverse order
-    /// (the additional object stays the last)
-    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>, sqlx::Error> {
+
+    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<MinimalRecordPD>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_records.sql"), order);
@@ -125,9 +119,9 @@ impl Pagination for RecordPagination {
             })
         }
 
-        Ok(records)
+        Ok(__pagination_compat(&self.params, records))
     }
-    
+
     fn id_of(item: &Self::Item) -> i32 {
         item.id
     }

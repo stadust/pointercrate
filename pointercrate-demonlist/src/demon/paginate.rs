@@ -5,7 +5,7 @@ use crate::{
 use futures::stream::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{Pagination, PaginationParameters},
+    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
     util::non_nullable,
 };
 use serde::{Deserialize, Serialize};
@@ -60,7 +60,7 @@ impl Pagination for DemonIdPagination {
 
     first_and_last!("demons");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>, sqlx::Error> {
+    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Demon>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_demons_by_id.sql"), order);
@@ -111,7 +111,7 @@ impl Pagination for DemonIdPagination {
             })
         }
 
-        Ok(demons)
+        Ok(__pagination_compat(&self.params, demons))
     }
 
     fn id_of(demon: &Demon) -> i32 {
@@ -168,7 +168,7 @@ impl Pagination for DemonPositionPagination {
 
     first_and_last!("demons", "position");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Demon>, sqlx::Error> {
+    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Demon>, PageContext), sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_demons_by_position.sql"), order);
@@ -219,9 +219,9 @@ impl Pagination for DemonPositionPagination {
             })
         }
 
-        Ok(demons)
+        Ok(__pagination_compat(&self.params, demons))
     }
-    
+
     fn id_of(item: &Self::Item) -> i32 {
         item.base.position as i32
     }
