@@ -26,16 +26,14 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
     let mut connection = pool.connection().await?;
 
     let demons = pagination.page(&mut *connection).await?;
-    let (max_id, min_id) = Demon::extremal_demon_ids(&mut *connection).await?;
 
     Ok(pagination_response(
         "/api/v2/demons/",
         demons,
         pagination,
-        min_id,
-        max_id,
+        &mut *connection,
         |demon| demon.base.id,
-    ))
+    ).await?)
 }
 
 #[rocket::get("/listed")]
@@ -46,16 +44,14 @@ pub async fn paginate_listed(
     let mut connection = pool.connection().await?;
 
     let demons = pagination.page(&mut *connection).await?;
-    let max_position = Demon::max_position(&mut *connection).await?;
 
     Ok(pagination_response(
         "/api/v2/demons/listed/",
         demons,
         pagination,
-        1,
-        max_position as i32,
+        &mut *connection,
         |demon| demon.base.position as i32,
-    ))
+    ).await?)
 }
 
 #[rocket::get("/<demon_id>")]

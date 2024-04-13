@@ -6,8 +6,7 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    pagination::{Pagination, PaginationParameters},
-    util::{non_nullable, nullable},
+    first_and_last, pagination::{Pagination, PaginationParameters}, util::{non_nullable, nullable}
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
@@ -67,6 +66,8 @@ impl Pagination for RecordPagination {
             ..self.clone()
         }
     }
+
+    first_and_last!("records");
 }
 
 impl RecordPagination {

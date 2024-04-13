@@ -183,16 +183,6 @@ pub struct MinimalRecordP {
 }
 
 impl FullRecord {
-    /// Gets the maximal and minimal submitter id currently in use
-    ///
-    /// The returned tuple is of the form (max, min)
-    pub async fn extremal_record_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
-        let row = sqlx::query!(r#"SELECT MAX(id) AS "max_id!: i32", MIN(id) AS "min_id!: i32" FROM records"#)
-            .fetch_one(connection)
-            .await?; // FIXME: crashes on empty table
-        Ok((row.max_id, row.min_id))
-    }
-
     pub async fn was_modified(&self, connection: &mut PgConnection) -> Result<bool> {
         Ok(sqlx::query!(
             r#"SELECT EXISTS (SELECT 1 FROM record_modifications WHERE id = $1 AND status_ IS NOT NULL) AS "was_modified!: bool""#,

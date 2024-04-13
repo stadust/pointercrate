@@ -1,16 +1,17 @@
 use std::collections::BTreeMap;
 
-use pointercrate_core::pagination::{Pagination, PaginationParameters};
+use pointercrate_core::{error::CoreError, pagination::{Pagination, PaginationParameters}};
 use rocket::serde::json::Json;
 use serde::Serialize;
+use sqlx::PgConnection;
 
 use crate::response::Response2;
 
 
 
-pub fn pagination_response<P, T, F>(
-    endpoint: &'static str, mut objects: Vec<T>, paginate: P, min_id: i32, max_id: i32, id_func: F,
-) -> Response2<Json<Vec<T>>>
+pub async fn pagination_response<P, T, F>(
+    endpoint: &'static str, mut objects: Vec<T>, paginate: P, connection: &mut PgConnection, id_func: F,
+) -> Result<Response2<Json<Vec<T>>>, CoreError>
 where
     F: Fn(&T) -> i32,
     P: Pagination,
@@ -20,22 +21,24 @@ where
     // Use a BTreeMap so that we retain insertion order
     let mut rel = BTreeMap::new();
 
-    rel.insert(
-        "first",
-        paginate.with_parameters(PaginationParameters {
-            before: None,
-            after: Some(min_id - 1),
-            ..parameters
-        }),
-    );
-    rel.insert(
-        "last",
-        paginate.with_parameters(PaginationParameters {
-            before: Some(max_id + 1),
-            after: None,
-            ..parameters
-        }),
-    );
+    if let Some((min_id, max_id)) = P::first_and_last(connection).await? {
+        rel.insert(
+            "first",
+            paginate.with_parameters(PaginationParameters {
+                before: None,
+                after: Some(min_id - 1),
+                ..parameters
+            }),
+        );
+        rel.insert(
+            "last",
+            paginate.with_parameters(PaginationParameters {
+                before: Some(max_id + 1),
+                after: None,
+                ..parameters
+            }),
+        );
+    }
 
     let limit = parameters.limit as usize;
     let next_page_exists = objects.len() > limit;
@@ -113,5 +116,5 @@ where
         .collect::<Vec<_>>()
         .join(",");
 
-    Response2::json(objects).with_header("Links", links)
+    Ok(Response2::json(objects).with_header("Links", links))
 }

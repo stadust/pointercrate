@@ -1,9 +1,7 @@
 use crate::{error::Result, User};
 use futures::StreamExt;
 use pointercrate_core::{
-    pagination::{Pagination, PaginationParameters},
-    permission::Permission,
-    util::{non_nullable, nullable},
+    first_and_last, pagination::{Pagination, PaginationParameters}, permission::Permission, util::{non_nullable, nullable}
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, PgConnection, Row};
@@ -40,6 +38,8 @@ impl Pagination for UserPagination {
             ..self.clone()
         }
     }
+    
+    first_and_last!("members", "member_id");
 }
 
 impl UserPagination {

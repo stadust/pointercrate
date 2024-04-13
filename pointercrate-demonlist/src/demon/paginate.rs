@@ -5,8 +5,7 @@ use crate::{
 };
 use futures::stream::StreamExt;
 use pointercrate_core::{
-    pagination::{Pagination, PaginationParameters},
-    util::non_nullable,
+    first_and_last, pagination::{Pagination, PaginationParameters}, util::non_nullable
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{PgConnection, Row};
@@ -55,6 +54,8 @@ impl Pagination for DemonIdPagination {
             ..self.clone()
         }
     }
+
+    first_and_last!("demons");
 }
 
 impl DemonIdPagination {
@@ -159,6 +160,8 @@ impl Pagination for DemonPositionPagination {
             ..self.clone()
         }
     }
+
+    first_and_last!("demons", "position");
 }
 
 impl DemonPositionPagination {

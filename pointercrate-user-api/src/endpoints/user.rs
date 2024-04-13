@@ -34,9 +34,7 @@ pub async fn paginate(mut auth: TokenAuth, data: Query<UserPagination>) -> Resul
 
     let users = pagination.page(&mut auth.connection).await?;
 
-    let (max_id, min_id) = User::extremal_member_ids(&mut auth.connection).await?;
-
-    Ok(pagination_response("/api/v1/users", users, pagination, min_id, max_id, |user| user.id))
+    Ok(pagination_response("/api/v1/users", users, pagination, &mut auth.connection, |user| user.id).await?)
 }
 
 #[rocket::get("/<user_id>")]
