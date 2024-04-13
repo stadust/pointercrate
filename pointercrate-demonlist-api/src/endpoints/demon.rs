@@ -3,7 +3,7 @@ use pointercrate_core::{audit::AuditLogEntry, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
-    response::pagination_response,
+    pagination::pagination_response,
     query::Query,
     response::Response2,
 };
@@ -28,7 +28,14 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
     let demons = pagination.page(&mut *connection).await?;
     let (max_id, min_id) = Demon::extremal_demon_ids(&mut *connection).await?;
 
-    Ok(pagination_response("/api/v2/demons/", demons, pagination, min_id, max_id, |demon| demon.base.id))
+    Ok(pagination_response(
+        "/api/v2/demons/",
+        demons,
+        pagination,
+        min_id,
+        max_id,
+        |demon| demon.base.id,
+    ))
 }
 
 #[rocket::get("/listed")]
@@ -47,7 +54,7 @@ pub async fn paginate_listed(
         pagination,
         1,
         max_position as i32,
-        |demon| demon.base.position as i32
+        |demon| demon.base.position as i32,
     ))
 }
 

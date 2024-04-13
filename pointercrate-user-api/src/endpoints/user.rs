@@ -4,7 +4,7 @@ use pointercrate_core::error::CoreError;
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, Tagged},
-    response::pagination_response,
+    pagination::pagination_response,
     query::Query,
     response::Response2,
 };
