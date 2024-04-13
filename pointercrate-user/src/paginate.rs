@@ -28,6 +28,8 @@ pub struct UserPagination {
 }
 
 impl Pagination for UserPagination {
+    type Item = User;
+    
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -40,12 +42,8 @@ impl Pagination for UserPagination {
     }
     
     first_and_last!("members", "member_id");
-}
-
-impl UserPagination {
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<User>> {
-        self.params.validate()?;
-
+    
+    async fn page(&self, connection: &mut PgConnection) -> std::result::Result<Vec<User>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../sql/paginate_users.sql"), order);

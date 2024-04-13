@@ -60,8 +60,12 @@ impl PaginationParameters {
 
 #[allow(async_fn_in_trait)]
 pub trait Pagination: Serialize {
+    type Item: Serialize;
+
     fn parameters(&self) -> PaginationParameters;
     fn with_parameters(&self, parameters: PaginationParameters) -> Self;
+
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Self::Item>, sqlx::Error>;
 
     async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error>;
 }

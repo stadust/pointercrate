@@ -37,11 +37,8 @@ pub async fn paginate(
         pagination.banned = Some(false);
     }
 
-    let players = pagination.page(&mut *connection).await?;
-
     Ok(pagination_response(
         "/api/v1/players/",
-        players,
         pagination,
         &mut *connection,
         |player| player.base.id,
@@ -53,11 +50,8 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
     let pagination = query.0;
     let mut connection = pool.connection().await?;
 
-    let players = pagination.page(&mut *connection).await?;
-
     Ok(pagination_response(
         "/api/v1/players/ranking/",
-        players,
         pagination,
         &mut *connection,
         |player| player.index as i32,
@@ -163,14 +157,9 @@ pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> 
 pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimPagination>) -> Result<Response2<Json<Vec<ListedClaim>>>> {
     auth.require_permission(MODERATOR)?;
 
-    let pagination = pagination.0;
-
-    let claims = pagination.page(&mut auth.connection).await?;
-
     Ok(pagination_response(
         "/api/v1/players/claims/",
-        claims,
-        pagination,
+        pagination.0,
         &mut auth.connection,
         |claim| claim.id,
     ).await?)

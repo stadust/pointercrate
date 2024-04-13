@@ -11,7 +11,7 @@ use crate::{
 };
 use derive_more::Display;
 use log::info;
-use pointercrate_core::{etag::Taggable};
+use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use std::{

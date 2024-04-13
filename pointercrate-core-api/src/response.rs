@@ -1,8 +1,6 @@
 use crate::etag::Tagged;
 use maud::{html, DOCTYPE};
-use pointercrate_core::{
-    etag::Taggable,
-};
+use pointercrate_core::etag::Taggable;
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
     PageConfiguration, PageFragment,

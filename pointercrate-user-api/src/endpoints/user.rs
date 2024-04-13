@@ -32,9 +32,7 @@ pub async fn paginate(mut auth: TokenAuth, data: Query<UserPagination>) -> Resul
         }
     }
 
-    let users = pagination.page(&mut auth.connection).await?;
-
-    Ok(pagination_response("/api/v1/users", users, pagination, &mut auth.connection, |user| user.id).await?)
+    Ok(pagination_response("/api/v1/users", pagination, &mut auth.connection, |user| user.id).await?)
 }
 
 #[rocket::get("/<user_id>")]

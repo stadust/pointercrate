@@ -1,6 +1,5 @@
 use crate::{
     demon::MinimalDemon,
-    error::Result,
     player::DatabasePlayer,
     record::{MinimalRecordPD, RecordStatus},
 };
@@ -56,6 +55,8 @@ pub struct RecordPagination {
 }
 
 impl Pagination for RecordPagination {
+    type Item = MinimalRecordPD;
+
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -68,9 +69,7 @@ impl Pagination for RecordPagination {
     }
 
     first_and_last!("records");
-}
-
-impl RecordPagination {
+    
     /// Retrieves the page of records matching the pagination data in here
     ///
     /// Note that this method returns _one more record than requested_. This is used as a quick and
@@ -79,9 +78,7 @@ impl RecordPagination {
     ///
     /// Additionally, if _before_ is set, but not _after_, the page is returned in reverse order
     /// (the additional object stays the last)
-    pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>> {
-        self.params.validate()?;
-
+    async fn page(&self, connection: &mut PgConnection) -> Result<Vec<MinimalRecordPD>, sqlx::Error> {
         let order = self.params.order();
 
         let query = format!(include_str!("../../sql/paginate_records.sql"), order);

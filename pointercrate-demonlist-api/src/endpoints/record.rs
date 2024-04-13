@@ -53,11 +53,8 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
         pagination.status = Some(RecordStatus::Approved);
     }
 
-    let records = pagination.page(&mut auth.connection).await?;
-
     Ok(pagination_response(
         "/api/v1/records/",
-        records,
         pagination,
         &mut auth.connection,
         |record| record.id,
@@ -81,11 +78,8 @@ pub async fn unauthed_pagination(
 
     pagination.status = Some(RecordStatus::Approved);
 
-    let records = pagination.page(&mut *connection).await?;
-
     Ok(pagination_response(
         "/api/v1/records/",
-        records,
         pagination,
         &mut *connection,
         |record| record.id,
