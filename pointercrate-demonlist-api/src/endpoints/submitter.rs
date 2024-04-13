@@ -1,8 +1,8 @@
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
+    pagination::pagination_response,
     query::Query,
-    response::pagination_response,
     response::Response2,
 };
 use pointercrate_demonlist::{
@@ -22,9 +22,14 @@ pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination
 
     let (max_id, min_id) = Submitter::extremal_submitter_ids(&mut auth.connection).await?;
 
-    Ok(pagination_response("/api/v1/submitters/", submitters, pagination, min_id, max_id, |submitter| {
-        submitter.id
-    }))
+    Ok(pagination_response(
+        "/api/v1/submitters/",
+        submitters,
+        pagination,
+        min_id,
+        max_id,
+        |submitter| submitter.id,
+    ))
 }
 
 #[rocket::get("/<submitter_id>")]

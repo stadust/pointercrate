@@ -3,8 +3,8 @@ use pointercrate_core::{error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
+    pagination::pagination_response,
     query::Query,
-    response::pagination_response,
     response::Response2,
 };
 use pointercrate_demonlist::{
