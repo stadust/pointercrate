@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
 <!--
 On October 30, 2003, Brett Roper dedicated to the public domain the
@@ -26,7 +26,7 @@ modified, built upon, or otherwise exploited by anyone for any
 purpose, commercial or non-commercial, and in any way, including by
 methods that have not yet been invented or conceived.
 -->
-<svg id="canada" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" fill-opacity="14.118" height="480" width="640" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" fill="#28ff09">
+<svg id="canada" width="640" height="480" fill="#28ff09" fill-opacity="14.118" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <metadata id="metadata3128">
   <rdf:RDF>
    <cc:Work rdf:about="">
@@ -35,9 +35,9 @@ methods that have not yet been invented or conceived.
    </cc:Work>
   </rdf:RDF>
  </metadata>
- <g id="flag" fill-rule="evenodd" fill-opacity="1" transform="matrix(1.25 0 0 .93750 0 .000019425)">
-  <rect id="rect574" height="170.3" width="512" y="341.7" x="0" fill="#0000cd"/>
-  <rect id="rect573" height="170.3" width="512" y="171.4" x="0" fill="#fff"/>
-  <rect id="rect572" height="171.4" width="512" y="-.000019656" x="0" fill="#00cd00"/>
+ <g id="flag" transform="matrix(1.25 0 0 .9375 0 1.9425e-5)" fill-opacity="1" fill-rule="evenodd">
+  <rect id="rect574" y="341.7" width="512" height="170.3" fill="#0000cd"/>
+  <rect id="rect573" y="171.4" width="512" height="170.3" fill="#fff"/>
+  <rect id="rect572" y="-1.9656e-5" width="512" height="171.4" fill="#00cd00"/>
  </g>
 </svg>

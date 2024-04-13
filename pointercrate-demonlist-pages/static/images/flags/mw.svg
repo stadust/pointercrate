@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
-<svg id="svg378" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="480" width="640" version="1" y="0" x="0" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<svg id="svg378" width="640" height="480" version="1" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <metadata id="metadata3847">
   <rdf:RDF>
    <cc:Work rdf:about="">
@@ -9,13 +9,13 @@
    </cc:Work>
   </rdf:RDF>
  </metadata>
- <g id="flag" stroke-width="1pt" fill-rule="evenodd">
-  <g id="g6497" transform="matrix(.83333 0 0 .9375 108.2 .0000021859)">
-   <rect id="rect171" height="512" width="768" y="-.0000023316" x="-129.84" fill="#f41408"/>
-   <rect id="rect256" height="170.67" width="768" y="341.33" x="-129.84" fill="#21873b"/>
-   <rect id="rect255" height="170.67" width="768" y="-.0000023316" x="-129.84"/>
+ <g id="flag" fill-rule="evenodd" stroke-width="1pt">
+  <g id="g6497" transform="matrix(.83333 0 0 .9375 108.2 2.1859e-6)">
+   <rect id="rect171" x="-129.84" y="-2.3316e-6" width="768" height="512" fill="#f41408"/>
+   <rect id="rect256" x="-129.84" y="341.33" width="768" height="170.67" fill="#21873b"/>
+   <rect id="rect255" x="-129.84" y="-2.3316e-6" width="768" height="170.67"/>
   </g>
-  <g id="g6372" transform="matrix(1 0 0 .90680 60.299 .83219)">
+  <g id="g6372" transform="matrix(1 0 0 .9068 60.299 .83219)">
    <path id="path386" d="m160.18 154.64c22.308-54.325 84.502-80.311 138.83-58.003 27.36 11.235 46.74 30.607 57.987 57.963l-196.81 0.0407z" fill="#f31509"/>
    <path id="path353" d="m134.21 161.66c-23.45-1.74-48.376-7.12-52.443-8.6-4.0665-1.4808-4.2229-3.954-3.722-5.8475 0.50108-1.8942 3.0964-4.0446 6.1266-3.243 5.6819 1.503 28.788 7.6146 50.034 17.693z" fill="#f31509"/>
    <path id="path354" d="m258.84 66.919c-4.2082-23.136-5.2705-48.609-4.8599-52.917 0.41062-4.3082 2.765-5.0815 4.7237-5.0728 1.9594 0.00865 4.6933 1.9799 4.6794 5.1143-0.026 5.8772-0.13081 29.778-4.5432 52.876z" fill="#f31509"/>
@@ -49,7 +49,7 @@
    <path id="path382" d="m142.03 140.56c-22.785-5.8169-46.383-15.467-50.128-17.636-3.7451-2.1687-3.4668-4.6312-2.6426-6.4081 0.82446-1.7775 3.7557-3.4411 6.5992-2.1222 5.3317 2.473 27.014 12.529 46.171 26.166z" fill="#f31509"/>
    <path id="path383" d="m137.83 150.47c-23.192-3.8867-47.516-11.525-51.43-13.373-3.9137-1.8472-3.8427-4.3244-3.1704-6.164 0.67257-1.8403 3.454-3.7438 6.398-2.6679 5.5202 2.0174 27.969 10.221 48.202 22.204z" fill="#f31509"/>
    <path id="path384" d="m134.21 161.66c-23.45-1.74-48.376-7.12-52.443-8.6-4.0665-1.4808-4.2229-3.954-3.722-5.8475 0.50108-1.8942 3.0964-4.0446 6.1266-3.243 5.6819 1.503 28.788 7.6146 50.034 17.693z" fill="#f31509"/>
-   <rect id="rect385" height="13.853" width="381.23" y="155.15" x="69.087"/>
+   <rect id="rect385" x="69.087" y="155.15" width="381.23" height="13.853"/>
   </g>
  </g>
 </svg>

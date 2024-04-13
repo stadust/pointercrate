@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="400">
-	<rect width="800" height="400" fill="#fff"/>
-	<g id="s" transform="translate(200,60)" fill="#bf0000">
-		<g id="c">
-			<path id="t" d="M 0,-40 V 0 H 20 z" transform="rotate(18 0,-40)"/>
-			<use xlink:href="#t" transform="scale(-1,1)"/>
-		</g>
-		<use xlink:href="#c" transform="rotate(72)"/>
-		<use xlink:href="#c" transform="rotate(144)"/>
-		<use xlink:href="#c" transform="rotate(216)"/>
-		<use xlink:href="#c" transform="rotate(288)"/>
-	</g>
-	<use xlink:href="#s" x="200"/>
-	<use xlink:href="#s" x="400"/>
-	<rect id="b" y="120" height="80" width="800" fill="#bf0000"/>
-	<use xlink:href="#b" y="120"/>
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <rect width="800" height="400" fill="#fff"/>
+ <g id="s" transform="translate(200,60)" fill="#bf0000">
+  <g id="c">
+   <path id="t" transform="rotate(18 0,-40)" d="m0-40v40h20z"/>
+   <use transform="scale(-1,1)" xlink:href="#t"/>
+  </g>
+  <use transform="rotate(72)" xlink:href="#c"/>
+  <use transform="rotate(144)" xlink:href="#c"/>
+  <use transform="rotate(216)" xlink:href="#c"/>
+  <use transform="rotate(288)" xlink:href="#c"/>
+ </g>
+ <use x="200" xlink:href="#s"/>
+ <use x="400" xlink:href="#s"/>
+ <rect id="b" y="120" width="800" height="80" fill="#bf0000"/>
+ <use y="120" xlink:href="#b"/>
 </svg>

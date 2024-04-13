@@ -250,7 +250,7 @@ export class InteractiveWorldMap {
     }
 
     deselectSubdivision() {
-        if (this.currentlySelected === undefined || !this.currentlySelected.id.contains("-"))
+        if (this.currentlySelected === undefined || !this.currentlySelected.id.includes("-"))
             return;
 
         this.select(this.currentlySelected.id.substring(0, 2));

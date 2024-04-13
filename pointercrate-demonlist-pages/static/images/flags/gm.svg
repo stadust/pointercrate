@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
 <!-- /Creative Commons Public Domain -->
 <!--
@@ -23,7 +23,7 @@ Guinea, Honduras, Israel, Jamaica, Jordan, and Romania Flags</dc:title>
 </License>
 </rdf:RDF>
 -->
-<svg id="svg585" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="480" width="640" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<svg id="svg585" width="640" height="480" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <metadata id="metadata3300">
   <rdf:RDF>
    <cc:Work rdf:about="">
@@ -33,15 +33,15 @@ Guinea, Honduras, Israel, Jamaica, Jordan, and Romania Flags</dc:title>
   </rdf:RDF>
  </metadata>
  <defs id="defs587">
-  <clipPath id="clipPath6263" clipPathUnits="userSpaceOnUse">
-   <rect id="rect6265" fill-opacity="0.67" height="480" width="640" y="-48" x="0"/>
+  <clipPath id="clipPath6263">
+   <rect id="rect6265" y="-48" width="640" height="480" fill-opacity=".67"/>
   </clipPath>
  </defs>
- <g id="flag" fill-rule="evenodd" clip-path="url(#clipPath6263)" transform="translate(0 48)" stroke-width="1pt">
-  <rect id="rect588" height="213.33" width="640" y="-128" x="0" fill="#f00"/>
-  <rect id="rect589" height="35.556" width="640" y="85.333" x="0" fill="#fff"/>
-  <rect id="rect590" height="142.22" width="640" y="120.89" x="0" fill="#009"/>
-  <rect id="rect591" height="35.556" width="640" y="263.11" x="0" fill="#fff"/>
-  <rect id="rect592" height="213.33" width="640" y="298.67" x="0" fill="#090"/>
+ <g id="flag" transform="translate(0 48)" clip-path="url(#clipPath6263)" fill-rule="evenodd" stroke-width="1pt">
+  <rect id="rect588" y="-128" width="640" height="213.33" fill="#f00"/>
+  <rect id="rect589" y="85.333" width="640" height="35.556" fill="#fff"/>
+  <rect id="rect590" y="120.89" width="640" height="142.22" fill="#009"/>
+  <rect id="rect591" y="263.11" width="640" height="35.556" fill="#fff"/>
+  <rect id="rect592" y="298.67" width="640" height="213.33" fill="#090"/>
  </g>
 </svg>
