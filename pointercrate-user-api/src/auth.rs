@@ -84,8 +84,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
             Outcome::Error(err) => {
                 return Outcome::Error((
                     Status::InternalServerError,
-                    CoreError::internal_server_error(format!("PointercratePool not retrievable from rocket state: {:?}", err))
-                    .into(),
+                    CoreError::internal_server_error(format!("PointercratePool not retrievable from rocket state: {:?}", err)).into(),
                 ));
             },
             Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State

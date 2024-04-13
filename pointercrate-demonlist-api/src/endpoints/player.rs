@@ -224,10 +224,12 @@ pub async fn geolocate_nationality(
     .await
     .map_err(|err| CoreError::internal_server_error(format!("Ip Geolocation failed: {}", err)))?;
 
-    let data = response
-        .json::<GeolocationResponse>()
-        .await
-        .map_err(|err| CoreError::internal_server_error(format!("Ip Geolocation succeeded, but we could not deserialize the response: {}", err)))?;
+    let data = response.json::<GeolocationResponse>().await.map_err(|err| {
+        CoreError::internal_server_error(format!(
+            "Ip Geolocation succeeded, but we could not deserialize the response: {}",
+            err
+        ))
+    })?;
 
     if data.security.is_vpn {
         return Err(DemonlistError::VpsDetected.into());
