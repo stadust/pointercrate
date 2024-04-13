@@ -76,7 +76,9 @@ jobs:
       - name: Generate coverage report
         run: grcov . -s . --binary-path ./target/debug/ -t lcov --ignore-not-existing -o ./target/debug/coverage.lcov  --ignore "pointercrate-test/*" --ignore "pointercrate-example/*" --keep-only "pointercrate-*"
 
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v3
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: ./target/debug/coverage.lcov
