@@ -27,7 +27,6 @@ pub async fn paginate(
     pool: &State<PointercratePool>, query: Query<PlayerPagination>, auth: Option<TokenAuth>,
 ) -> Result<Response2<Json<Vec<Player>>>> {
     let mut pagination = query.0;
-    let mut connection = pool.connection().await?;
 
     if let Some(auth) = auth {
         if !auth.has_permission(LIST_HELPER) {
@@ -40,19 +39,16 @@ pub async fn paginate(
     Ok(pagination_response(
         "/api/v1/players/",
         pagination,
-        &mut *connection,
+        &mut *pool.connection().await?,
     ).await?)
 }
 
 #[rocket::get("/ranking")]
 pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPagination>) -> Result<Response2<Json<Vec<RankedPlayer>>>> {
-    let pagination = query.0;
-    let mut connection = pool.connection().await?;
-
     Ok(pagination_response(
         "/api/v1/players/ranking/",
-        pagination,
-        &mut *connection,
+        query.0,
+        &mut *pool.connection().await?,
     ).await?)
 }
 

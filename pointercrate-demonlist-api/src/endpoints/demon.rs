@@ -22,14 +22,10 @@ use rocket::{http::Status, serde::json::Json, State};
 
 #[rocket::get("/")]
 pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdPagination>) -> Result<Response2<Json<Vec<Demon>>>> {
-    let pagination = pagination.0;
-    let mut connection = pool.connection().await?;
-
-
     Ok(pagination_response(
         "/api/v2/demons/",
-        pagination,
-        &mut *connection,
+        pagination.0,
+        &mut *pool.connection().await?,
     ).await?)
 }
 
@@ -37,13 +33,10 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
 pub async fn paginate_listed(
     pool: &State<PointercratePool>, pagination: Query<DemonPositionPagination>,
 ) -> Result<Response2<Json<Vec<Demon>>>> {
-    let pagination = pagination.0;
-    let mut connection = pool.connection().await?;
-
     Ok(pagination_response(
         "/api/v2/demons/listed/",
-        pagination,
-        &mut *connection,
+        pagination.0,
+        &mut *pool.connection().await?,
     ).await?)
 }
 
