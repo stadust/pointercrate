@@ -30,7 +30,6 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
         "/api/v2/demons/",
         pagination,
         &mut *connection,
-        |demon| demon.base.id,
     ).await?)
 }
 
@@ -45,7 +44,6 @@ pub async fn paginate_listed(
         "/api/v2/demons/listed/",
         pagination,
         &mut *connection,
-        |demon| demon.base.position as i32,
     ).await?)
 }
 

@@ -78,6 +78,10 @@ impl Pagination for UserPagination {
 
         Ok(users)
     }
+    
+    fn id_of(user: &User) -> i32 {
+        user.id
+    }
 }
 
 impl User {

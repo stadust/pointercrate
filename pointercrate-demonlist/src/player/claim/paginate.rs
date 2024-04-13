@@ -76,4 +76,8 @@ impl Pagination for PlayerClaimPagination {
 
         Ok(claims)
     }
+    
+    fn id_of(item: &Self::Item) -> i32 {
+        item.id
+    }
 }

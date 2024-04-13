@@ -41,7 +41,6 @@ pub async fn paginate(
         "/api/v1/players/",
         pagination,
         &mut *connection,
-        |player| player.base.id,
     ).await?)
 }
 
@@ -54,7 +53,6 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
         "/api/v1/players/ranking/",
         pagination,
         &mut *connection,
-        |player| player.index as i32,
     ).await?)
 }
 
@@ -161,7 +159,6 @@ pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimP
         "/api/v1/players/claims/",
         pagination.0,
         &mut auth.connection,
-        |claim| claim.id,
     ).await?)
 }
 

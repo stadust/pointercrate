@@ -68,6 +68,8 @@ pub trait Pagination: Serialize {
     async fn page(&self, connection: &mut PgConnection) -> Result<Vec<Self::Item>, sqlx::Error>;
 
     async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error>;
+
+    fn id_of(item: &Self::Item) -> i32;
 }
 
 #[macro_export]

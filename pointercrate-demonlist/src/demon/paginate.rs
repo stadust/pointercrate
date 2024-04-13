@@ -113,6 +113,10 @@ impl Pagination for DemonIdPagination {
 
         Ok(demons)
     }
+
+    fn id_of(demon: &Demon) -> i32 {
+        demon.base.id
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -216,5 +220,9 @@ impl Pagination for DemonPositionPagination {
         }
 
         Ok(demons)
+    }
+    
+    fn id_of(item: &Self::Item) -> i32 {
+        item.base.position as i32
     }
 }

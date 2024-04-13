@@ -22,7 +22,6 @@ pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination
         "/api/v1/submitters/",
         pagination,
         &mut auth.connection,
-        |submitter| submitter.id,
     ).await?)
 }
 
