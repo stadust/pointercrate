@@ -498,7 +498,7 @@ textarea:invalid {
   top: 2em; /* place it below the box! */
 
   width: calc(100% - 2px);
-  max-height: 400px;
+  max-height: 290px;
   overflow-y: scroll;
 
   background: white;
