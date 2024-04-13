@@ -211,7 +211,10 @@ pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<Str
         r#"SELECT LOWER(iso_country_code) as "code!", score as "score!" from nations_with_score order by score desc"#,
     );
 
-    let countries_with_subdivisions = sqlx::query!("SELECT DISTINCT nation FROM subdivisions").fetch_all(&mut *connection).await.map_err(DemonlistError::from)?;
+    let countries_with_subdivisions = sqlx::query!("SELECT DISTINCT nation FROM subdivisions")
+        .fetch_all(&mut *connection)
+        .await
+        .map_err(DemonlistError::from)?;
 
     for row in countries_with_subdivisions {
         css.push_str(&heatmap_query!(
