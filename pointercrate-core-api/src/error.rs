@@ -1,5 +1,5 @@
 use crate::response::Page;
-use log::{error, info};
+use log::info;
 use pointercrate_core::error::PointercrateError;
 use pointercrate_core_pages::error::ErrorFragment;
 use rocket::{
@@ -33,10 +33,6 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
         };
 
         let status = Status::from_code(self.error_code / 100).unwrap_or(Status::InternalServerError);
-
-        if status.code >= 500 {
-            error!("Encountered an internal server error: {:?}", self);
-        }
 
         if accept == MediaType::HTML {
             Response::build_from(

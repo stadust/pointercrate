@@ -218,22 +218,16 @@ pub async fn geolocate_nationality(
 
     let response = reqwest::get(format!(
         "https://ipgeolocation.abstractapi.com/v1/?api_key={}&ip_address={}&fields=security,country_code,region_iso_code",
-        config::abstract_api_key().ok_or(CoreError::InternalServerError {
-            message: "No API key for abstract configured".to_string()
-        })?,
+        config::abstract_api_key().ok_or(CoreError::internal_server_error("No API key for abstract configured"))?,
         ip
     ))
     .await
-    .map_err(|err| CoreError::InternalServerError {
-        message: format!("Ip Geolocation failed: {}", err),
-    })?;
+    .map_err(|err| CoreError::internal_server_error(format!("Ip Geolocation failed: {}", err)))?;
 
     let data = response
         .json::<GeolocationResponse>()
         .await
-        .map_err(|err| CoreError::InternalServerError {
-            message: format!("Ip Geolocation succeeded, but we could not deserialize the response: {}", err),
-        })?;
+        .map_err(|err| CoreError::internal_server_error(format!("Ip Geolocation succeeded, but we could not deserialize the response: {}", err)))?;
 
     if data.security.is_vpn {
         return Err(DemonlistError::VpsDetected.into());

@@ -194,10 +194,7 @@ pub enum CoreError {
         fmt = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there \
                is an error in the application. Please notify a server administrator and have them look at the server logs!"
     )]
-    InternalServerError {
-        #[serde(skip)]
-        message: String,
-    },
+    InternalServerError,
 
     /// `500 INTERNAL SERVER ERROR`
     ///
@@ -220,6 +217,14 @@ pub enum CoreError {
     /// Error Core `50301`
     #[display(fmt = "The website is currently in read-only maintenance mode.")]
     ReadOnlyMaintenance,
+}
+
+impl CoreError {
+    pub fn internal_server_error(message: impl AsRef<str>) -> CoreError {
+        error!("INTERNAL SERVER ERROR: {}", message.as_ref());
+
+        CoreError::InternalServerError
+    }
 }
 
 impl Error for CoreError {}
