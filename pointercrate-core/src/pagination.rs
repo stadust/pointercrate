@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use crate::{error::CoreError, util::non_nullable};
 use serde::{de::Error, Deserialize, Serialize};
+use sqlx::PgConnection;
 
 /// The maximal number of entries that can be requested per page via the `limit` parameter.
 pub const ENTRIES_PER_PAGE: i32 = 100;
@@ -57,9 +58,28 @@ impl PaginationParameters {
     }
 }
 
+#[allow(async_fn_in_trait)]
 pub trait Pagination: Serialize {
     fn parameters(&self) -> PaginationParameters;
     fn with_parameters(&self, parameters: PaginationParameters) -> Self;
+
+    async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error>;
+}
+
+#[macro_export]
+macro_rules! first_and_last {
+    ($table_name: expr, $id_column: expr) => {
+        async fn first_and_last(connection: &mut PgConnection) -> std::result::Result<Option<(i32, i32)>, sqlx::Error> {
+            let row = sqlx::query!("SELECT CAST(MIN(" + $id_column + ") AS INTEGER), CAST(MAX(" + $id_column + ") AS INTEGER) FROM " + $table_name)
+                .fetch_one(connection)
+                .await?;
+
+            Ok(row.min.zip(row.max))
+        }
+    };
+    ($table_name: expr) => {
+        first_and_last!($table_name, "id");
+    };
 }
 
 /// Helper function because serde does not allow literals/constants in #[serde(default = ...)] attributes.

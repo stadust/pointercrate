@@ -17,7 +17,6 @@ use pointercrate_core::{
 };
 use serde::Serialize;
 pub use sqlx;
-use sqlx::PgConnection;
 use std::{
     fmt::{Display, Formatter},
     hash::Hash,
@@ -100,15 +99,5 @@ impl User {
             Some(ref name) => name,
             None => self.name.as_ref(),
         }
-    }
-
-    /// Gets the maximal and minimal member id currently in use
-    ///
-    /// The returned tuple is of the form (max, min)
-    pub async fn extremal_member_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
-        let row = sqlx::query!(r#"SELECT MAX(member_id) AS "max_id!: i32", MIN(member_id) AS "min_id!: i32" FROM members"#)
-            .fetch_one(connection)
-            .await?; // FIXME: crashes on empty table
-        Ok((row.max_id, row.min_id))
     }
 }

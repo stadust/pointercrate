@@ -5,8 +5,7 @@ use crate::{
 };
 use futures::StreamExt;
 use pointercrate_core::{
-    pagination::{Pagination, PaginationParameters},
-    util::{non_nullable, nullable},
+    first_and_last, pagination::{Pagination, PaginationParameters}, util::{non_nullable, nullable}
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnection, Row};
@@ -40,6 +39,8 @@ impl Pagination for PlayerPagination {
             ..self.clone()
         }
     }
+
+    first_and_last!("players");
 }
 
 impl PlayerPagination {
@@ -118,6 +119,14 @@ impl Pagination for RankingPagination {
             params: parameters,
             ..self.clone()
         }
+    }
+
+    async fn first_and_last(connection: &mut PgConnection) -> std::prelude::v1::Result<Option<(i32, i32)>, sqlx::Error> {
+        Ok(sqlx::query!("SELECT MAX(index) FROM players_with_score")
+            .fetch_one(connection)
+            .await?
+            .max
+            .map(|max| (1, max as i32)))
     }
 }
 

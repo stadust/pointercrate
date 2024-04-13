@@ -20,16 +20,13 @@ pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination
 
     let submitters = pagination.page(&mut auth.connection).await?;
 
-    let (max_id, min_id) = Submitter::extremal_submitter_ids(&mut auth.connection).await?;
-
     Ok(pagination_response(
         "/api/v1/submitters/",
         submitters,
         pagination,
-        min_id,
-        max_id,
+        &mut auth.connection,
         |submitter| submitter.id,
-    ))
+    ).await?)
 }
 
 #[rocket::get("/<submitter_id>")]

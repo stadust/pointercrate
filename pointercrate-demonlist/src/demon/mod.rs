@@ -11,7 +11,7 @@ use crate::{
 };
 use derive_more::Display;
 use log::info;
-use pointercrate_core::{error::CoreError, etag::Taggable};
+use pointercrate_core::{etag::Taggable};
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use std::{
@@ -178,7 +178,7 @@ impl Demon {
     pub async fn validate_position(position: i16, connection: &mut PgConnection) -> Result<()> {
         // To prevent holes from being created in the list, the new position must lie between 1 and (current
         // last position + 1), inclusive
-        let maximal_position = Demon::max_position(connection).await.unwrap_or(0) + 1;
+        let maximal_position = Demon::max_position(connection).await? + 1;
 
         if position > maximal_position || position < 1 {
             return Err(DemonlistError::InvalidPosition { maximal: maximal_position });
@@ -214,21 +214,11 @@ impl Demon {
     /// Gets the current max position a demon has, or `CoreError::NotFound` if there are no demons
     /// in the database
     pub async fn max_position(connection: &mut PgConnection) -> Result<i16> {
-        sqlx::query!("SELECT MAX(position) as max_position FROM demons")
+        Ok(sqlx::query!("SELECT MAX(position) as max_position FROM demons")
             .fetch_one(connection)
             .await?
             .max_position
-            .ok_or_else(|| CoreError::NotFound.into())
-    }
-
-    /// Gets the maximal and minimal submitter id currently in use
-    ///
-    /// The returned tuple is of the form (max, min)
-    pub async fn extremal_demon_ids(connection: &mut PgConnection) -> Result<(i32, i32)> {
-        let row = sqlx::query!(r#"SELECT MAX(id) AS "max_id!: i32", MIN(id) AS "min_id!: i32" FROM demons"#)
-            .fetch_one(connection)
-            .await?;
-        Ok((row.max_id, row.min_id))
+            .unwrap_or(0))
     }
 
     pub fn score(&self, progress: i16) -> f64 {

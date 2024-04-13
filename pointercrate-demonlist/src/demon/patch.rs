@@ -186,6 +186,7 @@ impl MinimalDemon {
     /// Validates that `to` is `> 0` and less than or equal to the currently highest position on the
     /// list (to preven "holes")
     pub async fn mv(&mut self, to: i16, connection: &mut PgConnection) -> Result<()> {
+        // This returns 0 if the list is empty, but if the list is empty then there is no demon for us to do a move with, so we will never get here anyway.
         let maximal_position = Demon::max_position(connection).await?;
 
         if to > maximal_position || to < 1 {
