@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="1200px" height="800px" viewBox="0 0 450 300">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200px" height="800px" viewBox="0 0 450 300" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
 <clipPath id="mid"><circle cx="225" cy="150" r="50"/></clipPath>
-<rect fill="#3399FF" width="450" height="100"/>
-<rect fill="white" width="450" height="100" y="100"/>
-<rect fill="#00923F" width="450" height="100" y="200"/>
-<circle cx="225" cy="150" r="50" fill="#3399FF"/>
-<path clip-path="url(#mid)" fill="white" stroke="#3399FF" stroke-width="1" stroke-linejoin="round" d="M 276,151 C 276,151 251,122 240,122 C 231,122 226,132 226,132 L 229,135 C 224,131 219,124 211,124 C 199,124 174,151 174,151 Z"/>
-<rect clip-path="url(#mid)" fill="#00923F" x="175" y="150" width="100" height="50"/>
+<rect width="450" height="100" fill="#39f"/>
+<rect y="100" width="450" height="100" fill="#fff"/>
+<rect y="200" width="450" height="100" fill="#00923F"/>
+<circle cx="225" cy="150" r="50" fill="#39f"/>
+<path d="m276 151s-25-29-36-29c-9 0-14 10-14 10l3 3c-5-4-10-11-18-11-12 0-37 27-37 27z" clip-path="url(#mid)" fill="#fff" stroke="#39f" stroke-linejoin="round"/>
+<rect x="175" y="150" width="100" height="50" clip-path="url(#mid)" fill="#00923F"/>
 </svg>

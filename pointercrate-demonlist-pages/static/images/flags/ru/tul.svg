@@ -1,114 +1,110 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
-    "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
-	 width="1949px" height="1298px"
-	 viewBox="0 0 1949 1298">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 20010904//EN'  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="1949px" height="1298px" viewBox="0 0 1949 1298" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
 <defs>
-	<linearGradient id="grad1" x1="1" y1="0" x2="0" y2="1" gradientUnits = "objectBoundingBox">
-		<stop offset="0%" stop-color="#699" />
-		<stop offset="100%" stop-color="#eee" />
+	<linearGradient id="grad1" x1="1" x2="0" y2="1">
+		<stop stop-color="#699" offset="0"/>
+		<stop stop-color="#eee" offset="1"/>
 	</linearGradient>
 
 	<linearGradient id="grad2">
-		<stop offset="0%" stop-color="#688" />
-		<stop offset="100%" stop-color="#ded" />
+		<stop stop-color="#688" offset="0"/>
+		<stop stop-color="#ded" offset="1"/>
 	</linearGradient>
 
 	<linearGradient id="grad3">
-		<stop offset="0%" stop-color="#9ba" />
-		<stop offset="100%" stop-color="white" />
+		<stop stop-color="#9ba" offset="0"/>
+		<stop stop-color="#fff" offset="1"/>
 	</linearGradient>
 
 	<linearGradient id="grad4">
-		<stop offset="0%" stop-color="white" />
-		<stop offset="100%" stop-color="#7a9" />
+		<stop stop-color="#fff" offset="0"/>
+		<stop stop-color="#7a9" offset="1"/>
 	</linearGradient>
 
-	<linearGradient id="grad5" x1="0" y1="0" x2="0" y2="1" gradientUnits = "objectBoundingBox">
-		<stop offset="0%" stop-color="#8aa" />
-		<stop offset="100%" stop-color="#eee" />
+	<linearGradient id="grad5" x2="0" y2="1">
+		<stop stop-color="#8aa" offset="0"/>
+		<stop stop-color="#eee" offset="1"/>
 	</linearGradient>
 
-	<radialGradient id="grad6" cx="207" cy="292" r="300" gradientUnits = "userSpaceOnUse">
-		<stop offset="0%" stop-color="#fe9" />
-		<stop offset="10%" stop-color="#fd5" />
-		<stop offset="33%" stop-color="#d60" />
-		<stop offset="100%" stop-color="#fc1" />
+	<radialGradient id="grad6" cx="207" cy="292" r="300" gradientUnits="userSpaceOnUse">
+		<stop stop-color="#fe9" offset="0"/>
+		<stop stop-color="#fd5" offset=".1"/>
+		<stop stop-color="#d60" offset=".33"/>
+		<stop stop-color="#fc1" offset="1"/>
 	</radialGradient>
 
-	<linearGradient id="grad7" x1="0" y1="0" x2="0" y2="1" gradientUnits = "objectBoundingBox">
-		<stop offset="0%" stop-color="#fe9" />
-		<stop offset="25%" stop-color="#d80" />
-		<stop offset="65%" stop-color="#fe5" />
-		<stop offset="85%" stop-color="#c70" />
-		<stop offset="100%" stop-color="#e80" />
+	<linearGradient id="grad7" x2="0" y2="1">
+		<stop stop-color="#fe9" offset="0"/>
+		<stop stop-color="#d80" offset=".25"/>
+		<stop stop-color="#fe5" offset=".65"/>
+		<stop stop-color="#c70" offset=".85"/>
+		<stop stop-color="#e80" offset="1"/>
 	</linearGradient>
 
 	<linearGradient id="grad8">
-		<stop offset="0%" stop-color="#fc3" />
-		<stop offset="15%" stop-color="#e90" />
-		<stop offset="55%" stop-color="#fe4" />
-		<stop offset="90%" stop-color="#e81" />
+		<stop stop-color="#fc3" offset="0"/>
+		<stop stop-color="#e90" offset=".15"/>
+		<stop stop-color="#fe4" offset=".55"/>
+		<stop stop-color="#e81" offset=".9"/>
 	</linearGradient>
 
 	<linearGradient id="grad9">
-		<stop offset="0%" stop-color="#d81" />
-		<stop offset="100%" stop-color="#fd4" />
+		<stop stop-color="#d81" offset="0"/>
+		<stop stop-color="#fd4" offset="1"/>
 	</linearGradient>
 
-	<linearGradient id="grad10" x1="0" y1="0" x2="0" y2="1" gradientUnits = "objectBoundingBox">
-		<stop offset="0%" stop-color="#ec5" />
-		<stop offset="100%" stop-color="#fe9" />
+	<linearGradient id="grad10" x2="0" y2="1">
+		<stop stop-color="#ec5" offset="0"/>
+		<stop stop-color="#fe9" offset="1"/>
 	</linearGradient>
 
-	<linearGradient id="grad11" x1="0" y1="0" x2="0" y2="1" gradientUnits = "objectBoundingBox">
-		<stop offset="0%" stop-color="#a81" />
-		<stop offset="100%" stop-color="#ffa" />
+	<linearGradient id="grad11" x2="0" y2="1">
+		<stop stop-color="#a81" offset="0"/>
+		<stop stop-color="#ffa" offset="1"/>
 	</linearGradient>
 
-	<linearGradient id="grad12" x1="0" y1="0" x2="0" y2="1" gradientUnits = "objectBoundingBox">
-		<stop offset="0%" stop-color="#d70" />
-		<stop offset="100%" stop-color="#f91" />
+	<linearGradient id="grad12" x2="0" y2="1">
+		<stop stop-color="#d70" offset="0"/>
+		<stop stop-color="#f91" offset="1"/>
 	</linearGradient>
 
 <g id="thing">
-    <path fill="white" d="M 434,195 L 453,212 L 622,37 L 479,234 L 498,249 L -169,1008 L -200,1018 L -196,985 Z" />
-    <path fill="url(#grad3)" d="M 464,226 L 622,37 L 479,234 Z" />
-    <path fill="url(#grad4)" d="M 491,250 L 498,249 L -169,1008 L -172,1005 Z" />
-    <path fill="url(#grad5)" d="M 460,230 L 491,250 L -172,1005 L -200,1018 Z" />
-    <path fill="#a99" d="M -172,1005 L -169,1008 L -200,1018 Z" />
+    <path d="m434 195 19 17 169-175-143 197 19 15-667 759-31 10 4-33z" fill="#fff"/>
+    <path d="m464 226 158-189-143 197z" fill="url(#grad3)"/>
+    <path d="m491 250 7-1-667 759-3-3z" fill="url(#grad4)"/>
+    <path d="m460 230 31 20-663 755-28 13z" fill="url(#grad5)"/>
+    <path d="m-172 1005 3 3-31 10z" fill="#a99"/>
 </g>
 
 <g id="hammer">
-    <path fill="url(#grad7)" d="M 207,371 C 264,371 243,249 237,220 C 225,171 229,159 229,35 C 229,4 185,4 185,35 C 185,159 189,171 177,220 C 171,249 150,371 207,371 Z" />
-    <path fill="url(#grad6)" d="M 207,360 C 251,360 238,264 231,236 C 219,187 223,159 223,35 C 223,14 191,14 191,35 C 191,159 195,187 183,236 C 176,264 163,360 207,360 Z" />
+    <path d="m207 371c57 0 36-122 30-151-12-49-8-61-8-185 0-31-44-31-44 0 0 124 4 136-8 185-6 29-27 151 30 151z" fill="url(#grad7)"/>
+    <path d="m207 360c44 0 31-96 24-124-12-49-8-77-8-201 0-21-32-21-32 0 0 124 4 152-8 201-7 28-20 124 24 124z" fill="url(#grad6)"/>
 
-    <path fill="url(#grad8)" d="M 92,100 L 352,100 L 352,89 C 285,89 261,55 251,33 L 91,33 Z" />
-    <rect fill="url(#grad12)" x="92" y="92" width="260" height="8" />
-    <path fill="url(#grad9)" d="M 92,100 L 100,92 L 100,42 L 92,32 Z" />
-    <path fill="url(#grad10)" d="M 92,32 L 251,32 L 245,42 L 100,42 Z" />
-    <path fill="url(#grad11)" d="M 352,92 L 352,89 C 285,89 261,55 251,33 L 245,42 C 247,48 271,85 314,92 Z" />
+    <path d="m92 100h260v-11c-67 0-91-34-101-56h-160z" fill="url(#grad8)"/>
+    <rect x="92" y="92" width="260" height="8" fill="url(#grad12)"/>
+    <path d="m92 100 8-8v-50l-8-10z" fill="url(#grad9)"/>
+    <path d="m92 32h159l-6 10h-145z" fill="url(#grad10)"/>
+    <path d="m352 92v-3c-67 0-91-34-101-56l-6 9c2 6 26 43 69 50z" fill="url(#grad11)"/>
 </g>
 </defs>   
 
 <g transform="translate(763,108)">
 
-<rect x="-763" y="-108" width="1949" height="1298" fill="red" />
-<use xlink:href="#thing" />
-<use xlink:href="#thing" transform="translate(420) scale(-1,1)"/>
+<rect x="-763" y="-108" width="1949" height="1298" fill="red"/>
+<use xlink:href="#thing"/>
+<use transform="translate(420) scale(-1,1)" xlink:href="#thing"/>
 
-    <path fill="white" d="M -341,527 L -297,554 L 542,567 L 542,547 L 762,527 L 542,509 L 542,488 L -297,501 Z" />
-    <path fill="url(#grad1)" d="M -341,527 L 531,527 L 542,562 L -295,549 L -297,554 Z" />
-    <path fill="#ced" d="M 537,527 L 542,547 L 542,567 L 540,561 L 531,527 Z" />
-    <path fill="url(#grad2)" d="M 537,527 L 542,509 L 542,487 L 531,527 Z" />
-    <path fill="url(#grad3)" d="M 537,527 L 762,527 L 542,547 Z" />
-    <path fill="#588" d="M 540,561 L 542,567 L -297,554 L -295,549 Z" />
+    <path d="m-341 527 44 27 839 13v-20l220-20-220-18v-21l-839 13z" fill="#fff"/>
+    <path d="m-341 527h872l11 35-837-13-2 5z" fill="url(#grad1)"/>
+    <path d="m537 527 5 20v20l-2-6-9-34z" fill="#ced"/>
+    <path d="m537 527 5-18v-22l-11 40z" fill="url(#grad2)"/>
+    <path d="m537 527h225l-220 20z" fill="url(#grad3)"/>
+    <path d="m540 561 2 6-839-13 2-5z" fill="#588"/>
     
-<use xlink:href="#hammer" />
-<use xlink:href="#hammer" y="740"/>
+<use xlink:href="#hammer"/>
+<use y="740" xlink:href="#hammer"/>
 
 </g>
 </svg>

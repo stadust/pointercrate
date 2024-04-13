@@ -1,141 +1,49 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   id="svg2"
-   sodipodi:docname="sillius-flag-basque-country.svg"
-   viewBox="0 0 1600 900"
-   sodipodi:version="0.32"
-   version="1.0"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape"
-   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <defs
-     id="defs4" />
-  <sodipodi:namedview
-     id="base"
-     bordercolor="#666666"
-     inkscape:snap-guide="false"
-     inkscape:pageshadow="2"
-     inkscape:window-y="0"
-     pagecolor="#ffffff"
-     inkscape:snap-global="false"
-     width="0px"
-     inkscape:zoom="0.35"
-     inkscape:window-x="0"
-     inkscape:window-height="1000"
-     showgrid="true"
-     borderopacity="1.0"
-     inkscape:current-layer="layer2"
-     inkscape:cx="587.14286"
-     inkscape:cy="520"
-     inkscape:window-width="1680"
-     inkscape:pageopacity="0.0"
-     inkscape:document-units="px"
-     inkscape:showpageshadow="2"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:window-maximized="0">
-    <inkscape:grid
-       id="grid2383"
-       dotted="false"
-       spacingx="1.3877788e-16px"
-       enabled="true"
-       spacingy="1.3877788e-16px"
-       visible="true"
-       type="xygrid"
-       empspacing="1"
-       originx="0"
-       originy="0"
-       units="px" />
-  </sodipodi:namedview>
-  <g
-     id="layer1"
-     inkscape:label="fondrouge"
-     inkscape:groupmode="layer">
-    <rect
-       id="rect2385"
-       style="fill-rule:evenodd;stroke:#000000;stroke-width:1px;fill:#ff0000"
-       height="899"
-       width="1599"
-       y="0.5"
-       x="0.5" />
-  </g>
-  <g
-     id="layer2"
-     inkscape:label="bandeverte"
-     inkscape:groupmode="layer">
-    <path
-       id="path2388"
-       sodipodi:nodetypes="ccccccc"
-       style="fill-rule:evenodd;fill:#009d00"
-       d="m125 0l1475 775v125h-125l-1475-775v-125h125z" />
-    <path
-       id="path3188"
-       sodipodi:nodetypes="ccccccc"
-       style="fill-rule:evenodd;fill:#009d00"
-       d="m1600 0v125l-1475 775h-125v-125l1475-775h125z" />
-  </g>
-  <g
-     id="layer3"
-     inkscape:label="bandeblanche"
-     inkscape:groupmode="layer">
-    <path
-       id="path3191"
-       sodipodi:nodetypes="ccccc"
-       style="fill-rule:evenodd;fill:#ffffff"
-       d="m700 0h200v900h-200v-900z" />
-    <path
-       id="path3193"
-       sodipodi:nodetypes="ccccc"
-       style="fill-rule:evenodd;fill:#ffffff"
-       d="m1600 345v200h-1600v-200h1600z" />
-  </g>
-  <metadata
-     id="metadata1">
-    <rdf:RDF>
-      <cc:Work>
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <cc:license
-           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
-        <dc:publisher>
-          <cc:Agent
-             rdf:about="http://openclipart.org/">
-            <dc:title>Openclipart</dc:title>
-          </cc:Agent>
-        </dc:publisher>
-        <dc:title>flag basque country</dc:title>
-        <dc:date>2009-10-15T14:15:17</dc:date>
-        <dc:description>Flag of the autonomous region of the Basque Country\nA white cross over a green saltire on a red field.</dc:description>
-        <dc:source>https://openclipart.org/detail/27802/flag-basque-country-by-sillius</dc:source>
-        <dc:creator>
-          <cc:Agent>
-            <dc:title>sillius</dc:title>
-          </cc:Agent>
-        </dc:creator>
-        <dc:subject>
-          <rdf:Bag>
-            <rdf:li>flag basque</rdf:li>
-          </rdf:Bag>
-        </dc:subject>
-      </cc:Work>
-      <cc:License
-         rdf:about="http://creativecommons.org/licenses/publicdomain/">
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Reproduction" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Distribution" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
-      </cc:License>
-    </rdf:RDF>
-  </metadata>
+<svg id="svg2" version="1.0" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+ <g id="layer1">
+  <rect id="rect2385" x=".5" y=".5" width="1599" height="899" fill="#f00" fill-rule="evenodd" stroke="#000" stroke-width="1px"/>
+ </g>
+ <g id="layer2" fill="#009d00" fill-rule="evenodd">
+  <path id="path2388" d="m125 0 1475 775v125h-125l-1475-775v-125h125z"/>
+  <path id="path3188" d="m1600 0v125l-1475 775h-125v-125l1475-775h125z"/>
+ </g>
+ <g id="layer3" fill="#fff" fill-rule="evenodd">
+  <path id="path3191" d="m700 0h200v900h-200v-900z"/>
+  <path id="path3193" d="m1600 345v200h-1600v-200h1600z"/>
+ </g>
+ <metadata id="metadata1">
+  <rdf:RDF>
+   <cc:Work>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <cc:license rdf:resource="http://creativecommons.org/licenses/publicdomain/"/>
+    <dc:publisher>
+     <cc:Agent rdf:about="http://openclipart.org/">
+      <dc:title>Openclipart</dc:title>
+     </cc:Agent>
+    </dc:publisher>
+    <dc:title>flag basque country</dc:title>
+    <dc:date>2009-10-15T14:15:17</dc:date>
+    <dc:description>Flag of the autonomous region of the Basque Country
+\nA white cross over a green saltire on a red field.</dc:description>
+    <dc:source>https://openclipart.org/detail/27802/flag-basque-country-by-sillius</dc:source>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>sillius</dc:title>
+     </cc:Agent>
+    </dc:creator>
+    <dc:subject>
+     <rdf:Bag>
+      <rdf:li>flag basque</rdf:li>
+     </rdf:Bag>
+    </dc:subject>
+   </cc:Work>
+   <cc:License rdf:about="http://creativecommons.org/licenses/publicdomain/">
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+   </cc:License>
+  </rdf:RDF>
+ </metadata>
 </svg>

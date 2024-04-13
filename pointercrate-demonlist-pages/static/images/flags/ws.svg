@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
-<svg id="svg548" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="480" width="640" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<svg id="svg548" width="640" height="480" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <metadata id="metadata3764">
   <rdf:RDF>
    <cc:Work rdf:about="">
@@ -10,9 +10,9 @@
   </rdf:RDF>
  </metadata>
  <g id="flag" fill-rule="evenodd" stroke-width="1pt">
-  <rect id="rect551" height="480" width="640" y=".0000047684" x="0" fill="#f00"/>
+  <rect id="rect551" y="4.7684e-6" width="640" height="480" fill="#f00"/>
   <g id="g3051" transform="scale(1.3126)">
-   <rect id="rect552" height="119.77" width="239.53" y=".00000118" x="0" fill="#00006b"/>
+   <rect id="rect552" y="1.18e-6" width="239.53" height="119.77" fill="#00006b"/>
    <g id="g4187" transform="matrix(.42837 0 0 .42837 114.71 5.6278)" fill="#fff">
     <polygon id="polygon553" transform="matrix(.62565 0 0 .65463 -132.68 100.69)" d="m 246.7536,218.4237 -35.44182,-22.86769 -33.97697,23.2468 10.79635,-40.77369 -32.60848,-25.13035 42.11433,-2.33183 13.82381,-38.77821 15.23175,39.33253 41.15207,1.1641 -32.7006,26.64067 z" points="246.75 218.42 211.31 195.56 177.34 218.8 188.13 178.03 155.52 152.9 197.64 150.57 211.46 111.79 226.69 151.12 267.84 152.28 235.14 178.93"/>
     <polygon id="polygon555" transform="matrix(1.1939 0 0 1.2544 -278.4 12.56)" d="m 248.18091,42.711273 -14.86513,-9.087931 -14.58304,9.018406 4.04956,-16.945898 -13.08343,-11.082461 17.36789,-1.385211 6.49705,-15.8677433 6.68439,16.0897913 17.09882,1.275656 -13.23672,11.329248 z" points="248.18 42.711 233.32 33.623 218.73 42.642 222.78 25.696 209.7 14.613 227.07 13.228 233.56 -2.6396 240.25 13.45 257.35 14.726 244.11 26.055"/>

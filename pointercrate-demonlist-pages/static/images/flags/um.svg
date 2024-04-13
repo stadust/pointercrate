@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
 <!-- /Creative Commons Public Domain -->
 <!--
@@ -23,7 +23,7 @@ Guinea, Honduras, Israel, Jamaica, Jordan, and Romania Flags</dc:title>
 </License>
 </rdf:RDF>
 -->
-<svg id="svg153" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="480" width="640" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<svg id="svg153" width="640" height="480" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
  <metadata id="metadata88">
   <rdf:RDF>
    <cc:Work rdf:about="">
@@ -34,32 +34,32 @@ Guinea, Honduras, Israel, Jamaica, Jordan, and Romania Flags</dc:title>
  </metadata>
  <desc id="desc3">The United States of America flag, produced by Daniel McRae</desc>
  <defs id="defs155">
-  <clipPath id="clipPath4819" clipPathUnits="userSpaceOnUse">
-   <rect id="rect4821" fill-opacity="0.67" height="512" width="682.67" y=".0000054613" x="0"/>
+  <clipPath id="clipPath4819">
+   <rect id="rect4821" y="5.4613e-6" width="682.67" height="512" fill-opacity=".67"/>
   </clipPath>
  </defs>
- <g id="flag" fill-rule="evenodd" clip-path="url(#clipPath4819)" transform="matrix(.93750 0 0 .93750 0 -.00000512)">
-  <g id="g390" stroke-width="1pt" transform="matrix(3.9385 0 0 3.9385 0 .000005)">
+ <g id="flag" transform="matrix(.9375 0 0 .9375 0 -5.12e-6)" clip-path="url(#clipPath4819)" fill-rule="evenodd">
+  <g id="g390" transform="matrix(3.9385 0 0 3.9385 0 5e-6)" stroke-width="1pt">
    <g id="g169" fill="#bd3d44">
-    <rect id="rect156" height="10" width="247" y="0" x="0"/>
-    <rect id="rect158" height="10" width="247" y="20" x="0"/>
-    <rect id="rect160" height="10" width="247" y="40" x="0"/>
-    <rect id="rect162" height="10" width="247" y="60" x="0"/>
-    <rect id="rect164" height="10" width="247" y="80" x="0"/>
-    <rect id="rect166" height="10" width="247" y="100" x="0"/>
-    <rect id="rect168" height="10" width="247" y="120" x="0"/>
+    <rect id="rect156" width="247" height="10"/>
+    <rect id="rect158" y="20" width="247" height="10"/>
+    <rect id="rect160" y="40" width="247" height="10"/>
+    <rect id="rect162" y="60" width="247" height="10"/>
+    <rect id="rect164" y="80" width="247" height="10"/>
+    <rect id="rect166" y="100" width="247" height="10"/>
+    <rect id="rect168" y="120" width="247" height="10"/>
    </g>
    <g id="g177" fill="#fff">
-    <rect id="rect157" height="10" width="247" y="10" x="0"/>
-    <rect id="rect159" height="10" width="247" y="30" x="0"/>
-    <rect id="rect161" height="10" width="247" y="50" x="0"/>
-    <rect id="rect163" height="10" width="247" y="70" x="0"/>
-    <rect id="rect165" height="10" width="247" y="90" x="0"/>
-    <rect id="rect167" height="10" width="247" y="110" x="0"/>
+    <rect id="rect157" y="10" width="247" height="10"/>
+    <rect id="rect159" y="30" width="247" height="10"/>
+    <rect id="rect161" y="50" width="247" height="10"/>
+    <rect id="rect163" y="70" width="247" height="10"/>
+    <rect id="rect165" y="90" width="247" height="10"/>
+    <rect id="rect167" y="110" width="247" height="10"/>
    </g>
   </g>
-  <rect id="rect200" height="275.69" width="389.12" y="0.000005" x="0" stroke-width="1pt" fill="#192f5d"/>
-  <g id="g274" fill="#fff" transform="matrix(3.9385 0 0 3.9385 0 .000005)">
+  <rect id="rect200" y="5e-6" width="389.12" height="275.69" fill="#192f5d" stroke-width="1pt"/>
+  <g id="g274" transform="matrix(3.9385 0 0 3.9385 0 5e-6)" fill="#fff">
    <g id="g218">
     <g id="g194">
      <polygon id="polygon207" transform="translate(8.2333 7)" d="M 1.3084868e-6,-4.0040002 0.89895399,-1.237304 3.8080309,-1.2373029 1.4545381,0.47260808 2.3534912,3.239305 0,1.5293919 l -2.3534933,1.7099115 0.8989552,-2.76669531 -2.353492,-1.70991339 2.9090761,1.3e-6 z" points="0 -4.004 0.89895 -1.2373 3.808 -1.2373 1.4545 0.47261 2.3535 3.2393 0 1.5294 -2.3535 3.2393 -1.4545 0.47261 -3.808 -1.2373 -0.89895 -1.2373"/>
