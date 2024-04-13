@@ -152,7 +152,7 @@ The last line will tell you the URL for accessing your local pointercrate instan
 
 ### Next Steps
 
-If you want to use pointercrate as a framework for setting up your own demonlist-like website, check out the actual sample code contained in [`pointercrate-example/src/main.rs`](pointercrate-example/src/main.rs). As a first step, you will probably want to replace all the placeholder strings (such as replacing `"<your website>"' with your domain). You probably also want to the "Hello World" home page with a proper home page of your own, and familiarize yourself with the demonlist administration interface in the "User Area". For the latter, you will need to create an account (via the usual registration routine), and then grant yourself (list) administrator permissions via the postgres shell:
+If you want to use pointercrate as a framework for setting up your own demonlist-like website, check out the actual sample code contained in [`pointercrate-example/src/main.rs`](pointercrate-example/src/main.rs). As a first step, you will probably want to replace all the placeholder strings (such as replacing `"<your website>"` with your domain). You probably also want to the "Hello World" home page with a proper home page of your own, and familiarize yourself with the demonlist administration interface in the "User Area". For the latter, you will need to create an account (via the usual registration routine), and then grant yourself (list) administrator permissions via the postgres shell:
 
 ```
 $ psql -U pointercrate pointercrate
