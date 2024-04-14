@@ -16,5 +16,5 @@ pointercrate-integrate = {path = "../pointercrate-integrate"}
 maud = "0.26.0"
 chrono = "0.4.37"
 url = "2.2.0"
-async-trait = "0.1.79"
+async-trait = "0.1.80"
 log = "0.4.21"
