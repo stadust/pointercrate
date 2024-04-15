@@ -53,11 +53,7 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
         pagination.status = Some(RecordStatus::Approved);
     }
 
-    Ok(pagination_response(
-        "/api/v1/records/",
-        pagination,
-        &mut auth.connection,
-    ).await?)
+    Ok(pagination_response("/api/v1/records/", pagination, &mut auth.connection).await?)
 }
 
 #[rocket::get("/", rank = 1)]
@@ -77,11 +73,7 @@ pub async fn unauthed_pagination(
 
     pagination.status = Some(RecordStatus::Approved);
 
-    Ok(pagination_response(
-        "/api/v1/records/",
-        pagination,
-        &mut *connection,
-    ).await?)
+    Ok(pagination_response("/api/v1/records/", pagination, &mut *connection).await?)
 }
 
 #[rocket::post("/", data = "<submission>")]

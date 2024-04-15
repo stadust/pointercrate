@@ -36,20 +36,12 @@ pub async fn paginate(
         pagination.banned = Some(false);
     }
 
-    Ok(pagination_response(
-        "/api/v1/players/",
-        pagination,
-        &mut *pool.connection().await?,
-    ).await?)
+    Ok(pagination_response("/api/v1/players/", pagination, &mut *pool.connection().await?).await?)
 }
 
 #[rocket::get("/ranking")]
 pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPagination>) -> Result<Response2<Json<Vec<RankedPlayer>>>> {
-    Ok(pagination_response(
-        "/api/v1/players/ranking/",
-        query.0,
-        &mut *pool.connection().await?,
-    ).await?)
+    Ok(pagination_response("/api/v1/players/ranking/", query.0, &mut *pool.connection().await?).await?)
 }
 
 #[rocket::get("/<player_id>")]
@@ -151,11 +143,7 @@ pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> 
 pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimPagination>) -> Result<Response2<Json<Vec<ListedClaim>>>> {
     auth.require_permission(MODERATOR)?;
 
-    Ok(pagination_response(
-        "/api/v1/players/claims/",
-        pagination.0,
-        &mut auth.connection,
-    ).await?)
+    Ok(pagination_response("/api/v1/players/claims/", pagination.0, &mut auth.connection).await?)
 }
 
 #[derive(Deserialize, Debug)]

@@ -8,7 +8,7 @@ use sqlx::PgConnection;
 pub const ENTRIES_PER_PAGE: i32 = 100;
 
 /// The default number of entries returned per page if the `limit` parameter was omited.
-/// 
+///
 /// Try not to directly rely on this constant, and instead use `PaginationParameters::default()`
 pub const DEFAULT_ENTRIES_PER_PAGE: i32 = 50;
 
@@ -30,7 +30,11 @@ pub struct PaginationParameters {
 
 impl Default for PaginationParameters {
     fn default() -> Self {
-        Self { before: None, after: None, limit: DEFAULT_ENTRIES_PER_PAGE }
+        Self {
+            before: None,
+            after: None,
+            limit: DEFAULT_ENTRIES_PER_PAGE,
+        }
     }
 }
 
@@ -138,20 +142,20 @@ pub trait Pagination: Serialize + Debug {
 }
 
 /// Historically, pointercrate has been determining whether a new page exists by simply incrementing the "limit" parameter
-/// by one, and seeing if we can get one extra object from the database. This object was then popped from the results, 
+/// by one, and seeing if we can get one extra object from the database. This object was then popped from the results,
 /// and its presence indicated that "another page in the same direction" existed - e.g. if `after` was specified, it
 /// meant that a "next" should be generated, and if `before` was specified (but not after), it meant that a "prev" should
 /// be generated. While this logic is correct, it should never have leaked outside of the `page` implementation and into
 /// the actual pagination API.
-/// 
+///
 /// Additionally, pointercrate assumes that a previous page exists whenever "after" is set, and that a next page exists
 /// whenever "previous" is set (but that we have a standalong page if _both_ are set). This is not sound (we should really be
 /// trying to find an "extra" object at the other end of the list), but fixing this would require a bigger refractor than I am
-/// willing to do at the time of writing this. 
-/// 
+/// willing to do at the time of writing this.
+///
 /// Lastly, pointercrate used to return the object list in reverse if `before` but not `after` was set, and left it up
 /// to the caller to reverse it. That, too, is an implementation detail that should never become API.
-/// 
+///
 /// This compat function tries to fix these up as best as it can - it reverses the given list of objects if needed, and translates
 /// the "extra" object into a `PageContext`. It doesn't solve the second point though.
 #[doc(hidden)]

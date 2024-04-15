@@ -116,13 +116,10 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
 
     let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
 
-    // Pagination on an empty table results in an empty response with empty links header. 
+    // Pagination on an empty table results in an empty response with empty links header.
     //
     // Regression test for #77
-    let (demons, links) = clnt
-        .get(URL)
-        .get_pagination_result::<Demon>()
-        .await;
+    let (demons, links) = clnt.get(URL).get_pagination_result::<Demon>().await;
 
     assert!(demons.is_empty(), "{:?}", demons);
     assert_eq!(links, LinksBuilder::new(URL).generate(&DemonPositionPagination::default()).unwrap());
@@ -151,11 +148,7 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
     assert_eq!(demons.len(), 1);
     assert_eq!(demons[0].base.id, id2);
 
-    let expected = LinksBuilder::new(URL)
-        .with_first(0)
-        .with_last(4)
-        .with_next(2)
-        .with_previous(2);
+    let expected = LinksBuilder::new(URL).with_first(0).with_last(4).with_next(2).with_previous(2);
     assert_eq!(links, expected.generate(&base).unwrap());
 
     // The same, but in reverse Get the demon at position 2 via before=3 and limit=1. We should get both "next" and "previous" pages
@@ -177,15 +170,11 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
     assert_eq!(demons.len(), 1);
     assert_eq!(demons[0].base.id, id2);
 
-    let expected = LinksBuilder::new(URL)
-        .with_first(0)
-        .with_last(4)
-        .with_next(2)
-        .with_previous(2);
+    let expected = LinksBuilder::new(URL).with_first(0).with_last(4).with_next(2).with_previous(2);
     assert_eq!(links, expected.generate(&base).unwrap());
 
     // Query an empty page by only setting before=1. We should still get a "next" link, with after=0 (e.g. before minus one),
-    // but no "prev" link 
+    // but no "prev" link
     let base = DemonPositionPagination {
         params: PaginationParameters {
             before: Some(1),
@@ -193,14 +182,14 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
         },
         ..Default::default()
     };
-    let (demons, links) = clnt.get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap())).get_pagination_result::<Demon>().await;
+    let (demons, links) = clnt
+        .get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap()))
+        .get_pagination_result::<Demon>()
+        .await;
 
     assert_eq!(demons.len(), 0);
 
-    let expected = LinksBuilder::new(URL)
-        .with_first(0)
-        .with_last(4)
-        .with_next(0);
+    let expected = LinksBuilder::new(URL).with_first(0).with_last(4).with_next(0);
 
     assert_eq!(links, expected.generate(&base).unwrap());
 
@@ -213,28 +202,30 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
         },
         ..Default::default()
     };
-    let (demons, links) = clnt.get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap())).get_pagination_result::<Demon>().await;
+    let (demons, links) = clnt
+        .get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap()))
+        .get_pagination_result::<Demon>()
+        .await;
 
     assert_eq!(demons.len(), 0);
 
-    let expected = LinksBuilder::new(URL)
-        .with_first(0)
-        .with_last(4);
+    let expected = LinksBuilder::new(URL).with_first(0).with_last(4);
 
     assert_eq!(links, expected.generate(&base).unwrap());
 
     // Query with limit=3, which should result in all three demons being returned, and only "first" and "last" headers set (since there are no other pages)
     let base = DemonPositionPagination::default();
-    let (demons, links) = clnt.get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap())).get_pagination_result::<Demon>().await;
+    let (demons, links) = clnt
+        .get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap()))
+        .get_pagination_result::<Demon>()
+        .await;
 
     assert_eq!(demons.len(), 3);
     assert_eq!(demons[0].base.id, id1);
     assert_eq!(demons[1].base.id, id2);
     assert_eq!(demons[2].base.id, id3);
 
-    let expected = LinksBuilder::new(URL)
-        .with_first(0)
-        .with_last(4);
+    let expected = LinksBuilder::new(URL).with_first(0).with_last(4);
 
     assert_eq!(links, expected.generate(&base).unwrap());
 
@@ -247,7 +238,10 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
         },
         ..Default::default()
     };
-    let (demons, links) = clnt.get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap())).get_pagination_result::<Demon>().await;
+    let (demons, links) = clnt
+        .get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap()))
+        .get_pagination_result::<Demon>()
+        .await;
 
     assert_eq!(demons.len(), 2);
     assert_eq!(demons[0].base.id, id2);
