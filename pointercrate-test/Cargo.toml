@@ -10,6 +10,7 @@ edition.workspace = true
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}
 pointercrate-demonlist-api = {path = "../pointercrate-demonlist-api"}
 pointercrate-core = {path = "../pointercrate-core"}
+pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
@@ -18,3 +19,4 @@ sqlx = { version = "0.7", default-features = false, features = [ "runtime-tokio-
 rocket = "0.5.0"
 serde_json = "1.0.115"
 dotenv = "0.15.0"
+serde_urlencoded = "0.7.1"
