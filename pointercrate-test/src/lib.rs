@@ -98,6 +98,22 @@ impl<'c> TestRequest<'c> {
         deserialized.unwrap()
     }
 
+    pub async fn get_pagination_result<Result: DeserializeOwned + Debug>(self) -> (Vec<Result>, String) {
+        let response = self.execute().await;
+        let links_header = response
+            .headers()
+            .get_one("Links")
+            .expect("'Links' header to be set on pagination responses")
+            .to_owned();
+        let body_text = response.into_string().await.unwrap();
+
+        let deserialized = serde_json::from_str(&body_text);
+
+        assert!(deserialized.is_ok(), "{:?}: {}", deserialized.unwrap_err(), body_text);
+
+        (deserialized.unwrap(), links_header)
+    }
+
     pub async fn execute(self) -> LocalResponse<'c> {
         let response = self.request.dispatch().await;
 

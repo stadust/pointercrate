@@ -119,37 +119,37 @@ impl Pagination for DemonIdPagination {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct DemonPositionPagination {
     #[serde(flatten)]
     pub params: PaginationParameters,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    name: Option<String>,
+    pub name: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    name_contains: Option<String>,
+    pub name_contains: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    requirement: Option<i16>,
+    pub requirement: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    verifier_id: Option<i32>,
+    pub verifier_id: Option<i32>,
     #[serde(default, deserialize_with = "non_nullable")]
-    publisher_id: Option<i32>,
+    pub publisher_id: Option<i32>,
 
     #[serde(default, deserialize_with = "non_nullable")]
-    verifier_name: Option<String>,
+    pub verifier_name: Option<String>,
     #[serde(default, deserialize_with = "non_nullable")]
-    publisher_name: Option<String>,
+    pub publisher_name: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__gt")]
-    requirement_gt: Option<i16>,
+    pub requirement_gt: Option<i16>,
 
     #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__lt")]
-    requirement_lt: Option<i16>,
+    pub requirement_lt: Option<i16>,
 }
 
 impl Pagination for DemonPositionPagination {

@@ -1823,6 +1823,7 @@ version = "0.1.0"
 dependencies = [
  "dotenv",
  "pointercrate-core",
+ "pointercrate-core-api",
  "pointercrate-demonlist",
  "pointercrate-demonlist-api",
  "pointercrate-user",
@@ -1831,6 +1832,7 @@ dependencies = [
  "rocket",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "sqlx",
 ]
 

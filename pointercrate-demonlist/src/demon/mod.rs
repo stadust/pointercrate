@@ -32,7 +32,7 @@ pub struct TimeShiftedDemon {
 }
 
 /// Struct modelling a demon. These objects are returned from the paginating `/demons/` endpoint
-#[derive(Debug, Serialize, Hash, Display, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Hash, Display, Eq, PartialEq)]
 #[display(fmt = "{}", base)]
 pub struct Demon {
     #[serde(flatten)]
