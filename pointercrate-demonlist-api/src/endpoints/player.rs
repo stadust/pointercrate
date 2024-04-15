@@ -218,7 +218,7 @@ pub async fn geolocate_nationality(
 
     let response = reqwest::get(format!(
         "https://ipgeolocation.abstractapi.com/v1/?api_key={}&ip_address={}&fields=security,country_code,region_iso_code",
-        config::abstract_api_key().ok_or(CoreError::internal_server_error("No API key for abstract configured"))?,
+        config::abstract_api_key().ok_or_else(|| CoreError::internal_server_error("No API key for abstract configured"))?,
         ip
     ))
     .await
