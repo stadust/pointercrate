@@ -186,7 +186,7 @@ footer {
 
   width: 100%;
 
-  font-size: 0.5em;
+  font-size: 0.75em;
   font-weight: 300;
   text-align: center;
 
@@ -203,7 +203,7 @@ footer .flex {
 footer .flex > * {
   margin: 1% 1%;
   min-width: 150px;
-  max-width: 15%;
+  max-width: 35%;
 }
 
 footer a.link {
