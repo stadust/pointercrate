@@ -89,7 +89,7 @@ impl Render for Footer {
                         (column)
                     }
                 }
-                div style="display: flex; justify-content: flex-end; align-items: center" {
+                div style="display: flex; justify-content: center; align-items: center" {
                     i class = "fab fa-twitter fa-2x" {}
                     (PreEscaped("&nbsp;&nbsp;Tweet Us:"))
                     @for link in &self.twitter_links {
