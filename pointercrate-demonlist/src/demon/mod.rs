@@ -224,23 +224,13 @@ impl Demon {
     pub fn score(&self, progress: i16) -> f64 {
         let position = self.base.position;
 
-        let beaten_score = if 55 < position && position <= 150 {
-            let b = 6.273f64;
-            56.191f64 * (2f64.powf((54.147f64 - (position as f64 + 3.2f64) as f64) * ((50f64.ln()) / 99f64))) + b
-        } else if 35 < position && position <= 55 {
-            let g = 1.036f64;
-            let h = 25.071f64;
-            212.61f64 * (g.powf(1f64 - position as f64)) + h
-        } else if 20 < position && position <= 35 {
-            let c = 1.0099685f64;
-            let d = 31.152f64;
-            (250f64 - 83.389f64) * (c.powf(2f64 - position as f64)) - d
-        } else if 0 < position && position <= 20 {
-            let e = 1.168f64;
-            let f = 100.39f64;
-            (250f64 - f) * (e.powf(1f64 - position as f64) as f64) + f
-        } else {
-            0f64
+        let beaten_score = match position {
+            56..=150 => 1.039035131_f64 * ((185.7_f64 * (-0.02715_f64 * position as f64).exp()) + 14.84_f64),
+            36..=55 => 1.0371139743_f64 * ((212.61_f64 * 1.036_f64.powf(1_f64 - position as f64)) + 25.071_f64),
+            21..=35 => (((250_f64 - 83.389_f64) * (1.0099685_f64.powf(2_f64 - position as f64)) - 31.152_f64)) * 1.0371139743_f64,
+            4..=20 => ((326.1_f64 * (-0.0871_f64 * position as f64).exp()) + 51.09_f64) * 1.037117142_f64,
+            1..=3 => (-18.2899079915_f64 * position as f64) + 368.2899079915_f64,
+            _ => 0_f64
         };
 
         if progress != 100 {
