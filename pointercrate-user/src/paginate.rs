@@ -2,7 +2,7 @@ use crate::{error::Result, User};
 use futures::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     permission::Permission,
     util::{non_nullable, nullable},
 };
@@ -30,9 +30,7 @@ pub struct UserPagination {
     pub any_permissions: Option<u16>,
 }
 
-impl Pagination for UserPagination {
-    type Item = User;
-
+impl PaginationQuery for UserPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -43,24 +41,26 @@ impl Pagination for UserPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<UserPagination> for User {
     first_and_last!("members", "member_id");
 
-    async fn page(&self, connection: &mut PgConnection) -> std::result::Result<(Vec<User>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &UserPagination, connection: &mut PgConnection) -> std::result::Result<(Vec<User>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../sql/paginate_users.sql"), order);
+        let sql_query = format!(include_str!("../sql/paginate_users.sql"), order);
 
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.name.as_ref())
-            .bind(self.display_name.as_ref())
-            .bind(self.display_name == Some(None))
-            .bind(self.has_permissions.map(|p| p as i32))
-            .bind(self.any_permissions.map(|p| p as i32))
-            .bind(self.name_contains.as_ref())
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.name.as_ref())
+            .bind(query.display_name.as_ref())
+            .bind(query.display_name == Some(None))
+            .bind(query.has_permissions.map(|p| p as i32))
+            .bind(query.any_permissions.map(|p| p as i32))
+            .bind(query.name_contains.as_ref())
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut users = Vec::new();
@@ -79,11 +79,11 @@ impl Pagination for UserPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, users))
+        Ok(__pagination_compat(&query.params, users))
     }
 
-    fn id_of(user: &User) -> i32 {
-        user.id
+    fn pagination_id(&self) -> i32 {
+        self.id
     }
 }
 

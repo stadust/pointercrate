@@ -108,25 +108,25 @@ impl PageContext {
     }
 }
 
-#[allow(async_fn_in_trait)]
-pub trait Pagination: Serialize + Debug {
-    type Item: Serialize;
-
+pub trait PaginationQuery: Serialize + Debug {
     fn parameters(&self) -> PaginationParameters;
     fn with_parameters(&self, parameters: PaginationParameters) -> Self;
+}
 
-    /// Returns a page of objects matching the query described by this [`Pagination`] object
+#[allow(async_fn_in_trait)]
+pub trait Paginatable<Q: PaginationQuery>: Serialize + Sized {
+    /// Returns a page of objects matching the query described by tthe given [`PaginationQuery`].
     ///
     /// The returned list of objects must have the following properties:
-    /// - They are sorted in ascending order according to the value of [`Pagination::id_of`].
+    /// - They are sorted in ascending order according to the value of [`pagination_id`].
     /// - Their ids are consecutive, meaning if the object at index `i` in the list has ID `a`, and
     ///   the object at index `i + 1` has id `b`, then there exists no object also matching all conditions
     ///   of this `Pagination` in the _database_ with an ID `c` such that `a < c < b`.
-    /// - If the `after` parameter of the associated [`PaginationParameters`] is set, then the first
-    ///   object in the returned list must have the smallest ID out of all objects matching this
-    ///   `PaginationParameters` greater than `after`.
+    /// - If the `after` parameter of the query's associated [`PaginationParameters`] is set, then the first
+    ///   object in the returned list must have the smallest ID out of all objects matching the given
+    ///   query greater than `after`.
     /// - If the `after` parameter is not set, but `before` is, then the last object in the returned
-    ///   list must have the greatest ID otu of all objects matching this `Pagination` smaller than
+    ///   list must have the greatest ID out of all objects matching the given query smaller than
     ///   `before`.
     ///
     /// The returned [`PageContext`] should describe whether more pages surrounding this page exist which
@@ -134,11 +134,11 @@ pub trait Pagination: Serialize + Debug {
     /// HOWEVER, if both `before` and `after` are set, then it should be [`PageContext::Standalone`].
     ///
     /// The number of items in the returned `Vec` must not exceed [`PaginationParameters::limit`].
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Self::Item>, PageContext), sqlx::Error>;
+    async fn page(query: &Q, connection: &mut PgConnection) -> Result<(Vec<Self>, PageContext), sqlx::Error>;
 
     async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error>;
 
-    fn id_of(item: &Self::Item) -> i32;
+    fn pagination_id(&self) -> i32;
 }
 
 /// Historically, pointercrate has been determining whether a new page exists by simply incrementing the "limit" parameter

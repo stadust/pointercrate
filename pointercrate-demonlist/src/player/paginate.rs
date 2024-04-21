@@ -5,7 +5,7 @@ use crate::{
 use futures::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
@@ -29,9 +29,7 @@ pub struct PlayerPagination {
     nation: Option<Option<String>>,
 }
 
-impl Pagination for PlayerPagination {
-    type Item = Player;
-
+impl PaginationQuery for PlayerPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -42,24 +40,26 @@ impl Pagination for PlayerPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<PlayerPagination> for Player {
     first_and_last!("players");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Player>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &PlayerPagination, connection: &mut PgConnection) -> Result<(Vec<Player>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../../sql/paginate_players_by_id.sql"), order);
+        let sql_query = format!(include_str!("../../sql/paginate_players_by_id.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.name.as_deref())
-            .bind(self.name_contains.as_deref())
-            .bind(self.banned)
-            .bind(&self.nation)
-            .bind(self.nation == Some(None))
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.name.as_deref())
+            .bind(query.name_contains.as_deref())
+            .bind(query.banned)
+            .bind(&query.nation)
+            .bind(query.nation == Some(None))
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut players = Vec::new();
@@ -86,11 +86,11 @@ impl Pagination for PlayerPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, players))
+        Ok(__pagination_compat(&query.params, players))
     }
 
-    fn id_of(item: &Self::Item) -> i32 {
-        item.base.id
+    fn pagination_id(&self) -> i32 {
+        self.base.id
     }
 }
 
@@ -112,9 +112,7 @@ pub struct RankingPagination {
     name_contains: Option<String>,
 }
 
-impl Pagination for RankingPagination {
-    type Item = RankedPlayer;
-
+impl PaginationQuery for RankingPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -125,7 +123,9 @@ impl Pagination for RankingPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<RankingPagination> for RankedPlayer {
     async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error> {
         Ok(sqlx::query!("SELECT MAX(index) FROM players_with_score")
             .fetch_one(connection)
@@ -134,20 +134,20 @@ impl Pagination for RankingPagination {
             .map(|max| (1, max as i32)))
     }
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<RankedPlayer>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &RankingPagination, connection: &mut PgConnection) -> Result<(Vec<RankedPlayer>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);
+        let sql_query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);
 
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.name_contains.as_deref())
-            .bind(&self.nation)
-            .bind(self.nation == Some(None))
-            .bind(self.continent.as_ref().map(|c| c.to_sql()))
-            .bind(&self.subdivision)
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.name_contains.as_deref())
+            .bind(&query.nation)
+            .bind(query.nation == Some(None))
+            .bind(query.continent.as_ref().map(|c| c.to_sql()))
+            .bind(&query.subdivision)
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut players = Vec::new();
@@ -174,10 +174,10 @@ impl Pagination for RankingPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, players))
+        Ok(__pagination_compat(&query.params, players))
     }
 
-    fn id_of(item: &Self::Item) -> i32 {
-        item.index as i32
+    fn pagination_id(&self) -> i32 {
+        self.index as i32
     }
 }

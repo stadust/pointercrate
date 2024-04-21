@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use pointercrate_core::{
     error::CoreError,
-    pagination::{Pagination, PaginationParameters},
+    pagination::{Paginatable, PaginationParameters, PaginationQuery},
 };
 use rocket::serde::json::Json;
 use sqlx::PgConnection;
@@ -71,7 +71,7 @@ impl LinksBuilder {
         self
     }
 
-    pub fn generate<P: Pagination>(&self, base: &P) -> Result<String, CoreError> {
+    pub fn generate<P: PaginationQuery>(&self, base: &P) -> Result<String, CoreError> {
         let mut buf = String::new();
         let mut is_first = true;
         // The build functions set a default value for "limit" - copy the actual value from the given base here
@@ -98,14 +98,14 @@ impl LinksBuilder {
     }
 }
 
-pub async fn pagination_response<P: Pagination>(
-    endpoint: &'static str, paginate: P, connection: &mut PgConnection,
-) -> Result<Response2<Json<Vec<P::Item>>>, CoreError> {
-    let parameters = paginate.parameters();
+pub async fn pagination_response<Q: PaginationQuery, P: Paginatable<Q>>(
+    endpoint: &'static str, query: Q, connection: &mut PgConnection,
+) -> Result<Response2<Json<Vec<P>>>, CoreError> {
+    let parameters = query.parameters();
 
     parameters.validate()?;
 
-    let (objects, context) = paginate.page(&mut *connection).await?;
+    let (objects, context) = P::page(&query, &mut *connection).await?;
 
     let mut links = LinksBuilder::new(endpoint);
 
@@ -115,14 +115,14 @@ pub async fn pagination_response<P: Pagination>(
 
     if context.has_next() {
         let after = match objects.last() {
-            Some(obj) => P::id_of(obj),
+            Some(obj) => obj.pagination_id(),
             None => {
                 // If there exists a next page, but this page is empty, then
                 // we must have had a `before` value set (e.g. this is a page before the first object matching the pagination conditions).
                 parameters.before.ok_or_else(|| {
                     CoreError::internal_server_error(format!(
                         "Empty page claims next page exists, yet `before` not set on current request. Caused by {:?}",
-                        paginate
+                        query
                     ))
                 })? - 1
             },
@@ -136,12 +136,12 @@ pub async fn pagination_response<P: Pagination>(
 
     if context.has_previous() {
         let before = match objects.first() {
-            Some(obj) => P::id_of(obj),
+            Some(obj) => obj.pagination_id(),
             None => {
                 parameters.after.ok_or_else(|| {
                     CoreError::internal_server_error(format!(
                         "Empty page claims previous page exists, yet `after` not set on current request. Caused by {:?}",
-                        paginate
+                        query
                     ))
                 })? + 1
             },
@@ -152,5 +152,39 @@ pub async fn pagination_response<P: Pagination>(
         links = links.with_previous(before);
     };
 
-    Ok(Response2::json(objects).with_header("Links", links.generate(&paginate)?))
+    Ok(Response2::json(objects).with_header("Links", links.generate(&query)?))
+}
+
+#[cfg(test)]
+mod tests {
+    use pointercrate_core::pagination::{PaginationParameters, PaginationQuery};
+    use serde::Serialize;
+
+    use super::LinksBuilder;
+
+    #[derive(Debug, Default, Serialize)]
+    struct DummyQuery(PaginationParameters);
+
+    impl PaginationQuery for DummyQuery {
+        fn parameters(&self) -> PaginationParameters {
+            self.0
+        }
+
+        fn with_parameters(&self, parameters: PaginationParameters) -> Self {
+            DummyQuery(parameters)
+        }
+    }
+
+    #[test]
+    fn test_links_builder() {
+        let links_header = LinksBuilder::new("/dummies")
+            .with_first(0)
+            .with_last(1971)
+            .with_next(2)
+            .with_previous(100)
+            .generate(&DummyQuery::default())
+            .unwrap();
+
+        assert_eq!(links_header, "</dummies?after=0>; rel=first,</dummies?before=1971>; rel=last,</dummies?after=2>; rel=next,</dummies?before=100>; rel=prev");
+    }
 }

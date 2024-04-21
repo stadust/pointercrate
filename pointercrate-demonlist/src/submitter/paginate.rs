@@ -2,7 +2,7 @@ use crate::submitter::Submitter;
 use futures::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     util::non_nullable,
 };
 use serde::{Deserialize, Serialize};
@@ -17,9 +17,7 @@ pub struct SubmitterPagination {
     banned: Option<bool>,
 }
 
-impl Pagination for SubmitterPagination {
-    type Item = Submitter;
-
+impl PaginationQuery for SubmitterPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -30,19 +28,21 @@ impl Pagination for SubmitterPagination {
             ..*self
         }
     }
+}
 
+impl Paginatable<SubmitterPagination> for Submitter {
     first_and_last!("submitters", "submitter_id");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Submitter>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &SubmitterPagination, connection: &mut PgConnection) -> Result<(Vec<Submitter>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!("SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND (banned = $3 OR $3 IS NULL) ORDER BY submitter_id {} LIMIT $4", order);
+        let sql_query = format!("SELECT submitter_id, banned FROM submitters WHERE (submitter_id < $1 OR $1 IS NULL) AND (submitter_id > $2 OR $2 IS NULL) AND (banned = $3 OR $3 IS NULL) ORDER BY submitter_id {} LIMIT $4", order);
 
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.banned)
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.banned)
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut submitters = Vec::new();
@@ -56,10 +56,10 @@ impl Pagination for SubmitterPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, submitters))
+        Ok(__pagination_compat(&query.params, submitters))
     }
 
-    fn id_of(item: &Self::Item) -> i32 {
-        item.id
+    fn pagination_id(&self) -> i32 {
+        self.id
     }
 }

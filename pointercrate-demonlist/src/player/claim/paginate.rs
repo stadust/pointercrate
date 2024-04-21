@@ -2,7 +2,7 @@ use futures::StreamExt;
 use pointercrate_core::{
     audit::NamedId,
     first_and_last,
-    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     util::non_nullable,
 };
 use serde::{Deserialize, Serialize};
@@ -29,9 +29,7 @@ pub struct ListedClaim {
     verified: bool,
 }
 
-impl Pagination for PlayerClaimPagination {
-    type Item = ListedClaim;
-
+impl PaginationQuery for PlayerClaimPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -42,20 +40,22 @@ impl Pagination for PlayerClaimPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<PlayerClaimPagination> for ListedClaim {
     first_and_last!("player_claims");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<ListedClaim>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &PlayerClaimPagination, connection: &mut PgConnection) -> Result<(Vec<ListedClaim>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../../../sql/paginate_claims.sql"), order);
+        let sql_query = format!(include_str!("../../../sql/paginate_claims.sql"), order);
 
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.any_name_contains.as_ref())
-            .bind(self.verified)
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.any_name_contains.as_ref())
+            .bind(query.verified)
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut claims = Vec::new();
@@ -77,10 +77,10 @@ impl Pagination for PlayerClaimPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, claims))
+        Ok(__pagination_compat(&query.params, claims))
     }
 
-    fn id_of(item: &Self::Item) -> i32 {
-        item.id
+    fn pagination_id(&self) -> i32 {
+        self.id
     }
 }

@@ -5,7 +5,7 @@ use crate::{
 use futures::stream::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     util::non_nullable,
 };
 use serde::{Deserialize, Serialize};
@@ -44,9 +44,7 @@ pub struct DemonIdPagination {
     requirement_lt: Option<i16>,
 }
 
-impl Pagination for DemonIdPagination {
-    type Item = Demon;
-
+impl PaginationQuery for DemonIdPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -57,28 +55,30 @@ impl Pagination for DemonIdPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<DemonIdPagination> for Demon {
     first_and_last!("demons");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Demon>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &DemonIdPagination, connection: &mut PgConnection) -> Result<(Vec<Demon>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../../sql/paginate_demons_by_id.sql"), order);
+        let sql_query = format!(include_str!("../../sql/paginate_demons_by_id.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.name.as_deref())
-            .bind(self.requirement)
-            .bind(self.requirement_lt)
-            .bind(self.requirement_gt)
-            .bind(self.verifier_id)
-            .bind(self.verifier_name.as_deref())
-            .bind(self.publisher_id)
-            .bind(self.publisher_name.as_deref())
-            .bind(self.name_contains.as_deref())
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.name.as_deref())
+            .bind(query.requirement)
+            .bind(query.requirement_lt)
+            .bind(query.requirement_gt)
+            .bind(query.verifier_id)
+            .bind(query.verifier_name.as_deref())
+            .bind(query.publisher_id)
+            .bind(query.publisher_name.as_deref())
+            .bind(query.name_contains.as_deref())
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut demons = Vec::new();
@@ -111,11 +111,11 @@ impl Pagination for DemonIdPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, demons))
+        Ok(__pagination_compat(&query.params, demons))
     }
 
-    fn id_of(demon: &Demon) -> i32 {
-        demon.base.id
+    fn pagination_id(&self) -> i32 {
+        self.base.id
     }
 }
 
@@ -152,9 +152,7 @@ pub struct DemonPositionPagination {
     pub requirement_lt: Option<i16>,
 }
 
-impl Pagination for DemonPositionPagination {
-    type Item = Demon;
-
+impl PaginationQuery for DemonPositionPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -165,28 +163,30 @@ impl Pagination for DemonPositionPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<DemonPositionPagination> for Demon {
     first_and_last!("demons", "position");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<Demon>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &DemonPositionPagination, connection: &mut PgConnection) -> Result<(Vec<Demon>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../../sql/paginate_demons_by_position.sql"), order);
+        let sql_query = format!(include_str!("../../sql/paginate_demons_by_position.sql"), order);
 
         // FIXME(sqlx) once CITEXT is supported
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.name.as_deref())
-            .bind(self.requirement)
-            .bind(self.requirement_lt)
-            .bind(self.requirement_gt)
-            .bind(self.verifier_id)
-            .bind(self.verifier_name.as_deref())
-            .bind(self.publisher_id)
-            .bind(self.publisher_name.as_deref())
-            .bind(self.name_contains.as_deref())
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.name.as_deref())
+            .bind(query.requirement)
+            .bind(query.requirement_lt)
+            .bind(query.requirement_gt)
+            .bind(query.verifier_id)
+            .bind(query.verifier_name.as_deref())
+            .bind(query.publisher_id)
+            .bind(query.publisher_name.as_deref())
+            .bind(query.name_contains.as_deref())
+            .bind(query.params.limit + 1)
             .fetch(connection);
 
         let mut demons = Vec::new();
@@ -219,10 +219,10 @@ impl Pagination for DemonPositionPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, demons))
+        Ok(__pagination_compat(&query.params, demons))
     }
 
-    fn id_of(item: &Self::Item) -> i32 {
-        item.base.position as i32
+    fn pagination_id(&self) -> i32 {
+        self.base.position as i32
     }
 }

@@ -6,7 +6,7 @@ use crate::{
 use futures::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{PageContext, Pagination, PaginationParameters, __pagination_compat},
+    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     util::{non_nullable, nullable},
 };
 use serde::{Deserialize, Serialize};
@@ -56,9 +56,7 @@ pub struct RecordPagination {
     pub submitter: Option<i32>,
 }
 
-impl Pagination for RecordPagination {
-    type Item = MinimalRecordPD;
-
+impl PaginationQuery for RecordPagination {
     fn parameters(&self) -> PaginationParameters {
         self.params
     }
@@ -69,31 +67,33 @@ impl Pagination for RecordPagination {
             ..self.clone()
         }
     }
+}
 
+impl Paginatable<RecordPagination> for MinimalRecordPD {
     first_and_last!("records");
 
-    async fn page(&self, connection: &mut PgConnection) -> Result<(Vec<MinimalRecordPD>, PageContext), sqlx::Error> {
-        let order = self.params.order();
+    async fn page(query: &RecordPagination, connection: &mut PgConnection) -> Result<(Vec<MinimalRecordPD>, PageContext), sqlx::Error> {
+        let order = query.params.order();
 
-        let query = format!(include_str!("../../sql/paginate_records.sql"), order);
+        let sql_query = format!(include_str!("../../sql/paginate_records.sql"), order);
 
-        let mut stream = sqlx::query(&query)
-            .bind(self.params.before)
-            .bind(self.params.after)
-            .bind(self.progress)
-            .bind(self.progress_lt)
-            .bind(self.progress_gt)
-            .bind(self.demon_position)
-            .bind(self.demon_position_lt)
-            .bind(self.demon_position_gt)
-            .bind(self.status.map(|s| s.to_sql()))
-            .bind(self.demon.as_deref())
-            .bind(self.demon_id)
-            .bind(&self.video)
-            .bind(self.video == Some(None))
-            .bind(self.player)
-            .bind(self.submitter)
-            .bind(self.params.limit + 1)
+        let mut stream = sqlx::query(&sql_query)
+            .bind(query.params.before)
+            .bind(query.params.after)
+            .bind(query.progress)
+            .bind(query.progress_lt)
+            .bind(query.progress_gt)
+            .bind(query.demon_position)
+            .bind(query.demon_position_lt)
+            .bind(query.demon_position_gt)
+            .bind(query.status.map(|s| s.to_sql()))
+            .bind(query.demon.as_deref())
+            .bind(query.demon_id)
+            .bind(&query.video)
+            .bind(query.video == Some(None))
+            .bind(query.player)
+            .bind(query.submitter)
+            .bind(query.params.limit + 1)
             .fetch(&mut *connection);
 
         let mut records = Vec::new();
@@ -119,10 +119,10 @@ impl Pagination for RecordPagination {
             })
         }
 
-        Ok(__pagination_compat(&self.params, records))
+        Ok(__pagination_compat(&query.params, records))
     }
 
-    fn id_of(item: &Self::Item) -> i32 {
-        item.id
+    fn pagination_id(&self) -> i32 {
+        self.id
     }
 }
