@@ -178,7 +178,7 @@ impl AccountPageTab for ListIntegrationTab {
                         "To initiate a claim, click the pen left of the 'Claimed Player' heading. Once initiated, you have an unverified claim on a player. These claims will then be manually verified by members of the pointercrate team. You can request verification in " a.link href=(self.0) {"this discord server"} "."
                         br;
                         b {
-                            "Note: for all list related inquiries including but not limitied to, record status, name changes, etc, you should use " a.link href=(self.1) {"this discord server"} "."
+                            "Note: for all list related inquiries including but not limited to, record status, name changes, etc, you should use " a.link href=(self.1) {"this discord server"} "."
                         }
                         br;
                         "You cannot initiate a claim on a player that already has a verified claim by a different user on it. "
