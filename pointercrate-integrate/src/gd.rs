@@ -24,6 +24,8 @@ use reqwest::header::HeaderMap;
 ratelimits! {
     IntegrationRatelimits {
         demon_refresh[1u32 per 86400 per i32] => "Only one refresh per day per demon",
+        throttle[1u32 per 60] => "Wait at least 1 minute between level requests",
+        throttle_throttle[1u32 per 600 per i32] => "Only hit the global throttle rate limit once per 10 minutes per demon",
     }
 }
 
@@ -35,8 +37,10 @@ impl GeometryDashConnector {
     /// If the last time the data for this demon was sought on the Geomeetry Dash servers was over 24h ago,
     /// re-query them for updated data.
     pub async fn load_level_for_demon(&self, demon: &Demon) -> Option<IntegrationLevel> {
-        if self.ratelimits.demon_refresh(demon.base.id).is_ok() {
-            tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
+        if self.ratelimits.throttle_throttle(demon.base.id).is_ok() {
+            if self.ratelimits.throttle().is_ok() && self.ratelimits.demon_refresh(demon.base.id).is_ok() {
+                tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
+            }
         }
 
         if let Some(level_id) = demon.level_id {
