@@ -185,6 +185,9 @@ mod tests {
             .generate(&DummyQuery::default())
             .unwrap();
 
-        assert_eq!(links_header, "</dummies?after=0>; rel=first,</dummies?before=1971>; rel=last,</dummies?after=2>; rel=next,</dummies?before=100>; rel=prev");
+        assert_eq!(
+            links_header,
+            "</dummies?after=0>; rel=first,</dummies?before=1971>; rel=last,</dummies?after=2>; rel=next,</dummies?before=100>; rel=prev"
+        );
     }
 }
