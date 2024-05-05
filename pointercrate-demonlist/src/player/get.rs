@@ -8,16 +8,6 @@ use crate::{
 };
 use sqlx::{Error, PgConnection};
 
-// Required until https://github.com/launchbadge/sqlx/pull/108 is merged
-struct FetchedPlayer {
-    id: i32,
-    name: String,
-    banned: bool,
-    nation: Option<String>,
-    iso_country_code: Option<String>,
-    subdivision_name: Option<String>,
-    subdivision_code: Option<String>,
-}
 
 impl Player {
     pub async fn upgrade(self, connection: &mut PgConnection) -> Result<FullPlayer> {
@@ -36,8 +26,7 @@ impl Player {
     }
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Player> {
-        let result = sqlx::query_as!(
-            FetchedPlayer,
+        let result = sqlx::query!(
             r#"SELECT id, players.name AS "name: String", banned, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
              players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"#,
             id
