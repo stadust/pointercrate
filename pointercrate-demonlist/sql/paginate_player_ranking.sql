@@ -1,5 +1,5 @@
-SELECT id, name::TEXT, rank, score, index, nation::TEXT, iso_country_code::TEXT
-FROM players_with_score
+SELECT index, rank, id, name, score, subdivision, iso_country_code, nation
+FROM ranked_players
 WHERE (index < $1 OR $1 IS NULL)
   AND (index > $2 OR $2 IS NULL)
   AND (STRPOS(name, $3::CITEXT) > 0 OR $3 is NULL)

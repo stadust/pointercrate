@@ -1,5 +1,5 @@
 pub use self::{
-    paginate::{PlayerPagination, RankingPagination},
+    paginate::{PlayerPagination, RankingPagination, RankedPlayer},
     patch::PatchPlayer,
 };
 use crate::{demon::MinimalDemon, nationality::Nationality, record::MinimalRecordD};
@@ -34,18 +34,6 @@ pub struct FullPlayer {
     pub created: Vec<MinimalDemon>,
     pub verified: Vec<MinimalDemon>,
     pub published: Vec<MinimalDemon>,
-}
-
-#[derive(Debug, PartialEq, Serialize, Display)]
-#[display(fmt = "{} (ID: {}) at rank {} with score {}", name, id, rank, score)]
-pub struct RankedPlayer {
-    pub id: i32,
-    pub name: String,
-    pub rank: i64,
-    pub score: f64,
-    pub nationality: Option<Nationality>,
-    #[serde(skip)]
-    pub index: i64,
 }
 
 #[derive(Debug, PartialEq, Serialize, Display, Deserialize)]

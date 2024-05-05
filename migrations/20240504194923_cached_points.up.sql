@@ -42,3 +42,17 @@ CREATE FUNCTION recompute_player_scores() RETURNS void AS $$
 $$ LANGUAGE SQL;
 
 SELECT recompute_player_scores();
+
+DROP VIEW players_with_score;
+CREATE VIEW ranked_players AS 
+    SELECT 
+        ROW_NUMBER() OVER(ORDER BY score DESC, id) AS index,
+        RANK() OVER(ORDER BY score DESC) AS rank,
+        id, name, score, subdivision,
+        nationalities.iso_country_code,
+        nationalities.nation,
+        nationalities.continent
+    FROM players
+    LEFT OUTER JOIN nationalities
+                 ON players.nationality = nationalities.iso_country_code
+    WHERE NOT players.banned AND players.score > 0.0;

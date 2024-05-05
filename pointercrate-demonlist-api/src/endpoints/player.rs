@@ -13,7 +13,7 @@ use pointercrate_demonlist::{
     nationality::Nationality,
     player::{
         claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
-        DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
+        DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankingPagination, RankedPlayer
     },
     LIST_HELPER,
 };
