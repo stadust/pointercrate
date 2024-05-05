@@ -199,18 +199,6 @@ impl Demon {
         Ok(())
     }
 
-    /// Decrements the position of all demons with positions equal to or smaller than the given one,
-    /// by one.
-    async fn shift_up(until: i16, connection: &mut PgConnection) -> Result<()> {
-        info!("Shifting up all demons until {}", until);
-
-        sqlx::query!("UPDATE demons SET position = position - 1 WHERE position <= $1", until)
-            .execute(connection)
-            .await?;
-
-        Ok(())
-    }
-
     /// Gets the current max position a demon has, or `CoreError::NotFound` if there are no demons
     /// in the database
     pub async fn max_position(connection: &mut PgConnection) -> Result<i16> {
