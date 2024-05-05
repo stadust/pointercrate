@@ -199,7 +199,7 @@ impl Demon {
         Ok(())
     }
 
-    /// Gets the current max position a demon has, or `CoreError::NotFound` if there are no demons
+    /// Gets the current max position a demon has, or `0` if there are no demons
     /// in the database
     pub async fn max_position(connection: &mut PgConnection) -> Result<i16> {
         Ok(sqlx::query!("SELECT MAX(position) as max_position FROM demons")
