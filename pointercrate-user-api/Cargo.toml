@@ -15,7 +15,7 @@ pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
 log = "0.4.21"
-base64 = "0.22.0"
+base64 = "0.22.1"
 nonzero_ext = "0.3.0"
 serde_urlencoded = "0.7.0"
 governor = "0.6.0"
