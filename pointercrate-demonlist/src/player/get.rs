@@ -58,6 +58,7 @@ impl Player {
                         name: row.name,
                         banned: row.banned,
                     },
+                    score: row.score,
                     nationality,
                 })
             },

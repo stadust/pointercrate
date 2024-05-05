@@ -82,6 +82,7 @@ impl Paginatable<PlayerPagination> for Player {
                     name: row.get("name"),
                     banned: row.get("banned"),
                 },
+                score: row.get("score"),
                 nationality,
             })
         }

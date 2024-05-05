@@ -24,7 +24,7 @@ pub struct DatabasePlayer {
     pub banned: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Display, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Display, PartialEq, Hash)]
 #[display(fmt = "{}", player)]
 pub struct FullPlayer {
     #[serde(flatten)]
@@ -47,13 +47,24 @@ pub struct RankedPlayer {
     pub index: i64,
 }
 
-#[derive(Debug, Eq, Hash, PartialEq, Serialize, Display, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Display, Deserialize)]
 #[display(fmt = "{}", base)]
 pub struct Player {
     #[serde(flatten)]
     pub base: DatabasePlayer,
 
+    pub score: f64,
     pub nationality: Option<Nationality>,
+}
+
+// `f64` does not implement hash. Most things in the pointercrate frontend only display score with an accuracy of two digits after the dot,
+// so hashing only this part should be fine for ETag purposes. 
+impl Hash for Player {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.base.hash(state);
+        ((self.score * 100f64) as u64).hash(state);
+        self.nationality.hash(state);
+    }
 }
 
 impl Taggable for FullPlayer {
