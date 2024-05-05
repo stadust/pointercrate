@@ -64,6 +64,8 @@ impl FullPlayer {
             self.set_name(name, connection).await?;
         }
 
+        self.player.score = self.player.base.update_score(connection).await?;
+
         Ok(self)
     }
 
