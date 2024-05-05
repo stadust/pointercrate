@@ -61,7 +61,7 @@ impl FullRecord {
 pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalRecordD>> {
     let mut stream = sqlx::query!(
         r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, demons.id AS demon_id, 
-         demons.name as "name: String", demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id 
+         demons.name, demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id 
          = $1 WHERE status_ = 'APPROVED' AND records.player = $1"#,
         player.id
     )
@@ -103,7 +103,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
     let mut stream = sqlx::query_as!(
         Fetched,
         r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
-         players.name AS "name: String", players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
+         players.name, players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
          records.demon = $1 ORDER BY progress DESC, id ASC"#,
         demon.id
     )

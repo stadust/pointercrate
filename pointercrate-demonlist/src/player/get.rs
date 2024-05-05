@@ -27,7 +27,7 @@ impl Player {
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Player> {
         let result = sqlx::query!(
-            r#"SELECT id, players.name AS "name: String", banned, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
+            r#"SELECT id, players.name, banned, score, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
              players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"#,
             id
         )
@@ -71,19 +71,15 @@ impl DatabasePlayer {
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<DatabasePlayer> {
         let name = name.trim();
 
-        let result = sqlx::query!(
-            "SELECT id, name::text, banned FROM players WHERE name = cast($1::text as citext)",
-            name.to_string()
-        ) // FIXME(sqlx) once CITEXT is supported
+        let result = sqlx::query_as!(DatabasePlayer,
+            "SELECT id, name, banned FROM players WHERE name = $1",
+            name
+        )
         .fetch_one(connection)
         .await;
 
         match result {
-            Ok(row) => Ok(DatabasePlayer {
-                id: row.id,
-                name: row.name.unwrap(), // FIXME(sqlx) casted columns interpreted as nullable
-                banned: row.banned,
-            }),
+            Ok(player) => Ok(player),
             Err(Error::RowNotFound) => Err(DemonlistError::PlayerNotFoundName {
                 player_name: name.to_string(),
             }),
@@ -92,16 +88,12 @@ impl DatabasePlayer {
     }
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<DatabasePlayer> {
-        let result = sqlx::query!(r#"SELECT id, name as "name: String", banned FROM players WHERE id = $1"#, id)
+        let result = sqlx::query_as!(DatabasePlayer, r#"SELECT id, name, banned FROM players WHERE id = $1"#, id)
             .fetch_one(connection)
             .await;
 
         match result {
-            Ok(row) => Ok(DatabasePlayer {
-                id: row.id,
-                name: row.name,
-                banned: row.banned,
-            }),
+            Ok(player) => Ok(player),
             Err(Error::RowNotFound) => Err(DemonlistError::PlayerNotFound { player_id: id }),
             Err(err) => Err(err.into()),
         }
@@ -112,7 +104,7 @@ impl DatabasePlayer {
 
         match Self::by_name(name, connection).await {
             Err(DemonlistError::PlayerNotFoundName { .. }) => {
-                let id = sqlx::query!("INSERT INTO players (name) VALUES ($1::text) RETURNING id", name.to_string())
+                let id = sqlx::query!("INSERT INTO players (name) VALUES ($1) RETURNING id", name.to_string())
                     .fetch_one(connection)
                     .await?
                     .id;
