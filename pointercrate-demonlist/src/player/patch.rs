@@ -231,9 +231,12 @@ impl Player {
             subdivision_code,
             self.base.id
         )
-        .execute(connection)
+        .execute(&mut *connection)
         .await?;
 
+        if let Some(ref mut nationality) = self.nationality {
+            nationality.update_nation_score(connection).await?;
+        }
         self.nationality = nationality;
 
         Ok(())

@@ -1,7 +1,7 @@
 use crate::{
     demon::{Demon, FullDemon, MinimalDemon},
     error::{DemonlistError, Result},
-    player::{recompute_player_scores, DatabasePlayer},
+    player::{recompute_scores, DatabasePlayer},
 };
 use log::{debug, info, warn};
 use pointercrate_core::util::{non_nullable, nullable};
@@ -247,7 +247,7 @@ impl MinimalDemon {
 
         self.position = to;
 
-        recompute_player_scores(connection).await?;
+        recompute_scores(connection).await?;
 
         Ok(())
     }

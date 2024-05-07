@@ -2,7 +2,7 @@ use crate::{
     creator::Creator,
     demon::{Demon, FullDemon, MinimalDemon},
     error::Result,
-    player::{recompute_player_scores, DatabasePlayer},
+    player::{recompute_scores, DatabasePlayer},
 };
 use log::info;
 use serde::Deserialize;
@@ -74,7 +74,7 @@ impl FullDemon {
             creators.push(player);
         }
 
-        recompute_player_scores(connection).await?;
+        recompute_scores(connection).await?;
 
         Ok(FullDemon {
             demon,
