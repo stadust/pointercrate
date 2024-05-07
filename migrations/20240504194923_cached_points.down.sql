@@ -2,9 +2,15 @@
 DROP VIEW ranked_players;
 
 ALTER TABLE players DROP COLUMN score;
+ALTER TABLE nationalities DROP COLUMN score;
+ALTER TABLE subdivisions DROP COLUMN score;
 
 DROP FUNCTION recompute_player_scores();
 DROP FUNCTION score_of_player(player_id INTEGER);
+DROP FUNCTION recompute_nation_scores();
+DROP FUNCTION score_of_nation(iso_country_code VARCHAR(2));
+DROP FUNCTION recompute_subdivision_scores();
+DROP FUNCTION score_of_subdivision(iso_country_code VARCHAR(2), iso_code VARCHAR(3));
 DROP VIEW score_giving;
 
 -- Copied from 20210419002933.up

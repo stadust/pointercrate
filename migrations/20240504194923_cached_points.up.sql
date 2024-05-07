@@ -46,9 +46,9 @@ SELECT recompute_player_scores();
 DROP VIEW players_with_score;
 CREATE VIEW ranked_players AS 
     SELECT 
-        ROW_NUMBER() OVER(ORDER BY score DESC, id) AS index,
+        ROW_NUMBER() OVER(ORDER BY players.score DESC, id) AS index,
         RANK() OVER(ORDER BY score DESC) AS rank,
-        id, name, score, subdivision,
+        id, name, players.score, subdivision,
         nationalities.iso_country_code,
         nationalities.nation,
         nationalities.continent
@@ -56,3 +56,71 @@ CREATE VIEW ranked_players AS
     LEFT OUTER JOIN nationalities
                  ON players.nationality = nationalities.iso_country_code
     WHERE NOT players.banned AND players.score > 0.0;
+
+
+ALTER TABLE nationalities ADD COLUMN score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
+
+CREATE FUNCTION score_of_nation(iso_country_code VARCHAR(2)) RETURNS DOUBLE PRECISION AS $$
+    SELECT SUM(record_score(progress, position, 150, requirement))
+    FROM (
+        SELECT DISTINCT ON (position) * from score_giving
+        INNER JOIN players 
+                ON players.id=player
+        WHERE players.nationality = iso_country_code
+        ORDER BY position, progress DESC
+    )
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION recompute_nation_scores() RETURNS void AS $$
+    UPDATE nationalities
+    SET score = COALESCE(p.sum, 0)
+    FROM (
+        SELECT nationality, SUM(record_score(q.progress, q.position, 150, q.requirement))
+        FROM (
+            SELECT DISTINCT ON (position, nationality) * from score_giving
+            INNER JOIN players 
+                    ON players.id=player
+            WHERE players.nationality IS NOT NULL
+            ORDER BY players.nationality, position, progress DESC
+        ) q
+        GROUP BY nationality
+    ) p
+    WHERE p.nationality = iso_country_code
+$$ LANGUAGE SQL;
+
+SELECT recompute_nation_scores();
+
+ALTER TABLE subdivisions ADD COLUMN score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
+
+CREATE FUNCTION score_of_subdivision(iso_country_code VARCHAR(2), iso_code VARCHAR(3)) RETURNS DOUBLE PRECISION AS $$
+    SELECT SUM(record_score(progress, position, 150, requirement))
+    FROM (
+        SELECT DISTINCT ON (position) * from score_giving
+        INNER JOIN players 
+                ON players.id=player
+        WHERE players.nationality = iso_country_code
+          AND players.subdivision = iso_code
+        ORDER BY position, progress DESC
+    )
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION recompute_subdivision_scores() RETURNS void AS $$
+    UPDATE subdivisions
+    SET score = COALESCE(p.sum, 0)
+    FROM (
+        SELECT nationality, subdivision, SUM(record_score(q.progress, q.position, 150, q.requirement))
+        FROM (
+            SELECT DISTINCT ON (position, nationality, subdivision) * from score_giving
+            INNER JOIN players 
+                    ON players.id=player
+            WHERE players.nationality IS NOT NULL
+              AND players.subdivision IS NOT NULL
+            ORDER BY players.nationality, players.subdivision, position, progress DESC
+        ) q
+        GROUP BY nationality, subdivision
+    ) p
+    WHERE p.nationality = nation
+      AND p.subdivision = iso_code
+$$ LANGUAGE SQL;
+
+SELECT recompute_subdivision_scores();
