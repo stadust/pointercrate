@@ -1,5 +1,6 @@
 -- Add down migration script here
 DROP VIEW ranked_players;
+DROP VIEW ranked_nations;
 
 ALTER TABLE players DROP COLUMN score;
 ALTER TABLE nationalities DROP COLUMN score;
@@ -69,3 +70,44 @@ FROM
         LEFT OUTER JOIN nationalities
                         ON players.nationality = nationalities.iso_country_code
 WHERE NOT players.banned AND players.id != 1534;
+
+-- Copied from 20210726174613
+CREATE VIEW nations_with_score AS
+    SELECT RANK() OVER(ORDER BY scores.total_score DESC) AS rank,
+           scores.total_score AS score,
+           nationalities.iso_country_code,
+           nationalities.nation,
+           nationalities.continent
+    FROM (
+          SELECT nationality,
+                 SUM(record_score(pseudo_records.progress::FLOAT, pseudo_records.position::FLOAT,
+                                  100::FLOAT, pseudo_records.requirement)) as total_score
+          FROM (
+                   select distinct on (nationality, demon)
+                       nationality,
+                       progress,
+                       position,
+                       CASE WHEN demons.position > 75 THEN 100 ELSE requirement END AS requirement
+                   from (
+                       select demon, player, progress
+                       from records
+                       where status_='APPROVED'
+
+                       union
+
+                       select id, verifier, 100
+                       from demons
+                   ) records
+                       inner join demons
+                           on demons.id = records.demon
+                       inner join players
+                           on players.id=records.player
+                       inner join nationalities
+                           on iso_country_code=players.nationality
+                   where position <= 150 and not players.banned
+                   order by nationality, demon, progress desc
+               ) AS pseudo_records
+          GROUP BY nationality
+   ) scores
+INNER JOIN nationalities
+        ON nationalities.iso_country_code = scores.nationality;

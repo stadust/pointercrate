@@ -208,7 +208,7 @@ pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<Str
     let mut connection = pool.connection().await?;
     let mut css = heatmap_query!(
         connection,
-        r#"SELECT LOWER(iso_country_code) as "code!", score as "score!" from nations_with_score order by score desc"#,
+        r#"SELECT LOWER(iso_country_code) as "code!", score as "score!" from ranked_nations order by score desc"#,
     );
 
     for nation_iso_code in nations_with_subdivisions(&mut *connection).await? {

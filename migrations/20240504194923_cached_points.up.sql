@@ -124,3 +124,15 @@ CREATE FUNCTION recompute_subdivision_scores() RETURNS void AS $$
 $$ LANGUAGE SQL;
 
 SELECT recompute_subdivision_scores();
+
+DROP VIEW nations_with_score;
+CREATE VIEW ranked_nations AS 
+    SELECT 
+        ROW_NUMBER() OVER(ORDER BY score DESC, iso_country_code) AS index,
+        RANK() OVER(ORDER BY score DESC) AS rank,
+        score,
+        iso_country_code,
+        nation,
+        continent
+    FROM nationalities
+    WHERE score > 0.0;
