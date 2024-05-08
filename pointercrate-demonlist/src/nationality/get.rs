@@ -52,6 +52,28 @@ impl Nationality {
         })
     }
 
+    pub async fn subdivision_by_code(&self, code: &str, connection: &mut PgConnection) -> Result<Subdivision> {
+        let result = sqlx::query!(
+            "SELECT name FROM subdivisions WHERE iso_code = $1 AND nation = $2",
+            code,
+            self.iso_country_code
+        )
+        .fetch_one(&mut *connection)
+        .await;
+
+        match result {
+            Ok(row) => Ok(Subdivision {
+                iso_code: code.to_string(),
+                name: row.name,
+            }),
+            Err(sqlx::Error::RowNotFound) => Err(DemonlistError::SubdivisionNotFound {
+                nation_code: self.iso_country_code.clone(),
+                subdivision_code: code.to_string(),
+            }),
+            Err(err) => Err(err.into()),
+        }
+    }
+
     pub async fn all(connection: &mut PgConnection) -> Result<Vec<Nationality>> {
         let mut stream =
             sqlx::query!(r#"SELECT nation as "nation: String", iso_country_code as "iso_country_code: String" FROM nationalities"#)

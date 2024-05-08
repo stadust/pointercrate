@@ -4,11 +4,12 @@ pub use get::nations_with_subdivisions;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use sqlx::PgConnection;
 
 mod get;
 mod paginate;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor, Deserialize, Clone)]
 pub struct Nationality {
     #[serde(rename = "country_code")]
     pub iso_country_code: String,

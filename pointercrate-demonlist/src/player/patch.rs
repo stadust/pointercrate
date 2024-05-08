@@ -1,6 +1,6 @@
 use crate::{
     error::{DemonlistError, Result},
-    nationality::{Nationality, Subdivision},
+    nationality::Nationality,
     player::{claim::PlayerClaim, DatabasePlayer, FullPlayer, Player},
     record::{approved_records_by, FullRecord},
 };
@@ -26,23 +26,28 @@ pub struct PatchPlayer {
 
 impl FullPlayer {
     pub async fn apply_patch(mut self, patch: PatchPlayer, connection: &mut PgConnection) -> Result<Self> {
-        if let Some(nationality) = patch.nationality {
-            match nationality {
-                Some(ident) => {
-                    self.player
-                        .set_nationality(Nationality::by_country_code_or_name(ident.as_ref(), connection).await?, connection)
-                        .await?
-                },
-                None => self.player.reset_nationality(connection).await?,
-            }
+        let mut new_nationality = match patch.nationality {
+            None => self.player.nationality.clone(),
+            Some(None) => None,
+            Some(Some(ref code_or_name)) => Some(Nationality::by_country_code_or_name(code_or_name, connection).await?),
+        };
+
+        match new_nationality {
+            Some(ref mut nationality) => {
+                nationality.subdivision = match patch.subdivision {
+                    None => self.player.nationality.as_ref().map(|n| n.subdivision.clone()).unwrap_or(None),
+                    Some(None) => None,
+                    Some(Some(subdivision_code)) => Some(nationality.subdivision_by_code(&subdivision_code, connection).await?),
+                }
+            },
+            None => {
+                if matches!(patch.subdivision, Some(Some(_))) {
+                    return Err(DemonlistError::NoNationSet);
+                }
+            },
         }
 
-        if let Some(subdivision) = patch.subdivision {
-            match subdivision {
-                Some(subdivision) => self.player.set_subdivision(subdivision, connection).await?,
-                None => self.player.reset_subdivision(connection).await?,
-            }
-        }
+        self.player.set_nationality(new_nationality, connection).await?;
 
         if let Some(banned) = patch.banned {
             if banned && !self.player.base.banned {
@@ -214,84 +219,22 @@ impl FullPlayer {
 }
 
 impl Player {
-    pub async fn reset_nationality(&mut self, connection: &mut PgConnection) -> Result<()> {
+    pub async fn set_nationality(&mut self, nationality: Option<Nationality>, connection: &mut PgConnection) -> Result<()> {
+        let iso_country_code = nationality.as_ref().map(|n| &n.iso_country_code);
+        let subdivision_code = nationality.as_ref().map(|n| n.subdivision.as_ref().map(|s| &s.iso_code)).flatten();
+
         sqlx::query!(
-            "UPDATE players SET nationality = NULL, subdivision = NULL WHERE id = $1",
+            "UPDATE players SET nationality = $1, subdivision = $2 WHERE id = $3",
+            iso_country_code, 
+            subdivision_code,
             self.base.id
         )
         .execute(connection)
         .await?;
 
-        self.nationality = None;
+        self.nationality = nationality;
 
         Ok(())
-    }
-
-    pub async fn set_nationality(&mut self, nationality: Nationality, connection: &mut PgConnection) -> Result<()> {
-        sqlx::query!(
-            "UPDATE players SET nationality = $1::text, subdivision = NULL WHERE id = $2",
-            nationality.iso_country_code,
-            self.base.id
-        )
-        .execute(connection)
-        .await?;
-
-        self.nationality = Some(nationality);
-
-        Ok(())
-    }
-
-    pub async fn reset_subdivision(&mut self, connection: &mut PgConnection) -> Result<()> {
-        if let Some(ref mut nationality) = self.nationality {
-            sqlx::query!("UPDATE players SET subdivision = NULL WHERE id = $1", self.base.id)
-                .execute(connection)
-                .await?;
-
-            nationality.subdivision = None;
-        }
-
-        Ok(())
-    }
-
-    pub async fn set_subdivision(&mut self, subdivision_code: String, connection: &mut PgConnection) -> Result<()> {
-        match self.nationality {
-            Some(ref mut nationality) => {
-                let result = sqlx::query!(
-                    "SELECT iso_code, name::TEXT FROM subdivisions WHERE iso_code = $1 AND nation = $2",
-                    subdivision_code,
-                    nationality.iso_country_code
-                )
-                .fetch_one(&mut *connection)
-                .await;
-
-                match result {
-                    Ok(row) => {
-                        let subdivision = Subdivision {
-                            iso_code: row.iso_code,
-                            name: row.name.unwrap(),
-                        };
-
-                        sqlx::query!(
-                            "UPDATE players SET subdivision = $1::TEXT where id = $2",
-                            subdivision_code,
-                            self.base.id
-                        )
-                        .execute(connection)
-                        .await?;
-
-                        nationality.subdivision = Some(subdivision);
-
-                        Ok(())
-                    },
-                    Err(sqlx::Error::RowNotFound) => Err(DemonlistError::SubdivisionNotFound {
-                        nation_code: nationality.iso_country_code.clone(),
-                        subdivision_code,
-                    }),
-                    Err(err) => Err(err.into()),
-                }
-            },
-            None => Err(DemonlistError::NoNationSet),
-        }
     }
 }
 
