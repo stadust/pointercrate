@@ -1,6 +1,5 @@
 use crate::demon::MinimalDemon;
 use derive_more::Constructor;
-pub use get::nations_with_subdivisions;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};

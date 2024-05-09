@@ -237,15 +237,3 @@ pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection
 
     Ok(records)
 }
-
-/// Returns a list of ISO codes of countries that have subdivisions
-pub async fn nations_with_subdivisions(connection: &mut PgConnection) -> Result<Vec<String>> {
-    let mut nations = Vec::new();
-    let mut stream = sqlx::query!("SELECT DISTINCT nation FROM subdivisions").fetch(&mut *connection);
-
-    while let Some(row) = stream.next().await {
-        nations.push(row?.nation);
-    }
-
-    Ok(nations)
-}

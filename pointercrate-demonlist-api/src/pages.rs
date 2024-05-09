@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
@@ -10,7 +12,7 @@ use pointercrate_core_pages::head::HeadLike;
 use pointercrate_demonlist::{
     demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
     error::DemonlistError,
-    nationality::{nations_with_subdivisions, Nationality},
+    nationality::Nationality,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_demonlist_pages::{
@@ -178,51 +180,53 @@ pub async fn nation_stats_viewer() -> Page {
     Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
 }
 
-macro_rules! heatmap_query {
-    ($connection: expr, $query: expr, $($param:expr),*) => {
-        {
-            let mut css = String::new();
-            let mut stream = sqlx::query!($query, $($param),*).fetch(&mut *$connection);
-
-            if let Some(firstrow) = stream.next().await {
-                // first one is the one with most score
-                let firstrow = firstrow.map_err(DemonlistError::from)?;
-                let highest_score = firstrow.score * 1.5;
-
-                css.push_str(&make_css_rule(&firstrow.code, firstrow.score, highest_score));
-
-                while let Some(row) = stream.next().await {
-                    let row = row.map_err(DemonlistError::from)?;
-
-                    css.push_str(&make_css_rule(&row.code, row.score, highest_score));
-                }
-            }
-
-            css
-        }
-    };
-}
-
 #[rocket::get("/statsviewer/heatmap.css")]
 pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<String>> {
     let mut connection = pool.connection().await?;
-    let mut css = heatmap_query!(
-        connection,
-        r#"SELECT LOWER(iso_country_code) as "code!", score as "score!" from ranked_nations order by score desc"#,
-    );
+    let mut css = String::new();
 
-    for nation_iso_code in nations_with_subdivisions(&mut *connection).await? {
-        css.push_str(&heatmap_query!(
-            connection,
-            r#"SELECT CONCAT($1, '-', UPPER(subdivision_code)) AS "code!", score AS "score!" FROM subdivision_ranking_of($1) ORDER BY score DESC"#,
-            nation_iso_code
-        ));
+    let mut nation_scores = HashMap::new();
+    let mut nations_stream = sqlx::query!("SELECT iso_country_code, score FROM nationalities WHERE score > 0.0").fetch(&mut *connection);
+
+    while let Some(row) = nations_stream.next().await {
+        let row = row.map_err(DemonlistError::from)?;
+
+        nation_scores.insert(row.iso_country_code, row.score);
+    }
+
+    let Some(&max_nation_score) = nation_scores.values().max_by(|a, b| a.total_cmp(b)) else {
+        // Not a single nation has a score > 0. This means there are no approved records. So return no CSS
+        return Ok(Response2::new(css).with_header("Content-Type", "text/css"));
+    };
+
+    for (nation, &score) in &nation_scores {
+        css.push_str(&make_css_rule(&nation.to_lowercase(), score, max_nation_score));
+    }
+
+    // un-borrow `connection`
+    drop(nations_stream);
+
+    let mut subdivisions_stream =
+        sqlx::query!("SELECT nation, iso_code, score FROM subdivisions WHERE score > 0.0").fetch(&mut *connection);
+
+    while let Some(row) = subdivisions_stream.next().await {
+        let row = row.map_err(DemonlistError::from)?;
+
+        css.push_str(&make_css_rule(
+            &format!("{}-{}", row.nation, row.iso_code),
+            row.score,
+            *nation_scores.get(&row.nation).unwrap_or(&f64::INFINITY),
+        ))
     }
 
     Ok(Response2::new(css).with_header("Content-Type", "text/css"))
 }
 
 fn make_css_rule(code: &str, score: f64, highest_score: f64) -> String {
+    // Artificially adjust the highest score so that score/high_score is never 1. If it were 1, the resulting
+    // color will be equal to the "hover"/"selected" color, which looks bad.
+    let highest_score = highest_score * 1.5;
+
     format!(
         ".heatmapped #{0}, .heatmapped #{0} > path {{ fill: rgb({1}, {2}, {3}); }}",
         code,
