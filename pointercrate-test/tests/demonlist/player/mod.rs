@@ -6,6 +6,8 @@ use pointercrate_demonlist::{
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
+mod score;
+
 async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, DatabasePlayer) {
     let mut banned = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
     banned.ban(&mut *connection).await.unwrap();
