@@ -1,6 +1,7 @@
 use crate::{TestClient, TestRequest};
 use pointercrate_core::etag::Taggable;
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_demonlist::demon::FullDemon;
 use pointercrate_demonlist::{
     player::{claim::PlayerClaim, FullPlayer},
     record::RecordStatus,
@@ -101,10 +102,20 @@ impl TestClient {
             .get_success_result()
             .await;
 
-        self
-            .patch(format!("/api/v1/players/{}/", player_id), &patch)
+        self.patch(format!("/api/v1/players/{}/", player_id), &patch)
             .authorize_as(&auth_context)
             .header("If-Match", player.etag_string())
             .expect_status(Status::Ok)
+    }
+
+    pub async fn add_demon(
+        &self, auth_context: &AuthenticatedUser, name: impl Into<String>, position: i16, requirement: i16, verifier: impl Into<String>,
+        publisher: impl Into<String>,
+    ) -> FullDemon {
+        self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": []}))
+            .expect_status(Status::Created)
+            .authorize_as(&auth_context)
+            .get_success_result()
+            .await
     }
 }

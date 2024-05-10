@@ -126,7 +126,7 @@ async fn submit_existing_record(pool: Pool<Postgres>) {
     let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut *connection).await;
 
     let submission =
-        serde_json::json! {{"progress": 60, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890"}};
+        serde_json::json! {{"progress": 60, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "raw_footage": "https://pointercrate.com"}};
 
     let json: serde_json::Value = clnt
         .post("/api/v1/records/", &submission)

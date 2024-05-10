@@ -81,7 +81,7 @@ pub struct MinimalDemon {
 ///
 /// In addition to containing publisher/verifier information it also contains a list of the demon's
 /// creators and a list of accepted records
-#[derive(Debug, Serialize, Display, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Display, PartialEq, Eq, Hash)]
 #[display(fmt = "{}", demon)]
 pub struct FullDemon {
     #[serde(flatten)]
