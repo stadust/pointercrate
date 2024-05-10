@@ -35,7 +35,13 @@ impl FullPlayer {
         match new_nationality {
             Some(ref mut nationality) => {
                 nationality.subdivision = match patch.subdivision {
-                    None => self.player.nationality.as_ref().map(|n| n.subdivision.clone()).unwrap_or(None),
+                    None => self
+                        .player
+                        .nationality
+                        .as_ref()
+                        .filter(|n| n.same_country_as(nationality))
+                        .map(|n| n.subdivision.clone())
+                        .unwrap_or(None),
                     Some(None) => None,
                     Some(Some(subdivision_code)) => Some(nationality.subdivision_by_code(&subdivision_code, connection).await?),
                 }

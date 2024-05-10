@@ -128,6 +128,11 @@ impl Serialize for Continent {
 }
 
 impl Nationality {
+    /// Checks whether [`self`] and `other` refer to the same country (but potentially different subdivisions)
+    pub fn same_country_as(&self, other: &Nationality) -> bool {
+        self.iso_country_code == other.iso_country_code
+    }
+
     /// Updates the score for this [`Nationality`] and contained [`Subdivision`] (if set).
     pub async fn update_nation_score(&self, connection: &mut PgConnection) -> Result<(), sqlx::Error> {
         sqlx::query!(
