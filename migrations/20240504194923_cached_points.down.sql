@@ -14,6 +14,8 @@ DROP FUNCTION recompute_subdivision_scores();
 DROP FUNCTION score_of_subdivision(iso_country_code VARCHAR(2), iso_code VARCHAR(3));
 DROP VIEW score_giving;
 
+ALTER TABLE players DROP CONSTRAINT nation_subdivions_fkey;
+
 -- Copied from 20210419002933.up
 CREATE VIEW players_with_score AS
 SELECT players.id,
