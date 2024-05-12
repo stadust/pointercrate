@@ -233,7 +233,7 @@ impl Player {
 
         sqlx::query!(
             "UPDATE players SET nationality = $1, subdivision = $2 WHERE id = $3",
-            iso_country_code, 
+            iso_country_code,
             subdivision_code,
             self.base.id
         )

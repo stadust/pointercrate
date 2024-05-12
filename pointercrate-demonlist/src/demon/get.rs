@@ -23,11 +23,7 @@ impl MinimalDemon {
     }
 
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<MinimalDemon> {
-        let mut stream = sqlx::query!(
-            r#"SELECT id, name, position FROM demons WHERE name = $1"#,
-            name.to_string()
-        )
-        .fetch(connection);
+        let mut stream = sqlx::query!(r#"SELECT id, name, position FROM demons WHERE name = $1"#, name.to_string()).fetch(connection);
 
         let mut demon = None;
         let mut further_demons = Vec::new();

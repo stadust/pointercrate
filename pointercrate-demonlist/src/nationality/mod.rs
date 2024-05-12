@@ -150,7 +150,7 @@ impl Nationality {
             .execute(&mut *connection)
             .await?;
         }
-        
+
         Ok(())
     }
 }

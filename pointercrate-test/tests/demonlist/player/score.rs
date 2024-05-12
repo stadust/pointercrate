@@ -108,27 +108,19 @@ pub async fn test_player_score_reflects_to_nationality(pool: Pool<Postgres>) {
     assert_ne!(nationality_score("GB", &mut connection).await, 0f64);
     assert_ne!(subdivision_score("GB", "ENG", &mut connection).await, 0f64);
 
-    clnt.patch_player(
-        demon.demon.verifier.id,
-        &helper,
-        serde_json::json!({"subdivision": "SCT"}),
-    )
-    .await
-    .execute()
-    .await;
+    clnt.patch_player(demon.demon.verifier.id, &helper, serde_json::json!({"subdivision": "SCT"}))
+        .await
+        .execute()
+        .await;
 
     assert_ne!(nationality_score("GB", &mut connection).await, 0f64);
     assert_eq!(subdivision_score("GB", "ENG", &mut connection).await, 0f64);
     assert_ne!(subdivision_score("GB", "SCT", &mut connection).await, 0f64);
 
-    clnt.patch_player(
-        demon.demon.verifier.id,
-        &helper,
-        serde_json::json!({"nationality": "DE"}),
-    )
-    .await
-    .execute()
-    .await;
+    clnt.patch_player(demon.demon.verifier.id, &helper, serde_json::json!({"nationality": "DE"}))
+        .await
+        .execute()
+        .await;
 
     assert_eq!(nationality_score("GB", &mut connection).await, 0f64);
     assert_eq!(subdivision_score("GB", "SCT", &mut connection).await, 0f64);

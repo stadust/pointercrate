@@ -8,7 +8,6 @@ use crate::{
 };
 use sqlx::{Error, PgConnection};
 
-
 impl Player {
     pub async fn upgrade(self, connection: &mut PgConnection) -> Result<FullPlayer> {
         let records = approved_records_by(&self.base, connection).await?;
@@ -72,12 +71,9 @@ impl DatabasePlayer {
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<DatabasePlayer> {
         let name = name.trim();
 
-        let result = sqlx::query_as!(DatabasePlayer,
-            "SELECT id, name, banned FROM players WHERE name = $1",
-            name
-        )
-        .fetch_one(connection)
-        .await;
+        let result = sqlx::query_as!(DatabasePlayer, "SELECT id, name, banned FROM players WHERE name = $1", name)
+            .fetch_one(connection)
+            .await;
 
         match result {
             Ok(player) => Ok(player),

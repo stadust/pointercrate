@@ -73,7 +73,8 @@ async fn test_patch_player_nationality(pool: Pool<Postgres>) {
     let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
 
     // Try to set subdivision when no nation is set. Should fail.
-    let result: serde_json::Value = client.patch_player(player.id, &user, serde_json::json!({"subdivision": "ENG"}))
+    let result: serde_json::Value = client
+        .patch_player(player.id, &user, serde_json::json!({"subdivision": "ENG"}))
         .await
         .expect_status(Status::Conflict)
         .get_result()
