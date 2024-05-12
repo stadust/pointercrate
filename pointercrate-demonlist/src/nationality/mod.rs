@@ -1,14 +1,14 @@
 use crate::demon::MinimalDemon;
 use derive_more::Constructor;
-pub use get::nations_with_subdivisions;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use sqlx::PgConnection;
 
 mod get;
 mod paginate;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor, Deserialize, Clone)]
 pub struct Nationality {
     #[serde(rename = "country_code")]
     pub iso_country_code: String,
@@ -124,5 +124,33 @@ impl Serialize for Continent {
             Continent::SouthAmerica => "south america",
             Continent::MiddleAmerica => "central america",
         })
+    }
+}
+
+impl Nationality {
+    /// Checks whether [`self`] and `other` refer to the same country (but potentially different subdivisions)
+    pub fn same_country_as(&self, other: &Nationality) -> bool {
+        self.iso_country_code == other.iso_country_code
+    }
+
+    /// Updates the score for this [`Nationality`] and contained [`Subdivision`] (if set).
+    pub async fn update_nation_score(&self, connection: &mut PgConnection) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE nationalities SET score = coalesce(score_of_nation($1), 0) FROM players WHERE iso_country_code = $1",
+            self.iso_country_code
+        )
+        .execute(&mut *connection)
+        .await?;
+        if let Some(ref subdivision) = self.subdivision {
+            sqlx::query!(
+                "UPDATE subdivisions SET score = coalesce(score_of_subdivision($1, $2), 0) FROM players WHERE nation = $1 AND iso_code = $2",
+                self.iso_country_code,
+                subdivision.iso_code
+            )
+            .execute(&mut *connection)
+            .await?;
+        }
+        
+        Ok(())
     }
 }

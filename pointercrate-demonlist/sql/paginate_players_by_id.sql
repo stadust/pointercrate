@@ -1,4 +1,4 @@
-SELECT id, name::TEXT, banned, nation::TEXT, iso_country_code::TEXT
+SELECT id, name::TEXT, banned, nation::TEXT, iso_country_code::TEXT, players.score
 FROM players
 LEFT OUTER JOIN nationalities ON nationality = iso_country_code
 WHERE (id < $1 OR $1 IS NULL)

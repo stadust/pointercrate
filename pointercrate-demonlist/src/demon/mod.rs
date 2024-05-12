@@ -81,7 +81,7 @@ pub struct MinimalDemon {
 ///
 /// In addition to containing publisher/verifier information it also contains a list of the demon's
 /// creators and a list of accepted records
-#[derive(Debug, Serialize, Display, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Display, PartialEq, Eq, Hash)]
 #[display(fmt = "{}", demon)]
 pub struct FullDemon {
     #[serde(flatten)]
@@ -199,19 +199,7 @@ impl Demon {
         Ok(())
     }
 
-    /// Decrements the position of all demons with positions equal to or smaller than the given one,
-    /// by one.
-    async fn shift_up(until: i16, connection: &mut PgConnection) -> Result<()> {
-        info!("Shifting up all demons until {}", until);
-
-        sqlx::query!("UPDATE demons SET position = position - 1 WHERE position <= $1", until)
-            .execute(connection)
-            .await?;
-
-        Ok(())
-    }
-
-    /// Gets the current max position a demon has, or `CoreError::NotFound` if there are no demons
+    /// Gets the current max position a demon has, or `0` if there are no demons
     /// in the database
     pub async fn max_position(connection: &mut PgConnection) -> Result<i16> {
         Ok(sqlx::query!("SELECT MAX(position) as max_position FROM demons")

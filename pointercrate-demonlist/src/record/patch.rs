@@ -69,6 +69,10 @@ impl FullRecord {
             _ => (),
         }
 
+        // Not all record update require recomputing scores (for example, changing status from "submitted" to "under consideration")
+        // but the logic for correctly determining this is hard, and updating scores of individual players cheap, so we do not bother.
+        self.player.update_score(connection).await?;
+
         Ok(self)
     }
 
@@ -239,6 +243,8 @@ impl FullRecord {
     ///
     /// If the new player has a record that would stand in conflict with this one, this records
     /// takes precedence and overrides the existing one.
+    ///
+    /// If this record is approved, updates the score of the old holder.
     pub async fn set_player(&mut self, player: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
         if player.banned && self.status != RecordStatus::Rejected {
             return Err(DemonlistError::PlayerBanned);
@@ -249,8 +255,10 @@ impl FullRecord {
         self.ensure_invariants(player.id, self.demon.id, connection).await?;
 
         sqlx::query!("UPDATE records SET player = $1 WHERE id = $2", player.id, self.id)
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
+
+        self.player.update_score(connection).await?;
 
         self.player = player;
 

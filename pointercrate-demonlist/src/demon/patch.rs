@@ -1,7 +1,7 @@
 use crate::{
     demon::{Demon, FullDemon, MinimalDemon},
     error::{DemonlistError, Result},
-    player::DatabasePlayer,
+    player::{recompute_scores, DatabasePlayer},
 };
 use log::{debug, info, warn};
 use pointercrate_core::util::{non_nullable, nullable};
@@ -95,8 +95,11 @@ impl Demon {
     pub async fn set_verifier(&mut self, verifier: DatabasePlayer, connection: &mut PgConnection) -> Result<()> {
         if verifier.id != self.verifier.id {
             sqlx::query!("UPDATE demons SET verifier = $1 WHERE id = $2", verifier.id, self.base.id)
-                .execute(connection)
+                .execute(&mut *connection)
                 .await?;
+
+            self.verifier.update_score(connection).await?;
+            verifier.update_score(connection).await?;
 
             self.verifier = verifier;
         }
@@ -237,12 +240,14 @@ impl MinimalDemon {
         debug!("Performing actual move to position {}", to);
 
         sqlx::query!("UPDATE demons SET position = $2 WHERE id = $1", self.id, to)
-            .execute(connection)
+            .execute(&mut *connection)
             .await?;
 
         info!("Moved demon {} from {} to {} successfully!", self, self.position, to);
 
         self.position = to;
+
+        recompute_scores(connection).await?;
 
         Ok(())
     }

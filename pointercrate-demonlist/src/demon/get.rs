@@ -11,7 +11,7 @@ use sqlx::{Error, PgConnection};
 
 impl MinimalDemon {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<MinimalDemon> {
-        let row = sqlx::query!(r#"SELECT id, name as "name: String", position FROM demons WHERE id = $1"#, id)
+        let row = sqlx::query!(r#"SELECT id, name, position FROM demons WHERE id = $1"#, id)
             .fetch_one(connection)
             .await?;
 
@@ -24,7 +24,7 @@ impl MinimalDemon {
 
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<MinimalDemon> {
         let mut stream = sqlx::query!(
-            r#"SELECT id, name as "name: String", position FROM demons WHERE name = cast($1::text as citext)"#, // FIXME(sqlx) once CITEXT is supported
+            r#"SELECT id, name, position FROM demons WHERE name = $1"#,
             name.to_string()
         )
         .fetch(connection);
@@ -111,17 +111,11 @@ impl Demon {
 
 macro_rules! query_many_demons {
     ($connection:expr, $query:expr, $id:expr) => {{
-        let mut stream = sqlx::query!($query, $id).fetch($connection);
+        let mut stream = sqlx::query_as!(MinimalDemon, $query, $id).fetch($connection);
         let mut demons = Vec::new();
 
         while let Some(row) = stream.next().await {
-            let row = row?;
-
-            demons.push(MinimalDemon {
-                id: row.id,
-                position: row.position,
-                name: row.name,
-            })
+            demons.push(row?)
         }
 
         Ok(demons)
@@ -131,7 +125,7 @@ macro_rules! query_many_demons {
 pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     query_many_demons!(
         connection,
-        r#"SELECT id, name AS "name: String", position FROM demons WHERE publisher = $1"#,
+        r#"SELECT id, name, position FROM demons WHERE publisher = $1"#,
         player.id
     )
 }
@@ -139,7 +133,7 @@ pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection
 pub async fn verified_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     query_many_demons!(
         connection,
-        r#"SELECT id, name as "name: String", position FROM demons WHERE verifier = $1"#,
+        r#"SELECT id, name, position FROM demons WHERE verifier = $1"#,
         player.id
     )
 }

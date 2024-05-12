@@ -171,7 +171,7 @@ pub struct MinimalRecordD {
     pub demon: MinimalDemon,
 }
 
-#[derive(Debug, Hash, Serialize, Display, PartialEq, Eq)]
+#[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq)]
 #[display(fmt = "{} - {}% (ID: {})", player, progress, id)]
 pub struct MinimalRecordP {
     pub id: i32,

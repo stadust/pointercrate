@@ -1,4 +1,3 @@
-use pointercrate_core::etag::Taggable;
 use pointercrate_demonlist::{
     nationality::{Nationality, Subdivision},
     player::{DatabasePlayer, FullPlayer, Player},
@@ -6,6 +5,8 @@ use pointercrate_demonlist::{
 };
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
+
+mod score;
 
 async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, DatabasePlayer) {
     let mut banned = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
@@ -71,27 +72,28 @@ async fn test_patch_player_nationality(pool: Pool<Postgres>) {
     let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
     let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
 
-    let etag = Player::by_id(player.id, &mut *connection)
+    // Try to set subdivision when no nation is set. Should fail.
+    let result: serde_json::Value = client.patch_player(player.id, &user, serde_json::json!({"subdivision": "ENG"}))
         .await
-        .unwrap()
-        .upgrade(&mut *connection)
-        .await
-        .unwrap()
-        .etag_string();
+        .expect_status(Status::Conflict)
+        .get_result()
+        .await;
 
-    let json: FullPlayer = client
-        .patch(
-            format!("/api/v1/players/{}/", player.id),
-            &serde_json::json!({"nationality": "United Kingdom", "subdivision": "ENG"}),
+    assert_eq!(result["code"], 40907);
+
+    // Patch both nationality and subdivision
+    let patched_player: FullPlayer = client
+        .patch_player(
+            player.id,
+            &user,
+            serde_json::json!({"nationality": "United Kingdom", "subdivision": "ENG"}),
         )
-        .authorize_as(&user)
-        .header("If-Match", etag)
-        .expect_status(Status::Ok)
+        .await
         .get_success_result()
         .await;
 
     assert_eq!(
-        json.player.nationality,
+        patched_player.player.nationality,
         Some(Nationality {
             iso_country_code: "GB".into(),
             nation: "United Kingdom".into(),
@@ -101,4 +103,67 @@ async fn test_patch_player_nationality(pool: Pool<Postgres>) {
             })
         })
     );
+
+    // Patch only subdivision, nationality should remain untouched
+    let patched_player: FullPlayer = client
+        .patch_player(
+            player.id,
+            &user,
+            serde_json::json!({"nationality": "United Kingdom", "subdivision": "SCT"}),
+        )
+        .await
+        .get_success_result()
+        .await;
+
+    assert_eq!(
+        patched_player.player.nationality,
+        Some(Nationality {
+            iso_country_code: "GB".into(),
+            nation: "United Kingdom".into(),
+            subdivision: Some(Subdivision {
+                iso_code: "SCT".into(),
+                name: "Scotland".into()
+            })
+        })
+    );
+
+    // Patch nation, but to the one we already have. Shouldn't change anything.
+    client
+        .patch_player(player.id, &user, serde_json::json!({"nationality": "United Kingdom"}))
+        .await
+        .expect_status(Status::NotModified)
+        .execute()
+        .await;
+
+    // Patch only nationality. Should reset subdivision
+    let patched_player: FullPlayer = client
+        .patch_player(player.id, &user, serde_json::json!({"nationality": "Germany"}))
+        .await
+        .get_success_result()
+        .await;
+
+    assert_eq!(
+        patched_player.player.nationality,
+        Some(Nationality {
+            iso_country_code: "DE".into(),
+            nation: "Germany".into(),
+            subdivision: None
+        })
+    );
+
+    // Nonsense nationality/subdivision combo should be rejected
+    let result: serde_json::Value = client
+        .patch_player(
+            player.id,
+            &user,
+            serde_json::json!({"nationality": "Belgium", "subdivision": "ENG"}),
+        )
+        .await
+        .expect_status(Status::NotFound)
+        .get_result()
+        .await;
+
+    assert_eq!(result["code"], 40401);
+    assert_eq!(result["data"]["nation_code"], "BE");
+    assert_eq!(result["data"]["subdivision_code"], "ENG");
 }

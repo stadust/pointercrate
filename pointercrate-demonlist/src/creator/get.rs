@@ -34,7 +34,7 @@ impl Creator {
 
 pub async fn creators_of(demon: &MinimalDemon, connection: &mut PgConnection) -> Result<Vec<DatabasePlayer>> {
     let mut stream = sqlx::query!(
-        r#"SELECT players.id, players.name AS "name: String", players.banned FROM players INNER JOIN creators ON players.id = creators.creator WHERE 
+        r#"SELECT players.id, players.name, players.banned FROM players INNER JOIN creators ON players.id = creators.creator WHERE 
          creators.demon = $1"#,
         demon.id
     )
@@ -57,7 +57,7 @@ pub async fn creators_of(demon: &MinimalDemon, connection: &mut PgConnection) ->
 pub async fn created_by(player_id: i32, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     query_many_demons!(
         connection,
-        r#"SELECT demons.id, demons.name as "name: String", demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE
+        r#"SELECT demons.id, demons.name, demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE
          creators.creator=$1"#,
         player_id
     )

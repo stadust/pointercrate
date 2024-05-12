@@ -1,4 +1,5 @@
 use crate::{config, ratelimits::DemonlistRatelimits};
+use log::warn;
 use pointercrate_core::{error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
@@ -9,10 +10,10 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     error::DemonlistError,
-    nationality::{nations_with_subdivisions, Nationality},
+    nationality::Nationality,
     player::{
         claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
-        DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
+        DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankingPagination, RankedPlayer
     },
     LIST_HELPER,
 };
@@ -190,15 +191,21 @@ pub async fn geolocate_nationality(
         return Err(DemonlistError::VpsDetected.into());
     }
 
-    let nationality = Nationality::by_country_code_or_name(&data.country_code, &mut auth.connection).await?;
-
-    player.set_nationality(nationality, &mut auth.connection).await?;
-
-    if nations_with_subdivisions(&mut auth.connection).await?.contains(&data.country_code) {
-        if let Some(region) = data.region_iso_code {
-            player.set_subdivision(region, &mut auth.connection).await?;
-        }
+    let mut nationality = Nationality::by_country_code_or_name(&data.country_code, &mut auth.connection).await?;
+    if let Some(region) = data.region_iso_code {
+        nationality.subdivision = nationality
+            .subdivision_by_code(&region, &mut auth.connection)
+            .await
+            .inspect_err(|err| {
+                warn!(
+                    "No subdivision {} for nation {}, or nation does not support subdivisions: {:?}",
+                    region, nationality.iso_country_code, err
+                )
+            })
+            .ok();
     }
+
+    player.set_nationality(Some(nationality), &mut auth.connection).await?;
 
     auth.commit().await?;
 

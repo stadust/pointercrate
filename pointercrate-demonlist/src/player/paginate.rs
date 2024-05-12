@@ -1,6 +1,6 @@
 use crate::{
     nationality::{Continent, Nationality},
-    player::{DatabasePlayer, Player, RankedPlayer},
+    player::{DatabasePlayer, Player},
 };
 use futures::StreamExt;
 use pointercrate_core::{
@@ -82,6 +82,7 @@ impl Paginatable<PlayerPagination> for Player {
                     name: row.get("name"),
                     banned: row.get("banned"),
                 },
+                score: row.get("score"),
                 nationality,
             })
         }
@@ -125,12 +126,21 @@ impl PaginationQuery for RankingPagination {
     }
 }
 
+#[derive(Debug, Serialize)]
+pub struct RankedPlayer {
+    rank: i64,
+    #[serde(skip)]
+    index: i64,
+    #[serde(flatten)]
+    player: Player,
+}
+
 impl Paginatable<RankingPagination> for RankedPlayer {
     async fn first_and_last(connection: &mut PgConnection) -> Result<Option<(i32, i32)>, sqlx::Error> {
-        Ok(sqlx::query!("SELECT MAX(index) FROM players_with_score")
+        Ok(sqlx::query!("SELECT COUNT(*) FROM players WHERE NOT banned AND score > 0.0")
             .fetch_one(connection)
             .await?
-            .max
+            .count
             .map(|max| (1, max as i32)))
     }
 
@@ -164,13 +174,20 @@ impl Paginatable<RankingPagination> for RankedPlayer {
                 _ => None,
             };
 
-            players.push(RankedPlayer {
-                id: row.get("id"),
-                name: row.get("name"),
-                rank: row.get("rank"),
-                nationality,
+            let player = Player {
+                base: DatabasePlayer {
+                    id: row.get("id"),
+                    name: row.get("name"),
+                    banned: false,
+                },
                 score: row.get("score"),
+                nationality,
+            };
+
+            players.push(RankedPlayer {
+                rank: row.get("rank"),
                 index: row.get("index"),
+                player,
             })
         }
 

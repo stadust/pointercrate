@@ -1,10 +1,16 @@
-use crate::TestClient;
+use crate::{TestClient, TestRequest};
+use pointercrate_core::etag::Taggable;
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_demonlist::demon::FullDemon;
 use pointercrate_demonlist::{
-    player::claim::PlayerClaim, record::RecordStatus, submitter::Submitter, LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
+    player::{claim::PlayerClaim, FullPlayer},
+    record::RecordStatus,
+    submitter::Submitter,
+    LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
+use pointercrate_user::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageConfig;
-use rocket::local::asynchronous::Client;
+use rocket::{http::Status, local::asynchronous::Client};
 use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
 use std::{net::IpAddr, str::FromStr};
 
@@ -86,4 +92,30 @@ pub async fn add_simple_record(progress: i16, player: i32, demon: i32, status: R
     .await
     .unwrap()
     .id
+}
+
+impl TestClient {
+    pub async fn patch_player(&self, player_id: i32, auth_context: &AuthenticatedUser, patch: serde_json::Value) -> TestRequest {
+        let player: FullPlayer = self
+            .get(format!("/api/v1/players/{}/", player_id))
+            .expect_status(Status::Ok)
+            .get_success_result()
+            .await;
+
+        self.patch(format!("/api/v1/players/{}/", player_id), &patch)
+            .authorize_as(&auth_context)
+            .header("If-Match", player.etag_string())
+            .expect_status(Status::Ok)
+    }
+
+    pub async fn add_demon(
+        &self, auth_context: &AuthenticatedUser, name: impl Into<String>, position: i16, requirement: i16, verifier: impl Into<String>,
+        publisher: impl Into<String>,
+    ) -> FullDemon {
+        self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": []}))
+            .expect_status(Status::Created)
+            .authorize_as(&auth_context)
+            .get_success_result()
+            .await
+    }
 }

@@ -219,6 +219,10 @@ impl ValidatedSubmission {
             .await?;
         }
 
+        if self.status != RecordStatus::Submitted {
+            record.player.update_score(connection).await?;
+        }
+
         Ok(record)
     }
 }
