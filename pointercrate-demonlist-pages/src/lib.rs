@@ -1,4 +1,4 @@
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup};
 
 use pointercrate_demonlist::{config, demon::Demon};
 
@@ -118,52 +118,6 @@ fn dropdown(section: &ListSection, demons: &[&Demon], current: Option<&Demon>) -
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-fn sidebar_ad() -> Markup {
-    html! {
-        @if let Some(publisher_id) = pointercrate_core_pages::config::adsense_publisher_id() {
-            section.panel.fade.js-scroll-anim data-anim = "fade" style = "order: 1; padding: 0px; border: 0" {
-                (PreEscaped(format!(r#"
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-         crossorigin="anonymous"></script>
-    <!-- Demonlist Sidebar Ad -->
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="{0}"
-         data-ad-slot="2559641548"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({{}});
-    </script>
-                "#, publisher_id)))
-            }
-        }
-    }
-}
-
-fn besides_sidebar_ad() -> Markup {
-    html! {
-        @if let Some(publisher_id) = pointercrate_core_pages::config::adsense_publisher_id() {
-            div #outofboundsad style="margin-left: calc(45% + 1072px/2);position: fixed;padding-left: 15px;padding-top: 15px; max-width: 200px" {
-                (PreEscaped(format!(r#"
-                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-         crossorigin="anonymous"></script>
-    <!-- Demonlist Sidebar Ad #2 -->
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="{0}"
-         data-ad-slot="3380750697"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({{}});
-    </script>
-                "#, publisher_id)))
             }
         }
     }

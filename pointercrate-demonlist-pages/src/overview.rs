@@ -7,7 +7,7 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core_pages::{config as page_config, head::HeadLike, PageFragment};
+use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, TimeShiftedDemon},
@@ -22,76 +22,39 @@ pub struct OverviewPage {
 
 fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
     html! {
-        section.panel.fade style="overflow:hidden" {
-            div.flex style = "align-items: center" {
-                div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {
-                    @if let Some(video) = &demon.video {
-                        a.play href = (video) {}
-                    }
-                    @else {
-                        a.play href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" {}
-                    }
-                }
-                div style = "padding-left: 15px" {
-                    h2 style = "text-align: left; margin-bottom: 0px" {
-                        a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
-                            "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
-                        }
-                    }
-                    h3 style = "text-align: left" {
-                        i {
-                            (demon.publisher.name)
-                        }
-                        @if let Some(current_position) = current_position {
-                            br;
-                            @if current_position > list_config::extended_list_size() {
-                                "Currently Legacy"
-                            }
-                            @else {
-                                "Currently #"(current_position)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // Gotta put the ads in this method although they dont belong here, yikes
-        @if let Some(publisher_id) = page_config::adsense_publisher_id() {
-            @if demon.base.position == 1 {
-                section.panel.fade style = "padding: 0px; height: 90px"{
-                    (PreEscaped(format!(r#"
-                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-    crossorigin="anonymous"></script>
-    <!-- Demonlist Responsive Feed Ad -->
-    <ins class="adsbygoogle"
-    style="display:inline-block;width:728px;height:90px"
-    data-ad-client="{0}"
-    data-ad-slot="2819150519"></ins>
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({{}});
-    </script>
-                    "#, publisher_id)))
-                }
-            }
-            // Place ad every 10th demon
-            @if demon.base.position % 10 == 0 {
-                section.panel.fade {
-                (PreEscaped(format!(r#"
-                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-    crossorigin="anonymous"></script>
-    <ins class="adsbygoogle"
-    style="display:block"
-    data-ad-format="fluid"
-    data-ad-layout-key="-h1+40+4u-93+n"
-    data-ad-client="{0}"
-    data-ad-slot="5157884729"></ins>
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({{}});
-    </script>
-                    "#, publisher_id)))
-                }
-            }
-        }
+         section.panel.fade style="overflow:hidden" {
+             div.flex style = "align-items: center" {
+                 div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {
+                     @if let Some(video) = &demon.video {
+                         a.play href = (video) {}
+                     }
+                     @else {
+                         a.play href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" {}
+                     }
+                 }
+                 div style = "padding-left: 15px" {
+                     h2 style = "text-align: left; margin-bottom: 0px" {
+                         a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
+                             "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
+                         }
+                     }
+                     h3 style = "text-align: left" {
+                         i {
+                             (demon.publisher.name)
+                         }
+                         @if let Some(current_position) = current_position {
+                             br;
+                             @if current_position > list_config::extended_list_size() {
+                                 "Currently Legacy"
+                             }
+                             @else {
+                                 "Currently #"(current_position)
+                             }
+                         }
+                     }
+                 }
+             }
+         }
     }
 }
 
@@ -163,7 +126,6 @@ impl OverviewPage {
         let dropdowns = super::dropdowns(&demons_for_dropdown[..], None);
 
         html! {
-            (super::besides_sidebar_ad())
             (dropdowns)
 
             div.flex.m-center.container {
@@ -191,7 +153,6 @@ impl OverviewPage {
 
                 aside.right {
                     (self.team)
-                    (super::sidebar_ad())
                     (super::rules_panel())
                     (submit_panel())
                     (stats_viewer_panel())

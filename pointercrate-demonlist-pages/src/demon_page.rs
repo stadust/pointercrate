@@ -6,8 +6,8 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use chrono::NaiveDateTime;
-use maud::{html, Markup, PreEscaped, Render};
-use pointercrate_core_pages::{config as page_config, head::HeadLike, PageFragment};
+use maud::{html, Markup, PreEscaped};
+use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
     config::{self as list_config, extended_list_size},
     demon::{Demon, FullDemon},
@@ -145,27 +145,10 @@ impl DemonPage {
         }
 
         html! {
-            (super::besides_sidebar_ad())
             (dropdowns)
 
             div.flex.m-center.container {
                 main.left {
-                    @if let Some(publisher_id) = page_config::adsense_publisher_id() {
-                        div.panel.fade style = "padding: 0px; height: 90px" {
-                            (PreEscaped(format!(r#"
-                            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={0}"
-         crossorigin="anonymous"></script>
-    <!-- Demonpage Banner ad -->
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:728px;height:90px"
-         data-ad-client="{0}"
-         data-ad-slot="4829214686"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({{}});
-    </script>
-                            "#, publisher_id)))
-                        }
-                    }
                     (RecordSubmitter::new(false, &self.demonlist))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
@@ -208,7 +191,6 @@ impl DemonPage {
                 }
                 aside.right {
                     (self.team)
-                    (super::sidebar_ad())
                     (super::rules_panel())
                     (submit_panel())
                     (stats_viewer_panel())
