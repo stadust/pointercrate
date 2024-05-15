@@ -57,6 +57,7 @@ impl Render for Tardis {
                                 @match destination.day() {
                                    1 | 21 | 31 => (destination.format("%A, %B %est %Y at %l:%M:%S%P GMT%Z")),
                                    2 | 22 => (destination.format("%A, %B %end %Y at %l:%M:%S%P GMT%Z")),
+                                   3 | 23 => (destination.format("%A, %B %erd %Y at %l:%M:%S%P GMT%Z")),
                                    _ => (destination.format("%A, %B %eth %Y at %l:%M:%S%P GMT%Z"))
                                 }
                             }
