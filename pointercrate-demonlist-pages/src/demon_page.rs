@@ -9,7 +9,7 @@ use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped, Render};
 use pointercrate_core_pages::{config as page_config, head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
-    config as list_config,
+    config::{self as list_config, extended_list_size},
     demon::{Demon, FullDemon},
 };
 use pointercrate_integrate::gd::{DemonRating, IntegrationLevel, LevelRating, Thunk};
@@ -46,11 +46,16 @@ impl From<DemonPage> for PageFragment {
 
 impl DemonPage {
     fn title(&self) -> String {
-        format!(
-            "#{} - {} - Geometry Dash Demonlist",
-            self.data.demon.base.position,
+        let mut title = format!(
+            "{} - Geometry Dash Demonlist",
             self.data.demon.base.name // FIXME: flatten the structs, holy shit
-        )
+        );
+
+        if self.data.demon.base.position <= extended_list_size() {
+            title = format!("#{} - {}", self.data.demon.base.position, title);
+        }
+
+        title
     }
 
     fn description(&self) -> String {
@@ -100,7 +105,7 @@ impl DemonPage {
                     "url": "https://pointercrate.com/demonlist/{0}/"
                 }}
                 </script>
-            "##, self.data.position(), self.data.name(), self.description().render().0)))
+            "##, self.data.position(), self.data.name(), self.description())))
             (PreEscaped(format!("
                 <script>
                     window.list_length = {0};
@@ -238,7 +243,7 @@ impl DemonPage {
                     }
                     (PreEscaped(format!(r#"
                     <script>
-                    document.getElementById("demon-heading").addEventListener('click', () => navigator.clipboard.writeText('https://pointercrate.com/demonlist/permalink/{}/'))
+                    document.getElementById("demon-heading").addEventListener('click', () => navigator.clipboard.writeText('https://pointercrate.com/demonlist/permalink/{}/?redirect'))
                     </script>
                     "#, self.data.demon.base.id)))
                     h3 {
