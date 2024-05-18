@@ -61,14 +61,14 @@ CREATE VIEW ranked_players AS
 ALTER TABLE nationalities ADD COLUMN score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
 
 CREATE FUNCTION score_of_nation(iso_country_code VARCHAR(2)) RETURNS DOUBLE PRECISION AS $$
-    SELECT SUM(record_score(progress, position, 150, requirement))
+    SELECT SUM(record_score(q.progress, q.position, 150, q.requirement))
     FROM (
         SELECT DISTINCT ON (position) * from score_giving
         INNER JOIN players 
                 ON players.id=player
         WHERE players.nationality = iso_country_code
         ORDER BY position, progress DESC
-    )
+    ) q
 $$ LANGUAGE SQL;
 
 CREATE FUNCTION recompute_nation_scores() RETURNS void AS $$
@@ -93,7 +93,7 @@ SELECT recompute_nation_scores();
 ALTER TABLE subdivisions ADD COLUMN score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
 
 CREATE FUNCTION score_of_subdivision(iso_country_code VARCHAR(2), iso_code VARCHAR(3)) RETURNS DOUBLE PRECISION AS $$
-    SELECT SUM(record_score(progress, position, 150, requirement))
+    SELECT SUM(record_score(q.progress, q.position, 150, q.requirement))
     FROM (
         SELECT DISTINCT ON (position) * from score_giving
         INNER JOIN players 
@@ -101,7 +101,7 @@ CREATE FUNCTION score_of_subdivision(iso_country_code VARCHAR(2), iso_code VARCH
         WHERE players.nationality = iso_country_code
           AND players.subdivision = iso_code
         ORDER BY position, progress DESC
-    )
+    ) q
 $$ LANGUAGE SQL;
 
 CREATE FUNCTION recompute_subdivision_scores() RETURNS void AS $$
