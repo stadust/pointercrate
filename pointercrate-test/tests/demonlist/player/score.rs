@@ -166,3 +166,70 @@ pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) 
 
     assert_eq!(player.player.score, 0.0f64, "Progress record on extended list demon is given score");
 }
+
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+
+    let list_size = std::env::var("LIST_SIZE").unwrap().parse::<i16>().unwrap();
+
+    let mut last_demon_id = 0;
+
+    for position in 1..=list_size {
+        last_demon_id = sqlx::query!(
+            "INSERT INTO demons (name, position, requirement, verifier, publisher) VALUES ('Bloodbath', $2, 98, $1, $1) RETURNING id",
+            player.id,
+            position
+        )
+        .fetch_one(&mut *connection)
+        .await
+        .unwrap()
+        .id;
+    }
+
+    let submission = serde_json::json! {{"progress": 99, "demon": last_demon_id, "player": "stardust1972", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
+    let record = clnt
+        .post("/api/v1/records", &submission)
+        .authorize_as(&helper)
+        .expect_status(Status::Ok)
+        .get_success_result::<FullRecord>()
+        .await;
+
+    assert_eq!(record.demon.position, 75);
+
+    let player: FullPlayer = clnt
+        .get(format!("/api/v1/players/{}", record.player.id))
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
+
+    assert_ne!(
+        player.player.score, 0.0f64,
+        "Progress record on final main list demon not giving score"
+    );
+
+    // Shift everything down. The demon on which the player has a progress record is now no longer main list, so his score should be updated to 0 now.
+    let _ = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
+
+    let record: FullRecord = clnt
+        .get(format!("/api/v1/records/{}", record.id))
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
+
+    assert_eq!(record.demon.position, 76);
+
+    let player: FullPlayer = clnt
+        .get(format!("/api/v1/players/{}", record.player.id))
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
+
+    assert_eq!(
+        player.player.score, 0.0f64,
+        "Removal of player's last record did not reset their score to 0"
+    );
+}
