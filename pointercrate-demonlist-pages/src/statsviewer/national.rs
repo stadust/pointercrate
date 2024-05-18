@@ -31,7 +31,7 @@ fn nation_based_stats_viewer_html() -> Markup {
             }
         }
         div #world-map-wrapper {
-            object #world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" {}
+            object style="min-width:100%" #world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" {}
         }
         div.flex.m-center.container {
             main.left {
