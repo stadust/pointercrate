@@ -66,6 +66,8 @@ jobs:
           DATABASE_URL: postgresql://pointercrate:postgres@localhost/postgres
           RUST_BACKTRACE: 1
           RUSTFLAGS: -Cinstrument-coverage
+          LIST_SIZE: 75
+          EXNTEDED_LIST_SIZE: 150
 
       - name: Install grcov
         uses: actions-rs/cargo@v1
