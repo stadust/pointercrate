@@ -70,8 +70,8 @@ impl Render for NavigationBar {
             header {
                 nav.center.collapse.underlined.see-through {
                     div.nav-icon style = "margin-right: auto" {
-                        a href = "/" {
-                            img src = (self.logo_path) style="height:15px";
+                        a href = "/" aria-label = "Go to homepage" {
+                            img src = (self.logo_path) style="height:15px" alt="Logo";
                         }
                     }
                     @for item in &self.items {
