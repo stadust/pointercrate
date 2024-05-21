@@ -53,7 +53,9 @@ impl FullPlayer {
             },
         }
 
-        self.player.set_nationality(new_nationality, connection).await?;
+        if new_nationality != self.player.nationality {
+            self.player.set_nationality(new_nationality, connection).await?;
+        }
 
         if let Some(banned) = patch.banned {
             if banned && !self.player.base.banned {
