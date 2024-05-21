@@ -136,14 +136,14 @@ impl Nationality {
     /// Updates the score for this [`Nationality`] and contained [`Subdivision`] (if set).
     pub async fn update_nation_score(&self, connection: &mut PgConnection) -> Result<(), sqlx::Error> {
         sqlx::query!(
-            "UPDATE nationalities SET score = coalesce(score_of_nation($1), 0) FROM players WHERE iso_country_code = $1",
+            "UPDATE nationalities SET score = coalesce(score_of_nation($1), 0) WHERE iso_country_code = $1",
             self.iso_country_code
         )
         .execute(&mut *connection)
         .await?;
         if let Some(ref subdivision) = self.subdivision {
             sqlx::query!(
-                "UPDATE subdivisions SET score = coalesce(score_of_subdivision($1, $2), 0) FROM players WHERE nation = $1 AND iso_code = $2",
+                "UPDATE subdivisions SET score = coalesce(score_of_subdivision($1, $2), 0) WHERE nation = $1 AND iso_code = $2",
                 self.iso_country_code,
                 subdivision.iso_code
             )
