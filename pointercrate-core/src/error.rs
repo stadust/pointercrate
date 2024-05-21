@@ -205,11 +205,12 @@ pub enum CoreError {
     )]
     DatabaseError,
 
-
     /// `500 INTERNAL SERVER ERROR` reported when postgres terminates a query due to hitting `statement_timeout`
     ///
     /// Error Code `50004`
-    #[display(fmt = "Internally, a database query timed out. This could be due to high server load, or because of a logic error resulting in a deadlock. If this issue persists after retrying, please notify a server administrator!")]
+    #[display(
+        fmt = "Internally, a database query timed out. This could be due to high server load, or because of a logic error resulting in a deadlock. If this issue persists after retrying, please notify a server administrator!"
+    )]
     QueryTimeout,
 
     /// `500 INTERNAL SERVER ERROR` variant returned if the server fails to acquire a database
@@ -276,7 +277,7 @@ impl From<sqlx::Error> for CoreError {
                 error!("Database error: {:?}. ", err);
 
                 CoreError::QueryTimeout
-            }
+            },
             sqlx::Error::Database(database_error) => {
                 let database_error = database_error.downcast::<PgDatabaseError>();
 
