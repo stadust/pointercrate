@@ -11,15 +11,13 @@ use sqlx::{Error, PgConnection};
 
 impl MinimalDemon {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<MinimalDemon> {
-        let row = sqlx::query!(r#"SELECT id, name, position FROM demons WHERE id = $1"#, id)
+        sqlx::query_as!(MinimalDemon, r#"SELECT id, name, position FROM demons WHERE id = $1"#, id)
             .fetch_one(connection)
-            .await?;
-
-        Ok(MinimalDemon {
-            id,
-            position: row.position,
-            name: row.name,
-        })
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => DemonlistError::DemonNotFound { demon_id: id },
+                _ => err.into()
+            })
     }
 
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<MinimalDemon> {
