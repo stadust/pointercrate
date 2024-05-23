@@ -16,7 +16,7 @@ impl MinimalDemon {
             .await
             .map_err(|err| match err {
                 Error::RowNotFound => DemonlistError::DemonNotFound { demon_id: id },
-                _ => err.into()
+                _ => err.into(),
             })
     }
 
