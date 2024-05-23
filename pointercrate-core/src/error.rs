@@ -2,7 +2,6 @@ use crate::permission::Permission;
 use derive_more::Display;
 use log::error;
 use serde::Serialize;
-use sqlx::postgres::PgDatabaseError;
 use std::{error::Error, time::Duration};
 
 pub type Result<T> = std::result::Result<T, CoreError>;
@@ -272,39 +271,12 @@ impl PointercrateError for CoreError {
 
 impl From<sqlx::Error> for CoreError {
     fn from(error: sqlx::Error) -> Self {
+        error!("Database error: {:?}. Backtrace:\n {}", error, std::backtrace::Backtrace::capture());
+
         match error {
-            sqlx::Error::Database(err) if err.code().as_deref() == Some("57014") => {
-                error!("Database error: {:?}. ", err);
-
-                CoreError::QueryTimeout
-            },
-            sqlx::Error::Database(database_error) => {
-                let database_error = database_error.downcast::<PgDatabaseError>();
-
-                error!("Database error: {:?}. ", database_error);
-
-                CoreError::DatabaseError
-            },
-            sqlx::Error::PoolClosed | sqlx::Error::PoolTimedOut => {
-                error!("Failed to acquire database connection");
-
-                CoreError::DatabaseConnectionError
-            },
-            sqlx::Error::ColumnNotFound(column) => {
-                format!("Invalid access to column {}, which does not exist", column);
-
-                CoreError::DatabaseError
-            },
-            sqlx::Error::RowNotFound => {
-                error!("Unhandled 'NotFound', this is a logic or data consistency error");
-
-                CoreError::DatabaseError
-            },
-            _ => {
-                error!("Database error: {:?}", error);
-
-                CoreError::DatabaseError
-            },
+            sqlx::Error::Database(err) if err.code().as_deref() == Some("57014") => CoreError::QueryTimeout,
+            sqlx::Error::PoolClosed | sqlx::Error::PoolTimedOut => CoreError::DatabaseConnectionError,
+            _ => CoreError::DatabaseError,
         }
     }
 }
