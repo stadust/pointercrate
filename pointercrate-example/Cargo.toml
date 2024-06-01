@@ -18,4 +18,4 @@ pointercrate-demonlist-pages = { version = "0.1.0", path = "../pointercrate-demo
 pointercrate-user = { version = "0.1.0", path = "../pointercrate-user" }
 pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api" }
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages" }
-rocket = "0.5.0"
+rocket = "0.5.1"

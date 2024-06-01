@@ -7,7 +7,7 @@ edition.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.5.0"
+rocket = "0.5.1"
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}
 pointercrate-demonlist-pages = {path = "../pointercrate-demonlist-pages"}
 pointercrate-core = {path = "../pointercrate-core"}
@@ -23,6 +23,6 @@ serde_urlencoded = "0.7.0"
 nonzero_ext = "0.3.0"
 reqwest = {version = "0.12.*", features = ["json"]}
 chrono = "0.4.38"
-serde = "1.0.202"
+serde = "1.0.203"
 governor = "0.6.0"
 rand = "0.8.5"
