@@ -41,7 +41,7 @@ impl Render for RecordSubmitter<'_> {
                         "Holder:"
                     }
                     p {
-                        "The holder of the record. Please enter the holders Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
+                        "The player holding the record. Please enter the player's Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
                     }
                     span.form-input.flex.col #id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
                         span {
