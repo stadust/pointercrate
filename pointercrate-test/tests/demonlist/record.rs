@@ -216,7 +216,6 @@ async fn test_record_deletion_updates_player_score(pool: Pool<Postgres>) {
         .execute()
         .await;
 
-
     let player: FullPlayer = clnt
         .get(format!("/api/v1/players/{}", player.player.base.id))
         .expect_status(Status::Ok)
