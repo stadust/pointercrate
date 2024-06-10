@@ -1,9 +1,10 @@
 use pointercrate_core::error::PointercrateError;
+use pointercrate_core::etag::Taggable;
 use pointercrate_demonlist::{
     error::DemonlistError,
-    player::DatabasePlayer,
+    player::{DatabasePlayer, FullPlayer},
     record::{note::Note, FullRecord, RecordStatus},
-    LIST_HELPER,
+    LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_test::{demonlist::add_simple_record, user::system_user_with_perms};
 use rocket::http::Status;
@@ -181,4 +182,46 @@ async fn test_record_note_creation_and_deletion(pool: Pool<Postgres>) {
         .expect_status(Status::NoContent)
         .execute()
         .await;
+}
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_record_deletion_updates_player_score(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1972", "stardust1972").await;
+
+    let submission = serde_json::json! {{"progress": 100, "demon": demon.demon.base.id, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
+
+    let record = clnt
+        .post("/api/v1/records", &submission)
+        .authorize_as(&helper)
+        .expect_status(Status::Ok)
+        .get_success_result::<FullRecord>()
+        .await;
+
+    let player: FullPlayer = clnt
+        .get(format!("/api/v1/players/{}", player.id))
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
+
+    assert_ne!(player.player.score, 0.0f64, "Adding approved record failed to give player score");
+
+    clnt.delete(format!("/api/v1/records/{}/", record.id))
+        .authorize_as(&helper)
+        .header("If-Match", record.etag_string())
+        .expect_status(Status::NoContent)
+        .execute()
+        .await;
+
+
+    let player: FullPlayer = clnt
+        .get(format!("/api/v1/players/{}", player.player.base.id))
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
+
+    assert_eq!(player.player.score, 0.0f64, "Deleting approved record failed to lower player score");
 }
