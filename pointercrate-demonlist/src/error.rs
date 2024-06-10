@@ -127,7 +127,7 @@ pub enum DemonlistError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42217`
-    #[display(fmt = "This record is already {}", status)]
+    #[display(fmt = "This record is already {} (existing record: {})", status, existing)]
     SubmissionExists {
         /// The [`RecordStatus`] of the existing [`Record`]
         status: RecordStatus,
