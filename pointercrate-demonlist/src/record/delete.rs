@@ -6,10 +6,15 @@ impl FullRecord {
     pub async fn delete(self, connection: &mut PgConnection) -> Result<()> {
         info!("Deleting record {}", self);
 
-        FullRecord::delete_by_id(self.id, connection).await
+        FullRecord::delete_by_id(self.id, &mut *connection).await?;
+
+        self.player.update_score(connection).await?;
+
+        Ok(())
     }
 
-    /// `FullRecord::delete` should be preferred
+    /// `FullRecord::delete` should be preferred. Only exists to delete invalid submissions
+    /// in the asychronous validation (which is why no score adjustment needs to take place here)
     pub async fn delete_by_id(record_id: i32, connection: &mut PgConnection) -> Result<()> {
         // Associated notes get deleted due to the ON DELETE CASCADE on record_notes.record
 
