@@ -26,8 +26,9 @@ mod post;
 
 pub struct AuthenticatedUser {
     user: User,
-    password_hash: String,
+    password_hash: Option<String>,
     email_address: Option<String>,
+    google_account_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -208,7 +209,11 @@ impl AuthenticatedUser {
     }
 
     fn password_salt(&self) -> Vec<u8> {
-        let raw_parts: Vec<_> = self.password_hash.split('$').filter(|s| !s.is_empty()).collect();
+        if self.password_hash.is_none() {
+            return Vec::new();
+        }
+
+        let raw_parts: Vec<_> = self.password_hash.as_ref().unwrap().split('$').filter(|s| !s.is_empty()).collect();
 
         match &raw_parts[..] {
             [_, _, hash] => b64::decode(&hash[..22]),
@@ -219,7 +224,13 @@ impl AuthenticatedUser {
     pub fn verify_password(self, password: &str) -> Result<Self> {
         debug!("Verifying a password!");
 
-        let valid = bcrypt::verify(password, &self.password_hash).map_err(|err| {
+        if self.password_hash.is_none() {
+            warn!("Attempt to verify password for account {} with no password hash set", self.user);
+
+            return Err(CoreError::Unauthorized.into());
+        }
+
+        let valid = bcrypt::verify(password, &self.password_hash.as_ref().unwrap()).map_err(|err| {
             warn!("Password verification FAILED for account {}: {}", self.user, err);
 
             UserError::Core(CoreError::Unauthorized)
@@ -250,8 +261,9 @@ mod tests {
                 display_name: None,
                 youtube_channel: None,
             },
-            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            password_hash: Some(bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap()),
             email_address: None,
+            google_account_id: None,
         }
     }
 
@@ -264,8 +276,9 @@ mod tests {
                 display_name: None,
                 youtube_channel: None,
             },
-            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            password_hash: Some(bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap()),
             email_address: None,
+            google_account_id: None,
         }
     }
 

@@ -38,6 +38,35 @@ pub async fn register(
         .status(Status::Created))
 }
 
+#[rocket::get("/authorize")]
+pub async fn authorize(ip: IpAddr, ratelimits: &State<UserRatelimits>) -> Result<Response2<()>> {
+    ratelimits.login_attempts(ip)?;
+
+    let redirect_uri = "https://accounts.google.com/o/oauth2/v2/auth".to_string()
+        + format!("?client_id={}", std::env::var("GOOGLE_CLIENT_ID").unwrap()).as_str()
+        + "&response_type=code"
+        + "&scope=email%20profile"
+        + "&redirect_uri=http%3A%2F%2Flocalhost%3A1971%2Fapi%2Fv1%2Fauth%2Fcallback";
+
+    Ok(Response2::new(())
+        .with_header("Location", redirect_uri)
+        .status(Status::TemporaryRedirect))
+}
+
+#[rocket::get("/callback?<code>")]
+pub async fn callback(
+    pool: &State<PointercratePool>, ip: IpAddr, ratelimits: &State<UserRatelimits>, code: &str,
+) -> Result<Response2<Tagged<User>>> {
+    ratelimits.login_attempts(ip)?;
+    let mut connection = pool.transaction().await.map_err(UserError::from)?;
+
+    let user = AuthenticatedUser::oauth2_callback(code, &mut *connection).await?;
+
+    Ok(Response2::tagged(user.into_inner())
+        .with_header("Location", "api/v1/auth/me")
+        .status(Status::Created))
+}
+
 #[rocket::post("/")]
 pub async fn login(
     auth: std::result::Result<BasicAuth, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>,

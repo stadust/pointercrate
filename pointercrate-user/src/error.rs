@@ -40,6 +40,9 @@ pub enum UserError {
     #[display(fmt = "No user with name {} found", user_name)]
     UserNotFoundName { user_name: String },
 
+    #[display(fmt = "No user with google account {} found", google_account_id)]
+    UserNotFoundGoogleAccount { google_account_id: String },
+
     /// `409 CONFLICT` error returned if a user tries to register with a name that's already taken
     ///
     /// Error Code `40902`
@@ -88,6 +91,7 @@ impl PointercrateError for UserError {
             PermissionNotAssignable { .. } => 40305,
             UserNotFound { .. } => 40401,
             UserNotFoundName { .. } => 40401,
+            UserNotFoundGoogleAccount { .. } => 40401,
             NameTaken => 40902,
             InvalidUsername => 42202,
             InvalidPassword => 42204,

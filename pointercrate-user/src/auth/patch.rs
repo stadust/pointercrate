@@ -120,7 +120,7 @@ impl AuthenticatedUser {
         // or errors that happen during internally parsing the hash the library itself just
         // generated. Obviously, an error there is a bug in the library, so we definitely wanna panic since
         // we're dealing with passwords
-        self.password_hash = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
+        self.password_hash = Some(bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap());
 
         sqlx::query!(
             "UPDATE members SET password_hash = $1 WHERE member_id = $2",

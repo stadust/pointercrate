@@ -32,6 +32,23 @@ impl User {
         }
     }
 
+    pub async fn by_google_account(id: &str, connection: &mut PgConnection) -> Result<User> {
+        let row = sqlx::query!(
+            r#"SELECT member_id, members.name, CAST(permissions AS integer), display_name, youtube_channel::text FROM members WHERE google_account_id = $1"#,
+            id
+        )
+        .fetch_one(connection)
+        .await;
+
+        match row {
+            Err(Error::RowNotFound) => Err(UserError::UserNotFoundGoogleAccount {
+                google_account_id: id.to_string(),
+            }),
+            Err(err) => Err(err.into()),
+            Ok(row) => Ok(construct_from_row!(row)),
+        }
+    }
+
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<User> {
         let row = sqlx::query!(
             r#"SELECT member_id, members.name, CAST(permissions AS integer), display_name, youtube_channel::text FROM members WHERE members.name = $1"#,

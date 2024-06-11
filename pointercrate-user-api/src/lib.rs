@@ -22,6 +22,8 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
                 endpoints::auth::patch_me,
                 endpoints::auth::delete_me,
                 endpoints::auth::verify_email,
+                endpoints::auth::authorize,
+                endpoints::auth::callback,
             ],
         )
         .mount(
