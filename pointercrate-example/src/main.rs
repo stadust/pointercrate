@@ -74,7 +74,7 @@ async fn rocket() -> _ {
         // Tab where users can modify their own accounts
         .with_page(ProfileTab)
         // Tab where users can initiate player claims and manage their claimed players
-        .with_page(ListIntegrationTab("https://discord.gg/tMBzYP77ag"))
+        .with_page(ListIntegrationTab("https://discord.gg/tMBzYP77ag", "https://discord.gg/demonlist"))
         // Tab where website moderators can manage permissions. 
         // The vector below specified which permissions a user needs to have for the tab to be displayed.
         .with_page(UsersTab(vec![MODERATOR, LIST_ADMINISTRATOR]))
