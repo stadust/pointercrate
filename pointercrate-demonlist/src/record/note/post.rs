@@ -24,10 +24,11 @@ impl Note {
         }
 
         let note_id = sqlx::query!(
-            "INSERT INTO record_notes (record, content, is_public) VALUES ($1, $2, $3) RETURNING id",
+            "INSERT INTO record_notes (record, content, is_public, is_raw_footage) VALUES ($1, $2, $3, $4) RETURNING id",
             record.id,
             new_note.content,
-            new_note.is_public
+            new_note.is_public,
+            new_note.is_raw_footage
         )
         .fetch_one(connection)
         .await?
@@ -38,6 +39,7 @@ impl Note {
             record: record.id,
             content: new_note.content,
             is_public: new_note.is_public,
+            is_raw_footage: new_note.is_raw_footage,
             transferred: false,
             author: None,
             editors: vec![],
