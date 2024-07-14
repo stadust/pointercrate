@@ -11,4 +11,4 @@ maud = "0.26.0"
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
-async-trait = "0.1.80"
+async-trait = "0.1.81"
