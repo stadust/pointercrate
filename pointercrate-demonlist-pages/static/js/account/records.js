@@ -222,6 +222,7 @@ function createNoteHtml(note) {
   let i = document.createElement("i");
   i.innerHTML = note.content;
 
+
   let furtherInfo = document.createElement("i");
   furtherInfo.style.fontSize = "80%";
   furtherInfo.style.textAlign = "right";
@@ -251,6 +252,16 @@ function createNoteHtml(note) {
   if (isAdmin) noteDiv.appendChild(closeX);
   noteDiv.appendChild(b);
   noteDiv.appendChild(i);
+
+  if (note.raw_footage) {
+    let a = document.createElement("a");
+    a.classList.add("link")
+    a.target = "_blank";
+    a.innerHTML = note.raw_footage;
+    a.href = note.raw_footage; 
+    noteDiv.appendChild(a);
+  }
+
   noteDiv.appendChild(furtherInfo);
 
   return noteDiv;

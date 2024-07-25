@@ -10,6 +10,7 @@ struct PartialNote {
     record: i32,
     content: String,
     is_public: bool,
+    raw_footage: Option<String>,
     author: Option<String>,
     transferred: bool,
 }
@@ -34,6 +35,7 @@ impl PartialNote {
             record: self.record,
             content: self.content,
             is_public: self.is_public,
+            raw_footage: self.raw_footage,
             author: self.author,
             transferred: self.transferred,
             editors,
@@ -46,7 +48,7 @@ impl Note {
         // TODO: handling of deleted users
         let row = sqlx::query_as!(
             PartialNote,
-            r#"SELECT id, record, content, is_public, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL 
+            r#"SELECT id, record, content, is_public, raw_footage, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL 
              AND id = $1) AS "transferred!: bool" FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on 
              members.member_id = record_notes_additions.userid WHERE id = $1 and record = $2"#,
             note_id, record_id
@@ -65,7 +67,7 @@ impl Note {
 pub async fn notes_on(record_id: i32, public_only: bool, connection: &mut PgConnection) -> Result<Vec<Note>> {
     let partials = sqlx::query_as!(
         PartialNote,
-        r#"SELECT id, record, content, is_public, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND 
+        r#"SELECT id, record, content, is_public, raw_footage, members.name AS "author?: String", EXISTS(SELECT 1 FROM record_notes_modifications WHERE record IS NOT NULL AND 
          id = $1) AS "transferred!: bool"  FROM record_notes NATURAL JOIN record_notes_additions LEFT OUTER JOIN members on members.member_id = 
          record_notes_additions.userid WHERE record = $1 AND (NOT $2 OR is_public)"#,
         record_id, public_only

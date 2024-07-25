@@ -201,23 +201,14 @@ impl ValidatedSubmission {
             record.set_status(self.status, &mut *connection).await?;
         }
 
-        if let Some(note) = self.note {
-            if !note.trim().is_empty() {
-                sqlx::query!("INSERT INTO record_notes (record, content) VALUES ($1, $2)", record.id, note)
-                    .execute(&mut *connection)
-                    .await?;
-            }
-        }
-
-        if let Some(raw_footage) = self.raw_footage {
-            sqlx::query!(
-                "INSERT INTO record_notes (record, content) VALUES ($1, $2)",
-                record.id,
-                format!("Raw footage: {}", raw_footage)
-            )
-            .execute(&mut *connection)
-            .await?;
-        }
+        sqlx::query!(
+            "INSERT INTO record_notes (record, content, raw_footage) VALUES ($1, $2, $3)",
+            record.id,
+            self.note,
+            self.raw_footage,
+        )
+        .execute(&mut *connection)
+        .await?;
 
         if self.status != RecordStatus::Submitted {
             record.player.update_score(connection).await?;
