@@ -29,7 +29,7 @@ pub async fn test_search_nation(pool: Pool<Postgres>) {
         .get_result()
         .await;
 
-    assert_eq!(json.len(), 1, "Search did not return player");
+    assert_eq!(json.len(), 1);
     assert_eq!(json[0].nationality.iso_country_code, "DE");
     assert_eq!(json[0].nationality.nation, "Germany");
 }
