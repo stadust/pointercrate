@@ -16,7 +16,7 @@ pub struct NationalityRankingPagination {
     name_contains: Option<String>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RankedNation {
     pub rank: i64,
     pub score: f64,
@@ -27,7 +27,7 @@ pub struct RankedNation {
 impl NationalityRankingPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedNation>> {
         let mut stream = sqlx::query!(
-            r#"SELECT rank as "rank!", score as "score!", nation as "nation!", iso_country_code as "iso_country_code!" FROM ranked_nations WHERE (STRPOS(nation, $1) > 
+            r#"SELECT rank as "rank!", score as "score!", nation as "nation!", iso_country_code as "iso_country_code!" FROM ranked_nations WHERE (STRPOS(nation, $1::CITEXT) > 
              0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#,
             self.name_contains,
             self.continent.map(|c| c.to_sql())
