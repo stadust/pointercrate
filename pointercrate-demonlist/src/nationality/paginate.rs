@@ -16,7 +16,7 @@ pub struct NationalityRankingPagination {
     name_contains: Option<String>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RankedNation {
     pub rank: i64,
     pub score: f64,
