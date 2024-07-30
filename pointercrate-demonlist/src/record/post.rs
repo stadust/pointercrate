@@ -14,19 +14,19 @@ use url::Url;
 #[derive(Deserialize, Debug, Display)]
 #[display(fmt = "{}% on {} by {} [status: {}]", progress, demon, player, status)]
 pub struct Submission {
-    progress: i16,
-    player: String,
-    demon: i32,
+    pub progress: i16,
+    pub player: String,
+    pub demon: i32,
     #[serde(default)]
-    video: Option<String>,
+    pub video: Option<String>,
     #[serde(default)]
-    raw_footage: Option<String>,
+    pub raw_footage: Option<String>,
     #[serde(default)]
-    status: RecordStatus,
+    pub status: RecordStatus,
 
     /// An initial, submitter provided note for the demon.
     #[serde(default)]
-    note: Option<String>,
+    pub note: Option<String>,
 }
 
 #[derive(Debug)]
