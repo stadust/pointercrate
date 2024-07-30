@@ -8,7 +8,7 @@ use crate::{
 use derive_more::Display;
 use log::debug;
 use serde::Deserialize;
-use sqlx::{PgConnection, Row};
+use sqlx::PgConnection;
 use url::Url;
 
 #[derive(Deserialize, Debug, Display)]
@@ -172,23 +172,24 @@ impl NormalizedSubmission {
 
 impl ValidatedSubmission {
     pub async fn create(self, submitter: Submitter, connection: &mut PgConnection) -> Result<FullRecord> {
-        let id = sqlx::query(
-            "INSERT INTO records (progress, video, status_, player, submitter, demon) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4,$5) \
-             RETURNING id",
+        let id = sqlx::query!(
+            "INSERT INTO records (progress, video, status_, player, submitter, demon, raw_footage) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4, $5, $6) RETURNING id",
+            self.progress,
+            self.video,
+            self.player.id,
+            submitter.id,
+            self.demon.id,
+            self.raw_footage
         )
-        .bind(self.progress)
-        .bind(&self.video)
-        .bind(self.player.id)
-        .bind(submitter.id)
-        .bind(self.demon.id)
         .fetch_one(&mut *connection)
         .await?
-        .get("id");
+        .id;
 
         let mut record = FullRecord {
             id,
             progress: self.progress,
             video: self.video,
+            raw_footage: self.raw_footage,
             status: RecordStatus::Submitted,
             player: self.player,
             demon: self.demon,
@@ -201,14 +202,13 @@ impl ValidatedSubmission {
             record.set_status(self.status, &mut *connection).await?;
         }
 
-        sqlx::query!(
-            "INSERT INTO record_notes (record, content, raw_footage) VALUES ($1, $2, $3)",
-            record.id,
-            self.note,
-            self.raw_footage,
-        )
-        .execute(&mut *connection)
-        .await?;
+        if let Some(note) = self.note {
+            if !note.trim().is_empty() {
+                sqlx::query!("INSERT INTO record_notes (record, content) VALUES ($1, $2)", record.id, note)
+                    .execute(&mut *connection)
+                    .await?;
+            }
+        }
 
         if self.status != RecordStatus::Submitted {
             record.player.update_score(connection).await?;

@@ -23,8 +23,6 @@ pub struct Note {
 
     pub is_public: bool,
 
-    pub raw_footage: Option<String>,
-
     /// Whether this note was originally made on a different record and later transferred to this
     /// one due to deletion.
     pub transferred: bool,

@@ -13,6 +13,7 @@ use sqlx::{Error, PgConnection};
 struct FetchedRecord {
     progress: i16,
     video: Option<String>,
+    raw_footage: Option<String>,
     status: String,
     player_id: i32,
     player_name: String,
@@ -35,6 +36,7 @@ impl FullRecord {
                 id,
                 progress: row.progress,
                 video: row.video,
+                raw_footage: row.raw_footage,
                 status: RecordStatus::from_sql(&row.status),
                 player: DatabasePlayer {
                     id: row.player_id,
@@ -60,9 +62,12 @@ impl FullRecord {
 
 pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalRecordD>> {
     let mut stream = sqlx::query!(
-        r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, demons.id AS demon_id, 
-         demons.name, demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id 
-         = $1 WHERE status_ = 'APPROVED' AND records.player = $1"#,
+        r#"SELECT records.id, progress,
+        CASE WHEN players.link_banned THEN NULL ELSE records.video::text END,
+        CASE WHEN players.link_banned THEN NULL ELSE records.raw_footage::text END, 
+        demons.id AS demon_id, 
+        demons.name, demons.position FROM records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id 
+        = $1 WHERE status_ = 'APPROVED' AND records.player = $1"#,
         player.id
     )
     .fetch(connection);
@@ -76,6 +81,7 @@ pub async fn approved_records_by(player: &DatabasePlayer, connection: &mut PgCon
             id: row.id,
             progress: row.progress,
             video: row.video,
+            raw_footage: row.raw_footage,
             status: RecordStatus::Approved,
             demon: MinimalDemon {
                 id: row.demon_id,
@@ -93,6 +99,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
         id: i32,
         progress: i16,
         video: Option<String>,
+        raw_footage: Option<String>,
         player_id: i32,
         name: String,
         banned: bool,
@@ -102,9 +109,12 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
 
     let mut stream = sqlx::query_as!(
         Fetched,
-        r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
-         players.name, players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
-         records.demon = $1 ORDER BY progress DESC, id ASC"#,
+        r#"SELECT records.id, progress,
+        CASE WHEN players.link_banned THEN NULL ELSE video::text END,
+        CASE WHEN players.link_banned THEN NULL ELSE records.raw_footage::text END, 
+        players.id AS player_id, 
+        players.name, players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
+        records.demon = $1 ORDER BY progress DESC, id ASC"#,
         demon.id
     )
     .fetch(connection);
@@ -118,6 +128,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
             id: row.id,
             progress: row.progress,
             video: row.video,
+            raw_footage: row.raw_footage,
             status: RecordStatus::Approved,
             player: DatabasePlayer {
                 id: row.player_id,

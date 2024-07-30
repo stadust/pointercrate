@@ -132,6 +132,13 @@ fn record_manager(demons: &[Demon]) -> Markup {
                         }
                         div.stats-container.flex.space {
                             span {
+                                b { "Raw Footage:" }
+                                br;
+                                a.link #record-raw-footage-link target = "_blank" {}
+                            }
+                        }
+                        div.stats-container.flex.space {
+                            span {
                                 b {
                                     i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " Demon:"
                                 }

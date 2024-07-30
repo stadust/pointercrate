@@ -1,4 +1,7 @@
-SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, status_::text AS status,
+SELECT records.id, progress,
+       CASE WHEN players.link_banned THEN NULL ELSE records.video::text END,
+       CASE WHEN players.link_banned THEN NULL ELSE records.raw_footage::text END,
+       status_::text AS status,
        players.id AS player_id, players.name::text AS player_name, players.banned AS player_banned,
        demons.id AS demon_id, demons.name::text AS demon_name, demons.position
 FROM records

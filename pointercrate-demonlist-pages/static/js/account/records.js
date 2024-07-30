@@ -39,6 +39,7 @@ class RecordManager extends Paginator {
 
     this._video = document.getElementById("record-video");
     this._video_link = document.getElementById("record-video-link");
+    this._raw_footage_link = document.getElementById("record-raw-footage-link");
     this._id = document.getElementById("record-id");
     this._demon = document.getElementById("record-demon");
     this._holder = document.getElementById("record-holder");
@@ -157,6 +158,14 @@ class RecordManager extends Paginator {
       this._video_link.style.display = "none";
     }
 
+    if(this.currentObject.raw_footage !== undefined) {
+      this._raw_footage_link.href = this.currentObject.raw_footage;
+      this._raw_footage_link.innerHTML = this.currentObject.raw_footage;
+      this._raw_footage_link.style.display = "initial";
+    } else {
+      this._raw_footage_link.style.display = "none";
+    }
+
     this._id.innerHTML = this.currentObject.id;
     this._demon.innerHTML =
       this.currentObject.demon.name + " (" + this.currentObject.demon.id + ")";
@@ -222,7 +231,6 @@ function createNoteHtml(note) {
   let i = document.createElement("i");
   i.innerHTML = note.content;
 
-
   let furtherInfo = document.createElement("i");
   furtherInfo.style.fontSize = "80%";
   furtherInfo.style.textAlign = "right";
@@ -252,16 +260,6 @@ function createNoteHtml(note) {
   if (isAdmin) noteDiv.appendChild(closeX);
   noteDiv.appendChild(b);
   noteDiv.appendChild(i);
-
-  if (note.raw_footage) {
-    let a = document.createElement("a");
-    a.classList.add("link")
-    a.target = "_blank";
-    a.innerHTML = note.raw_footage;
-    a.href = note.raw_footage; 
-    noteDiv.appendChild(a);
-  }
-
   noteDiv.appendChild(furtherInfo);
 
   return noteDiv;
