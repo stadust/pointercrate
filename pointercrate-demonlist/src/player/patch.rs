@@ -205,7 +205,7 @@ impl FullPlayer {
         {
             // FIXME: this is really inefficient and can be made a lot faster by simple moving around some code
             // in the FullRecord impls
-            let mut record = FullRecord::by_id(row.id, false, &mut *connection).await?;
+            let mut record = FullRecord::by_id(row.id, &mut *connection).await?;
             info!("Moving record {} over to new player {}", record, self.player.base);
             record.set_player(self.player.base.clone(), &mut *connection).await?
         }

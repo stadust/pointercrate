@@ -26,7 +26,7 @@ struct FetchedRecord {
 }
 
 impl FullRecord {
-    pub async fn by_id(id: i32, show_raw_footage: bool, connection: &mut PgConnection) -> Result<FullRecord> {
+    pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<FullRecord> {
         let result = sqlx::query_file_as!(FetchedRecord, "sql/record_by_id.sql", id)
             .fetch_one(&mut *connection)
             .await;
@@ -36,7 +36,7 @@ impl FullRecord {
                 id,
                 progress: row.progress,
                 video: row.video,
-                raw_footage: if show_raw_footage { row.raw_footage } else { None },
+                raw_footage: row.raw_footage,
                 status: RecordStatus::from_sql(&row.status),
                 player: DatabasePlayer {
                     id: row.player_id,
