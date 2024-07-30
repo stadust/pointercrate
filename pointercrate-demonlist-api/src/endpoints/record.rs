@@ -161,17 +161,14 @@ pub async fn submit(
 
 #[rocket::get("/<record_id>")]
 pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<PointercratePool>) -> Result<Tagged<FullRecord>> {
-    let is_helper = match auth {
-        Some(ref auth) => auth.has_permission(LIST_HELPER),
-        _ => false,
-    };
+    let is_helper = auth.as_ref().is_some_and(|auth| auth.has_permission(LIST_HELPER));
 
     let mut connection = match auth {
         Some(auth) => auth.connection,
         None => pool.transaction().await?,
     };
 
-    let mut record = FullRecord::by_id(record_id, &mut *connection).await?;
+    let mut record = FullRecord::by_id(record_id, is_helper, &mut *connection).await?;
 
     // TODO: allow access if auth is provided and a verified claim on the record's player is given
     if !is_helper {
@@ -201,7 +198,7 @@ pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<Audit
 pub async fn patch(
     record_id: i32, mut auth: TokenAuth, precondition: Precondition, patch: Json<PatchRecord>,
 ) -> Result<Tagged<FullRecord>> {
-    let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
+    let record = FullRecord::by_id(record_id, true, &mut auth.connection).await?;
 
     if record.demon.position > pointercrate_demonlist::config::extended_list_size() {
         auth.require_permission(LIST_MODERATOR)?;
@@ -221,7 +218,7 @@ pub async fn patch(
 
 #[rocket::delete("/<record_id>")]
 pub async fn delete(record_id: i32, mut auth: TokenAuth, precondition: Precondition) -> Result<Status> {
-    let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
+    let record = FullRecord::by_id(record_id, true, &mut auth.connection).await?;
 
     if record.status == RecordStatus::Submitted && !record.was_modified(&mut auth.connection).await? {
         auth.require_permission(LIST_HELPER)?;
@@ -268,7 +265,7 @@ pub async fn get_notes(record_id: i32, mut auth: TokenAuth) -> Result<Response2<
 pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) -> Result<Response2<Tagged<Note>>> {
     auth.require_permission(LIST_HELPER)?;
 
-    let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
+    let record = FullRecord::by_id(record_id, true, &mut auth.connection).await?;
 
     let mut note = Note::create_on(&record, data.0, &mut auth.connection).await?;
 

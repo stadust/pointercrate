@@ -105,7 +105,6 @@ impl Paginatable<RecordPagination> for MinimalRecordPD {
                 id: row.try_get("id")?,
                 progress: row.try_get("progress")?,
                 video: row.try_get("video")?,
-                raw_footage: row.try_get("raw_footage")?,
                 status: RecordStatus::from_sql(&row.try_get::<String, _>("status")?),
                 player: DatabasePlayer {
                     id: row.try_get("player_id")?,

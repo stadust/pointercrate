@@ -160,7 +160,6 @@ pub struct MinimalRecordPD {
     pub status: RecordStatus,
     pub demon: MinimalDemon,
     pub player: DatabasePlayer,
-    pub raw_footage: Option<String>,
 }
 
 #[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq)]
@@ -171,7 +170,6 @@ pub struct MinimalRecordD {
     pub video: Option<String>,
     pub status: RecordStatus,
     pub demon: MinimalDemon,
-    pub raw_footage: Option<String>,
 }
 
 #[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq)]
@@ -183,7 +181,6 @@ pub struct MinimalRecordP {
     pub status: RecordStatus,
     pub player: DatabasePlayer,
     pub nationality: Option<Nationality>,
-    pub raw_footage: Option<String>,
 }
 
 impl FullRecord {
