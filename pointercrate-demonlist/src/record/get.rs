@@ -13,6 +13,7 @@ use sqlx::{Error, PgConnection};
 struct FetchedRecord {
     progress: i16,
     video: Option<String>,
+    raw_footage: Option<String>,
     status: String,
     player_id: i32,
     player_name: String,
@@ -35,6 +36,7 @@ impl FullRecord {
                 id,
                 progress: row.progress,
                 video: row.video,
+                raw_footage: row.raw_footage,
                 status: RecordStatus::from_sql(&row.status),
                 player: DatabasePlayer {
                     id: row.player_id,

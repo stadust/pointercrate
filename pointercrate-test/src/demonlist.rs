@@ -80,7 +80,7 @@ pub async fn add_simple_record(progress: i16, player: i32, demon: i32, status: R
         .unwrap();
 
     sqlx::query!(
-        "INSERT INTO records (progress, status_, player, submitter, demon, video) VALUES ($1, $2::text::record_status, $3, $4, $5, NULL) \
+        "INSERT INTO records (progress, status_, player, submitter, demon, video, raw_footage) VALUES ($1, $2::text::record_status, $3, $4, $5, NULL, NULL) \
          RETURNING id",
         progress,
         status.to_sql(),

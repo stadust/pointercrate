@@ -161,10 +161,7 @@ pub async fn submit(
 
 #[rocket::get("/<record_id>")]
 pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<PointercratePool>) -> Result<Tagged<FullRecord>> {
-    let is_helper = match auth {
-        Some(ref auth) => auth.has_permission(LIST_HELPER),
-        _ => false,
-    };
+    let is_helper = auth.as_ref().is_some_and(|auth| auth.has_permission(LIST_HELPER));
 
     let mut connection = match auth {
         Some(auth) => auth.connection,
@@ -179,6 +176,7 @@ pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<Pointercr
             return Err(DemonlistError::RecordNotFound { record_id }.into());
         }
         record.submitter = None;
+        record.raw_footage = None;
     }
 
     Ok(Tagged(record))

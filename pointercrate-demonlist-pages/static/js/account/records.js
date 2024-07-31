@@ -39,6 +39,7 @@ class RecordManager extends Paginator {
 
     this._video = document.getElementById("record-video");
     this._video_link = document.getElementById("record-video-link");
+    this._raw_footage_link = document.getElementById("record-raw-footage-link");
     this._id = document.getElementById("record-id");
     this._demon = document.getElementById("record-demon");
     this._holder = document.getElementById("record-holder");
@@ -155,6 +156,14 @@ class RecordManager extends Paginator {
       this._video_link.style.display = "initial";
     } else {
       this._video_link.style.display = "none";
+    }
+
+    if(this.currentObject.raw_footage !== undefined) {
+      this._raw_footage_link.href = this.currentObject.raw_footage;
+      this._raw_footage_link.innerHTML = this.currentObject.raw_footage;
+      this._raw_footage_link.style.display = "initial";
+    } else {
+      this._raw_footage_link.style.display = "none";
     }
 
     this._id.innerHTML = this.currentObject.id;

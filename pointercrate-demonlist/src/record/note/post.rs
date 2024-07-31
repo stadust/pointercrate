@@ -27,7 +27,7 @@ impl Note {
             "INSERT INTO record_notes (record, content, is_public) VALUES ($1, $2, $3) RETURNING id",
             record.id,
             new_note.content,
-            new_note.is_public
+            new_note.is_public,
         )
         .fetch_one(connection)
         .await?

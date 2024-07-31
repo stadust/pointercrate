@@ -152,6 +152,31 @@ async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
 }
 
 #[sqlx::test(migrations = "../migrations")]
+async fn test_no_raw_footage_on_unauthed_get(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    let raw_footage = "https://youtube.com/watch?v=0987654321";
+
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+    let submission = serde_json::json! {{"progress": 100, "demon": demon1, "player": player1.name, "video": "https://youtube.com/watch?v=1234567890", "raw_footage": raw_footage, "status": "approved"}};
+
+    let record: FullRecord = clnt
+        .post("/api/v1/records/", &submission)
+        .authorize_as(&user)
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
+
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).get_success_result().await;
+    assert_eq!(record.raw_footage, None);
+
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).authorize_as(&user).get_success_result().await;
+    assert_eq!(record.raw_footage.as_deref(), Some(raw_footage));
+}
+
+#[sqlx::test(migrations = "../migrations")]
 async fn test_record_note_creation_and_deletion(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
