@@ -83,3 +83,77 @@ impl FullDemon {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use sqlx::{pool::PoolConnection, Postgres};
+
+    use crate::demon::{FullDemon, PostDemon};
+
+    const DEFAULT_THUMBNAIL: &str = "https://i.ytimg.com/vi/zebrafishes/mqdefault.jpg";
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn test_default_thumbnail_no_video(mut conn: PoolConnection<Postgres>) {
+        let demon = FullDemon::create_from(
+            PostDemon {
+                name: "Bloodbath".to_owned(),
+                position: 1,
+                requirement: 90,
+                verifier: "Riot".to_owned(),
+                publisher: "Riot".to_owned(),
+                creators: Vec::new(),
+                video: None,
+            },
+            &mut conn,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(demon.demon.thumbnail, DEFAULT_THUMBNAIL);
+    }
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn test_default_thumbnail_linked_banned(mut conn: PoolConnection<Postgres>) {
+        sqlx::query!("INSERT INTO players (name, link_banned) VALUES ('Riot', TRUE)")
+            .execute(&mut *conn)
+            .await
+            .unwrap();
+
+        let demon = FullDemon::create_from(
+            PostDemon {
+                name: "Bloodbath".to_owned(),
+                position: 1,
+                requirement: 90,
+                verifier: "Riot".to_owned(),
+                publisher: "Riot".to_owned(),
+                creators: Vec::new(),
+                video: Some("https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_owned()),
+            },
+            &mut conn,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(demon.demon.thumbnail, DEFAULT_THUMBNAIL);
+    }
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn test_default_thumbnail_with_video(mut conn: PoolConnection<Postgres>) {
+        let demon = FullDemon::create_from(
+            PostDemon {
+                name: "Bloodbath".to_owned(),
+                position: 1,
+                requirement: 90,
+                verifier: "Riot".to_owned(),
+                publisher: "Riot".to_owned(),
+                creators: Vec::new(),
+                video: Some("https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_owned()),
+            },
+            &mut conn,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(demon.demon.thumbnail, "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg");
+    }
+}
