@@ -23,9 +23,9 @@ fn login_page_body() -> Markup {
             }
             div.flex #login {
                 div.flex.col {
-                    h2 {"Login"}
+                    h2 {"Login with Password"}
                     p {
-                        "Log in to an existing pointercrate account. You have 3 login attempts by 30 minutes. If you do not have an account yet, register on the right or below. "
+                        "Log in to an existing pointercrate account. You have 3 login attempts by 30 minutes. If you do not have an account yet, log in with Google instead."
                     }
                     form.flex.col.grow #login-form novalidate = "" {
                         p.info-red.output {}
@@ -44,29 +44,12 @@ fn login_page_body() -> Markup {
                     }
                 }
                 div.flex.col {
-                    h2 {"Register"}
+                    h2 {"Login with Google"}
                     p {
-                        "Not registered yet? Create a new pointercrate account below."
+                        "Log in or create a pointercrate account with your Google account."
                     }
-                    form.flex.col.grow #register-form novalidate = "" {
-                        p.info-red.output {}
-                        span.form-input #register-username {
-                            label for = "name" {"Username:"}
-                            input required = "" type = "text" name = "name";
-                            p.error {}
-                        }
-                        span.form-input #register-password {
-                            label for = "password" {"Password:"}
-                            input required = "" type = "password" name = "password" minlength = "10";
-                            p.error {}
-                        }
-                        span.form-input #register-password-repeat {
-                            label for = "password2" {"Repeat Password:"}
-                            input required = "" type = "password" name = "password2" minlength = "10";
-                            p.error {}
-                        }
-                        div.grow {}
-                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Register";
+                    form.flex.col.grow #google-form novalidate = "" {
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Log in with Google";
                     }
                 }
             }

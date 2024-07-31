@@ -15,13 +15,13 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
         .mount(
             "/api/v1/auth/",
             rocket::routes![
-                endpoints::auth::register,
                 endpoints::auth::login,
                 endpoints::auth::invalidate,
                 endpoints::auth::get_me,
                 endpoints::auth::patch_me,
                 endpoints::auth::delete_me,
-                endpoints::auth::verify_email,
+                endpoints::auth::authorize,
+                endpoints::auth::callback,
             ],
         )
         .mount(

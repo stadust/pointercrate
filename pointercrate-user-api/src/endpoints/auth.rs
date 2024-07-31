@@ -2,40 +2,89 @@ use crate::{
     auth::{BasicAuth, TokenAuth},
     ratelimits::UserRatelimits,
 };
-use pointercrate_core::{etag::Taggable, pool::PointercratePool};
+use pointercrate_core::{error::CoreError, etag::Taggable, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, Tagged},
     response::Response2,
 };
-use pointercrate_user::{error::UserError, AuthenticatedUser, PatchMe, Registration, User};
+use pointercrate_user::{error::UserError, AuthenticatedUser, PatchMe, User};
 use rocket::{
-    http::Status,
+    http::{Cookie, CookieJar, SameSite, Status},
     serde::json::{serde_json, Json},
     State,
 };
 use std::net::IpAddr;
 
-#[rocket::post("/register", data = "<body>")]
-pub async fn register(
-    ip: IpAddr, body: Json<Registration>, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,
-) -> Result<Response2<Tagged<User>>> {
+#[rocket::get("/authorize?<legacy>")]
+pub async fn authorize(
+    ip: IpAddr, ratelimits: &State<UserRatelimits>, legacy: Option<&str>, cookies: &CookieJar<'_>,
+) -> Result<Response2<()>> {
+    ratelimits.login_attempts(ip)?;
+
+    if legacy.is_some() {
+        let legacy_cookie = Cookie::build(("legacy", "true"))
+            .http_only(true)
+            .same_site(SameSite::Strict)
+            .path("/");
+
+        cookies.add(legacy_cookie);
+    }
+
+    let redirect_uri = "https://accounts.google.com/o/oauth2/v2/auth".to_string()
+        + format!("?client_id={}", std::env::var("GOOGLE_CLIENT_ID").unwrap()).as_str()
+        + "&response_type=code"
+        + "&prompt=consent"
+        + "&scope=email%20profile"
+        + "&redirect_uri=http%3A%2F%2Flocalhost%3A1971%2Fapi%2Fv1%2Fauth%2Fcallback";
+
+    Ok(Response2::new(())
+        .with_header("Location", redirect_uri)
+        .status(Status::TemporaryRedirect))
+}
+
+#[rocket::get("/callback?<code>")]
+pub async fn callback(
+    auth: std::result::Result<TokenAuth, UserError>, pool: &State<PointercratePool>, ip: IpAddr, ratelimits: &State<UserRatelimits>,
+    code: &str, cookies: &CookieJar<'_>,
+) -> Result<Response2<()>> {
+    ratelimits.login_attempts(ip)?;
     let mut connection = pool.transaction().await.map_err(UserError::from)?;
 
-    ratelimits.soft_registrations(ip)?;
+    let mut existing_id: Option<i32> = None;
 
-    AuthenticatedUser::validate_password(&body.password)?;
-    User::validate_name(&body.name)?;
+    if cookies.get("legacy").is_some() {
+        if auth.is_err() {
+            return Err(UserError::Core(CoreError::Unauthorized).into());
+        }
 
-    let user = AuthenticatedUser::register(body.0, &mut *connection).await?;
+        let user = auth?.user;
 
-    ratelimits.registrations(ip)?;
+        if user.google_account_id.is_some() {
+            return Err(UserError::AlreadyLinked.into());
+        }
+
+        existing_id = Some(user.inner().id);
+
+        cookies.remove("legacy");
+    }
+
+    let user = AuthenticatedUser::oauth2_callback(code, existing_id, &mut *connection).await?;
 
     connection.commit().await.map_err(UserError::from)?;
 
-    Ok(Response2::tagged(user.into_inner())
-        .with_header("Location", "api/v1/auth/me")
-        .status(Status::Created))
+    let mut cookie = Cookie::build(("access_token", user.generate_access_token()))
+        .http_only(true)
+        .same_site(SameSite::Strict)
+        .path("/");
+
+    if !cfg!(debug_assertions) {
+        cookie = cookie.secure(true)
+    }
+
+    cookies.add(cookie);
+
+    Ok(Response2::new(()).with_header("Location", "/").status(Status::TemporaryRedirect))
 }
 
 #[rocket::post("/")]
@@ -60,16 +109,6 @@ pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
     auth.connection.commit().await.map_err(UserError::from)?;
 
     Ok(Status::NoContent)
-}
-
-#[rocket::get("/verify_email?<token>")]
-pub async fn verify_email(mut auth: TokenAuth, token: &str) -> Result<&'static str> {
-    let email = auth.user.validate_change_email_token(token)?;
-
-    auth.user.set_email_address(email, &mut auth.connection).await?;
-    auth.commit().await?;
-
-    Ok("Success! You can close this tab/window now")
 }
 
 #[rocket::get("/me")]

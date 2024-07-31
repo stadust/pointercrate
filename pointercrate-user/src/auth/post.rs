@@ -43,7 +43,8 @@ impl AuthenticatedUser {
                         display_name: None,
                         youtube_channel: None,
                     },
-                    password_hash: hash,
+                    password_hash: Some(hash),
+                    google_account_id: None,
                     email_address: None,
                 })
             },

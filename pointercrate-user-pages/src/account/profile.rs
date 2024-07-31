@@ -111,7 +111,12 @@ impl AccountPageTab for ProfileTab {
                     }
                     div.flex.no-stretch {
                         input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
-                        input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                        @if !authenticated_user.is_google_linked() {
+                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                            a.button.blue.hover #link-google href="/api/v1/auth/authorize?legacy=true" type = "button" style = "margin: 15px auto 0px;" {
+                                "Link Google"
+                            };
+                        }
                     }
                 }
             }
@@ -171,7 +176,7 @@ impl AccountPageTab for ProfileTab {
             (edit_youtube_link_dialog())
             (edit_email_address_dialog())
             (change_password_dialog())
-            (delete_account_dialog())
+            (delete_account_dialog(authenticated_user.is_google_linked()))
         }
     }
 }
@@ -305,7 +310,9 @@ fn change_password_dialog() -> Markup {
     }
 }
 
-fn delete_account_dialog() -> Markup {
+fn delete_account_dialog(is_google: bool) -> Markup {
+    // TODO: Add an alternative flow for Google authenticated users
+
     html! {
         div.overlay.closable {
             div.dialog #delete-acc-dialog {

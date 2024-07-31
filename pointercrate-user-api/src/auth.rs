@@ -64,7 +64,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         // No auth header set, forward to the request handler that doesnt require authorization (if one exists)
         if request.headers().get_one("Authorization").is_none() && request.cookies().get("access_token").is_none() {
-            return Outcome::Forward(Status::NotFound);
+            return Outcome::Error((Status::NotFound, CoreError::NotFound.into()));
         }
 
         let pool = request.guard::<&State<PointercratePool>>().await;
