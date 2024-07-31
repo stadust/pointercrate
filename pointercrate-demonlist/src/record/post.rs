@@ -226,19 +226,10 @@ mod tests {
         player::DatabasePlayer,
         record::{post::NormalizedSubmission, RecordStatus},
     };
-    use pointercrate_core::pool::PointercratePool;
-    use sqlx::{Postgres, Transaction};
+    use sqlx::{pool::PoolConnection, Postgres};
 
-    async fn connection() -> Transaction<'static, Postgres> {
-        let _ = dotenv::dotenv();
-
-        PointercratePool::init().await.transaction().await.unwrap()
-    }
-
-    #[tokio::test]
-    async fn test_banned_cannot_submit() {
-        let mut conn = connection().await;
-
+    #[sqlx::test(migrations = "../migrations")]
+    async fn test_banned_cannot_submit(mut conn: PoolConnection<Postgres>) {
         let result = NormalizedSubmission {
             progress: 100,
             player: DatabasePlayer {
