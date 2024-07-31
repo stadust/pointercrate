@@ -3,14 +3,12 @@ use pointercrate_core::etag::Taggable;
 use pointercrate_demonlist::{
     error::DemonlistError,
     player::{DatabasePlayer, FullPlayer},
-    record::{note::Note, FullRecord, RecordStatus, Submission},
-    submitter::Submitter,
+    record::{note::Note, FullRecord, RecordStatus},
     LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_test::{demonlist::add_simple_record, user::system_user_with_perms};
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
-use std::{net::IpAddr, str::FromStr as _};
 
 #[sqlx::test(migrations = "../migrations")]
 async fn paginate_records_unauthorized(pool: Pool<Postgres>) {
@@ -157,37 +155,25 @@ async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
 async fn test_no_raw_footage_on_unauthed_get(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
+    let raw_footage = "https://youtube.com/watch?v=0987654321";
+
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
     let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
     let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
-    let submission = Submission {
-        progress: 100,
-        video: Some("https://youtube.com/watch?v=1234567890".to_string()),
-        raw_footage: Some("https://youtube.com/watch?v=0987654321".to_string()),
-        status: RecordStatus::Approved,
-        player: player1.name,
-        demon: demon1,
-        note: None,
-    };
+    let submission = serde_json::json! {{"progress": 100, "demon": demon1, "player": player1.name, "video": "https://youtube.com/watch?v=1234567890", "raw_footage": raw_footage, "status": "approved"}};
 
-    let system_sub = Submitter::by_ip(IpAddr::from_str("127.0.0.1").unwrap(), &mut *connection)
-        .await
-        .unwrap()
-        .unwrap();
+    let record: FullRecord = clnt
+        .post("/api/v1/records/", &submission)
+        .authorize_as(&user)
+        .expect_status(Status::Ok)
+        .get_success_result()
+        .await;
 
-    let existing = submission
-        .normalize(&mut *connection)
-        .await
-        .unwrap()
-        .validate(&mut *connection)
-        .await
-        .unwrap()
-        .create(system_sub, &mut *connection)
-        .await
-        .unwrap();
-
-    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing.id)).get_success_result().await;
-
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).get_success_result().await;
     assert_eq!(record.raw_footage, None);
+
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).authorize_as(&user).get_success_result().await;
+    assert_eq!(record.raw_footage.as_deref(), Some(raw_footage));
 }
 
 #[sqlx::test(migrations = "../migrations")]
