@@ -27,20 +27,11 @@ mod post;
 pub struct AuthenticatedUser {
     user: User,
     password_hash: String,
-    email_address: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
 pub struct AccessClaims {
     pub id: i32,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct ChangeEmailClaims {
-    pub id: i32,
-    pub email: String,
-    pub exp: u64,
-    pub iat: u64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -57,10 +48,6 @@ impl AuthenticatedUser {
 
     pub fn inner(&self) -> &User {
         &self.user
-    }
-
-    pub fn email_address(&self) -> Option<&str> {
-        self.email_address.as_deref()
     }
 
     pub fn validate_password(password: &str) -> Result<()> {
@@ -112,54 +99,6 @@ impl AuthenticatedUser {
                     Ok(self)
                 }
             })
-    }
-
-    pub fn generate_change_email_token(&self, email: String) -> String {
-        let start = SystemTime::now();
-        let since_epoch = start
-            .duration_since(UNIX_EPOCH)
-            .expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
-
-        let claim = ChangeEmailClaims {
-            id: self.user.id,
-            email,
-            iat: since_epoch.as_secs(),
-            exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
-        };
-
-        jsonwebtoken::encode(
-            &jsonwebtoken::Header::default(),
-            &claim,
-            &EncodingKey::from_secret(&self.jwt_secret()),
-        )
-        .unwrap()
-    }
-
-    pub fn validate_change_email_token(&self, token: &str) -> Result<String> {
-        jsonwebtoken::decode::<ChangeEmailClaims>(
-            token,
-            &DecodingKey::from_secret(&self.jwt_secret()),
-            &jsonwebtoken::Validation::default(),
-        )
-        .map_err(|err| {
-            warn!("Change email token validation FAILED for account {}: {}", self.user, err);
-
-            CoreError::Unauthorized.into()
-        })
-        .and_then(|token_data| {
-            // sanity check, should never fail
-            if token_data.claims.id != self.user.id {
-                log::error!(
-                    "Token for user {} decoded successfully even though user {} is logged in",
-                    token_data.claims.id,
-                    self.inner()
-                );
-
-                Err(CoreError::Unauthorized.into())
-            } else {
-                Ok(token_data.claims.email)
-            }
-        })
     }
 
     pub fn generate_csrf_token(&self) -> String {
@@ -251,7 +190,6 @@ mod tests {
                 youtube_channel: None,
             },
             password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
-            email_address: None,
         }
     }
 
@@ -265,21 +203,7 @@ mod tests {
                 youtube_channel: None,
             },
             password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
-            email_address: None,
         }
-    }
-
-    #[test]
-    fn test_change_email_token() {
-        let patrick = patrick();
-        let jacob = jacob();
-
-        let token = patrick.generate_change_email_token("patrick@pointercrate.com".to_string());
-        let validation_result = patrick.validate_change_email_token(&token);
-
-        assert!(validation_result.is_ok());
-        assert_eq!(validation_result.unwrap(), "patrick@pointercrate.com".to_string());
-        assert!(jacob.validate_change_email_token(&token).is_err());
     }
 
     #[test]
@@ -299,10 +223,6 @@ mod tests {
         // make sure only the correct user can decode them
         assert!(patrick.validate_csrf_token(&patricks_csrf_token).is_ok());
         assert!(jacob.validate_csrf_token(&patricks_csrf_token).is_err());
-
-        // make sure they arent usable in other places that require tokens
-        assert!(patrick.validate_change_email_token(&patricks_csrf_token).is_err());
-        assert!(jacob.validate_change_email_token(&patricks_csrf_token).is_err());
 
         assert!(patrick.validate_access_token(&patricks_csrf_token).is_err());
         assert!(jacob.validate_access_token(&patricks_csrf_token).is_err());

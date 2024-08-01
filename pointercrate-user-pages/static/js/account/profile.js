@@ -141,25 +141,6 @@ function setupEditAccount() {
   editYoutubeForm.addErrorOverride(40100, "auth-yt");
   editYoutubeForm.addErrorOverride(42225, "edit-yt");
 
-  /*let changeEmailForm = setupFormDialogEditor(
-      new ProfileEditorBackend(document.querySelector("#auth-email input")), // not pretty, but oh well
-      "edit-email-dialog",
-      "email-pen",
-      output
-  );
-
-  changeEmailForm.addValidators({
-    "edit-email": {
-      "Please enter a valid e-mail address": typeMismatch,
-    },
-    "auth-email": {
-      "Password required": valueMissing,
-      "Password too short. It needs to be at least 10 characters long.": tooShort,
-    },
-  });
-
-  changeEmailForm.addErrorOverride(40100, "auth-email");*/
-
   let changePasswordForm = setupFormDialogEditor(
     new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
     "edit-pw-dialog",
