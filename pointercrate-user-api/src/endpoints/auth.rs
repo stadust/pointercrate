@@ -68,9 +68,7 @@ pub fn get_me(auth: TokenAuth) -> Tagged<User> {
 }
 
 #[rocket::patch("/me", data = "<patch>")]
-pub async fn patch_me(
-    mut auth: BasicAuth, patch: Json<PatchMe>, pred: Precondition
-) -> Result<std::result::Result<Tagged<User>, Status>> {
+pub async fn patch_me(mut auth: BasicAuth, patch: Json<PatchMe>, pred: Precondition) -> Result<std::result::Result<Tagged<User>, Status>> {
     pred.require_etag_match(auth.user.inner())?;
 
     let changes_password = patch.changes_password();
