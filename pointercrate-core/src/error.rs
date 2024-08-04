@@ -122,7 +122,7 @@ pub enum CoreError {
     /// `422 UNPROCESSABLE ENTITY`
     ///
     /// Error Code `42200`
-    #[display(fmt = "The request was well-formed but was unable to be followed due to semeantic errors.")]
+    #[display(fmt = "The request was well-formed but was unable to be followed due to semantic errors.")]
     UnprocessableEntity,
 
     /// `422 UNPRECESSABLE ENTITY` variant returned if the `limit` parameter provided for
