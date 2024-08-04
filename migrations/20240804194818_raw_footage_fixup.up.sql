@@ -1,9 +1,16 @@
-ALTER TABLE records DROP COLUMN raw_footage;
-
+-- Add up migration script here
 DROP FUNCTION best_records_in(VARCHAR(2));
 
-CREATE OR REPLACE FUNCTION best_records_in(country VARCHAR(2))
-    RETURNS TABLE (LIKE records)
+CREATE FUNCTION best_records_in(country VARCHAR(2))
+    RETURNS TABLE (
+        id integer ,
+        progress smallint ,
+        video character varying(200),
+        status_ public.record_status ,
+        player integer ,
+        submitter integer ,
+        demon integer
+    )
     AS
 $body$
     WITH grp AS (
