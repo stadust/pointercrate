@@ -45,7 +45,7 @@ export function initializeTimeMachine() {
   destination.addValidator(rangeUnderflow, "You cannot go back in time that far!");
 
   var offset = new Date().getTimezoneOffset();
-  var offsetHours = offset / 60;
+  var offsetHours = Math.trunc(offset / 60);  // round towards zero to ensure things like GMT-2.5 work
   var offsetMinutes = Math.abs(offset) % 60;
 
   timeMachineForm.onSubmit(() => {
