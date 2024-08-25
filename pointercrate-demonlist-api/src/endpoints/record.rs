@@ -80,7 +80,7 @@ pub async fn unauthed_pagination(
 pub async fn submit(
     ip: IpAddr, auth: Option<TokenAuth>, submission: Json<Submission>, pool: &State<PointercratePool>,
     ratelimits: &State<DemonlistRatelimits>,
-) -> Result<Tagged<FullRecord>> {
+) -> Result<Response2<Tagged<FullRecord>>> {
     let submission = submission.0;
     let (is_team_member, user_id) = match auth {
         Some(ref auth) => (auth.has_permission(LIST_HELPER), Some(auth.user.inner().id)),
@@ -156,7 +156,7 @@ pub async fn submit(
         record.submitter = None;
     }
 
-    Ok(Tagged(record))
+    Ok(Response2::tagged(record))
 }
 
 #[rocket::get("/<record_id>")]
