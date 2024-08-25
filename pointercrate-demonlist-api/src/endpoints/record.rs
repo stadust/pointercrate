@@ -82,12 +82,13 @@ pub async fn submit(
     ratelimits: &State<DemonlistRatelimits>,
 ) -> Result<Response2<Tagged<FullRecord>>> {
     let submission = submission.0;
+    let status_is_submitted = submission.status() == RecordStatus::Submitted;
     let (is_team_member, user_id) = match auth {
         Some(ref auth) => (auth.has_permission(LIST_HELPER), Some(auth.user.inner().id)),
         None => (false, None),
     };
 
-    if submission.status() != RecordStatus::Submitted || !submission.has_video() {
+    if !status_is_submitted || !submission.has_video() {
         match auth {
             Some(ref auth) => auth.require_permission(LIST_HELPER)?,
             None => return Err(CoreError::Unauthorized.into()),
@@ -141,7 +142,7 @@ pub async fn submit(
     connection.commit().await.map_err(DemonlistError::from)?;
 
     // FIXME: This is fucking stupid
-    if record.status == RecordStatus::Submitted {
+    if status_is_submitted {
         if let Some(ref video) = record.video {
             tokio::spawn(validate(
                 record.id,
