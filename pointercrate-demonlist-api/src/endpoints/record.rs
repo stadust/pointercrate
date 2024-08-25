@@ -12,7 +12,9 @@ use pointercrate_demonlist::{
     error::DemonlistError,
     player::claim::PlayerClaim,
     record::{
-        audit::RecordModificationData, note::{notes_on, NewNote, Note, PatchNote}, submission_count, FullRecord, MinimalRecordPD, PatchRecord, RecordPagination, RecordStatus, Submission
+        audit::RecordModificationData,
+        note::{notes_on, NewNote, Note, PatchNote},
+        submission_count, FullRecord, MinimalRecordPD, PatchRecord, RecordPagination, RecordStatus, Submission,
     },
     submitter::Submitter,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
@@ -158,7 +160,10 @@ pub async fn submit(
     let mut response = Response2::tagged(record);
 
     if status_is_submitted {
-        response = response.with_header("X-SUBMISSION-COUNT", submission_count(&mut *pool.connection().await?).await?.to_string());
+        response = response.with_header(
+            "X-SUBMISSION-COUNT",
+            submission_count(&mut *pool.connection().await?).await?.to_string(),
+        );
     }
 
     Ok(response)
