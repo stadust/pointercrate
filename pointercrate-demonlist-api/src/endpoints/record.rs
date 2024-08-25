@@ -12,9 +12,7 @@ use pointercrate_demonlist::{
     error::DemonlistError,
     player::claim::PlayerClaim,
     record::{
-        audit::RecordModificationData,
-        note::{notes_on, NewNote, Note, PatchNote},
-        FullRecord, MinimalRecordPD, PatchRecord, RecordPagination, RecordStatus, Submission,
+        audit::RecordModificationData, note::{notes_on, NewNote, Note, PatchNote}, submission_count, FullRecord, MinimalRecordPD, PatchRecord, RecordPagination, RecordStatus, Submission
     },
     submitter::Submitter,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
@@ -157,7 +155,13 @@ pub async fn submit(
         record.submitter = None;
     }
 
-    Ok(Response2::tagged(record))
+    let mut response = Response2::tagged(record);
+
+    if status_is_submitted {
+        response = response.with_header("X-SUBMISSION-COUNT", submission_count(&mut *pool.connection().await?).await?.to_string());
+    }
+
+    Ok(response)
 }
 
 #[rocket::get("/<record_id>")]

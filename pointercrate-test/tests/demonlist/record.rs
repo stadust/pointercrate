@@ -139,6 +139,22 @@ async fn submit_existing_record(pool: Pool<Postgres>) {
 }
 
 #[sqlx::test(migrations = "../migrations")]
+async fn test_submit_successful(pool: Pool<Postgres>) {
+    let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+    let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut *connection).await;
+
+    let submission = serde_json::json! {{"progress": 60, "demon": demon1, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "raw_footage": "https://pointercrate.com"}};
+
+    let _ = clnt
+        .post("/api/v1/records/", &submission)
+        .expect_status(Status::Ok)
+        .expect_header("X-SUBMISSION-COUNT", "1")
+        .execute()
+        .await;
+}
+
+#[sqlx::test(migrations = "../migrations")]
 async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
