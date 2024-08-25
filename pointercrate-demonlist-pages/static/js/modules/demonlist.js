@@ -105,8 +105,13 @@ export function initializeRecordSubmitter(submitApproved = false) {
       data.status = "approved";
     }
     post("/api/v1/records/", headers, data)
-      .then(() => {
-        submissionForm.setSuccess("Record successfully submitted");
+      .then(response => {
+        let queue_position = response.headers['x-submission-count'];
+
+        if (queue_position)
+          submissionForm.setSuccess(`Record successfully submitted. It is #${queue_position} in the queue!`);
+        else
+          submissionForm.setSuccess("Record successfully submitted.");
         submissionForm.clear();
         gtag('event', 'record-submit-success', {'event-category': 'demonlist'});
       })
