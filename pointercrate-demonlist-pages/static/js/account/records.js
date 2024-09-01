@@ -301,9 +301,9 @@ function setupRecordFilterPlayerIdForm() {
   );
   var playerId = recordFilterPlayerIdForm.input("record-player-id");
 
-  playerId.addValidator(valueMissing, "Player ID required");
   recordFilterPlayerIdForm.onSubmit(function () {
-    recordManager.updateQueryData("player", playerId.value);
+    // Reset search filter if player ID field is empty
+    recordManager.updateQueryData("player", valueMissing(playerId) ? playerId.value : undefined);
   });
 }
 
@@ -327,12 +327,12 @@ function setupRecordFilterPlayerNameForm() {
   );
   var playerName = recordFilterPlayerNameForm.input("record-player-name");
 
-  playerName.addValidators({
-    "Player name required": valueMissing,
-  });
-
   recordFilterPlayerNameForm.onSubmit(function () {
-    get("/api/v1/players/?name=" + playerName.value)
+    if (!valueMissing(playerName)) {
+      // Player name field is empty, so reset search filter
+      recordManager.updateQueryData("player", undefined);
+    } else {
+      get("/api/v1/players/?name=" + playerName.value)
       .then((response) => {
         let json = response.data;
 
@@ -343,6 +343,7 @@ function setupRecordFilterPlayerNameForm() {
         }
       })
       .catch(displayError(recordFilterPlayerNameForm));
+    }
   });
 }
 
