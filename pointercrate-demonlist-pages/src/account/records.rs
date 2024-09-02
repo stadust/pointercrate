@@ -259,7 +259,7 @@ fn player_selector() -> Markup {
                 "Filter by player"
             }
             p {
-                "Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Right now the only way to reset this filter is to reload the page. Sorry!"
+                "Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Reset by clicking \"Find ...\" when the text field is empty."
             }
             form.flex.col.underlined.pad #record-filter-by-player-id-form novalidate = "" {
                 p.info-red.output {}
