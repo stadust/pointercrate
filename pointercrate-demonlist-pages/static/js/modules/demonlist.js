@@ -44,6 +44,15 @@ export function initializeTimeMachine() {
   destination.addValidator(valueMissing, "Please specify a value");
   destination.addValidator(rangeUnderflow, "You cannot go back in time that far!");
 
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = String(now.getMonth() + 1).padStart(2, '0');
+  var day = String(now.getDate()).padStart(2, '0');
+  var hours = String(now.getHours()).padStart(2, '0');
+  var minutes = String(now.getMinutes()).padStart(2, '0');
+
+  destination.value = `${year}-${month}-${day}T${hours}:${minutes}`
+
   var offset = new Date().getTimezoneOffset();
   var offsetHours = Math.trunc(offset / 60);  // round towards zero to ensure things like GMT-2.5 work
   var offsetMinutes = Math.abs(offset) % 60;

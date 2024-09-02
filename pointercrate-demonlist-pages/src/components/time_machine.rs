@@ -79,7 +79,7 @@ impl Render for Tardis {
                     div.flex {
                         span.form-input #time-machine-destination data-type = "datetime-local" {
                             h3 {"Destination:"}
-                            input name="time-machine-destination" type="datetime-local" min="2017-01-04T00:00" required value="1971-06-19T00:00";
+                            input name="time-machine-destination" type="datetime-local" min="2017-01-04T00:00" required;
                             p.error {}
                         }
                     }
