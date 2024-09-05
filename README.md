@@ -9,7 +9,12 @@ Note that exclusion of pointercrate-specific code from this repository is still 
 
 The goal of this section is to compile and successful run the `pointercrate-example` binary target to set up a locally running demonlist-clone. 
 
-We assume that you have a rust toolchain set up. If not, install one using [`rustup`](https://rustup.rs).
+We assume that you have a rust toolchain set up. If not, install the latest stable one using [`rustup`](https://rustup.rs):
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+. "$HOME/.cargo/env"
+```
 
 ### Database Setup
 
@@ -26,7 +31,8 @@ export DATABASE_URL=postgresql://pointercrate@localhost/pointercrate
 To set up a database with all the tables used by pointercrate, this repository contains a set of migrations that can be applied to an empty database (in the [`migrations`](migrations) directory). To apply the migrations, run
 
 ```bash
-cargo install sqlx-cli
+# you might need your distrbutions equivalent of the libssl-dev and gcc packages
+cargo install sqlx-cli --no-default-features --features native-tls,postgres
 cargo sqlx migrate run
 ```
 
