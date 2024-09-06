@@ -26,7 +26,11 @@ mod post;
 
 pub struct AuthenticatedUser {
     user: User,
-    password_hash: String,
+    auth_method: AuthenticationMethod,
+}
+
+pub enum AuthenticationMethod {
+    Legacy { password_hash: String },
 }
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -147,31 +151,41 @@ impl AuthenticatedUser {
     }
 
     fn password_salt(&self) -> Vec<u8> {
-        let raw_parts: Vec<_> = self.password_hash.split('$').filter(|s| !s.is_empty()).collect();
+        match &self.auth_method {
+            AuthenticationMethod::Legacy { password_hash } => {
+                let raw_parts: Vec<_> = password_hash.split('$').filter(|s| !s.is_empty()).collect();
 
-        match &raw_parts[..] {
-            [_, _, hash] => b64::decode(&hash[..22]),
-            _ => unreachable!(),
+                match &raw_parts[..] {
+                    [_, _, hash] => b64::decode(&hash[..22]),
+                    _ => unreachable!(),
+                }
+            },
+            _ => Vec::new(),
         }
     }
 
     pub fn verify_password(self, password: &str) -> Result<Self> {
-        debug!("Verifying a password!");
+        match &self.auth_method {
+            AuthenticationMethod::Legacy { password_hash } => {
+                debug!("Verifying a password!");
 
-        let valid = bcrypt::verify(password, &self.password_hash).map_err(|err| {
-            warn!("Password verification FAILED for account {}: {}", self.user, err);
+                let valid = bcrypt::verify(password, password_hash).map_err(|err| {
+                    warn!("Password verification FAILED for account {}: {}", self.user, err);
 
-            UserError::Core(CoreError::Unauthorized)
-        })?;
+                    UserError::Core(CoreError::Unauthorized)
+                })?;
 
-        if valid {
-            debug!("Password correct, proceeding");
+                if valid {
+                    debug!("Password correct, proceeding");
 
-            Ok(self)
-        } else {
-            warn!("Potentially malicious log-in attempt to account {}", self.user);
+                    Ok(self)
+                } else {
+                    warn!("Potentially malicious log-in attempt to account {}", self.user);
 
-            Err(CoreError::Unauthorized.into())
+                    Err(CoreError::Unauthorized.into())
+                }
+            },
+            _ => Err(CoreError::Unauthorized.into()),
         }
     }
 }
@@ -179,6 +193,8 @@ impl AuthenticatedUser {
 #[cfg(test)]
 mod tests {
     use crate::{AuthenticatedUser, User};
+
+    use super::AuthenticationMethod;
 
     fn patrick() -> AuthenticatedUser {
         AuthenticatedUser {
@@ -189,7 +205,9 @@ mod tests {
                 display_name: None,
                 youtube_channel: None,
             },
-            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            auth_method: AuthenticationMethod::Legacy {
+                password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            },
         }
     }
 
@@ -202,7 +220,9 @@ mod tests {
                 display_name: None,
                 youtube_channel: None,
             },
-            password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            auth_method: AuthenticationMethod::Legacy {
+                password_hash: bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            },
         }
     }
 

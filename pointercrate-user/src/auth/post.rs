@@ -1,5 +1,5 @@
 use crate::{
-    auth::{patch::PatchMe, AuthenticatedUser},
+    auth::{patch::PatchMe, AuthenticatedUser, AuthenticationMethod},
     error::{Result, UserError},
     User,
 };
@@ -43,7 +43,7 @@ impl AuthenticatedUser {
                         display_name: None,
                         youtube_channel: None,
                     },
-                    password_hash: hash,
+                    auth_method: AuthenticationMethod::Legacy { password_hash: hash },
                 })
             },
             Err(err) => Err(err),

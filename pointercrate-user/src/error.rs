@@ -65,6 +65,14 @@ pub enum UserError {
     /// Error Code `42226`
     #[display(fmt = "The given URL is no YouTube URL")]
     NotYouTube,
+
+    /// `422 UNPROCESSABL ENTITY` variant indicating that the attempted operation can only be
+    /// performed on a legacy, password-based account (for example, trying to change password
+    /// for a non-legacy account).
+    ///
+    /// Error Code `42224`
+    #[display(fmt = "The given operation is invalid on non-legacy account")]
+    NonLegacyAccount,
 }
 
 impl std::error::Error for UserError {}
@@ -92,6 +100,7 @@ impl PointercrateError for UserError {
             InvalidUsername => 42202,
             InvalidPassword => 42204,
             NotYouTube => 42226,
+            NonLegacyAccount => 42224,
         }
     }
 }
