@@ -19,3 +19,6 @@ base64 = "0.22.1"
 nonzero_ext = "0.3.0"
 serde_urlencoded = "0.7.0"
 governor = "0.6.0"
+
+[features]
+legacy_accounts = ["pointercrate-user/legacy_accounts"]

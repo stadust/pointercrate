@@ -2,13 +2,17 @@ use crate::{
     auth::{BasicAuth, TokenAuth},
     ratelimits::UserRatelimits,
 };
-use pointercrate_core::{etag::Taggable, pool::PointercratePool};
+use pointercrate_core::etag::Taggable;
+#[cfg(feature = "legacy_accounts")]
+use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, Tagged},
     response::Response2,
 };
-use pointercrate_user::{error::UserError, AuthenticatedUser, PatchMe, Registration, User};
+#[cfg(feature = "legacy_accounts")]
+use pointercrate_user::{AuthenticatedUser, Registration};
+use pointercrate_user::{error::UserError, PatchMe, User};
 use rocket::{
     http::Status,
     serde::json::{serde_json, Json},
@@ -16,6 +20,7 @@ use rocket::{
 };
 use std::net::IpAddr;
 
+#[cfg(feature = "legacy_accounts")]
 #[rocket::post("/register", data = "<body>")]
 pub async fn register(
     ip: IpAddr, body: Json<Registration>, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,

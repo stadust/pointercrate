@@ -5,7 +5,9 @@
 //! * Deletion of own account
 //! * Modification of own account
 
-pub use self::{patch::PatchMe, post::Registration};
+#[cfg(feature = "legacy_accounts")]
+pub use self::post::Registration;
+pub use self::patch::PatchMe;
 use crate::{
     error::{Result, UserError},
     User,
