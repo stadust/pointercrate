@@ -5,8 +5,10 @@
 //! * Modifying other people's accounts (assign permissions, change offensive names, etc)
 //! * Querying account information
 
+#[cfg(feature = "legacy_accounts")]
+pub use self::auth::Registration;
 pub use self::{
-    auth::{AuthenticatedUser, PatchMe, Registration},
+    auth::{AuthenticatedUser, PatchMe},
     paginate::UserPagination,
     patch::PatchUser,
 };

@@ -10,6 +10,8 @@ use log::{debug, info};
 use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
 
+use super::AuthenticationMethod;
+
 impl AuthenticatedUser {
     pub async fn basic_auth(username: &str, password: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform basic authentication");
@@ -59,7 +61,9 @@ impl AuthenticatedUser {
             Err(err) => Err(err.into()),
             Ok(row) => Ok(AuthenticatedUser {
                 user: construct_from_row!(row),
-                password_hash: row.password_hash,
+                auth_method: AuthenticationMethod:: Legacy {
+                    password_hash: row.password_hash,
+                }
             }),
         }
     }
@@ -77,7 +81,9 @@ impl AuthenticatedUser {
             Err(err) => Err(err.into()),
             Ok(row) => Ok(AuthenticatedUser {
                 user: construct_from_row!(row),
-                password_hash: row.password_hash,
+                auth_method: AuthenticationMethod:: Legacy {
+                    password_hash: row.password_hash,
+                }
             }),
         }
     }

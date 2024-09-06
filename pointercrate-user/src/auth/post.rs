@@ -1,12 +1,15 @@
+#[cfg(feature = "legacy_accounts")]
+use crate::{auth::AuthenticationMethod, error::UserError, User};
 use crate::{
     auth::{patch::PatchMe, AuthenticatedUser},
-    error::{Result, UserError},
-    User,
+    error::Result,
 };
-use log::{info, trace, warn};
+use log::warn;
+#[cfg(feature = "legacy_accounts")]
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 
+#[cfg(feature = "legacy_accounts")]
 #[derive(Deserialize, Serialize)]
 pub struct Registration {
     pub name: String,
@@ -14,10 +17,11 @@ pub struct Registration {
 }
 
 impl AuthenticatedUser {
+    #[cfg(feature = "legacy_accounts")]
     pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
-        info!("Attempting registration of new user under name {}", registration.name);
+        log::info!("Attempting registration of new user under name {}", registration.name);
 
-        trace!("Registration request is formally correct");
+        log::trace!("Registration request is formally correct");
 
         match User::by_name(&registration.name, connection).await {
             Ok(_) => Err(UserError::NameTaken),
@@ -33,7 +37,7 @@ impl AuthenticatedUser {
                 .await?
                 .member_id;
 
-                info!("Newly registered user with name {} has been assigned ID {}", registration.name, id);
+                log::info!("Newly registered user with name {} has been assigned ID {}", registration.name, id);
 
                 Ok(AuthenticatedUser {
                     user: User {
@@ -43,7 +47,7 @@ impl AuthenticatedUser {
                         display_name: None,
                         youtube_channel: None,
                     },
-                    password_hash: hash,
+                    auth_method: AuthenticationMethod::Legacy { password_hash: hash },
                 })
             },
             Err(err) => Err(err),
