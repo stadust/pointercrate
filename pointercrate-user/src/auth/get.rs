@@ -61,9 +61,9 @@ impl AuthenticatedUser {
             Err(err) => Err(err.into()),
             Ok(row) => Ok(AuthenticatedUser {
                 user: construct_from_row!(row),
-                auth_method: AuthenticationMethod:: Legacy {
+                auth_method: AuthenticationMethod::Legacy {
                     password_hash: row.password_hash,
-                }
+                },
             }),
         }
     }
@@ -81,9 +81,9 @@ impl AuthenticatedUser {
             Err(err) => Err(err.into()),
             Ok(row) => Ok(AuthenticatedUser {
                 user: construct_from_row!(row),
-                auth_method: AuthenticationMethod:: Legacy {
+                auth_method: AuthenticationMethod::Legacy {
                     password_hash: row.password_hash,
-                }
+                },
             }),
         }
     }

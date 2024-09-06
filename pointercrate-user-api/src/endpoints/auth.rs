@@ -10,9 +10,9 @@ use pointercrate_core_api::{
     etag::{Precondition, Tagged},
     response::Response2,
 };
+use pointercrate_user::{error::UserError, PatchMe, User};
 #[cfg(feature = "legacy_accounts")]
 use pointercrate_user::{AuthenticatedUser, Registration};
-use pointercrate_user::{error::UserError, PatchMe, User};
 use rocket::{
     http::Status,
     serde::json::{serde_json, Json},
