@@ -1,0 +1,62 @@
+name: Check all feature permutations
+on: pull_request
+
+jobs:
+  # Label of the container job
+  container-job:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: pointercrate
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: llvm-tools-preview
+
+      - name: Install sqlx-cli and cargo-all-features
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: sqlx-cli cargo-all-features
+
+      - name: Load pointercrate schema
+        uses: actions-rs/cargo@v1
+        with:
+          command: sqlx
+          args: migrate run
+        env:
+          DATABASE_URL: postgresql://pointercrate:postgres@localhost/postgres
+
+      - name: Check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check-all-features
+        env:
+          DATABASE_URL: postgresql://pointercrate:postgres@localhost/postgres
