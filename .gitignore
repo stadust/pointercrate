@@ -3,3 +3,9 @@
 .secret
 .idea
 .vscode
+
+# random stuff I have because of enabling eslint in vscode
+node_modules
+eslint.config.mjs
+package-lock.json
+package.json
