@@ -18,7 +18,7 @@ async fn test_put_claim(pool: Pool<Postgres>) {
         .expect_status(Status::Created)
         .expect_header(
             "Location",
-            format!("/api/v1/players/{}/claims/{}/", player_id, user.inner().id).as_str(),
+            format!("/api/v1/players/{}/claims/{}/", player_id, user.user().id).as_str(),
         )
         .get_result()
         .await;
@@ -26,7 +26,7 @@ async fn test_put_claim(pool: Pool<Postgres>) {
     assert_eq!(
         json,
         PlayerClaim {
-            user_id: user.inner().id,
+            user_id: user.user().id,
             player_id,
             verified: false,
             lock_submissions: false

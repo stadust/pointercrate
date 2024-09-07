@@ -17,7 +17,7 @@ pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
             .get_result()
             .await;
 
-        assert_eq!(user.inner().id as i64, response["data"]["id"].as_i64().unwrap());
+        assert_eq!(user.user().id as i64, response["data"]["id"].as_i64().unwrap());
 
         // validate_access_token takes ownership, but it gives back the object if verification is successfuly
         user = user.validate_access_token(response["token"].as_str().unwrap()).unwrap();

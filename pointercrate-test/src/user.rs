@@ -38,7 +38,7 @@ pub async fn system_user_with_perms(perm: Permission, connection: &mut PgConnect
 
     sqlx::query!(
         "UPDATE members SET permissions = $2::INTEGER::BIT(16) WHERE member_id = $1",
-        user.inner().id,
+        user.user().id,
         perm.bit() as i16
     )
     .execute(connection)

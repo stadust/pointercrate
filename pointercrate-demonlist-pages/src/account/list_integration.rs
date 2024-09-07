@@ -36,10 +36,10 @@ impl AccountPageTab for ListIntegrationTab {
     }
 
     async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
-        let player_claim = match PlayerClaim::by_user(user.inner().id, connection).await {
+        let player_claim = match PlayerClaim::by_user(user.user().id, connection).await {
             Ok(player_claim) => player_claim,
             Err(err) => {
-                error!("Error retrieving player claim of user {}: {:?}", user.inner(), err);
+                error!("Error retrieving player claim of user {}: {:?}", user.user(), err);
 
                 return ErrorFragment {
                     status: err.status_code(),
@@ -49,7 +49,7 @@ impl AccountPageTab for ListIntegrationTab {
                 .body();
             },
         };
-        let is_moderator = permissions.require_permission(user.inner().permissions, MODERATOR).is_ok();
+        let is_moderator = permissions.require_permission(user.user().permissions, MODERATOR).is_ok();
 
         html! {
             div.left {

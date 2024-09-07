@@ -39,13 +39,13 @@ pub struct CSRFClaims {
 }
 
 impl AuthenticatedUser {
-    pub fn into_inner(self) -> User {
+    pub fn into_user(self) -> User {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.into_user(),
         }
     }
 
-    pub fn inner(&self) -> &User {
+    pub fn user(&self) -> &User {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.user(),
         }
@@ -60,7 +60,7 @@ impl AuthenticatedUser {
     pub fn generate_access_token(&self) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
-            &AccessClaims { id: self.inner().id },
+            &AccessClaims { id: self.user().id },
             &EncodingKey::from_secret(&self.jwt_secret()),
         )
         .unwrap()
@@ -74,17 +74,17 @@ impl AuthenticatedUser {
 
         jsonwebtoken::decode::<AccessClaims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
             .map_err(|err| {
-                warn!("Token validation FAILED for account {}: {}", self.inner(), err);
+                warn!("Token validation FAILED for account {}: {}", self.user(), err);
 
                 CoreError::Unauthorized.into()
             })
             .and_then(move |token_data| {
                 // sanity check, should never fail
-                if token_data.claims.id != self.inner().id {
+                if token_data.claims.id != self.user().id {
                     log::error!(
                         "Access token for user {} decoded successfully even though user {} is logged in",
                         token_data.claims.id,
-                        self.inner()
+                        self.user()
                     );
 
                     Err(CoreError::Unauthorized.into())
@@ -101,7 +101,7 @@ impl AuthenticatedUser {
             .expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
 
         let claim = CSRFClaims {
-            id: self.inner().id,
+            id: self.user().id,
             iat: since_epoch.as_secs(),
             exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
         };
@@ -121,15 +121,15 @@ impl AuthenticatedUser {
 
         jsonwebtoken::decode::<CSRFClaims>(token, &DecodingKey::from_secret(&pointercrate_core::config::secret()), &validation)
             .map_err(|err| {
-                warn!("Access token validation FAILED for account {}: {}", self.inner(), err);
+                warn!("Access token validation FAILED for account {}: {}", self.user(), err);
 
                 CoreError::Unauthorized.into()
             })
             .and_then(|token_data| {
-                if token_data.claims.id != self.inner().id {
+                if token_data.claims.id != self.user().id {
                     warn!(
                         "User {} attempt to authenticate using CSRF token generated for user {}",
-                        self.inner(),
+                        self.user(),
                         token_data.claims.id
                     );
 

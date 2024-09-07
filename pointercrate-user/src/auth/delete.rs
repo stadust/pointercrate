@@ -6,8 +6,8 @@ use sqlx::PgConnection;
 
 impl AuthenticatedUser {
     pub async fn delete(self, connection: &mut PgConnection) -> Result<()> {
-        warn!("Self-Deleting user account {}", self.inner());
+        warn!("Self-Deleting user account {}", self.user());
 
-        self.into_inner().delete(connection).await
+        self.into_user().delete(connection).await
     }
 }

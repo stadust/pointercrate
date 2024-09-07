@@ -32,7 +32,7 @@ impl AccountPageTab for ProfileTab {
     async fn content(
         &self, authenticated_user: &AuthenticatedUser, permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
-        let user = authenticated_user.inner();
+        let user = authenticated_user.user();
 
         let permissions = permissions.bits_to_permissions(user.permissions);
         let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");

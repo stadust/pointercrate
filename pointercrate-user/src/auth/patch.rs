@@ -1,7 +1,8 @@
 use crate::{
     auth::AuthenticatedUser,
     error::{Result, UserError},
-    patch::PatchUser, User,
+    patch::PatchUser,
+    User,
 };
 use pointercrate_core::util::{non_nullable, nullable};
 use serde::Deserialize;
@@ -42,7 +43,7 @@ impl AuthenticatedUser {
             self.set_password(password, connection).await?;
         }
 
-        self.into_inner()
+        self.into_user()
             .apply_patch(
                 PatchUser {
                     display_name: patch.display_name,
