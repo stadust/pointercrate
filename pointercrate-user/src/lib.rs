@@ -5,10 +5,7 @@
 //! * Modifying other people's accounts (assign permissions, change offensive names, etc)
 //! * Querying account information
 
-pub use self::{
-    paginate::UserPagination,
-    patch::PatchUser,
-};
+pub use self::{paginate::UserPagination, patch::PatchUser};
 use crate::error::{Result, UserError};
 use pointercrate_core::{
     etag::Taggable,
