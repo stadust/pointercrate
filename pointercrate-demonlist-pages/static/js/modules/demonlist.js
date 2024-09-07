@@ -79,9 +79,6 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
   demon.addValidator(input => input.dropdown.selected !== undefined, "Please specify a demon");
 
-  let holderSelector = new PlayerSelectionDialog("submission-holder-dialog");
-  document.getElementById("record-submitter-holder-pen").addEventListener('click', () => holderSelector.open().then(data => player.value = data.player));
-
   player.addValidator(input => input.value !== undefined, "Please specify a record holder");
   player.addValidator(
     input => input.value === undefined || input.value.length <= 50,

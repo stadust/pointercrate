@@ -129,6 +129,53 @@ export class Dropdown {
   }
 }
 
+export class DynamicSuggestionDropdown extends Dropdown {
+  constructor(html) {
+    super(html);
+
+    this.endpoint = html.dataset.endpoint;
+    this.field = html.dataset.field;
+
+    this.input.addEventListener("input", () => this._updateOptionsWithRequest());
+    this.timeout = null;
+  }
+
+  _updateOptionsWithRequest() {
+    var filterString = this.input.value;
+
+    if (this.timeout) 
+      window.clearTimeout(this.timeout);
+    
+    this.timeout = window.setTimeout(() => {
+      get(this.endpoint + "?limit=5&" + this.field + "_contains=" + filterString)
+      .then(response => {
+        // No change since request was made?
+        if (this.input.value == filterString) {
+          while(this.ul.childNodes.length) 
+            this.ul.removeChild(this.ul.lastChild);
+
+          for (let item of response.data) {
+            let li = document.createElement("li");
+            li.innerText = item[this.field];
+            li.classList.add("hover", "white");
+            li.dataset.value = item[this.field];
+
+            this.addListItem(li);
+          }
+        }
+      })
+    }, 500);
+  }
+
+  onFocus() {
+    this._updateOptionsWithRequest();
+  }
+
+  onUnfocus() {
+    this.selected = this.input.value;
+  }
+}
+
 /**
  * Class representing complex HTML components that contain elements with the `.output` class, meaning we can display success and error messages in them somewhere.
  *
@@ -879,9 +926,13 @@ export class DropdownFormInput extends FormInput {
   constructor(dropdown) {
     super();
 
-    this.dropdown = new Dropdown(
-      dropdown.getElementsByClassName("dropdown-menu")[0]
-    );
+    let html = dropdown.getElementsByClassName("dropdown-menu")[0];
+
+    if (html.dataset.endpoint) 
+      this.dropdown = new DynamicSuggestionDropdown(html);
+    else
+      this.dropdown = new Dropdown(html);
+
     this.error = dropdown.getElementsByTagName("p")[0];
 
     this.dropdown.addEventListener((selected) => {

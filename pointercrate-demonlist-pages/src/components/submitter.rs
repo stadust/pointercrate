@@ -1,4 +1,4 @@
-use crate::components::{demon_dropdown, player_selection_dialog};
+use crate::components::demon_dropdown;
 use maud::{html, Markup, Render};
 use pointercrate_demonlist::{config, demon::Demon};
 
@@ -41,15 +41,17 @@ impl Render for RecordSubmitter<'_> {
                         "Holder:"
                     }
                     p {
-                        "The player holding the record. Click the pencil to select a player!"
+                        "The player holding the record. Start typing to see suggestions of existing players"
                     }
-                    span.form-input.flex.col #id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #record-submitter-holder-pen aria-hidden = "true" {}
-                                " "
+                    span.form-input.flex.col data-type = "dropdown" {
+                        div.dropdown-menu #id_player data-endpoint = "/api/v1/players/" data-field = "name" {
+                            div {
+                                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
                             }
-                            i #selected-holder data-name = "player" {"None Selected"}
+                            div.menu {
+                                // dynamically populated once the user starts typing
+                                ul {}
+                            }
                         }
                         p.error {}
                     }
@@ -109,12 +111,6 @@ impl Render for RecordSubmitter<'_> {
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
             }
-            (player_selection_dialog(
-                "submission-holder-dialog",
-                "Select player:",
-                "To select the player holding this record, search them up on the left to see if they already have records on the list and click them. In case the player does not exist, fill out only the text field on the right.",
-                "Select"
-            ))
         }
     }
 }
