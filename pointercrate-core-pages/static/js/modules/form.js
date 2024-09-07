@@ -957,9 +957,7 @@ export class DropdownFormInput extends FormInput {
   }
 
   get value() {
-    // FIXME: obviously not always int
-    let asInt = parseInt(this.dropdown.selected);
-    return isNaN(asInt) ? this.dropdown.selected : asInt;
+    return this.dropdown.selected;
   }
 
   get name() {
