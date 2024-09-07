@@ -55,3 +55,17 @@ pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &st
         }
     }
 }
+
+pub fn player_selection_dropdown(dropdown_id: &str, endpoint: &str, field: &str) -> Markup {
+    html! {
+        div.dropdown-menu #(dropdown_id) data-endpoint = (endpoint) data-field = (name) {
+            div {
+                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
+            }
+            div.menu {
+                // dynamically populated once the user starts typing
+                ul {}
+            }
+        }
+    }
+}

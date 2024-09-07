@@ -1,4 +1,4 @@
-use crate::components::player_selection_dialog;
+use crate::components::{player_selection_dialog, player_selection_dropdown};
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_pages::util::filtered_paginator;
@@ -357,29 +357,13 @@ fn demon_submitter() -> Markup {
                     span.form-input.flex.col data-type = "dropdown" {
                         label{"Verifier:"}
                         br;
-                        div.dropdown-menu #demon-add-verifier data-endpoint = "/api/v1/players/" data-field = "name" {
-                            div {
-                                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
-                            }
-                            div.menu {
-                                // dynamically populated once the user starts typing
-                                ul {}
-                            }
-                        }
+                        (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name"))
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
                         label {"Publisher:"}
                         br;
-                        div.dropdown-menu #demon-add-publisher data-endpoint = "/api/v1/players/" data-field = "name" {
-                            div {
-                                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
-                            }
-                            div.menu {
-                                // dynamically populated once the user starts typing
-                                ul {}
-                            }
-                        }
+                        (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name"))
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-video {

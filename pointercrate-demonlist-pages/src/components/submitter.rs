@@ -1,4 +1,4 @@
-use crate::components::demon_dropdown;
+use crate::components::{demon_dropdown, player_selection_dropdown};
 use maud::{html, Markup, Render};
 use pointercrate_demonlist::{config, demon::Demon};
 
@@ -44,15 +44,7 @@ impl Render for RecordSubmitter<'_> {
                         "The player holding the record. Start typing to see suggestions of existing players"
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        div.dropdown-menu #id_player data-endpoint = "/api/v1/players/" data-field = "name" {
-                            div {
-                                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
-                            }
-                            div.menu {
-                                // dynamically populated once the user starts typing
-                                ul {}
-                            }
-                        }
+                        (player_selection_dropdown("id_player", "/api/v1/players/", "name"))
                         p.error {}
                     }
                     h3 {
