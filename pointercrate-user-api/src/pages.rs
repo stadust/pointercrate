@@ -9,6 +9,8 @@ use pointercrate_core_api::response::Page;
 use pointercrate_core_pages::head::HeadLike;
 use pointercrate_user::error::UserError;
 #[cfg(feature = "legacy_accounts")]
+use pointercrate_user::LegacyAuthenticatedUser;
+#[cfg(feature = "legacy_accounts")]
 use pointercrate_user::{AuthenticatedUser, Registration, User};
 use pointercrate_user_pages::account::AccountPageConfig;
 #[cfg(feature = "legacy_accounts")]
@@ -58,7 +60,7 @@ pub async fn register(
 
     ratelimits.soft_registrations(ip)?;
 
-    AuthenticatedUser::validate_password(&registration.password)?;
+    LegacyAuthenticatedUser::validate_password(&registration.password)?;
     User::validate_name(&registration.name)?;
 
     ratelimits.registrations(ip)?;

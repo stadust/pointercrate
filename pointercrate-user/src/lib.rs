@@ -6,7 +6,8 @@
 //! * Querying account information
 
 #[cfg(feature = "legacy_accounts")]
-pub use self::auth::Registration;
+pub use self::auth::legacy::Registration;
+pub use self::auth::legacy::LegacyAuthenticatedUser;
 pub use self::{
     auth::{AuthenticatedUser, PatchMe},
     paginate::UserPagination,

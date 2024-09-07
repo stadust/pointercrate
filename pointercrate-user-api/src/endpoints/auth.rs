@@ -5,14 +5,14 @@ use crate::{
 use pointercrate_core::etag::Taggable;
 #[cfg(feature = "legacy_accounts")]
 use pointercrate_core::pool::PointercratePool;
+#[cfg(feature = "legacy_accounts")]
+use pointercrate_user::LegacyAuthenticatedUser;
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, Tagged},
     response::Response2,
 };
-use pointercrate_user::{error::UserError, PatchMe, User};
-#[cfg(feature = "legacy_accounts")]
-use pointercrate_user::{AuthenticatedUser, Registration};
+use pointercrate_user::{error::UserError, AuthenticatedUser, PatchMe, User};
 use rocket::{
     http::Status,
     serde::json::{serde_json, Json},
@@ -23,13 +23,13 @@ use std::net::IpAddr;
 #[cfg(feature = "legacy_accounts")]
 #[rocket::post("/register", data = "<body>")]
 pub async fn register(
-    ip: IpAddr, body: Json<Registration>, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,
+    ip: IpAddr, body: Json<pointercrate_user::Registration>, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,
 ) -> Result<Response2<Tagged<User>>> {
     let mut connection = pool.transaction().await.map_err(UserError::from)?;
 
     ratelimits.soft_registrations(ip)?;
 
-    AuthenticatedUser::validate_password(&body.password)?;
+    LegacyAuthenticatedUser::validate_password(&body.password)?;
     User::validate_name(&body.name)?;
 
     let user = AuthenticatedUser::register(body.0, &mut *connection).await?;
@@ -61,7 +61,10 @@ pub async fn login(
 
 #[rocket::post("/invalidate")]
 pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
-    auth.user.invalidate_all_tokens(&auth.secret, &mut auth.connection).await?;
+    match auth.user {
+        AuthenticatedUser::Legacy(legacy) => legacy.invalidate_all_tokens(auth.secret, &mut auth.connection).await?
+    }
+    
     auth.connection.commit().await.map_err(UserError::from)?;
 
     Ok(Status::NoContent)
@@ -85,7 +88,7 @@ pub async fn patch_me(mut auth: BasicAuth, patch: Json<PatchMe>, pred: Precondit
     if changes_password {
         Ok(Err(Status::NotModified))
     } else {
-        Ok(Ok(Tagged(updated_user.into_inner())))
+        Ok(Ok(Tagged(updated_user)))
     }
 }
 
