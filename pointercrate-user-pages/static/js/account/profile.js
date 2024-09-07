@@ -47,7 +47,7 @@ function setupGetAccessToken() {
     })
       .then((response) => {
         loginPassword.value = "";
-        accessToken.innerHTML = response.data.token;
+        accessToken.innerText = response.data.token;
         htmlLoginForm.style.display = "none";
         accessTokenArea.style.display = "block";
       })

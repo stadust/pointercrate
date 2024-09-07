@@ -16,12 +16,15 @@ import {
   setupFormDialogEditor,
   Output,
   setupDropdownEditor,
-  PaginatorEditorBackend, setupEditorDialog, DropdownDialog,
+  PaginatorEditorBackend,
+  setupEditorDialog,
+  DropdownDialog,
 } from "/static/core/js/modules/form.js";
 import {
   initializeRecordSubmitter,
   generateRecord,
-  embedVideo, PlayerSelectionDialog,
+  embedVideo,
+  PlayerSelectionDialog,
 } from "/static/demonlist/js/modules/demonlist.js";
 
 export let recordManager;
@@ -74,14 +77,30 @@ class RecordManager extends Paginator {
     this.initProgressDialog();
     this.initVideoDialog();
 
-    setupEditorDialog(new PlayerSelectionDialog("record-holder-dialog"), "record-holder-pen", new PaginatorEditorBackend(this, true), this.output);
+    setupEditorDialog(
+      new PlayerSelectionDialog("record-holder-dialog"),
+      "record-holder-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output
+    );
     this.initDemonDialog();
 
-    document.getElementById("record-copy-info").addEventListener('click', () => {
-      navigator.clipboard.writeText(this.currentObject.id + ", " + this._holder.innerText + ", " + this.currentObject.video)
-          .then(() => this.output.setSuccess("Copied record data to clipboard!"))
+    document
+      .getElementById("record-copy-info")
+      .addEventListener("click", () => {
+        navigator.clipboard
+          .writeText(
+            this.currentObject.id +
+              ", " +
+              this._holder.innerText +
+              ", " +
+              this.currentObject.video
+          )
+          .then(() =>
+            this.output.setSuccess("Copied record data to clipboard!")
+          )
           .catch(() => this.output.setError("Error copying to clipboard"));
-    });
+      });
   }
 
   initProgressDialog() {
@@ -130,7 +149,7 @@ class RecordManager extends Paginator {
       "record-demon-pen",
       new PaginatorEditorBackend(this, true),
       this.output,
-      demonId => ({demon_id: parseInt(demonId)})
+      (demonId) => ({ demon_id: parseInt(demonId) })
     );
   }
 
@@ -150,47 +169,49 @@ class RecordManager extends Paginator {
       this._video.style.display = "none";
     }
 
-    if(this.currentObject.video !== undefined) {
+    if (this.currentObject.video !== undefined) {
       this._video_link.href = this.currentObject.video;
-      this._video_link.innerHTML = this.currentObject.video;
+      this._video_link.innerText = this.currentObject.video;
       this._video_link.style.display = "initial";
     } else {
       this._video_link.style.display = "none";
     }
 
-    if(this.currentObject.raw_footage !== undefined) {
+    if (this.currentObject.raw_footage !== undefined) {
       this._raw_footage_link.href = this.currentObject.raw_footage;
-      this._raw_footage_link.innerHTML = this.currentObject.raw_footage;
+      this._raw_footage_link.innerText = this.currentObject.raw_footage;
       this._raw_footage_link.style.display = "initial";
     } else {
       this._raw_footage_link.style.display = "none";
     }
 
-    this._id.innerHTML = this.currentObject.id;
-    this._demon.innerHTML =
+    this._id.innerText = this.currentObject.id;
+    this._demon.innerText =
       this.currentObject.demon.name + " (" + this.currentObject.demon.id + ")";
-    this._holder.innerHTML =
+    this._holder.innerText =
       this.currentObject.player.name +
       " (" +
       this.currentObject.player.id +
       ")";
     this._status.selectSilently(this.currentObject.status);
-    this._progress.innerHTML = this.currentObject.progress + "%";
-    this._submitter.innerHTML = this.currentObject.submitter.id;
+    this._progress.innerText = this.currentObject.progress + "%";
+    this._submitter.innerText = this.currentObject.submitter.id;
 
     // this is introducing race conditions. Oh well.
-    return get("/api/v1/records/" + this.currentObject.id + "/notes").then(response => {
-      // clear notes
-      while (this._notes.firstChild) {
-        this._notes.removeChild(this._notes.firstChild);
-      }
+    return get("/api/v1/records/" + this.currentObject.id + "/notes").then(
+      (response) => {
+        // clear notes
+        while (this._notes.firstChild) {
+          this._notes.removeChild(this._notes.firstChild);
+        }
 
-      for (let note of response.data) {
-        this._notes.appendChild(createNoteHtml(note));
-      }
+        for (let note of response.data) {
+          this._notes.appendChild(createNoteHtml(note));
+        }
 
-      $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
-    })
+        $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
+      }
+    );
   }
 }
 
@@ -226,35 +247,36 @@ function createNoteHtml(note) {
   }
 
   let b = document.createElement("b");
-  b.innerHTML = "Record Note #" + note.id;
+  b.innerText = "Record Note #" + note.id;
 
   let i = document.createElement("i");
-  i.innerHTML = note.content;
+  i.innerText = note.content;
 
   let furtherInfo = document.createElement("i");
   furtherInfo.style.fontSize = "80%";
   furtherInfo.style.textAlign = "right";
 
   if (note.author === null) {
-    furtherInfo.innerHTML =
+    furtherInfo.innerText =
       "This note was left as a comment by the submitter. ";
   } else {
-    furtherInfo.innerHTML = "This note was left by " + note.author + ". ";
+    furtherInfo.innerText = "This note was left by " + note.author + ". ";
   }
 
   if (note.editors.length) {
-    furtherInfo.innerHTML +=
+    furtherInfo.innerText +=
       "This note was subsequently modified by: " +
       note.editors.join(", ") +
       ". ";
   }
 
   if (note.transferred) {
-    furtherInfo.innerHTML += "This not was not originally left on this record. ";
+    furtherInfo.innerText +=
+      "This not was not originally left on this record. ";
   }
 
-  if(note.is_public) {
-    furtherInfo.innerHTML += "This note is public. ";
+  if (note.is_public) {
+    furtherInfo.innerText += "This note is public. ";
   }
 
   if (isAdmin) noteDiv.appendChild(closeX);
@@ -303,7 +325,10 @@ function setupRecordFilterPlayerIdForm() {
 
   recordFilterPlayerIdForm.onSubmit(function () {
     // Reset search filter if player ID field is empty
-    recordManager.updateQueryData("player", valueMissing(playerId) ? playerId.value : undefined);
+    recordManager.updateQueryData(
+      "player",
+      valueMissing(playerId) ? playerId.value : undefined
+    );
   });
 }
 
@@ -333,16 +358,16 @@ function setupRecordFilterPlayerNameForm() {
       recordManager.updateQueryData("player", undefined);
     } else {
       get("/api/v1/players/?name=" + playerName.value)
-      .then((response) => {
-        let json = response.data;
+        .then((response) => {
+          let json = response.data;
 
-        if (!json || json.length == 0) {
-          playerName.errorText = "No player with that name found!";
-        } else {
-          recordManager.updateQueryData("player", json[0].id);
-        }
-      })
-      .catch(displayError(recordFilterPlayerNameForm));
+          if (!json || json.length == 0) {
+            playerName.errorText = "No player with that name found!";
+          } else {
+            recordManager.updateQueryData("player", json[0].id);
+          }
+        })
+        .catch(displayError(recordFilterPlayerNameForm));
     }
   });
 }

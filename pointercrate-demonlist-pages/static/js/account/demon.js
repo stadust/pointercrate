@@ -153,7 +153,7 @@ export class DemonManager extends FilteredPaginator {
 
     if (this.currentObject.video) {
       this._video_link.href = this.currentObject.video;
-      this._video_link.innerHTML = this.currentObject.video;
+      this._video_link.innerText = this.currentObject.video;
     } else {
       this._video_link.style.display = "none";
     }
@@ -161,12 +161,12 @@ export class DemonManager extends FilteredPaginator {
     this._thumbnail_link.href = this.currentObject.thumbnail;
     this._thumbnail_link.innerText = this.currentObject.thumbnail;
 
-    this._publisher.innerHTML =
+    this._publisher.innerText =
       this.currentObject.publisher.name +
       " (" +
       this.currentObject.publisher.id +
       ")";
-    this._verifier.innerHTML =
+    this._verifier.innerText =
       this.currentObject.verifier.name +
       " (" +
       this.currentObject.verifier.id +
