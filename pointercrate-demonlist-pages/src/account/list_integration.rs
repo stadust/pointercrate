@@ -6,8 +6,9 @@ use pointercrate_core_pages::{
     util::{filtered_paginator, paginator},
 };
 use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, MODERATOR};
+use pointercrate_user::{auth::AuthenticatedUser, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
 

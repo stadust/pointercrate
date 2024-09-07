@@ -3,24 +3,28 @@ use crate::{
     ratelimits::UserRatelimits,
 };
 use pointercrate_core::permission::PermissionsManager;
-#[cfg(feature = "legacy_accounts")]
-use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::response::Page;
 use pointercrate_core_pages::head::HeadLike;
 use pointercrate_user::error::UserError;
-#[cfg(feature = "legacy_accounts")]
-use pointercrate_user::LegacyAuthenticatedUser;
-#[cfg(feature = "legacy_accounts")]
-use pointercrate_user::{AuthenticatedUser, Registration, User};
 use pointercrate_user_pages::account::AccountPageConfig;
-#[cfg(feature = "legacy_accounts")]
-use rocket::serde::json::Json;
+
 use rocket::{
     http::{Cookie, CookieJar, SameSite, Status},
     response::Redirect,
     State,
 };
 use std::net::IpAddr;
+
+#[cfg(feature = "legacy_accounts")]
+use {
+    pointercrate_core::pool::PointercratePool,
+    pointercrate_user::{
+        auth::legacy::{LegacyAuthenticatedUser, Registration},
+        auth::AuthenticatedUser,
+        User,
+    },
+    rocket::serde::json::Json,
+};
 
 #[rocket::get("/login")]
 pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page> {

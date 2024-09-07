@@ -1818,6 +1818,7 @@ dependencies = [
  "pointercrate-integrate",
  "pointercrate-user",
  "pointercrate-user-pages",
+ "sqlx",
  "url",
 ]
 
@@ -1921,6 +1922,7 @@ dependencies = [
  "pointercrate-core",
  "pointercrate-core-pages",
  "pointercrate-user",
+ "sqlx",
 ]
 
 [[package]]

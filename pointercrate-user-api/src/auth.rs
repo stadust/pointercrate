@@ -5,7 +5,7 @@ use pointercrate_core::{
     permission::{Permission, PermissionsManager},
     pool::{audit_connection, PointercratePool},
 };
-use pointercrate_user::{error::UserError, AuthenticatedUser};
+use pointercrate_user::{auth::AuthenticatedUser, error::UserError};
 use rocket::{
     http::{Method, Status},
     request::{FromRequest, Outcome},

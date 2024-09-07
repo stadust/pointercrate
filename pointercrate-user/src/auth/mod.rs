@@ -156,7 +156,7 @@ impl AuthenticatedUser {
 
 #[cfg(test)]
 mod tests {
-    use crate::{AuthenticatedUser, User};
+    use crate::auth::{AuthenticatedUser, User};
 
     fn patrick() -> AuthenticatedUser {
         AuthenticatedUser::legacy(

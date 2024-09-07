@@ -4,7 +4,8 @@ use crate::{error::UserError, User};
 
 use super::AuthenticatedUser;
 
-pub use post::*;
+#[cfg(feature = "legacy_accounts")]
+pub use post::Registration;
 
 mod get;
 mod patch;

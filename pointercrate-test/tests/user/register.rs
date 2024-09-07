@@ -1,4 +1,4 @@
-use pointercrate_user::Registration;
+use pointercrate_user::auth::legacy::Registration;
 use rocket::http::Status;
 use sqlx::{Pool, Postgres};
 

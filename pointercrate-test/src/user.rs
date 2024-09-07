@@ -3,7 +3,7 @@ use pointercrate_core::{
     permission::{Permission, PermissionsManager},
     pool::PointercratePool,
 };
-use pointercrate_user::{AuthenticatedUser, Registration, ADMINISTRATOR, MODERATOR};
+use pointercrate_user::{auth::legacy::Registration, auth::AuthenticatedUser, ADMINISTRATOR, MODERATOR};
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::local::asynchronous::Client;
 use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};

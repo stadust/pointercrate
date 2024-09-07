@@ -1,6 +1,6 @@
 use sqlx::PgConnection;
 
-use crate::AuthenticatedUser;
+use crate::auth::AuthenticatedUser;
 use crate::Result;
 
 impl AuthenticatedUser {

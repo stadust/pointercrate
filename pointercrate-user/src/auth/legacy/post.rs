@@ -2,12 +2,12 @@
 pub use register::Registration;
 use sqlx::PgConnection;
 
+use crate::auth::LegacyAuthenticatedUser;
 use crate::Result;
-use super::LegacyAuthenticatedUser;
 
 impl LegacyAuthenticatedUser {
     /// Invalidates all access tokens for the given account
-    /// 
+    ///
     /// Works by re-hashing the password, and updating the `password_hash` field in the database
     /// with the new hash. Even rehashing the same password causes a new salt to be used, and this
     /// salt is part of the signing key for access tokens. Thus, changing the salt causes all old
@@ -24,7 +24,7 @@ impl LegacyAuthenticatedUser {
 #[cfg(feature = "legacy_accounts")]
 mod register {
     use super::*;
-    use crate::{error::UserError, AuthenticatedUser, User};
+    use crate::{auth::AuthenticatedUser, error::UserError, User};
     use serde::{Deserialize, Serialize};
     use sqlx::PgConnection;
 

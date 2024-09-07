@@ -12,8 +12,9 @@ use pointercrate_demonlist::{
     demon::{current_list, Demon},
     LIST_HELPER,
 };
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct RecordsPage;
 

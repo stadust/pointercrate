@@ -2,7 +2,8 @@ use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::{Permission, PermissionsManager};
 use pointercrate_core_pages::util::filtered_paginator;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, ADMINISTRATOR};
+use pointercrate_user::{auth::AuthenticatedUser, ADMINISTRATOR};
+use sqlx::PgConnection;
 
 pub struct UsersTab(pub Vec<Permission>);
 
