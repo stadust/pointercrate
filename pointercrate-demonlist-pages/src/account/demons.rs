@@ -354,27 +354,31 @@ fn demon_submitter() -> Markup {
                         input type = "number" name = "requirement" required="" min="0" max = "100";
                         p.error {}
                     }
-                    span.form-input.flex.col #demon-add-verifier data-type = "html" data-target-id = "selected-verifier" data-default = "None Selected" {
+                    span.form-input.flex.col data-type = "dropdown" {
                         label{"Verifier:"}
                         br;
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #demon-add-verifier-pen aria-hidden = "true" {}
-                                " "
+                        div.dropdown-menu #demon-add-verifier data-endpoint = "/api/v1/players/" data-field = "name" {
+                            div {
+                                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
                             }
-                            i #selected-verifier data-name = "verifier" {"None Selected"}
+                            div.menu {
+                                // dynamically populated once the user starts typing
+                                ul {}
+                            }
                         }
                         p.error {}
                     }
-                    span.form-input.flex.col #demon-add-publisher data-type = "html" data-target-id = "selected-publisher" data-default = "None Selected" {
+                    span.form-input.flex.col data-type = "dropdown" {
                         label {"Publisher:"}
                         br;
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #demon-add-publisher-pen aria-hidden = "true" {}
-                                " "
+                        div.dropdown-menu #demon-add-publisher data-endpoint = "/api/v1/players/" data-field = "name" {
+                            div {
+                                input type = "text" name = "player" required="" autocomplete="off" placeholder = "Start typing for suggestions...";
                             }
-                            i #selected-publisher data-name = "publisher" {"None Selected"}
+                            div.menu {
+                                // dynamically populated once the user starts typing
+                                ul {}
+                            }
                         }
                         p.error {}
                     }
@@ -395,21 +399,5 @@ fn demon_submitter() -> Markup {
                 }
             }
         }
-        (player_selection_dialog(
-            "demon-add-verifier-dialog",
-            "Set demon verifier:",
-            "Set the verifier of this demon. If the player you want to set as verifier already exists, search them up on the left \
-             and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-             create a new player.",
-            "Select",
-        ))
-        (player_selection_dialog(
-            "demon-add-publisher-dialog",
-            "Set demon publisher:",
-            "Set the publisher of this demon. If the player you want to set as publisher already exists, search them up on the left \
-             and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-             create a new player.",
-            "Select",
-        ))
     }
 }

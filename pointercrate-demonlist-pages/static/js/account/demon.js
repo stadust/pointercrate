@@ -243,13 +243,6 @@ function createCreatorHtml(creator) {
 function setupDemonAdditionForm() {
   let form = new Form(document.getElementById("demon-submission-form"));
 
-  let verifierSelector = new PlayerSelectionDialog("demon-add-verifier-dialog");
-  document.getElementById("demon-add-verifier-pen").addEventListener('click', () => verifierSelector.open().then(data => form.input('demon-add-verifier').value = data.player));
-
-  let publisherSelector = new PlayerSelectionDialog("demon-add-publisher-dialog");
-  document.getElementById("demon-add-publisher-pen").addEventListener('click', () => publisherSelector.open().then(data => form.input('demon-add-publisher').value = data.player));
-
-
   form.addValidators({
     "demon-add-name": { "Please specify a name": valueMissing },
     "demon-add-position": {
