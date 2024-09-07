@@ -5,7 +5,7 @@ use pointercrate_core::{
     permission::{Permission, PermissionsManager},
     pool::{audit_connection, PointercratePool},
 };
-use pointercrate_user::{error::UserError, AuthenticatedUser};
+use pointercrate_user::{auth::AuthenticatedUser, error::UserError};
 use rocket::{
     http::{Method, Status},
     request::{FromRequest, Outcome},
@@ -31,7 +31,7 @@ impl<const IsToken: bool> Auth<IsToken> {
     }
 
     pub fn require_permission(&self, permission: Permission) -> Result<(), UserError> {
-        self.permissions.require_permission(self.user.inner().permissions, permission)?;
+        self.permissions.require_permission(self.user.user().permissions, permission)?;
 
         Ok(())
     }
@@ -41,7 +41,7 @@ impl<const IsToken: bool> Auth<IsToken> {
     }
 
     pub fn assignable_permissions(&self) -> HashSet<Permission> {
-        self.permissions.assignable_by_bits(self.user.inner().permissions)
+        self.permissions.assignable_by_bits(self.user.user().permissions)
     }
 }
 
@@ -94,7 +94,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
             if let ["Bearer", token] = authorization.split(' ').collect::<Vec<_>>()[..] {
                 let user = try_outcome!(AuthenticatedUser::token_auth(token, None, &mut *connection).await);
 
-                try_outcome!(audit_connection(&mut *connection, user.inner().id).await);
+                try_outcome!(audit_connection(&mut *connection, user.user().id).await);
 
                 return Outcome::Success(Auth {
                     user,
@@ -114,7 +114,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
 
                 let user = try_outcome!(AuthenticatedUser::token_auth(access_token, None, &mut *connection).await);
 
-                try_outcome!(audit_connection(&mut *connection, user.inner().id).await);
+                try_outcome!(audit_connection(&mut *connection, user.user().id).await);
 
                 return Outcome::Success(Auth {
                     user,
@@ -132,7 +132,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
             if let Some(csrf_token) = request.headers().get_one("X-CSRF-TOKEN") {
                 let user = try_outcome!(AuthenticatedUser::token_auth(access_token, Some(csrf_token), &mut *connection).await);
 
-                try_outcome!(audit_connection(&mut *connection, user.inner().id).await);
+                try_outcome!(audit_connection(&mut *connection, user.user().id).await);
 
                 return Outcome::Success(Auth {
                     user,
@@ -197,7 +197,7 @@ impl<'r> FromRequest<'r> for Auth<false> {
                 if let [username, password] = &decoded.splitn(2, ':').collect::<Vec<_>>()[..] {
                     let user = try_outcome!(AuthenticatedUser::basic_auth(username, password, &mut *connection).await);
 
-                    try_outcome!(audit_connection(&mut *connection, user.inner().id).await);
+                    try_outcome!(audit_connection(&mut *connection, user.user().id).await);
 
                     return Outcome::Success(Auth {
                         user,

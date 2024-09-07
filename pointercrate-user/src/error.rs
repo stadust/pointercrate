@@ -71,7 +71,9 @@ pub enum UserError {
     /// for a non-legacy account).
     ///
     /// Error Code `42224`
-    #[display(fmt = "The given operation is invalid on non-legacy account")]
+    #[display(
+        fmt = "The given operation (change password) is invalid on non-legacy account, as password login is not supported for these"
+    )]
     NonLegacyAccount,
 }
 

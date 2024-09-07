@@ -73,7 +73,7 @@ pub async fn patch(
 
 #[rocket::put("/<player_id>/claims")]
 pub async fn put_claim(player_id: i32, mut auth: TokenAuth) -> Result<Response2<Json<PlayerClaim>>> {
-    let user_id = auth.user.inner().id;
+    let user_id = auth.user.user().id;
     let player = DatabasePlayer::by_id(player_id, &mut auth.connection).await?;
     let claim = player.initiate_claim(user_id, &mut auth.connection).await?;
 
@@ -97,7 +97,7 @@ pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data
 
     let claim = match claim {
         Ok(claim) if data.lock_submissions.is_some() => {
-            if claim.user_id != auth.user.inner().id {
+            if claim.user_id != auth.user.user().id {
                 return Err(DemonlistError::ClaimNotFound {
                     member_id: user_id,
                     player_id,
@@ -164,7 +164,7 @@ pub async fn geolocate_nationality(
     player_id: i32, ip: IpAddr, mut auth: TokenAuth, ratelimits: &State<DemonlistRatelimits>,
 ) -> Result<Json<Nationality>> {
     let mut player = Player::by_id(player_id, &mut auth.connection).await?;
-    let claim = PlayerClaim::get(auth.user.inner().id, player_id, &mut auth.connection).await?;
+    let claim = PlayerClaim::get(auth.user.user().id, player_id, &mut auth.connection).await?;
 
     if !claim.verified {
         return Err(DemonlistError::ClaimUnverified.into());

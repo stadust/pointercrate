@@ -1,6 +1,6 @@
 //! Utilities for pointercrate integration tests
 
-use pointercrate_user::AuthenticatedUser;
+use pointercrate_user::auth::AuthenticatedUser;
 
 use rocket::{
     http::{Header, Status},

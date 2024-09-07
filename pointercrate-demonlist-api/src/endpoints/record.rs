@@ -41,7 +41,7 @@ pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Re
         auth.require_permission(LIST_MODERATOR)?;
     }
 
-    let claim = PlayerClaim::by_user(auth.user.inner().id, &mut auth.connection)
+    let claim = PlayerClaim::by_user(auth.user.user().id, &mut auth.connection)
         .await?
         .filter(|c| c.verified);
 
@@ -84,7 +84,7 @@ pub async fn submit(
     let submission = submission.0;
     let status_is_submitted = submission.status() == RecordStatus::Submitted;
     let (is_team_member, user_id) = match auth {
-        Some(ref auth) => (auth.has_permission(LIST_HELPER), Some(auth.user.inner().id)),
+        Some(ref auth) => (auth.has_permission(LIST_HELPER), Some(auth.user.user().id)),
         None => (false, None),
     };
 
@@ -262,7 +262,7 @@ pub async fn get_notes(record_id: i32, mut auth: TokenAuth) -> Result<Response2<
     let notes = if auth.has_permission(LIST_HELPER) {
         notes_on(record_id, false, &mut auth.connection).await?
     } else {
-        match PlayerClaim::get(auth.user.inner().id, record_holder_id, &mut auth.connection).await {
+        match PlayerClaim::get(auth.user.user().id, record_holder_id, &mut auth.connection).await {
             Ok(claim) if claim.verified => notes_on(record_id, true, &mut auth.connection).await?,
             Ok(_) | Err(DemonlistError::ClaimNotFound { .. }) => return Err(DemonlistError::RecordNotFound { record_id }.into()),
             Err(err) => return Err(err.into()),
@@ -280,7 +280,7 @@ pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) 
 
     let mut note = Note::create_on(&record, data.0, &mut auth.connection).await?;
 
-    note.author = Some(auth.user.into_inner().name);
+    note.author = Some(auth.user.into_user().name);
 
     let note_id = note.id;
 
@@ -295,7 +295,7 @@ pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) 
 pub async fn patch_note(record_id: i32, note_id: i32, mut auth: TokenAuth, patch: Json<PatchNote>) -> Result<Tagged<Note>> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
-    if note.author.as_ref() != Some(&auth.user.inner().name) {
+    if note.author.as_ref() != Some(&auth.user.user().name) {
         auth.require_permission(LIST_ADMINISTRATOR)?;
     } else {
         auth.require_permission(LIST_HELPER)?;
@@ -312,7 +312,7 @@ pub async fn patch_note(record_id: i32, note_id: i32, mut auth: TokenAuth, patch
 pub async fn delete_note(record_id: i32, note_id: i32, mut auth: TokenAuth) -> Result<Status> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
-    if note.author.as_ref() != Some(&auth.user.inner().name) {
+    if note.author.as_ref() != Some(&auth.user.user().name) {
         auth.require_permission(LIST_ADMINISTRATOR)?;
     } else {
         auth.require_permission(LIST_HELPER)?;

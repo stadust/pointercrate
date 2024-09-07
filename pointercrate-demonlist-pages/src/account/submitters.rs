@@ -2,8 +2,9 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_pages::util::paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct SubmittersPage;
 

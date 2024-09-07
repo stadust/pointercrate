@@ -5,10 +5,7 @@
 //! * Modifying other people's accounts (assign permissions, change offensive names, etc)
 //! * Querying account information
 
-#[cfg(feature = "legacy_accounts")]
-pub use self::auth::Registration;
 pub use self::{
-    auth::{AuthenticatedUser, PatchMe},
     paginate::UserPagination,
     patch::PatchUser,
 };
@@ -18,7 +15,6 @@ use pointercrate_core::{
     permission::{Permission, PermissionsManager},
 };
 use serde::Serialize;
-pub use sqlx;
 use std::{
     fmt::{Display, Formatter},
     hash::Hash,
@@ -26,7 +22,7 @@ use std::{
 
 #[macro_use]
 mod get;
-mod auth;
+pub mod auth;
 mod delete;
 pub mod error;
 mod paginate;

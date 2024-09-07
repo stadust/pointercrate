@@ -2,14 +2,12 @@ use crate::{
     auth::AuthenticatedUser,
     error::{Result, UserError},
     patch::PatchUser,
+    User,
 };
-use log::info;
 use pointercrate_core::util::{non_nullable, nullable};
 use serde::Deserialize;
 use sqlx::PgConnection;
 use std::fmt::{Debug, Formatter};
-
-use super::AuthenticationMethod;
 
 #[derive(Deserialize)]
 pub struct PatchMe {
@@ -40,13 +38,12 @@ impl Debug for PatchMe {
 }
 
 impl AuthenticatedUser {
-    pub async fn apply_patch(mut self, patch: PatchMe, connection: &mut PgConnection) -> Result<Self> {
+    pub async fn apply_patch(mut self, patch: PatchMe, connection: &mut PgConnection) -> Result<User> {
         if let Some(password) = patch.password {
             self.set_password(password, connection).await?;
         }
 
-        self.user = self
-            .user
+        self.into_user()
             .apply_patch(
                 PatchUser {
                     display_name: patch.display_name,
@@ -55,35 +52,12 @@ impl AuthenticatedUser {
                 },
                 connection,
             )
-            .await?;
-
-        Ok(self)
+            .await
     }
 
     pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
-        match &mut self.auth_method {
-            AuthenticationMethod::Legacy { password_hash } => {
-                Self::validate_password(&password)?;
-
-                info!("Setting new password for user {}", self.user);
-
-                // it is safe to unwrap here because the only errors that can happen are
-                // 'BcryptError::CostNotAllowed' (won't happen because DEFAULT_COST is obviously allowed)
-                // or errors that happen during internally parsing the hash the library itself just
-                // generated. Obviously, an error there is a bug in the library, so we definitely wanna panic since
-                // we're dealing with passwords
-                *password_hash = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
-
-                sqlx::query!(
-                    "UPDATE members SET password_hash = $1 WHERE member_id = $2",
-                    *password_hash,
-                    self.user.id
-                )
-                .execute(connection)
-                .await?;
-
-                Ok(())
-            },
+        match self {
+            AuthenticatedUser::Legacy(legacy) => legacy.set_password(password, connection).await,
             _ => Err(UserError::NonLegacyAccount),
         }
     }
