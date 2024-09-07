@@ -41,7 +41,7 @@ impl Render for RecordSubmitter<'_> {
                         "Holder:"
                     }
                     p {
-                        "The player holding the record. Start typing to see suggestions of existing players"
+                        "The player holding the record. Start typing to see suggestions of existing players. If this is your first submission, write your name, as you wish it to appear on the website, into the text field (ignoring any suggestions)."
                     }
                     span.form-input.flex.col data-type = "dropdown" {
                         (player_selection_dropdown("id_player", "/api/v1/players/", "name", "player"))
