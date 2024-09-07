@@ -292,33 +292,33 @@ fn change_thumbnail_dialog() -> Markup {
 fn change_verifier_dialog() -> Markup {
     player_selection_dialog(
         "demon-verifier-dialog",
+        "demon-verifier-edit",
         "Change demon verifier:",
-        "Change the verifier of this demon. If the player you want to change the verifier to already exists, search them up on the left \
-         and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-         create a new player.",
+        "Type the new verifier of the demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Edit",
+        "verifier",
     )
 }
 
 fn change_publisher_dialog() -> Markup {
     player_selection_dialog(
         "demon-publisher-dialog",
+        "demon-publisher-edit",
         "Change demon publisher:",
-        "Change the publisher of this demon. If the player you want to change the publisher to already exists, search them up on the left \
-         and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-         create a new player.",
+        "Type the new publisher of the demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Edit",
+        "publisher"
     )
 }
 
 fn add_creator_dialog() -> Markup {
     player_selection_dialog(
         "demon-add-creator-dialog",
+        "demon-creator-add",
         "Add creator:",
-        "Select a creator to add to this demon. If the player you want to change the publisher to already exists, search them up on the \
-         left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server \
-         to create a new player.",
+        "Type the creator to add to this demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Add Creator",
+        "creator"
     )
 }
 
@@ -357,13 +357,13 @@ fn demon_submitter() -> Markup {
                     span.form-input.flex.col data-type = "dropdown" {
                         label{"Verifier:"}
                         br;
-                        (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name"))
+                        (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name", "verifier"))
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
                         label {"Publisher:"}
                         br;
-                        (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name"))
+                        (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher"))
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-video {

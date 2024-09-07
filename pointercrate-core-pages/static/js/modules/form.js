@@ -375,7 +375,13 @@ export class DropdownDialog extends Dialog {
   constructor(dialogId, dropdownId) {
     super(dialogId);
 
-    this.dropdown = new Dropdown(document.getElementById(dropdownId));
+    let html = document.getElementById(dropdownId);
+
+    if (html.dataset.endpoint) 
+      this.dropdown = new DynamicSuggestionDropdown(html);
+    else
+      this.dropdown = new Dropdown(html);
+
     this.dropdown.addEventListener((selected) => this.onSubmit(selected));
   }
 }

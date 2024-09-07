@@ -190,32 +190,6 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
   });
 }
 
-export class PlayerSelectionDialog extends FormDialog {
-  constructor(dialogId, selectionHandler) {
-    super(dialogId);
-
-    let paginator = new FilteredPaginator(
-        dialogId + "-pagination",
-        generatePlayer,
-        "name_contains"
-    );
-
-    let playerName = this.form.inputs[0];
-
-    playerName.addValidator(valueMissing, "Please provide a player name");
-
-    paginator.initialize();
-    if(selectionHandler === undefined) {
-      paginator.addSelectionListener((selected) => {
-        playerName.value = selected.name;
-        this.form.html.requestSubmit();
-      });
-    } else {
-      paginator.addSelectionListener(selectionHandler);
-    }
-  }
-}
-
 export function generatePlayer(player) {
   var li = document.createElement("li");
   var b = document.createElement("b");

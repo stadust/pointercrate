@@ -44,7 +44,7 @@ impl Render for RecordSubmitter<'_> {
                         "The player holding the record. Start typing to see suggestions of existing players"
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        (player_selection_dropdown("id_player", "/api/v1/players/", "name"))
+                        (player_selection_dropdown("id_player", "/api/v1/players/", "name", "player"))
                         p.error {}
                     }
                     h3 {

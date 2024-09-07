@@ -19,12 +19,12 @@ import {
   PaginatorEditorBackend,
   setupEditorDialog,
   DropdownDialog,
+  FormDialog,
 } from "/static/core/js/modules/form.js";
 import {
   initializeRecordSubmitter,
   generateRecord,
   embedVideo,
-  PlayerSelectionDialog,
 } from "/static/demonlist/js/modules/demonlist.js";
 
 export let recordManager;
@@ -76,9 +76,8 @@ class RecordManager extends Paginator {
 
     this.initProgressDialog();
     this.initVideoDialog();
-
     setupEditorDialog(
-      new PlayerSelectionDialog("record-holder-dialog"),
+      new FormDialog("record-holder-dialog"),
       "record-holder-pen",
       new PaginatorEditorBackend(this, true),
       this.output

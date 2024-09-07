@@ -1,7 +1,7 @@
 import {
   generateDemon,
   embedVideo,
-  generatePlayer, PlayerSelectionDialog,
+  generatePlayer,
 } from "/static/demonlist/js/modules/demonlist.js";
 import {
   FilteredPaginator,
@@ -123,10 +123,18 @@ export class DemonManager extends FilteredPaginator {
         "Please provide a name for the demon": valueMissing,
       },
     });
-
-    setupEditorDialog(new PlayerSelectionDialog("demon-verifier-dialog"), "demon-verifier-pen", new PaginatorEditorBackend(this, true), this.output, data => ({verifier: data.player}));
-
-    setupEditorDialog(new PlayerSelectionDialog("demon-publisher-dialog"), "demon-publisher-pen", new PaginatorEditorBackend(this, true), this.output, data => ({publisher: data.player}));
+    setupEditorDialog(
+      new FormDialog("demon-verifier-dialog"),
+      "demon-verifier-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output
+    );
+    setupEditorDialog(
+      new FormDialog("demon-publisher-dialog"),
+      "demon-publisher-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output
+    );
   }
 
   onReceive(response) {
@@ -288,7 +296,7 @@ export function initialize() {
 
   let addDemonForm = setupDemonAdditionForm();
 
-  let creatorFormDialog = new PlayerSelectionDialog("demon-add-creator-dialog");
+  let creatorFormDialog = new FormDialog("demon-add-creator-dialog");
   let dialogCreators = document.getElementById("demon-add-creators");
 
   let button1 = document.getElementById("demon-add-creator-pen");
@@ -299,13 +307,13 @@ export function initialize() {
       return post(
           "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
           {},
-          {creator: data.player}
+          data
       )
           .then((response) => {
             let location = response.headers["location"];
 
             demonManager.addCreator({
-              name: data.player,
+              name: data.creator,
               id: location.substring(
                   location.lastIndexOf("/", location.length - 2) + 1,
                   location.length - 1
@@ -323,7 +331,7 @@ export function initialize() {
   });
 
   button2.addEventListener("click", () => {
-    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve({creator: data.player}));
+    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve(data));
     creatorFormDialog.open()
         .then(data => {
           let creator = insertCreatorInto({ name: data.creator }, dialogCreators);

@@ -383,11 +383,11 @@ fn change_video_dialog() -> Markup {
 fn change_holder_dialog() -> Markup {
     player_selection_dialog(
         "record-holder-dialog",
+        "_edit-holder-record",
         "Change record holder:",
-        "Change the player associated with this record. If the player you want to change this record to already exists, search them up on \
-         the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the \
-         server to create a new player.",
+        "Type the new holder of the record into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Edit",
+        "player"
     )
 }
 
