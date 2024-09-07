@@ -188,7 +188,7 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
       li.appendChild(flag);
       li.appendChild(document.createTextNode(subdivision.name));
 
-      dropdown.addLI(li);
+      dropdown.addListItem(li);
     }
   });
 }

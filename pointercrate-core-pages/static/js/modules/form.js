@@ -3,41 +3,51 @@
  */
 export class Dropdown {
   /**
-   * Creates an instance of Dropdown.
+   * Creates an instance of Dropdown. The dropdown menu consists on an input element and an actual dropdown (an unordered list).
+   * The dropdown only appears if the input is focused.
+   * 
+   * Each dropdown menu item needs to define a `data-value` attribute, which, confusingly,
+   * acts as the unique key identifying that item. 
+   * 
+   * Upon selecting an item in the dropdown, the value of the input element is set to the dropdowns data-display attribute,
+   * or its innerText if no data-display is provided.
+   * 
+   * The input element can have a data-default attribute, which should link to one of the dropdown items' `data-value`.
+   * This will be the item selected by default.
+   * 
    * @param {HTMLElement} html
    * @memberof Dropdown
    */
   constructor(html) {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
-    if (this.input.dataset.default === undefined)
+    if (this.input.dataset.default === undefined && !this.input.placeholder)
       this.input.placeholder = "Click to select";
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
-    this.listeners = [];
+    this.ul = this.html.getElementsByTagName("ul")[0];
 
+    this.listeners = [];
+    // mapping each list items data-value to data-display
     this.values = {};
 
-    for (let li of this.html.querySelectorAll("ul li")) {
-      li.addEventListener("click", () => this.select(li.dataset.value));
+    this.selected = this.input.dataset.default;
 
-      this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
+    for (let li of this.html.querySelectorAll("ul li")) {
+      this._initListItem(li);
     }
 
     const config = { attributes: false, childList: true, subtree: false };
     const callback = (mutationList) => {
       for (let mutation of mutationList) {
-        /*for(let addedLI of mutation.addedNodes) {
-          addedLI.addEventListener("click", () => this.select(addedLI.dataset.value));
-
-          this.values[addedLI.dataset.value] = addedLI.dataset.display || addedLI.innerHTML;
-        }*/
+        for (let addedLI of mutation.addedNodes) {
+          this._initListItem(addedLI);
+        }
         for (let removedLI of mutation.removedNodes) {
           delete this.values[removedLI.dataset.value];
         }
       }
     };
 
-    this.ul = this.html.getElementsByTagName("ul")[0];
 
     const observer = new MutationObserver(callback);
     observer.observe(this.ul, config);
@@ -45,29 +55,35 @@ export class Dropdown {
     // in case some browser randomly decide to store text field values
     this.reset();
 
-    // temporarily variable to store selection while we clear the text field when the dropdown is opened
-    var value;
-
     this.input.addEventListener("focus", () => {
-      value = this.input.value;
-      this.input.value = "";
-      this.input.dispatchEvent(new Event("change"));
+      this.onFocus();
       this.menu.fadeTo(300, 0.95);
     });
 
     this.input.addEventListener("focusout", () => {
+      this.onUnfocus();
       this.menu.fadeOut(300);
-      this.input.value = value;
     });
   }
 
-  // FIXME: horrible hack
-  addLI(li) {
-    this.ul.appendChild(li);
-
+  _initListItem(li) {
     li.addEventListener("click", () => this.select(li.dataset.value));
 
-    this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
+    this.values[li.dataset.value] = li.dataset.display || li.innerText;
+  }
+
+  addListItem(li) {
+    this.ul.appendChild(li);
+  }
+
+  onFocus() {
+    this.input.value = "";
+    this.input.dispatchEvent(new Event("change"));
+  }
+
+  onUnfocus() {
+    if (this.selected)
+      this.input.value = this.values[this.selected];
   }
 
   /**
