@@ -27,14 +27,14 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
             None => {
                 info!("No ACCEPT header set, assuming application/json");
 
-                MediaType::JSON
+                &MediaType::JSON
             },
-            Some(accept) => accept.preferred().0.clone(), // ?????
+            Some(accept) => &accept.preferred().0,
         };
 
         let status = Status::from_code(self.error_code / 100).unwrap_or(Status::InternalServerError);
 
-        if accept == MediaType::HTML {
+        if *accept == MediaType::HTML {
             Response::build_from(
                 Page::new(ErrorFragment {
                     status: self.error_code / 100,
