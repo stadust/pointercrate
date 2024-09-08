@@ -2,14 +2,14 @@ import {
   getCountryFlag,
   getSubdivisionFlag,
   populateSubdivisionDropdown,
-} from "/static/demonlist/js/modules/demonlist.js?v=3";
+} from "/static/demonlist/js/modules/demonlist.js?v=4";
 import {
   Dropdown,
   FilteredPaginator,
   findParentWithClass,
   get,
   Viewer,
-} from "/static/core/js/modules/form.js?v=3";
+} from "/static/core/js/modules/form.js?v=4";
 
 export class StatsViewer extends FilteredPaginator {
   /**

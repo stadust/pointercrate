@@ -1,4 +1,4 @@
-import { Form, valueMissing, tooShort, post } from "/static/core/js/modules/form.js?v=3";
+import { Form, valueMissing, tooShort, post } from "/static/core/js/modules/form.js?v=4";
 
 function initializeLoginForm() {
   var loginForm = new Form(document.getElementById("login-form"));

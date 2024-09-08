@@ -73,7 +73,7 @@ pub struct AccountPage {
 impl From<AccountPage> for PageFragment {
     fn from(account: AccountPage) -> Self {
         let mut fragment = PageFragment::new(format!("Account - {}", account.user.user().name), "")
-            .module("/static/core/js/modules/form.js?v=3")
+            .module("/static/core/js/modules/form.js?v=4")
             .stylesheet("/static/user/css/account.css")
             .stylesheet("/static/core/css/sidebar.css")
             .head(PreEscaped(
@@ -126,7 +126,7 @@ impl AccountPage {
 
     fn initialization_script(&self) -> String {
         let mut imports = r#"
-import { TabbedPane } from "/static/core/js/modules/tab.js?v=3";
+import { TabbedPane } from "/static/core/js/modules/tab.js?v=4";
         "#
         .to_owned();
         let mut initialization_states = String::new();

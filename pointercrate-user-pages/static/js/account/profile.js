@@ -12,7 +12,7 @@ import {
   tooShort,
   typeMismatch,
   valueMissing,
-} from "/static/core/js/modules/form.js?v=3";
+} from "/static/core/js/modules/form.js?v=4";
 
 function setupGetAccessToken() {
   var accessTokenArea = document.getElementById("token-area");

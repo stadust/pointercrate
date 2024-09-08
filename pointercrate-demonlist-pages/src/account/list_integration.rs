@@ -19,7 +19,7 @@ impl AccountPageTab for ListIntegrationTab {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/integration.js?v=3".into()
+        "/static/demonlist/js/account/integration.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {
