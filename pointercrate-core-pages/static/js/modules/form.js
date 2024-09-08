@@ -942,9 +942,12 @@ export class DropdownFormInput extends FormInput {
     this.error = dropdown.getElementsByTagName("p")[0];
 
     this.dropdown.addEventListener((selected) => {
-      if (this.input.validity.valid || this.input.validity.customError) {
+      if (this.input.validity.valid || this.input.validity.customError)
         this.errorText = "";
-      }
+    });
+    this.dropdown.input.addEventListener("input", () => {
+      if (this.input.validity.valid || this.input.validity.customError)
+        this.errorText = "";
     });
   }
 
