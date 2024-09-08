@@ -1,7 +1,7 @@
 import {
   initializeRecordSubmitter, initializeTimeMachine,
-} from "/static/demonlist/js/modules/demonlist.js";
-import {get} from "/static/core/js/modules/form.js";
+} from "/static/demonlist/js/modules/demonlist.js?v=3";
+import {get} from "/static/core/js/modules/form.js?v=3";
 
 $(document).ready(function () {
   if(window.demon_id) {

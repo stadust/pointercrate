@@ -13,7 +13,7 @@ impl AccountPageTab for ProfileTab {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/user/js/account/profile.js".into()
+        "/static/user/js/account/profile.js?v=3".into()
     }
 
     fn tab_id(&self) -> u8 {

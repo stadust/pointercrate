@@ -6,8 +6,8 @@ pub fn login_page() -> PageFragment {
         "Pointercrate - Login",
         "Log in to an existing pointercrate account or register for a new one!",
     )
-    .module("/static/user/js/login.js")
-    .module("/static/core/js/modules/form.js")
+    .module("/static/user/js/login.js?v=3")
+    .module("/static/core/js/modules/form.js?v=3")
     .stylesheet("/static/user/css/login.css")
     .body(login_page_body())
 }

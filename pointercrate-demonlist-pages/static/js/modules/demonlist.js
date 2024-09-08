@@ -13,7 +13,7 @@ import {
   FilteredPaginator,
   Viewer,
   setupFormDialogEditor, FormDialog, setupEditorDialog, get,
-} from "/static/core/js/modules/form.js";
+} from "/static/core/js/modules/form.js?v=3";
 
 export function embedVideo(video) {
   if (!video) return;

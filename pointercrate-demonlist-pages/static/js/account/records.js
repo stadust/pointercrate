@@ -20,12 +20,12 @@ import {
   setupEditorDialog,
   DropdownDialog,
   FormDialog,
-} from "/static/core/js/modules/form.js";
+} from "/static/core/js/modules/form.js?v=3";
 import {
   initializeRecordSubmitter,
   generateRecord,
   embedVideo,
-} from "/static/demonlist/js/modules/demonlist.js";
+} from "/static/demonlist/js/modules/demonlist.js?v=3";
 
 export let recordManager;
 

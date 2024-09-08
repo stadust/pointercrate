@@ -16,7 +16,7 @@ impl AccountPageTab for DemonsTab {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/demon.js".into()
+        "/static/demonlist/js/account/demon.js?v=3".into()
     }
 
     fn tab_id(&self) -> u8 {

@@ -1,6 +1,6 @@
-import {formatInto, InteractiveWorldMap, StatsViewer} from "/static/demonlist/js/modules/statsviewer.js";
-import {Dropdown} from "/static/core/js/modules/form.js";
-import {getCountryFlag} from "/static/demonlist/js/modules/demonlist.js";
+import {formatInto, InteractiveWorldMap, StatsViewer} from "/static/demonlist/js/modules/statsviewer.js?v=3";
+import {Dropdown} from "/static/core/js/modules/form.js?v=3";
+import {getCountryFlag} from "/static/demonlist/js/modules/demonlist.js?v=3";
 
 class NationStatsViewer extends StatsViewer {
     constructor(html) {

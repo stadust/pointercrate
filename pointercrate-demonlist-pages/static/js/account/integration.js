@@ -1,7 +1,7 @@
-import {del, displayError, FilteredPaginator, Output, patch, post, put, get} from "/static/core/js/modules/form.js";
-import {embedVideo, generatePlayer} from "/static/demonlist/js/modules/demonlist.js";
-import {Paginator} from "/static/core/js/modules/form.js";;
-import {generateRecord} from "/static/demonlist/js/modules/demonlist.js";
+import {del, displayError, FilteredPaginator, Output, patch, post, put, get} from "/static/core/js/modules/form.js?v=3";
+import {embedVideo, generatePlayer} from "/static/demonlist/js/modules/demonlist.js?v=3";
+import {Paginator} from "/static/core/js/modules/form.js?v=3";;
+import {generateRecord} from "/static/demonlist/js/modules/demonlist.js?v=3";
 
 export let claimManager;
 
