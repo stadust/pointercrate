@@ -752,6 +752,11 @@ export class FormInput {
   constructor() {
     this._clearOnInvalid = false;
     this._validators = [];
+    this._transform = (x) => x;
+  }
+
+  setTransform(transform) {
+    this._transform = transform;
   }
 
   addValidator(validator, msg) {
@@ -809,6 +814,10 @@ export class FormInput {
    */
   get value() {
     throw new Error("Abstract Property");
+  }
+
+  get transformedValue() {
+    return this._transform(this.value);
   }
 
   set value(value) {
@@ -1107,7 +1116,7 @@ export class Form extends Output {
 
     for (let input of this.inputs) {
       if (input.name && (input.value !== null || !input.required)) {
-        data[input.name] = input.value;
+        data[input.name] = input.transformedValue;
       }
     }
 

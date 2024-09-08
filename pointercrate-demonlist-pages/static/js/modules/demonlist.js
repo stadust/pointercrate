@@ -78,6 +78,7 @@ export function initializeRecordSubmitter(submitApproved = false) {
   var rawFootage = submissionForm.input("submit-raw-footage");
 
   demon.addValidator(input => input.dropdown.selected !== undefined, "Please specify a demon");
+  demon.setTransform(parseInt);
 
   player.addValidator(input => input.value !== undefined, "Please specify a record holder");
   player.addValidator(
