@@ -124,10 +124,20 @@ mod tests {
     #[sqlx::test(migrations = "../migrations")]
     async fn test_by_name_or_create(mut conn: PoolConnection<Postgres>) {
         // No players: return error
-        assert_eq!(DatabasePlayer::by_name("PlasmaLust", &mut conn).await, Err(DemonlistError::PlayerNotFoundName { player_name: "PlasmaLust".to_string()}));
+        assert_eq!(
+            DatabasePlayer::by_name("PlasmaLust", &mut conn).await,
+            Err(DemonlistError::PlayerNotFoundName {
+                player_name: "PlasmaLust".to_string()
+            })
+        );
 
         // White spaces are trimmed, even in the error case
-        assert_eq!(DatabasePlayer::by_name(" PlasmaLust ", &mut conn).await, Err(DemonlistError::PlayerNotFoundName { player_name: "PlasmaLust".to_string()}));
+        assert_eq!(
+            DatabasePlayer::by_name(" PlasmaLust ", &mut conn).await,
+            Err(DemonlistError::PlayerNotFoundName {
+                player_name: "PlasmaLust".to_string()
+            })
+        );
 
         // Create the player
         let player = DatabasePlayer::by_name_or_create(" PlasmaLust", &mut conn).await.unwrap();
@@ -142,8 +152,17 @@ mod tests {
         assert_eq!(DatabasePlayer::by_name(" plAsmalust ", &mut conn).await.as_ref(), Ok(&player));
 
         // Same thing for by_name_or_create
-        assert_eq!(DatabasePlayer::by_name_or_create("PlasmaLust", &mut conn).await.as_ref(), Ok(&player));
-        assert_eq!(DatabasePlayer::by_name_or_create(" PlasmaLust ", &mut conn).await.as_ref(), Ok(&player));
-        assert_eq!(DatabasePlayer::by_name_or_create(" plAsmalust ", &mut conn).await.as_ref(), Ok(&player));
+        assert_eq!(
+            DatabasePlayer::by_name_or_create("PlasmaLust", &mut conn).await.as_ref(),
+            Ok(&player)
+        );
+        assert_eq!(
+            DatabasePlayer::by_name_or_create(" PlasmaLust ", &mut conn).await.as_ref(),
+            Ok(&player)
+        );
+        assert_eq!(
+            DatabasePlayer::by_name_or_create(" plAsmalust ", &mut conn).await.as_ref(),
+            Ok(&player)
+        );
     }
 }
