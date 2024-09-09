@@ -97,18 +97,16 @@ impl DatabasePlayer {
     }
 
     pub async fn by_name_or_create(name: &str, connection: &mut PgConnection) -> Result<DatabasePlayer> {
-        let name = name.trim();
-
         match Self::by_name(name, connection).await {
-            Err(DemonlistError::PlayerNotFoundName { .. }) => {
-                let id = sqlx::query!("INSERT INTO players (name) VALUES ($1) RETURNING id", name.to_string())
+            Err(DemonlistError::PlayerNotFoundName { player_name }) => {
+                let id = sqlx::query!("INSERT INTO players (name) VALUES ($1) RETURNING id", player_name)
                     .fetch_one(connection)
                     .await?
                     .id;
 
                 Ok(DatabasePlayer {
                     id,
-                    name: name.to_owned(),
+                    name: player_name,
                     banned: false,
                 })
             },
