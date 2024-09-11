@@ -1,7 +1,7 @@
 use crate::{config, error::Result};
 use log::trace;
-use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
 use shuttle_runtime::SecretStore;
+use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
 
 pub struct PointercratePool {
     connection_pool: Pool<Postgres>,
@@ -13,7 +13,6 @@ impl PointercratePool {
     }
 
     pub async fn init(secrets: &SecretStore) -> Self {
-
         let pool = PointercratePool {
             connection_pool: PgPoolOptions::default()
                 .max_connections(20)

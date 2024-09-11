@@ -56,8 +56,8 @@ impl AuthenticatedUser {
     }
 
     pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
-            match self {
-                AuthenticatedUser::Legacy(legacy) => legacy.set_password(password, connection).await,
+        match self {
+            AuthenticatedUser::Legacy(legacy) => legacy.set_password(password, connection).await,
             _ => Err(UserError::NonLegacyAccount),
         }
     }

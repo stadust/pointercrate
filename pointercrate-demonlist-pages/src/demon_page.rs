@@ -205,7 +205,6 @@ impl DemonPage {
         let name = &self.data.demon.base.name;
 
         let score100 = self.data.demon.score(100);
-        
 
         html! {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
@@ -336,7 +335,7 @@ impl DemonPage {
                             }
                         }
                     }
-                    
+
                         span {
                             b {
                                 "Points: "
@@ -344,7 +343,7 @@ impl DemonPage {
                             br;
                             (format!("{:.2}", score100))
                         }
-                    
+
                     @if self.data.demon.level_id.unwrap_or_default() == 0 {
                         span {
                             b {
@@ -380,8 +379,8 @@ impl DemonPage {
                             a href = {"https://drive.google.com/file/d/1ByRGNWc3EGd-OcOBFE62g82Vo_vfPTfZ/view"} {"Download"}
                             }
                         }
-                        
-                    @else { 
+
+                    @else {
                         span {
                             b {
                                 "Level ID:"
@@ -390,7 +389,7 @@ impl DemonPage {
                             (format!("{:?}", self.data.demon.level_id.unwrap_or_default()))
                         }
                     }
-                    
+
                 }
             }
         }
@@ -407,8 +406,8 @@ impl DemonPage {
                         h2 {
                             "Records"
                         }
-                        
-                        
+
+
                         @if !self.data.records.is_empty() {
                             h4 {
                                 (self.data.records.len())

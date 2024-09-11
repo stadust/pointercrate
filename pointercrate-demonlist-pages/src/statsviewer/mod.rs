@@ -67,7 +67,6 @@ fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
             ("Levels published", "published"),
             ("Levels verified", "verified"),
         ]),
-        
     ]
 }
 

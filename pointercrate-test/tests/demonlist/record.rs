@@ -188,7 +188,11 @@ async fn test_no_raw_footage_on_unauthed_get(pool: Pool<Postgres>) {
     let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).get_success_result().await;
     assert_eq!(record.raw_footage, None);
 
-    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).authorize_as(&user).get_success_result().await;
+    let record: FullRecord = clnt
+        .get(format!("/api/v1/records/{}", record.id))
+        .authorize_as(&user)
+        .get_success_result()
+        .await;
     assert_eq!(record.raw_footage.as_deref(), Some(raw_footage));
 }
 

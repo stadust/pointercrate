@@ -76,7 +76,7 @@ pub enum DemonlistError {
 
     #[display(fmt = "This player is already registered as a creator on this demon")]
     CreatorExists,
-    
+
     /// `409 CONFLICT` variant
     ///
     /// Error Code `40907`
@@ -174,8 +174,6 @@ pub enum DemonlistError {
     /// Error Code `42231`
     #[display(fmt = "This player already have a verified claim associated with them")]
     AlreadyClaimed,
-
-    
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///

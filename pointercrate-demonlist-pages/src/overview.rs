@@ -72,7 +72,6 @@ impl From<OverviewPage> for PageFragment {
 }
 
 impl OverviewPage {
-
     fn head(&self) -> Markup {
         html! {
             (PreEscaped(r#"
@@ -122,8 +121,6 @@ impl OverviewPage {
         let demons_for_dropdown: Vec<&Demon> = match self.time_machine {
             Tardis::Activated { ref demons, .. } => demons.iter().map(|demon| &demon.current_demon).collect(),
             _ => self.demonlist.iter().collect(),
-
-            
         };
 
         let dropdowns = super::dropdowns(&demons_for_dropdown[..], None);
@@ -160,7 +157,7 @@ impl OverviewPage {
                     (super::nongs_panel())
                     (submit_panel())
                     (stats_viewer_panel())
-                    
+
                 }
             }
         }

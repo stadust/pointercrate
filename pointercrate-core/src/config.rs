@@ -1,7 +1,7 @@
 use crate::util::from_env_or_default;
 use log::error;
-use std::{fs::File, io::Read};
 use shuttle_runtime::SecretStore;
+use std::{fs::File, io::Read};
 
 pub fn database_url(secrets: &SecretStore) -> String {
     secrets.get("DATABASE_URL").expect("DATABASE_URL is not set")

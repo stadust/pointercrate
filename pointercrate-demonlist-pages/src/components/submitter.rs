@@ -75,7 +75,7 @@ impl Render for RecordSubmitter<'_> {
                     p {
                         "Any personal information possibly contained within your unedited video (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the list team. Conversely, you acknowledge that you might inadvertently share such information. You have the right to request deletion of this video by contacting a list administrator."
                     }
-                    
+
                     span.form-input.flex.col #submit-raw-footage {
                         input type = "url"  name = "raw_footage" placeholder = "This does not need to be a YouTube link!" {}
                         p.error {}

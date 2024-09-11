@@ -13,9 +13,8 @@ use pointercrate_demonlist_pages::account::{
 };
 use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
-use rocket::{fs::FileServer, response::Redirect, uri, get, catch, build, Rocket};
+use rocket::{build, catch, fs::FileServer, get, response::Redirect, uri, Rocket};
 use shuttle_runtime::SecretStore;
-
 
 #[catch(404)]
 fn catch_404() -> ErrorResponder {
@@ -33,8 +32,6 @@ fn home() -> Redirect {
 }
 
 async fn configure_rocket(secrets: &SecretStore) -> Result<Rocket<rocket::Build>, Box<dyn std::error::Error>> {
-    
-
     let pool = PointercratePool::init(secrets).await;
 
     let rocket = build()
@@ -106,12 +103,8 @@ fn page_configuration() -> PageConfiguration {
         heading: "The Clicksync Challenge list v1.5",
         links: vec![
             Link::new("/list/1/", "Hardest Challenge"),
-            Link::new(
-                "/list/statsviewer/", "Stats Viewer",
-            ),
-            Link::new(
-                "/account/", "User Area",
-            ),
+            Link::new("/list/statsviewer/", "Stats Viewer"),
+            Link::new("/account/", "User Area"),
         ],
     })
     .with_link("https://twitter.com/stadust1971", "Site Dev")
@@ -123,9 +116,8 @@ fn page_configuration() -> PageConfiguration {
 }
 
 #[shuttle_runtime::main]
-async fn main(#[shuttle_runtime::Secrets] secrets: SecretStore,) -> shuttle_rocket::ShuttleRocket {
+async fn main(#[shuttle_runtime::Secrets] secrets: SecretStore) -> shuttle_rocket::ShuttleRocket {
     let rocket = configure_rocket(&secrets).await.expect("Failed to configure Rocket");
-    
 
     rocket::build();
     Ok(rocket.into())

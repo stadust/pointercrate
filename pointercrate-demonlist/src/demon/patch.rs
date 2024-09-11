@@ -179,12 +179,11 @@ impl Demon {
         sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level_id, self.base.id)
             .execute(connection)
             .await?;
-    
+
         self.level_id = Some(level_id as u64);
-    
+
         Ok(())
     }
-    
 }
 
 impl MinimalDemon {
@@ -219,8 +218,8 @@ impl MinimalDemon {
         }
 
         // FIXME: Temporarily move the demon somewhere else because otherwise the unique constraints
-        // complains. I actually dont know why, its DEFERRABLE INITIALLY IMMEDIATE (whatever 
-        // that means, it made it work in the python version of the demonlist) 
+        // complains. I actually dont know why, its DEFERRABLE INITIALLY IMMEDIATE (whatever
+        // that means, it made it work in the python version of the demonlist)
         sqlx::query!("UPDATE demons SET position = -1 WHERE id = $1", self.id)
             .execute(&mut *connection)
             .await?;

@@ -111,7 +111,7 @@ impl NormalizedSubmission {
         if self.progress > 100 || self.progress < requirement {
             return Err(DemonlistError::InvalidProgress { requirement });
         }
-        
+
         debug!("Submission is valid, checking for duplicates!");
         debug!("Nevermind!");
 
@@ -148,7 +148,7 @@ impl NormalizedSubmission {
             Some(ref raw) => {
                 let _ = Url::parse(raw).map_err(|_| DemonlistError::MalformedRawUrl)?;
             },
-            
+
             _ => (),
         }
 

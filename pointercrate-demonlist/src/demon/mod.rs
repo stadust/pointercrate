@@ -146,24 +146,23 @@ impl FullDemon {
             if verifier == "N/A" {
                 format!("by {}, published by {}", creator, publisher)
             } else {
-            format!("by {}, verified and published by {}", creator, verifier)
-        }
+                format!("by {}, verified and published by {}", creator, verifier)
+            }
         } else if creator != verifier && creator != publisher && publisher != verifier {
             if verifier == "N/A" {
                 format!("by {}, published by {}", creator, publisher)
             } else {
-            format!("by {}, verified by {}, published by {}", creator, verifier, publisher)
+                format!("by {}, verified by {}, published by {}", creator, verifier, publisher)
             }
         } else if creator == verifier && creator != publisher {
             format!("by {}, published by {}", creator, publisher)
         } else if creator == publisher && creator != verifier {
             if verifier == "N/A" {
                 format!("by {}", creator)
-            }
-            else {
+            } else {
                 format!("by {}, verified by {}", creator, verifier)
-            
-         }} else {
+            }
+        } else {
             "If you're seeing this, file a bug report".to_string()
         }
     }

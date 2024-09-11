@@ -85,7 +85,7 @@ impl AccountPageTab for DemonsTab {
                                         br;
                                         span #demon-position {}
                                     }
-                                    
+
                                 }
                                 div.stats-container.flex.space  {
                                     span{
@@ -181,8 +181,6 @@ fn change_name_dialog() -> Markup {
         }
     }
 }
-
-
 
 fn change_position_dialog() -> Markup {
     html! {
@@ -324,7 +322,6 @@ fn change_level_id_dialog() -> Markup {
     }
 }
 
-
 fn demon_submitter() -> Markup {
     html! {
         section.panel.fade.closable #demon-submitter style = "display: none" {
@@ -383,14 +380,14 @@ fn demon_submitter() -> Markup {
                         (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher"))
                         p.error {}
                     }
-                    
+
                     span {
                         i.fa.fa-plus.clickable #add-demon-add-creator-pen aria-hidden = "true" {} i {
                             " Creators: "
                         }
                         span #demon-add-creators {}
                     }
-                    
+
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Add";
                 }
             }

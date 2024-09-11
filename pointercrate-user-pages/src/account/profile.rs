@@ -84,7 +84,7 @@ impl AccountPageTab for ProfileTab {
                                 "A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it."
                             }
                         }
-    
+
                         span {
                             b {
                                 "Permissions: "

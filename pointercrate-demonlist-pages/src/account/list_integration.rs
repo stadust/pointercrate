@@ -93,7 +93,7 @@ impl AccountPageTab for ListIntegrationTab {
                                 p.info-red.output style = "margin: 10px 0" {}
                                 p.info-green.output style = "margin: 10px 0" {}
                                  div.flex.no-stretch style="justify-content: space-between; align-items: center; display: none;" {
-                                    
+
                                     b {
                                         "Geolocate statsviewer flag:"
                                     }
@@ -106,7 +106,7 @@ impl AccountPageTab for ListIntegrationTab {
                                     a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
                                     ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
                                 }
-                                
+
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
                                         "Lock Submissions:"
@@ -122,7 +122,7 @@ impl AccountPageTab for ListIntegrationTab {
                                 p {
                                     "Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)"
                                 }
-                                
+
                                 p {
                                     "To set your player nationality, join the " a.link href = {"https://discord.com/invite/W7Eqqj8NG2"} {"Discord server"} " and create a thread in " a.link href = {"https://discord.com/channels/1236218202829230211/1260745449040777338/1260745449040777338"} {"#website-help."} " Geolocation coming soon! Hopefully!!"
                                 }

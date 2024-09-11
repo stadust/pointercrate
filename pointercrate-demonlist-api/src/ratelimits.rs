@@ -12,7 +12,7 @@ ratelimits! {
 
         geolocate[1u32 per 5 per IpAddr] => "You can only geolocate once per month!",
 
-        add_demon[1u32 per 20] => "Please don't spam the button zel", 
+        add_demon[1u32 per 20] => "Please don't spam the button zel",
     }
 }
 
