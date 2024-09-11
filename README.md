@@ -1,6 +1,6 @@
 # Hey!!!
 
-This is the code for the new CSCL site. It took a lot of work to get this up and running while hiding some sensitive info lol. Feel free to report bugs, request features, or help out with development here! If you are curious about anything, open an issue or ask me on Discord. (i probably won't know tho lol)
+This is the code for the new CSCL site. It took a lot of work (probably more than it should have) to get this up and running while hiding some sensitive info lol. Feel free to report bugs, request features, or help out with development here! If you are curious about anything, open an issue or ask me on Discord. (i probably won't know tho lol)
 
 # How to use this to experiment with the site
 
