@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="1500" height="1e3" fill="#fff" xmlns="http://www.w3.org/2000/svg">
- <title>Bandeira da Bahia</title>
- <rect width="1500" height="1e3"/>
- <path d="M0 250h1500v250H500zm0 500h1500v250H0z" fill="#d31920"/>
- <rect width="500" height="500" fill="#003087"/>
- <path d="m54 410h392l-196-340-196 340z"/>
-</svg>

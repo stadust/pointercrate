@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg>
-<svg width="1e3" height="600" version="1.1" xmlns="http://www.w3.org/2000/svg">
- <rect id="blue_stripe" width="1e3" height="600" fill="#0039ad"/>
- <rect id="white_stripe" y="200" width="1e3" height="600" fill="#fff"/>
- <rect id="red_stripe" y="400" width="1e3" height="600" fill="#d61810"/>
-</svg>

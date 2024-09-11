@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="900" height="600" xmlns="http://www.w3.org/2000/svg">
- <rect id="noir" width="900" height="600" fill="#231f1e"/>
- <rect id="vert" width="900" height="300" fill="#00a650"/>
- <polygon id="tri_rouge" points="0 0 450 300 0 600" fill="#ef1923"/>
-</svg>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="900" height="600" viewBox="0 0 138 92" xmlns="http://www.w3.org/2000/svg">
- <title>Flag of Antigua and Barbuda</title>
- <path d="m0 0h138v92H0z" fill="#fff"/>
- <path d="m0 0h138l-9 46H9z"/>
- <path d="m69 46-30-10 15.288-2.926-13.004-8.555 15.244 3.147-8.741-12.879 12.879 8.741-3.147-15.244 8.555 13.004L69 6l2.926 15.288L80.481 8.284 77.334 23.528l12.879-8.741-8.741 12.879 15.244-3.147-13.004 8.555L99 36z" fill="#fcd116"/>
- <path d="m9 36h120v20H9z" fill="#0072c6"/>
- <path d="m0 0 69 92 69-92v92H0z" fill="#ce1126"/>
-</svg>

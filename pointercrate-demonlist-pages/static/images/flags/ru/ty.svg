@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="900" height="600" fill="none" xmlns="http://www.w3.org/2000/svg">
- <path d="m0 0h900v600H0" fill="#63b1e5"/>
- <path d="m370 300-335-335v670l335-335h530" fill="#fff" stroke="#fff" stroke-width="100"/>
- <path d="m35-35 335 335m-335 335 335-335h530" stroke="#63b1e5" stroke-width="33.3"/>
- <path d="m0 0v600l300-300" fill="#fecb00"/>
-</svg>

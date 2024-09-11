@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="960" height="600" xmlns="http://www.w3.org/2000/svg">
- <path d="M0 0h960v600H0" fill="#00923f"/>
- <path d="M0 0h960v300H0" fill="#fff500"/>
- <path d="M0 250h960v150H0" fill="#da251d"/>
- <path d="M0 200h960v100H0" fill="#fff"/>
-</svg>

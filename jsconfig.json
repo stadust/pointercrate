@@ -1,9 +1,0 @@
-{
-    "compilerOptions": {
-        "target": "ES6",
-        "paths": {
-            "/static/core/js/*": ["./pointercrate-core-pages/static/js/*"],
-            "/static/demonlist/js/*": ["./pointercrate-demonlist-pages/static/js/*"]
-        }
-    }
-}

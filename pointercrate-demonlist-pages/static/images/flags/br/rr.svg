@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="svg1810" width="2e3" height="1400" version="1.1" xmlns="http://www.w3.org/2000/svg">
- <defs id="defs1790"></defs>
- <rect id="rect1792" width="100%" height="100%" fill="#fff"/>
- <path id="path1794" d="m0 800v-800h1600z" fill="#00a5ff" stroke-width=".94281"/>
- <path id="path1796" d="m2e3 600v800h-1600z" fill="#008200" stroke-width=".89443"/>
- <path id="rect1798" d="m0 1180h2e3v40h-2e3z" fill="#dc0000"/>
- <path id="polygon2210" d="m1e3 200-112.13 343.77h-362.87l293.56 212.46-112.13 343.77 293.57-212.46 293.57 212.46-112.13-343.77 293.56-212.46h-362.87z" fill="#f8c300" stroke-width="498.48"/>
-</svg>

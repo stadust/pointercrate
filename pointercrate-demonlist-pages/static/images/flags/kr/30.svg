@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="220" height="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
- <g id="s">
-  <path id="r" d="m110 120-49 81c21 7 43-3 49-26 6 23 28 33 49 26" fill="#0A4"/>
-  <use transform="rotate(72 110,110)" xlink:href="#r"/>
- </g>
- <use transform="rotate(144 110,110)" xlink:href="#s"/>
- <use transform="rotate(-72 110,110)" xlink:href="#r"/>
-</svg>

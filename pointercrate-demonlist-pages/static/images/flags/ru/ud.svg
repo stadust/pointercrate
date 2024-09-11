@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="540" height="270" version="1.1" xmlns="http://www.w3.org/2000/svg">
- <rect width="180" height="270"/>
- <rect x="180" width="180" height="270" fill="#fff"/>
- <rect x="360" width="180" height="270" fill="#d21"/>
- <polygon points="245 60 345 160 195 160 295 60 295 210 195 110 345 110 245 210" fill="#d21"/>
-</svg>

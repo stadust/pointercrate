@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="900" height="600" version="1.0" xmlns="http://www.w3.org/2000/svg">
- <g transform="translate(0 -552.36)">
-  <rect y="552.36" width="900" height="600" rx="0" ry="0" fill="#fff"/>
-  <rect y="852.36" width="900" height="300" rx="0" ry="0" fill="#009645"/>
-  <text x="898.70691" y="1278.6553" font-family="'Californian FB'" font-size="40px" font-style="italic" style="line-height:1.25" xml:space="preserve"><tspan x="898.70691" y="1278.6553" font-family="sans-serif" font-style="normal" font-weight="400">PANTONE 355 C</tspan></text>
- </g>
-</svg>
