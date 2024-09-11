@@ -4,9 +4,7 @@ name: Rustfmt
 
 on:
   workflow_dispatch:
-    types: 
-      - closed
-
+  
 jobs:
   format:
     name: Rustfmt
