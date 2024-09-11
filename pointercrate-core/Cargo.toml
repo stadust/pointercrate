@@ -1,0 +1,18 @@
+[package]
+name = "pointercrate-core"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = "1.0.210"
+derive_more = "0.99.18"
+sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate"] }
+log = "0.4.22"
+chrono = {version = "0.4.38", features = ["serde"]}
+dotenv = "0.15.0"
+toml = "0.8"
+shuttle-runtime = "0.47.0"
+config = "0.14.0"

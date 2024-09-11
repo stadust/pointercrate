@@ -1,0 +1,5 @@
+[project]
+name = "cscl"
+
+[secrets]
+DATABASE_URL = { source = "secret" }

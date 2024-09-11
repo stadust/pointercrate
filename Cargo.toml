@@ -1,0 +1,54 @@
+[workspace]
+members = [
+    "pointercrate-core",
+    "pointercrate-core-api",
+    "pointercrate-core-pages",
+    "pointercrate-demonlist",
+    "pointercrate-demonlist-api",
+    "pointercrate-demonlist-pages",
+    "pointercrate-user",
+    "pointercrate-user-api",
+    "pointercrate-user-pages",
+    "pointercrate-integrate",
+
+    # Crate only containing integration tests
+    "pointercrate-test",
+
+    # Crate containing an example setup for a custom list
+    "pointercrate-example"
+]
+resolver = "2"
+
+[workspace.package]
+authors = ["stadust"]
+description = "Libraries for creating pointercrate-like demonlist websites"
+homepage = "https://pointercrate.com"
+edition = "2021"
+repository = "https://github.com/stadust/pointercrate"
+
+[package]
+name = "cscl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rocket = "0.5.0"
+shuttle-rocket = "0.47.0"
+shuttle-runtime = "0.47.0"
+tokio = "1.40.0"
+dotenv = "0.15.0"
+rocket_sync_db_pools = "0.1.0-rc.4"
+maud = "0.26.0"
+pointercrate-core = { path = "pointercrate-core/" }
+pointercrate-core-api = { path = "pointercrate-core-api/" }
+pointercrate-core-pages = { path = "pointercrate-core-pages/" }
+pointercrate-demonlist = { path = "pointercrate-demonlist/" }
+pointercrate-demonlist-api = { path = "pointercrate-demonlist-api" }
+pointercrate-demonlist-pages = { path = "pointercrate-demonlist-pages/" }
+pointercrate-user = { path = "pointercrate-user/" }
+pointercrate-user-api = { path = "pointercrate-user-api/" }
+pointercrate-user-pages = { path = "pointercrate-user-pages/" }
+
+[[bin]]
+name = "cscl"
+path = "pointercrate-example/src/main.rs"

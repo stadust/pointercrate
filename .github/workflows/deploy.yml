@@ -1,0 +1,53 @@
+name: Shuttle Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v4
+
+      # Generate secrets to .env
+      - name: Generate secrets to .env
+        run: echo "DATABASE_URL=${{ secrets.database }}" > .env
+
+      # Generate secrets to Secrets.toml
+      - name: Generate secrets to Secrets.toml
+        run: echo "DATABASE_URL='${{ secrets.database }}'" > Secrets.toml
+
+      # Install cargo-binstall
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+        shell: bash
+
+      # Install cargo-shuttle (specific version if specified)
+      - name: Install cargo-shuttle
+        run: |
+          if [ -z "${{ secrets.CARGO_SHUTTLE_VERSION }}" ]; then
+            cargo binstall -y --locked cargo-shuttle
+          else
+            cargo binstall -y --locked cargo-shuttle@${{ secrets.CARGO_SHUTTLE_VERSION }}
+          fi
+        shell: bash
+
+      # Restart project (optional)
+      - name: Restart project
+        run: |
+          cargo shuttle project restart --idle-minutes 0 --name cscl 
+        env:
+          SHUTTLE_API_KEY: ${{ secrets.SHUTTLE_API_KEY }}
+        shell: bash
+
+      # Deploy to Shuttle
+      - name: Deploy to Shuttle
+        run: |
+          cargo shuttle deploy --name cscl --allow-dirty
+        env:
+          SHUTTLE_API_KEY: ${{ secrets.SHUTTLE_API_KEY }}
+        shell: bash
