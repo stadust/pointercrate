@@ -3,3 +3,4 @@ name = "cscl"
 
 [secrets]
 DATABASE_URL = { source = "secret" }
+ABSTRACT_API_KEY = { source = "secret" }
