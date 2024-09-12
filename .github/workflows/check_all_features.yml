@@ -49,7 +49,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: sqlx
-          args: migrate run --source /pointercrate-example/sample/migrations/_new/
+          args: migrate run --source pointercrate-example/sample/migrations/_new/
         env:
           DATABASE_URL: postgresql://pointercrate:postgres@localhost/postgres
 
