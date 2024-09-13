@@ -23,10 +23,9 @@ header nav + * {
 
 header nav .nav-icon {
   font-size: 150%;
-  padding: 2px 10px;
+  padding: 5px 20px;
   display: flex;
   align-items: center;
-  width: 150%;
 }
 
 header nav .nav-item {
