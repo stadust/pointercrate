@@ -441,6 +441,7 @@ textarea:invalid {
   margin-left: 10px;
 }
 
+@media (min-width: 768px) {
   .viewer .paginator {
     max-width: 35%;
   }
