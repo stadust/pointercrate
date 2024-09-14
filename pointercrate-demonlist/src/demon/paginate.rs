@@ -36,6 +36,9 @@ pub struct DemonIdPagination {
     publisher_name: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
+    level_id: Option<i64>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__gt")]
     requirement_gt: Option<i16>,
 
@@ -78,6 +81,7 @@ impl Paginatable<DemonIdPagination> for Demon {
             .bind(query.publisher_id)
             .bind(query.publisher_name.as_deref())
             .bind(query.name_contains.as_deref())
+            .bind(query.level_id)
             .bind(query.params.limit + 1)
             .fetch(connection);
 
@@ -144,6 +148,9 @@ pub struct DemonPositionPagination {
     pub publisher_name: Option<String>,
 
     #[serde(default, deserialize_with = "non_nullable")]
+    pub level_id: Option<i64>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
     #[serde(rename = "requirement__gt")]
     pub requirement_gt: Option<i16>,
 
@@ -186,6 +193,7 @@ impl Paginatable<DemonPositionPagination> for Demon {
             .bind(query.publisher_id)
             .bind(query.publisher_name.as_deref())
             .bind(query.name_contains.as_deref())
+            .bind(query.level_id)
             .bind(query.params.limit + 1)
             .fetch(connection);
 
