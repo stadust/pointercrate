@@ -177,7 +177,7 @@ impl Demon {
 
     pub fn validate_level_id(level_id: i64) -> Result<u64> {
         if level_id < 1 {
-            return Err(DemonlistError::InvalidLevelId)
+            return Err(DemonlistError::InvalidLevelId);
         }
 
         Ok(level_id as u64)

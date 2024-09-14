@@ -17,7 +17,7 @@ pub struct PostDemon {
     publisher: String,
     creators: Vec<String>,
     video: Option<String>,
-    level_id: Option<i64>
+    level_id: Option<i64>,
 }
 
 impl FullDemon {
@@ -91,7 +91,10 @@ impl FullDemon {
 mod tests {
     use sqlx::{pool::PoolConnection, Postgres};
 
-    use crate::{demon::{FullDemon, PostDemon}, error::DemonlistError};
+    use crate::{
+        demon::{FullDemon, PostDemon},
+        error::DemonlistError,
+    };
 
     const DEFAULT_THUMBNAIL: &str = "https://i.ytimg.com/vi/zebrafishes/mqdefault.jpg";
 
@@ -178,7 +181,8 @@ mod tests {
             },
             &mut conn,
         )
-        .await.unwrap_err();
+        .await
+        .unwrap_err();
 
         assert_eq!(error, DemonlistError::InvalidLevelId);
     }
