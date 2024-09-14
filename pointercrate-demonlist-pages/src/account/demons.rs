@@ -340,6 +340,13 @@ fn demon_submitter() -> Markup {
                         input type = "text" name = "name" required="";
                         p.error {}
                     }
+                    span.form-input.flex.col #demon-add-level-id {
+                        label for = "level_id" {
+                            "Geometry Dash Level ID:"
+                        }
+                        input type = "number" name = "level_id" required min = "1";
+                        p.error {}
+                    }
                     span.form-input.flex.col #demon-add-position {
                         label for = "position" {
                             "Position:"
