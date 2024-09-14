@@ -70,7 +70,7 @@ pub enum UserError {
     /// performed on a legacy, password-based account (for example, trying to change password
     /// for a non-legacy account).
     ///
-    /// Error Code `42224`
+    /// Error Code `42234`
     #[display(
         fmt = "The given operation (change password) is invalid on non-legacy account, as password login is not supported for these"
     )]
@@ -102,7 +102,7 @@ impl PointercrateError for UserError {
             InvalidUsername => 42202,
             InvalidPassword => 42204,
             NotYouTube => 42226,
-            NonLegacyAccount => 42224,
+            NonLegacyAccount => 42234,
         }
     }
 }
