@@ -239,7 +239,7 @@ impl PointercrateError for DemonlistError {
             AlreadyClaimed => 42231,
             RawRequired => 42232,
             MalformedRawUrl => 42233,
-            InvalidLevelId => 42234,
+            InvalidLevelId => 42235,
         }
     }
 }
