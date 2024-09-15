@@ -1,10 +1,11 @@
-use crate::components::player_selection_dialog;
+use crate::components::{player_selection_dialog, player_selection_dropdown};
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct DemonsTab;
 
@@ -15,7 +16,7 @@ impl AccountPageTab for DemonsTab {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/demon.js".into()
+        "/static/demonlist/js/account/demon.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -291,33 +292,33 @@ fn change_thumbnail_dialog() -> Markup {
 fn change_verifier_dialog() -> Markup {
     player_selection_dialog(
         "demon-verifier-dialog",
+        "demon-verifier-edit",
         "Change demon verifier:",
-        "Change the verifier of this demon. If the player you want to change the verifier to already exists, search them up on the left \
-         and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-         create a new player.",
+        "Type the new verifier of the demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Edit",
+        "verifier",
     )
 }
 
 fn change_publisher_dialog() -> Markup {
     player_selection_dialog(
         "demon-publisher-dialog",
+        "demon-publisher-edit",
         "Change demon publisher:",
-        "Change the publisher of this demon. If the player you want to change the publisher to already exists, search them up on the left \
-         and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-         create a new player.",
+        "Type the new publisher of the demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Edit",
+        "publisher"
     )
 }
 
 fn add_creator_dialog() -> Markup {
     player_selection_dialog(
         "demon-add-creator-dialog",
+        "demon-creator-add",
         "Add creator:",
-        "Select a creator to add to this demon. If the player you want to change the publisher to already exists, search them up on the \
-         left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server \
-         to create a new player.",
+        "Type the creator to add to this demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Add Creator",
+        "creator"
     )
 }
 
@@ -339,6 +340,13 @@ fn demon_submitter() -> Markup {
                         input type = "text" name = "name" required="";
                         p.error {}
                     }
+                    span.form-input.flex.col #demon-add-level-id {
+                        label for = "level_id" {
+                            "Geometry Dash Level ID:"
+                        }
+                        input type = "number" name = "level_id" required min = "1";
+                        p.error {}
+                    }
                     span.form-input.flex.col #demon-add-position {
                         label for = "position" {
                             "Position:"
@@ -353,28 +361,16 @@ fn demon_submitter() -> Markup {
                         input type = "number" name = "requirement" required="" min="0" max = "100";
                         p.error {}
                     }
-                    span.form-input.flex.col #demon-add-verifier data-type = "html" data-target-id = "selected-verifier" data-default = "None Selected" {
+                    span.form-input.flex.col data-type = "dropdown" {
                         label{"Verifier:"}
                         br;
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #demon-add-verifier-pen aria-hidden = "true" {}
-                                " "
-                            }
-                            i #selected-verifier data-name = "verifier" {"None Selected"}
-                        }
+                        (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name", "verifier"))
                         p.error {}
                     }
-                    span.form-input.flex.col #demon-add-publisher data-type = "html" data-target-id = "selected-publisher" data-default = "None Selected" {
+                    span.form-input.flex.col data-type = "dropdown" {
                         label {"Publisher:"}
                         br;
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #demon-add-publisher-pen aria-hidden = "true" {}
-                                " "
-                            }
-                            i #selected-publisher data-name = "publisher" {"None Selected"}
-                        }
+                        (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher"))
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-video {
@@ -394,21 +390,5 @@ fn demon_submitter() -> Markup {
                 }
             }
         }
-        (player_selection_dialog(
-            "demon-add-verifier-dialog",
-            "Set demon verifier:",
-            "Set the verifier of this demon. If the player you want to set as verifier already exists, search them up on the left \
-             and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-             create a new player.",
-            "Select",
-        ))
-        (player_selection_dialog(
-            "demon-add-publisher-dialog",
-            "Set demon publisher:",
-            "Set the publisher of this demon. If the player you want to set as publisher already exists, search them up on the left \
-             and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the server to \
-             create a new player.",
-            "Select",
-        ))
     }
 }

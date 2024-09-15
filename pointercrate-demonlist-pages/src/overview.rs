@@ -61,9 +61,9 @@ fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
 impl From<OverviewPage> for PageFragment {
     fn from(page: OverviewPage) -> Self {
         PageFragment::new("Geometry Dash Demonlist", "The official pointercrate Demonlist!")
-            .module("/static/core/js/modules/form.js")
-            .module("/static/demonlist/js/modules/demonlist.js")
-            .module("/static/demonlist/js/demonlist.js")
+            .module("/static/core/js/modules/form.js?v=4")
+            .module("/static/demonlist/js/modules/demonlist.js?v=4")
+            .module("/static/demonlist/js/demonlist.js?v=4")
             .stylesheet("/static/demonlist/css/demonlist.css")
             .stylesheet("/static/core/css/sidebar.css")
             .head(page.head())

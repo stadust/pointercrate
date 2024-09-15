@@ -6,8 +6,9 @@ use pointercrate_core_pages::{
     util::{filtered_paginator, paginator},
 };
 use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, MODERATOR};
+use pointercrate_user::{auth::AuthenticatedUser, MODERATOR};
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
 
@@ -18,7 +19,7 @@ impl AccountPageTab for ListIntegrationTab {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/integration.js".into()
+        "/static/demonlist/js/account/integration.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -36,10 +37,10 @@ impl AccountPageTab for ListIntegrationTab {
     }
 
     async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
-        let player_claim = match PlayerClaim::by_user(user.inner().id, connection).await {
+        let player_claim = match PlayerClaim::by_user(user.user().id, connection).await {
             Ok(player_claim) => player_claim,
             Err(err) => {
-                error!("Error retrieving player claim of user {}: {:?}", user.inner(), err);
+                error!("Error retrieving player claim of user {}: {:?}", user.user(), err);
 
                 return ErrorFragment {
                     status: err.status_code(),
@@ -49,7 +50,7 @@ impl AccountPageTab for ListIntegrationTab {
                 .body();
             },
         };
-        let is_moderator = permissions.require_permission(user.inner().permissions, MODERATOR).is_ok();
+        let is_moderator = permissions.require_permission(user.user().permissions, MODERATOR).is_ok();
 
         html! {
             div.left {

@@ -12,8 +12,9 @@ use pointercrate_demonlist::{
     demon::{current_list, Demon},
     LIST_HELPER,
 };
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct RecordsPage;
 
@@ -24,7 +25,7 @@ impl AccountPageTab for RecordsPage {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/records.js".into()
+        "/static/demonlist/js/account/records.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -259,7 +260,7 @@ fn player_selector() -> Markup {
                 "Filter by player"
             }
             p {
-                "Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Right now the only way to reset this filter is to reload the page. Sorry!"
+                "Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Reset by clicking \"Find ...\" when the text field is empty."
             }
             form.flex.col.underlined.pad #record-filter-by-player-id-form novalidate = "" {
                 p.info-red.output {}
@@ -382,11 +383,11 @@ fn change_video_dialog() -> Markup {
 fn change_holder_dialog() -> Markup {
     player_selection_dialog(
         "record-holder-dialog",
+        "_edit-holder-record",
         "Change record holder:",
-        "Change the player associated with this record. If the player you want to change this record to already exists, search them up on \
-         the left and click them. In case the player does not exist, fill out only the text field on the right. This will prompt the \
-         server to create a new player.",
+        "Type the new holder of the record into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.",
         "Edit",
+        "player"
     )
 }
 

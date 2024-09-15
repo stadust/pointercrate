@@ -1,8 +1,8 @@
 import {
   generateDemon,
   embedVideo,
-  generatePlayer, PlayerSelectionDialog,
-} from "/static/demonlist/js/modules/demonlist.js";
+  generatePlayer,
+} from "/static/demonlist/js/modules/demonlist.js?v=4";
 import {
   FilteredPaginator,
   Viewer,
@@ -18,7 +18,7 @@ import {
   displayError,
   Form,
   post, setupEditorDialog, FormDialog,
-} from "/static/core/js/modules/form.js";
+} from "/static/core/js/modules/form.js?v=4";
 
 export let demonManager;
 
@@ -123,10 +123,18 @@ export class DemonManager extends FilteredPaginator {
         "Please provide a name for the demon": valueMissing,
       },
     });
-
-    setupEditorDialog(new PlayerSelectionDialog("demon-verifier-dialog"), "demon-verifier-pen", new PaginatorEditorBackend(this, true), this.output, data => ({verifier: data.player}));
-
-    setupEditorDialog(new PlayerSelectionDialog("demon-publisher-dialog"), "demon-publisher-pen", new PaginatorEditorBackend(this, true), this.output, data => ({publisher: data.player}));
+    setupEditorDialog(
+      new FormDialog("demon-verifier-dialog"),
+      "demon-verifier-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output
+    );
+    setupEditorDialog(
+      new FormDialog("demon-publisher-dialog"),
+      "demon-publisher-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output
+    );
   }
 
   onReceive(response) {
@@ -153,7 +161,7 @@ export class DemonManager extends FilteredPaginator {
 
     if (this.currentObject.video) {
       this._video_link.href = this.currentObject.video;
-      this._video_link.innerHTML = this.currentObject.video;
+      this._video_link.innerText = this.currentObject.video;
     } else {
       this._video_link.style.display = "none";
     }
@@ -161,12 +169,12 @@ export class DemonManager extends FilteredPaginator {
     this._thumbnail_link.href = this.currentObject.thumbnail;
     this._thumbnail_link.innerText = this.currentObject.thumbnail;
 
-    this._publisher.innerHTML =
+    this._publisher.innerText =
       this.currentObject.publisher.name +
       " (" +
       this.currentObject.publisher.id +
       ")";
-    this._verifier.innerHTML =
+    this._verifier.innerText =
       this.currentObject.verifier.name +
       " (" +
       this.currentObject.verifier.id +
@@ -243,15 +251,12 @@ function createCreatorHtml(creator) {
 function setupDemonAdditionForm() {
   let form = new Form(document.getElementById("demon-submission-form"));
 
-  let verifierSelector = new PlayerSelectionDialog("demon-add-verifier-dialog");
-  document.getElementById("demon-add-verifier-pen").addEventListener('click', () => verifierSelector.open().then(data => form.input('demon-add-verifier').value = data.player));
-
-  let publisherSelector = new PlayerSelectionDialog("demon-add-publisher-dialog");
-  document.getElementById("demon-add-publisher-pen").addEventListener('click', () => publisherSelector.open().then(data => form.input('demon-add-publisher').value = data.player));
-
-
   form.addValidators({
     "demon-add-name": { "Please specify a name": valueMissing },
+    "demon-add-level-id": { 
+      "Please specify a Geometry Dash level ID": valueMissing, 
+      "Level ID must be positive": rangeUnderflow
+    },
     "demon-add-position": {
       "Please specify a position": valueMissing,
       "Demon position cannot be smaller than 1": rangeUnderflow,
@@ -295,7 +300,7 @@ export function initialize() {
 
   let addDemonForm = setupDemonAdditionForm();
 
-  let creatorFormDialog = new PlayerSelectionDialog("demon-add-creator-dialog");
+  let creatorFormDialog = new FormDialog("demon-add-creator-dialog");
   let dialogCreators = document.getElementById("demon-add-creators");
 
   let button1 = document.getElementById("demon-add-creator-pen");
@@ -306,13 +311,13 @@ export function initialize() {
       return post(
           "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
           {},
-          {creator: data.player}
+          data
       )
           .then((response) => {
             let location = response.headers["location"];
 
             demonManager.addCreator({
-              name: data.player,
+              name: data.creator,
               id: location.substring(
                   location.lastIndexOf("/", location.length - 2) + 1,
                   location.length - 1
@@ -330,7 +335,7 @@ export function initialize() {
   });
 
   button2.addEventListener("click", () => {
-    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve({creator: data.player}));
+    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve(data));
     creatorFormDialog.open()
         .then(data => {
           let creator = insertCreatorInto({ name: data.creator }, dialogCreators);

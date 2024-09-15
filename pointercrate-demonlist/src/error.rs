@@ -189,6 +189,12 @@ pub enum DemonlistError {
     /// Error Code `42233`
     #[display(fmt = "Raw footage needs to be a valid URL")]
     MalformedRawUrl,
+
+    /// `422 UNPROCESSABLE ENTITY` variant
+    ///
+    /// Error Code `42235`
+    #[display(fmt = "Level ID needs to be positive")]
+    InvalidLevelId,
 }
 
 impl std::error::Error for DemonlistError {}
@@ -233,6 +239,7 @@ impl PointercrateError for DemonlistError {
             AlreadyClaimed => 42231,
             RawRequired => 42232,
             MalformedRawUrl => 42233,
+            InvalidLevelId => 42234,
         }
     }
 }

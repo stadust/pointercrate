@@ -6,8 +6,8 @@ import {
   Paginator,
   setupDropdownEditor,
   PaginatorEditorBackend,
-} from "/static/core/js/modules/form.js";
-import { recordManager, initialize as initRecords } from "./records.js";
+} from "/static/core/js/modules/form.js?v=4";
+import { recordManager, initialize as initRecords } from "./records.js?v=4";
 
 export let submitterManager;
 

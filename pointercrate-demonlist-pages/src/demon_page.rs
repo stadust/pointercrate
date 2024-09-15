@@ -32,10 +32,10 @@ pub struct DemonPage {
 impl From<DemonPage> for PageFragment {
     fn from(page: DemonPage) -> Self {
         PageFragment::new(page.title(), page.description())
-            .script("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js")
-            .module("/static/core/js/modules/form.js")
-            .module("/static/demonlist/js/modules/demonlist.js")
-            .module("/static/demonlist/js/demonlist.js")
+            .script("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js?v=4")
+            .module("/static/core/js/modules/form.js?v=4")
+            .module("/static/demonlist/js/modules/demonlist.js?v=4")
+            .module("/static/demonlist/js/demonlist.js?v=4")
             .stylesheet("https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css")
             .stylesheet("/static/demonlist/css/demonlist.css")
             .stylesheet("/static/core/css/sidebar.css")

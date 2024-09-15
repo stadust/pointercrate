@@ -1,4 +1,4 @@
-use crate::components::{demon_dropdown, player_selection_dialog};
+use crate::components::{demon_dropdown, player_selection_dropdown};
 use maud::{html, Markup, Render};
 use pointercrate_demonlist::{config, demon::Demon};
 
@@ -41,16 +41,10 @@ impl Render for RecordSubmitter<'_> {
                         "Holder:"
                     }
                     p {
-                        "The player holding the record. Please enter the player's Geometry Dash name here, even if their YouTube name differs! Click the pencil to select a player!"
+                        "The player holding the record. Start typing to see suggestions of existing players. If this is your first submission, write your name, as you wish it to appear on the website, into the text field (ignoring any suggestions)."
                     }
-                    span.form-input.flex.col #id_player data-type = "html" data-target-id = "selected-holder" data-default = "None Selected" {
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #record-submitter-holder-pen aria-hidden = "true" {}
-                                " "
-                            }
-                            i #selected-holder data-name = "player" {"None Selected"}
-                        }
+                    span.form-input.flex.col data-type = "dropdown" {
+                        (player_selection_dropdown("id_player", "/api/v1/players/", "name", "player"))
                         p.error {}
                     }
                     h3 {
@@ -109,12 +103,6 @@ impl Render for RecordSubmitter<'_> {
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
                 }
             }
-            (player_selection_dialog(
-                "submission-holder-dialog",
-                "Select player:",
-                "To select the player holding this record, search them up on the left to see if they already have records on the list and click them. In case the player does not exist, fill out only the text field on the right.",
-                "Select"
-            ))
         }
     }
 }

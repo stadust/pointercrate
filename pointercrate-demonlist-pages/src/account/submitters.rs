@@ -2,8 +2,9 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_pages::util::paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct SubmittersPage;
 
@@ -14,7 +15,7 @@ impl AccountPageTab for SubmittersPage {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/submitter.js".into()
+        "/static/demonlist/js/account/submitter.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {

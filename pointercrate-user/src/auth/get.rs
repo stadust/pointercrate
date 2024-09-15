@@ -11,13 +11,6 @@ use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
 
 impl AuthenticatedUser {
-    pub async fn basic_auth(username: &str, password: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
-        info!("We are expected to perform basic authentication");
-        debug!("Trying to authorize user {}", username);
-
-        Self::by_name(username, connection).await?.verify_password(password)
-    }
-
     pub async fn token_auth(access_token: &str, csrf_token: Option<&str>, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform token authentication");
 
@@ -46,9 +39,9 @@ impl AuthenticatedUser {
         Ok(user)
     }
 
-    async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
+    pub(in crate::auth) async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query!(
-            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE member_id = $1"#,
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE member_id = $1"#,
             id
         )
         .fetch_one(connection)
@@ -57,17 +50,13 @@ impl AuthenticatedUser {
         match row {
             Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
             Err(err) => Err(err.into()),
-            Ok(row) => Ok(AuthenticatedUser {
-                user: construct_from_row!(row),
-                password_hash: row.password_hash,
-                email_address: row.email_address,
-            }),
+            Ok(row) => Ok(AuthenticatedUser::legacy(construct_from_row!(row), row.password_hash)),
         }
     }
 
-    async fn by_name(name: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
+    pub(in crate::auth) async fn by_name(name: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query!(
-            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, email_address::text, password_hash FROM members WHERE members.name = $1"#,
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE members.name = $1"#,
             name.to_string()
         )
         .fetch_one(connection)
@@ -76,11 +65,7 @@ impl AuthenticatedUser {
         match row {
             Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
             Err(err) => Err(err.into()),
-            Ok(row) => Ok(AuthenticatedUser {
-                user: construct_from_row!(row),
-                password_hash: row.password_hash,
-                email_address: row.email_address,
-            }),
+            Ok(row) => Ok(AuthenticatedUser::legacy(construct_from_row!(row), row.password_hash)),
         }
     }
 }

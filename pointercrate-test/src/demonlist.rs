@@ -8,7 +8,7 @@ use pointercrate_demonlist::{
     submitter::Submitter,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
-use pointercrate_user::AuthenticatedUser;
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{http::Status, local::asynchronous::Client};
 use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};

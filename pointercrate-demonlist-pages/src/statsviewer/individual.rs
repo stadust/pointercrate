@@ -15,8 +15,8 @@ impl From<IndividualStatsViewer> for PageFragment {
             "The pointercrate individual stats viewer, a ranking of the worlds best Geometry Dash players. Now more local than ever, \
              allowing you to see who's the best in your state!",
         )
-        .module("/static/demonlist/js/modules/statsviewer.js")
-        .module("/static/demonlist/js/statsviewer/individual.js")
+        .module("/static/demonlist/js/modules/statsviewer.js?v=4")
+        .module("/static/demonlist/js/statsviewer/individual.js?v=4")
         .stylesheet("/static/demonlist/css/statsviewer.css")
         .stylesheet("/static/core/css/sidebar.css")
         .body(stats_viewer.body())

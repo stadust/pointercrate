@@ -2,18 +2,29 @@ use crate::{
     auth::{BasicAuth, TokenAuth},
     ratelimits::UserRatelimits,
 };
-use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
 use pointercrate_core_pages::head::HeadLike;
-use pointercrate_user::{error::UserError, AuthenticatedUser, Registration, User};
+use pointercrate_user::error::UserError;
 use pointercrate_user_pages::account::AccountPageConfig;
+
 use rocket::{
     http::{Cookie, CookieJar, SameSite, Status},
     response::Redirect,
-    serde::json::Json,
     State,
 };
 use std::net::IpAddr;
+
+#[cfg(feature = "legacy_accounts")]
+use {
+    pointercrate_core::pool::PointercratePool,
+    pointercrate_user::{
+        auth::legacy::{LegacyAuthenticatedUser, Registration},
+        auth::AuthenticatedUser,
+        User,
+    },
+    rocket::serde::json::Json,
+};
 
 #[rocket::get("/login")]
 pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page> {
@@ -43,6 +54,7 @@ pub async fn login(
     Ok(Status::NoContent)
 }
 
+#[cfg(feature = "legacy_accounts")]
 #[rocket::post("/register", data = "<registration>")]
 pub async fn register(
     ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>, registration: Json<Registration>,
@@ -52,7 +64,7 @@ pub async fn register(
 
     ratelimits.soft_registrations(ip)?;
 
-    AuthenticatedUser::validate_password(&registration.password)?;
+    LegacyAuthenticatedUser::validate_password(&registration.password)?;
     User::validate_name(&registration.name)?;
 
     ratelimits.registrations(ip)?;

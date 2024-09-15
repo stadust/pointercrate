@@ -5,18 +5,13 @@
 //! * Modifying other people's accounts (assign permissions, change offensive names, etc)
 //! * Querying account information
 
-pub use self::{
-    auth::{AuthenticatedUser, PatchMe, Registration},
-    paginate::UserPagination,
-    patch::PatchUser,
-};
+pub use self::{paginate::UserPagination, patch::PatchUser};
 use crate::error::{Result, UserError};
 use pointercrate_core::{
     etag::Taggable,
     permission::{Permission, PermissionsManager},
 };
 use serde::Serialize;
-pub use sqlx;
 use std::{
     fmt::{Display, Formatter},
     hash::Hash,
@@ -24,7 +19,7 @@ use std::{
 
 #[macro_use]
 mod get;
-mod auth;
+pub mod auth;
 mod delete;
 pub mod error;
 mod paginate;

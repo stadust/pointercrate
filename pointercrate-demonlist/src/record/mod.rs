@@ -22,7 +22,7 @@
 //!   the 'under consideration' status makes. A record under consideration IS NOT UNIQUE!
 
 pub use self::{
-    get::{approved_records_by, approved_records_on},
+    get::{approved_records_by, approved_records_on, submission_count},
     paginate::RecordPagination,
     patch::PatchRecord,
     post::Submission,

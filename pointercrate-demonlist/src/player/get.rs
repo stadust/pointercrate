@@ -71,7 +71,7 @@ impl DatabasePlayer {
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<DatabasePlayer> {
         let name = name.trim();
 
-        let result = sqlx::query_as!(DatabasePlayer, "SELECT id, name, banned FROM players WHERE name = $1", name)
+        let result = sqlx::query_as!(DatabasePlayer, "SELECT id, name, banned FROM players WHERE name = $1::CITEXT", name)
             .fetch_one(connection)
             .await;
 
@@ -97,22 +97,72 @@ impl DatabasePlayer {
     }
 
     pub async fn by_name_or_create(name: &str, connection: &mut PgConnection) -> Result<DatabasePlayer> {
-        let name = name.trim();
-
         match Self::by_name(name, connection).await {
-            Err(DemonlistError::PlayerNotFoundName { .. }) => {
-                let id = sqlx::query!("INSERT INTO players (name) VALUES ($1) RETURNING id", name.to_string())
+            Err(DemonlistError::PlayerNotFoundName { player_name }) => {
+                let id = sqlx::query!("INSERT INTO players (name) VALUES ($1) RETURNING id", player_name)
                     .fetch_one(connection)
                     .await?
                     .id;
 
                 Ok(DatabasePlayer {
                     id,
-                    name: name.to_owned(),
+                    name: player_name,
                     banned: false,
                 })
             },
             result => result,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use sqlx::{pool::PoolConnection, Postgres};
+
+    use crate::{error::DemonlistError, player::DatabasePlayer};
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn test_by_name_or_create(mut conn: PoolConnection<Postgres>) {
+        // No players: return error
+        assert_eq!(
+            DatabasePlayer::by_name("PlasmaLust", &mut conn).await,
+            Err(DemonlistError::PlayerNotFoundName {
+                player_name: "PlasmaLust".to_string()
+            })
+        );
+
+        // White spaces are trimmed, even in the error case
+        assert_eq!(
+            DatabasePlayer::by_name(" PlasmaLust ", &mut conn).await,
+            Err(DemonlistError::PlayerNotFoundName {
+                player_name: "PlasmaLust".to_string()
+            })
+        );
+
+        // Create the player
+        let player = DatabasePlayer::by_name_or_create(" PlasmaLust", &mut conn).await.unwrap();
+        // Whitespaces got stripped
+        assert_eq!(player.name, "PlasmaLust");
+
+        // Now `by_name` returns the player
+        assert_eq!(DatabasePlayer::by_name("PlasmaLust", &mut conn).await.as_ref(), Ok(&player));
+        // Even with whitespaces stripped
+        assert_eq!(DatabasePlayer::by_name(" PlasmaLust ", &mut conn).await.as_ref(), Ok(&player));
+        // And for different capitalization
+        assert_eq!(DatabasePlayer::by_name(" plAsmalust ", &mut conn).await.as_ref(), Ok(&player));
+
+        // Same thing for by_name_or_create
+        assert_eq!(
+            DatabasePlayer::by_name_or_create("PlasmaLust", &mut conn).await.as_ref(),
+            Ok(&player)
+        );
+        assert_eq!(
+            DatabasePlayer::by_name_or_create(" PlasmaLust ", &mut conn).await.as_ref(),
+            Ok(&player)
+        );
+        assert_eq!(
+            DatabasePlayer::by_name_or_create(" plAsmalust ", &mut conn).await.as_ref(),
+            Ok(&player)
+        );
     }
 }

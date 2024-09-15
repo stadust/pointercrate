@@ -2,8 +2,9 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
 use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator};
 use pointercrate_demonlist::{nationality::Nationality, LIST_MODERATOR};
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageTab;
+use sqlx::PgConnection;
 
 pub struct PlayersPage;
 
@@ -14,7 +15,7 @@ impl AccountPageTab for PlayersPage {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/player.js".into()
+        "/static/demonlist/js/account/player.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {

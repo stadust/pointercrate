@@ -13,7 +13,7 @@ import {
   FilteredPaginator,
   Viewer,
   setupFormDialogEditor, FormDialog, setupEditorDialog, get,
-} from "/static/core/js/modules/form.js";
+} from "/static/core/js/modules/form.js?v=4";
 
 export function embedVideo(video) {
   if (!video) return;
@@ -44,8 +44,17 @@ export function initializeTimeMachine() {
   destination.addValidator(valueMissing, "Please specify a value");
   destination.addValidator(rangeUnderflow, "You cannot go back in time that far!");
 
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = String(now.getMonth() + 1).padStart(2, '0');
+  var day = String(now.getDate()).padStart(2, '0');
+  var hours = String(now.getHours()).padStart(2, '0');
+  var minutes = String(now.getMinutes()).padStart(2, '0');
+
+  destination.value = `${year}-${month}-${day}T${hours}:${minutes}`
+
   var offset = new Date().getTimezoneOffset();
-  var offsetHours = offset / 60;
+  var offsetHours = Math.trunc(offset / 60);  // round towards zero to ensure things like GMT-2.5 work
   var offsetMinutes = Math.abs(offset) % 60;
 
   timeMachineForm.onSubmit(() => {
@@ -69,9 +78,7 @@ export function initializeRecordSubmitter(submitApproved = false) {
   var rawFootage = submissionForm.input("submit-raw-footage");
 
   demon.addValidator(input => input.dropdown.selected !== undefined, "Please specify a demon");
-
-  let holderSelector = new PlayerSelectionDialog("submission-holder-dialog");
-  document.getElementById("record-submitter-holder-pen").addEventListener('click', () => holderSelector.open().then(data => player.value = data.player));
+  demon.setTransform(parseInt);
 
   player.addValidator(input => input.value !== undefined, "Please specify a record holder");
   player.addValidator(
@@ -105,8 +112,13 @@ export function initializeRecordSubmitter(submitApproved = false) {
       data.status = "approved";
     }
     post("/api/v1/records/", headers, data)
-      .then(() => {
-        submissionForm.setSuccess("Record successfully submitted");
+      .then(response => {
+        let queue_position = response.headers['x-submission-count'];
+
+        if (queue_position)
+          submissionForm.setSuccess(`Record successfully submitted. It is #${queue_position} in the queue!`);
+        else
+          submissionForm.setSuccess("Record successfully submitted.");
         submissionForm.clear();
         gtag('event', 'record-submit-success', {'event-category': 'demonlist'});
       })
@@ -174,35 +186,9 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
       li.appendChild(flag);
       li.appendChild(document.createTextNode(subdivision.name));
 
-      dropdown.addLI(li);
+      dropdown.addListItem(li);
     }
   });
-}
-
-export class PlayerSelectionDialog extends FormDialog {
-  constructor(dialogId, selectionHandler) {
-    super(dialogId);
-
-    let paginator = new FilteredPaginator(
-        dialogId + "-pagination",
-        generatePlayer,
-        "name_contains"
-    );
-
-    let playerName = this.form.inputs[0];
-
-    playerName.addValidator(valueMissing, "Please provide a player name");
-
-    paginator.initialize();
-    if(selectionHandler === undefined) {
-      paginator.addSelectionListener((selected) => {
-        playerName.value = selected.name;
-        this.form.html.requestSubmit();
-      });
-    } else {
-      paginator.addSelectionListener(selectionHandler);
-    }
-  }
 }
 
 export function generatePlayer(player) {

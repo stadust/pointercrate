@@ -8,8 +8,8 @@ pub fn nation_based_stats_viewer() -> PageFragment {
         "The pointercrate nation stats viewer, ranking how well each nation's players are doing in their quest to collectively complete \
          the entire demonlist!",
     )
-    .module("/static/demonlist/js/modules/statsviewer.js")
-    .module("/static/demonlist/js/statsviewer/nation.js")
+    .module("/static/demonlist/js/modules/statsviewer.js?v=4")
+    .module("/static/demonlist/js/statsviewer/nation.js?v=4")
     .stylesheet("/static/demonlist/css/statsviewer.css")
     .stylesheet("/static/core/css/sidebar.css")
     .body(nation_based_stats_viewer_html())

@@ -3,72 +3,87 @@
  */
 export class Dropdown {
   /**
-   * Creates an instance of Dropdown.
+   * Creates an instance of Dropdown. The dropdown menu consists on an input element and an actual dropdown (an unordered list).
+   * The dropdown only appears if the input is focused.
+   * 
+   * Each dropdown menu item needs to define a `data-value` attribute, which, confusingly,
+   * acts as the unique key identifying that item. 
+   * 
+   * Upon selecting an item in the dropdown, the value of the input element is set to the dropdowns data-display attribute,
+   * or its innerText if no data-display is provided.
+   * 
+   * The input element can have a data-default attribute, which should link to one of the dropdown items' `data-value`.
+   * This will be the item selected by default.
+   * 
    * @param {HTMLElement} html
    * @memberof Dropdown
    */
   constructor(html) {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
-    if(this.input.dataset.default === undefined)
+    if (this.input.dataset.default === undefined && !this.input.placeholder)
       this.input.placeholder = "Click to select";
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
-    this.listeners = [];
+    this.ul = this.html.getElementsByTagName("ul")[0];
 
+    this.listeners = [];
+    // mapping each list items data-value to data-display
     this.values = {};
 
-    for (let li of this.html.querySelectorAll("ul li")) {
-      li.addEventListener("click", () => this.select(li.dataset.value));
+    this.selected = this.input.dataset.default;
 
-      this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
+    for (let li of this.html.querySelectorAll("ul li")) {
+      this._initListItem(li);
     }
 
-    const config = {attributes: false, childList: true, subtree: false};
+    const config = { attributes: false, childList: true, subtree: false };
     const callback = (mutationList) => {
-      for(let mutation of mutationList) {
-        /*for(let addedLI of mutation.addedNodes) {
-          addedLI.addEventListener("click", () => this.select(addedLI.dataset.value));
-
-          this.values[addedLI.dataset.value] = addedLI.dataset.display || addedLI.innerHTML;
-        }*/
-        for(let removedLI of mutation.removedNodes) {
+      for (let mutation of mutationList) {
+        for (let addedLI of mutation.addedNodes) {
+          this._initListItem(addedLI);
+        }
+        for (let removedLI of mutation.removedNodes) {
           delete this.values[removedLI.dataset.value];
         }
       }
     };
 
-    this.ul = this.html.getElementsByTagName("ul")[0];
 
     const observer = new MutationObserver(callback);
     observer.observe(this.ul, config);
 
-
     // in case some browser randomly decide to store text field values
     this.reset();
 
-    // temporarily variable to store selection while we clear the text field when the dropdown is opened
-    var value;
-
     this.input.addEventListener("focus", () => {
-      value = this.input.value;
-      this.input.value = "";
-      this.input.dispatchEvent(new Event("change"));
+      this.onFocus();
       this.menu.fadeTo(300, 0.95);
     });
 
     this.input.addEventListener("focusout", () => {
+      this.onUnfocus();
       this.menu.fadeOut(300);
-      this.input.value = value;
     });
   }
 
-  // FIXME: horrible hack
-  addLI(li) {
-    this.ul.appendChild(li);
-
+  _initListItem(li) {
     li.addEventListener("click", () => this.select(li.dataset.value));
 
-    this.values[li.dataset.value] = li.dataset.display || li.innerHTML;
+    this.values[li.dataset.value] = li.dataset.display || li.innerText;
+  }
+
+  addListItem(li) {
+    this.ul.appendChild(li);
+  }
+
+  onFocus() {
+    this.input.value = "";
+    this.input.dispatchEvent(new Event("change"));
+  }
+
+  onUnfocus() {
+    if (this.selected)
+      this.input.value = this.values[this.selected];
   }
 
   /**
@@ -78,22 +93,20 @@ export class Dropdown {
     this.reset();
 
     // Kill all but the default entry
-    while(this.ul.childNodes.length > 1)
+    while (this.ul.childNodes.length > 1)
       this.ul.removeChild(this.ul.lastChild);
   }
 
   reset() {
     this.selected = this.input.dataset.default;
-    if(this.values[this.selected] )
+    if (this.values[this.selected])
       this.input.value = this.values[this.selected];
-    else
-      this.input.value = null;
+    else this.input.value = null;
   }
 
   select(entry) {
     if (entry in this.values) {
-      if(entry === this.selected)
-        return;
+      if (entry === this.selected) return;
 
       this.selected = entry;
       this.input.value = this.values[entry];
@@ -113,6 +126,53 @@ export class Dropdown {
 
   addEventListener(listener) {
     this.listeners.push(listener);
+  }
+}
+
+export class DynamicSuggestionDropdown extends Dropdown {
+  constructor(html) {
+    super(html);
+
+    this.endpoint = html.dataset.endpoint;
+    this.field = html.dataset.field;
+
+    this.input.addEventListener("input", () => this._updateOptionsWithRequest());
+    this.timeout = null;
+  }
+
+  _updateOptionsWithRequest() {
+    var filterString = this.input.value;
+
+    if (this.timeout) 
+      window.clearTimeout(this.timeout);
+    
+    this.timeout = window.setTimeout(() => {
+      get(this.endpoint + "?limit=5&" + this.field + "_contains=" + filterString)
+      .then(response => {
+        // No change since request was made?
+        if (this.input.value == filterString) {
+          while(this.ul.childNodes.length) 
+            this.ul.removeChild(this.ul.lastChild);
+
+          for (let item of response.data) {
+            let li = document.createElement("li");
+            li.innerText = item[this.field];
+            li.classList.add("hover", "white");
+            li.dataset.value = item[this.field];
+
+            this.addListItem(li);
+          }
+        }
+      })
+    }, 500);
+  }
+
+  onFocus() {
+    this._updateOptionsWithRequest();
+  }
+
+  onUnfocus() {
+    this.selected = this.input.value;
   }
 }
 
@@ -137,7 +197,7 @@ export class Output {
       if (message === null || message === undefined) {
         this.errorOutput.style.display = "none";
       } else {
-        this.errorOutput.innerHTML = message;
+        this.errorOutput.innerText = message;
         this.errorOutput.style.display = "block";
       }
     }
@@ -150,7 +210,7 @@ export class Output {
       if (message === null || message === undefined) {
         this.successOutput.style.display = "none";
       } else {
-        this.successOutput.innerHTML = message;
+        this.successOutput.innerText = message;
         this.successOutput.style.display = "block";
       }
     }
@@ -208,9 +268,7 @@ export class PaginatorEditorBackend extends EditorBackend {
 
   url() {
     return (
-      this._paginator.retrievalEndpoint +
-      this._paginator.currentObject.id +
-      "/"
+      this._paginator.retrievalEndpoint + this._paginator.currentObject.id + "/"
     );
   }
 
@@ -239,9 +297,13 @@ export function setupDropdownEditor(
       data[field] = selected;
     }
 
-    backend.edit(data).then(was304 => {
-      if(was304) output.setSuccess("Nothing changed!"); else output.setSuccess("Edit successful!");
-    }).catch(response => displayError(output)(response));
+    backend
+      .edit(data)
+      .then((was304) => {
+        if (was304) output.setSuccess("Nothing changed!");
+        else output.setSuccess("Edit successful!");
+      })
+      .catch((response) => displayError(output)(response));
   });
 
   return dropdown;
@@ -253,12 +315,15 @@ export class Dialog {
 
     this.reject = undefined;
     this.resolve = undefined;
-    this.submissionPredicateFactory = (data) => new Promise(resolve => resolve(data));
+    this.submissionPredicateFactory = (data) =>
+      new Promise((resolve) => resolve(data));
 
-    this.dialog.getElementsByClassName("cross")[0].addEventListener("click", () => {
-      this.reject(); // order important
-      this.close();
-    })
+    this.dialog
+      .getElementsByClassName("cross")[0]
+      .addEventListener("click", () => {
+        this.reject(); // order important
+        this.close();
+      });
   }
 
   onSubmit(data) {
@@ -274,8 +339,7 @@ export class Dialog {
    * @returns {Promise<unknown>}
    */
   open() {
-    if(this.reject !== undefined)
-      throw new Error("Dialog is already open");
+    if (this.reject !== undefined) throw new Error("Dialog is already open");
 
     $(this.dialog.parentNode).fadeIn(300);
 
@@ -311,29 +375,43 @@ export class DropdownDialog extends Dialog {
   constructor(dialogId, dropdownId) {
     super(dialogId);
 
-    this.dropdown = new Dropdown( document.getElementById(dropdownId));
-    this.dropdown.addEventListener(selected => this.onSubmit(selected));
+    let html = document.getElementById(dropdownId);
+
+    if (html.dataset.endpoint) 
+      this.dropdown = new DynamicSuggestionDropdown(html);
+    else
+      this.dropdown = new Dropdown(html);
+
+    this.dropdown.addEventListener((selected) => this.onSubmit(selected));
   }
 }
 
-export function setupEditorDialog(dialog, buttonId, backend, output, dataTransform = x => x) {
-  document.getElementById(buttonId)
-      .addEventListener("click", () => dialog.open());
+export function setupEditorDialog(
+  dialog,
+  buttonId,
+  backend,
+  output,
+  dataTransform = (x) => x
+) {
+  document
+    .getElementById(buttonId)
+    .addEventListener("click", () => dialog.open());
 
   dialog.submissionPredicateFactory = (data) => {
-    return backend.edit(dataTransform(data))
-        .then(was304 => {
-          if(was304){
-            output.setSuccess("Nothing changed");
-          } else {
-            output.setSuccess("Edit successful!");
-          }
-        })
-        .catch(response => {
-          // FIXME: only works for form dialogs!
-          displayError(dialog.form)(response);
-          throw response;
-        });
+    return backend
+      .edit(dataTransform(data))
+      .then((was304) => {
+        if (was304) {
+          output.setSuccess("Nothing changed");
+        } else {
+          output.setSuccess("Edit successful!");
+        }
+      })
+      .catch((response) => {
+        // FIXME: only works for form dialogs!
+        displayError(dialog.form)(response);
+        throw response;
+      });
   };
 }
 
@@ -674,6 +752,11 @@ export class FormInput {
   constructor() {
     this._clearOnInvalid = false;
     this._validators = [];
+    this._transform = (x) => x;
+  }
+
+  setTransform(transform) {
+    this._transform = transform;
   }
 
   addValidator(validator, msg) {
@@ -685,7 +768,7 @@ export class FormInput {
 
   addValidators(validators) {
     Object.keys(validators).forEach((message) =>
-        this.addValidator(validators[message], message)
+      this.addValidator(validators[message], message)
     );
   }
 
@@ -733,6 +816,10 @@ export class FormInput {
     throw new Error("Abstract Property");
   }
 
+  get transformedValue() {
+    return this._transform(this.value);
+  }
+
   set value(value) {
     throw new Error("Abstract Property");
   }
@@ -755,8 +842,7 @@ export class FormInput {
 
   set errorText(value) {
     // clear only if we dont actually reset the error!
-    if (this.clearOnInvalid && value)
-      this.clear();
+    if (this.clearOnInvalid && value) this.clear();
   }
 
   /**
@@ -780,18 +866,18 @@ export class HtmlFormInput extends FormInput {
 
     this.span = span;
     this.input =
-        span.getElementsByTagName("input")[0] ||
-        span.getElementsByTagName("textarea")[0];
+      span.getElementsByTagName("input")[0] ||
+      span.getElementsByTagName("textarea")[0];
     this.error = span.getElementsByTagName("p")[0];
 
     this.input.addEventListener(
-        "input",
-        () => {
-          if (this.input.validity.valid || this.input.validity.customError) {
-            this.errorText = "";
-          }
-        },
-        false
+      "input",
+      () => {
+        if (this.input.validity.valid || this.input.validity.customError) {
+          this.errorText = "";
+        }
+      },
+      false
     );
   }
 
@@ -811,10 +897,8 @@ export class HtmlFormInput extends FormInput {
   }
 
   set value(value) {
-    if(this.input.type === "checkbox")
-      this.input.checked = value;
-    else
-      this.input.value = value;
+    if (this.input.type === "checkbox") this.input.checked = value;
+    else this.input.value = value;
   }
 
   get name() {
@@ -826,10 +910,8 @@ export class HtmlFormInput extends FormInput {
   }
 
   clear() {
-    if(this.input.type === "checkbox")
-      this.input.checked = false;
-    else
-      this.input.value = "";
+    if (this.input.type === "checkbox") this.input.checked = false;
+    else this.input.value = "";
   }
 
   get required() {
@@ -837,16 +919,15 @@ export class HtmlFormInput extends FormInput {
   }
 
   get errorText() {
-    return this.error.innerHTML;
+    return this.error.innerText;
   }
 
   set errorText(value) {
     // weird super call lol
     super.errorText = value;
 
-    if(this.error)
-      this.error.innerHTML = value;
-    else if(value !== "")
+    if (this.error) this.error.innerText = value;
+    else if (value !== "")
       console.log("Unreportable error on input " + this.input + ": " + value);
     this.input.setCustomValidity(value);
   }
@@ -860,13 +941,22 @@ export class DropdownFormInput extends FormInput {
   constructor(dropdown) {
     super();
 
-    this.dropdown = new Dropdown(dropdown.getElementsByClassName("dropdown-menu")[0]);
+    let html = dropdown.getElementsByClassName("dropdown-menu")[0];
+
+    if (html.dataset.endpoint) 
+      this.dropdown = new DynamicSuggestionDropdown(html);
+    else
+      this.dropdown = new Dropdown(html);
+
     this.error = dropdown.getElementsByTagName("p")[0];
 
-    this.dropdown.addEventListener(selected => {
-      if (this.input.validity.valid || this.input.validity.customError) {
+    this.dropdown.addEventListener((selected) => {
+      if (this.input.validity.valid || this.input.validity.customError)
         this.errorText = "";
-      }
+    });
+    this.dropdown.input.addEventListener("input", () => {
+      if (this.input.validity.valid || this.input.validity.customError)
+        this.errorText = "";
     });
   }
 
@@ -874,15 +964,12 @@ export class DropdownFormInput extends FormInput {
     return this.dropdown.input;
   }
 
-
   clear() {
     this.dropdown.reset();
   }
 
   get value() {
-    // FIXME: obviously not always int
-    let asInt = parseInt(this.dropdown.selected);
-    return isNaN(asInt) ? this.dropdown.selected : asInt;
+    return this.dropdown.selected;
   }
 
   get name() {
@@ -894,14 +981,14 @@ export class DropdownFormInput extends FormInput {
   }
 
   get errorText() {
-    return this.error.innerHTML;
+    return this.error.innerText;
   }
 
   set errorText(value) {
     // weird super call lol
     super.errorText = value;
 
-    this.error.innerHTML = value;
+    this.error.innerText = value;
     this.dropdown.input.setCustomValidity(value);
   }
 }
@@ -919,8 +1006,12 @@ export class HtmlInput extends FormInput {
 
     this.error = input.getElementsByTagName("p")[0];
 
-    let mutationObserver = new MutationObserver(() => this.errorText = "");
-    mutationObserver.observe(this.target, { attributes: true, childList: true, subtree: true });
+    let mutationObserver = new MutationObserver(() => (this.errorText = ""));
+    mutationObserver.observe(this.target, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
   }
 
   clear() {
@@ -928,7 +1019,9 @@ export class HtmlInput extends FormInput {
   }
 
   get value() {
-    return this.target.innerText === this.default ? undefined : this.target.innerText;
+    return this.target.innerText === this.default
+      ? undefined
+      : this.target.innerText;
   }
 
   set value(value) {
@@ -944,14 +1037,14 @@ export class HtmlInput extends FormInput {
   }
 
   get errorText() {
-    return this.error.innerHTML;
+    return this.error.innerText;
   }
 
   set errorText(value) {
     // weird super call lol
     super.errorText = value;
 
-    this.error.innerHTML = value;
+    this.error.innerText = value;
   }
 }
 
@@ -967,12 +1060,11 @@ export class Form extends Output {
     this._errorRedirects = {};
 
     for (var input of this.html.getElementsByClassName("form-input")) {
-      if(input.dataset.type === 'dropdown')
+      if (input.dataset.type === "dropdown")
         this.inputs.push(new DropdownFormInput(input));
-      else if(input.dataset.type === "html")
-        this.inputs.push(new HtmlInput(input))
-      else
-        this.inputs.push(new HtmlFormInput(input));
+      else if (input.dataset.type === "html")
+        this.inputs.push(new HtmlInput(input));
+      else this.inputs.push(new HtmlFormInput(input));
     }
 
     this.html.addEventListener(
@@ -1024,7 +1116,7 @@ export class Form extends Output {
 
     for (let input of this.inputs) {
       if (input.name && (input.value !== null || !input.required)) {
-        data[input.name] = input.value;
+        data[input.name] = input.transformedValue;
       }
     }
 
@@ -1044,11 +1136,11 @@ export class Form extends Output {
             input.errorText = message;
           } else {
             this.errorOutput.style.display = "block";
-            this.errorOutput.innerHTML = message;
+            this.errorOutput.innerText = message;
           }
         } else {
           this.errorOutput.style.display = "block";
-          this.errorOutput.innerHTML = message;
+          this.errorOutput.innerText = message;
         }
       }
     }
@@ -1115,7 +1207,7 @@ export function typeMismatch(input) {
 }
 
 export function valueMissing(input) {
-  if(input.input === undefined || input.input.validity === undefined)
+  if (input.input === undefined || input.input.validity === undefined)
     return input.value !== undefined;
   return !input.input.validity.valueMissing;
 }
@@ -1123,7 +1215,7 @@ export function valueMissing(input) {
 /**
  * Standard error handler for a promise returned by `get`, `post`, `del` or `patch` which displays the error message in an html element.
  *
- * @param errorOutput The HTML element whose `innerHtml` property should be set to the error message
+ * @param errorOutput The HTML element whose `innerText` property should be set to the error message
  * @param specialCodes Special error handlers for specific error codes. Special handlers should be keyed by pointercrate error code and take the error object as only argument
  */
 export function displayError(output, specialCodes = {}) {
@@ -1185,10 +1277,11 @@ const UNEXPECTED_REDIRECT = {
   data: null,
 };
 const RATELIMITED = {
-  message: "You have hit a Cloudflare ratelimit. Please wait a short time and try again.",
+  message:
+    "You have hit a Cloudflare ratelimit. Please wait a short time and try again.",
   code: 42900,
-  data: null
-}
+  data: null,
+};
 
 function mkReq(method, endpoint, headers = {}, data = null) {
   headers["Content-Type"] = "application/json";
@@ -1196,8 +1289,7 @@ function mkReq(method, endpoint, headers = {}, data = null) {
 
   let csrf_meta = document.querySelector('meta[name="csrf_token"]');
 
-  if(csrf_meta)
-    headers["X-CSRF-TOKEN"] = csrf_meta.content;
+  if (csrf_meta) headers["X-CSRF-TOKEN"] = csrf_meta.content;
 
   return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();

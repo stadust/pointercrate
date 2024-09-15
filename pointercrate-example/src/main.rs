@@ -28,6 +28,14 @@ fn catch_404() -> ErrorResponder {
     CoreError::NotFound.into()
 }
 
+/// Failures in json deserialization of request bodies will just return
+/// an immediate 422 response. This catcher is needed to translate them into a pointercrate
+/// error response.
+#[rocket::catch(422)]
+fn catch_422() -> ErrorResponder {
+    CoreError::UnprocessableEntity.into()
+}
+
 /// We do not have a home page, so have the website root simply redirect to the demonlist
 #[rocket::get("/")]
 fn home() -> Redirect {
@@ -50,7 +58,7 @@ async fn rocket() -> _ {
         // Tell pointercrate's core components about navigation bar and footers, so that it knows how to render the website
         .manage(page_configuration())
         // Register our 404 catcher
-        .register("/", rocket::catchers![catch_404])
+        .register("/", rocket::catchers![catch_404, catch_422])
         // Register our home page
         .mount("/", rocket::routes![home]);
 

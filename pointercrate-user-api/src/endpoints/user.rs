@@ -91,7 +91,7 @@ pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id
         *permissions |= user.permissions & !assignable_bitmask;
     }
 
-    if user_id == auth.user.inner().id {
+    if user_id == auth.user.user().id {
         return Err(UserError::PatchSelf.into());
     }
 
@@ -108,7 +108,7 @@ pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id
 pub async fn delete_user(mut auth: TokenAuth, precondition: Precondition, user_id: i32) -> Result<Status> {
     auth.require_permission(ADMINISTRATOR)?;
 
-    if user_id == auth.user.inner().id {
+    if user_id == auth.user.user().id {
         return Err(UserError::DeleteSelf.into());
     }
 

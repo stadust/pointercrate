@@ -4,7 +4,8 @@ use pointercrate_core_pages::{
     head::{HeadLike, Script},
     PageFragment,
 };
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser};
+use pointercrate_user::auth::AuthenticatedUser;
+use sqlx::PgConnection;
 
 pub mod profile;
 pub mod users;
@@ -48,7 +49,7 @@ impl AccountPageConfig {
         };
 
         for tab_config in &self.tabs {
-            if tab_config.should_display_for(page.user.inner().permissions, permissions) {
+            if tab_config.should_display_for(page.user.user().permissions, permissions) {
                 let tab = tab_config.tab();
                 let content = tab_config.content(&page.user, permissions, connection).await;
 
@@ -71,11 +72,12 @@ pub struct AccountPage {
 
 impl From<AccountPage> for PageFragment {
     fn from(account: AccountPage) -> Self {
-        let mut fragment = PageFragment::new(format!("Account - {}", account.user.inner().name), "")
+        let mut fragment = PageFragment::new(format!("Account - {}", account.user.user().name), "")
+            .module("/static/core/js/modules/form.js?v=4")
             .stylesheet("/static/user/css/account.css")
             .stylesheet("/static/core/css/sidebar.css")
             .head(PreEscaped(
-                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'; window.userId={}</script><script type="module">{}</script>"#, account.user.inner().name, account.user.inner().etag_string(), account.user.inner().permissions, account.user.inner().id, account.initialization_script())
+                format!(r#"<script>window.username='{}'; window.etag='{}'; window.permissions='{}'; window.userId={}</script><script type="module">{}</script>"#, account.user.user().name, account.user.user().etag_string(), account.user.user().permissions, account.user.user().id, account.initialization_script())
             ))
             .body(account.body());
 
@@ -124,7 +126,7 @@ impl AccountPage {
 
     fn initialization_script(&self) -> String {
         let mut imports = r#"
-import { TabbedPane } from "/static/core/js/modules/tab.js";
+import { TabbedPane } from "/static/core/js/modules/tab.js?v=4";
         "#
         .to_owned();
         let mut initialization_states = String::new();

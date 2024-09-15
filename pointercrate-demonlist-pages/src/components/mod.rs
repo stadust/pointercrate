@@ -1,7 +1,6 @@
 //! Module containing various UI components that are used across a variety of demonlist pages
 
 use maud::{html, Markup};
-use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::demon::Demon;
 
 pub mod submitter;
@@ -25,31 +24,39 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a De
     }
 }
 
-pub fn player_selection_dialog(dialog_id: &str, headline: &str, description: &str, button_text: &str) -> Markup {
+pub fn player_selection_dropdown(dropdown_id: &str, endpoint: &str, field: &str, form_field: &str) -> Markup {
+    html! {
+        div.dropdown-menu #(dropdown_id) data-endpoint = (endpoint) data-field = (field) {
+            div {
+                input type = "text" name = (form_field) required="" autocomplete="off" placeholder = "Start typing for suggestions...";
+            }
+            div.menu {
+                // dynamically populated once the user starts typing
+                ul {}
+            }
+        }
+    }
+}
+
+pub fn player_selection_dialog(
+    dialog_id: &str, dropdown_id: &str, headline: &str, description: &str, button_text: &str, form_field: &str,
+) -> Markup {
     html! {
         div.overlay.closable {
-            div.dialog #(dialog_id) {
+            div.dialog #(dialog_id) style="overflow: initial;" {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
                     (headline)
                 }
-                div.flex.viewer {
-                    (filtered_paginator(&format!("{}-pagination", dialog_id), "/api/v1/players/"))
-                    div {
-                        p {
-                            (description)
-                        }
-                        form.flex.col novalidate = "" {
-                            p.info-red.output {}
-                            p.info-green.output {}
-                            span.form-input #{(dialog_id)"-input"} {
-                                label for = "player" {"Player name:"}
-                                input name = "player" type="text" required = "";
-                                p.error {}
-                            }
-                            input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (button_text);
-                        }
+                form.flex.col novalidate {
+                    p {
+                        (description)
                     }
+                    span.form-input.flex.col data-type = "dropdown" {
+                        (player_selection_dropdown(dropdown_id, "/api/v1/players/", "name", form_field))
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (button_text);
                 }
             }
         }

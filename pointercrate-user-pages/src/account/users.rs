@@ -2,7 +2,8 @@ use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::{Permission, PermissionsManager};
 use pointercrate_core_pages::util::filtered_paginator;
-use pointercrate_user::{sqlx::PgConnection, AuthenticatedUser, ADMINISTRATOR};
+use pointercrate_user::{auth::AuthenticatedUser, ADMINISTRATOR};
+use sqlx::PgConnection;
 
 pub struct UsersTab(pub Vec<Permission>);
 
@@ -19,7 +20,7 @@ impl AccountPageTab for UsersTab {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/user/js/account/users.js".into()
+        "/static/user/js/account/users.js?v=4".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -38,7 +39,7 @@ impl AccountPageTab for UsersTab {
 
     async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, _connection: &mut PgConnection) -> Markup {
         let mut assignable_permissions = permissions
-            .assignable_by_bits(user.inner().permissions)
+            .assignable_by_bits(user.user().permissions)
             .into_iter()
             .collect::<Vec<_>>();
         assignable_permissions.sort_by_key(|perm| perm.bit());
@@ -102,7 +103,7 @@ impl AccountPageTab for UsersTab {
                                     }
                                 }
                                 div.flex.no-stretch {
-                                    @if user.inner().has_permission(ADMINISTRATOR) {
+                                    @if user.user().has_permission(ADMINISTRATOR) {
                                         input.button.red.hover #delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
                                     }
                                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
