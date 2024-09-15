@@ -247,7 +247,7 @@ impl PointercrateError for CoreError {
             CoreError::NotFound => 40400,
             CoreError::MethodNotAllowed => 40500,
             CoreError::Conflict => 40900,
-            CoreError::LengthRequired => 41200,
+            CoreError::LengthRequired => 41100,
             CoreError::PreconditionFailed => 41200,
             CoreError::PayloadTooLarge => 41300,
             CoreError::UnsupportedMediaType { .. } => 41500,
