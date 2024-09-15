@@ -18,4 +18,4 @@ WHERE (demons.position < $1 OR $1 IS NULL)
   AND (demons.level_id = $12 OR $12 IS NULL)
   AND demons.position IS NOT NULL
 ORDER BY demons.position {}
-LIMIT $12
+LIMIT $13
