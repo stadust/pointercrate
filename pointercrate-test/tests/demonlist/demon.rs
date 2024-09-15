@@ -56,6 +56,24 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
     let id2 = pointercrate_test::demonlist::add_demon("Bloodbath 2", 2, 100, player.id, player.id, &mut *connection).await;
     let id3 = pointercrate_test::demonlist::add_demon("Bloodbath 3", 3, 100, player.id, player.id, &mut *connection).await;
 
+    // Test only the limit parameter in isolation. Off-by-one errors in the limit are hard to catch due to how the "next" parameter
+    // is computed internally, so make sure that if limit is ignored, at least 2 more elements would be returned
+    // Regression test for 148330e8f21912345e4f6f627942b48e4a7ec75a
+    let base = DemonPositionPagination {
+        params: PaginationParameters {
+            limit: 1,
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    let (demons, _) = clnt
+        .get(format!("{}?{}", URL, serde_urlencoded::to_string(&base).unwrap()))
+        .get_pagination_result::<Demon>()
+        .await;
+
+    assert_eq!(demons.len(), 1);
+    assert_eq!(demons[0].base.id, id1);
+
     // Normal pagination: Get the demon at position 2 via after=1 and limit=1. We should get both "next" and "previous" pages
     // for the first and third demons! Let's throw in a requirement=100 as well, to test that these parameters do indeed get propagated into the Links headers
     let base = DemonPositionPagination {
