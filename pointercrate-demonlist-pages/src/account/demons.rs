@@ -25,7 +25,7 @@ impl AccountPageTab for DemonsTab {
 
     fn tab(&self) -> Markup {
         html! {
-            i class = "fa fa-shower fa-2x" aria-hidden="true" {}
+            i class = "fa fa-solid fa-shapes fa-2x" aria-hidden="true" {}
             (PreEscaped("&nbsp;&nbsp;"))
             b {
                 "Levels"

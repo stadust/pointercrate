@@ -442,10 +442,6 @@ textarea:invalid {
 }
 
 @media (min-width: 768px) {
-  body > div:first-child{
-    background-image: url(/static/images/squares3.png);
-  }
-
   .viewer .paginator {
     max-width: 35%;
   }

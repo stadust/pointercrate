@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use maud::html;
 use pointercrate_core::error::CoreError;
 use pointercrate_core::pool::PointercratePool;
@@ -15,7 +16,6 @@ use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
 use rocket::{build, catch, fs::FileServer, get, response::Redirect, uri, Rocket};
 use shuttle_runtime::SecretStore;
-use dotenv::dotenv;
 
 #[catch(404)]
 fn catch_404() -> ErrorResponder {

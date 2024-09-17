@@ -195,7 +195,7 @@ export class DemonManager extends FilteredPaginator {
       )
         .then(() => {
           this._creators.removeChild(html);
-          this.output.setSuccess("owo uwu owo");
+          this.output.setSuccess("NO CREATOR?!?! OMG?!?!");
         })
         .catch(displayError(this.output));
     });
@@ -296,7 +296,9 @@ function setupDemonAdditionForm() {
 
     post("/api/v2/demons/", {}, data)
       .then(() => {
-        form.setSuccess("Successfully added demon!");
+        form.setSuccess(
+          `Successfully added demon!\n\n
+          ${form.name} by ${form.creators} has been placed at #${form.position}.`);
         demonManager.refresh();
         form.clear();
       })
@@ -335,8 +337,7 @@ export function initialize() {
                   location.length - 1
               ),
             });
-
-            demonManager.output.setSuccess("Successfully added creator");
+            
           })
           .catch(response => {
             displayError(creatorFormDialog.form)(response);
