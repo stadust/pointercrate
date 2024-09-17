@@ -49,12 +49,14 @@ impl AccountPageTab for DemonsTab {
 
                         div.viewer-content {
                             div.flex.col{
+
                                 h3 style = "font-size:1.1em; margin: 10px 0" {
                                     "Level #"
                                     i #demon-demon-id {}
                                     " - "
                                     i.fa.fa-pencil-alt.clickable #demon-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i #demon-demon-name {}
-                                }
+                                }      
+                                span.plus.cross.hover #demon_x {}                          
 
                                 iframe."ratio-16-9"#demon-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Verification Video"}
                                 p.info-red.output style = "margin: 10px" {}

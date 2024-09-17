@@ -73,7 +73,8 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
                 endpoints::demon::patch,
                 endpoints::demon::post,
                 endpoints::demon::post_creator,
-                endpoints::demon::delete_creator
+                endpoints::demon::delete_creator,
+                endpoints::demon::delete_demon_data
             ],
         )
         .mount(

@@ -25,6 +25,7 @@ pub mod audit;
 mod paginate;
 mod patch;
 mod post;
+mod delete;
 
 pub struct TimeShiftedDemon {
     pub current_demon: Demon,
@@ -53,9 +54,6 @@ pub struct Demon {
     pub verifier: DatabasePlayer,
 
     /// This ['Demons']'s Geometry Dash level ID
-    ///
-    /// This is automatically queried based on the level name, but can be manually overridden by a
-    /// list mod.
     pub level_id: Option<u64>,
 }
 
@@ -87,7 +85,7 @@ pub struct FullDemon {
     #[serde(flatten)]
     pub demon: Demon,
     pub creators: Vec<DatabasePlayer>,
-    pub records: Vec<MinimalRecordP>,
+    pub records: Vec<MinimalRecordP>, //wtf
 }
 
 impl Taggable for FullDemon {
@@ -107,6 +105,7 @@ impl MinimalDemon {
             .await?
             .requirement)
     }
+    
 }
 
 impl FullDemon {
@@ -176,6 +175,17 @@ impl FullDemon {
             format!("published by {}, verified by {}", demon.publisher.name, demon.verifier.name)
         }
     }
+
+    async fn shift_up(starting_at: i16, connection: &mut PgConnection) -> Result<()> {
+        info!("Shifting up all demons, starting at {}", starting_at);
+
+        sqlx::query!("UPDATE demons SET position = position - 1 WHERE position >= $1", starting_at)
+            .execute(connection)
+            .await?;
+
+        Ok(())
+    }
+    
 }
 
 impl Demon {
@@ -210,6 +220,8 @@ impl Demon {
 
         Ok(())
     }
+
+    
 
     /// Gets the current max position a demon has, or `0` if there are no demons
     /// in the database

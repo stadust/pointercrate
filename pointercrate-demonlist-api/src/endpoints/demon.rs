@@ -10,11 +10,10 @@ use pointercrate_core_api::{
 use pointercrate_demonlist::{
     creator::{Creator, PostCreator},
     demon::{
-        audit::{DemonModificationData, MovementLogEntry},
-        Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon,
+        audit::{DemonModificationData, MovementLogEntry}, Demon, DemonIdPagination, DemonPositionPagination, FullDemon, PatchDemon, PostDemon
     },
     error::DemonlistError,
-    player::DatabasePlayer,
+    player::{DatabasePlayer, recompute_scores},
     LIST_ADMINISTRATOR, LIST_MODERATOR,
 };
 use pointercrate_user_api::auth::TokenAuth;
@@ -127,4 +126,30 @@ pub async fn delete_creator(demon_id: i32, player_id: i32, mut auth: TokenAuth) 
     auth.commit().await?;
 
     Ok(Status::NoContent)
+}
+
+#[rocket::delete("/<demon_id>")]
+pub async fn delete_demon_data(demon_id: i32, mut auth: TokenAuth) -> Result<Status> {
+    
+
+    auth.require_permission(LIST_MODERATOR)?;
+
+
+    // pass in the id of the demon we're trying to delete
+    let demon = FullDemon::by_id(demon_id, &mut auth.connection).await?;
+    
+    // we don't really need fulldemon here but oh well
+    FullDemon::by_id(demon.demon.base.id, &mut auth.connection)
+        .await?
+        .delete_demon(&mut auth.connection)
+        .await?;
+    
+    recompute_scores(&mut auth.connection).await?;
+    
+
+    auth.commit().await?;
+
+    Ok(Status::NoContent)
+
+    
 }

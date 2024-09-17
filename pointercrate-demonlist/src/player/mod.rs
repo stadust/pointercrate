@@ -51,10 +51,12 @@ pub struct Player {
     ///   * Record progress updated
     ///   * Record holder updated
     ///   * Record Added
+    ///   * Record Removed
     /// - Demon updates
     ///   * Demon movement/addition (recompute all scores)
     ///   * Demon requirement updated (recompute all scores)
     ///   * Demon verifier updated
+    ///   * Demon removed
     /// - Player updates
     ///   * Player banned
     ///   * Player objects merged

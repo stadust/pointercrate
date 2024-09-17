@@ -199,7 +199,19 @@ export class DemonManager extends FilteredPaginator {
         })
         .catch(displayError(this.output));
     });
-  }
+  }       
+}
+
+function deleteDemon(demon_id) {
+  
+    if (confirm("Are you sure? This will irrevocably delete this level and all its records!")) {
+      del("/api/v2/demons/" + demon_id + "/")
+        .then(() => {
+          demonManager.output.setSuccess("This demon has been deleted.");
+          demonManager.refresh(); 
+        })
+        .catch(displayError(output))
+    }
 }
 
 function insertCreatorInto(creator, container) {
@@ -349,6 +361,12 @@ export function initialize() {
 
           addDemonForm.creators.push(data.creator);
         });
+  });
+
+  let demon_x = document.getElementById("demon_x")
+
+  demon_x.addEventListener("click", () => {
+    deleteDemon(demonManager.currentObject.id);
   });
   
 }
