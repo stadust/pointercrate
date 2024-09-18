@@ -15,5 +15,6 @@ WHERE (demons.id < $1 OR $1 IS NULL)
   AND (publishers.id = $9 OR $9 IS NULL)
   AND (publishers.name::CITEXT = $10 OR $10 IS NULL)
   AND (STRPOS(demons.name, $11::CITEXT) > 0 OR $11 is NULL)
+  AND (demons.level_id = $12 OR $12 IS NULL)
 ORDER BY demons.id {}
-LIMIT $12
+LIMIT $13
