@@ -51,7 +51,7 @@ jobs:
       # Deploy to Shuttle
       - name: Deploy to Shuttle
         run: |
-          cargo shuttle deploy --name cscl --allow-dirty
+          cargo shuttle deploy --name cscl --allow-dirty --nt
         env:
           SHUTTLE_API_KEY: ${{ secrets.SHUTTLE_API_KEY }}
         shell: bash
