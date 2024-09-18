@@ -1,16 +1,9 @@
-use crate::{
-    demon::FullDemon,
-    error::Result
-};
+use crate::{demon::FullDemon, error::Result};
 use log::info;
 use sqlx::PgConnection;
- 
- 
+
 impl FullDemon {
-    pub async fn delete_demon(
-        self, 
-        connection: &mut PgConnection, 
-    ) -> Result<()> {
+    pub async fn delete_demon(self, connection: &mut PgConnection) -> Result<()> {
         info!("Deleting demon {}", self);
 
         // delete all records and creators on a demon to avoid foreign key errors
@@ -21,39 +14,26 @@ impl FullDemon {
         // prevent holes in the list of demons
         FullDemon::shift_up(self.demon.base.position, connection).await?;
 
-
-
         Ok(())
     }
-        
-        pub async fn delete_all_records(demon_id: i32, demon_name: &String, connection: &mut PgConnection) -> Result<()> {
 
-            
+    pub async fn delete_all_records(demon_id: i32, demon_name: &String, connection: &mut PgConnection) -> Result<()> {
         // backup records before they're deleted
         sqlx::query!("
             INSERT INTO rec_backup (id, progress, video, status_, player, submitter, demon, raw_footage, demon_name) SELECT id, progress, video, status_, player, submitter, demon, raw_footage, $1::text FROM records WHERE demon = $2::integer;
             ", demon_name, demon_id)
             .execute(&mut *connection)
             .await?;
-        
-        
-    
+
         // Delete records from records table
         sqlx::query!("DELETE FROM records WHERE demon = $1", demon_id)
             .execute(&mut *connection)
-            .await?; 
-    
+            .await?;
+
         Ok(())
     }
-    
-    
-
-
-    
 
     pub async fn delete_demon_data(demon_id: i32, connection: &mut PgConnection) -> Result<()> {
-
-
         sqlx::query!("DELETE FROM creators WHERE demon = $1", demon_id)
             .execute(&mut *connection)
             .await?;
@@ -64,6 +44,4 @@ impl FullDemon {
 
         Ok(())
     }
-    
-
 }

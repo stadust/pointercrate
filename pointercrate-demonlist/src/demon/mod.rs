@@ -22,10 +22,10 @@ use std::{
 #[macro_use]
 mod get;
 pub mod audit;
+mod delete;
 mod paginate;
 mod patch;
 mod post;
-mod delete;
 
 pub struct TimeShiftedDemon {
     pub current_demon: Demon,
@@ -105,7 +105,6 @@ impl MinimalDemon {
             .await?
             .requirement)
     }
-    
 }
 
 impl FullDemon {
@@ -185,7 +184,6 @@ impl FullDemon {
 
         Ok(())
     }
-    
 }
 
 impl Demon {
@@ -228,8 +226,6 @@ impl Demon {
 
         Ok(())
     }
-
-    
 
     /// Gets the current max position a demon has, or `0` if there are no demons
     /// in the database
