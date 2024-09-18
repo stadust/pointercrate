@@ -8,6 +8,8 @@ updates:
     allow:
       - dependency-type: "all"
     open-pull-requests-limit: 1
+    ignore:
+      - dependency-name: "derive_more"
     groups:
       pointercrate:
         patterns:
