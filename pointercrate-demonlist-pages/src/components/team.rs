@@ -36,7 +36,9 @@ impl Render for Team {
                         }
                     }
                     @for moderator in &self.moderators {
-                        (maybe_link(moderator))
+                        b {
+                            (maybe_link(moderator))
+                        }
                     }
                     @for helper in &self.helpers {
                         (maybe_link(helper))
