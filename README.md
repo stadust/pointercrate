@@ -21,7 +21,7 @@ Shuttle (open command prompt and type `cargo install cargo-shuttle`),
 and sqlx (open command prompt and type `cargo install sqlx-cli --no-default-features --features native-tls,postgres`. 
 
 
-Now open pgAdmin 4, which is installed with postgres, and make sure there is a server called "Postgres" or something. If there isn't, right click on servers > register > server > name it whatever you want, then go to the definition tab, set Host name/address to "localhost", set the username to "postgres" and the password to "asdf", and press save.
+Now search for the program "pgAdmin 4" which should be installed with Postgres, open it, and make sure there is a server called "Postgres" or something. If there isn't, right click on servers > register > server > name it whatever you want, then go to the definition tab, set Host name/address to "localhost", set the username to "postgres" and the password to "asdf", and press save.
 
 Now we need to create a new role and database. You must make the role before the database. To make a role, right click on Login/Group Roles and create a Login/Group role. Name it "pointercratetest", and in the Definition tab make the password "asdf". Next, in the Priveleges tab toggle the "Can login?" and "Superuser?" settings on and press Save.
 
