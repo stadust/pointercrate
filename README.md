@@ -14,9 +14,7 @@ Next, you need to download a few things:
 
 [rustup](https://rustup.rs), 
 
-[Postgres](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) 
-
-(if prompted, set the password to "asdf". the security of this password won't matter since you're hosting this database locally, meaning only you can access it.), 
+[Postgres](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)  (if prompted, set the password to "asdf". the security of this password won't matter since you're hosting this database locally, meaning only you can access it.), 
 
 Shuttle (open command prompt and type `cargo install cargo-shuttle`), 
 
