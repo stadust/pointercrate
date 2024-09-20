@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE VIEW demons_pv AS  -- demons with publisher and verifier
     SELECT demons.position, demons.name, demons.requirement, demons.video,
@@ -60,4 +60,4 @@ CREATE VIEW players_n AS  -- players with nationality
     LEFT OUTER JOIN nationalities
     ON players.nationality = nationalities.iso_country_code;
 
-DROP VIEW IF EXISTS demon_verifier_publisher_join; */
+DROP VIEW IF EXISTS demon_verifier_publisher_join;

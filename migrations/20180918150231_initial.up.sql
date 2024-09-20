@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 -- This is a workaround
 -- To get the new backend to work, we need to run all migrations against the existing database
@@ -67,4 +67,4 @@ CREATE TABLE IF NOT EXISTS  creators (
 );
 
 GRANT TRIGGER, REFERENCES, SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO pointercrate;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO pointercrate; */
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO pointercrate;

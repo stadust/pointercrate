@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 -- Fix up the views over the records table
 DROP VIEW records_pds;
@@ -11,4 +11,4 @@ CREATE VIEW records_pds AS  -- records with player, demon and submitter
     INNER JOIN submitters
     ON records_pd.submitter_id = submitters.submitter_id;
 
-ALTER TABLE records DROP COLUMN notes; */
+ALTER TABLE records DROP COLUMN notes;

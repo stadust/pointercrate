@@ -1,4 +1,4 @@
-/* CREATE TABLE public.rec_backup
+CREATE TABLE public.rec_backup
 (
     id integer DEFAULT nextval('records_id_seq'::regclass),
     progress smallint,
@@ -16,4 +16,4 @@ USING heap
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.rec_backup
-    OWNER to pointercrate; */
+    OWNER to pointercrate;

@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE OR REPLACE FUNCTION best_records_in(country VARCHAR(2))
     RETURNS TABLE (LIKE records)
@@ -57,4 +57,3 @@ CREATE OR REPLACE VIEW nations_with_score AS
    ) scores
 INNER JOIN nationalities
         ON nationalities.iso_country_code = scores.nationality;
- */

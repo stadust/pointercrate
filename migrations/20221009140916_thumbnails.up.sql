@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 ALTER TABLE demons ADD COLUMN thumbnail TEXT NOT NULL DEFAULT 'https://i.ytimg.com/vi/zebrafishes/mqdefault.jpg';
 
@@ -97,4 +97,4 @@ FROM demons
 WHERE NOT EXISTS (SELECT 1 FROM demon_additions WHERE demon_additions.id = demons.id AND time >= $1)
 $$
     LANGUAGE SQL
-    STABLE; */
+    STABLE;

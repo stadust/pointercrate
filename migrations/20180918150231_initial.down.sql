@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 -- Drop everything in reverse order
 
@@ -12,4 +12,4 @@ DROP TABLE players;
 DROP TYPE AUDIT_OPERATION;
 
 DROP TYPE RECORD_STATUS;
-DROP EXTENSION CITEXT; */
+DROP EXTENSION CITEXT;

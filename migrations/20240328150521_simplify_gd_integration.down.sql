@@ -1,4 +1,4 @@
-/* -- Add down migration script here
+-- Add down migration script here
 
 CREATE TABLE gj_creator_meta (
     user_id bigint PRIMARY KEY NOT NULL,  -- No REFERENCES creator(user_id) as we also have to keep track of _missing_ entries here!
@@ -39,4 +39,4 @@ CREATE TABLE gj_newgrounds_song_meta (
 
 CREATE TABLE download_lock(
     level_id bigint not null
-); */
+);

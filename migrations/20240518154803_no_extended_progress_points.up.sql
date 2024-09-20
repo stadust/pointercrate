@@ -1,4 +1,4 @@
-/* -- Add up migration script here
+-- Add up migration script here
 CREATE OR REPLACE VIEW score_giving AS
     SELECT records.progress, demons.position, demons.requirement, records.player
     FROM records
@@ -14,4 +14,4 @@ CREATE OR REPLACE VIEW score_giving AS
 
 SELECT recompute_player_scores();
 SELECT recompute_nation_scores();
-SELECT recompute_subdivision_scores(); */
+SELECT recompute_subdivision_scores();

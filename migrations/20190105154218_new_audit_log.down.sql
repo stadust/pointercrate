@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 DROP TABLE demon_additions;
 DROP FUNCTION audit_demon_addition() CASCADE;
@@ -44,4 +44,4 @@ DROP FUNCTION audit_user_deletion() CASCADE;
 
 DROP TABLE audit_log2;
 
-DROP TABLE active_user; */
+DROP TABLE active_user;

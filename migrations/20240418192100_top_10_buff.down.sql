@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE OR REPLACE FUNCTION record_score(progress FLOAT, demon FLOAT, list_size FLOAT, requirement FLOAT) RETURNS FLOAT AS
 $record_score$
@@ -35,4 +35,3 @@ SELECT CASE
            END;
 $record_score$
     LANGUAGE SQL IMMUTABLE;
- */

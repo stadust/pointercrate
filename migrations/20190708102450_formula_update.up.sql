@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 DROP VIEW players_with_score;
 DROP FUNCTION record_score(FLOAT, FLOAT, FLOAT);
@@ -69,4 +69,4 @@ CREATE VIEW players_with_score AS
     ON scores.player = players.id
     LEFT OUTER JOIN nationalities
     ON players.nationality = nationalities.iso_country_code
-    WHERE NOT players.banned; */
+    WHERE NOT players.banned;

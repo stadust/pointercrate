@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE TABLE gj_creator (
     user_id bigint PRIMARY KEY NOT NULL,
@@ -94,4 +94,4 @@ CREATE TABLE download_lock(
     level_id bigint not null
 );
 
-ALTER TABLE demons ADD COLUMN level_id INT8 NULL UNIQUE REFERENCES gj_level(level_id); */
+ALTER TABLE demons ADD COLUMN level_id INT8 NULL UNIQUE REFERENCES gj_level(level_id);

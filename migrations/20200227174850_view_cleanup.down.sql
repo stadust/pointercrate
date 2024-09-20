@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 
 CREATE VIEW records_pds AS  -- records with player, demon and submitter
@@ -63,4 +63,4 @@ CREATE VIEW players_n AS  -- players with nationality
            nationalities.iso_country_code, nationalities.nation
     FROM players
     LEFT OUTER JOIN nationalities
-    ON players.nationality = nationalities.iso_country_code; */
+    ON players.nationality = nationalities.iso_country_code;

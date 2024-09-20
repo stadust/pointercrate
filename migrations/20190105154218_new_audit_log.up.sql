@@ -1,4 +1,4 @@
-/* -- Alright, audit_log overhault
+-- Alright, audit_log overhault
 -- In audit log entries we cannot use foreign keys because that would force us to delete log entries
 -- when objects are removed from the db, or disallow the deletion of objects
 -- Thus, we need to make sure we references database objects by a non-modifiable primary key, which
@@ -367,4 +367,3 @@ CREATE FUNCTION audit_user_deletion() RETURNS trigger AS $user_deletion_trigger$
 $user_deletion_trigger$ LANGUAGE plpgsql;
 
 CREATE TRIGGER user_deletion_trigger AFTER DELETE ON members FOR EACH ROW EXECUTE PROCEDURE audit_user_deletion();
- */

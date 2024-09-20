@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 -- Your SQL goes here
 
 DROP VIEW players_with_score;
@@ -70,4 +70,4 @@ CREATE OR REPLACE VIEW players_with_score AS
     ON scores.player = players.id
     LEFT OUTER JOIN nationalities
     ON players.nationality = nationalities.iso_country_code
-    WHERE NOT players.banned; */
+    WHERE NOT players.banned;

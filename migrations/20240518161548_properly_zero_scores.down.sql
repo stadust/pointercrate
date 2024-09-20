@@ -1,4 +1,4 @@
-/* -- Add down migration script here
+-- Add down migration script here
 
 CREATE OR REPLACE FUNCTION recompute_player_scores() RETURNS void AS $$ 
     UPDATE players 
@@ -50,4 +50,4 @@ $$ LANGUAGE SQL;
 
 SELECT recompute_player_scores();
 SELECT recompute_nation_scores();
-SELECT recompute_subdivision_scores(); */
+SELECT recompute_subdivision_scores();

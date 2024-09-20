@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 ALTER TABLE demons DROP COLUMN level_id;
 
@@ -16,4 +16,4 @@ DROP TABLE gj_level_request_meta;
 DROP TABLE gj_newgrounds_song;
 DROP TABLE gj_newgrounds_song_meta;
 
-DROP TABLE download_lock; */
+DROP TABLE download_lock;

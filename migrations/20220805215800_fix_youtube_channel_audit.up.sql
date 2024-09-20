@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 CREATE OR REPLACE FUNCTION audit_user_modification() RETURNS trigger as $user_modification_trigger$
 DECLARE
     display_name_change CITEXT;
@@ -22,4 +22,4 @@ BEGIN
 
     RETURN NEW;
 END;
-$user_modification_trigger$ LANGUAGE plpgsql; */
+$user_modification_trigger$ LANGUAGE plpgsql;

@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 DROP TRIGGER demons_insert_set_thumbnail ON demons;
 DROP FUNCTION set_initial_thumbnail;
@@ -74,4 +74,4 @@ FROM demons
 WHERE NOT EXISTS (SELECT 1 FROM demon_additions WHERE demon_additions.id = demons.id AND time >= $1)
 $$
     LANGUAGE SQL
-    STABLE; */
+    STABLE;

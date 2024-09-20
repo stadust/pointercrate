@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE TABLE player_claims(
     id SERIAL PRIMARY KEY, -- only used for pagination
@@ -11,4 +11,4 @@ INSERT INTO player_claims (member_id, player_id)
     SELECT member_id, claimed_player FROM members WHERE claimed_player IS NOT NULL;
 
 ALTER TABLE members DROP COLUMN claimed_player;
-ALTER TABLE players DROP COLUMN claimed_by; */
+ALTER TABLE players DROP COLUMN claimed_by;

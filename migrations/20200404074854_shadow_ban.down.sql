@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 ALTER TABLE players
-DROP COLUMN link_banned; */
+DROP COLUMN link_banned;

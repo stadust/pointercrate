@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE OR REPLACE FUNCTION best_records_local(country VARCHAR(2), the_subdivision VARCHAR(3))
     RETURNS TABLE (LIKE records)
@@ -66,4 +66,3 @@ AS
     $body$
 LANGUAGE SQL;
 
- */

@@ -1,4 +1,4 @@
-/* -- Add up migration script here
+-- Add up migration script here
 
 -- We need LEFT OUTER JOINs below so that those players which DO NOT show up in the 
 -- SELECT player, SUM(...) query (because they no longer have any records that give scores) have their scores correctly
@@ -59,4 +59,4 @@ $$ LANGUAGE SQL;
 
 SELECT recompute_player_scores();
 SELECT recompute_nation_scores();
-SELECT recompute_subdivision_scores(); */
+SELECT recompute_subdivision_scores();

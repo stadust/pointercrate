@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 
 CREATE OR REPLACE FUNCTION audit_demon_modification() RETURNS trigger AS $demon_modification_trigger$
@@ -40,4 +40,4 @@ CREATE OR REPLACE FUNCTION audit_demon_modification() RETURNS trigger AS $demon_
 
         RETURN NEW;
     END;
-$demon_modification_trigger$ LANGUAGE plpgsql; */
+$demon_modification_trigger$ LANGUAGE plpgsql;

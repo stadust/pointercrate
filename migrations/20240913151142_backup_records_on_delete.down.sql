@@ -1,1 +1,1 @@
-/* DROP TABLE rec_backup */
+DROP TABLE rec_backup

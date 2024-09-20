@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 CREATE TABLE record_notes (
     id SERIAL PRIMARY KEY,
     record INTEGER REFERENCES records(id) NOT NULL,
@@ -68,4 +68,4 @@ $record_notes_deletion_trigger$ LANGUAGE plpgsql;
 
 CREATE TRIGGER record_note_addition_trigger AFTER INSERT ON record_notes FOR EACH ROW EXECUTE PROCEDURE audit_record_notes_addition();
 CREATE TRIGGER record_note_modification_trigger AFTER UPDATE ON record_notes FOR EACH ROW EXECUTE PROCEDURE audit_record_notes_modification();
-CREATE TRIGGER record_note_deletion_trigger AFTER DELETE ON record_notes FOR EACH ROW EXECUTE PROCEDURE audit_record_notes_modification(); */
+CREATE TRIGGER record_note_deletion_trigger AFTER DELETE ON record_notes FOR EACH ROW EXECUTE PROCEDURE audit_record_notes_modification();

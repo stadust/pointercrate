@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 -- Create the ID column
 ALTER TABLE demons ADD COLUMN id SERIAL;
@@ -305,4 +305,3 @@ ALTER TABLE records ADD CONSTRAINT records_demon_fkey FOREIGN KEY (demon) REFERE
 
 -- set up the primary key of the creators table again
 ALTER TABLE creators ADD CONSTRAINT creators_pkey PRIMARY KEY (demon, creator);
- */

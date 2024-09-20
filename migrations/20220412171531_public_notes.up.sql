@@ -1,3 +1,3 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
-ALTER TABLE record_notes ADD COLUMN is_public BOOLEAN NOT NULL DEFAULT FALSE; */
+ALTER TABLE record_notes ADD COLUMN is_public BOOLEAN NOT NULL DEFAULT FALSE;

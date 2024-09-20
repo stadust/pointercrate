@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 CREATE FUNCTION list_at(TIMESTAMP WITHOUT TIME ZONE)
 RETURNS TABLE (
@@ -25,4 +25,4 @@ AS $$
     WHERE NOT EXISTS (SELECT 1 FROM demon_additions WHERE demon_additions.id = demons.id AND time >= $1)
 $$
 LANGUAGE SQL
-STABLE; */
+STABLE;

@@ -1,4 +1,4 @@
-/* -- Add down migration script here
+-- Add down migration script here
 DELETE FROM subdivisions;
 
 INSERT INTO subdivisions (iso_code, name, nation) 
@@ -78,4 +78,4 @@ VALUES
     ('QLD', 'Queensland', 'AU'), 
     ('NSW', 'New South Wales', 'AU'),
     ('VIC', 'Victoria', 'AU'), 
-    ('SA', 'South Australia', 'AU'); */
+    ('SA', 'South Australia', 'AU');

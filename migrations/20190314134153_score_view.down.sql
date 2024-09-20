@@ -1,3 +1,3 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
-DROP VIEW players_with_score; */
+DROP VIEW players_with_score;

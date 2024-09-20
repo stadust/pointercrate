@@ -1,4 +1,4 @@
-/* -- Your SQL goes here
+-- Your SQL goes here
 
 ALTER TABLE records ADD COLUMN notes TEXT;
 
@@ -17,4 +17,3 @@ CREATE VIEW records_pds AS  -- records with player, demon and submitter
     ON records.player = players.id
     INNER JOIN demons
     ON demons.id = records.demon;
- */

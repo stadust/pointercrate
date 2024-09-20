@@ -1,4 +1,4 @@
-/* DROP FUNCTION best_records_in(VARCHAR(2));
+DROP FUNCTION best_records_in(VARCHAR(2));
 
 CREATE FUNCTION best_records_in(country VARCHAR(2))
     RETURNS TABLE (
@@ -25,4 +25,3 @@ $body$
     WHERE rk = 1;
 $body$
 LANGUAGE SQL;
- */

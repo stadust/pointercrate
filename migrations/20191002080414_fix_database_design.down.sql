@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 DROP VIEW demons_pv;
 DROP VIEW demons_p;
 DROP VIEW records_pds;
@@ -13,4 +13,4 @@ FROM demons
 INNER JOIN players AS p1
 ON demons.verifier = p1.id
 INNER JOIN players AS p2
-ON demons.publisher = p2.id */
+ON demons.publisher = p2.id

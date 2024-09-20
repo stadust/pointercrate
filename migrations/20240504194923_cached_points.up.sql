@@ -1,4 +1,4 @@
-/* -- Add up migration script here
+-- Add up migration script here
 
 ALTER TABLE players ADD COLUMN score DOUBLE PRECISION DEFAULT 0 NOT NULL;
 
@@ -142,4 +142,4 @@ DROP FUNCTION subdivision_ranking_of(country varchar(2));
 DROP FUNCTION best_records_local(country VARCHAR(2), the_subdivision VARCHAR(3));
 
 -- Hardening against invalid database state
-ALTER TABLE players ADD CONSTRAINT nation_subdivions_fkey FOREIGN KEY (nationality, subdivision) REFERENCES subdivisions (nation, iso_code); */
+ALTER TABLE players ADD CONSTRAINT nation_subdivions_fkey FOREIGN KEY (nationality, subdivision) REFERENCES subdivisions (nation, iso_code);

@@ -1,4 +1,4 @@
-/* -- Add up migration script here
+-- Add up migration script here
 INSERT INTO subdivisions (iso_code, name, nation) 
 VALUES
     ('V', 'Provincia de Tierra del Fuego', 'AR'),
@@ -426,4 +426,3 @@ VALUES
     ('48', 'Gyeongsangnam-do', 'KR'),
     ('49', 'Jeju-do', 'KR'),
     ('50', 'Sejong', 'KR');
- */

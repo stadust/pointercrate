@@ -1,4 +1,4 @@
-/* -- This file should undo anything in `up.sql`
+-- This file should undo anything in `up.sql`
 
 ALTER TABLE records ADD COLUMN notes TEXT;
 
@@ -21,4 +21,4 @@ DROP TABLE record_notes_modifications;
 DROP FUNCTION audit_record_notes_modification() CASCADE;
 
 DROP TABLE record_notes_deletions;
-DROP FUNCTION audit_record_notes_deletion() CASCADE; */
+DROP FUNCTION audit_record_notes_deletion() CASCADE;
