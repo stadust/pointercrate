@@ -11,11 +11,17 @@ Firstly, do NOT use this guide as a way to set up your own pointercrate list. Re
 To begin, start by downloading a .zip of this repo (or clone it with github desktop) and unzip it. 
 
 Next, you need to download a few things: 
+
 [rustup](https://rustup.rs), 
+
 [Postgres](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) 
+
 (if prompted, set the password to "asdf". the security of this password won't matter since you're hosting this database locally, meaning only you can access it.), 
+
 Shuttle (open command prompt and type `cargo install cargo-shuttle`), 
+
 and sqlx (open command prompt and type `cargo install sqlx-cli --no-default-features --features native-tls,postgres`. 
+
 
 Now open pgAdmin 4, which is installed with postgres, and make sure there is a server called "Postgres" or something. If there isn't, right click on servers > register > server > name it whatever you want, then go to the definition tab, set Host name/address to "localhost", set the username to "postgres" and the password to "asdf", and press save.
 
@@ -24,6 +30,7 @@ Now we need to create a new role and database. You must make the role before the
 Next, right click "Databases" on the left and create a new one. Name it "pointercrate" and set the owner to the "pointercratetest" role you just created and press save. Remember that as long as Pgadmin 4 is open and the "pointercrate" database on the left is yellow (not grey), the local database is running on from your computer. This must be the case while you're doing anything on the site.
 
 Next, we need to apply the database schema Pointercrate uses. You can think of a schema as the "files and folders" the site stores its data in. 
+
 First, open the repository folder on your computer, then go to /pointercrate-example/sample/migrations/_new , select all files in the folder, and move them to the migrations folder in the root (TheClicksyncChallengeList-main/migrations/), and replace the files if prompted. 
 (side note i know this sucks but i'm working on it lol....,...)
 
