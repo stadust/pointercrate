@@ -363,13 +363,6 @@ fn demon_submitter() -> Markup {
                         input type = "number" name = "requirement" required="" value="100" min="100" max = "100";
                         p.error {}
                     }
-                    span.form-input.flex.col #demon-add-level_id {
-                        label for = "level_id" {
-                            "Level ID:"
-                        }
-                        input type = "number" name = "level_id" required="";
-                        p.error {}
-                    }
                     span.form-input.flex.col #demon-add-video {
                         label for = "video" {
                             "Verification Video:"
