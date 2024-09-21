@@ -76,7 +76,7 @@ impl AccountPageTab for ProfileTab {
                             }
                             i #profile-youtube-channel {
                                 @match user.youtube_channel {
-                                    Some(ref yc) => a.link href = (yc) {},
+                                    Some(ref yc) => a.link href = (yc) {(yc)},
                                     None => "-"
                                 }
                             }
