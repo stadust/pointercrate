@@ -280,12 +280,6 @@ function setupDemonAdditionForm() {
       "Record requirement must be a valid integer": badInput,
       "Record requirement must be integer": stepMismatch,
     },
-    "demon-add-level_id": {
-      "Please specify a level ID": valueMissing,
-      "Level ID must be a Level ID": rangeUnderflow,
-      "Record requirement cannot be greater than 100%": rangeOverflow,
-      "Record requirement must be a valid integer": badInput,
-    },
     "demon-add-verifier": { "Please specify a verifier": valueMissing },
     "demon-add-publisher": { "Please specify a publisher": valueMissing },
     "demon-add-video": { "Please enter a valid URL": typeMismatch },
