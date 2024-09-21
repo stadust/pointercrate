@@ -1,4 +1,4 @@
-ALTER TABLE records DROP COLUMN raw_footage;
+/* ALTER TABLE records DROP COLUMN raw_footage;
 
 DROP FUNCTION best_records_in(VARCHAR(2));
 
@@ -19,3 +19,4 @@ $body$
     WHERE rk = 1;
 $body$
 LANGUAGE SQL;
+ */

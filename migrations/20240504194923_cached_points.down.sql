@@ -1,4 +1,4 @@
--- Add down migration script here
+/* -- Add down migration script here
 DROP VIEW ranked_players;
 DROP VIEW ranked_nations;
 
@@ -181,3 +181,4 @@ AS
     $body$
 LANGUAGE SQL;
 
+ */

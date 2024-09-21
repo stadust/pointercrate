@@ -1,4 +1,4 @@
--- Your SQL goes here
+/* -- Your SQL goes here
 
 CREATE TABLE nationalities (
     iso_country_code VARCHAR(2) PRIMARY KEY,
@@ -259,3 +259,4 @@ VALUES ('Afghanistan','AF'),
 
 ALTER TABLE players ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationalities(iso_country_code);
 ALTER TABLE members ADD COLUMN nationality VARCHAR(2) NULL DEFAULT NULL REFERENCES nationalities(iso_country_code);
+ */
