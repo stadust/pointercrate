@@ -382,8 +382,8 @@ fn webhook_embed(record: &FullRecord) -> serde_json::Value {
         "embeds": [
             {
                 "type": "rich",
-                "title": format!("{}% on {}", record.progress, record.demon.name),
-                "description": format!("{} just got {}% on {}! Go add their record!", record.player.name, record.progress, record.demon.name),
+                "title": record.demon.name,
+                "description": format!("{} just beat {}!", record.player.name, record.demon.name),
                 "footer": {
                     "text": format!("This record has been submitted by submitter #{}", record.submitter.map(|s|s.id).unwrap_or(1))
                 },
@@ -392,7 +392,7 @@ fn webhook_embed(record: &FullRecord) -> serde_json::Value {
                     "url": record.video
                 },
                 "thumbnail": {
-                    "url": "https://cdn.discordapp.com/avatars/277391246035648512/b03c85d94dc02084c413a7fdbe2cea79.webp?size=1024"
+                    "url": "https://images-ext-1.discordapp.net/external/N3dQA0vBRLKMt6YDut0IfDFu3mnWr7ov1eqZiN8jPAM/%3Fsize%3D4096/https/cdn.discordapp.com/icons/1236218202829230211/2704cd7c7315665885bc56fd4db9a7b6.png?format=webpheight=1024"
                 },
             }
         ]
