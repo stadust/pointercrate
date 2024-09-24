@@ -57,7 +57,7 @@ fn login_page_body() -> Markup {
                 div.flex.col {
                     h2 {"Login"}
                     p {
-                        "Log in to an existing pointercrate account. You have 3 login attempts by 30 minutes. If you do not have an account yet, register on the right or below. "
+                        "Log in to an existing pointercrate account. You have 3 login attempts every 30 minutes. If you do not have an account yet, register on the right or below. "
                     }
                     form.flex.col.grow #login-form novalidate = "" {
                         p.info-red.output {}

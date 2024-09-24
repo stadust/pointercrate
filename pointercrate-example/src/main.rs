@@ -105,17 +105,15 @@ fn page_configuration() -> PageConfiguration {
     .with_column(FooterColumn::LinkList {
         heading: "The Clicksync Challenge list v1.6",
         links: vec![
-            Link::new("/list/1/", "Hardest Challenge"),
+            Link::new("/list/1/", "Top 1 Challenge"),
             Link::new("/list/statsviewer/", "Stats Viewer"),
             Link::new("/account/", "User Area"),
         ],
     })
-    .with_link("https://twitter.com/stadust1971", "Site Dev")
-    .with_link("https://discord.com/invite/W7Eqqj8NG2", "Discord Server");
+    .with_link("https://twitter.com/stadust1971", "Site Dev");
 
     PageConfiguration::new("Clicksync Challenge List", nav_bar, footer)
         .author("sphericle")
-        .keywords("Your SEO keywords here")
 }
 
 #[shuttle_runtime::main]
