@@ -297,7 +297,7 @@ function setupDemonAdditionForm() {
       .then(() => {
         form.setSuccess(
           `Successfully added demon!\n\n
-          ${form.name} by ${form.creators} has been placed at #${form.position}.`);
+          ${data["name"]} by ${form.creators} has been placed at #${data["position"]}, above  and below  .`);
         demonManager.refresh();
         form.clear();
       })
