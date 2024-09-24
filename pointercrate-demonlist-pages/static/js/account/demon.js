@@ -205,6 +205,7 @@ export class DemonManager extends FilteredPaginator {
 function deleteDemon(demon_id) {
   
     if (confirm("Are you sure? This will irrevocably delete this level and all its records!")) {
+      demonManager.output.setSuccess("Deleting, please wait...");
       del("/api/v2/demons/" + demon_id + "/")
         .then(() => {
           demonManager.output.setSuccess("This demon has been deleted.");

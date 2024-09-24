@@ -20,21 +20,22 @@ Shuttle (open command prompt and type `cargo install cargo-shuttle`),
 
 and sqlx (open command prompt and type `cargo install sqlx-cli --no-default-features --features native-tls,postgres`. 
 
+# -----
 
-Now search for the program "pgAdmin 4" which should be installed with Postgres, open it, and make sure there is a server called "Postgres" or something. If there isn't, right click on servers > register > server > name it whatever you want, then go to the definition tab, set Host name/address to "localhost", set the username to "postgres" and the password to "asdf", and press save.
+Now search for the program "pgAdmin 4" which should be installed with Postgres, open it, and make sure there is a server called "Postgres" or something. If there isn't, right click on `servers > register > server > name it whatever you want`, then go to the `definition` tab, set `Host name/address` to "`localhost`", set the username to "`postgres`" and the password to "`asdf`", and press save.
 
-Now we need to create a new role and database. You must make the role before the database. To make a role, right click on Login/Group Roles and create a Login/Group role. Name it "pointercratetest", and in the Definition tab make the password "asdf". Next, in the Priveleges tab toggle the "Can login?" and "Superuser?" settings on and press Save.
+Now we need to create a new role and database. You must make the role before the database. To make a role, right click on `Login/Group Roles` and create a Login/Group role. Name it "pointercratetest", and in the Definition tab make the password "asdf". Next, in the Privileges tab toggle the "Can login?" and "Superuser?" settings on and press Save. Next, right click "Databases" on the left and create a new one. Name it "pointercrate" and set the owner to the "pointercratetest" role you just created and press save. 
 
-Next, right click "Databases" on the left and create a new one. Name it "pointercrate" and set the owner to the "pointercratetest" role you just created and press save. Remember that as long as Pgadmin 4 is open and the "pointercrate" database on the left is yellow (not grey), the local database is running on from your computer. This must be the case while you're doing anything on the site.
+# -----
 
 Next, we need to apply the database schema Pointercrate uses. You can think of a schema as the "files and folders" the site stores its data in. 
 
 First, open the repository folder on your computer, then go to /pointercrate-example/sample/migrations/_new , select all files in the folder, and move them to the migrations folder in the root (TheClicksyncChallengeList-main/migrations/), and replace the files if prompted. 
 (side note i know this sucks but i'm working on it lol....,...)
 
-Next, open the command prompt/shell and navigate to the folder you downloaded this repository to via "cd". The command line usually drops you in your user folder (C:/Users/username), so to if the folder is on your Desktop, for example, type `cd desktop/TheClicksyncChallengeList-main`. If you renamed the folder change "TheClicksyncChallengeList-main" to whatever the folder is named. Next, run `cargo sqlx migrate run`. This should automatically apply the schema the database needs. 
+Next, open the command prompt/shell and navigate to the folder you downloaded this repository to via "cd". The command line usually drops you in your user folder (C:/Users/username), so to if the folder is on your Desktop, for example, type `cd desktop/[folder name]`. Next, run `cargo sqlx migrate run`. This should automatically apply the schema the database needs. 
 
-The last thing to do is actually compile and run the site. To do this, type `cargo shuttle run` and wait for all the libraries to install and compile. At the end, it should give you a link (probably https://127.0.0.1:8001 ) to access the site in your browser!
+The last thing to do is actually compile and run the site. To do this, run `cargo shuttle run` and wait for all the libraries to install and compile. At the end, it should give you a link (probably https://127.0.0.1:8001 ) to access the site in your browser!
 
 # Next steps
 

@@ -18,12 +18,14 @@ jobs:
         run: |
           echo "DATABASE_URL=${{ secrets.database }}" > .env
           echo "ABSTRACT_API_KEY='${{ secrets.abstract }}'" >> .env
+          echo "DISCORD_WEBHOOK= '${{ secrets.DISCORD_WEBHOOK }}'" >> .env
 
       # Generate secrets to Secrets.toml
       - name: Generate secrets to Secrets.toml
         run: |
           echo "DATABASE_URL='${{ secrets.database }}'" > Secrets.toml
           echo "ABSTRACT_API_KEY='${{ secrets.abstract }}'" >> Secrets.toml
+          echo "DISCORD_WEBHOOK= '${{ secrets.DISCORD_WEBHOOK }}'" >> .Secrets.toml
 
       # Install cargo-binstall
       - name: Install cargo-binstall
