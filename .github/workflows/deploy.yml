@@ -27,6 +27,11 @@ jobs:
           echo "ABSTRACT_API_KEY='${{ secrets.abstract }}'" >> Secrets.toml
           echo "DISCORD_WEBHOOK= '${{ secrets.DISCORD_WEBHOOK }}'" >> .Secrets.toml
 
+      # Generate secrets to Secrets.toml
+      - name: Generate secrets to Secrets.toml
+        run: |
+          echo ${{ secrets.SECRET_THING }} > .secret
+
       # Install cargo-binstall
       - name: Install cargo-binstall
         run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
