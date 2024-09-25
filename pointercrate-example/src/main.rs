@@ -15,7 +15,6 @@ use pointercrate_demonlist_pages::account::{
 use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
 use rocket::{build, catch, fs::FileServer, get, response::Redirect, uri, Rocket};
-use shuttle_runtime::SecretStore;
 
 #[catch(404)]
 fn catch_404() -> ErrorResponder {
@@ -32,10 +31,10 @@ fn home() -> Redirect {
     Redirect::to(uri!("/list/"))
 }
 
-async fn configure_rocket(secrets: &SecretStore) -> Result<Rocket<rocket::Build>, Box<dyn std::error::Error>> {
+async fn configure_rocket() -> Result<Rocket<rocket::Build>, Box<dyn std::error::Error>> {
     dotenv::dotenv().unwrap();
 
-    let pool = PointercratePool::init(secrets).await;
+    let pool = PointercratePool::init().await;
 
     let rocket = build()
         .manage(pool)
@@ -117,9 +116,9 @@ fn page_configuration() -> PageConfiguration {
 }
 
 #[shuttle_runtime::main]
-async fn main(#[shuttle_runtime::Secrets] secrets: SecretStore) -> shuttle_rocket::ShuttleRocket {
+async fn main() -> shuttle_rocket::ShuttleRocket {
     dotenv().ok();
-    let rocket = configure_rocket(&secrets).await.expect("Failed to configure Rocket");
+    let rocket = configure_rocket().await.expect("Failed to configure Rocket");
 
     rocket::build();
     Ok(rocket.into())

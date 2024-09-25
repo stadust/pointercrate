@@ -19,16 +19,8 @@ jobs:
           echo "DATABASE_URL=${{ secrets.database }}" > .env
           echo "ABSTRACT_API_KEY='${{ secrets.abstract }}'" >> .env
           echo "DISCORD_WEBHOOK= '${{ secrets.DISCORD_WEBHOOK }}'" >> .env
-
-      # Generate secrets to Secrets.toml
-      - name: Generate secrets to Secrets.toml
-        run: |
-          echo "DATABASE_URL='${{ secrets.database }}'" > Secrets.toml
-          echo "ABSTRACT_API_KEY='${{ secrets.abstract }}'" >> Secrets.toml
-          echo "DISCORD_WEBHOOK= '${{ secrets.DISCORD_WEBHOOK }}'" >> .Secrets.toml
-
-      # Generate secrets to Secrets.toml
-      - name: Generate secrets to Secrets.toml
+      
+      - name: Generate auth secret
         run: |
           echo ${{ secrets.SECRET_THING }} > .secret
 
@@ -40,11 +32,7 @@ jobs:
       # Install cargo-shuttle (specific version if specified)
       - name: Install cargo-shuttle
         run: |
-          if [ -z "${{ secrets.CARGO_SHUTTLE_VERSION }}" ]; then
             cargo binstall -y --locked cargo-shuttle
-          else
-            cargo binstall -y --locked cargo-shuttle@${{ secrets.CARGO_SHUTTLE_VERSION }}
-          fi
         shell: bash
 
       # Restart project (optional)

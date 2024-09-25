@@ -1,6 +1,5 @@
 use crate::{config, error::Result};
 use log::trace;
-use shuttle_runtime::SecretStore;
 use sqlx::{pool::PoolConnection, postgres::PgPoolOptions, PgConnection, Pool, Postgres, Transaction};
 
 pub struct PointercratePool {
@@ -12,11 +11,11 @@ impl PointercratePool {
         self.connection_pool.clone()
     }
 
-    pub async fn init(secrets: &SecretStore) -> Self {
+    pub async fn init() -> Self {
         let pool = PointercratePool {
             connection_pool: PgPoolOptions::default()
                 .max_connections(20)
-                .connect(&config::database_url(secrets))
+                .connect(&config::database_url())
                 .await
                 .expect("Failed to connect to pointercrate database"),
         };
