@@ -174,7 +174,8 @@ impl FullDemon {
             format!("published by {}, verified by {}", demon.publisher.name, demon.verifier.name)
         }
     }
-
+    /// Shifts all demons' positions by one, starting from the specified position.
+    /// This is used to prevent holes in the list when we delete a level.
     async fn shift_up(starting_at: i16, connection: &mut PgConnection) -> Result<()> {
         info!("Shifting up all demons, starting at {}", starting_at);
 

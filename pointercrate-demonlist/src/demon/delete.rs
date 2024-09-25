@@ -6,9 +6,10 @@ impl FullDemon {
     pub async fn delete_demon(self, connection: &mut PgConnection) -> Result<()> {
         info!("Deleting demon {}", self);
 
-        // delete all records and creators on a demon to avoid foreign key errors
         FullDemon::delete_all_records(self.demon.base.id, &self.demon.base.name, connection).await?;
 
+
+        // creator is stored separately from demons
         FullDemon::delete_demon_data(self.demon.base.id, connection).await?;
 
         // prevent holes in the list of demons
@@ -16,7 +17,7 @@ impl FullDemon {
 
         Ok(())
     }
-
+    /// Delete all records on a demon
     pub async fn delete_all_records(demon_id: i32, demon_name: &String, connection: &mut PgConnection) -> Result<()> {
         // backup records before they're deleted
         sqlx::query!("
@@ -32,7 +33,7 @@ impl FullDemon {
 
         Ok(())
     }
-
+    /// Delete a demon from the database
     pub async fn delete_demon_data(demon_id: i32, connection: &mut PgConnection) -> Result<()> {
         sqlx::query!("DELETE FROM creators WHERE demon = $1", demon_id)
             .execute(&mut *connection)

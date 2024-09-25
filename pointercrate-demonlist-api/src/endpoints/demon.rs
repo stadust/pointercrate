@@ -130,6 +130,8 @@ pub async fn delete_creator(demon_id: i32, player_id: i32, mut auth: TokenAuth) 
 }
 
 #[rocket::delete("/<demon_id>")]
+
+/// delete all creators and records from a demon, and delete the demon itself
 pub async fn delete_demon_data(demon_id: i32, mut auth: TokenAuth) -> Result<Status> {
     auth.require_permission(LIST_MODERATOR)?;
 
