@@ -172,7 +172,7 @@ i.fa.hover:hover {
 
 /* dark mode */
 @media (prefers-color-scheme: dark) {
-  .arrow:before, .arrow:after {
+  .arrow:before, .arrow:after, .hamburger span, .plus:before, .plus:after {
     background-color: #e6e6e6 !important;
   }
 
