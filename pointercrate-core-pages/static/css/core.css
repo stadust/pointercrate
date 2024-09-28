@@ -164,6 +164,63 @@
   background: #5ba324;
 }
 
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #292929;
+    color: #e6e6e6;
+  }
+  
+  .fade {
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+    border: 1px #6d6d6d dashed;
+  }
+  
+  @media (min-width: 1072px) {
+    .fade-hide {
+      box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* color modifying styles */
+  
+  .blue {
+    background-color: #0A95E6;
+    color: white;
+  }
+  
+  .white {
+    background-color: #414141;
+    color: #FFFFFF;
+  }
+
+  .white.hover:not(.disabled):not([disabled]):hover,
+  .white.active {
+    background-color: #616161;
+    color: #fff;
+  }
+  
+  .white.hover:not(.disabled):not([disabled]):active {
+    background-color: #5a5a5a;
+    color: #f0eeee;
+  }
+  
+  .red {
+    background: #fc426d;
+    color: white;
+  }
+  
+  .red.hover:not(.disabled):not([disabled]):hover,
+  .red.active {
+    background: #e22b56;
+  }
+  
+  .red.hover:not(.disabled):not([disabled]):active,
+  .red.active {
+    background: #c7274c;
+  }
+}
+
 /* size modifying styles */
 
 .large {
