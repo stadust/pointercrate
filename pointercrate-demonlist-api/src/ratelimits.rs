@@ -4,7 +4,7 @@ use pointercrate_core::ratelimits;
 
 ratelimits! {
     DemonlistRatelimits {
-        record_submission[3u32 per 20 per IpAddr] => "You're submitting too many records too fast!",
+        record_submission[3u32 per 10 per IpAddr] => "You're submitting too many records too fast!",
 
         record_submission_global[20u32 per 3600] => "Too many records are being submitted right now! Complain to sphericle if you need this fixed!",
 
@@ -12,7 +12,7 @@ ratelimits! {
 
         geolocate[1u32 per 2_678_400 per IpAddr] => "You can only geolocate once per month!",
 
-        add_demon[1u32 per 20] => "Please don't spam the button zel",
+        add_demon[1u32 per 20] => "Spam Detected, Loser!",
     }
 }
 
