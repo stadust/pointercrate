@@ -364,7 +364,8 @@ impl DemonPage {
                         @if avg_enjoyment > 0.0 {
                             (format!("{:.2}/10", avg_enjoyment))
                         
-                        } else {
+                        } 
+                        @else {
                             "N/A"
                         }
                     }   
