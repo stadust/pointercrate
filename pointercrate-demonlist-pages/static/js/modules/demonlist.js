@@ -76,6 +76,7 @@ export function initializeRecordSubmitter(submitApproved = false) {
   var progress = submissionForm.input("id_progress");
   var video = submissionForm.input("id_video");
   var rawFootage = submissionForm.input("submit-raw-footage");
+  var enjoyment = submissionForm.input("id_enjoyment");
 
   demon.addValidator(input => input.dropdown.selected !== undefined, "Please specify a demon");
   demon.setTransform(parseInt);
@@ -102,6 +103,15 @@ export function initializeRecordSubmitter(submitApproved = false) {
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
   rawFootage.addValidator(typeMismatch, "Please enter a valid URL");
+
+  enjoyment.addValidator(valueMissing, "Please specify the record's enjoyment");
+  enjoyment.addValidator(rangeUnderflow, "Record enjoyment cannot be negative");
+  enjoyment.addValidator(
+    rangeOverflow,
+    "Record enjoyment cannot be larger than 10"
+  );
+  enjoyment.addValidator(badInput, "Record enjoyment must be a valid integer");
+  enjoyment.addValidator(stepMismatch, "Record enjoyment mustn't be a decimal");
 
   submissionForm.onInvalid(() => gtag('event', 'record-submit-failure-frontend', {'event-category': 'demonlist'}));
   submissionForm.onSubmit(function () {

@@ -23,6 +23,7 @@ struct FetchedRecord {
     position: i16,
     submitter_id: i32,
     submitter_banned: bool,
+    enjoyment: Option<i32>,
 }
 
 impl FullRecord {
@@ -37,6 +38,7 @@ impl FullRecord {
                 progress: row.progress,
                 video: row.video,
                 raw_footage: row.raw_footage,
+                enjoyment: row.enjoyment,
                 status: RecordStatus::from_sql(&row.status),
                 player: DatabasePlayer {
                     id: row.player_id,
@@ -100,11 +102,12 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
         banned: bool,
         nation: Option<String>,
         iso_country_code: Option<String>,
+        enjoyment: Option<i32>,
     }
 
     let mut stream = sqlx::query_as!(
         Fetched,
-        r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
+        r#"SELECT records.id, progress, enjoyment, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
          players.name, players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
          records.demon = $1 ORDER BY progress DESC, id ASC"#,
         demon.id
@@ -114,12 +117,13 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
     let mut records = Vec::new();
 
     while let Some(row) = stream.next().await {
-        let row = row?;
+        let row: Fetched = row?;
 
         records.push(MinimalRecordP {
             id: row.id,
             progress: row.progress,
             video: row.video,
+            enjoyment: row.enjoyment,
             status: RecordStatus::Approved,
             player: DatabasePlayer {
                 id: row.player_id,

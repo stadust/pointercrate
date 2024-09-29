@@ -43,6 +43,7 @@ class RecordManager extends Paginator {
     this._video = document.getElementById("record-video");
     this._video_link = document.getElementById("record-video-link");
     this._raw_footage_link = document.getElementById("record-raw-footage-link");
+    this._enjoyment = document.getElementById("record-enjoyment");
     this._id = document.getElementById("record-id");
     this._demon = document.getElementById("record-demon");
     this._holder = document.getElementById("record-holder");
@@ -81,6 +82,13 @@ class RecordManager extends Paginator {
       new PaginatorEditorBackend(this, true),
       this.output
     );
+    this.initEnjoymentDialog();
+    setupEditorDialog(
+      new FormDialog("record-enjoyment-dialog"),
+      "record-enjoyment-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output
+    )
     this.initDemonDialog();
 
     document.getElementById("record-copy-info").addEventListener('click', () => {
@@ -108,6 +116,24 @@ class RecordManager extends Paginator {
 
     for (let errorCode of [42222, 42223, 42224, 42225]) {
       form.addErrorOverride(errorCode, "record-video-edit");
+    }
+  }
+  initEnjoymentDialog() {
+    let form = setupFormDialogEditor(
+      new PaginatorEditorBackend(this, false),
+      "record-enjoyment-dialog",
+      "record-enjoyment-pen",
+      this.output
+    );
+
+    form.addValidators({
+      "record-enjoyment-edit": {
+        "Please enter a valid enjoyment": typeMismatch,
+      },
+    });
+
+    for (let errorCode of [42222, 42223, 42224, 42225]) {
+      form.addErrorOverride(errorCode, "record-enjoyment-edit");
     }
   }
 
@@ -163,6 +189,7 @@ class RecordManager extends Paginator {
       ")";
     this._status.selectSilently(this.currentObject.status);
     this._submitter.innerHTML = this.currentObject.submitter.id;
+    this._enjoyment.innerHTML = this.currentObject.enjoyment;
 
     // this is introducing race conditions. Oh well.
     return get("/api/v1/records/" + this.currentObject.id + "/notes").then(response => {

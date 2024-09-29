@@ -76,6 +76,7 @@ impl AccountPageTab for RecordsPage {
             }
 
             (change_video_dialog())
+            (change_enjoyment_dialog())
             (change_holder_dialog())
             (change_demon_dialog(&demons[..]))
         }
@@ -155,7 +156,7 @@ fn record_manager(demons: &[Demon]) -> Markup {
                             span #record-holder {}
                         }
                     }
-
+                    div.stats-container.flex.space {
                         span {
                             b {
                                 "Submitter ID:"
@@ -163,13 +164,21 @@ fn record_manager(demons: &[Demon]) -> Markup {
                             br;
                             span #record-submitter {}
                         }
+                        span {
+                            b { 
+                                i.fa.fa-pencil-alt.clickable #record-enjoyment-pen aria-hidden = "true" {} " Enjoyment:" 
+                            }
+                            br;
+                            span #record-enjoyment {}
+                        }
                     }
-                    span.button.red.hover #record-delete style = "margin: 15px auto 0px" {"Delete Record"};
                 }
+                    span.button.red.hover #record-delete style = "margin: 15px auto 0px" {"Delete Record"};
             }
-
         }
+
     }
+}
 }
 
 fn manager_help() -> Markup {
@@ -360,6 +369,29 @@ fn change_holder_dialog() -> Markup {
         "Edit",
         "player"
     )
+}
+
+fn change_enjoyment_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog #record-enjoyment-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Change record enjoyment:"
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input #record-enjoyment-edit {
+                        label for = "enjoyment" {"Enjoyment:"}
+                        input name = "enjoyment" type = "number";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                }
+            }
+        }
+    }
 }
 
 fn change_demon_dialog(demons: &[Demon]) -> Markup {

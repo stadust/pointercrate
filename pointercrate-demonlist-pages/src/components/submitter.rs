@@ -53,6 +53,16 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     h3 {
+                        "(Optional) Enjoyment:"
+                    }
+                    p {
+                        "A rating out of 10 based on how much you enjoyed this level. If it was an 8 out of 10, for example, write 8."
+                    }
+                    span.form-input.flex.col #id_enjoyment {
+                        input type = "number" name = "enjoyment" placeholder = "e.g. 8 = 8/10" min="1" max="10";
+                        p.error {}
+                    }
+                    h3 {
                         "Video: "
                     }
                     p {

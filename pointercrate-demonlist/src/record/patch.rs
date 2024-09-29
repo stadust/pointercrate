@@ -20,6 +20,9 @@ pub struct PatchRecord {
     #[serde(default, deserialize_with = "nullable")]
     video: Option<Option<String>>,
 
+    #[serde(default, deserialize_with = "nullable")]
+    enjoyment: Option<Option<i32>>,
+
     #[serde(default, deserialize_with = "non_nullable")]
     status: Option<RecordStatus>,
 
@@ -46,6 +49,13 @@ impl FullRecord {
             match video {
                 None => self.delete_video(connection).await?,
                 Some(video) => self.set_video(video, connection).await?,
+            }
+        }
+
+        if let Some(enjoyment) = data.enjoyment {
+            match enjoyment {
+                None => self.delete_enjoyment(connection).await?,
+                Some(enjoyment) => self.set_enjoyment(enjoyment, connection).await?,
             }
         }
 
@@ -194,6 +204,31 @@ impl FullRecord {
             .await?;
 
         self.video = None;
+
+        Ok(())
+    }
+
+    pub async fn delete_enjoyment(&mut self, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!("UPDATE records SET enjoyment = NULL WHERE id = $1", self.id)
+            .execute(connection)
+            .await?;
+
+        self.enjoyment = None;
+
+        Ok(())
+    }
+
+    pub async fn set_enjoyment(&mut self, enjoyment: i32, connection: &mut PgConnection) -> Result<()> {
+
+        if Some(&enjoyment) == self.enjoyment.as_ref() {
+            return Ok(());
+        }
+
+        sqlx::query!("UPDATE records SET enjoyment = $1::integer WHERE id = $2", enjoyment, self.id)
+            .execute(connection)
+            .await?;
+
+        self.enjoyment = Some(enjoyment);
 
         Ok(())
     }

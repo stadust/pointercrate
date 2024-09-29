@@ -21,6 +21,7 @@ pub struct Submission {
     video: Option<String>,
     #[serde(default)]
     raw_footage: Option<String>,
+    enjoyment: Option<i32>,
     #[serde(default)]
     status: RecordStatus,
 
@@ -35,7 +36,7 @@ pub struct NormalizedSubmission {
     player: DatabasePlayer,
     demon: MinimalDemon,
     status: RecordStatus,
-
+    enjoyment: Option<i32>,
     video: Option<String>,
     raw_footage: Option<String>,
     note: Option<String>,
@@ -46,6 +47,7 @@ pub struct ValidatedSubmission {
     progress: i16,
     video: Option<String>,
     raw_footage: Option<String>,
+    enjoyment: Option<i32>,
     status: RecordStatus,
     player: DatabasePlayer,
     demon: MinimalDemon,
@@ -79,6 +81,7 @@ impl Submission {
             status: self.status,
             video,
             raw_footage: self.raw_footage,
+            enjoyment: self.enjoyment,
             note: self.note,
         })
     }
@@ -156,6 +159,7 @@ impl NormalizedSubmission {
             progress: self.progress,
             video: self.video,
             raw_footage: self.raw_footage,
+            enjoyment: self.enjoyment,
             status: self.status,
             player: self.player,
             demon: self.demon,
@@ -167,13 +171,14 @@ impl NormalizedSubmission {
 impl ValidatedSubmission {
     pub async fn create(self, submitter: Submitter, connection: &mut PgConnection) -> Result<FullRecord> {
         let id = sqlx::query!(
-            "INSERT INTO records (progress, video, status_, player, submitter, demon, raw_footage) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4, $5, $6) RETURNING id",
+            "INSERT INTO records (progress, video, status_, player, submitter, demon, raw_footage, enjoyment) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4, $5, $6, $7) RETURNING id",
             self.progress,
             self.video,
             self.player.id,
             submitter.id,
             self.demon.id,
-            self.raw_footage
+            self.raw_footage,
+            self.enjoyment
         )
         .fetch_one(&mut *connection)
         .await?
@@ -188,6 +193,7 @@ impl ValidatedSubmission {
             player: self.player,
             demon: self.demon,
             submitter: Some(submitter),
+            enjoyment: self.enjoyment
         };
 
         // Dealing with different status and upholding their invariant is complicated, we should not
@@ -248,6 +254,7 @@ mod tests {
             status: RecordStatus::Submitted,
             video: None,
             raw_footage: None,
+            enjoyment: None,
             note: None,
         }
         .validate(&mut conn)

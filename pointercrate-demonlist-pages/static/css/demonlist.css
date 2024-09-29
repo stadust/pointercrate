@@ -130,6 +130,7 @@ tr:nth-child(even) {
 }
 
 #level-info span {
+  width: 180px;
   margin: 5px 10px;
 }
 

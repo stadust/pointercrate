@@ -206,6 +206,16 @@ impl DemonPage {
 
         let score100 = self.data.demon.score(100);
 
+        let mut total_enjoyment: i32 = 0;
+
+        for record in &self.data.records {
+            if let Some(ref enjoyment) = record.enjoyment {
+                total_enjoyment += *enjoyment;
+            }
+        }
+
+        let avg_enjoyment: f32 = total_enjoyment as f32 / self.data.records.len() as f32;
+
         html! {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
                 div.underlined {
@@ -336,13 +346,26 @@ impl DemonPage {
                         }
                     }
 
-                        span {
-                            b {
-                                "Points: "
-                            }
-                            br;
-                            (format!("{:.2}", score100))
+                    span {
+                        b {
+                            "Points: "
                         }
+                        br;
+                        (format!("{:.2}", score100))
+                    }
+
+                    span {
+                        b {
+                            "Enjoyment: "
+                        }
+                        br;
+                        @if avg_enjoyment > 0.0 {
+                            (format!("{:.2}", avg_enjoyment))
+                        
+                        } else {
+                            "N/A"
+                        }
+                    }   
 
                     @if self.data.demon.level_id.unwrap_or_default() == 0 {
                         span {
@@ -433,6 +456,9 @@ impl DemonPage {
                                     th.blue {
                                         "Record Holder"
                                     }
+                                    th.blue {
+                                        "Enjoyment"
+                                    }
                                     th.video-link.blue {
                                         "Video Proof"
                                     }
@@ -452,6 +478,11 @@ impl DemonPage {
                                             }
                                             @else {
                                                 (record.player.name)
+                                            }
+                                        }
+                                        td {
+                                            @if let Some(ref enjoyment) = record.enjoyment {
+                                                (format!("{}/10", enjoyment))
                                             }
                                         }
                                         td.video-link {

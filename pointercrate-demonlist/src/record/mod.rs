@@ -133,6 +133,7 @@ pub struct FullRecord {
     pub demon: MinimalDemon,
     pub submitter: Option<Submitter>,
     pub raw_footage: Option<String>,
+    pub enjoyment: Option<i32>,
 }
 
 impl Taggable for FullRecord {
@@ -181,6 +182,7 @@ pub struct MinimalRecordP {
     pub status: RecordStatus,
     pub player: DatabasePlayer,
     pub nationality: Option<Nationality>,
+    pub enjoyment: Option<i32>,
 }
 
 impl FullRecord {
