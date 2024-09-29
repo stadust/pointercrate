@@ -207,14 +207,16 @@ impl DemonPage {
         let score100 = self.data.demon.score(100);
 
         let mut total_enjoyment: i32 = 0;
+        let mut with_enjoyment = 0;
 
         for record in &self.data.records {
             if let Some(ref enjoyment) = record.enjoyment {
                 total_enjoyment += *enjoyment;
+                with_enjoyment += 1;
             }
         }
 
-        let avg_enjoyment: f32 = total_enjoyment as f32 / self.data.records.len() as f32;
+        let avg_enjoyment: f32 = total_enjoyment as f32 / with_enjoyment as f32;
 
         html! {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
@@ -360,7 +362,7 @@ impl DemonPage {
                         }
                         br;
                         @if avg_enjoyment > 0.0 {
-                            (format!("{:.2}", avg_enjoyment))
+                            (format!("{:.2}/10", avg_enjoyment))
                         
                         } else {
                             "N/A"
