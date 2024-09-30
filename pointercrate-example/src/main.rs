@@ -111,8 +111,7 @@ fn page_configuration() -> PageConfiguration {
     })
     .with_link("https://twitter.com/stadust1971", "Site Dev");
 
-    PageConfiguration::new("Clicksync Challenge List", nav_bar, footer)
-        .author("sphericle")
+    PageConfiguration::new("Clicksync Challenge List", nav_bar, footer).author("sphericle")
 }
 
 #[shuttle_runtime::main]

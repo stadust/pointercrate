@@ -193,7 +193,7 @@ impl ValidatedSubmission {
             player: self.player,
             demon: self.demon,
             submitter: Some(submitter),
-            enjoyment: self.enjoyment
+            enjoyment: self.enjoyment,
         };
 
         // Dealing with different status and upholding their invariant is complicated, we should not

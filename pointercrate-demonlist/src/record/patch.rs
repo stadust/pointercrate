@@ -219,7 +219,6 @@ impl FullRecord {
     }
 
     pub async fn set_enjoyment(&mut self, enjoyment: i32, connection: &mut PgConnection) -> Result<()> {
-
         if Some(&enjoyment) == self.enjoyment.as_ref() {
             return Ok(());
         }
