@@ -363,12 +363,12 @@ impl DemonPage {
                         br;
                         @if avg_enjoyment > 0.0 {
                             (format!("{:?}/10", avg_enjoyment))
-                        
-                        } 
+
+                        }
                         @else {
                             "N/A"
                         }
-                    }   
+                    }
 
                     @if self.data.demon.level_id.unwrap_or_default() == 0 {
                         span {

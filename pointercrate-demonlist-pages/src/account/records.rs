@@ -85,100 +85,100 @@ impl AccountPageTab for RecordsPage {
 
 fn record_manager(demons: &[Demon]) -> Markup {
     html! {
-    div.panel.fade #record-manager {
-        h2.underlined.pad {
-            "Record Manager - "
-            (dropdown("All", html! {
-                li.white.hover.underlined data-value = "All"
-                 {"All levels"}
-            }, demons.iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}))))
-        }
-        div.flex.viewer {
-            (paginator("record-pagination", "/api/v1/records/"))
-            p.viewer-welcome {
-                "Click on a record on the left to get started!"
+        div.panel.fade #record-manager {
+            h2.underlined.pad {
+                "Record Manager - "
+                (dropdown("All", html! {
+                    li.white.hover.underlined data-value = "All"
+                     {"All levels"}
+                }, demons.iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}))))
             }
-            div.viewer-content {
-                div.flex.col {
-                    h3 style = "font-size:1.1em; margin-top: 10px" {
-                        i.fa.fa-clipboard.clickable #record-copy-info aria-hidden = "true" {}
-                        " Record #"
-                        i #record-id {}
-                        " - "
-                        div.dropdown-menu.js-search #edit-record-status style = "max-width: 220px" {
-                            div{
-                                input type="text" style = "color: #444446; font-weight: bold;";
-                            }
-                            div.menu {
-                                ul {
-                                    li.white.hover data-value="approved" {"Approved"}
-                                    li.white.hover data-value="rejected" {"Rejected"}
-                                    li.white.hover data-value="under consideration" {"Under Consideration"}
-                                    li.white.hover data-value="submitted" {"Submitted"}
+            div.flex.viewer {
+                (paginator("record-pagination", "/api/v1/records/"))
+                p.viewer-welcome {
+                    "Click on a record on the left to get started!"
+                }
+                div.viewer-content {
+                    div.flex.col {
+                        h3 style = "font-size:1.1em; margin-top: 10px" {
+                            i.fa.fa-clipboard.clickable #record-copy-info aria-hidden = "true" {}
+                            " Record #"
+                            i #record-id {}
+                            " - "
+                            div.dropdown-menu.js-search #edit-record-status style = "max-width: 220px" {
+                                div{
+                                    input type="text" style = "color: #444446; font-weight: bold;";
+                                }
+                                div.menu {
+                                    ul {
+                                        li.white.hover data-value="approved" {"Approved"}
+                                        li.white.hover data-value="rejected" {"Rejected"}
+                                        li.white.hover data-value="under consideration" {"Under Consideration"}
+                                        li.white.hover data-value="submitted" {"Submitted"}
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Video"}
-                    p.info-red.output style = "margin: 10px" {}
-                    p.info-green.output style = "margin: 10px" {}
-                    div.stats-container.flex.space  {
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " Video Link:"
+                        iframe."ratio-16-9"#record-video style="width:90%; margin: 15px 5%" allowfullscreen="" {"Video"}
+                        p.info-red.output style = "margin: 10px" {}
+                        p.info-green.output style = "margin: 10px" {}
+                        div.stats-container.flex.space  {
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " Video Link:"
+                                }
+                                br;
+                                a.link #record-video-link target = "_blank" {}
                             }
-                            br;
-                            a.link #record-video-link target = "_blank" {}
                         }
-                    }
 
-                    div.stats-container.flex.space {
-                        span {
-                            b { "Raw Footage:" }
-                            br;
-                            a.link #record-raw-footage-link target = "_blank" {}
+                        div.stats-container.flex.space {
+                            span {
+                                b { "Raw Footage:" }
+                                br;
+                                a.link #record-raw-footage-link target = "_blank" {}
+                            }
+                        }
+                        div.stats-container.flex.space {
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " Level:"
+                                }
+                                br;
+                                span #record-demon {}
+                            }
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " Record Holder:"
+                                }
+                                br;
+                                span #record-holder {}
+                            }
+                        }
+                        div.stats-container.flex.space {
+                            span {
+                                b {
+                                    "Submitter ID:"
+                                }
+                                br;
+                                span #record-submitter {}
+                            }
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #record-enjoyment-pen aria-hidden = "true" {} " Enjoyment:"
+                                }
+                                br;
+                                span #record-enjoyment {}
+                            }
                         }
                     }
-                    div.stats-container.flex.space {
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " Level:"
-                            }
-                            br;
-                            span #record-demon {}
-                        }
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " Record Holder:"
-                            }
-                            br;
-                            span #record-holder {}
-                        }
-                    }
-                    div.stats-container.flex.space {
-                        span {
-                            b {
-                                "Submitter ID:"
-                            }
-                            br;
-                            span #record-submitter {}
-                        }
-                        span {
-                            b { 
-                                i.fa.fa-pencil-alt.clickable #record-enjoyment-pen aria-hidden = "true" {} " Enjoyment:" 
-                            }
-                            br;
-                            span #record-enjoyment {}
-                        }
-                    }
+                        span.button.red.hover #record-delete style = "margin: 15px auto 0px" {"Delete Record"};
                 }
-                    span.button.red.hover #record-delete style = "margin: 15px auto 0px" {"Delete Record"};
             }
-        }
 
+        }
     }
-}
 }
 
 fn manager_help() -> Markup {

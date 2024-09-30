@@ -8,7 +8,6 @@ impl FullDemon {
 
         FullDemon::delete_all_records(self.demon.base.id, &self.demon.base.name, connection).await?;
 
-
         // creator is stored separately from demons
         FullDemon::delete_demon_data(self.demon.base.id, connection).await?;
 
