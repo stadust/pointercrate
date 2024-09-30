@@ -52,6 +52,9 @@ pub struct RecordPagination {
     #[serde(default, deserialize_with = "nullable")]
     video: Option<Option<String>>,
 
+    #[serde(default, deserialize_with = "nullable")]
+    enjoyment: Option<Option<i32>>,
+
     #[serde(default, deserialize_with = "non_nullable")]
     pub submitter: Option<i32>,
 }
@@ -93,6 +96,7 @@ impl Paginatable<RecordPagination> for MinimalRecordPD {
             .bind(query.video == Some(None))
             .bind(query.player)
             .bind(query.submitter)
+            .bind(query.enjoyment)
             .bind(query.params.limit + 1)
             .fetch(&mut *connection);
 
@@ -105,6 +109,7 @@ impl Paginatable<RecordPagination> for MinimalRecordPD {
                 id: row.try_get("id")?,
                 progress: row.try_get("progress")?,
                 video: row.try_get("video")?,
+                enjoyment: row.try_get("enjoyment")?,
                 status: RecordStatus::from_sql(&row.try_get::<String, _>("status")?),
                 player: DatabasePlayer {
                     id: row.try_get("player_id")?,

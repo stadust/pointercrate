@@ -157,6 +157,7 @@ impl Taggable for FullRecord {
 pub struct MinimalRecordPD {
     pub id: i32,
     pub progress: i16,
+    pub enjoyment: Option<i32>,
     pub video: Option<String>,
     pub status: RecordStatus,
     pub demon: MinimalDemon,

@@ -1,6 +1,7 @@
-SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, status_::text AS status,
-       players.id AS player_id, players.name::text AS player_name, players.banned AS player_banned,
-       demons.id AS demon_id, demons.name::text AS demon_name, demons.position
+SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE records.video::text END, 
+       status_::text AS status, players.id AS player_id, players.name::text AS player_name, 
+       players.banned AS player_banned, demons.id AS demon_id, demons.name::text AS demon_name, 
+       demons.position, records.enjoyment
 FROM records
 INNER JOIN players ON records.player = players.id
 INNER JOIN demons ON records.demon = demons.id
@@ -18,5 +19,6 @@ WHERE (records.id < $1 OR $1 IS NULL)
   AND (records.video = $12 OR (records.video IS NULL AND $13) OR ($12 IS NULL AND NOT $13))
   AND (players.id = $14 OR $14 IS NULL)
   AND (records.submitter = $15 OR $15 IS NULL)
+  AND (records.enjoyment = $16 OR $16 IS NULL)
 ORDER BY id {}
-LIMIT $16
+LIMIT $17
