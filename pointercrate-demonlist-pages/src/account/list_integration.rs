@@ -80,7 +80,6 @@ impl AccountPageTab for ListIntegrationTab {
                                     i style="margin-right: 15px;" {
                                         "Verified"
                                     }
-                                    span.arrow.hover {}
                                 },
                                 Some(_) => i{"Unverified"},
                                 _ => {}
@@ -124,7 +123,7 @@ impl AccountPageTab for ListIntegrationTab {
                                 }
 
                                 p {
-                                    "To set your player nationality, join the " a.link href = {"https://discord.com/invite/W7Eqqj8NG2"} {"Discord server"} " and create a thread in " a.link href = {"https://discord.com/channels/1236218202829230211/1260745449040777338/1260745449040777338"} {"#website-help."} " Geolocation coming soon! Hopefully!!"
+                                    "To set your player nationality, join the " a.link href = {"https://discord.com/invite/W7Eqqj8NG2"} {"Discord server"} " and create a thread in " a.link href = {"https://discord.com/channels/1236218202829230211/1260745449040777338/1260745449040777338"} {"#website-help."} " Geolocation coming soon!"
                                 }
                             }
                         }
@@ -138,7 +137,7 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             p {
                                 "A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record tells you whether the record is "
-                                span  style = "background-color: #E9FAE3" { "Approved"  } ", "
+                                span style = "background-color: #E9FAE3" { "Approved"  } ", "
                                 span style = "background-color: #F7F7E0" { "Unchecked" } ", "
                                 span style = "background-color: #F8DCE4" { "Rejected" } " or "
                                 span style = "background-color: #D8EFF3" { "Under Consideration" } "."
