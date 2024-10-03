@@ -377,7 +377,7 @@ fn change_enjoyment_dialog() -> Markup {
             div.dialog #record-enjoyment-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Change record enjoyment:"
+                    "Change enjoyment:"
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
