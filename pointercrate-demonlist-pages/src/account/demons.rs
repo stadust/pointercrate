@@ -331,7 +331,7 @@ fn demon_submitter() -> Markup {
             div.flex {
                 form #demon-submission-form novalidate = "" {
                     div.underlined {
-                        h2 {"Add challenge:"}
+                        h2 {"Add level:"}
                     }
                     p.info-red.output {}
                     p.info-green.output {}
