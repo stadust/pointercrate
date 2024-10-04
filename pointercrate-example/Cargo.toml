@@ -20,5 +20,5 @@ pointercrate-user = { version = "0.1.0", path = "../pointercrate-user", features
 pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api", features = ["legacy_accounts"]}
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages", features = ["legacy_accounts"] }
 rocket = "0.5.1"
-shuttle-runtime = "0.47.0"
-shuttle-rocket = "0.47.0"
+shuttle-runtime = "0.48.0"
+shuttle-rocket = "0.48.0"
