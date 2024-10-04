@@ -102,7 +102,7 @@ fn page_configuration() -> PageConfiguration {
         "The Clicksync Challenge list and Pointercrate are in no way affiliated with RobTopGamesAB ® or eachother."
     })
     .with_column(FooterColumn::LinkList {
-        heading: "The Clicksync Challenge list v1.6",
+        heading: "The Clicksync Challenge list v1.6.3",
         links: vec![
             Link::new("/list/1/", "Top 1 Challenge"),
             Link::new("/list/statsviewer/", "Stats Viewer"),
