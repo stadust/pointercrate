@@ -15,7 +15,6 @@ use rocket::{
     State,
 };
 use std::net::IpAddr;
-
 #[cfg(feature = "legacy_accounts")]
 use {
     pointercrate_core::pool::PointercratePool,
@@ -65,6 +64,7 @@ pub async fn login(
 pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
     match auth.user {
         AuthenticatedUser::Legacy(legacy) => legacy.invalidate_all_tokens(auth.secret, &mut auth.connection).await?,
+        AuthenticatedUser::OAuth2(oauth) => oauth.invalidate_all_tokens(&mut auth.connection).await?, // I have no clue what we'll do here
     }
 
     auth.connection.commit().await.map_err(UserError::from)?;

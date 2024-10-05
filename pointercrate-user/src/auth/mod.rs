@@ -9,6 +9,7 @@ pub use self::patch::PatchMe;
 use crate::{error::Result, User};
 use jsonwebtoken::{errors::ErrorKind, DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
+use oauth2::OAuth2AuthenticatedUser;
 use pointercrate_core::error::CoreError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{
@@ -19,10 +20,12 @@ use std::{
 mod delete;
 mod get;
 pub mod legacy;
+pub mod oauth2;
 mod patch;
 
 pub enum AuthenticatedUser {
     Legacy(LegacyAuthenticatedUser),
+    OAuth2(OAuth2AuthenticatedUser),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -34,20 +37,29 @@ struct AccessClaims {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 struct CSRFClaims {
-    sub: String,  // we're using the jsonwebtoken library's validation to check this field, which expect it to be a string
+    sub: String, // we're using the jsonwebtoken library's validation to check this field, which expect it to be a string
     exp: u64,
 }
 
 impl AuthenticatedUser {
+    pub fn is_legacy(&self) -> bool {
+        match self {
+            AuthenticatedUser::Legacy(_) => true,
+            AuthenticatedUser::OAuth2(_) => false,
+        }
+    }
+
     pub fn into_user(self) -> User {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.into_user(),
+            AuthenticatedUser::OAuth2(oauth2) => oauth2.into_user(),
         }
     }
 
     pub fn user(&self) -> &User {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.user(),
+            AuthenticatedUser::OAuth2(oauth2) => oauth2.user(),
         }
     }
 
@@ -97,7 +109,7 @@ impl AuthenticatedUser {
 
         #[derive(Deserialize)]
         struct _Unsafe {
-            sub: String
+            sub: String,
         }
 
         jsonwebtoken::decode::<_Unsafe>(jwt, &DecodingKey::from_secret(b""), &no_validation)
@@ -110,7 +122,7 @@ impl AuthenticatedUser {
 
     pub fn generate_access_token(&self) -> String {
         self.generate_jwt(&AccessClaims {
-            sub: self.user().id.to_string()
+            sub: self.user().id.to_string(),
         })
     }
 
@@ -144,6 +156,7 @@ impl AuthenticatedUser {
     fn salt(&self) -> Vec<u8> {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.salt(),
+            AuthenticatedUser::OAuth2(oauth2) => oauth2.salt(),
         }
     }
 

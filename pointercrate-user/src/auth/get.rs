@@ -25,7 +25,7 @@ impl AuthenticatedUser {
 
     pub(in crate::auth) async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query!(
-            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE member_id = $1"#,
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash, google_account_id FROM members WHERE member_id = $1"#,
             id
         )
         .fetch_one(connection)
@@ -34,13 +34,23 @@ impl AuthenticatedUser {
         match row {
             Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
             Err(err) => Err(err.into()),
-            Ok(row) => Ok(AuthenticatedUser::legacy(construct_from_row!(row), row.password_hash)),
+            Ok(row) => {
+                if row.google_account_id.is_some() {
+                    Ok(AuthenticatedUser::oauth2(
+                        construct_from_row!(row),
+                        row.google_account_id.unwrap(),
+                        row.password_hash,
+                    ))
+                } else {
+                    Ok(AuthenticatedUser::legacy(construct_from_row!(row), row.password_hash))
+                }
+            },
         }
     }
 
     pub(in crate::auth) async fn by_name(name: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         let row = sqlx::query!(
-            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash FROM members WHERE members.name = $1"#,
+            r#"SELECT member_id, members.name, permissions::integer, display_name, youtube_channel::text, password_hash, google_account_id FROM members WHERE members.name = $1"#,
             name.to_string()
         )
         .fetch_one(connection)
@@ -49,7 +59,17 @@ impl AuthenticatedUser {
         match row {
             Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
             Err(err) => Err(err.into()),
-            Ok(row) => Ok(AuthenticatedUser::legacy(construct_from_row!(row), row.password_hash)),
+            Ok(row) => {
+                if row.google_account_id.is_some() {
+                    Ok(AuthenticatedUser::oauth2(
+                        construct_from_row!(row),
+                        row.google_account_id.unwrap(),
+                        row.password_hash,
+                    ))
+                } else {
+                    Ok(AuthenticatedUser::legacy(construct_from_row!(row), row.password_hash))
+                }
+            },
         }
     }
 }
