@@ -25,6 +25,7 @@ pub mod error;
 mod paginate;
 mod patch;
 mod video;
+pub mod config;
 
 pub const ADMINISTRATOR: Permission = Permission::new("Administrator", 0x4000);
 pub const MODERATOR: Permission = Permission::new("Moderator", 0x2000);
