@@ -1,11 +1,4 @@
-use std::collections::HashSet;
-
-use crate::{
-    auth::{AccessClaims, AuthenticatedUser},
-    error::Result,
-    User,
-};
-use jsonwebtoken::{DecodingKey, Validation};
+use crate::{auth::AuthenticatedUser, error::Result, User};
 use log::{debug, info};
 use pointercrate_core::error::CoreError;
 use sqlx::{Error, PgConnection};
@@ -14,23 +7,14 @@ impl AuthenticatedUser {
     pub async fn token_auth(access_token: &str, csrf_token: Option<&str>, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform token authentication");
 
-        // Well this is reassuring. Also we directly deconstruct it and only save the ID
-        // so we don't accidentally use unsafe values later on
-        let mut no_validation = Validation::default();
-        no_validation.insecure_disable_signature_validation();
-        no_validation.validate_exp = false;
-        no_validation.required_spec_claims = HashSet::new();
+        let sub = AuthenticatedUser::peek_jwt_sub(access_token)?;
 
-        let AccessClaims { id, .. } = jsonwebtoken::decode(access_token, &DecodingKey::from_secret(b""), &no_validation)
-            .map_err(|_| CoreError::Unauthorized)?
-            .claims;
-
-        debug!("The token identified the user with id {}, validating...", id);
+        debug!("The token identified the user with id {}, validating...", sub);
 
         // Note that at this point we haven't validated the access token OR the csrf token yet.
         // However, the key they are signed with encompasses the password salt for the user they supposedly
         // identify, so we need to retrieve that.
-        let user = Self::by_id(id, connection).await?.validate_access_token(access_token)?;
+        let user = Self::by_id(sub, connection).await?.validate_access_token(access_token)?;
 
         if let Some(csrf_token) = csrf_token {
             user.validate_csrf_token(csrf_token)?
