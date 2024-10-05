@@ -52,7 +52,7 @@ impl AuthenticatedUser {
     }
 
     fn jwt_secret(&self) -> Vec<u8> {
-        let mut key: Vec<u8> = pointercrate_core::config::secret();
+        let mut key: Vec<u8> = crate::config::secret();
         key.extend(self.salt());
         key
     }
