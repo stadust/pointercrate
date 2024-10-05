@@ -36,7 +36,6 @@ struct AccessClaims {
 struct CSRFClaims {
     sub: String,  // we're using the jsonwebtoken library's validation to check this field, which expect it to be a string
     exp: u64,
-    iat: u64,
 }
 
 impl AuthenticatedUser {
@@ -125,14 +124,14 @@ impl AuthenticatedUser {
 
     pub fn generate_csrf_token(&self) -> String {
         let start = SystemTime::now();
-        let since_epoch = start
+        let exp = (start + Duration::from_secs(3600))
             .duration_since(UNIX_EPOCH)
-            .expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
+            .expect("one hour in the future is earlier than the Unix Epoch. Wtf?")
+            .as_secs();
 
         let claim = CSRFClaims {
             sub: self.user().id.to_string(),
-            iat: since_epoch.as_secs(),
-            exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
+            exp,
         };
 
         self.generate_jwt(&claim)
