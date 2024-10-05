@@ -16,6 +16,6 @@ pointercrate-demonlist = { version = "0.1.0", path = "../pointercrate-demonlist"
 pointercrate-demonlist-api = { version = "0.1.0", path = "../pointercrate-demonlist-api" }
 pointercrate-demonlist-pages = { version = "0.1.0", path = "../pointercrate-demonlist-pages" }
 pointercrate-user = { version = "0.1.0", path = "../pointercrate-user" }
-pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api" }
+pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api", features = ["legacy_accounts"] }
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages", features = ["legacy_accounts"] }
 rocket = "0.5.1"
