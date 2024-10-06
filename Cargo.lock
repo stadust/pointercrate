@@ -1701,6 +1701,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "derive_more",
+ "getrandom",
  "log",
  "serde",
  "sqlx",

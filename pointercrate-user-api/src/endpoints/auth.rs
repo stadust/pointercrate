@@ -55,7 +55,7 @@ pub async fn login(
     Ok(Response2::json(serde_json::json! {
         {
             "data": auth.user.user(),
-            "token": auth.user.generate_access_token()
+            "token": auth.user.generate_programmatic_access_token()
         }
     })
     .with_header("etag", auth.user.user().etag_string()))

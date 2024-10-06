@@ -109,6 +109,9 @@ impl<'r> FromRequest<'r> for Auth<true> {
         if let Some(access_token) = request.cookies().get("access_token") {
             let access_token = access_token.value();
 
+            // For GET requests, we do not need to worry about CSRF attacks, as GETs are non-mutating, and a
+            // potential attacker is unable to retrieve the response to their request.
+            // Additionally, for things like browser navigation, we _cannot_ set the X-CSRF-TOKEN header.
             if request.method() == Method::Get {
                 debug!("GET request, the cookie is enough");
 
@@ -124,10 +127,7 @@ impl<'r> FromRequest<'r> for Auth<true> {
                 });
             }
 
-            debug!("Non-GET request, testing X-CSRF-TOKEN header");
-            // if we're doing cookie based authorization, there needs to be a X-CSRF-TOKEN
-            // header set, unless we're in GET requests, in which case everything is fine
-            // :tm:
+            debug!("Non-GET request, testing X-CSRF-TOKEN header and csrf_token cookie");
 
             if let Some(csrf_token) = request.headers().get_one("X-CSRF-TOKEN") {
                 let user = try_outcome!(AuthenticatedUser::token_auth(access_token, Some(csrf_token), &mut *connection).await);

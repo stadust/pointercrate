@@ -20,7 +20,9 @@ pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
         assert_eq!(user.user().id as i64, response["data"]["id"].as_i64().unwrap());
 
         // validate_access_token takes ownership, but it gives back the object if verification is successfuly
-        user = user.validate_access_token(response["token"].as_str().unwrap()).unwrap();
+        user = user
+            .validate_programmatic_access_token(response["token"].as_str().unwrap())
+            .unwrap();
     }
 
     // After 3 requests, both valid and invalid requests should just return a 429 response

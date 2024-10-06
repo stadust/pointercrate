@@ -9,7 +9,7 @@ pub use self::patch::PatchMe;
 use crate::{error::Result, User};
 use jsonwebtoken::{errors::ErrorKind, DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
-use pointercrate_core::error::CoreError;
+use pointercrate_core::{error::CoreError, util::csprng_u64};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{
     collections::HashSet,
@@ -28,14 +28,26 @@ pub enum AuthenticatedUser {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(deny_unknown_fields)] // to prevent a CSRF token to work as an access token
 struct AccessClaims {
+    /// The id of the pointercrate account this token authenticates
+    ///
+    /// Stored as a string as that's a requirement of [`jsonwebtoken`]'s validation facilities
     sub: String,
+
+    /// An optional session ID.
+    ///
+    /// Access tokens without associated session IDs cannot be used in the web interface. The
+    /// session ID is found again in the CSRF token, to ensure CSRF tokens regenerate with
+    /// each new session.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    session_uuid: Option<u64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(deny_unknown_fields)]
 struct CSRFClaims {
-    sub: String,  // we're using the jsonwebtoken library's validation to check this field, which expect it to be a string
+    sub: String, // we're using the jsonwebtoken library's validation to check this field, which expect it to be a string
     exp: u64,
+    session: u64,
 }
 
 impl AuthenticatedUser {
@@ -97,7 +109,7 @@ impl AuthenticatedUser {
 
         #[derive(Deserialize)]
         struct _Unsafe {
-            sub: String
+            sub: String,
         }
 
         jsonwebtoken::decode::<_Unsafe>(jwt, &DecodingKey::from_secret(b""), &no_validation)
@@ -108,37 +120,62 @@ impl AuthenticatedUser {
             .map_err(|_| CoreError::Unauthorized.into())
     }
 
-    pub fn generate_access_token(&self) -> String {
+    /// Generates an access token that can be used for programmatic access to the pointercrate API.
+    ///
+    /// These tokens are not tied to a user session, and as such cannot be used for administrative
+    /// user account actions.
+    pub fn generate_programmatic_access_token(&self) -> String {
         self.generate_jwt(&AccessClaims {
-            sub: self.user().id.to_string()
+            sub: self.user().id.to_string(),
+            session_uuid: None,
         })
     }
 
-    pub fn validate_access_token(self, token: &str) -> Result<Self> {
+    pub fn validate_programmatic_access_token(self, token: &str) -> Result<Self> {
+        self.validate_access_token(token).map(|_| self)
+    }
+
+    pub fn generate_token_pair(&self) -> Result<(String, String)> {
+        let session_uuid = csprng_u64()?;
+        let csrf_exp = (SystemTime::now() + Duration::from_secs(7 * 24 * 3600))
+            .duration_since(UNIX_EPOCH)
+            .expect("7 days in the future is earlier than the Unix Epoch. Wtf?")
+            .as_secs();
+
+        let access_claims = AccessClaims {
+            sub: self.user().id.to_string(),
+            session_uuid: Some(session_uuid),
+        };
+
+        let csrf_claims = CSRFClaims {
+            sub: self.user().id.to_string(),
+            exp: csrf_exp,
+            session: session_uuid,
+        };
+
+        let access_token = self.generate_jwt(&access_claims);
+        let csrf_token = self.generate_jwt(&csrf_claims);
+
+        Ok((access_token, csrf_token))
+    }
+
+    pub fn validate_token_pair(self, access_token: &str, csrf_token: &str) -> Result<Self> {
+        let access_claims = self.validate_access_token(access_token)?;
+        let csrf_claims = self.validate_jwt::<CSRFClaims>(csrf_token, Validation::default())?;
+
+        match access_claims.session_uuid {
+            Some(session_uuid) if csrf_claims.session == session_uuid => Ok(self),
+            _ => Err(CoreError::Unauthorized.into()),
+        }
+    }
+
+    fn validate_access_token(&self, token: &str) -> Result<AccessClaims> {
+        // No expiry on access tokens
         let mut validation = Validation::default();
         validation.validate_exp = false;
         validation.required_spec_claims = HashSet::new();
 
-        self.validate_jwt::<AccessClaims>(token, validation).map(|_| self)
-    }
-
-    pub fn generate_csrf_token(&self) -> String {
-        let start = SystemTime::now();
-        let exp = (start + Duration::from_secs(3600))
-            .duration_since(UNIX_EPOCH)
-            .expect("one hour in the future is earlier than the Unix Epoch. Wtf?")
-            .as_secs();
-
-        let claim = CSRFClaims {
-            sub: self.user().id.to_string(),
-            exp,
-        };
-
-        self.generate_jwt(&claim)
-    }
-
-    pub fn validate_csrf_token(&self, token: &str) -> Result<()> {
-        self.validate_jwt::<CSRFClaims>(&token, Validation::default()).map(|_| ())
+        self.validate_jwt::<AccessClaims>(token, validation)
     }
 
     fn salt(&self) -> Vec<u8> {
@@ -193,36 +230,63 @@ mod tests {
     }
 
     #[test]
-    fn test_csrf_token() {
+    fn test_token_pair() {
         let patrick = patrick();
-        let jacob = jacob();
 
-        let patricks_csrf_token = patrick.generate_csrf_token();
+        let (patricks_access_token, patricks_csrf_token) = patrick.generate_token_pair().unwrap();
 
         // make sure only the correct user can decode them
-        assert!(patrick.validate_csrf_token(&patricks_csrf_token).is_ok());
-        assert!(jacob.validate_csrf_token(&patricks_csrf_token).is_err());
+        let patrick = patrick.validate_token_pair(&patricks_access_token, &patricks_csrf_token).unwrap();
+        assert!(jacob().validate_token_pair(&patricks_access_token, &patricks_csrf_token).is_err());
 
-        assert!(patrick.validate_access_token(&patricks_csrf_token).is_err());
-        assert!(jacob.validate_access_token(&patricks_csrf_token).is_err());
+        // Make sure the tokens with session uuid also work as programmatic access tokens
+        let patrick = patrick.validate_programmatic_access_token(&patricks_access_token).unwrap();
+
+        // Make sure csrf tokens don't work as access tokens
+        assert!(patrick.validate_programmatic_access_token(&patricks_csrf_token).is_err());
+        assert!(jacob().validate_programmatic_access_token(&patricks_csrf_token).is_err());
     }
 
     #[test]
-    fn test_access_token() {
+    fn test_cannot_transfer_csrf_tokens_across_sessions() {
+        let patrick = patrick();
+
+        let (access_token, _) = patrick.generate_token_pair().unwrap();
+        let (_, csrf_token) = patrick.generate_token_pair().unwrap();
+
+        assert!(patrick.validate_token_pair(&access_token, &csrf_token).is_err());
+    }
+
+    #[test]
+    fn test_cannot_use_programmatic_token_with_csrf_token() {
+        let patrick = patrick();
+
+        let (_, csrf_token) = patrick.generate_token_pair().unwrap();
+        let access_token = patrick.generate_programmatic_access_token();
+
+        assert!(patrick.validate_token_pair(&access_token, &csrf_token).is_err());
+    }
+
+    #[test]
+    fn test_programmatic_access_token() {
         let patrick = patrick();
         let jacob = jacob();
 
-        let patricks_access_token = patrick.generate_access_token();
+        let patricks_access_token = patrick.generate_programmatic_access_token();
 
-        assert!(patrick.validate_access_token(&patricks_access_token).is_ok());
-        assert!(jacob.validate_access_token(&patricks_access_token).is_err());
+        assert!(patrick.validate_programmatic_access_token(&patricks_access_token).is_ok());
+        assert!(jacob.validate_programmatic_access_token(&patricks_access_token).is_err());
     }
 
     #[test]
     fn test_peek_jwt_sub() {
         let patrick = patrick();
 
-        let patricks_csrf_token = patrick.generate_csrf_token();
-        assert_eq!(AuthenticatedUser::peek_jwt_sub(&patricks_csrf_token).unwrap(), patrick.user().id)
+        let (access_token, csrf_token) = patrick.generate_token_pair().unwrap();
+        assert_eq!(AuthenticatedUser::peek_jwt_sub(&access_token).unwrap(), patrick.user().id);
+        assert_eq!(AuthenticatedUser::peek_jwt_sub(&csrf_token).unwrap(), patrick.user().id);
+
+        let access_token = patrick.generate_programmatic_access_token();
+        assert_eq!(AuthenticatedUser::peek_jwt_sub(&access_token).unwrap(), patrick.user().id);
     }
 }

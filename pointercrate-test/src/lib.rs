@@ -64,7 +64,7 @@ impl<'c> TestRequest<'c> {
     }
 
     pub fn authorize_as(self, user: &AuthenticatedUser) -> Self {
-        self.header("Authorization", format!("Bearer {}", user.generate_access_token()))
+        self.header("Authorization", format!("Bearer {}", user.generate_programmatic_access_token()))
     }
 
     pub fn expect_status(mut self, status: Status) -> Self {

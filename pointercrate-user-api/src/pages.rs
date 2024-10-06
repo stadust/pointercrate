@@ -4,7 +4,6 @@ use crate::{
 };
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
-use pointercrate_core_pages::head::HeadLike;
 use pointercrate_user::error::UserError;
 use pointercrate_user_pages::account::AccountPageConfig;
 
@@ -40,8 +39,18 @@ pub async fn login(
 
     let auth = auth?;
 
-    let cookie = Cookie::build(("access_token", auth.user.generate_access_token()))
+    let (access_token, csrf_token) = auth.user.generate_token_pair()?;
+
+    let cookie = Cookie::build(("access_token", access_token))
         .http_only(true)
+        .same_site(SameSite::Strict)
+        .secure(!cfg!(debug_assertions))
+        .path("/");
+
+    cookies.add(cookie);
+
+    let cookie = Cookie::build(("csrf_token", csrf_token))
+        .http_only(false)
         .same_site(SameSite::Strict)
         .secure(!cfg!(debug_assertions))
         .path("/");
@@ -70,8 +79,18 @@ pub async fn register(
 
     connection.commit().await.map_err(UserError::from)?;
 
-    let cookie = Cookie::build(("access_token", user.generate_access_token()))
+    let (access_token, csrf_token) = user.generate_token_pair()?;
+
+    let cookie = Cookie::build(("access_token", access_token))
         .http_only(true)
+        .same_site(SameSite::Strict)
+        .secure(!cfg!(debug_assertions))
+        .path("/");
+
+    cookies.add(cookie);
+
+    let cookie = Cookie::build(("csrf_token", csrf_token))
+        .http_only(false)
         .same_site(SameSite::Strict)
         .secure(!cfg!(debug_assertions))
         .path("/");
@@ -86,11 +105,7 @@ pub async fn account_page(
     auth: Option<TokenAuth>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
     match auth {
-        Some(mut auth) => {
-            let csrf_token = auth.user.generate_csrf_token();
-
-            Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await).meta("csrf_token", csrf_token))
-        },
+        Some(mut auth) => Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await)),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }

@@ -14,13 +14,12 @@ impl AuthenticatedUser {
         // Note that at this point we haven't validated the access token OR the csrf token yet.
         // However, the key they are signed with encompasses the password salt for the user they supposedly
         // identify, so we need to retrieve that.
-        let user = Self::by_id(sub, connection).await?.validate_access_token(access_token)?;
+        let user = Self::by_id(sub, connection).await?;
 
-        if let Some(csrf_token) = csrf_token {
-            user.validate_csrf_token(csrf_token)?
+        match csrf_token {
+            Some(csrf_token) => user.validate_token_pair(access_token, csrf_token),
+            None => user.validate_programmatic_access_token(access_token),
         }
-
-        Ok(user)
     }
 
     pub(in crate::auth) async fn by_id(id: i32, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
