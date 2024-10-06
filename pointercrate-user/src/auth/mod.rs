@@ -20,6 +20,7 @@ mod delete;
 mod get;
 pub mod legacy;
 mod patch;
+mod post;
 
 pub struct AuthenticatedUser {
     gen: i64,

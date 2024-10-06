@@ -9,7 +9,7 @@ use pointercrate_core_api::{
     response::Response2,
 };
 use pointercrate_user::{
-    auth::{AuthenticatedUser, AuthenticationType, PatchMe},
+    auth::{AuthenticatedUser, PatchMe},
     error::UserError,
     User,
 };
@@ -67,10 +67,7 @@ pub async fn login(
 
 #[rocket::post("/invalidate")]
 pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
-    match auth.user.auth_type {
-        AuthenticationType::Legacy(legacy) => legacy.invalidate_all_tokens(&mut auth.connection).await?,
-    }
-
+    auth.user.invalidate_all_tokens(&mut auth.connection).await?;
     auth.connection.commit().await.map_err(UserError::from)?;
 
     Ok(Status::NoContent)
