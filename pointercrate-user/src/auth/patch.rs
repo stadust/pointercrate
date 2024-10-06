@@ -9,6 +9,8 @@ use serde::Deserialize;
 use sqlx::PgConnection;
 use std::fmt::{Debug, Formatter};
 
+use super::AuthenticationType;
+
 #[derive(Deserialize)]
 pub struct PatchMe {
     #[serde(default, deserialize_with = "non_nullable")]
@@ -56,8 +58,8 @@ impl AuthenticatedUser {
     }
 
     pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
-        match self {
-            AuthenticatedUser::Legacy(legacy) => legacy.set_password(password, connection).await,
+        match &mut self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.set_password(password, connection).await,
             _ => Err(UserError::NonLegacyAccount),
         }
     }

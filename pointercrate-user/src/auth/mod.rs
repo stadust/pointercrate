@@ -21,7 +21,12 @@ mod get;
 pub mod legacy;
 mod patch;
 
-pub enum AuthenticatedUser {
+pub struct AuthenticatedUser {
+    gen: i64,
+    pub auth_type: AuthenticationType,
+}
+
+pub enum AuthenticationType {
     Legacy(LegacyAuthenticatedUser),
 }
 
@@ -40,6 +45,10 @@ struct AccessClaims {
     /// each new session.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     session_uuid: Option<u64>,
+
+    /// A generation ID that allows token invalidation. Tokens are only accepted if the generation
+    /// ID in the token matches the current generation id on the [`AuthenticatedUser`]
+    gen: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -52,14 +61,14 @@ struct CSRFClaims {
 
 impl AuthenticatedUser {
     pub fn into_user(self) -> User {
-        match self {
-            AuthenticatedUser::Legacy(legacy) => legacy.into_user(),
+        match self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.into_user(),
         }
     }
 
     pub fn user(&self) -> &User {
-        match self {
-            AuthenticatedUser::Legacy(legacy) => legacy.user(),
+        match &self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.user(),
         }
     }
 
@@ -128,6 +137,7 @@ impl AuthenticatedUser {
         self.generate_jwt(&AccessClaims {
             sub: self.user().id.to_string(),
             session_uuid: None,
+            gen: self.gen,
         })
     }
 
@@ -145,6 +155,7 @@ impl AuthenticatedUser {
         let access_claims = AccessClaims {
             sub: self.user().id.to_string(),
             session_uuid: Some(session_uuid),
+            gen: self.gen,
         };
 
         let csrf_claims = CSRFClaims {
@@ -175,18 +186,24 @@ impl AuthenticatedUser {
         validation.validate_exp = false;
         validation.required_spec_claims = HashSet::new();
 
-        self.validate_jwt::<AccessClaims>(token, validation)
+        self.validate_jwt::<AccessClaims>(token, validation).and_then(|access_claims| {
+            if access_claims.gen != self.gen {
+                Err(CoreError::Unauthorized.into())
+            } else {
+                Ok(access_claims)
+            }
+        })
     }
 
     fn salt(&self) -> Vec<u8> {
-        match self {
-            AuthenticatedUser::Legacy(legacy) => legacy.salt(),
+        match &self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.salt(),
         }
     }
 
     pub fn verify_password(self, password: &str) -> Result<Self> {
-        match &self {
-            AuthenticatedUser::Legacy(legacy) => legacy.verify(password).map(|_| self),
+        match &self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.verify(password).map(|_| self),
             _ => Err(CoreError::Unauthorized.into()),
         }
     }
@@ -196,30 +213,38 @@ impl AuthenticatedUser {
 mod tests {
     use crate::auth::{AuthenticatedUser, User};
 
+    use super::AuthenticationType;
+
     fn patrick() -> AuthenticatedUser {
-        AuthenticatedUser::legacy(
-            User {
-                id: 0,
-                name: "Patrick".to_string(),
-                permissions: 0,
-                display_name: None,
-                youtube_channel: None,
-            },
-            bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
-        )
+        AuthenticatedUser {
+            auth_type: AuthenticationType::legacy(
+                User {
+                    id: 0,
+                    name: "Patrick".to_string(),
+                    permissions: 0,
+                    display_name: None,
+                    youtube_channel: None,
+                },
+                bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            ),
+            gen: 0,
+        }
     }
 
     fn jacob() -> AuthenticatedUser {
-        AuthenticatedUser::legacy(
-            User {
-                id: 1,
-                name: "".to_string(),
-                permissions: 0,
-                display_name: None,
-                youtube_channel: None,
-            },
-            bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
-        )
+        AuthenticatedUser {
+            auth_type: AuthenticationType::legacy(
+                User {
+                    id: 1,
+                    name: "".to_string(),
+                    permissions: 0,
+                    display_name: None,
+                    youtube_channel: None,
+                },
+                bcrypt::hash("bad password", bcrypt::DEFAULT_COST).unwrap(),
+            ),
+            gen: 0,
+        }
     }
 
     #[test]
@@ -276,6 +301,19 @@ mod tests {
 
         assert!(patrick.validate_programmatic_access_token(&patricks_access_token).is_ok());
         assert!(jacob.validate_programmatic_access_token(&patricks_access_token).is_err());
+    }
+
+    #[test]
+    fn test_generation_id_change_invalidates_tokens() {
+        let mut p = patrick();
+        let access_token = p.generate_programmatic_access_token();
+        p.gen = 1;
+        assert!(p.validate_programmatic_access_token(&access_token).is_err());
+
+        let mut p = patrick();
+        let (access_token, csrf_token) = p.generate_token_pair().unwrap();
+        p.gen = 1;
+        assert!(p.validate_token_pair(&access_token, &csrf_token).is_err());
     }
 
     #[test]

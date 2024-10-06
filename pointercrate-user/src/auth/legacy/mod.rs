@@ -2,7 +2,7 @@ use pointercrate_core::error::CoreError;
 
 use crate::{error::UserError, User};
 
-use super::AuthenticatedUser;
+use super::AuthenticationType;
 
 #[cfg(feature = "legacy_accounts")]
 pub use post::Registration;
@@ -65,9 +65,9 @@ impl LegacyAuthenticatedUser {
     }
 }
 
-impl AuthenticatedUser {
+impl AuthenticationType {
     pub fn legacy(user: User, password_hash: String) -> Self {
-        AuthenticatedUser::Legacy(LegacyAuthenticatedUser { user, password_hash })
+        AuthenticationType::Legacy(LegacyAuthenticatedUser { user, password_hash })
     }
 }
 

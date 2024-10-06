@@ -8,7 +8,11 @@ use pointercrate_core_api::{
     etag::{Precondition, Tagged},
     response::Response2,
 };
-use pointercrate_user::{auth::AuthenticatedUser, auth::PatchMe, error::UserError, User};
+use pointercrate_user::{
+    auth::{AuthenticatedUser, AuthenticationType, PatchMe},
+    error::UserError,
+    User,
+};
 use rocket::{
     http::Status,
     serde::json::{serde_json, Json},
@@ -63,8 +67,8 @@ pub async fn login(
 
 #[rocket::post("/invalidate")]
 pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
-    match auth.user {
-        AuthenticatedUser::Legacy(legacy) => legacy.invalidate_all_tokens(auth.secret, &mut auth.connection).await?,
+    match auth.user.auth_type {
+        AuthenticationType::Legacy(legacy) => legacy.invalidate_all_tokens(auth.secret, &mut auth.connection).await?,
     }
 
     auth.connection.commit().await.map_err(UserError::from)?;

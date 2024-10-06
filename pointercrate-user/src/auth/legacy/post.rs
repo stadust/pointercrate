@@ -24,7 +24,11 @@ impl LegacyAuthenticatedUser {
 #[cfg(feature = "legacy_accounts")]
 mod register {
     use super::*;
-    use crate::{auth::AuthenticatedUser, error::UserError, User};
+    use crate::{
+        auth::{AuthenticatedUser, AuthenticationType},
+        error::UserError,
+        User,
+    };
     use serde::{Deserialize, Serialize};
     use sqlx::PgConnection;
 
@@ -56,16 +60,19 @@ mod register {
 
                     log::info!("Newly registered user with name {} has been assigned ID {}", registration.name, id);
 
-                    Ok(AuthenticatedUser::legacy(
-                        User {
-                            id,
-                            name: registration.name,
-                            permissions: 0,
-                            display_name: None,
-                            youtube_channel: None,
-                        },
-                        hash,
-                    ))
+                    Ok(AuthenticatedUser {
+                        gen: 0,
+                        auth_type: AuthenticationType::legacy(
+                            User {
+                                id,
+                                name: registration.name,
+                                permissions: 0,
+                                display_name: None,
+                                youtube_channel: None,
+                            },
+                            hash,
+                        ),
+                    })
                 },
                 Err(err) => Err(err),
             }
