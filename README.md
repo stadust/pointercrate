@@ -4,7 +4,7 @@ This is the code for the new CSCL site. It took a lot of work (probably more tha
 
 # How to use this respository to experiment with the site
 
-Firstly, do NOT use this guide as a way to set up your own pointercrate list. Refer to the [official Pointercrate repo readme](https://github.com/stadust/pointercrate) instead. If you need any help with following that guide, ask me or join the [Pointercrate Central discord](https://discord.gg/sQewUEB).
+Firstly, do NOT use this guide as a way to set up your own pointercrate list. Refer to the [official Pointercrate repo readme](https://github.com/stadust/pointercrate) instead. If you need any help with following that guide, join the [Pointercrate Central discord](https://discord.gg/sQewUEB).
 
 # -----
 
