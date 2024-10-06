@@ -103,6 +103,17 @@ impl AccountPageTab for ProfileTab {
             div.right {
                 div.panel.fade {
                     h2.underlined.pad {
+                        "Logout"
+                    }
+                    p {
+                        "Log out of your pointercrate account in this browser."
+                    }
+                    a.red.hover.button href = "/logout" {
+                        "Logout"
+                    }
+                }
+                div.panel.fade {
+                    h2.underlined.pad {
                         "Get access token"
                     }
                     p {

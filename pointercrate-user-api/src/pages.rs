@@ -109,3 +109,11 @@ pub async fn account_page(
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }
+
+#[rocket::get("/logout")]
+pub async fn logout(_auth: TokenAuth, cookies: &CookieJar<'_>) -> Redirect {
+    cookies.remove("access_token");
+    cookies.remove("csrf_token");
+
+    Redirect::to(rocket::uri!(login_page))
+}
