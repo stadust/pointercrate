@@ -43,6 +43,9 @@ impl AuthenticatedUser {
     pub async fn apply_patch(mut self, patch: PatchMe, connection: &mut PgConnection) -> Result<User> {
         if let Some(password) = patch.password {
             self.set_password(password, connection).await?;
+
+            // needed to invalidate existing access tokens
+            self.increment_generation_id(connection).await?;
         }
 
         self.into_user()
@@ -62,5 +65,18 @@ impl AuthenticatedUser {
             AuthenticationType::Legacy(legacy) => legacy.set_password(password, connection).await,
             _ => Err(UserError::NonLegacyAccount),
         }
+    }
+
+    pub(in super) async fn increment_generation_id(&mut self, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!(
+            "UPDATE members SET generation = generation + 1 WHERE member_id = $1",
+            self.user().id
+        )
+        .execute(connection)
+        .await?;
+
+        self.gen += 1;
+
+        Ok(())
     }
 }

@@ -6,7 +6,7 @@
 //! * Modification of own account
 
 pub use self::patch::PatchMe;
-use crate::{error::Result, User};
+use crate::{config, error::Result, User};
 use jsonwebtoken::{errors::ErrorKind, DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
 use pointercrate_core::{error::CoreError, util::csprng_u64};
@@ -73,17 +73,11 @@ impl AuthenticatedUser {
         }
     }
 
-    fn jwt_secret(&self) -> Vec<u8> {
-        let mut key: Vec<u8> = crate::config::secret();
-        key.extend(self.salt());
-        key
-    }
-
     pub fn generate_jwt<C: Serialize>(&self, claims: &C) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             &claims,
-            &EncodingKey::from_secret(&self.jwt_secret()),
+            &EncodingKey::from_secret(&config::secret()),
         )
         .unwrap()
     }
@@ -92,19 +86,8 @@ impl AuthenticatedUser {
         validation.sub = Some(self.user().id.to_string());
         validation.required_spec_claims.insert("sub".to_string());
 
-        jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
-            .map_err(|err| {
-                if err.into_kind() == ErrorKind::InvalidSubject {
-                    CoreError::internal_server_error(format!(
-                        "Token for user with id {:?} decoded successfully using key for user with id {}",
-                        Self::peek_jwt_sub(jwt),
-                        self.user().id
-                    ))
-                    .into()
-                } else {
-                    CoreError::Unauthorized.into()
-                }
-            })
+        jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), &validation)
+            .map_err(|err| CoreError::Unauthorized.into())
             .map(|token_data| token_data.claims)
     }
 
@@ -194,12 +177,6 @@ impl AuthenticatedUser {
                 Ok(access_claims)
             }
         })
-    }
-
-    fn salt(&self) -> Vec<u8> {
-        match &self.auth_type {
-            AuthenticationType::Legacy(legacy) => legacy.salt(),
-        }
     }
 
     pub fn verify_password(self, password: &str) -> Result<Self> {
