@@ -13,7 +13,7 @@ derive_more = "0.99.18"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
 jsonwebtoken = "9.3.0"
 log = "0.4.22"
-futures = "0.3.8"
+futures = "0.3.31"
 base64 = "0.22.1"
 lazy_static = "1.5.0"
 bcrypt = "0.15.1"
