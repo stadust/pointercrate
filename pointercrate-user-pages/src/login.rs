@@ -45,6 +45,22 @@ fn login_page_body() -> Markup {
     } else {
         html!()
     };
+    let oauth2_login = if cfg!(feature = "oauth2") {
+        html! {
+            div.flex.col {
+                h2 {"Login with Google"}
+                p {
+                    "Log in or create a new pointercrate account with your Google account."
+                }
+                form.flex.col.grow #oauth2-form novalidate = "" {
+                    p.info-red.output {}
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Log in with Google";
+                }
+            }
+        }
+    } else {
+        html!()
+    };
     html! {
         div.m-center.flex.panel.fade.col.wrap style = "margin: 100px 0px;"{
             h1.underlined.pad {
@@ -55,9 +71,9 @@ fn login_page_body() -> Markup {
             }
             div.flex #login {
                 div.flex.col {
-                    h2 {"Login"}
+                    h2 {"Login with Password"}
                     p {
-                        "Log in to an existing pointercrate account. You have 3 login attempts by 30 minutes. If you do not have an account yet, register on the right or below. "
+                        "Log in to an existing pointercrate account. You have 3 login attempts by 30 minutes. If you do not have an account yet, log in with Google instead."
                     }
                     form.flex.col.grow #login-form novalidate = "" {
                         p.info-red.output {}
@@ -75,6 +91,7 @@ fn login_page_body() -> Markup {
                         input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                     }
                 }
+                (oauth2_login)
                 (legacy_register)
             }
         }

@@ -7,11 +7,11 @@
 
 pub use self::patch::PatchMe;
 use crate::{error::Result, User};
-use jsonwebtoken::{DecodingKey, EncodingKey};
+use jsonwebtoken::{errors::ErrorKind, DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
-use log::warn;
+use oauth2::OAuth2AuthenticatedUser;
 use pointercrate_core::error::CoreError;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::{
     collections::HashSet,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -20,129 +20,143 @@ use std::{
 mod delete;
 mod get;
 pub mod legacy;
+pub mod oauth2;
 mod patch;
 
 pub enum AuthenticatedUser {
     Legacy(LegacyAuthenticatedUser),
+    OAuth2(OAuth2AuthenticatedUser),
 }
 
-#[derive(Debug, Deserialize, Serialize, Copy, Clone)]
-pub struct AccessClaims {
-    pub id: i32,
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)] // to prevent a CSRF token to work as an access token
+struct AccessClaims {
+    sub: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Copy, Clone)]
-pub struct CSRFClaims {
-    pub id: i32,
-    pub exp: u64,
-    pub iat: u64,
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(deny_unknown_fields)]
+struct CSRFClaims {
+    sub: String, // we're using the jsonwebtoken library's validation to check this field, which expect it to be a string
+    exp: u64,
 }
 
 impl AuthenticatedUser {
+    pub fn is_legacy(&self) -> bool {
+        match self {
+            AuthenticatedUser::Legacy(_) => true,
+            AuthenticatedUser::OAuth2(_) => false,
+        }
+    }
+
     pub fn into_user(self) -> User {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.into_user(),
+            AuthenticatedUser::OAuth2(oauth2) => oauth2.into_user(),
         }
     }
 
     pub fn user(&self) -> &User {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.user(),
+            AuthenticatedUser::OAuth2(oauth2) => oauth2.user(),
         }
     }
 
     fn jwt_secret(&self) -> Vec<u8> {
-        let mut key: Vec<u8> = pointercrate_core::config::secret();
+        let mut key: Vec<u8> = crate::config::secret();
         key.extend(self.salt());
         key
     }
 
-    pub fn generate_access_token(&self) -> String {
+    pub fn generate_jwt<C: Serialize>(&self, claims: &C) -> String {
         jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
-            &AccessClaims { id: self.user().id },
+            &claims,
             &EncodingKey::from_secret(&self.jwt_secret()),
         )
         .unwrap()
     }
 
-    pub fn validate_access_token(self, token: &str) -> Result<Self> {
-        // TODO: maybe one day do something with this
-        let mut validation = jsonwebtoken::Validation::default();
-        validation.validate_exp = false;
-        validation.required_spec_claims = HashSet::default();
+    pub fn validate_jwt<C: DeserializeOwned>(&self, jwt: &str, mut validation: Validation) -> Result<C> {
+        validation.sub = Some(self.user().id.to_string());
+        validation.required_spec_claims.insert("sub".to_string());
 
-        jsonwebtoken::decode::<AccessClaims>(token, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
+        jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&self.jwt_secret()), &validation)
             .map_err(|err| {
-                warn!("Token validation FAILED for account {}: {}", self.user(), err);
-
-                CoreError::Unauthorized.into()
-            })
-            .and_then(move |token_data| {
-                // sanity check, should never fail
-                if token_data.claims.id != self.user().id {
-                    log::error!(
-                        "Access token for user {} decoded successfully even though user {} is logged in",
-                        token_data.claims.id,
-                        self.user()
-                    );
-
-                    Err(CoreError::Unauthorized.into())
+                if err.into_kind() == ErrorKind::InvalidSubject {
+                    CoreError::internal_server_error(format!(
+                        "Token for user with id {:?} decoded successfully using key for user with id {}",
+                        Self::peek_jwt_sub(jwt),
+                        self.user().id
+                    ))
+                    .into()
                 } else {
-                    Ok(self)
+                    CoreError::Unauthorized.into()
                 }
             })
+            .map(|token_data| token_data.claims)
+    }
+
+    pub fn peek_jwt_sub(jwt: &str) -> Result<i32> {
+        // Well this is reassuring. However, we only extract the id, and ensure the remaining
+        // values of the token are not even stored by using `struct _Unsafe` (serde will ignore
+        // superfluous fields during deserialization since its not tagged `deny_unknown_fields`)
+        let mut no_validation = Validation::default();
+        no_validation.insecure_disable_signature_validation();
+        no_validation.validate_exp = false;
+        no_validation.set_required_spec_claims(&["sub"]);
+
+        #[derive(Deserialize)]
+        struct _Unsafe {
+            sub: String,
+        }
+
+        jsonwebtoken::decode::<_Unsafe>(jwt, &DecodingKey::from_secret(b""), &no_validation)
+            .map_err(|_| CoreError::Unauthorized)?
+            .claims
+            .sub
+            .parse()
+            .map_err(|_| CoreError::Unauthorized.into())
+    }
+
+    pub fn generate_access_token(&self) -> String {
+        self.generate_jwt(&AccessClaims {
+            sub: self.user().id.to_string(),
+        })
+    }
+
+    pub fn validate_access_token(self, token: &str) -> Result<Self> {
+        let mut validation = Validation::default();
+        validation.validate_exp = false;
+        validation.required_spec_claims = HashSet::new();
+
+        self.validate_jwt::<AccessClaims>(token, validation).map(|_| self)
     }
 
     pub fn generate_csrf_token(&self) -> String {
         let start = SystemTime::now();
-        let since_epoch = start
+        let exp = (start + Duration::from_secs(3600))
             .duration_since(UNIX_EPOCH)
-            .expect("time went backwards (and this is probably gonna bite me in the ass when it comes to daytimesaving crap)");
+            .expect("one hour in the future is earlier than the Unix Epoch. Wtf?")
+            .as_secs();
 
         let claim = CSRFClaims {
-            id: self.user().id,
-            iat: since_epoch.as_secs(),
-            exp: (since_epoch + Duration::from_secs(3600)).as_secs(),
+            sub: self.user().id.to_string(),
+            exp,
         };
 
-        jsonwebtoken::encode(
-            &jsonwebtoken::Header::default(),
-            &claim,
-            &EncodingKey::from_secret(&pointercrate_core::config::secret()),
-        )
-        .unwrap()
+        self.generate_jwt(&claim)
     }
 
     pub fn validate_csrf_token(&self, token: &str) -> Result<()> {
-        let mut validation = jsonwebtoken::Validation::default();
-        validation.validate_exp = false;
-        validation.required_spec_claims = HashSet::new();
-
-        jsonwebtoken::decode::<CSRFClaims>(token, &DecodingKey::from_secret(&pointercrate_core::config::secret()), &validation)
-            .map_err(|err| {
-                warn!("Access token validation FAILED for account {}: {}", self.user(), err);
-
-                CoreError::Unauthorized.into()
-            })
-            .and_then(|token_data| {
-                if token_data.claims.id != self.user().id {
-                    warn!(
-                        "User {} attempt to authenticate using CSRF token generated for user {}",
-                        self.user(),
-                        token_data.claims.id
-                    );
-
-                    Err(CoreError::Unauthorized.into())
-                } else {
-                    Ok(())
-                }
-            })
+        self.validate_jwt::<CSRFClaims>(&token, Validation::default()).map(|_| ())
     }
 
     fn salt(&self) -> Vec<u8> {
         match self {
             AuthenticatedUser::Legacy(legacy) => legacy.salt(),
+            AuthenticatedUser::OAuth2(oauth2) => oauth2.salt(),
         }
     }
 
@@ -215,5 +229,13 @@ mod tests {
 
         assert!(patrick.validate_access_token(&patricks_access_token).is_ok());
         assert!(jacob.validate_access_token(&patricks_access_token).is_err());
+    }
+
+    #[test]
+    fn test_peek_jwt_sub() {
+        let patrick = patrick();
+
+        let patricks_csrf_token = patrick.generate_csrf_token();
+        assert_eq!(AuthenticatedUser::peek_jwt_sub(&patricks_csrf_token).unwrap(), patrick.user().id)
     }
 }

@@ -3,6 +3,8 @@
 .secret
 .idea
 .vscode
+**/.DS_Store
+.DS_Store
 
 # random stuff I have because of enabling eslint in vscode
 node_modules

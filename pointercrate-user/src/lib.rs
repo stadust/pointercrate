@@ -20,6 +20,7 @@ use std::{
 #[macro_use]
 mod get;
 pub mod auth;
+pub mod config;
 mod delete;
 pub mod error;
 mod paginate;
