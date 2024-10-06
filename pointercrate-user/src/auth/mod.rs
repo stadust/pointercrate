@@ -7,7 +7,7 @@
 
 pub use self::patch::PatchMe;
 use crate::{config, error::Result, User};
-use jsonwebtoken::{errors::ErrorKind, DecodingKey, EncodingKey, Validation};
+use jsonwebtoken::{DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
 use pointercrate_core::{error::CoreError, util::csprng_u64};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -60,6 +60,22 @@ struct CSRFClaims {
     session: u64,
 }
 
+/// Generates a JWT from the given claims, signed with this servers key, [`config::secret`].
+pub fn generate_jwt<C: Serialize>(claims: &C) -> String {
+    jsonwebtoken::encode(
+        &jsonwebtoken::Header::default(),
+        &claims,
+        &EncodingKey::from_secret(&config::secret()),
+    )
+    .unwrap()
+}
+
+pub fn decode_jwt<C: DeserializeOwned>(jwt: &str, validation: &Validation) -> Result<C> {
+    jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), &validation)
+        .map_err(|_| CoreError::Unauthorized.into())
+        .map(|token_data| token_data.claims)
+}
+
 impl AuthenticatedUser {
     pub fn into_user(self) -> User {
         match self.auth_type {
@@ -73,41 +89,27 @@ impl AuthenticatedUser {
         }
     }
 
-    pub fn generate_jwt<C: Serialize>(&self, claims: &C) -> String {
-        jsonwebtoken::encode(
-            &jsonwebtoken::Header::default(),
-            &claims,
-            &EncodingKey::from_secret(&config::secret()),
-        )
-        .unwrap()
-    }
-
     pub fn validate_jwt<C: DeserializeOwned>(&self, jwt: &str, mut validation: Validation) -> Result<C> {
         validation.sub = Some(self.user().id.to_string());
         validation.required_spec_claims.insert("sub".to_string());
 
-        jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), &validation)
-            .map_err(|err| CoreError::Unauthorized.into())
-            .map(|token_data| token_data.claims)
+        decode_jwt(jwt, &validation)
     }
 
     pub fn peek_jwt_sub(jwt: &str) -> Result<i32> {
         // Well this is reassuring. However, we only extract the id, and ensure the remaining
         // values of the token are not even stored by using `struct _Unsafe` (serde will ignore
         // superfluous fields during deserialization since its not tagged `deny_unknown_fields`)
-        let mut no_validation = Validation::default();
-        no_validation.insecure_disable_signature_validation();
-        no_validation.validate_exp = false;
-        no_validation.set_required_spec_claims(&["sub"]);
+        let mut validation = Validation::default();
+        validation.validate_exp = false;
+        validation.set_required_spec_claims(&["sub"]);
 
         #[derive(Deserialize)]
-        struct _Unsafe {
+        struct _Sub {
             sub: String,
         }
 
-        jsonwebtoken::decode::<_Unsafe>(jwt, &DecodingKey::from_secret(b""), &no_validation)
-            .map_err(|_| CoreError::Unauthorized)?
-            .claims
+        decode_jwt::<_Sub>(jwt, &validation)?
             .sub
             .parse()
             .map_err(|_| CoreError::Unauthorized.into())
@@ -118,7 +120,7 @@ impl AuthenticatedUser {
     /// These tokens are not tied to a user session, and as such cannot be used for administrative
     /// user account actions.
     pub fn generate_programmatic_access_token(&self) -> String {
-        self.generate_jwt(&AccessClaims {
+        generate_jwt(&AccessClaims {
             sub: self.user().id.to_string(),
             session_uuid: None,
             gen: self.gen,
@@ -148,8 +150,8 @@ impl AuthenticatedUser {
             session: session_uuid,
         };
 
-        let access_token = self.generate_jwt(&access_claims);
-        let csrf_token = self.generate_jwt(&csrf_claims);
+        let access_token = generate_jwt(&access_claims);
+        let csrf_token = generate_jwt(&csrf_claims);
 
         Ok((access_token, csrf_token))
     }
