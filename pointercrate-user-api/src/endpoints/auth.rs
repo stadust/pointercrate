@@ -68,7 +68,7 @@ pub async fn login(
 #[rocket::post("/invalidate")]
 pub async fn invalidate(mut auth: BasicAuth) -> Result<Status> {
     match auth.user.auth_type {
-        AuthenticationType::Legacy(legacy) => legacy.invalidate_all_tokens(auth.secret, &mut auth.connection).await?,
+        AuthenticationType::Legacy(legacy) => legacy.invalidate_all_tokens(&mut auth.connection).await?,
     }
 
     auth.connection.commit().await.map_err(UserError::from)?;

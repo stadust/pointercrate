@@ -8,14 +8,17 @@ use crate::Result;
 impl LegacyAuthenticatedUser {
     /// Invalidates all access tokens for the given account
     ///
-    /// Works by re-hashing the password, and updating the `password_hash` field in the database
-    /// with the new hash. Even rehashing the same password causes a new salt to be used, and this
-    /// salt is part of the signing key for access tokens. Thus, changing the salt causes all old
-    /// tokens to be invalidated.
-    pub async fn invalidate_all_tokens(mut self, password: String, connection: &mut PgConnection) -> Result<()> {
+    /// Works by incrementing the account's generation ID, which is part of every access token (and
+    /// a generation ID mismatch causes the token validation to fail).
+    pub async fn invalidate_all_tokens(self, connection: &mut PgConnection) -> Result<()> {
         log::warn!("Invalidating all tokens for user {}", self.user);
 
-        self.set_password(password, connection).await?;
+        sqlx::query!(
+            "UPDATE members SET generation = generation + 1 WHERE member_id = $1",
+            self.user().id
+        )
+        .execute(connection)
+        .await?;
 
         Ok(())
     }

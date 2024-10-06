@@ -19,9 +19,6 @@ pub struct Auth<const IsToken: bool> {
     pub user: AuthenticatedUser,
     pub connection: Transaction<'static, Postgres>,
     pub permissions: PermissionsManager,
-
-    /* The secret, either token or password */
-    pub(crate) secret: String,
 }
 
 #[allow(non_upper_case_globals)]
@@ -100,7 +97,6 @@ impl<'r> FromRequest<'r> for Auth<true> {
                     user,
                     connection,
                     permissions: permission_manager,
-                    secret: token.to_string(),
                 });
             }
         }
@@ -123,7 +119,6 @@ impl<'r> FromRequest<'r> for Auth<true> {
                     user,
                     connection,
                     permissions: permission_manager,
-                    secret: access_token.to_string(),
                 });
             }
 
@@ -138,7 +133,6 @@ impl<'r> FromRequest<'r> for Auth<true> {
                     user,
                     connection,
                     permissions: permission_manager,
-                    secret: access_token.to_string(),
                 });
             } else {
                 warn!("Cookie based authentication was used, but no CSRF-token was provided. This might be a CSRF attack!");
@@ -203,7 +197,6 @@ impl<'r> FromRequest<'r> for Auth<false> {
                         user,
                         connection,
                         permissions: permission_manager,
-                        secret: password.to_string(),
                     });
                 }
             }
