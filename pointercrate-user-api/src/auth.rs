@@ -54,6 +54,15 @@ macro_rules! try_outcome {
     };
 }
 
+macro_rules! try_state {
+    ($request: expr, $typ: ty) => {
+        match $request.guard::<&State<$typ>>().await {
+            Outcome::Success(state) => state.inner(),
+            _ => return Outcome::Error((Status::InternalServerError, CoreError::internal_server_error(format!("Missing required state: '{}'", stringify!($typ))).into()))
+        }
+    };
+}
+
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<true> {
     type Error = UserError;
@@ -64,28 +73,10 @@ impl<'r> FromRequest<'r> for Auth<true> {
             return Outcome::Forward(Status::NotFound);
         }
 
-        let pool = request.guard::<&State<PointercratePool>>().await;
-        let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
-            Outcome::Success(manager) => manager.inner().clone(),
-            Outcome::Error(err) => {
-                return Outcome::Error((
-                    Status::InternalServerError,
-                    CoreError::internal_server_error(format!("PermissionsManager not retrievable from rocket state: {:?}", err)).into(),
-                ))
-            },
-            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
-        };
+        let pool = try_state!(request, PointercratePool);
+        let permission_manager = try_state!(request, PermissionsManager).clone();
 
-        let mut connection = match pool {
-            Outcome::Success(pool) => try_outcome!(pool.transaction().await),
-            Outcome::Error(err) => {
-                return Outcome::Error((
-                    Status::InternalServerError,
-                    CoreError::internal_server_error(format!("PointercratePool not retrievable from rocket state: {:?}", err)).into(),
-                ));
-            },
-            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
-        };
+        let mut connection = try_outcome!(pool.transaction().await);
 
         for authorization in request.headers().get("Authorization") {
             if let ["Bearer", token] = authorization.split(' ').collect::<Vec<_>>()[..] {
@@ -153,28 +144,10 @@ impl<'r> FromRequest<'r> for Auth<false> {
             return Outcome::Forward(Status::NotFound);
         }
 
-        let pool = request.guard::<&State<PointercratePool>>().await;
-        let permission_manager = match request.guard::<&State<PermissionsManager>>().await {
-            Outcome::Success(manager) => manager.inner().clone(),
-            Outcome::Error(err) => {
-                return Outcome::Error((
-                    Status::InternalServerError,
-                    CoreError::internal_server_error(format!("PermissionsManager not retrievable from rocket state: {:?}", err)).into(),
-                ))
-            },
-            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
-        };
+        let pool = try_state!(request, PointercratePool);
+        let permission_manager = try_state!(request, PermissionsManager).clone();
 
-        let mut connection = match pool {
-            Outcome::Success(pool) => try_outcome!(pool.transaction().await),
-            Outcome::Error(err) => {
-                return Outcome::Error((
-                    Status::InternalServerError,
-                    CoreError::internal_server_error(format!("PointercratePool not retrievable from rocket state: {:?}", err)).into(),
-                ));
-            },
-            Outcome::Forward(_) => unreachable!(), // by impl FromRequest for State
-        };
+        let mut connection = try_outcome!(pool.transaction().await);
 
         for authorization in request.headers().get("Authorization") {
             if let ["Basic", basic_auth] = authorization.split(' ').collect::<Vec<_>>()[..] {
