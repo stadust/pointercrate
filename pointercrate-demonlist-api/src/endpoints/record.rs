@@ -19,7 +19,8 @@ use pointercrate_demonlist::{
     submitter::Submitter,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
-use pointercrate_user_api::auth::TokenAuth;
+use pointercrate_user::auth::ApiToken;
+use pointercrate_user_api::auth::Auth;
 use rocket::{http::Status, serde::json::Json, tokio, State};
 use sqlx::{pool::PoolConnection, Postgres};
 use std::net::IpAddr;
@@ -34,7 +35,7 @@ use std::net::IpAddr;
 /// verified claim of the user making the request, in which case access to all records is allowed
 /// (the `status` property does not get defaulted, and filtering on it is allowed)
 #[rocket::get("/")]
-pub async fn paginate(mut auth: TokenAuth, query: Query<RecordPagination>) -> Result<Response2<Json<Vec<MinimalRecordPD>>>> {
+pub async fn paginate(mut auth: Auth<ApiToken>, query: Query<RecordPagination>) -> Result<Response2<Json<Vec<MinimalRecordPD>>>> {
     let mut pagination = query.0;
 
     if pagination.submitter.is_some() {
@@ -78,7 +79,7 @@ pub async fn unauthed_pagination(
 
 #[rocket::post("/", data = "<submission>")]
 pub async fn submit(
-    ip: IpAddr, auth: Option<TokenAuth>, submission: Json<Submission>, pool: &State<PointercratePool>,
+    ip: IpAddr, auth: Option<Auth<ApiToken>>, submission: Json<Submission>, pool: &State<PointercratePool>,
     ratelimits: &State<DemonlistRatelimits>,
 ) -> Result<Response2<Tagged<FullRecord>>> {
     let submission = submission.0;
@@ -170,7 +171,7 @@ pub async fn submit(
 }
 
 #[rocket::get("/<record_id>")]
-pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<PointercratePool>) -> Result<Tagged<FullRecord>> {
+pub async fn get(record_id: i32, auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>) -> Result<Tagged<FullRecord>> {
     let is_helper = auth.as_ref().is_some_and(|auth| auth.has_permission(LIST_HELPER));
 
     let mut connection = match auth {
@@ -193,7 +194,7 @@ pub async fn get(record_id: i32, auth: Option<TokenAuth>, pool: &State<Pointercr
 }
 
 #[rocket::get("/<record_id>/audit")]
-pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditLogEntry<RecordModificationData>>>> {
+pub async fn audit(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<AuditLogEntry<RecordModificationData>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
     let log = pointercrate_demonlist::record::audit::audit_log_for_record(record_id, &mut auth.connection).await?;
@@ -207,7 +208,7 @@ pub async fn audit(record_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<Audit
 
 #[rocket::patch("/<record_id>", data = "<patch>")]
 pub async fn patch(
-    record_id: i32, mut auth: TokenAuth, precondition: Precondition, patch: Json<PatchRecord>,
+    record_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchRecord>,
 ) -> Result<Tagged<FullRecord>> {
     let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
 
@@ -228,7 +229,7 @@ pub async fn patch(
 }
 
 #[rocket::delete("/<record_id>")]
-pub async fn delete(record_id: i32, mut auth: TokenAuth, precondition: Precondition) -> Result<Status> {
+pub async fn delete(record_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition) -> Result<Status> {
     let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
 
     if record.status == RecordStatus::Submitted && !record.was_modified(&mut auth.connection).await? {
@@ -246,7 +247,7 @@ pub async fn delete(record_id: i32, mut auth: TokenAuth, precondition: Precondit
 }
 
 #[rocket::get("/<record_id>/notes")]
-pub async fn get_notes(record_id: i32, mut auth: TokenAuth) -> Result<Response2<Json<Vec<Note>>>> {
+pub async fn get_notes(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Response2<Json<Vec<Note>>>> {
     let record_holder_id = sqlx::query!("SELECT player FROM records WHERE id = $1", record_id)
         .fetch_one(&mut *auth.connection)
         .await
@@ -273,7 +274,7 @@ pub async fn get_notes(record_id: i32, mut auth: TokenAuth) -> Result<Response2<
 }
 
 #[rocket::post("/<record_id>/notes", data = "<data>")]
-pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) -> Result<Response2<Tagged<Note>>> {
+pub async fn add_note(record_id: i32, mut auth: Auth<ApiToken>, data: Json<NewNote>) -> Result<Response2<Tagged<Note>>> {
     auth.require_permission(LIST_HELPER)?;
 
     let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
@@ -292,7 +293,7 @@ pub async fn add_note(record_id: i32, mut auth: TokenAuth, data: Json<NewNote>) 
 }
 
 #[rocket::patch("/<record_id>/notes/<note_id>", data = "<patch>")]
-pub async fn patch_note(record_id: i32, note_id: i32, mut auth: TokenAuth, patch: Json<PatchNote>) -> Result<Tagged<Note>> {
+pub async fn patch_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>, patch: Json<PatchNote>) -> Result<Tagged<Note>> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
     if note.author.as_ref() != Some(&auth.user.user().name) {
@@ -309,7 +310,7 @@ pub async fn patch_note(record_id: i32, note_id: i32, mut auth: TokenAuth, patch
 }
 
 #[rocket::delete("/<record_id>/notes/<note_id>")]
-pub async fn delete_note(record_id: i32, note_id: i32, mut auth: TokenAuth) -> Result<Status> {
+pub async fn delete_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
     if note.author.as_ref() != Some(&auth.user.user().name) {

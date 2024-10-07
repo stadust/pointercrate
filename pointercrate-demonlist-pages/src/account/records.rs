@@ -12,7 +12,7 @@ use pointercrate_demonlist::{
     demon::{current_list, Demon},
     LIST_HELPER,
 };
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
 
@@ -42,7 +42,9 @@ impl AccountPageTab for RecordsPage {
         }
     }
 
-    async fn content(&self, _user: &AuthenticatedUser, _permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(
+        &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, connection: &mut PgConnection,
+    ) -> Markup {
         let demons = match current_list(connection).await {
             Ok(demons) => demons,
             Err(err) => {

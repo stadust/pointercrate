@@ -4,12 +4,15 @@ use crate::{
     patch::PatchUser,
     User,
 };
-use pointercrate_core::util::{non_nullable, nullable};
+use pointercrate_core::{
+    error::CoreError,
+    util::{non_nullable, nullable},
+};
 use serde::Deserialize;
 use sqlx::PgConnection;
 use std::fmt::{Debug, Formatter};
 
-use super::AuthenticationType;
+use super::{AuthenticationType, PasswordOrBrowser};
 
 #[derive(Deserialize)]
 pub struct PatchMe {
@@ -39,9 +42,13 @@ impl Debug for PatchMe {
     }
 }
 
-impl AuthenticatedUser {
+impl AuthenticatedUser<PasswordOrBrowser> {
     pub async fn apply_patch(mut self, patch: PatchMe, connection: &mut PgConnection) -> Result<User> {
         if let Some(password) = patch.password {
+            if !self.auth_artifact.is_password() {
+                return Err(CoreError::Unauthorized.into());
+            }
+
             self.set_password(password, connection).await?;
 
             // needed to invalidate existing access tokens

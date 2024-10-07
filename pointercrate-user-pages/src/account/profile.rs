@@ -1,7 +1,7 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use sqlx::PgConnection;
 
 pub struct ProfileTab;
@@ -31,7 +31,7 @@ impl AccountPageTab for ProfileTab {
     }
 
     async fn content(
-        &self, authenticated_user: &AuthenticatedUser, permissions: &PermissionsManager, _connection: &mut PgConnection,
+        &self, authenticated_user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
         let user = authenticated_user.user();
 

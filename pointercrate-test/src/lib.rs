@@ -1,6 +1,6 @@
 //! Utilities for pointercrate integration tests
 
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_user::auth::{AuthenticatedUser, PasswordOrBrowser};
 
 use rocket::{
     http::{Header, Status},
@@ -63,7 +63,7 @@ impl<'c> TestRequest<'c> {
         self
     }
 
-    pub fn authorize_as(self, user: &AuthenticatedUser) -> Self {
+    pub fn authorize_as(self, user: &AuthenticatedUser<PasswordOrBrowser>) -> Self {
         self.header("Authorization", format!("Bearer {}", user.generate_programmatic_access_token()))
     }
 

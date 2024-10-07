@@ -7,7 +7,6 @@ use super::AuthenticationType;
 #[cfg(feature = "legacy_accounts")]
 pub use post::Registration;
 
-mod get;
 mod patch;
 mod post;
 

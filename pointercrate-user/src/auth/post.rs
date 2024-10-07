@@ -3,7 +3,9 @@ use sqlx::PgConnection;
 
 use crate::auth::AuthenticatedUser;
 
-impl AuthenticatedUser {
+use super::PasswordOrBrowser;
+
+impl AuthenticatedUser<PasswordOrBrowser> {
     /// Invalidates all access tokens for the given account
     ///
     /// Works by incrementing the account's generation ID, which is part of every access token (and
@@ -21,7 +23,7 @@ mod tests {
     #[cfg(feature = "legacy_accounts")]
     #[sqlx::test(migrations = "../migrations")]
     fn test_invalidate_all_tokens(mut conn: sqlx::pool::PoolConnection<sqlx::Postgres>) {
-        use crate::auth::{legacy::Registration, AuthenticatedUser};
+        use crate::auth::{legacy::Registration, AccessClaims, AuthenticatedUser};
 
         let registration = Registration {
             name: "Patrick".to_string(),
@@ -33,11 +35,15 @@ mod tests {
         let patricks_clone = AuthenticatedUser::by_id(patricks_id, &mut conn).await.unwrap();
 
         let access_token = patrick.generate_programmatic_access_token();
-        assert!(patricks_clone.validate_programmatic_access_token(&access_token).is_ok()); // sanity check
+        assert!(patricks_clone
+            .validate_api_access(AccessClaims::decode(&access_token).unwrap())
+            .is_ok()); // sanity check
 
         patrick.invalidate_all_tokens(&mut conn).await.unwrap();
 
         let patricks_clone = AuthenticatedUser::by_id(patricks_id, &mut conn).await.unwrap();
-        assert!(patricks_clone.validate_programmatic_access_token(&access_token).is_err());
+        assert!(patricks_clone
+            .validate_api_access(AccessClaims::decode(&access_token).unwrap())
+            .is_err());
     }
 }

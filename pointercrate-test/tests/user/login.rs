@@ -1,4 +1,7 @@
-use pointercrate_user::ADMINISTRATOR;
+use pointercrate_user::{
+    auth::{AccessClaims, AuthenticatedUser},
+    ADMINISTRATOR,
+};
 use rocket::http::Status;
 use sqlx::{Pool, Postgres};
 
@@ -19,9 +22,10 @@ pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
 
         assert_eq!(user.user().id as i64, response["data"]["id"].as_i64().unwrap());
 
-        // validate_access_token takes ownership, but it gives back the object if verification is successfuly
-        user = user
-            .validate_programmatic_access_token(response["token"].as_str().unwrap())
+        AuthenticatedUser::by_id(user.user().id, &mut *connection)
+            .await
+            .unwrap()
+            .validate_api_access(AccessClaims::decode(response["token"].as_str().unwrap()).unwrap())
             .unwrap();
     }
 

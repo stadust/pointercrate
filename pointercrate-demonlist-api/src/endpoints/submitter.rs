@@ -9,18 +9,19 @@ use pointercrate_demonlist::{
     submitter::{PatchSubmitter, Submitter, SubmitterPagination},
     LIST_MODERATOR,
 };
-use pointercrate_user_api::auth::TokenAuth;
+use pointercrate_user::auth::ApiToken;
+use pointercrate_user_api::auth::Auth;
 use rocket::serde::json::Json;
 
 #[rocket::get("/")]
-pub async fn paginate(mut auth: TokenAuth, pagination: Query<SubmitterPagination>) -> Result<Response2<Json<Vec<Submitter>>>> {
+pub async fn paginate(mut auth: Auth<ApiToken>, pagination: Query<SubmitterPagination>) -> Result<Response2<Json<Vec<Submitter>>>> {
     auth.require_permission(LIST_MODERATOR)?;
 
     Ok(pagination_response("/api/v1/submitters/", pagination.0, &mut auth.connection).await?)
 }
 
 #[rocket::get("/<submitter_id>")]
-pub async fn get(submitter_id: i32, mut auth: TokenAuth) -> Result<Tagged<Submitter>> {
+pub async fn get(submitter_id: i32, mut auth: Auth<ApiToken>) -> Result<Tagged<Submitter>> {
     auth.require_permission(LIST_MODERATOR)?;
 
     Ok(Tagged(Submitter::by_id(submitter_id, &mut auth.connection).await?))
@@ -28,7 +29,7 @@ pub async fn get(submitter_id: i32, mut auth: TokenAuth) -> Result<Tagged<Submit
 
 #[rocket::patch("/<submitter_id>", data = "<patch>")]
 pub async fn patch(
-    submitter_id: i32, precondition: Precondition, mut auth: TokenAuth, patch: Json<PatchSubmitter>,
+    submitter_id: i32, precondition: Precondition, mut auth: Auth<ApiToken>, patch: Json<PatchSubmitter>,
 ) -> Result<Tagged<Submitter>> {
     auth.require_permission(LIST_MODERATOR)?;
 
