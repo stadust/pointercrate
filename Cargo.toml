@@ -37,7 +37,6 @@ shuttle-rocket = "0.48.0"
 shuttle-runtime = "0.48.0"
 tokio = "1.40.0"
 dotenv = "0.15.0"
-rocket_sync_db_pools = "0.1.0-rc.4"
 maud = "0.26.0"
 pointercrate-core = { path = "pointercrate-core/" }
 pointercrate-core-api = { path = "pointercrate-core-api/" }
