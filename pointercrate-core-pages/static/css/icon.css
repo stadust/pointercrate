@@ -169,3 +169,18 @@ i.fa.hover:hover {
  */
 
 .flag-icon-background{background-size:contain;background-position:50%;background-repeat:no-repeat}.flag-icon{background-size:contain;background-position:50%;background-repeat:no-repeat;position:relative;display:inline-block;width:1.33333333em;line-height:1em}.flag-icon:before{content:'\00a0'}
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  .arrow:before, .arrow:after, .hamburger span, .plus:before, .plus:after {
+    background-color: #e6e6e6 !important;
+  }
+
+  .arrow.hover {
+    opacity: 1;
+  }
+  
+  .arrow.hover:hover {
+    opacity: 0.5 !important;
+  }
+}

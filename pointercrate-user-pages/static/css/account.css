@@ -45,3 +45,11 @@ form {
   padding: 15px;
   border-bottom: 1px lightgray dashed;
 }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  .tab-active {
+    background-color: #616161;
+    color: #fff;
+  }
+}

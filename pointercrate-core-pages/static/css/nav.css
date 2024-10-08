@@ -236,3 +236,24 @@ footer * {
     flex-wrap: wrap;
   }
 }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  header nav {
+    background: #444446;
+  }
+  
+  /*
+   * Things for on hover sub-menus
+   */
+  header nav .nav-group .nav-hover-dropdown {
+    border: 1px solid rgba(211, 211, 211, 1);
+  }
+  
+  /* --------- smartphone ----------- */
+  @media (min-width: 1072px) {
+    header nav .seperator {
+      border-right: 1px solid #999;
+    }
+  } 
+}

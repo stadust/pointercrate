@@ -739,3 +739,152 @@ ul.selection-list li {
 .tab-active {
   color: #0881c6;
 }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    scrollbar-color: #363636 #525252;
+  }
+
+  /* Link styles */
+  
+  a.link {
+    color: #B3B3FF;
+  }
+
+  /* Misc element styles */
+  
+  a {
+    color: #f0f0f0;
+  }
+
+  input, textarea {
+    color: #e6e6e6 !important;
+  }
+
+  /* Flex layout classes */
+  
+  .overlay {
+    background-color: rgba(85, 85, 85, 0.8);
+  }
+  
+  .dialog {
+    background-color: #414141;
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
+    border: 1px lightgray dashed;
+  }
+
+  /* Panel styles */
+  
+  .panel {
+    background: #414141;
+  }
+  
+  /* General Input Styles */
+  .form-input .error {
+    font-size: 60% !important;
+    color: coral;
+  }
+  
+  /* When the checkbox is checked, add a blue background */
+  .cb-container input:checked ~ .checkmark {
+    background-color: #0A95E6;
+  }
+  
+  /* Search UI Element */
+  
+  .search {
+    border: 1px solid #999;
+  }
+  
+  .search.seperated input {
+    border-left: 1px solid #888;
+    border-right: 1px solid #888;
+  }
+  
+  /* Dropdown selection menu thingy styles */
+
+  .dropdown-menu .menu {
+    background: white;
+    border: 1px solid #bbb;
+    box-shadow: 0px 8px 10px #4e4e4e, -10px 8px 15px #4e4e4e, 10px 8px 15px #4e4e4e;
+  }
+  
+  .dropdown-menu > div {
+    border-bottom: 1px dotted #e6e6e6;
+  }
+  
+  .dropdown-menu div:focus-within {
+    border: 1px solid #bbb;
+    box-shadow: 0 0 10px 5px #6d6d6d;
+  }
+
+  /*
+   * Tooltip stuff
+   */
+  
+  .tooltip .tooltiptext {
+    border: 3px solid #696969;
+    background: #414141;
+  }
+  
+  /* (Under)lines */
+  .underlined {
+    border-bottom: 1px solid #e6e6e6;
+  }
+  
+  .leftlined {
+    border-left: 1px solid #e6e6e6;
+  }
+  
+  .rightlined {
+    border-right: 1px solid #e6e6e6;
+  }
+  
+  .overlined {
+    border-top: 1px solid #e6e6e6;
+  }
+
+  .menu .underlined  {
+    border-bottom: 1px solid #525252;
+  }
+
+  .menu ul {
+    background-color: #414141;
+  }
+  
+  .info-green {
+    background: #ddffdd;
+    border: 1px solid #a8ff93;
+    color: #074d07;
+  }
+  
+  .info-green a {
+    color: #68bf0b !important;
+  }
+  
+  .info-yellow {
+    background: #fffadd;
+    border: 1px solid #e0e37b;
+    color: #4d4707;
+  }
+  
+  .info-red {
+    background: #fdd;
+    border: 1px solid #ff9393;
+    color: #4d0707;
+  }
+  
+  ul.selection-list {
+    border: 1px solid #999;
+  }
+  
+  /* Tab panel stuff */
+  .tab-active {
+    color: #0881c6;
+  } 
+
+  #claimed-records-info span {
+    color: #444446;
+  }
+}
