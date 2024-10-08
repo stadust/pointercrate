@@ -96,7 +96,9 @@ impl AccountPageTab for ProfileTab {
                     }
                     div.flex.no-stretch {
                         input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
-                        input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                        @if authenticated_user.is_legacy() {
+                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                        }
                     }
                 }
             }
@@ -165,7 +167,9 @@ impl AccountPageTab for ProfileTab {
             }
             (edit_display_name_dialog())
             (edit_youtube_link_dialog())
-            (change_password_dialog())
+            @if authenticated_user.is_legacy() {
+                (change_password_dialog())
+            }
             (delete_account_dialog())
         }
     }

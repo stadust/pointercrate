@@ -141,30 +141,32 @@ function setupEditAccount() {
   editYoutubeForm.addErrorOverride(40100, "auth-yt");
   editYoutubeForm.addErrorOverride(42225, "edit-yt");
 
-  let changePasswordForm = setupFormDialogEditor(
-    new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
-    "edit-pw-dialog",
-    "change-password",
-    output
-  );
+  if (document.getElementById("change-password")) {
+    let changePasswordForm = setupFormDialogEditor(
+      new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
+      "edit-pw-dialog",
+      "change-password",
+      output
+    );
 
-  let editPw = changePasswordForm.input("edit-pw");
+    let editPw = changePasswordForm.input("edit-pw");
 
-  changePasswordForm.addValidators({
-    "auth-pw": {
-      "Password required": valueMissing,
-      "Password too short. It needs to be at least 10 characters long.": tooShort,
-    },
-    "edit-pw": {
-      "Password too short. It needs to be at least 10 characters long.": tooShort,
-    },
-    "edit-pw-repeat": {
-      "Password too short. It needs to be at least 10 characters long.": tooShort,
-      "Passwords don't match": (rpp) => rpp.value == editPw.value,
-    },
-  });
+    changePasswordForm.addValidators({
+      "auth-pw": {
+        "Password required": valueMissing,
+        "Password too short. It needs to be at least 10 characters long.": tooShort,
+      },
+      "edit-pw": {
+        "Password too short. It needs to be at least 10 characters long.": tooShort,
+      },
+      "edit-pw-repeat": {
+        "Password too short. It needs to be at least 10 characters long.": tooShort,
+        "Passwords don't match": (rpp) => rpp.value == editPw.value,
+      },
+    });
 
-  changePasswordForm.addErrorOverride(40100, "auth-pw");
+    changePasswordForm.addErrorOverride(40100, "auth-pw");
+  }
 
   var deleteAccountDialog = document.getElementById("delete-acc-dialog");
   var deleteAccountForm = new Form(

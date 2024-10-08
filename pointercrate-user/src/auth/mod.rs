@@ -140,6 +140,10 @@ pub fn decode_jwt<C: DeserializeOwned>(jwt: &str, validation: &Validation) -> Re
 }
 
 impl<Auth> AuthenticatedUser<Auth> {
+    pub fn is_legacy(&self) -> bool {
+        matches!(self.auth_type, AuthenticationType::Legacy(_))
+    }
+
     pub fn into_user(self) -> User {
         match self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.into_user(),
