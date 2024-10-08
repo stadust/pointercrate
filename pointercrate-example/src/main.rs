@@ -36,6 +36,12 @@ fn catch_422() -> ErrorResponder {
     CoreError::UnprocessableEntity.into()
 }
 
+/// Failures from the authorization FromRequest implementations can return 401s
+#[rocket::catch(401)]
+fn catch_401() -> ErrorResponder {
+    CoreError::Unauthorized.into()
+}
+
 /// We do not have a home page, so have the website root simply redirect to the demonlist
 #[rocket::get("/")]
 fn home() -> Redirect {
@@ -58,7 +64,7 @@ async fn rocket() -> _ {
         // Tell pointercrate's core components about navigation bar and footers, so that it knows how to render the website
         .manage(page_configuration())
         // Register our 404 catcher
-        .register("/", rocket::catchers![catch_404, catch_422])
+        .register("/", rocket::catchers![catch_401, catch_404, catch_422])
         // Register our home page
         .mount("/", rocket::routes![home]);
 
