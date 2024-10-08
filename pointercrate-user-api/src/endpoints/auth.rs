@@ -11,9 +11,7 @@ use pointercrate_user::{
     User,
 };
 use rocket::{
-    http::Status,
-    serde::json::{serde_json, Json},
-    State,
+    http::Status, serde::json::{serde_json, Json}, State
 };
 use std::net::IpAddr;
 
@@ -90,7 +88,7 @@ pub async fn patch_me(
     auth.connection.commit().await.map_err(UserError::from)?;
 
     if changes_password {
-        Ok(Err(Status::NotModified))
+        Ok(Err(Status::NoContent))
     } else {
         Ok(Ok(Tagged(updated_user)))
     }
