@@ -119,7 +119,7 @@ impl AccountPageTab for ProfileTab {
                         "Get access token"
                     }
                     p {
-                        "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
+                        "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. They do not allow modifications of your account however."
                     }
                     form.flex.col.overlined.pad #login-form novalidate = "" style="display: none" {
                         p style = "text-align: center" {
