@@ -11,7 +11,9 @@ use pointercrate_user::{
     User,
 };
 use rocket::{
-    http::Status, serde::json::{serde_json, Json}, State
+    http::Status,
+    serde::json::{serde_json, Json},
+    State,
 };
 use std::net::IpAddr;
 
