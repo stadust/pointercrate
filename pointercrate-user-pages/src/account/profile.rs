@@ -110,7 +110,7 @@ impl AccountPageTab for ProfileTab {
                     p {
                         "Log out of your pointercrate account in this browser."
                     }
-                    a.red.hover.button href = "/logout" {
+                    a.red.hover.button href = "/logout" style = "margin: 15px auto 0px; display: inline-block" {
                         "Logout"
                     }
                 }
