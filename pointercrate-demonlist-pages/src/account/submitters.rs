@@ -15,7 +15,7 @@ impl AccountPageTab for SubmittersPage {
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/submitter.js?v=4".into()
+        "/static/demonlist/js/account/submitter.js".into()
     }
 
     fn tab_id(&self) -> u8 {

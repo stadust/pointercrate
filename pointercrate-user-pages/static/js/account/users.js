@@ -8,7 +8,7 @@ import {
   FilteredPaginator,
   Form,
   Viewer,
-} from "/static/core/js/modules/form.js?v=4";
+} from "/static/core/js/modules/form.js";
 
 let selectedUser;
 let userPaginator;
