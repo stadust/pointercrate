@@ -1,11 +1,10 @@
-use crate::{
-    auth::{BasicAuth, TokenAuth},
-    ratelimits::UserRatelimits,
-};
+use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
-use pointercrate_core_pages::head::HeadLike;
-use pointercrate_user::error::UserError;
+use pointercrate_user::{
+    auth::{NonMutating, PasswordOrBrowser},
+    error::UserError,
+};
 use pointercrate_user_pages::account::AccountPageConfig;
 
 use rocket::{
@@ -27,27 +26,35 @@ use {
 };
 
 #[rocket::get("/login")]
-pub async fn login_page(auth: Option<TokenAuth>) -> Result<Redirect, Page> {
+pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
         .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
 }
 
+// Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
 #[rocket::post("/login")]
 pub async fn login(
-    auth: Result<BasicAuth, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>,
+    auth: Result<Auth<PasswordOrBrowser>, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
     ratelimits.login_attempts(ip)?;
 
     let auth = auth?;
 
-    let mut cookie = Cookie::build(("access_token", auth.user.generate_access_token()))
+    let (access_token, csrf_token) = auth.user.generate_token_pair()?;
+
+    let cookie = Cookie::build(("access_token", access_token))
         .http_only(true)
         .same_site(SameSite::Strict)
+        .secure(!cfg!(debug_assertions))
         .path("/");
 
-    if !cfg!(debug_assertions) {
-        cookie = cookie.secure(true)
-    }
+    cookies.add(cookie);
+
+    let cookie = Cookie::build(("csrf_token", csrf_token))
+        .http_only(false)
+        .same_site(SameSite::Strict)
+        .secure(!cfg!(debug_assertions))
+        .path("/");
 
     cookies.add(cookie);
 
@@ -73,14 +80,21 @@ pub async fn register(
 
     connection.commit().await.map_err(UserError::from)?;
 
-    let mut cookie = Cookie::build(("access_token", user.generate_access_token()))
+    let (access_token, csrf_token) = user.generate_token_pair()?;
+
+    let cookie = Cookie::build(("access_token", access_token))
         .http_only(true)
         .same_site(SameSite::Strict)
+        .secure(!cfg!(debug_assertions))
         .path("/");
 
-    if !cfg!(debug_assertions) {
-        cookie = cookie.secure(true)
-    }
+    cookies.add(cookie);
+
+    let cookie = Cookie::build(("csrf_token", csrf_token))
+        .http_only(false)
+        .same_site(SameSite::Strict)
+        .secure(!cfg!(debug_assertions))
+        .path("/");
 
     cookies.add(cookie);
 
@@ -89,14 +103,18 @@ pub async fn register(
 
 #[rocket::get("/account")]
 pub async fn account_page(
-    auth: Option<TokenAuth>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
+    auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
     match auth {
-        Some(mut auth) => {
-            let csrf_token = auth.user.generate_csrf_token();
-
-            Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await).meta("csrf_token", csrf_token))
-        },
+        Some(mut auth) => Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await)),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
+}
+
+#[rocket::get("/logout")]
+pub async fn logout(_auth: Auth<NonMutating>, cookies: &CookieJar<'_>) -> Redirect {
+    cookies.remove("access_token");
+    cookies.remove("csrf_token");
+
+    Redirect::to(rocket::uri!(login_page))
 }

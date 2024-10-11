@@ -6,7 +6,10 @@ use pointercrate_core_pages::{
     util::{filtered_paginator, paginator},
 };
 use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_user::{auth::AuthenticatedUser, MODERATOR};
+use pointercrate_user::{
+    auth::{AuthenticatedUser, NonMutating},
+    MODERATOR,
+};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
 
@@ -36,7 +39,9 @@ impl AccountPageTab for ListIntegrationTab {
         }
     }
 
-    async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup {
+    async fn content(
+        &self, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
+    ) -> Markup {
         let player_claim = match PlayerClaim::by_user(user.user().id, connection).await {
             Ok(player_claim) => player_claim,
             Err(err) => {

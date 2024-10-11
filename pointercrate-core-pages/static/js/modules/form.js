@@ -1283,13 +1283,28 @@ const RATELIMITED = {
   data: null,
 };
 
+// I cannot fucking believe javascript doesn't have this built in.
+// This is based on https://www.w3schools.com/js/js_cookies.asp
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let cookies = decodedCookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+
+      if (cookie.indexOf(name) == 0)
+        return cookie.substring(name.length, cookie.length);
+    }
+    return null;
+}
+
 function mkReq(method, endpoint, headers = {}, data = null) {
+  let csrf_token = getCookie("csrf_token");
+
   headers["Content-Type"] = "application/json";
   headers["Accept"] = "application/json";
 
-  let csrf_meta = document.querySelector('meta[name="csrf_token"]');
-
-  if (csrf_meta) headers["X-CSRF-TOKEN"] = csrf_meta.content;
+  if (csrf_token) headers["X-CSRF-TOKEN"] = csrf_token;
 
   return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();
