@@ -60,8 +60,8 @@
 /* dark mode */
 @media (prefers-color-scheme: dark) {
   .land path, .island path, .land-with-states .state, .land-with-states path {
-    stroke: #292929;
-    fill: #6b6b6b;
+    stroke: #292929 !important;
+    fill: #6b6b6b !important;
   }
 
   .selectable .land:hover path, .selectable .island:hover path, .selectable .land-with-states .state:hover, .selectable .land-with-states:not(.subdivided):hover path:not(.state),
