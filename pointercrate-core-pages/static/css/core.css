@@ -175,12 +175,6 @@
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
     border: 1px #6d6d6d dashed;
   }
-  
-  @media (min-width: 1072px) {
-    .fade-hide {
-      box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
-    }
-  }
 
   /* color modifying styles */
   
