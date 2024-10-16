@@ -1,4 +1,3 @@
-use crate::auth::TokenAuth;
 use log::info;
 use pointercrate_core::error::CoreError;
 use pointercrate_core_api::{
@@ -8,11 +7,13 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
-use pointercrate_user::{error::UserError, PatchUser, User, UserPagination, ADMINISTRATOR, MODERATOR};
+use pointercrate_user::{auth::ApiToken, error::UserError, PatchUser, User, UserPagination, ADMINISTRATOR, MODERATOR};
 use rocket::{http::Status, serde::json::Json};
 
+use crate::auth::Auth;
+
 #[rocket::get("/")]
-pub async fn paginate(mut auth: TokenAuth, data: Query<UserPagination>) -> Result<Response2<Json<Vec<User>>>> {
+pub async fn paginate(mut auth: Auth<ApiToken>, data: Query<UserPagination>) -> Result<Response2<Json<Vec<User>>>> {
     let mut pagination = data.0;
     // Rule of thumb: If you can assign permissions, you can see all users that currently have those
     // permissions
@@ -36,7 +37,7 @@ pub async fn paginate(mut auth: TokenAuth, data: Query<UserPagination>) -> Resul
 }
 
 #[rocket::get("/<user_id>")]
-pub async fn get_user(mut auth: TokenAuth, user_id: i32) -> Result<Tagged<User>> {
+pub async fn get_user(mut auth: Auth<ApiToken>, user_id: i32) -> Result<Tagged<User>> {
     let user = User::by_id(user_id, &mut auth.connection).await?;
 
     // We are only allowed to retrieve users who already have permissions we can set.
@@ -53,7 +54,9 @@ pub async fn get_user(mut auth: TokenAuth, user_id: i32) -> Result<Tagged<User>>
 }
 
 #[rocket::patch("/<user_id>", data = "<patch>")]
-pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id: i32, mut patch: Json<PatchUser>) -> Result<Tagged<User>> {
+pub async fn patch_user(
+    mut auth: Auth<ApiToken>, precondition: Precondition, user_id: i32, mut patch: Json<PatchUser>,
+) -> Result<Tagged<User>> {
     let user = User::by_id(user_id, &mut auth.connection).await?;
 
     if !auth.has_permission(MODERATOR) && !auth.has_permission(ADMINISTRATOR) {
@@ -105,7 +108,7 @@ pub async fn patch_user(mut auth: TokenAuth, precondition: Precondition, user_id
 }
 
 #[rocket::delete("/<user_id>")]
-pub async fn delete_user(mut auth: TokenAuth, precondition: Precondition, user_id: i32) -> Result<Status> {
+pub async fn delete_user(mut auth: Auth<ApiToken>, precondition: Precondition, user_id: i32) -> Result<Status> {
     auth.require_permission(ADMINISTRATOR)?;
 
     if user_id == auth.user.user().id {

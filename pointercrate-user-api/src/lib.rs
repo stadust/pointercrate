@@ -17,7 +17,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
         endpoints::auth::patch_me,
         endpoints::auth::delete_me,
     ];
-    let mut page_routes = rocket::routes![pages::login_page, pages::account_page, pages::login];
+    let mut page_routes = rocket::routes![pages::login_page, pages::account_page, pages::login, pages::logout];
     #[cfg(feature = "legacy_accounts")]
     auth_routes.extend(rocket::routes![endpoints::auth::register]);
     #[cfg(feature = "legacy_accounts")]

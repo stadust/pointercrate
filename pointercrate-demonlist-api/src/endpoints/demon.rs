@@ -16,7 +16,8 @@ use pointercrate_demonlist::{
     player::{DatabasePlayer, recompute_scores},
     LIST_ADMINISTRATOR, LIST_MODERATOR,
 };
-use pointercrate_user_api::auth::TokenAuth;
+use pointercrate_user::auth::ApiToken;
+use pointercrate_user_api::auth::Auth;
 use rocket::{http::Status, serde::json::Json, State};
 
 #[rocket::get("/")]
@@ -37,7 +38,7 @@ pub async fn get(demon_id: i32, pool: &State<PointercratePool>) -> Result<Tagged
 }
 
 #[rocket::get("/<demon_id>/audit")]
-pub async fn audit(demon_id: i32, mut auth: TokenAuth) -> Result<Json<Vec<AuditLogEntry<DemonModificationData>>>> {
+pub async fn audit(demon_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<AuditLogEntry<DemonModificationData>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
     let log = pointercrate_demonlist::demon::audit::audit_log_for_demon(demon_id, &mut auth.connection).await?;
@@ -62,7 +63,7 @@ pub async fn movement_log(demon_id: i32, pool: &State<PointercratePool>) -> Resu
 
 #[rocket::post("/", data = "<data>")]
 pub async fn post(
-    mut auth: TokenAuth, data: Json<PostDemon>, ratelimits: &State<DemonlistRatelimits>,
+    mut auth: Auth<ApiToken>, data: Json<PostDemon>, ratelimits: &State<DemonlistRatelimits>,
 ) -> Result<Response2<Tagged<FullDemon>>> {
     auth.require_permission(LIST_MODERATOR)?;
 
@@ -80,7 +81,9 @@ pub async fn post(
 }
 
 #[rocket::patch("/<demon_id>", data = "<patch>")]
-pub async fn patch(demon_id: i32, mut auth: TokenAuth, precondition: Precondition, patch: Json<PatchDemon>) -> Result<Tagged<FullDemon>> {
+pub async fn patch(
+    demon_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchDemon>,
+) -> Result<Tagged<FullDemon>> {
     auth.require_permission(LIST_MODERATOR)?;
 
     let demon = FullDemon::by_id(demon_id, &mut auth.connection)
@@ -95,7 +98,7 @@ pub async fn patch(demon_id: i32, mut auth: TokenAuth, precondition: Preconditio
 }
 
 #[rocket::post("/<demon_id>/creators", data = "<creator>")]
-pub async fn post_creator(demon_id: i32, mut auth: TokenAuth, creator: Json<PostCreator>) -> Result<Response2<Json<()>>> {
+pub async fn post_creator(demon_id: i32, mut auth: Auth<ApiToken>, creator: Json<PostCreator>) -> Result<Response2<Json<()>>> {
     auth.require_permission(LIST_MODERATOR)?;
 
     let demon = Demon::by_id(demon_id, &mut auth.connection).await?;
@@ -112,7 +115,7 @@ pub async fn post_creator(demon_id: i32, mut auth: TokenAuth, creator: Json<Post
 }
 
 #[rocket::delete("/<demon_id>/creators/<player_id>")]
-pub async fn delete_creator(demon_id: i32, player_id: i32, mut auth: TokenAuth) -> Result<Status> {
+pub async fn delete_creator(demon_id: i32, player_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     auth.require_permission(LIST_MODERATOR)?;
 
     let demon = Demon::by_id(demon_id, &mut auth.connection).await?;

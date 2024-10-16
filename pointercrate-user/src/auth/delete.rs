@@ -4,7 +4,9 @@ use crate::{auth::AuthenticatedUser, error::Result};
 use log::warn;
 use sqlx::PgConnection;
 
-impl AuthenticatedUser {
+use super::PasswordOrBrowser;
+
+impl AuthenticatedUser<PasswordOrBrowser> {
     pub async fn delete(self, connection: &mut PgConnection) -> Result<()> {
         warn!("Self-Deleting user account {}", self.user());
 

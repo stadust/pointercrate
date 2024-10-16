@@ -1,7 +1,7 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use sqlx::PgConnection;
 
 pub struct ProfileTab;
@@ -31,7 +31,7 @@ impl AccountPageTab for ProfileTab {
     }
 
     async fn content(
-        &self, authenticated_user: &AuthenticatedUser, permissions: &PermissionsManager, _connection: &mut PgConnection,
+        &self, authenticated_user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
         let user = authenticated_user.user();
 
@@ -97,36 +97,38 @@ impl AccountPageTab for ProfileTab {
                     }
                     div.flex.no-stretch {
                         input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
-                        input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                        @if authenticated_user.is_legacy() {
+                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                        }
                     }
                 }
             }
             div.right {
                 div.panel.fade {
                     h2.underlined.pad {
+                        "Logout"
+                    }
+                    p {
+                        "Log out of your pointercrate account in this browser."
+                    }
+                    a.red.hover.button href = "/logout" style = "margin: 15px auto 0px; display: inline-block" {
+                        "Logout"
+                    }
+                }
+                div.panel.fade {
+                    h2.underlined.pad {
                         "Get access token"
                     }
                     p {
-                        "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. Anyone with access to your pointercrate access token has nearly full control over your account. The only thing that's not possible with only an access token is to change your password. Proceed with care!"
-                    }
-                    form.flex.col.overlined.pad #login-form novalidate = "" style="display: none" {
-                        p style = "text-align: center" {
-                            "For security reasons, retrieving your access tokens requires you to reenter your password"
-                        }
-                        p.info-red.output {}
-                        span.form-input #login-password {
-                            label for = "password" {"Password:"}
-                            input required = "" type = "password" name = "password" minlength = "10";
-                            p.error {}
-                        }
-                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
+                        "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. They do not allow modifications of your account however."
                     }
                     div.overlined.pad #token-area style = "display: none" {
                         b {"Your access token is:"}
                         textarea #access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                     }
-                    a.blue.hover.button #get-token {
-                        "Get access token"
+                    form.flex.col #get-token-form novalidate = "" {
+                        p.info-red.output {}
+                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value="Get access token";
                     }
                 }
                 div.panel.fade {
@@ -134,28 +136,19 @@ impl AccountPageTab for ProfileTab {
                         "Invalidate tokens"
                     }
                     p {
-                        "If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action"
+                        "If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action!"
                     }
-                    form.flex.col.overlined.pad #invalidate-form novalidate = "" style="display: none" {
-                        p style = "text-align: center" {
-                            "For security reasons, invalidating your access tokens requires you to reenter your password"
-                        }
+                    form.flex.col #invalidate-form novalidate = "" {
                         p.info-red.output {}
-                        span.form-input #invalidate-auth-password {
-                            label for = "password" {"Password:"}
-                            input required = "" type = "password" name = "password" minlength = "10";
-                            p.error {}
-                        }
-                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Invalidate";
-                    }
-                    a.blue.hover.button #invalidate-token {
-                        "Invalidate all access tokens"
+                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value="Invalidate all access tokens";
                     }
                 }
             }
             (edit_display_name_dialog())
             (edit_youtube_link_dialog())
-            (change_password_dialog())
+            @if authenticated_user.is_legacy() {
+                (change_password_dialog())
+            }
             (delete_account_dialog())
         }
     }
@@ -169,20 +162,12 @@ fn edit_display_name_dialog() -> Markup {
                 h2.underlined.pad {
                     "Edit Display Name:"
                 }
-                p {
-                    "To make profile related edits, re-entering your password below is required."
-                }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-dn {
                         label for = "display_name" {"New display name:"}
                         input type = "text" name = "display_name";
-                        p.error {}
-                    }
-                    span.overlined.pad.form-input #auth-dn {
-                        label {"Authenticate:"}
-                        input type = "password" minlength = "10" required = "";
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
@@ -200,20 +185,12 @@ fn edit_youtube_link_dialog() -> Markup {
                 h2.underlined.pad {
                     "Edit YouTube Channel Link:"
                 }
-                p {
-                    "To make profile related edits, re-entering your password below is required."
-                }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-yt {
                         label for = "youtube_channel" {"New YouTube link:"}
                         input type = "url" name = "youtube_channel";
-                        p.error {}
-                    }
-                    span.overlined.pad.form-input #auth-yt {
-                        label {"Authenticate:"}
-                        input type = "password" minlength = "10" required = "";
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
@@ -268,16 +245,10 @@ fn delete_account_dialog() -> Markup {
                     "Delete Account:"
                 }
                 p {
-                    "To delete your account, please enter your password below. Deletion of your account is irreversible!"
+                    "Deletion of your account is irreversible!"
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
-                    p.info-green.output {}
-                    span.form-input #auth-delete {
-                        label {"Authenticate:"}
-                        input type = "password" minlength = "10" required = "";
-                        p.error {}
-                    }
                     input.button.red.hover type = "submit" style = "margin: 15px auto 0px;" value="Delete";
                 }
             }

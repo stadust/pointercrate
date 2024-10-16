@@ -1,6 +1,8 @@
 use serde::{de::Error, Deserialize, Deserializer};
 use std::{fmt::Debug, str::FromStr};
 
+use crate::error::CoreError;
+
 pub fn from_env_or_default<T: FromStr>(key: &str, default: T) -> T
 where
     <T as FromStr>::Err: Debug,
@@ -29,4 +31,12 @@ where
         None => Err(<D as Deserializer<'de>>::Error::custom("null value on non-nullable field")),
         some => Ok(some),
     }
+}
+
+pub fn csprng_u64() -> Result<u64, CoreError> {
+    let mut buf = [0u8; 8];
+
+    getrandom::getrandom(buf.as_mut_slice())
+        .map_err(|err| CoreError::internal_server_error(format!("getrandom: {}", err)))
+        .map(|()| u64::from_le_bytes(buf))
 }

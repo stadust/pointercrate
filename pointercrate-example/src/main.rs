@@ -27,7 +27,19 @@ fn catch_422() -> ErrorResponder {
     CoreError::UnprocessableEntity.into()
 }
 
-#[get("/")]
+/// Failures from the authorization FromRequest implementations can return 401s
+#[rocket::catch(401)]
+fn catch_401() -> ErrorResponder {
+    CoreError::Unauthorized.into()
+}
+
+/// Failures from the authorization FromRequest implementations can return 401s
+#[rocket::catch(401)]
+fn catch_401() -> ErrorResponder {
+    CoreError::Unauthorized.into()
+}
+
+#[rocket::get("/")]
 fn home() -> Redirect {
     Redirect::to(uri!("/list/"))
 }
@@ -40,7 +52,9 @@ async fn configure_rocket(secrets: &SecretStore) -> Result<Rocket<rocket::Build>
     let rocket = build()
         .manage(pool)
         .manage(page_configuration())
-        .register("/", rocket::catchers![catch_404, catch_422])
+        // Register our 404 catcher
+        .register("/", rocket::catchers![catch_401, catch_404, catch_422])
+        // Register our home page
         .mount("/", rocket::routes![home]);
 
     let mut permissions_manager = pointercrate_user::default_permissions_manager();
