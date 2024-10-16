@@ -17,15 +17,15 @@ use pointercrate_demonlist::{
     },
     LIST_HELPER,
 };
-use pointercrate_user::MODERATOR;
-use pointercrate_user_api::auth::TokenAuth;
+use pointercrate_user::{auth::ApiToken, MODERATOR};
+use pointercrate_user_api::auth::Auth;
 use rocket::{http::Status, serde::json::Json, State};
 use serde::Deserialize;
 use std::net::IpAddr;
 
 #[rocket::get("/")]
 pub async fn paginate(
-    pool: &State<PointercratePool>, query: Query<PlayerPagination>, auth: Option<TokenAuth>,
+    pool: &State<PointercratePool>, query: Query<PlayerPagination>, auth: Option<Auth<ApiToken>>,
 ) -> Result<Response2<Json<Vec<Player>>>> {
     let mut pagination = query.0;
 
@@ -56,7 +56,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
 
 #[rocket::patch("/<player_id>", data = "<patch>")]
 pub async fn patch(
-    player_id: i32, mut auth: TokenAuth, precondition: Precondition, patch: Json<PatchPlayer>,
+    player_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchPlayer>,
 ) -> Result<Tagged<FullPlayer>> {
     let player = Player::by_id(player_id, &mut auth.connection)
         .await?
@@ -72,7 +72,7 @@ pub async fn patch(
 }
 
 #[rocket::put("/<player_id>/claims")]
-pub async fn put_claim(player_id: i32, mut auth: TokenAuth) -> Result<Response2<Json<PlayerClaim>>> {
+pub async fn put_claim(player_id: i32, mut auth: Auth<ApiToken>) -> Result<Response2<Json<PlayerClaim>>> {
     let user_id = auth.user.user().id;
     let player = DatabasePlayer::by_id(player_id, &mut auth.connection).await?;
     let claim = player.initiate_claim(user_id, &mut auth.connection).await?;
@@ -88,7 +88,9 @@ pub async fn put_claim(player_id: i32, mut auth: TokenAuth) -> Result<Response2<
 /// changed by the person holding the claim, but only if the claim is verified (to claim a different
 /// player, put in a new `PUT` request)
 #[rocket::patch("/<player_id>/claims/<user_id>", data = "<data>")]
-pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data: Json<PatchPlayerClaim>) -> Result<Json<PlayerClaim>> {
+pub async fn patch_claim(
+    player_id: i32, user_id: i32, mut auth: Auth<ApiToken>, data: Json<PatchPlayerClaim>,
+) -> Result<Json<PlayerClaim>> {
     let claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await;
 
     if data.verified.is_some() {
@@ -129,7 +131,7 @@ pub async fn patch_claim(player_id: i32, user_id: i32, mut auth: TokenAuth, data
 }
 
 #[rocket::delete("/<player_id>/claims/<user_id>")]
-pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> Result<Status> {
+pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     auth.require_permission(MODERATOR)?;
 
     let claim = PlayerClaim::get(user_id, player_id, &mut auth.connection).await?;
@@ -141,7 +143,9 @@ pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: TokenAuth) -> 
 }
 
 #[rocket::get("/claims")]
-pub async fn paginate_claims(mut auth: TokenAuth, pagination: Query<PlayerClaimPagination>) -> Result<Response2<Json<Vec<ListedClaim>>>> {
+pub async fn paginate_claims(
+    mut auth: Auth<ApiToken>, pagination: Query<PlayerClaimPagination>,
+) -> Result<Response2<Json<Vec<ListedClaim>>>> {
     auth.require_permission(MODERATOR)?;
 
     Ok(pagination_response("/api/v1/players/claims/", pagination.0, &mut auth.connection).await?)
@@ -161,7 +165,7 @@ struct GeolocationResponse {
 
 #[rocket::post("/<player_id>/geolocate")]
 pub async fn geolocate_nationality(
-    player_id: i32, ip: IpAddr, mut auth: TokenAuth, ratelimits: &State<DemonlistRatelimits>,
+    player_id: i32, ip: IpAddr, mut auth: Auth<ApiToken>, ratelimits: &State<DemonlistRatelimits>,
 ) -> Result<Json<Nationality>> {
     let mut player = Player::by_id(player_id, &mut auth.connection).await?;
     let claim = PlayerClaim::get(auth.user.user().id, player_id, &mut auth.connection).await?;

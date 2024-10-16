@@ -4,12 +4,17 @@ use crate::{
     patch::PatchUser,
     User,
 };
-use pointercrate_core::util::{non_nullable, nullable};
+use pointercrate_core::{
+    error::CoreError,
+    util::{non_nullable, nullable},
+};
 use serde::Deserialize;
 use sqlx::PgConnection;
 use std::fmt::{Debug, Formatter};
 
-#[derive(Deserialize)]
+use super::{AuthenticationType, PasswordOrBrowser};
+
+#[derive(Deserialize, Default)]
 pub struct PatchMe {
     #[serde(default, deserialize_with = "non_nullable")]
     pub(super) password: Option<String>,
@@ -37,10 +42,17 @@ impl Debug for PatchMe {
     }
 }
 
-impl AuthenticatedUser {
+impl AuthenticatedUser<PasswordOrBrowser> {
     pub async fn apply_patch(mut self, patch: PatchMe, connection: &mut PgConnection) -> Result<User> {
         if let Some(password) = patch.password {
+            if !self.auth_artifact.is_password() {
+                return Err(CoreError::Unauthorized.into());
+            }
+
             self.set_password(password, connection).await?;
+
+            // needed to invalidate existing access tokens
+            self.increment_generation_id(connection).await?;
         }
 
         self.into_user()
@@ -55,10 +67,58 @@ impl AuthenticatedUser {
             .await
     }
 
-    pub async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
-        match self {
-            AuthenticatedUser::Legacy(legacy) => legacy.set_password(password, connection).await,
+    async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
+        match &mut self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.set_password(password, connection).await,
             _ => Err(UserError::NonLegacyAccount),
         }
+    }
+
+    pub(super) async fn increment_generation_id(&mut self, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!(
+            "UPDATE members SET generation = generation + 1 WHERE member_id = $1",
+            self.user().id
+        )
+        .execute(connection)
+        .await?;
+
+        self.gen += 1;
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[cfg(feature = "legacy_accounts")]
+    #[sqlx::test(migrations = "../migrations")]
+    async fn test_password_change_invalidates_tokens(mut conn: sqlx::pool::PoolConnection<sqlx::Postgres>) {
+        use crate::auth::{legacy::Registration, AccessClaims, AuthenticatedUser, PatchMe};
+
+        let patrick = AuthenticatedUser::register(
+            Registration {
+                name: "Patrick".to_string(),
+                password: "bad password".to_string(),
+            },
+            &mut conn,
+        )
+        .await
+        .unwrap();
+
+        let token = patrick.generate_programmatic_access_token();
+
+        let patrick = patrick
+            .apply_patch(
+                PatchMe {
+                    password: Some("worse password".into()),
+                    ..Default::default()
+                },
+                &mut conn,
+            )
+            .await
+            .unwrap();
+        let patrick = AuthenticatedUser::by_id(patrick.id, &mut conn).await.unwrap();
+
+        assert!(patrick.validate_api_access(AccessClaims::decode(&token).unwrap()).is_err());
     }
 }

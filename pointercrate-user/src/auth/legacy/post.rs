@@ -1,30 +1,16 @@
 #[cfg(feature = "legacy_accounts")]
 pub use register::Registration;
-use sqlx::PgConnection;
 
-use crate::auth::LegacyAuthenticatedUser;
 use crate::Result;
-
-impl LegacyAuthenticatedUser {
-    /// Invalidates all access tokens for the given account
-    ///
-    /// Works by re-hashing the password, and updating the `password_hash` field in the database
-    /// with the new hash. Even rehashing the same password causes a new salt to be used, and this
-    /// salt is part of the signing key for access tokens. Thus, changing the salt causes all old
-    /// tokens to be invalidated.
-    pub async fn invalidate_all_tokens(mut self, password: String, connection: &mut PgConnection) -> Result<()> {
-        log::warn!("Invalidating all tokens for user {}", self.user);
-
-        self.set_password(password, connection).await?;
-
-        Ok(())
-    }
-}
 
 #[cfg(feature = "legacy_accounts")]
 mod register {
     use super::*;
-    use crate::{auth::AuthenticatedUser, error::UserError, User};
+    use crate::{
+        auth::{AuthenticatedUser, AuthenticationType, NoAuth, PasswordOrBrowser},
+        error::UserError,
+        User,
+    };
     use serde::{Deserialize, Serialize};
     use sqlx::PgConnection;
 
@@ -34,8 +20,8 @@ mod register {
         pub password: String,
     }
 
-    impl AuthenticatedUser {
-        pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
+    impl AuthenticatedUser<NoAuth> {
+        pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<AuthenticatedUser<PasswordOrBrowser>> {
             log::info!("Attempting registration of new user under name {}", registration.name);
 
             log::trace!("Registration request is formally correct");
@@ -56,16 +42,20 @@ mod register {
 
                     log::info!("Newly registered user with name {} has been assigned ID {}", registration.name, id);
 
-                    Ok(AuthenticatedUser::legacy(
-                        User {
-                            id,
-                            name: registration.name,
-                            permissions: 0,
-                            display_name: None,
-                            youtube_channel: None,
-                        },
-                        hash,
-                    ))
+                    Ok(AuthenticatedUser {
+                        gen: 0,
+                        auth_type: AuthenticationType::legacy(
+                            User {
+                                id,
+                                name: registration.name,
+                                permissions: 0,
+                                display_name: None,
+                                youtube_channel: None,
+                            },
+                            hash,
+                        ),
+                        auth_artifact: PasswordOrBrowser(true),
+                    })
                 },
                 Err(err) => Err(err),
             }

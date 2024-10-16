@@ -8,7 +8,7 @@ use pointercrate_demonlist::{
     submitter::Submitter,
     LIST_ADMINISTRATOR, LIST_HELPER, LIST_MODERATOR,
 };
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_user::auth::{AuthenticatedUser, PasswordOrBrowser};
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{http::Status, local::asynchronous::Client};
 use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
@@ -95,7 +95,9 @@ pub async fn add_simple_record(progress: i16, player: i32, demon: i32, status: R
 }
 
 impl TestClient {
-    pub async fn patch_player(&self, player_id: i32, auth_context: &AuthenticatedUser, patch: serde_json::Value) -> TestRequest {
+    pub async fn patch_player(
+        &self, player_id: i32, auth_context: &AuthenticatedUser<PasswordOrBrowser>, patch: serde_json::Value,
+    ) -> TestRequest {
         let player: FullPlayer = self
             .get(format!("/api/v1/players/{}/", player_id))
             .expect_status(Status::Ok)
@@ -109,8 +111,8 @@ impl TestClient {
     }
 
     pub async fn add_demon(
-        &self, auth_context: &AuthenticatedUser, name: impl Into<String>, position: i16, requirement: i16, verifier: impl Into<String>,
-        publisher: impl Into<String>,
+        &self, auth_context: &AuthenticatedUser<PasswordOrBrowser>, name: impl Into<String>, position: i16, requirement: i16,
+        verifier: impl Into<String>, publisher: impl Into<String>,
     ) -> FullDemon {
         self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": []}))
             .expect_status(Status::Created)

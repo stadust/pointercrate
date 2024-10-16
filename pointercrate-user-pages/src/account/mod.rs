@@ -4,7 +4,7 @@ use pointercrate_core_pages::{
     head::{HeadLike, Script},
     PageFragment,
 };
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use sqlx::PgConnection;
 
 pub mod profile;
@@ -20,7 +20,9 @@ pub trait AccountPageTab {
 
     fn tab_id(&self) -> u8;
     fn tab(&self) -> Markup;
-    async fn content(&self, user: &AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection) -> Markup;
+    async fn content(
+        &self, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
+    ) -> Markup;
 }
 
 pub struct AccountPageConfig {
@@ -40,7 +42,7 @@ impl AccountPageConfig {
     }
 
     pub async fn account_page(
-        &self, user: AuthenticatedUser, permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, user: AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> AccountPage {
         let mut page = AccountPage {
             user,
@@ -65,7 +67,7 @@ impl AccountPageConfig {
 }
 
 pub struct AccountPage {
-    user: AuthenticatedUser,
+    user: AuthenticatedUser<NonMutating>,
     scripts: Vec<Script>,
     tabs: Vec<(Markup, Markup, String, u8)>,
 }
@@ -73,6 +75,7 @@ pub struct AccountPage {
 impl From<AccountPage> for PageFragment {
     fn from(account: AccountPage) -> Self {
         let mut fragment = PageFragment::new(format!("Account - {}", account.user.user().name), "")
+            .module("/static/core/js/modules/form.js")
             .stylesheet("/static/user/css/account.css")
             .stylesheet("/static/core/css/sidebar.css")
             .head(PreEscaped(

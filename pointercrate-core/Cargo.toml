@@ -14,5 +14,6 @@ log = "0.4.22"
 chrono = {version = "0.4.38", features = ["serde"]}
 dotenv = "0.15.0"
 toml = "0.8"
-shuttle-runtime = "0.48.0"
+shuttle-runtime = "0.47.0"
 config = "0.14.0"
+getrandom = "0.2.15"

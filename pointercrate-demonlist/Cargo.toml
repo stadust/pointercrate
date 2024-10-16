@@ -13,7 +13,7 @@ derive_more = "0.99.18"
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-user = {path = "../pointercrate-user"}
 log = "0.4.22"
-futures = "0.3.8"
+futures = "0.3.31"
 chrono = {version = "0.4.38", features = ["serde"]}
 url = "2.5.2"
 

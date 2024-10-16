@@ -228,7 +228,11 @@ pub enum CoreError {
 
 impl CoreError {
     pub fn internal_server_error(message: impl AsRef<str>) -> CoreError {
-        error!("INTERNAL SERVER ERROR: {}", message.as_ref());
+        error!(
+            "INTERNAL SERVER ERROR: {}. Backtrace:\n {}",
+            message.as_ref(),
+            std::backtrace::Backtrace::capture()
+        );
 
         CoreError::InternalServerError
     }
