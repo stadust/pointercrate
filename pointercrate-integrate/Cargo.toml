@@ -16,7 +16,7 @@ chrono = "0.4.38"
 tokio = {version = "1.40.0", features = ["rt"]}
 pointercrate-demonlist = { path = "../pointercrate-demonlist" }
 pointercrate-core = { path = "../pointercrate-core" }
-governor = "0.6.3"
+governor = "0.6.4"
 nonzero_ext = "0.3.0"
 
 [dependencies.dash-rs]

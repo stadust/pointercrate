@@ -17,6 +17,6 @@ pointercrate-user-pages = {path = "../pointercrate-user-pages", features = ["leg
 serde = "1.0.210"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
 rocket = "0.5.1"
-serde_json = "1.0.128"
+serde_json = "1.0.132"
 dotenv = "0.15.0"
 serde_urlencoded = "0.7.1"
