@@ -116,7 +116,9 @@ impl NormalizedSubmission {
         }
 
         debug!("Submission is valid, checking for duplicates!");
-        debug!("Nevermind!");
+
+        // Search for existing records. If a video exists, we also check if a record with
+        // exactly that video exists on the same level.
 
         if let Some(ref video) = self.video {
             if let Some(row) = sqlx::query!(r#"SELECT id, status_::text as "status_!: String" FROM records WHERE video = $1 AND demon = $2"#, video.to_string(), self.demon.id)
