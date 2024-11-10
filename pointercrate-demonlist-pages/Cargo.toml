@@ -15,7 +15,7 @@ pointercrate-demonlist = {path = "../pointercrate-demonlist"}
 pointercrate-integrate = {path = "../pointercrate-integrate"}
 maud = "0.26.0"
 chrono = "0.4.38"
-url = "2.5.2"
+url = "2.5.3"
 async-trait = "0.1.83"
 log = "0.4.22"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }

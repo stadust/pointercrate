@@ -14,7 +14,7 @@ pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages", features = ["legacy_accounts"]}
-serde = "1.0.213"
+serde = "1.0.214"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
 rocket = "0.5.1"
 serde_json = "1.0.132"
