@@ -7,7 +7,7 @@ edition.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = "1.0.213"
+serde = "1.0.214"
 rocket = {version = "0.5.1", features = ["json"]}
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}

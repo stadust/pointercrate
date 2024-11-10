@@ -23,6 +23,6 @@ serde_urlencoded = "0.7.0"
 nonzero_ext = "0.3.0"
 reqwest = {version = "0.12.*", features = ["json"]}
 chrono = "0.4.38"
-serde = "1.0.213"
+serde = "1.0.214"
 governor = "0.7.0"
 rand = "0.8.5"
