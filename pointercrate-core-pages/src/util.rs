@@ -41,7 +41,7 @@ pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl It
     html! {
         div.dropdown-menu.js-search.no-stretch {
             div {
-                input type="text" data-default=(default_entry) autocomplete="off" style = "color: #444446; font-weight: bold;";
+                input type="text" data-default=(default_entry) autocomplete="off" class="click-to-select";
             }
             div.menu {
                 ul {
@@ -61,10 +61,10 @@ pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, item
             div {
                 @match default {
                     Some(ref default) => {
-                        input type="text" autocomplete="off" data-default=(default) style = "color: #444446; font-weight: bold;";
+                        input type="text" autocomplete="off" data-default=(default) class = "click-to-select";
                     }
                     None => {
-                        input type="text" autocomplete="off" style = "color: #444446; font-weight: bold;";
+                        input type="text" autocomplete="off" class = "click-to-select";
                     }
                 }
             }

@@ -734,3 +734,200 @@ ul.selection-list li {
 .tab-active {
   color: #0881c6;
 }
+.click-to-select {
+  color: #444446; font-weight: bold;
+}
+
+.approved-info-label {
+  background-color: #E9FAE3;
+}
+
+.unchecked-info-label {
+  background-color: #F7F7E0;
+}
+
+.rejected-info-label {
+  background-color: #F8DCE4;
+}
+
+.under-consideration-info-label {
+  background-color: #d8eff3;
+}
+
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    scrollbar-color: #363636 #525252;
+  }
+
+  /* Link styles */
+
+  a.link {
+    color: #9b9bff;
+  }
+
+  /* Misc element styles */
+
+  a {
+    color: #f0f0f0;
+  }
+
+  input, textarea {
+    color: #e6e6e6 !important;
+  }
+
+  
+
+  /* Flex layout classes */
+
+  .overlay {
+    background-color: rgba(85, 85, 85, 0.8);
+  }
+
+  .dialog {
+    background-color: #414141;
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
+    border: 1px lightgray dashed;
+  }
+
+  /* Panel styles */
+
+  .panel {
+    background: #414141;
+  }
+
+  /* General Input Styles */
+  .form-input .error {
+    font-size: 60% !important;
+    color: coral;
+  }
+
+  /* When the checkbox is checked, add a blue background */
+  .cb-container input:checked ~ .checkmark {
+    background-color: #0A95E6;
+  }
+
+  /* Search UI Element */
+
+  .search {
+    border: 1px solid #999;
+  }
+
+  .search.seperated input {
+    border-left: 1px solid #888;
+    border-right: 1px solid #888;
+  }
+
+  /* Dropdown selection menu thingy styles */
+
+  .dropdown-menu .menu {
+    background: #4e4e4e;
+    border: 1px solid #bbb;
+    box-shadow: 0px 8px 10px #4e4e4e, -10px 8px 15px #4e4e4e, 10px 8px 15px #4e4e4e;
+  }
+
+  .dropdown-menu > div {
+    border-bottom: 1px dotted #e6e6e6;
+  }
+
+  .dropdown-menu div:focus-within {
+    border: 1px solid #bbb;
+    box-shadow: 0 0 10px 5px #6d6d6d;
+  }
+
+  /*
+   * Tooltip stuff
+   */
+
+  .tooltip .tooltiptext {
+    border: 3px solid #696969;
+    background: #414141;
+  }
+
+  /* (Under)lines */
+  .underlined {
+    border-bottom: 1px solid #767676;
+  }
+
+  .leftlined {
+    border-left: 1px solid #e6e6e6;
+  }
+
+  .rightlined {
+    border-right: 1px solid #e6e6e6;
+  }
+
+  .overlined {
+    border-top: 1px solid #e6e6e6;
+  }
+
+  .menu .underlined  {
+    border-bottom: 1px solid #525252;
+  }
+
+  .menu ul {
+    background-color: #414141;
+  }
+
+  .info-green {
+    background: #3a653a;
+    border: 1px solid #6ba15e;
+    color: #d2e6d2;
+  }
+
+  .info-green a {
+    color: #68bf0b !important;
+  }
+
+  .info-yellow {
+    background: #fffadd;
+    border: 1px solid #e0e37b;
+    color: #4d4707;
+  }
+
+  .info-red {
+    background: #805454;
+    border: 1px solid #bd7878;
+    color: #d2d2d2;
+  }
+
+  ul.selection-list {
+    border: 1px solid #999;
+  }
+
+  /* Tab panel stuff */
+  .tab-active {
+    color: #0881c6;
+  } 
+
+  .approved-info-label {
+    background-color: rgba(198, 255, 161, 0.3);
+  }
+  
+  .unchecked-info-label {
+    background-color: rgba(255, 255, 161, 0.3);
+  }
+  
+  .rejected-info-label {
+    background-color: rgba(255, 161, 174, 0.3);
+  }
+  
+  .under-consideration-info-label {
+    background-color: rgba(142, 230, 230, 0.3);
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="url"],
+  input[type="password"],
+  input[type="datetime-local"],
+  textarea {
+    min-width: 0; /* Firefox and Egde need this */
+
+    padding: 0px 5px;
+
+    background: rgba(0, 0, 0, 0);
+    box-sizing: border-box;
+  }
+}

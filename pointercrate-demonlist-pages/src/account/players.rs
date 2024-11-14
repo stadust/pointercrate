@@ -79,7 +79,7 @@ impl AccountPageTab for PlayersPage {
                                         br;
                                         div.dropdown-menu.js-search #edit-player-banned style = "max-width: 50px" {
                                             div {
-                                                input type="text" style = "color: #444446; font-weight: bold;";
+                                                input type="text" class = "click-to-select";
                                             }
                                             div.menu {
                                                 ul {
@@ -99,7 +99,7 @@ impl AccountPageTab for PlayersPage {
                                         }
                                         div.dropdown-menu.js-search #edit-player-nationality data-default = "None" {
                                             div {
-                                                input type="text" style = "color: #444446; font-weight: bold;";
+                                                input type="text" class = "click-to-select";
                                             }
                                             div.menu {
                                                 ul {

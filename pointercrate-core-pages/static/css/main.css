@@ -47,3 +47,10 @@ input {
   height: calc(90px + 0.6em); /* fixed header height*/
   margin-top: calc(-90px - 0.6em); /* negative fixed header height */
 }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #444446;
+  }
+}
