@@ -37,7 +37,7 @@ class RecordManager extends Paginator {
 
     this.output = new Viewer(
       manager.getElementsByClassName("viewer-content")[0],
-      this,
+      this
     );
 
     this._video = document.getElementById("record-video");
@@ -53,11 +53,11 @@ class RecordManager extends Paginator {
     this.dropdown = new Dropdown(
       document
         .getElementById("status-filter-panel")
-        .getElementsByClassName("dropdown-menu")[0],
+        .getElementsByClassName("dropdown-menu")[0]
     );
 
     new Dropdown(
-      manager.getElementsByClassName("dropdown-menu")[0],
+      manager.getElementsByClassName("dropdown-menu")[0]
     ).addEventListener((selected) => {
       if (selected === "All") this.updateQueryData("demon_id", undefined);
       else this.updateQueryData("demon_id", selected);
@@ -71,7 +71,7 @@ class RecordManager extends Paginator {
       new PaginatorEditorBackend(this, true),
       "edit-record-status",
       "status",
-      this.output,
+      this.output
     );
 
     this.initProgressDialog();
@@ -80,7 +80,7 @@ class RecordManager extends Paginator {
       new FormDialog("record-holder-dialog"),
       "record-holder-pen",
       new PaginatorEditorBackend(this, true),
-      this.output,
+      this.output
     );
     this.initDemonDialog();
 
@@ -93,10 +93,10 @@ class RecordManager extends Paginator {
               ", " +
               this._holder.innerText +
               ", " +
-              this.currentObject.video,
+              this.currentObject.video
           )
           .then(() =>
-            this.output.setSuccess("Copied record data to clipboard!"),
+            this.output.setSuccess("Copied record data to clipboard!")
           )
           .catch(() => this.output.setError("Error copying to clipboard"));
       });
@@ -107,7 +107,7 @@ class RecordManager extends Paginator {
       new PaginatorEditorBackend(this, true),
       "record-progress-dialog",
       "record-progress-pen",
-      this.output,
+      this.output
     );
 
     form.addValidators({
@@ -128,7 +128,7 @@ class RecordManager extends Paginator {
       new PaginatorEditorBackend(this, false),
       "record-video-dialog",
       "record-video-pen",
-      this.output,
+      this.output
     );
 
     form.addValidators({
@@ -148,7 +148,7 @@ class RecordManager extends Paginator {
       "record-demon-pen",
       new PaginatorEditorBackend(this, true),
       this.output,
-      (demonId) => ({ demon_id: parseInt(demonId) }),
+      (demonId) => ({ demon_id: parseInt(demonId) })
     );
   }
 
@@ -209,7 +209,7 @@ class RecordManager extends Paginator {
         }
 
         $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
-      },
+      }
     );
   }
 }
@@ -239,7 +239,7 @@ function createNoteHtml(note) {
             recordManager.currentObject.id +
             "/notes/" +
             note.id +
-            "/",
+            "/"
         ).then(() => noteDiv.parentElement.removeChild(noteDiv));
       }
     });
@@ -297,7 +297,7 @@ function setupAddNote() {
     post(
       "/api/v1/records/" + recordManager.currentObject.id + "/notes/",
       {},
-      { content: textArea.value, is_public: isPublic.checked },
+      { content: textArea.value, is_public: isPublic.checked }
     )
       .then((noteResponse) => {
         let newNote = createNoteHtml(noteResponse.data.data);
@@ -318,7 +318,7 @@ function setupAddNote() {
 
 function setupRecordFilterPlayerIdForm() {
   var recordFilterPlayerIdForm = new Form(
-    document.getElementById("record-filter-by-player-id-form"),
+    document.getElementById("record-filter-by-player-id-form")
   );
   var playerId = recordFilterPlayerIdForm.input("record-player-id");
 
@@ -326,14 +326,14 @@ function setupRecordFilterPlayerIdForm() {
     // Reset search filter if player ID field is empty
     recordManager.updateQueryData(
       "player",
-      valueMissing(playerId) ? playerId.value : undefined,
+      valueMissing(playerId) ? playerId.value : undefined
     );
   });
 }
 
 function setupRecordSearchRecordIdForm() {
   var recordSearchByIdForm = new Form(
-    document.getElementById("record-search-by-record-id-form"),
+    document.getElementById("record-search-by-record-id-form")
   );
   var recordId = recordSearchByIdForm.input("record-record-id");
 
@@ -347,7 +347,7 @@ function setupRecordSearchRecordIdForm() {
 
 function setupRecordFilterPlayerNameForm() {
   var recordFilterPlayerNameForm = new Form(
-    document.getElementById("record-filter-by-player-name-form"),
+    document.getElementById("record-filter-by-player-name-form")
   );
   var playerName = recordFilterPlayerNameForm.input("record-player-name");
 
@@ -375,7 +375,7 @@ function setupEditRecordForm() {
   document.getElementById("record-delete").addEventListener("click", () => {
     if (
       confirm(
-        "Are you sure? This will irrevocably delete this record and all notes made on it!",
+        "Are you sure? This will irrevocably delete this record and all notes made on it!"
       )
     ) {
       del("/api/v1/records/" + recordManager.currentObject.id + "/", {

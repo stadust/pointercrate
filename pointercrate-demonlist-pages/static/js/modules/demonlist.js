@@ -46,7 +46,7 @@ export function initializeTimeMachine() {
   destination.addValidator(valueMissing, "Please specify a value");
   destination.addValidator(
     rangeUnderflow,
-    "You cannot go back in time that far!",
+    "You cannot go back in time that far!"
   );
 
   var now = new Date();
@@ -93,31 +93,31 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
   demon.addValidator(
     (input) => input.dropdown.selected !== undefined,
-    "Please specify a demon",
+    "Please specify a demon"
   );
   demon.setTransform(parseInt);
 
   player.addValidator(
     (input) => input.value !== undefined,
-    "Please specify a record holder",
+    "Please specify a record holder"
   );
   player.addValidator(
     (input) => input.value === undefined || input.value.length <= 50,
-    "Due to Geometry Dash's limitations I know that no player has such a long name",
+    "Due to Geometry Dash's limitations I know that no player has such a long name"
   );
 
   progress.addValidator(valueMissing, "Please specify the record's progress");
   progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
   progress.addValidator(
     rangeOverflow,
-    "Record progress cannot be larger than 100%",
+    "Record progress cannot be larger than 100%"
   );
   progress.addValidator(badInput, "Record progress must be a valid integer");
   progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
 
   video.addValidator(
     valueMissing,
-    "Please specify a video so we can check the records validity",
+    "Please specify a video so we can check the records validity"
   );
   video.addValidator(typeMismatch, "Please enter a valid URL");
 
@@ -126,7 +126,7 @@ export function initializeRecordSubmitter(submitApproved = false) {
   submissionForm.onInvalid(() =>
     gtag("event", "record-submit-failure-frontend", {
       "event-category": "demonlist",
-    }),
+    })
   );
   submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
@@ -141,7 +141,7 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
         if (queue_position)
           submissionForm.setSuccess(
-            `Record successfully submitted. It is #${queue_position} in the queue!`,
+            `Record successfully submitted. It is #${queue_position} in the queue!`
           );
         else submissionForm.setSuccess("Record successfully submitted.");
         submissionForm.clear();
@@ -212,7 +212,7 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
         let flag = getSubdivisionFlag(
           subdivision.name,
           countryCode,
-          subdivision.iso_code,
+          subdivision.iso_code
         );
 
         flag.style.marginLeft = "-10px";
@@ -228,7 +228,7 @@ export function populateSubdivisionDropdown(dropdown, countryCode) {
 
         dropdown.addListItem(li);
       }
-    },
+    }
   );
 }
 
@@ -277,7 +277,7 @@ export function generateDemon(demon) {
 
   li.appendChild(b);
   li.appendChild(
-    document.createTextNode(demon.name + " (ID: " + demon.id + ")"),
+    document.createTextNode(demon.name + " (ID: " + demon.id + ")")
   );
   li.appendChild(document.createElement("br"));
   li.appendChild(document.createTextNode("by " + demon.publisher.name));
@@ -314,11 +314,11 @@ export function generateRecord(record) {
   li.appendChild(recordId);
   li.appendChild(document.createElement("br"));
   li.appendChild(
-    document.createTextNode(record.player.name + " (" + record.player.id + ")"),
+    document.createTextNode(record.player.name + " (" + record.player.id + ")")
   );
   li.appendChild(document.createElement("br"));
   li.appendChild(
-    document.createTextNode(record.progress + "% on " + record.demon.name),
+    document.createTextNode(record.progress + "% on " + record.demon.name)
   );
   li.appendChild(document.createElement("br"));
 

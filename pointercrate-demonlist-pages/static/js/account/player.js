@@ -24,7 +24,7 @@ class PlayerManager extends FilteredPaginator {
 
     this.output = new Viewer(
       this.html.parentNode.getElementsByClassName("viewer-content")[0],
-      this,
+      this
     );
 
     this._id = document.getElementById("player-player-id");
@@ -35,7 +35,7 @@ class PlayerManager extends FilteredPaginator {
       "edit-player-banned",
       "banned",
       this.output,
-      { true: true, false: false },
+      { true: true, false: false }
     );
 
     this._nationality = setupDropdownEditor(
@@ -43,7 +43,7 @@ class PlayerManager extends FilteredPaginator {
       "edit-player-nationality",
       "nationality",
       this.output,
-      { None: null },
+      { None: null }
     );
 
     this._subdivision = setupDropdownEditor(
@@ -51,7 +51,7 @@ class PlayerManager extends FilteredPaginator {
       "edit-player-subdivision",
       "subdivision",
       this.output,
-      { None: null },
+      { None: null }
     );
 
     this.initNameDialog();
@@ -71,18 +71,18 @@ class PlayerManager extends FilteredPaginator {
 
     if (this.currentObject.nationality) {
       this._nationality.selectSilently(
-        this.currentObject.nationality.country_code,
+        this.currentObject.nationality.country_code
       );
 
       populateSubdivisionDropdown(
         this._subdivision,
-        this.currentObject.nationality.country_code,
+        this.currentObject.nationality.country_code
       ).then(() => {
         if (!this.currentObject.nationality.subdivision) {
           this._subdivision.selectSilently("None");
         } else {
           this._subdivision.selectSilently(
-            this.currentObject.nationality.subdivision.iso_code,
+            this.currentObject.nationality.subdivision.iso_code
           );
         }
       });
@@ -97,7 +97,7 @@ class PlayerManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, true),
       "player-name-dialog",
       "player-name-pen",
-      this.output,
+      this.output
     );
 
     form.addValidators({
@@ -110,7 +110,7 @@ class PlayerManager extends FilteredPaginator {
 
 function setupPlayerSearchPlayerIdForm() {
   var playerSearchByIdForm = new Form(
-    document.getElementById("player-search-by-player-id-form"),
+    document.getElementById("player-search-by-player-id-form")
   );
   var playerId = playerSearchByIdForm.input("search-player-id");
 
@@ -136,7 +136,7 @@ export function initialize(tabber) {
         initRecords().then(() => {
           recordManager.updateQueryData(
             "player",
-            playerManager.currentObject.id,
+            playerManager.currentObject.id
           );
           tabber.selectPane("3");
         });

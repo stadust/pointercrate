@@ -34,21 +34,21 @@ class IndividualStatsViewer extends StatsViewer {
     beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
 
     let legacy = beaten.filter(
-      (record) => record.demon.position > this.extended_list_size,
+      (record) => record.demon.position > this.extended_list_size
     ).length;
     let extended = beaten.filter(
       (record) =>
         record.demon.position > this.list_size &&
-        record.demon.position <= this.extended_list_size,
+        record.demon.position <= this.extended_list_size
     ).length;
 
     let verifiedExtended = playerData.verified.filter(
       (demon) =>
         demon.position <= this.extended_list_size &&
-        demon.position > this.list_size,
+        demon.position > this.list_size
     ).length;
     let verifiedLegacy = playerData.verified.filter(
-      (demon) => demon.position > this.extended_list_size,
+      (demon) => demon.position > this.extended_list_size
     ).length;
 
     this.formatRecordsInto(this._beaten, beaten);
@@ -60,7 +60,7 @@ class IndividualStatsViewer extends StatsViewer {
         verifiedExtended -
         verifiedLegacy,
       extended + verifiedExtended,
-      legacy + verifiedLegacy,
+      legacy + verifiedLegacy
     );
 
     let hardest = playerData.verified
@@ -83,8 +83,8 @@ class IndividualStatsViewer extends StatsViewer {
     formatInto(
       element,
       demons.map((demon) =>
-        this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/"),
-      ),
+        this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
+      )
     );
   }
 
@@ -94,15 +94,15 @@ class IndividualStatsViewer extends StatsViewer {
       records.map((record) => {
         let demon = this.formatDemon(
           record.demon,
-          record.video ?? "/demonlist/permalink/" + record.demon.id + "/",
+          record.video ?? "/demonlist/permalink/" + record.demon.id + "/"
         );
         if (record.progress !== 100) {
           demon.appendChild(
-            document.createTextNode(" (" + record.progress + "%)"),
+            document.createTextNode(" (" + record.progress + "%)")
           );
         }
         return demon;
-      }),
+      })
     );
   }
 }
@@ -112,7 +112,7 @@ $(window).on("load", function () {
   map.showSubdivisions();
 
   let subdivisionCheckbox = document.getElementById(
-    "show-subdivisions-checkbox",
+    "show-subdivisions-checkbox"
   );
   subdivisionCheckbox.addEventListener("change", () => {
     if (subdivisionCheckbox.checked) map.showSubdivisions();
@@ -120,7 +120,7 @@ $(window).on("load", function () {
   });
 
   window.statsViewer = new IndividualStatsViewer(
-    document.getElementById("statsviewer"),
+    document.getElementById("statsviewer")
   );
   window.statsViewer.initialize();
 
@@ -133,11 +133,11 @@ $(window).on("load", function () {
         window.statsViewer.updateQueryData("continent", selected);
         map.highlightContinent(selected);
       }
-    },
+    }
   );
 
   let subdivisionDropdown = new Dropdown(
-    document.getElementById("subdivision-dropdown"),
+    document.getElementById("subdivision-dropdown")
   );
 
   subdivisionDropdown.addEventListener((selected) => {
@@ -170,7 +170,7 @@ $(window).on("load", function () {
 
   map.addSelectionListener((countryCode, subdivisionCode) => {
     populateSubdivisionDropdown(subdivisionDropdown, countryCode).then(() =>
-      subdivisionDropdown.selectSilently(subdivisionCode),
+      subdivisionDropdown.selectSilently(subdivisionCode)
     );
 
     statsViewer.dropdown.selectSilently(countryCode);
@@ -202,10 +202,7 @@ function generateStatsViewerPlayer(player) {
 
   if (player.nationality) {
     li.appendChild(
-      getCountryFlag(
-        player.nationality.nation,
-        player.nationality.country_code,
-      ),
+      getCountryFlag(player.nationality.nation, player.nationality.country_code)
     );
     li.appendChild(document.createTextNode(" "));
   }

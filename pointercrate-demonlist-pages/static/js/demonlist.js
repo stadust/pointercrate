@@ -57,7 +57,7 @@ function initializeHistoryTable() {
           } else {
             cells[1].appendChild(arrow);
             cells[1].appendChild(
-              document.createTextNode(" " + Math.abs(positionChange)),
+              document.createTextNode(" " + Math.abs(positionChange))
             );
           }
         } else {
@@ -98,7 +98,7 @@ function initializeHistoryTable() {
         cells.forEach((cell) => newRow.appendChild(cell));
         tableBody.appendChild(newRow);
       }
-    },
+    }
   );
 }
 
@@ -144,7 +144,7 @@ function initializePositionChart() {
             return -value;
           },
         },
-      },
+      }
     );
 
     chart.on("data", function (context) {

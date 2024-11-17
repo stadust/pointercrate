@@ -22,7 +22,7 @@ class NavigationBar {
           let clone = navItem.cloneNode(true);
 
           for (let hovered of clone.getElementsByClassName(
-            "nav-hover-dropdown",
+            "nav-hover-dropdown"
           ))
             hovered.classList.remove("nav-hover-dropdown");
 
@@ -86,7 +86,7 @@ NavigationBar.allNavigationBars = [];
 $(document).ready(function () {
   for (let i = 0; i < NOHIDE_CLASSES.length; ++i) {
     $(NOHIDE_CLASSES[i]).each((index, element) =>
-      $(element).addClass("nav-nohide"),
+      $(element).addClass("nav-nohide")
     );
   }
 

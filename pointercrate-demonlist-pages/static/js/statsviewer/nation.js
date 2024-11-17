@@ -91,16 +91,16 @@ class NationStatsViewer extends StatsViewer {
     formatInto(
       this._unbeaten,
       nationData.unbeaten.map((demon) =>
-        this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/"),
-      ),
+        this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
+      )
     );
     formatInto(
       this._beaten,
-      beaten.map((record) => this.formatDemonFromRecord(record)),
+      beaten.map((record) => this.formatDemonFromRecord(record))
     );
     formatInto(
       this._progress,
-      progress.map((record) => this.formatDemonFromRecord(record)),
+      progress.map((record) => this.formatDemonFromRecord(record))
     );
     formatInto(
       this._created,
@@ -108,16 +108,16 @@ class NationStatsViewer extends StatsViewer {
         return this.makeTooltip(
           this.formatDemon(
             { name: creation.demon, position: creation.position },
-            "/demonlist/permalink/" + creation.id + "/",
+            "/demonlist/permalink/" + creation.id + "/"
           ),
           "(Co)created&nbsp;by&nbsp;" +
             creation.players.length +
             "&nbsp;player" +
             (creation.players.length === 1 ? "" : "s") +
             "&nbsp;in&nbsp;this&nbsp;country: ",
-          creation.players.join(", "),
+          creation.players.join(", ")
         );
-      }),
+      })
     );
     formatInto(
       this._verified,
@@ -125,12 +125,12 @@ class NationStatsViewer extends StatsViewer {
         return this.makeTooltip(
           this.formatDemon(
             { name: verification.demon, position: verification.position },
-            "/demonlist/permalink/" + verification.id + "/",
+            "/demonlist/permalink/" + verification.id + "/"
           ),
           "Verified&nbsp;by: ",
-          verification.player,
+          verification.player
         );
-      }),
+      })
     );
     formatInto(
       this._published,
@@ -138,12 +138,12 @@ class NationStatsViewer extends StatsViewer {
         return this.makeTooltip(
           this.formatDemon(
             { name: publication.demon, position: publication.position },
-            "/demonlist/permalink/" + publication.id + "/",
+            "/demonlist/permalink/" + publication.id + "/"
           ),
           "Published&nbsp;by: ",
-          publication.player,
+          publication.player
         );
-      }),
+      })
     );
   }
 
@@ -169,12 +169,12 @@ class NationStatsViewer extends StatsViewer {
   formatDemonFromRecord(record) {
     let baseElement = this.formatDemon(
       { name: record.demon, position: record.position },
-      "/demonlist/permalink/" + record.id + "/",
+      "/demonlist/permalink/" + record.id + "/"
     );
 
     if (record.progress !== 100)
       baseElement.appendChild(
-        document.createTextNode(" (" + record.progress + "%)"),
+        document.createTextNode(" (" + record.progress + "%)")
       );
 
     let title =
@@ -193,11 +193,11 @@ $(window).on("load", function () {
   let map = new InteractiveWorldMap();
 
   window.statsViewer = new NationStatsViewer(
-    document.getElementById("statsviewer"),
+    document.getElementById("statsviewer")
   );
   window.statsViewer.initialize();
   window.statsViewer.addSelectionListener((selected) =>
-    map.select(selected.nation.country_code),
+    map.select(selected.nation.country_code)
   );
 
   map.addSelectionListener((country, _) => {
@@ -215,7 +215,7 @@ $(window).on("load", function () {
         window.statsViewer.updateQueryData("continent", selected);
         map.highlightContinent(selected);
       }
-    },
+    }
   );
 });
 

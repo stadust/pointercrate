@@ -31,7 +31,7 @@ class DropDown {
 
     if (DropDown.currentlyShown !== undefined) {
       DropDown.hideDropDown(DropDown.currentlyShown, () =>
-        toShow.show(complete),
+        toShow.show(complete)
       );
     } else {
       toShow.show(complete);

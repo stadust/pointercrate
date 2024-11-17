@@ -78,14 +78,14 @@ function setupEditAccount() {
     new ProfileEditorBackend(null),
     "edit-dn-dialog",
     "display-name-pen",
-    output,
+    output
   );
 
   let editYoutubeForm = setupFormDialogEditor(
     new ProfileEditorBackend(null),
     "edit-yt-dialog",
     "youtube-pen",
-    output,
+    output
   );
 
   editYoutubeForm.addValidators({
@@ -102,7 +102,7 @@ function setupEditAccount() {
       new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
       "edit-pw-dialog",
       "change-password",
-      output,
+      output
     );
 
     let editPw = changePasswordForm.input("edit-pw");
@@ -129,7 +129,7 @@ function setupEditAccount() {
 
   var deleteAccountDialog = document.getElementById("delete-acc-dialog");
   var deleteAccountForm = new Form(
-    deleteAccountDialog.getElementsByTagName("form")[0],
+    deleteAccountDialog.getElementsByTagName("form")[0]
   );
   document.getElementById("delete-account").addEventListener("click", () => {
     $(deleteAccountDialog.parentElement).show();

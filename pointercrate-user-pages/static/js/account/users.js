@@ -26,7 +26,7 @@ function setupPatchUserPermissionsForm() {
         permissions: editForm.inputs
           .map((input) => input.value * parseInt(input.span.dataset.bit))
           .reduce((a, b) => a + b, 0),
-      },
+      }
     )
       .then((response) => {
         if (response.status == 200) {
@@ -82,8 +82,8 @@ function generateUser(userData) {
   b.appendChild(document.createTextNode(userData.name));
   i.appendChild(
     document.createTextNode(
-      "Display name: " + (userData.display_name || "None"),
-    ),
+      "Display name: " + (userData.display_name || "None")
+    )
   );
 
   li.appendChild(b);
@@ -100,7 +100,7 @@ class UserPaginator extends FilteredPaginator {
 
     this.output = new Viewer(
       this.html.parentNode.getElementsByClassName("viewer-content")[0],
-      this,
+      this
     );
   }
 
@@ -114,7 +114,7 @@ class UserPaginator extends FilteredPaginator {
 
     if (selectedUser.name == window.username) {
       editForm.setError(
-        "This is your own account. You cannot modify your own account using this interface!",
+        "This is your own account. You cannot modify your own account using this interface!"
       );
       for (let btn of this.output.html.getElementsByTagName("input")) {
         btn.classList.add("disabled");

@@ -22,7 +22,7 @@ export class StatsViewer extends FilteredPaginator {
     super(
       "stats-viewer-pagination",
       statsviewerdata.entryGenerator,
-      "name_contains",
+      "name_contains"
     );
 
     this.endpoint = statsviewerdata.rankingEndpoint;
@@ -33,7 +33,7 @@ export class StatsViewer extends FilteredPaginator {
     this.html = html;
     this.output = new Viewer(
       html.getElementsByClassName("viewer-content")[0],
-      this,
+      this
     );
 
     this._name = document.getElementById("player-name");
@@ -85,7 +85,7 @@ export class StatsViewer extends FilteredPaginator {
       nameSpan.innerText = name;
 
       this._name.appendChild(
-        getCountryFlag(nationality.nation, nationality.country_code),
+        getCountryFlag(nationality.nation, nationality.country_code)
       );
       this._name.appendChild(nameSpan);
 
@@ -94,8 +94,8 @@ export class StatsViewer extends FilteredPaginator {
           getSubdivisionFlag(
             nationality.subdivision.name,
             nationality.country_code,
-            nationality.subdivision.iso_code,
-          ),
+            nationality.subdivision.iso_code
+          )
         );
       } else {
         // needed for layout
@@ -110,7 +110,7 @@ export class StatsViewer extends FilteredPaginator {
     this._hardest.appendChild(
       hardest === undefined
         ? document.createTextNode("None")
-        : this.formatDemon(hardest, "/demonlist/permalink/" + hardest.id + "/"),
+        : this.formatDemon(hardest, "/demonlist/permalink/" + hardest.id + "/")
     );
   }
 
@@ -196,7 +196,7 @@ export class InteractiveWorldMap {
     this.currentlySelected = undefined;
 
     for (let subdivision of this.map.contentDocument.querySelectorAll(
-      ".land-with-states .state",
+      ".land-with-states .state"
     )) {
       subdivision.addEventListener("click", (event) => {
         // states are overlaid over the .land-with-states. We need to stop propagation as otherwise the
@@ -205,7 +205,7 @@ export class InteractiveWorldMap {
 
         if (
           !findParentWithClass(subdivision, "continent").classList.contains(
-            "selectable",
+            "selectable"
           )
         )
           return;
@@ -219,12 +219,12 @@ export class InteractiveWorldMap {
     }
 
     for (let clickable of this.map.contentDocument.querySelectorAll(
-      ".land, .island, .land-with-states",
+      ".land, .island, .land-with-states"
     )) {
       clickable.addEventListener("click", () => {
         if (
           !findParentWithClass(clickable, "continent").classList.contains(
-            "selectable",
+            "selectable"
           )
         )
           return;
@@ -299,7 +299,7 @@ export class InteractiveWorldMap {
 
   showSubdivisions() {
     for (let divided of this.map.contentDocument.querySelectorAll(
-      ".land-with-states",
+      ".land-with-states"
     )) {
       divided.classList.add("subdivided");
     }
@@ -307,7 +307,7 @@ export class InteractiveWorldMap {
 
   hideSubdivisions() {
     for (let divided of this.map.contentDocument.querySelectorAll(
-      ".land-with-states.subdivided",
+      ".land-with-states.subdivided"
     )) {
       divided.classList.remove("subdivided");
     }
@@ -331,7 +331,7 @@ export class InteractiveWorldMap {
       for (let listener of this.selectionListeners)
         listener(
           countryCode.toUpperCase(),
-          subdivisionCode === "" ? undefined : subdivisionCode.toUpperCase(),
+          subdivisionCode === "" ? undefined : subdivisionCode.toUpperCase()
         );
   }
 
@@ -359,7 +359,7 @@ export class InteractiveWorldMap {
 
     // TODO(patrick): pretty sure this is nonsense?
     this.dragDistance += Math.sqrt(
-      this.translate.x * this.translate.x + this.translate.y * this.translate.y,
+      this.translate.x * this.translate.x + this.translate.y * this.translate.y
     );
 
     this.svg.style.transform =
@@ -397,7 +397,7 @@ export class InteractiveWorldMap {
       if (this.isDragging) {
         this.doDrag(
           event.touches[0].pageX - this.lastTouchPosition.x,
-          event.touches[0].pageY - this.lastTouchPosition.y,
+          event.touches[0].pageY - this.lastTouchPosition.y
         );
 
         this.setLastPosFromTouchEvent(event);

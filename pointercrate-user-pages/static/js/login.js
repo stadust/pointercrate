@@ -14,14 +14,14 @@ function initializeLoginForm() {
   loginUsername.addValidator(valueMissing, "Username required");
   loginUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long.",
+    "Username too short. It needs to be at least 3 characters long."
   );
 
   loginPassword.clearOnInvalid = true;
   loginPassword.addValidator(valueMissing, "Password required");
   loginPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long.",
+    "Password too short. It needs to be at least 10 characters long."
   );
 
   loginForm.onSubmit(function (event) {
@@ -53,23 +53,23 @@ function intializeRegisterForm() {
   registerUsername.addValidator(valueMissing, "Username required");
   registerUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long.",
+    "Username too short. It needs to be at least 3 characters long."
   );
 
   registerPassword.addValidator(valueMissing, "Password required");
   registerPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long.",
+    "Password too short. It needs to be at least 10 characters long."
   );
 
   registerPasswordRepeat.addValidator(valueMissing, "Password required");
   registerPasswordRepeat.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long.",
+    "Password too short. It needs to be at least 10 characters long."
   );
   registerPasswordRepeat.addValidator(
     (rpp) => rpp.value == registerPassword.value,
-    "Passwords don't match",
+    "Passwords don't match"
   );
 
   registerForm.onSubmit(function (event) {

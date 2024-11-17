@@ -37,7 +37,7 @@ class SubmitterManager extends Paginator {
 
     this.output = new Viewer(
       this.html.parentNode.getElementsByClassName("viewer-content")[0],
-      this,
+      this
     );
 
     this._id = document.getElementById("submitter-submitter-id");
@@ -46,7 +46,7 @@ class SubmitterManager extends Paginator {
       "edit-submitter-banned",
       "banned",
       this.output,
-      { true: true, false: false },
+      { true: true, false: false }
     );
   }
 
@@ -64,7 +64,7 @@ class SubmitterManager extends Paginator {
 
 function setupSubmitterSearchSubmitterIdForm() {
   var submitterSearchByIdForm = new Form(
-    document.getElementById("submitter-search-by-id-form"),
+    document.getElementById("submitter-search-by-id-form")
   );
   var submitterId = submitterSearchByIdForm.input("search-submitter-id");
 
@@ -90,14 +90,14 @@ export function initialize(tabber) {
         initRecords().then(() => {
           recordManager.updateQueryData(
             "submitter",
-            submitterManager.currentObject.id,
+            submitterManager.currentObject.id
           );
           tabber.selectPane("3");
         });
       } else {
         recordManager.updateQueryData(
           "submitter",
-          submitterManager.currentObject.id,
+          submitterManager.currentObject.id
         );
         tabber.selectPane("3");
       }

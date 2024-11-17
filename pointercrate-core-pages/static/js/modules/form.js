@@ -135,7 +135,7 @@ export class DynamicSuggestionDropdown extends Dropdown {
     this.field = html.dataset.field;
 
     this.input.addEventListener("input", () =>
-      this._updateOptionsWithRequest(),
+      this._updateOptionsWithRequest()
     );
     this.timeout = null;
   }
@@ -147,7 +147,7 @@ export class DynamicSuggestionDropdown extends Dropdown {
 
     this.timeout = window.setTimeout(() => {
       get(
-        this.endpoint + "?limit=5&" + this.field + "_contains=" + filterString,
+        this.endpoint + "?limit=5&" + this.field + "_contains=" + filterString
       ).then((response) => {
         // No change since request was made?
         if (this.input.value == filterString) {
@@ -285,7 +285,7 @@ export function setupDropdownEditor(
   dropdownId,
   field,
   output,
-  translationTable = {},
+  translationTable = {}
 ) {
   let dropdown = new Dropdown(document.getElementById(dropdownId));
 
@@ -390,7 +390,7 @@ export function setupEditorDialog(
   buttonId,
   backend,
   output,
-  dataTransform = (x) => x,
+  dataTransform = (x) => x
 ) {
   document
     .getElementById(buttonId)
@@ -494,7 +494,7 @@ export class Paginator extends Output {
    */
   selectArbitrary(id) {
     return get(this.retrievalEndpoint + id + "/").then(
-      this.onReceive.bind(this),
+      this.onReceive.bind(this)
     );
   }
 
@@ -701,7 +701,7 @@ export class FilteredPaginator extends Paginator {
     paginatorID,
     itemConstructor,
     filterParam,
-    initialQueryData = {},
+    initialQueryData = {}
   ) {
     super(paginatorID, initialQueryData, itemConstructor);
 
@@ -718,7 +718,7 @@ export class FilteredPaginator extends Paginator {
 
     // Apply filter when input is changed externally
     filterInput.addEventListener("change", () =>
-      this.updateQueryData(filterParam, filterInput.value),
+      this.updateQueryData(filterParam, filterInput.value)
     );
 
     filterInput.parentNode.addEventListener("click", (event) => {
@@ -738,7 +738,7 @@ export class FilteredPaginator extends Paginator {
 
       timeout = setTimeout(
         () => this.updateQueryData(filterParam, filterInput.value),
-        1000,
+        1000
       );
     });
   }
@@ -767,7 +767,7 @@ export class FormInput {
 
   addValidators(validators) {
     Object.keys(validators).forEach((message) =>
-      this.addValidator(validators[message], message),
+      this.addValidator(validators[message], message)
     );
   }
 
@@ -876,7 +876,7 @@ export class HtmlFormInput extends FormInput {
           this.errorText = "";
         }
       },
-      false,
+      false
     );
   }
 
@@ -1088,7 +1088,7 @@ export class Form extends Output {
           this.invalidHandler();
         }
       },
-      false,
+      false
     );
   }
 
@@ -1167,7 +1167,7 @@ export class Form extends Output {
 
   addValidators(validators) {
     Object.keys(validators).forEach((input_id) =>
-      this.input(input_id).addValidators(validators[input_id]),
+      this.input(input_id).addValidators(validators[input_id])
     );
   }
 }
@@ -1226,7 +1226,7 @@ export function displayError(output, specialCodes = {}) {
       }
     } else {
       output.setError(
-        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!",
+        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!"
       );
       throw new Error("FrontendError");
     }

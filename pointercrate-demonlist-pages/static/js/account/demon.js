@@ -30,7 +30,7 @@ export class DemonManager extends FilteredPaginator {
 
     this.output = new Viewer(
       this.html.parentNode.getElementsByClassName("viewer-content")[0],
-      this,
+      this
     );
 
     this.retrievalEndpoint = "/api/v2/demons/";
@@ -55,14 +55,14 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, false),
       "demon-video-dialog",
       "demon-video-pen",
-      this.output,
+      this.output
     );
 
     let thumbnailForm = setupFormDialogEditor(
       new PaginatorEditorBackend(this, false),
       "demon-thumbnail-dialog",
       "demon-thumbnail-pen",
-      this.output,
+      this.output
     );
 
     thumbnailForm.addValidators({
@@ -80,7 +80,7 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, false),
       "demon-requirement-dialog",
       "demon-requirement-pen",
-      this.output,
+      this.output
     );
 
     requirementForm.addValidators({
@@ -99,7 +99,7 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, true),
       "demon-position-dialog",
       "demon-position-pen",
-      this.output,
+      this.output
     );
 
     positionForm.addValidators({
@@ -117,7 +117,7 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, true),
       "demon-name-dialog",
       "demon-name-pen",
-      this.output,
+      this.output
     );
 
     nameForm.addValidators({
@@ -129,13 +129,13 @@ export class DemonManager extends FilteredPaginator {
       new FormDialog("demon-verifier-dialog"),
       "demon-verifier-pen",
       new PaginatorEditorBackend(this, true),
-      this.output,
+      this.output
     );
     setupEditorDialog(
       new FormDialog("demon-publisher-dialog"),
       "demon-publisher-pen",
       new PaginatorEditorBackend(this, true),
-      this.output,
+      this.output
     );
   }
 
@@ -199,7 +199,7 @@ export class DemonManager extends FilteredPaginator {
           this.currentObject.id +
           "/creators/" +
           creator.id +
-          "/",
+          "/"
       )
         .then(() => {
           this._creators.removeChild(html);
@@ -314,7 +314,7 @@ export function initialize() {
       return post(
         "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
         {},
-        data,
+        data
       )
         .then((response) => {
           let location = response.headers["location"];
@@ -323,7 +323,7 @@ export function initialize() {
             name: data.creator,
             id: location.substring(
               location.lastIndexOf("/", location.length - 2) + 1,
-              location.length - 1,
+              location.length - 1
             ),
           });
 
@@ -345,7 +345,7 @@ export function initialize() {
       creator.children[0].addEventListener("click", () => {
         addDemonForm.creators.splice(
           addDemonForm.creators.indexOf(data.creator),
-          1,
+          1
         );
         dialogCreators.removeChild(creator);
       });

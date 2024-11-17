@@ -27,7 +27,7 @@ export class TabbedPane {
 
       // we then try to find the associated pane
       let candiatePanes = htmlElement.querySelectorAll(
-        ".tab-display .tab-content[data-tab-id='" + id + "']",
+        ".tab-display .tab-content[data-tab-id='" + id + "']"
       );
       for (var pane of candiatePanes) {
         if (containingTabbedPane(pane) === htmlElement) {
