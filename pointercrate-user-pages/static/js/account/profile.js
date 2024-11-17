@@ -43,10 +43,11 @@ class ProfileEditorBackend extends EditorBackend {
   }
 
   headers() {
-    let headers = {"If-Match": window.etag}
-    if (this._pw) 
-      headers["Authorization"] = "Basic " + btoa(window.username + ":" + this._pw.value);
-    return headers
+    let headers = { "If-Match": window.etag };
+    if (this._pw)
+      headers["Authorization"] =
+        "Basic " + btoa(window.username + ":" + this._pw.value);
+    return headers;
   }
 
   onSuccess(response) {
@@ -77,14 +78,14 @@ function setupEditAccount() {
     new ProfileEditorBackend(null),
     "edit-dn-dialog",
     "display-name-pen",
-    output
+    output,
   );
 
   let editYoutubeForm = setupFormDialogEditor(
     new ProfileEditorBackend(null),
     "edit-yt-dialog",
     "youtube-pen",
-    output
+    output,
   );
 
   editYoutubeForm.addValidators({
@@ -101,7 +102,7 @@ function setupEditAccount() {
       new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
       "edit-pw-dialog",
       "change-password",
-      output
+      output,
     );
 
     let editPw = changePasswordForm.input("edit-pw");
@@ -109,13 +110,16 @@ function setupEditAccount() {
     changePasswordForm.addValidators({
       "auth-pw": {
         "Password required": valueMissing,
-        "Password too short. It needs to be at least 10 characters long.": tooShort,
+        "Password too short. It needs to be at least 10 characters long.":
+          tooShort,
       },
       "edit-pw": {
-        "Password too short. It needs to be at least 10 characters long.": tooShort,
+        "Password too short. It needs to be at least 10 characters long.":
+          tooShort,
       },
       "edit-pw-repeat": {
-        "Password too short. It needs to be at least 10 characters long.": tooShort,
+        "Password too short. It needs to be at least 10 characters long.":
+          tooShort,
         "Passwords don't match": (rpp) => rpp.value == editPw.value,
       },
     });
@@ -125,7 +129,7 @@ function setupEditAccount() {
 
   var deleteAccountDialog = document.getElementById("delete-acc-dialog");
   var deleteAccountForm = new Form(
-    deleteAccountDialog.getElementsByTagName("form")[0]
+    deleteAccountDialog.getElementsByTagName("form")[0],
   );
   document.getElementById("delete-account").addEventListener("click", () => {
     $(deleteAccountDialog.parentElement).show();

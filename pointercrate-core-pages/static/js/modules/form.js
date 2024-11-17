@@ -5,16 +5,16 @@ export class Dropdown {
   /**
    * Creates an instance of Dropdown. The dropdown menu consists on an input element and an actual dropdown (an unordered list).
    * The dropdown only appears if the input is focused.
-   * 
+   *
    * Each dropdown menu item needs to define a `data-value` attribute, which, confusingly,
-   * acts as the unique key identifying that item. 
-   * 
+   * acts as the unique key identifying that item.
+   *
    * Upon selecting an item in the dropdown, the value of the input element is set to the dropdowns data-display attribute,
    * or its innerText if no data-display is provided.
-   * 
+   *
    * The input element can have a data-default attribute, which should link to one of the dropdown items' `data-value`.
    * This will be the item selected by default.
-   * 
+   *
    * @param {HTMLElement} html
    * @memberof Dropdown
    */
@@ -47,7 +47,6 @@ export class Dropdown {
         }
       }
     };
-
 
     const observer = new MutationObserver(callback);
     observer.observe(this.ul, config);
@@ -82,8 +81,7 @@ export class Dropdown {
   }
 
   onUnfocus() {
-    if (this.selected)
-      this.input.value = this.values[this.selected];
+    if (this.selected) this.input.value = this.values[this.selected];
   }
 
   /**
@@ -136,22 +134,24 @@ export class DynamicSuggestionDropdown extends Dropdown {
     this.endpoint = html.dataset.endpoint;
     this.field = html.dataset.field;
 
-    this.input.addEventListener("input", () => this._updateOptionsWithRequest());
+    this.input.addEventListener("input", () =>
+      this._updateOptionsWithRequest(),
+    );
     this.timeout = null;
   }
 
   _updateOptionsWithRequest() {
     var filterString = this.input.value;
 
-    if (this.timeout) 
-      window.clearTimeout(this.timeout);
-    
+    if (this.timeout) window.clearTimeout(this.timeout);
+
     this.timeout = window.setTimeout(() => {
-      get(this.endpoint + "?limit=5&" + this.field + "_contains=" + filterString)
-      .then(response => {
+      get(
+        this.endpoint + "?limit=5&" + this.field + "_contains=" + filterString,
+      ).then((response) => {
         // No change since request was made?
         if (this.input.value == filterString) {
-          while(this.ul.childNodes.length) 
+          while (this.ul.childNodes.length)
             this.ul.removeChild(this.ul.lastChild);
 
           for (let item of response.data) {
@@ -163,7 +163,7 @@ export class DynamicSuggestionDropdown extends Dropdown {
             this.addListItem(li);
           }
         }
-      })
+      });
     }, 500);
   }
 
@@ -285,7 +285,7 @@ export function setupDropdownEditor(
   dropdownId,
   field,
   output,
-  translationTable = {}
+  translationTable = {},
 ) {
   let dropdown = new Dropdown(document.getElementById(dropdownId));
 
@@ -377,10 +377,9 @@ export class DropdownDialog extends Dialog {
 
     let html = document.getElementById(dropdownId);
 
-    if (html.dataset.endpoint) 
+    if (html.dataset.endpoint)
       this.dropdown = new DynamicSuggestionDropdown(html);
-    else
-      this.dropdown = new Dropdown(html);
+    else this.dropdown = new Dropdown(html);
 
     this.dropdown.addEventListener((selected) => this.onSubmit(selected));
   }
@@ -391,7 +390,7 @@ export function setupEditorDialog(
   buttonId,
   backend,
   output,
-  dataTransform = (x) => x
+  dataTransform = (x) => x,
 ) {
   document
     .getElementById(buttonId)
@@ -495,7 +494,7 @@ export class Paginator extends Output {
    */
   selectArbitrary(id) {
     return get(this.retrievalEndpoint + id + "/").then(
-      this.onReceive.bind(this)
+      this.onReceive.bind(this),
     );
   }
 
@@ -702,7 +701,7 @@ export class FilteredPaginator extends Paginator {
     paginatorID,
     itemConstructor,
     filterParam,
-    initialQueryData = {}
+    initialQueryData = {},
   ) {
     super(paginatorID, initialQueryData, itemConstructor);
 
@@ -719,7 +718,7 @@ export class FilteredPaginator extends Paginator {
 
     // Apply filter when input is changed externally
     filterInput.addEventListener("change", () =>
-      this.updateQueryData(filterParam, filterInput.value)
+      this.updateQueryData(filterParam, filterInput.value),
     );
 
     filterInput.parentNode.addEventListener("click", (event) => {
@@ -739,7 +738,7 @@ export class FilteredPaginator extends Paginator {
 
       timeout = setTimeout(
         () => this.updateQueryData(filterParam, filterInput.value),
-        1000
+        1000,
       );
     });
   }
@@ -768,7 +767,7 @@ export class FormInput {
 
   addValidators(validators) {
     Object.keys(validators).forEach((message) =>
-      this.addValidator(validators[message], message)
+      this.addValidator(validators[message], message),
     );
   }
 
@@ -877,7 +876,7 @@ export class HtmlFormInput extends FormInput {
           this.errorText = "";
         }
       },
-      false
+      false,
     );
   }
 
@@ -943,10 +942,9 @@ export class DropdownFormInput extends FormInput {
 
     let html = dropdown.getElementsByClassName("dropdown-menu")[0];
 
-    if (html.dataset.endpoint) 
+    if (html.dataset.endpoint)
       this.dropdown = new DynamicSuggestionDropdown(html);
-    else
-      this.dropdown = new Dropdown(html);
+    else this.dropdown = new Dropdown(html);
 
     this.error = dropdown.getElementsByTagName("p")[0];
 
@@ -1090,7 +1088,7 @@ export class Form extends Output {
           this.invalidHandler();
         }
       },
-      false
+      false,
     );
   }
 
@@ -1169,7 +1167,7 @@ export class Form extends Output {
 
   addValidators(validators) {
     Object.keys(validators).forEach((input_id) =>
-      this.input(input_id).addValidators(validators[input_id])
+      this.input(input_id).addValidators(validators[input_id]),
     );
   }
 }
@@ -1228,7 +1226,7 @@ export function displayError(output, specialCodes = {}) {
       }
     } else {
       output.setError(
-        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!"
+        "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!",
       );
       throw new Error("FrontendError");
     }
@@ -1286,16 +1284,16 @@ const RATELIMITED = {
 // I cannot fucking believe javascript doesn't have this built in.
 // This is based on https://www.w3schools.com/js/js_cookies.asp
 function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let cookies = decodedCookie.split(';');
-    for (let cookie of cookies) {
-      cookie = cookie.trim();
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let cookies = decodedCookie.split(";");
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
 
-      if (cookie.indexOf(name) == 0)
-        return cookie.substring(name.length, cookie.length);
-    }
-    return null;
+    if (cookie.indexOf(name) == 0)
+      return cookie.substring(name.length, cookie.length);
+  }
+  return null;
 }
 
 function mkReq(method, endpoint, headers = {}, data = null) {

@@ -17,7 +17,9 @@ import {
   del,
   displayError,
   Form,
-  post, setupEditorDialog, FormDialog,
+  post,
+  setupEditorDialog,
+  FormDialog,
 } from "/static/core/js/modules/form.js";
 
 export let demonManager;
@@ -28,7 +30,7 @@ export class DemonManager extends FilteredPaginator {
 
     this.output = new Viewer(
       this.html.parentNode.getElementsByClassName("viewer-content")[0],
-      this
+      this,
     );
 
     this.retrievalEndpoint = "/api/v2/demons/";
@@ -53,14 +55,14 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, false),
       "demon-video-dialog",
       "demon-video-pen",
-      this.output
+      this.output,
     );
 
     let thumbnailForm = setupFormDialogEditor(
-        new PaginatorEditorBackend(this, false),
-        "demon-thumbnail-dialog",
-        "demon-thumbnail-pen",
-        this.output
+      new PaginatorEditorBackend(this, false),
+      "demon-thumbnail-dialog",
+      "demon-thumbnail-pen",
+      this.output,
     );
 
     thumbnailForm.addValidators({
@@ -78,7 +80,7 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, false),
       "demon-requirement-dialog",
       "demon-requirement-pen",
-      this.output
+      this.output,
     );
 
     requirementForm.addValidators({
@@ -97,7 +99,7 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, true),
       "demon-position-dialog",
       "demon-position-pen",
-      this.output
+      this.output,
     );
 
     positionForm.addValidators({
@@ -115,7 +117,7 @@ export class DemonManager extends FilteredPaginator {
       new PaginatorEditorBackend(this, true),
       "demon-name-dialog",
       "demon-name-pen",
-      this.output
+      this.output,
     );
 
     nameForm.addValidators({
@@ -127,13 +129,13 @@ export class DemonManager extends FilteredPaginator {
       new FormDialog("demon-verifier-dialog"),
       "demon-verifier-pen",
       new PaginatorEditorBackend(this, true),
-      this.output
+      this.output,
     );
     setupEditorDialog(
       new FormDialog("demon-publisher-dialog"),
       "demon-publisher-pen",
       new PaginatorEditorBackend(this, true),
-      this.output
+      this.output,
     );
   }
 
@@ -197,7 +199,7 @@ export class DemonManager extends FilteredPaginator {
           this.currentObject.id +
           "/creators/" +
           creator.id +
-          "/"
+          "/",
       )
         .then(() => {
           this._creators.removeChild(html);
@@ -253,9 +255,9 @@ function setupDemonAdditionForm() {
 
   form.addValidators({
     "demon-add-name": { "Please specify a name": valueMissing },
-    "demon-add-level-id": { 
-      "Please specify a Geometry Dash level ID": valueMissing, 
-      "Level ID must be positive": rangeUnderflow
+    "demon-add-level-id": {
+      "Please specify a Geometry Dash level ID": valueMissing,
+      "Level ID must be positive": rangeUnderflow,
     },
     "demon-add-position": {
       "Please specify a position": valueMissing,
@@ -264,7 +266,8 @@ function setupDemonAdditionForm() {
       "Demon position must be integer": stepMismatch,
     },
     "demon-add-requirement": {
-      "Please specify a requirement for record progress on this demon": valueMissing,
+      "Please specify a requirement for record progress on this demon":
+        valueMissing,
       "Record requirement cannot be smaller than 0%": rangeUnderflow,
       "Record requirement cannot be greater than 100%": rangeOverflow,
       "Record requirement must be a valid integer": badInput,
@@ -309,45 +312,45 @@ export function initialize() {
   button1.addEventListener("click", () => {
     creatorFormDialog.submissionPredicateFactory = (data) => {
       return post(
-          "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
-          {},
-          data
+        "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
+        {},
+        data,
       )
-          .then((response) => {
-            let location = response.headers["location"];
+        .then((response) => {
+          let location = response.headers["location"];
 
-            demonManager.addCreator({
-              name: data.creator,
-              id: location.substring(
-                  location.lastIndexOf("/", location.length - 2) + 1,
-                  location.length - 1
-              ),
-            });
-
-            demonManager.output.setSuccess("Successfully added creator");
-          })
-          .catch(response => {
-            displayError(creatorFormDialog.form)(response);
-            throw response;
+          demonManager.addCreator({
+            name: data.creator,
+            id: location.substring(
+              location.lastIndexOf("/", location.length - 2) + 1,
+              location.length - 1,
+            ),
           });
-    }
+
+          demonManager.output.setSuccess("Successfully added creator");
+        })
+        .catch((response) => {
+          displayError(creatorFormDialog.form)(response);
+          throw response;
+        });
+    };
     creatorFormDialog.open();
   });
 
   button2.addEventListener("click", () => {
-    creatorFormDialog.submissionPredicateFactory = (data) => new Promise(resolve => resolve(data));
-    creatorFormDialog.open()
-        .then(data => {
-          let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
-          creator.children[0].addEventListener("click", () => {
-            addDemonForm.creators.splice(
-                addDemonForm.creators.indexOf(data.creator),
-                1
-            );
-            dialogCreators.removeChild(creator);
-          });
+    creatorFormDialog.submissionPredicateFactory = (data) =>
+      new Promise((resolve) => resolve(data));
+    creatorFormDialog.open().then((data) => {
+      let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
+      creator.children[0].addEventListener("click", () => {
+        addDemonForm.creators.splice(
+          addDemonForm.creators.indexOf(data.creator),
+          1,
+        );
+        dialogCreators.removeChild(creator);
+      });
 
-          addDemonForm.creators.push(data.creator);
-        });
+      addDemonForm.creators.push(data.creator);
+    });
   });
 }

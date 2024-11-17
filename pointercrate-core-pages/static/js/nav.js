@@ -3,7 +3,7 @@
 const TEMPLATES = {
   DROP_DOWN: "<div class='nav-drop-down'></div>",
   BUTTON:
-    '<div class ="nav-item collapse-button nav-nohide"><div class="hamburger hover"><input type="checkbox" /><span></span><span></span><span></span></div></div>'
+    '<div class ="nav-item collapse-button nav-nohide"><div class="hamburger hover"><input type="checkbox" /><span></span><span></span><span></span></div></div>',
 };
 
 const NOHIDE_CLASSES = [".collapse-button", ".nav-icon"];
@@ -16,12 +16,14 @@ class NavigationBar {
     let dropDown = document.createElement("div");
     dropDown.classList.add("nav-drop-down");
 
-    for(let navGroup of navigation.getElementsByClassName("nav-group")) {
-      for(let navItem of navGroup.childNodes) {
-        if(!navItem.classList.contains("nav-nohide")) {
+    for (let navGroup of navigation.getElementsByClassName("nav-group")) {
+      for (let navItem of navGroup.childNodes) {
+        if (!navItem.classList.contains("nav-nohide")) {
           let clone = navItem.cloneNode(true);
 
-          for (let hovered of clone.getElementsByClassName("nav-hover-dropdown"))
+          for (let hovered of clone.getElementsByClassName(
+            "nav-hover-dropdown",
+          ))
             hovered.classList.remove("nav-hover-dropdown");
 
           dropDown.appendChild(clone);
@@ -43,12 +45,12 @@ class NavigationBar {
     if (this.extended) {
       this.dropDown.stop().slideDown({
         duration: instant ? 0 : 400,
-        easing: "easeInOutQuad"
+        easing: "easeInOutQuad",
       });
     } else {
       this.dropDown.stop().slideUp({
         duration: instant ? 0 : 400,
-        easing: "easeInOutQuad"
+        easing: "easeInOutQuad",
       });
     }
   }
@@ -81,10 +83,10 @@ class NavigationBar {
 
 NavigationBar.allNavigationBars = [];
 
-$(document).ready(function() {
+$(document).ready(function () {
   for (let i = 0; i < NOHIDE_CLASSES.length; ++i) {
     $(NOHIDE_CLASSES[i]).each((index, element) =>
-      $(element).addClass("nav-nohide")
+      $(element).addClass("nav-nohide"),
     );
   }
 
