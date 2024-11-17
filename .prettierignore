@@ -1,0 +1,27 @@
+/*
+
+# This is very silly. See https://stackoverflow.com/questions/77238746/how-can-i-exclude-a-specific-file-from-a-ignored-folder-in-prettierignore
+
+!/pointercrate-user-pages
+/pointercrate-user-pages/*
+
+!/pointercrate-user-pages/static
+/pointercrate-user-pages/static/*
+
+!/pointercrate-user-pages/static/js
+
+!/pointercrate-core-pages
+/pointercrate-core-pages/*
+
+!/pointercrate-core-pages/static
+/pointercrate-core-pages/static/*
+
+!/pointercrate-core-pages/static/js
+
+!/pointercrate-demonlist-pages
+/pointercrate-demonlist-pages/*
+
+!/pointercrate-demonlist-pages/static
+/pointercrate-demonlist-pages/static/*
+
+!/pointercrate-demonlist-pages/static/js
