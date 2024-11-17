@@ -9,7 +9,7 @@ class DropDown {
     this.dropdown.stop().slideDown({
       duration: 200,
       easing: "easeInOutQuad",
-      complete: complete
+      complete: complete,
     });
 
     DropDown.currentlyShown = this.dropdown[0].id;
@@ -20,7 +20,7 @@ class DropDown {
     this.dropdown.stop().slideUp({
       duration: 200,
       easing: "easeInOutQuad",
-      complete: complete
+      complete: complete,
     });
 
     DropDown.currentlyShown = undefined;
@@ -31,7 +31,7 @@ class DropDown {
 
     if (DropDown.currentlyShown !== undefined) {
       DropDown.hideDropDown(DropDown.currentlyShown, () =>
-        toShow.show(complete)
+        toShow.show(complete),
       );
     } else {
       toShow.show(complete);
@@ -89,7 +89,7 @@ class Search {
     this.container.find("li").each((index, element) => {
       element = $(element);
       var content = element.text().toLowerCase();
-      if (queries.some(q => content.includes(q))) {
+      if (queries.some((q) => content.includes(q))) {
         element.show();
       } else {
         element.hide();
@@ -104,7 +104,7 @@ class Search {
       this.updateResults(this.input.val().toLowerCase());
     });
 
-    this.search.click(event => {
+    this.search.click((event) => {
       if ($(event.target).is(this.search)) {
         let xOff = event.pageX - this.search.offset().left;
 
@@ -119,7 +119,7 @@ class Search {
 
 Search.allSearchBars = [];
 
-$(document).ready(function() {
+$(document).ready(function () {
   // register dropdowns
 
   $(".dropdown").each((i, elem) => {
