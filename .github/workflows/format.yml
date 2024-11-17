@@ -1,6 +1,6 @@
-name: Rustfmt
+name: Format
 
-# Runs `cargo fmt` whenever code is pushed or pr'd into master. 
+# Runs `cargo fmt` (Rust formatter) and `prettier` (JS formatter) whenever code is pushed or pr'd into master. 
 
 on: 
   push:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   format:
-    name: Rustfmt
+    name: Format
     runs-on: ubuntu-latest
     
     steps:
@@ -26,16 +26,23 @@ jobs:
           override: true
           components: rustfmt
       - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all
+
+      - name: Run prettier
+        uses: actionsx/prettier@v2
+        with:
+          args: --write .
+        
       - name: Commit files # only runs if something actually changed
         run: |
           if [[ -n "$(git status -s)" ]]; then
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
-            git commit -m "CI: Automatic Rustfmt" -a
+            git commit -m "CI: Automatic Format" -a
           fi
       - name: Push changes
         uses: ad-m/github-push-action@master
