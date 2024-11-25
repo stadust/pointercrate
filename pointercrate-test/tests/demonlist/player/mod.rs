@@ -168,3 +168,49 @@ async fn test_patch_player_nationality(pool: Pool<Postgres>) {
     assert_eq!(result["data"]["nation_code"], "BE");
     assert_eq!(result["data"]["subdivision_code"], "ENG");
 }
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_me(pool: Pool<Postgres>) {
+    let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+
+    // Assert 401 without authentication
+    client.get("/api/v1/players/me").expect_status(Status::Unauthorized).execute().await;
+
+    let authenticated_user = pointercrate_test::user::add_normal_user(&mut *connection).await;
+    let user = authenticated_user.user();
+
+    // Assert 404 when authorized, but claim doesn't exist
+    client
+        .get("/api/v1/players/me")
+        .authorize_as(&authenticated_user)
+        .expect_status(Status::NotFound)
+        .execute()
+        .await;
+
+    // Create claim
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    player
+        .initiate_claim(user.id, &mut *connection)
+        .await
+        .unwrap()
+        .set_verified(true, &mut *connection)
+        .await
+        .unwrap();
+    let player = Player::by_id(player.id, &mut *connection)
+        .await
+        .unwrap()
+        .upgrade(&mut *connection)
+        .await
+        .unwrap();
+
+    // Authorized and claim exists
+    assert_eq!(
+        client
+            .get("/api/v1/players/me")
+            .authorize_as(&authenticated_user)
+            .expect_status(Status::Ok)
+            .get_success_result::<FullPlayer>()
+            .await,
+        player
+    );
+}

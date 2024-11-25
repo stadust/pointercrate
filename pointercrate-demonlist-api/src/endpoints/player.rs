@@ -45,6 +45,24 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
     Ok(pagination_response("/api/v1/players/ranking/", query.0, &mut *pool.connection().await?).await?)
 }
 
+#[rocket::get("/me")]
+pub async fn get_me(auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
+    let Some(auth) = auth else {
+        return Err(CoreError::Unauthorized.into());
+    };
+
+    let mut connection = pool.connection().await?;
+
+    let user = auth.user.into_user();
+    let Some(player_claim) = PlayerClaim::by_user(user.id, &mut *connection).await? else {
+        return Err(CoreError::NotFound.into());
+    };
+    let player = Player::by_id(player_claim.player.id, &mut *connection).await?;
+    let full_player = player.upgrade(&mut *connection).await?;
+
+    Ok(Tagged(full_player))
+}
+
 #[rocket::get("/<player_id>")]
 pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
     let mut connection = pool.connection().await?;
