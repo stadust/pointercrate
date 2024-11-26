@@ -44,6 +44,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             "/api/v1/players/",
             rocket::routes![
                 endpoints::player::get,
+                endpoints::player::get_me,
                 endpoints::player::paginate,
                 endpoints::player::patch,
                 endpoints::player::ranking,
