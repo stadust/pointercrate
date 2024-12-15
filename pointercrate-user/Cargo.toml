@@ -8,7 +8,7 @@ edition.workspace = true
 
 [dependencies]
 pointercrate-core = {path = "../pointercrate-core"}
-serde = "1.0.215"
+serde = "1.0.216"
 derive_more = "0.99.18"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
 jsonwebtoken = "9.3.0"
