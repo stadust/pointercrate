@@ -240,6 +240,6 @@ footer * {
 /* dark mode */
 @media (prefers-color-scheme: dark) {
   header nav {
-    background: #444446;
+    background: #353434;
   }
 }

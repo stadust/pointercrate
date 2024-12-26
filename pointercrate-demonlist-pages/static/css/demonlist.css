@@ -220,7 +220,7 @@ tr:nth-child(even) {
 /* dark mode */
 @media (prefers-color-scheme: dark) {
   .dropdown {
-    background: #414141;
+    background: #353434;
   }
 
   tr {
@@ -228,6 +228,6 @@ tr:nth-child(even) {
   }
   
   tr:nth-child(even) {
-    background: #333333;
+    background: #3d3b3b;
   }
 }

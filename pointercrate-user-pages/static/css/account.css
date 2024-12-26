@@ -49,7 +49,7 @@ form {
 /* dark mode */
 @media (prefers-color-scheme: dark) {
   .tab-active {
-    background-color: #616161;
+    background-color: #474747;
     color: #fff;
   }
 }

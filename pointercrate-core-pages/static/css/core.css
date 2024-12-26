@@ -184,18 +184,18 @@
   }
   
   .white {
-    background-color: #414141;
+    background-color: #353434;
     color: #FFFFFF;
   }
 
   .white.hover:not(.disabled):not([disabled]):hover,
   .white.active {
-    background-color: #616161;
+    background-color: #474747;
     color: #fff;
   }
   
   .white.hover:not(.disabled):not([disabled]):active {
-    background-color: #5a5a5a;
+    background-color: #383838;
     color: #f0eeee;
   }
   
