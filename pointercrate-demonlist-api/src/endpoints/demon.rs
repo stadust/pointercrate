@@ -19,6 +19,7 @@ use pointercrate_demonlist::{
 };
 use pointercrate_user::auth::ApiToken;
 use pointercrate_user_api::auth::Auth;
+use pointercrate_integrate::gd::GeometryDashConnector;
 use rocket::{http::Status, serde::json::Json, State};
 
 #[rocket::get("/")]
@@ -64,7 +65,7 @@ pub async fn movement_log(demon_id: i32, pool: &State<PointercratePool>) -> Resu
 
 #[rocket::post("/", data = "<data>")]
 pub async fn post(
-    mut auth: Auth<ApiToken>, data: Json<PostDemon>, ratelimits: &State<DemonlistRatelimits>,
+    mut auth: Auth<ApiToken>, data: Json<PostDemon>, ratelimits: &State<DemonlistRatelimits>, gd: &State<GeometryDashConnector>
 ) -> Result<Response2<Tagged<FullDemon>>> {
     auth.require_permission(LIST_MODERATOR)?;
 
@@ -75,6 +76,8 @@ pub async fn post(
     auth.commit().await?;
 
     let demon_id = demon.demon.base.id;
+
+    gd.inner().clone().refresh_demon_data(demon.demon.base.name.clone(), demon_id).await;
 
     Ok(Response2::tagged(demon)
         .status(Status::Created)
