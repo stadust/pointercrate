@@ -14,7 +14,7 @@ async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {
 
     let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
 
-    let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": []}};
+    let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": [], "level_id": 10565740}};
 
     // first one should succeed
     clnt.post("/api/v2/demons/", &demon)
