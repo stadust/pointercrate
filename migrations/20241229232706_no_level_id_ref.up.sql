@@ -1,0 +1,1 @@
+ALTER TABLE demons DROP CONSTRAINT IF EXISTS demons_level_id_fkey;

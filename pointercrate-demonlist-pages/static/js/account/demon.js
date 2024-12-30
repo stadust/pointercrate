@@ -256,7 +256,6 @@ function setupDemonAdditionForm() {
   form.addValidators({
     "demon-add-name": { "Please specify a name": valueMissing },
     "demon-add-level-id": {
-      "Please specify a Geometry Dash level ID": valueMissing,
       "Level ID must be positive": rangeUnderflow,
     },
     "demon-add-position": {
