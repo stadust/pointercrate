@@ -41,7 +41,7 @@ impl FullDemon {
         Demon::shift_down(data.position, connection).await?;
 
         let created = sqlx::query!(
-            "INSERT INTO demons (name, position, requirement, video, verifier, publisher) VALUES ($1::text,$2,$3,$4::text,$5,$6) \
+            "INSERT INTO demons (name, position, requirement, video, verifier, publisher, level_id) VALUES ($1::text,$2,$3,$4::text,$5,$6, $7) \
              RETURNING id, thumbnail",
             data.name.to_string(),
             data.position,
@@ -49,6 +49,7 @@ impl FullDemon {
             video.as_ref(),
             verifier.id,
             publisher.id,
+            data.level_id
         )
         .fetch_one(&mut *connection)
         .await?;
