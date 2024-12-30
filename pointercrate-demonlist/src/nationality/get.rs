@@ -150,7 +150,7 @@ pub async fn unbeaten_in(nation: &Nationality, connection: &mut PgConnection) ->
 }
 
 pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
-    let mut stream = sqlx::query!( r#"select distinct on (demon) demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from creators inner join demons on demons.id=demon inner join players on players.id=creator where nationality=$1"#, nation.iso_country_code).fetch(connection);
+    let mut stream = sqlx::query!( r#"select (demon) demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from creators inner join demons on demons.id=demon inner join players on players.id=creator where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
     let mut creations = Vec::<MiniDemonWithPlayers>::new();
 
