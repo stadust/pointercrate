@@ -34,11 +34,12 @@ class ClaimManager extends FilteredPaginator {
     ).then((response) => {
       if (response.data.length === 0) {
         this.setError(
-          "The claimed player (" + selected.dataset.playerId + ") does not have an approved record on the list"
+          "The claimed player (" +
+            selected.dataset.playerId +
+            ") does not have an approved record on the list"
         );
         document.getElementById("claim-video").removeAttribute("src");
-      }
-      else {
+      } else {
         document.getElementById("claim-video").src = embedVideo(
           response.data[0].video
         );
