@@ -23,6 +23,20 @@ pub(crate) fn stats_viewer_panel() -> Markup {
     }
 }
 
+fn demon_sorting_mode_panel() -> Markup {
+    html! {
+        section.panel.fade style="overflow:initial" {
+            h3.underlined {
+                "Demon Sorting"
+            }
+            p {
+                "The order in which completed demons are listed on stats viewer profiles"
+            }
+            (simple_dropdown("demonsortingmode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
+        }
+    }
+}
+
 fn continent_panel() -> Markup {
     html! {
         section.panel.fade style="overflow:initial"{

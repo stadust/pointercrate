@@ -25,13 +25,17 @@ class IndividualStatsViewer extends StatsViewer {
 
     this.setName(playerData.name, playerData.nationality);
 
+    this.populateStatsContainers(this.demonSortingMode);
+  }
+
+  populateStatsContainers(demonSortingMode) {
+    var playerData = this.currentObject;
+    
     this.formatDemonsInto(this._created, playerData.created);
     this.formatDemonsInto(this._published, playerData.published);
     this.formatDemonsInto(this._verified, playerData.verified);
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
-
-    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
 
     let legacy = beaten.filter(
       (record) => record.demon.position > this.extended_list_size
@@ -50,6 +54,12 @@ class IndividualStatsViewer extends StatsViewer {
     let verifiedLegacy = playerData.verified.filter(
       (demon) => demon.position > this.extended_list_size
     ).length;
+
+    if (demonSortingMode === "Alphabetical") {
+      beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    } else if (demonSortingMode === "Position") {
+      beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
+    }
 
     this.formatRecordsInto(this._beaten, beaten);
     this.setCompletionNumber(
@@ -123,6 +133,14 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
   window.statsViewer.initialize();
+
+  new Dropdown(document.getElementById("demonsortingmode-dropdown")).addEventListener(
+    (selected) => {
+      window.statsViewer.demonSortingMode = selected;
+
+      if (window.statsViewer.currentObject) { window.statsViewer.populateStatsContainers(selected); }
+    }
+  );
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {

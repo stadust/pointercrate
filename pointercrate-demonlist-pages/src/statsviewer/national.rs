@@ -38,6 +38,7 @@ fn nation_based_stats_viewer_html() -> Markup {
                 (stats_viewer_html(None, rows))
             }
             aside.right {
+                (super::demon_sorting_mode_panel())
                 (super::continent_panel())
             }
         }

@@ -42,6 +42,7 @@ impl IndividualStatsViewer {
                     (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows()))
                 }
                 aside.right {
+                    (super::demon_sorting_mode_panel())
                     (super::continent_panel())
                     (super::hide_subdivision_panel())
                     section.panel.fade style = "overflow: initial;" {

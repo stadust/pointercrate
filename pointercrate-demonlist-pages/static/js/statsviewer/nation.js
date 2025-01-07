@@ -25,6 +25,12 @@ class NationStatsViewer extends StatsViewer {
 
     this.setName(nationData.nation.nation, nationData.nation);
 
+    this.populateStatsContainers(this.demonSortingMode);
+  }
+
+  populateStatsContainers(demonSortingMode) {
+    let nationData = this.currentObject;
+
     let beaten = [];
     let progress = [];
 
@@ -83,8 +89,13 @@ class NationStatsViewer extends StatsViewer {
     this.setHardest(hardest);
     this.setCompletionNumber(amountBeaten, extended, legacy);
 
+    if (demonSortingMode === "Alphabetical") {
+      beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+    } else if (demonSortingMode === "Position") {
+      beaten.sort((r1, r2) => r1.position - r2.position);
+    }
+
     nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
-    beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
     progress.sort((r1, r2) => r2.progress - r1.progress);
     nationData.created.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
 
@@ -205,6 +216,14 @@ $(window).on("load", function () {
       if (li.dataset.id === country) window.statsViewer.onSelect(li);
     }
   });
+
+  new Dropdown(document.getElementById("demonsortingmode-dropdown")).addEventListener(
+    (selected) => {
+      window.statsViewer.demonSortingMode = selected;
+
+      if (window.statsViewer.currentObject) { window.statsViewer.populateStatsContainers(selected); }
+    }
+  )
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {
