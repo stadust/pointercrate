@@ -30,10 +30,6 @@ class IndividualStatsViewer extends StatsViewer {
 
   populateStatsContainers(demonSortingMode) {
     var playerData = this.currentObject;
-    
-    this.formatDemonsInto(this._created, playerData.created);
-    this.formatDemonsInto(this._published, playerData.published);
-    this.formatDemonsInto(this._verified, playerData.verified);
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
 
@@ -57,9 +53,19 @@ class IndividualStatsViewer extends StatsViewer {
 
     if (demonSortingMode === "Alphabetical") {
       beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+      playerData.created.sort((r1, r2) => d1.name.localeCompare(r2.name));
+      playerData.published.sort((r1, r2) => r1.name.localeCompare(r2.name));
+      playerData.verified.sort((r1, r2) => r1.name.localeCompare(r2.name));
     } else if (demonSortingMode === "Position") {
       beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
+      playerData.created.sort((r1, r2) => r1.position - r2.position);
+      playerData.published.sort((r1, r2) => r1.position - r2.position);
+      playerData.verified.sort((r1, r2) => r1.position - r2.position);
     }
+
+    this.formatDemonsInto(this._created, playerData.created);
+    this.formatDemonsInto(this._published, playerData.published);
+    this.formatDemonsInto(this._verified, playerData.verified);
 
     this.formatRecordsInto(this._beaten, beaten);
     this.setCompletionNumber(

@@ -91,13 +91,19 @@ class NationStatsViewer extends StatsViewer {
 
     if (demonSortingMode === "Alphabetical") {
       beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+      nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
+      nationData.created.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+      nationData.published.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+      nationData.verified.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
     } else if (demonSortingMode === "Position") {
       beaten.sort((r1, r2) => r1.position - r2.position);
+      nationData.unbeaten.sort((r1, r2) => r1.position - r2.position);
+      nationData.created.sort((r1, r2) => r1.position - r2.position);
+      nationData.published.sort((r1, r2) => r1.position - r2.position);
+      nationData.verified.sort((r1, r2) => r1.position - r2.position);
     }
 
-    nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
     progress.sort((r1, r2) => r2.progress - r1.progress);
-    nationData.created.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
 
     formatInto(
       this._unbeaten,
