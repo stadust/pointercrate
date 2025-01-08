@@ -30,7 +30,7 @@ fn demon_sorting_mode_panel() -> Markup {
                 "Demon Sorting"
             }
             p {
-                "The order in which completed demons are listed on stats viewer profiles"
+                "The order in which demons are listed on stats viewer profiles"
             }
             (simple_dropdown("demonsortingmode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
         }
