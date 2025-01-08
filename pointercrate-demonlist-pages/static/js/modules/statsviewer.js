@@ -49,7 +49,7 @@ export class StatsViewer extends FilteredPaginator {
     this._progress = document.getElementById("progress");
     this._content = html.getElementsByClassName("viewer-content")[0];
 
-    this.demonSortingMode = "Alphabetical";
+    this.demonSortingMode = "Position";
 
     let dropdownElement = html.getElementsByClassName("dropdown-menu")[0];
 
