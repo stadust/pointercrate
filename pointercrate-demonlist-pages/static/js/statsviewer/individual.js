@@ -16,6 +16,8 @@ class IndividualStatsViewer extends StatsViewer {
       rankingEndpoint: "/api/v1/players/ranking/",
       entryGenerator: generateStatsViewerPlayer,
     });
+
+    this.demonSortingMode = "Alphabetical"; // default to alphabetical, *should* be overridden anyways
   }
 
   onReceive(response) {
@@ -24,6 +26,11 @@ class IndividualStatsViewer extends StatsViewer {
     var playerData = response.data.data;
 
     this.setName(playerData.name, playerData.nationality);
+    this.populateStatsContainers();
+  }
+
+  populateStatsContainers() {
+    var playerData = this.currentObject;
 
     this.formatDemonsInto(this._created, playerData.created);
     this.formatDemonsInto(this._published, playerData.published);
@@ -31,7 +38,11 @@ class IndividualStatsViewer extends StatsViewer {
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
 
-    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    if (this.demonSortingMode === "Alphabetical") {
+      beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    } else if (this.demonSortingMode === "Position") {
+      beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
+    }
 
     let legacy = beaten.filter(
       (record) => record.demon.position > this.extended_list_size
@@ -122,6 +133,19 @@ $(window).on("load", function () {
   window.statsViewer = new IndividualStatsViewer(
     document.getElementById("statsviewer")
   );
+
+  let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"))
+  demonSortingModeDropdown.addEventListener(
+    (selected) => {
+      document.cookie = "demon_sorting_mode=" + selected;
+      window.statsViewer.demonSortingMode = selected;
+
+      if (window.statsViewer.currentObject) { window.statsViewer.populateStatsContainers() };
+    }
+  )
+
+  window.statsViewer.demonSortingMode = demonSortingModeDropdown.input.value;
+
   window.statsViewer.initialize();
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(

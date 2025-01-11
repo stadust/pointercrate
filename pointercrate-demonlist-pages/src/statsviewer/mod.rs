@@ -5,6 +5,46 @@ use pointercrate_demonlist::nationality::Nationality;
 pub mod individual;
 pub mod national;
 
+#[derive(Debug, PartialEq)]
+pub enum DemonSortingMode {
+    Alphabetical,
+    Position
+}
+
+impl DemonSortingMode {
+    pub fn from_cookie(cookie: &str) -> Self {
+        match cookie {
+            "Alphabetical" => DemonSortingMode::Alphabetical,
+            "Position" => DemonSortingMode::Position,
+            _ => panic!("invalid demon sorting mode: {}", cookie),
+        }
+    }
+
+    pub fn to_cookie(&self) -> String {
+        match &self {
+            DemonSortingMode::Alphabetical => "Alphabetical",
+            DemonSortingMode::Position => "Position",
+        }
+        .to_string()
+    }
+}
+
+impl Default for DemonSortingMode {
+    fn default() -> Self {
+        DemonSortingMode::Alphabetical
+    }
+}
+
+impl DemonSortingMode {
+    fn iterator() -> impl Iterator<Item = DemonSortingMode> {
+        [
+            DemonSortingMode::Alphabetical,
+            DemonSortingMode::Position,
+        ]
+        .into_iter()
+    }
+}
+
 pub(crate) fn stats_viewer_panel() -> Markup {
     html! {
         section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
@@ -33,6 +73,27 @@ fn continent_panel() -> Markup {
                 "Select a continent below to focus the stats viewer to that continent. Select 'All' to reset selection."
             }
             (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Central America"].into_iter()))
+        }
+    }
+}
+
+fn demon_sorting_panel(default_demon_sorting_mode: &DemonSortingMode) -> Markup {
+    html! {
+        section.panel.fade style="overflow:initial" {
+            h3.underlined {
+                "Demon Sorting"
+            }
+            p {
+                "The order in which completed demons should be listed"
+            }
+            (simple_dropdown(
+                "demon-sorting-mode-dropdown",
+                Some(default_demon_sorting_mode.to_cookie()), 
+                DemonSortingMode::iterator() // every sorting mode EXCEPT `default_demon_sorting_mode`
+                    .filter(|mode| mode != default_demon_sorting_mode)
+                    .map(|mode| mode.to_cookie())
+                    .into_iter()
+            ))
         }
     }
 }

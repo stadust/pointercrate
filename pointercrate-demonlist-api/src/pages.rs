@@ -18,12 +18,15 @@ use pointercrate_demonlist_pages::{
     components::{team::Team, time_machine::Tardis},
     demon_page::{DemonMovement, DemonPage},
     overview::OverviewPage,
-    statsviewer::individual::IndividualStatsViewer,
+    statsviewer::{
+        individual::IndividualStatsViewer,
+        DemonSortingMode
+    },
 };
 use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::User;
 use rand::Rng;
-use rocket::{futures::StreamExt, http::CookieJar};
+use rocket::{futures::StreamExt, http::{Cookie, CookieJar}};
 
 #[rocket::get("/?statsviewer=true")]
 pub fn stats_viewer_redirect() -> Redirect {
@@ -151,11 +154,24 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 }
 
 #[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
+pub async fn stats_viewer(pool: &State<PointercratePool>, cookies: &CookieJar<'_>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
+    let default_demon_sorting_mode = cookies
+        .get("demon_sorting_mode")
+        .map(|cookie| DemonSortingMode::from_cookie(cookie.value()))
+        .unwrap_or_else(|| {
+            let cookie = Cookie::build(("demon_sorting_mode", DemonSortingMode::default().to_cookie()))
+                .http_only(false);
+
+            cookies.add(cookie);
+
+            DemonSortingMode::default()
+        });
+    
     Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut *connection).await?,
+        default_demon_sorting_mode,
     }))
 }
 
