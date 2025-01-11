@@ -44,12 +44,37 @@ class IndividualStatsViewer extends StatsViewer {
 
     let legacy = beaten.filter(
       (record) => record.demon.position > this.extended_list_size
-    ).length;
+    );
     let extended = beaten.filter(
       (record) =>
         record.demon.position > this.list_size &&
         record.demon.position <= this.extended_list_size
-    ).length;
+    );
+    let main = beaten.filter(
+      (record) => record.demon.position <= this.list_size
+    );
+
+    if (this.demonSortingMode === "Alphabetical") {
+      $(this._main_beaten).hide();
+      $(this._extended_beaten).hide();
+      $(this._legacy_beaten).hide();
+      $(this._beaten).show();
+
+      this.formatRecordsInto(this._beaten, beaten);
+    } else if (this.demonSortingMode === "Position") {
+      $(this._beaten).hide();
+      $(this._main_beaten).show();
+      $(this._extended_beaten).show();
+      $(this._legacy_beaten).show();
+
+      this.formatRecordsInto(this._main_beaten, main, true);
+      this.formatRecordsInto(this._extended_beaten, extended, true);
+      this.formatRecordsInto(this._legacy_beaten, legacy, true);
+
+      this.formatDemonSection(this._main_beaten, "Main");
+      this.formatDemonSection(this._extended_beaten, "Extended");
+      this.formatDemonSection(this._legacy_beaten, "Legacy");
+    }
 
     let verifiedExtended = playerData.verified.filter(
       (demon) =>
@@ -60,16 +85,13 @@ class IndividualStatsViewer extends StatsViewer {
       (demon) => demon.position > this.extended_list_size
     ).length;
 
-    this.formatRecordsInto(this._beaten, beaten);
     this.setCompletionNumber(
-      beaten.length -
-        legacy -
-        extended +
+      main.length +
         playerData.verified.length -
         verifiedExtended -
         verifiedLegacy,
-      extended + verifiedExtended,
-      legacy + verifiedLegacy
+      extended.length + verifiedExtended,
+      legacy.length + verifiedLegacy
     );
 
     let hardest = playerData.verified
@@ -97,13 +119,14 @@ class IndividualStatsViewer extends StatsViewer {
     );
   }
 
-  formatRecordsInto(element, records) {
+  formatRecordsInto(element, records, dontStyle) {
     formatInto(
       element,
       records.map((record) => {
         let demon = this.formatDemon(
           record.demon,
-          record.video ?? "/demonlist/permalink/" + record.demon.id + "/"
+          record.video ?? "/demonlist/permalink/" + record.demon.id + "/",
+          dontStyle
         );
         if (record.progress !== 100) {
           demon.appendChild(
