@@ -69,19 +69,19 @@ fn hide_subdivision_panel() -> Markup {
     }
 }
 
-struct StatsViewerRow(Vec<(&'static str, &'static str)>);
+struct StatsViewerRow(Vec<(&'static str, Vec<&'static str>)>);
 
 fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
     vec![
-        StatsViewerRow(vec![("Demonlist rank", "rank"), ("Demonlist score", "score")]),
-        StatsViewerRow(vec![("Demonlist stats", "stats"), ("Hardest demon", "hardest")]),
-        StatsViewerRow(vec![("Demons completed", "beaten")]),
+        StatsViewerRow(vec![("Demonlist rank", vec!["rank"]), ("Demonlist score", vec!["score"])]),
+        StatsViewerRow(vec![("Demonlist stats", vec!["stats"]), ("Hardest demon", vec!["hardest"])]),
+        StatsViewerRow(vec![("Demons completed", vec!["beaten", "main-beaten", "extended-beaten", "legacy-beaten"])]),
         StatsViewerRow(vec![
-            ("Demons created", "created"),
-            ("Demons published", "published"),
-            ("Demons verified", "verified"),
+            ("Demons created", vec!["created"]),
+            ("Demons published", vec!["published"]),
+            ("Demons verified", vec!["verified"]),
         ]),
-        StatsViewerRow(vec![("Progress on", "progress")]),
+        StatsViewerRow(vec![("Progress on", vec!["progress"])]),
     ]
 }
 
@@ -131,7 +131,9 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
                                                 (column.0)
                                             }
                                             br;
-                                            span #(column.1) {}
+                                            @for section in column.1 {
+                                                span #(section) {}
+                                            }
                                         }
                                     }
                                 }
