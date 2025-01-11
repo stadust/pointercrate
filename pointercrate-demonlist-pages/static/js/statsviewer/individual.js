@@ -137,14 +137,14 @@ $(window).on("load", function () {
   let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"))
   demonSortingModeDropdown.addEventListener(
     (selected) => {
-      document.cookie = "demon_sorting_mode=" + selected + "; SameSite=Strict; Path=/";
+      window.localStorage.setItem("demon_sorting_mode", selected);
       window.statsViewer.demonSortingMode = selected;
 
       if (window.statsViewer.currentObject) { window.statsViewer.populateStatsContainers() };
     }
   )
 
-  window.statsViewer.demonSortingMode = demonSortingModeDropdown.input.value;
+  demonSortingModeDropdown.select(localStorage.getItem("demon_sorting_mode") ?? "Alphabetical");
 
   window.statsViewer.initialize();
 

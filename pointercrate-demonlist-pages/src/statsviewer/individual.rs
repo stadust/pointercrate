@@ -1,4 +1,4 @@
-use crate::statsviewer::{stats_viewer_html, DemonSortingMode};
+use crate::statsviewer::stats_viewer_html;
 use maud::{html, Markup};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::nationality::Nationality;
@@ -6,7 +6,6 @@ use pointercrate_demonlist::nationality::Nationality;
 #[derive(Debug)]
 pub struct IndividualStatsViewer {
     pub nationalities_in_use: Vec<Nationality>,
-    pub default_demon_sorting_mode: DemonSortingMode,
 }
 
 impl From<IndividualStatsViewer> for PageFragment {
@@ -43,7 +42,7 @@ impl IndividualStatsViewer {
                     (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows()))
                 }
                 aside.right {
-                    (super::demon_sorting_panel(&self.default_demon_sorting_mode))
+                    (super::demon_sorting_panel())
                     (super::continent_panel())
                     (super::hide_subdivision_panel())
                     section.panel.fade style = "overflow: initial;" {
