@@ -61,6 +61,23 @@ export class StatsViewer extends FilteredPaginator {
         }
       });
     }
+
+    let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"));
+    
+    if (demonSortingModeDropdown !== undefined) {
+      demonSortingModeDropdown.addEventListener(
+        (selected) => {
+          window.localStorage.setItem("demon_sorting_mode", selected);
+          this.demonSortingMode = selected;
+    
+          if (this.currentObject) { this.populateStatsContainers() };
+        }
+      );
+      
+      this.demonSortingMode = localStorage.getItem("demon_sorting_mode") ?? "Alphabetical"; // default to alphabetical
+
+      demonSortingModeDropdown.select(this.demonSortingMode);
+    }
   }
 
   initialize() {

@@ -16,8 +16,6 @@ class IndividualStatsViewer extends StatsViewer {
       rankingEndpoint: "/api/v1/players/ranking/",
       entryGenerator: generateStatsViewerPlayer,
     });
-
-    this.demonSortingMode = "Alphabetical"; // default to alphabetical, *should* be overridden anyways
   }
 
   onReceive(response) {
@@ -133,18 +131,6 @@ $(window).on("load", function () {
   window.statsViewer = new IndividualStatsViewer(
     document.getElementById("statsviewer")
   );
-
-  let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"))
-  demonSortingModeDropdown.addEventListener(
-    (selected) => {
-      window.localStorage.setItem("demon_sorting_mode", selected);
-      window.statsViewer.demonSortingMode = selected;
-
-      if (window.statsViewer.currentObject) { window.statsViewer.populateStatsContainers() };
-    }
-  )
-
-  demonSortingModeDropdown.select(localStorage.getItem("demon_sorting_mode") ?? "Alphabetical");
 
   window.statsViewer.initialize();
 
