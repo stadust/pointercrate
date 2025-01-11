@@ -178,10 +178,8 @@ export class StatsViewer extends FilteredPaginator {
   }
 
   formatDemonSection(element, name) {
-    var title = this.formatDemon({
-      name,
-      position: this.extended_list_size
-    });
+    var title = document.createElement("span");
+    title.textContent = name;
 
     // it looks pretty bad when it says none in this case
     if (element.textContent === "None") { element.textContent = "-"; }
