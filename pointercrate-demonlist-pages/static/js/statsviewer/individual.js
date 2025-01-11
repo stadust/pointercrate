@@ -31,16 +31,25 @@ class IndividualStatsViewer extends StatsViewer {
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
 
-    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
-
     let legacy = beaten.filter(
       (record) => record.demon.position > this.extended_list_size
-    ).length;
+    );
     let extended = beaten.filter(
       (record) =>
         record.demon.position > this.list_size &&
         record.demon.position <= this.extended_list_size
-    ).length;
+    );
+    let main = beaten.filter(
+      (record) => record.demon.position <= this.list_size
+    );
+
+    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    this.formatRecordsInto(this._beaten, beaten);
+    
+    beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
+    this.formatRecordsInto(this._main_beaten, main, true);
+    this.formatRecordsInto(this._extended_beaten, extended, true);
+    this.formatRecordsInto(this._legacy_beaten, legacy, true);
 
     let verifiedExtended = playerData.verified.filter(
       (demon) =>
@@ -51,16 +60,13 @@ class IndividualStatsViewer extends StatsViewer {
       (demon) => demon.position > this.extended_list_size
     ).length;
 
-    this.formatRecordsInto(this._beaten, beaten);
     this.setCompletionNumber(
-      beaten.length -
-        legacy -
-        extended +
+      main.length +
         playerData.verified.length -
         verifiedExtended -
         verifiedLegacy,
-      extended + verifiedExtended,
-      legacy + verifiedLegacy
+      extended.length + verifiedExtended,
+      legacy.length + verifiedLegacy
     );
 
     let hardest = playerData.verified
@@ -86,11 +92,11 @@ class IndividualStatsViewer extends StatsViewer {
     );
   }
 
-  formatRecordsInto(element, records) {
+  formatRecordsInto(element, records, dontStyle) {
     formatInto(
       element,
       records.map((record) => {
-        let demon = this.formatDemon(record.demon, record.video);
+        let demon = this.formatDemon(record.demon, record.video, dontStyle);
         if (record.progress !== 100) {
           demon.appendChild(
             document.createTextNode(" (" + record.progress + "%)")
@@ -117,6 +123,7 @@ $(window).on("load", function () {
   window.statsViewer = new IndividualStatsViewer(
     document.getElementById("statsviewer")
   );
+
   window.statsViewer.initialize();
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
