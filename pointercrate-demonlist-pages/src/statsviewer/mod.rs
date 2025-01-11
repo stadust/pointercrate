@@ -20,7 +20,7 @@ impl DemonSortingMode {
         }
     }
 
-    pub fn to_cookie(&self) -> String {
+    pub fn to_value(&self) -> String {
         match &self {
             DemonSortingMode::Alphabetical => "Alphabetical",
             DemonSortingMode::Position => "Position",
@@ -88,10 +88,10 @@ fn demon_sorting_panel(default_demon_sorting_mode: &DemonSortingMode) -> Markup 
             }
             (simple_dropdown(
                 "demon-sorting-mode-dropdown",
-                Some(default_demon_sorting_mode.to_cookie()), 
+                Some(default_demon_sorting_mode.to_value()), 
                 DemonSortingMode::iterator() // every sorting mode EXCEPT `default_demon_sorting_mode`
                     .filter(|mode| mode != default_demon_sorting_mode)
-                    .map(|mode| mode.to_cookie())
+                    .map(|mode| mode.to_value())
                     .into_iter()
             ))
         }

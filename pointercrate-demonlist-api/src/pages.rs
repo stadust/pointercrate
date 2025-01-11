@@ -161,7 +161,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>, cookies: &CookieJar<'_
         .get("demon_sorting_mode")
         .map(|cookie| DemonSortingMode::from_cookie(cookie.value()))
         .unwrap_or_else(|| {
-            let cookie = Cookie::build(("demon_sorting_mode", DemonSortingMode::default().to_cookie()))
+            let cookie = Cookie::build(("demon_sorting_mode", DemonSortingMode::default().to_value()))
                 .http_only(false);
 
             cookies.add(cookie);
