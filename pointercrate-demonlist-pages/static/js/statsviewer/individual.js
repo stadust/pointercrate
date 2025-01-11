@@ -137,7 +137,7 @@ $(window).on("load", function () {
   let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"))
   demonSortingModeDropdown.addEventListener(
     (selected) => {
-      document.cookie = "demon_sorting_mode=" + selected;
+      document.cookie = "demon_sorting_mode=" + selected + "; SameSite=Strict; Path=/";
       window.statsViewer.demonSortingMode = selected;
 
       if (window.statsViewer.currentObject) { window.statsViewer.populateStatsContainers() };
