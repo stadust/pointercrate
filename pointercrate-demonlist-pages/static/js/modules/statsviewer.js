@@ -176,19 +176,6 @@ export class StatsViewer extends FilteredPaginator {
 
     return element;
   }
-
-  formatDemonSection(element, name) {
-    var title = document.createElement("span");
-    title.textContent = name;
-
-    // it looks pretty bad when it says none in this case
-    if (element.textContent === "None") { element.textContent = "-"; }
-
-    element.insertBefore(document.createElement("br"), element.firstChild);
-    element.insertBefore(title, element.firstChild);
-    element.appendChild(document.createElement("br"));
-    element.appendChild(document.createElement("br")); // two breaks hahaha
-  }
 }
 
 export function formatInto(parent, childs) {

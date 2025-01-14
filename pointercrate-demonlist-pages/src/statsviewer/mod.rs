@@ -75,7 +75,10 @@ fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
     vec![
         StatsViewerRow(vec![("Demonlist rank", vec!["rank"]), ("Demonlist score", vec!["score"])]),
         StatsViewerRow(vec![("Demonlist stats", vec!["stats"]), ("Hardest demon", vec!["hardest"])]),
-        StatsViewerRow(vec![("Demons completed", vec!["beaten", "main-beaten", "extended-beaten", "legacy-beaten"])]),
+        StatsViewerRow(vec![("Demons completed", vec!["beaten"])]),
+        StatsViewerRow(vec![("Main Demons completed", vec!["main-beaten"])]),
+        StatsViewerRow(vec![("Extended Demons completed", vec!["extended-beaten"])]),
+        StatsViewerRow(vec![("Legacy Demons completed", vec!["legacy-beaten"])]),
         StatsViewerRow(vec![
             ("Demons created", vec!["created"]),
             ("Demons published", vec!["published"]),

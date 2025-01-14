@@ -55,25 +55,21 @@ class IndividualStatsViewer extends StatsViewer {
     );
 
     if (this.demonSortingMode === "Alphabetical") {
-      $(this._main_beaten).hide();
-      $(this._extended_beaten).hide();
-      $(this._legacy_beaten).hide();
-      $(this._beaten).show();
+      $(this._main_beaten.parentElement).hide();
+      $(this._extended_beaten.parentElement).hide();
+      $(this._legacy_beaten.parentElement).hide();
+      $(this._beaten.parentElement).show();
 
       this.formatRecordsInto(this._beaten, beaten);
     } else if (this.demonSortingMode === "Position") {
-      $(this._beaten).hide();
-      $(this._main_beaten).show();
-      $(this._extended_beaten).show();
-      $(this._legacy_beaten).show();
+      $(this._beaten.parentElement).hide();
+      $(this._main_beaten.parentElement).show();
+      $(this._extended_beaten.parentElement).show();
+      $(this._legacy_beaten.parentElement).show();
 
       this.formatRecordsInto(this._main_beaten, main, true);
       this.formatRecordsInto(this._extended_beaten, extended, true);
       this.formatRecordsInto(this._legacy_beaten, legacy, true);
-
-      this.formatDemonSection(this._main_beaten, "Main");
-      this.formatDemonSection(this._extended_beaten, "Extended");
-      this.formatDemonSection(this._legacy_beaten, "Legacy");
     }
 
     let verifiedExtended = playerData.verified.filter(
