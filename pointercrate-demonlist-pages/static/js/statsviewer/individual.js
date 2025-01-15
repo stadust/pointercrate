@@ -55,17 +55,17 @@ class IndividualStatsViewer extends StatsViewer {
     );
 
     if (this.demonSortingMode === "Alphabetical") {
-      $(this._main_beaten.parentElement).hide();
-      $(this._extended_beaten.parentElement).hide();
-      $(this._legacy_beaten.parentElement).hide();
-      $(this._beaten.parentElement).show();
+      $(this._main_beaten.parentElement.parentElement).hide();
+      $(this._extended_beaten.parentElement.parentElement).hide();
+      $(this._legacy_beaten.parentElement.parentElement).hide();
+      $(this._beaten.parentElement.parentElement).show();
 
       this.formatRecordsInto(this._beaten, beaten);
     } else if (this.demonSortingMode === "Position") {
-      $(this._beaten.parentElement).hide();
-      $(this._main_beaten.parentElement).show();
-      $(this._extended_beaten.parentElement).show();
-      $(this._legacy_beaten.parentElement).show();
+      $(this._beaten.parentElement.parentElement).hide();
+      $(this._main_beaten.parentElement.parentElement).show();
+      $(this._extended_beaten.parentElement.parentElement).show();
+      $(this._legacy_beaten.parentElement.parentElement).show();
 
       this.formatRecordsInto(this._main_beaten, main, true);
       this.formatRecordsInto(this._extended_beaten, extended, true);
