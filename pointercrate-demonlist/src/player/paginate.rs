@@ -1,5 +1,5 @@
 use crate::{
-    nationality::{Continent, Nationality},
+    nationality::{Continent, Nationality, Subdivision},
     player::{DatabasePlayer, Player},
 };
 use futures::StreamExt;
@@ -27,6 +27,9 @@ pub struct PlayerPagination {
 
     #[serde(default, deserialize_with = "nullable")]
     nation: Option<Option<String>>,
+
+    #[serde(default, deserialize_with = "nullable")]
+    subdivision: Option<Option<String>>,
 }
 
 impl PaginationQuery for PlayerPagination {
@@ -59,6 +62,7 @@ impl Paginatable<PlayerPagination> for Player {
             .bind(query.banned)
             .bind(&query.nation)
             .bind(query.nation == Some(None))
+            .bind(&query.subdivision)
             .bind(query.params.limit + 1)
             .fetch(connection);
 
@@ -67,11 +71,19 @@ impl Paginatable<PlayerPagination> for Player {
         while let Some(row) = stream.next().await {
             let row = row?;
 
-            let nationality = match (row.get("nation"), row.get("iso_country_code")) {
-                (Some(nation), Some(country_code)) => Some(Nationality {
+            let nationality = match (row.get("nation"), row.get("iso_country_code"), row.get("iso_code"), row.get("subdivision_name")) {
+                (Some(nation), Some(country_code), Some(iso_code), Some(subdivision_name)) => Some(Nationality {
                     iso_country_code: country_code,
                     nation,
-                    subdivision: None, // dont include subdivision in pagination data
+                    subdivision: Some(Subdivision {
+                        iso_code,
+                        name: subdivision_name,
+                    }),
+                }),
+                (Some(nation), Some(country_code), None, None) => Some(Nationality {
+                    iso_country_code: country_code,
+                    nation,
+                    subdivision: None,
                 }),
                 _ => None,
             };
