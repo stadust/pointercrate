@@ -10,6 +10,6 @@ edition.workspace = true
 serde = "1.0.217"
 derive_more = "0.99.18"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate"] }
-log = "0.4.22"
+log = "0.4.25"
 chrono = {version = "0.4.39", features = ["serde"]}
 getrandom = "0.2.15"
