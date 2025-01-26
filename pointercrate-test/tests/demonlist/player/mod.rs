@@ -1,10 +1,12 @@
+use pointercrate_test::TestClient;
 use pointercrate_demonlist::{
     nationality::{Nationality, Subdivision},
     player::{DatabasePlayer, FullPlayer, Player},
     LIST_HELPER,
+    LIST_MODERATOR
 };
 use rocket::http::Status;
-use sqlx::{PgConnection, Pool, Postgres};
+use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
 
 mod score;
 
@@ -213,4 +215,68 @@ async fn test_me(pool: Pool<Postgres>) {
             .await,
         player
     );
+}
+
+#[sqlx::test(migrations = "../migrations")]
+async fn test_players_pagination(pool: Pool<Postgres>) {
+    let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
+    let moderator = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+
+    // create players
+    let player1 = DatabasePlayer::by_name_or_create("stardust19701", &mut *connection).await.unwrap(); // no nationality, no subdivision
+    let player2 = DatabasePlayer::by_name_or_create("stardust19702", &mut *connection).await.unwrap(); // has nationality, no subdivision
+    let player3 = DatabasePlayer::by_name_or_create("stardust19703", &mut *connection).await.unwrap(); // has nationality, has subdivision
+
+    client.patch_player(player2.id, &moderator, serde_json::json!({"nationality": "GB"}))
+        .await
+        .execute()
+        .await;
+
+    client.patch_player(player3.id, &moderator, serde_json::json!({"nationality": "GB", "subdivision": "ENG"}))
+        .await
+        .execute()
+        .await;
+
+    // test if all players are returned by the endpoint (without filters)
+    let players: Vec<Player> = client
+        .get("/api/v1/players")
+        .expect_status(Status::Ok)
+        .get_result()
+        .await;
+
+    assert_eq!(players.len(), 3, "Not all players are listed");
+    
+    assert_eq!(players[0].nationality, None);
+    assert_eq!(players[1].nationality, Some(Nationality {
+        iso_country_code: "GB".into(),
+        nation: "United Kingdom".into(),
+        subdivision: None,
+    }));
+    assert_eq!(players[2].nationality, Some(Nationality {
+        iso_country_code: "GB".into(),
+        nation: "United Kingdom".into(),
+        subdivision: Some(Subdivision {
+            iso_code: "ENG".into(),
+            name: "England".into(),
+        }),
+    }));
+
+    // test subdivision filter
+    let filtered_players: Vec<Player> = client
+        .get("/api/v1/players?subdivision=ENG")
+        .expect_status(Status::Ok)
+        .get_result()
+        .await;
+
+    assert_eq!(filtered_players.len(), 1, "Subdivision filter did not return the correct number of players");
+
+    assert_eq!(filtered_players[0].base.id, player3.id);
+    assert_eq!(filtered_players[0].nationality, Some(Nationality {
+        iso_country_code: "GB".into(),
+        nation: "United Kingdom".into(),
+        subdivision: Some(Subdivision {
+            iso_code: "ENG".into(),
+            name: "England".into(),
+        }),
+    }));
 }
