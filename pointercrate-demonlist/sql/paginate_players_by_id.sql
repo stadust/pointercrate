@@ -1,7 +1,7 @@
 SELECT id, players.name::TEXT, banned, nationalities.nation::TEXT, iso_country_code::TEXT, subdivision::TEXT AS iso_code, subdivisions.name AS subdivision_name, players.score
 FROM players
 LEFT OUTER JOIN nationalities ON nationality = iso_country_code
-LEFT JOIN subdivisions ON iso_code = subdivision AND subdivisions.nation = nationality
+LEFT OUTER JOIN subdivisions ON iso_code = subdivision AND subdivisions.nation = nationality
 WHERE (id < $1 OR $1 IS NULL)
   AND (id > $2 OR $2 IS NULL)
   AND (players.name = $3::CITEXT OR $3 is NULL)

@@ -77,7 +77,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
             all_moves.insert(
                 row.time,
                 NamedId {
-                    id: row.id,
+                    id: row.id.expect("idk lol"),
                     name: row.name,
                 },
             );
@@ -118,7 +118,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                         continue;
                     }
 
-                    let moved = all_moves.get(&time);
+                    let moved = all_moves.get(&Some(time));
 
                     match moved {
                         Some(id) if id.id == demon_id => movement_log.push(MovementLogEntry {
