@@ -36,7 +36,7 @@ where
 pub fn csprng_u64() -> Result<u64, CoreError> {
     let mut buf = [0u8; 8];
 
-    getrandom::getrandom(buf.as_mut_slice())
+    getrandom::fill(buf.as_mut_slice())
         .map_err(|err| CoreError::internal_server_error(format!("getrandom: {}", err)))
         .map(|()| u64::from_le_bytes(buf))
 }
