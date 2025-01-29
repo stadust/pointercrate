@@ -6,7 +6,7 @@ use pointercrate_demonlist::{
     LIST_MODERATOR
 };
 use rocket::http::Status;
-use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
+use sqlx::{PgConnection, Pool, Postgres};
 
 mod score;
 
@@ -262,16 +262,42 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
     }));
 
     // test subdivision filter
-    let filtered_players: Vec<Player> = client
+    let subdivision_filtered_players: Vec<Player> = client
         .get("/api/v1/players?subdivision=ENG")
         .expect_status(Status::Ok)
         .get_result()
         .await;
 
-    assert_eq!(filtered_players.len(), 1, "Subdivision filter did not return the correct number of players");
+    assert_eq!(subdivision_filtered_players.len(), 1, "Subdivision filter did not return the correct number of players");
 
-    assert_eq!(filtered_players[0].base.id, player3.id);
-    assert_eq!(filtered_players[0].nationality, Some(Nationality {
+    assert_eq!(subdivision_filtered_players[0].base.id, player3.id);
+    assert_eq!(subdivision_filtered_players[0].nationality, Some(Nationality {
+        iso_country_code: "GB".into(),
+        nation: "United Kingdom".into(),
+        subdivision: Some(Subdivision {
+            iso_code: "ENG".into(),
+            name: "England".into(),
+        }),
+    }));
+
+    // test nation filter
+    let nation_filtered_players: Vec<Player> = client
+        .get("/api/v1/players?nation=GB")
+        .expect_status(Status::Ok)
+        .get_result()
+        .await;
+
+    assert_eq!(nation_filtered_players.len(), 2, "Nation filter did not return the correct number of players");
+
+    assert_eq!(nation_filtered_players[0].base.id, player2.id);
+    assert_eq!(nation_filtered_players[1].base.id, player3.id);
+
+    assert_eq!(nation_filtered_players[0].nationality, Some(Nationality {
+        iso_country_code: "GB".into(),
+        nation: "United Kingdom".into(),
+        subdivision: None,
+    }));
+    assert_eq!(nation_filtered_players[1].nationality, Some(Nationality {
         iso_country_code: "GB".into(),
         nation: "United Kingdom".into(),
         subdivision: Some(Subdivision {
