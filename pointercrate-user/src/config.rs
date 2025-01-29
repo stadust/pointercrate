@@ -19,3 +19,11 @@ pub(crate) fn secret() -> Vec<u8> {
         Err(err) => panic!("Unable to open secret file: {:?}", err),
     }
 }
+
+pub(crate) fn google_client_id() -> String {
+    std::env::var("GOOGLE_CLIENT_ID").expect("GOOGLE_CLIENT_ID is not set")
+}
+
+pub(crate) fn google_redirect_uri() -> String {
+    std::env::var("GOOGLE_REDIRECT_URI").expect("GOOGLE_REDIRECT_URI is not set")
+}

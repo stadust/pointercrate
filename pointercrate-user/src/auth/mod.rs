@@ -23,6 +23,7 @@ pub use self::patch::PatchMe;
 use crate::{config, error::Result, User};
 use jsonwebtoken::{DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
+use oauth2::OAuth2AuthenticatedUser;
 use pointercrate_core::{error::CoreError, util::csprng_u64};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -30,6 +31,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 mod delete;
 mod get;
 pub mod legacy;
+pub mod oauth2;
 mod patch;
 mod post;
 
@@ -78,6 +80,7 @@ pub struct AuthenticatedUser<Auth> {
 
 pub enum AuthenticationType {
     Legacy(LegacyAuthenticatedUser),
+    OAuth2(OAuth2AuthenticatedUser),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
