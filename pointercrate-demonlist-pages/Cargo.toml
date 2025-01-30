@@ -17,5 +17,5 @@ maud = "0.26.0"
 chrono = "0.4.39"
 url = "2.5.4"
 async-trait = "0.1.85"
-log = "0.4.22"
+log = "0.4.25"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
