@@ -71,7 +71,12 @@ impl Paginatable<PlayerPagination> for Player {
         while let Some(row) = stream.next().await {
             let row = row?;
 
-            let nationality = match (row.get("nation"), row.get("iso_country_code"), row.get("iso_code"), row.get("subdivision_name")) {
+            let nationality = match (
+                row.get("nation"),
+                row.get("iso_country_code"),
+                row.get("iso_code"),
+                row.get("subdivision_name"),
+            ) {
                 (Some(nation), Some(country_code), Some(iso_code), Some(subdivision_name)) => Some(Nationality {
                     iso_country_code: country_code,
                     nation,

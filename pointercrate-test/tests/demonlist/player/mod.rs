@@ -1,10 +1,9 @@
-use pointercrate_test::TestClient;
 use pointercrate_demonlist::{
     nationality::{Nationality, Subdivision},
     player::{DatabasePlayer, FullPlayer, Player},
-    LIST_HELPER,
-    LIST_MODERATOR
+    LIST_HELPER, LIST_MODERATOR,
 };
+use pointercrate_test::TestClient;
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
@@ -227,39 +226,47 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
     let player2 = DatabasePlayer::by_name_or_create("stardust19702", &mut *connection).await.unwrap(); // has nationality, no subdivision
     let player3 = DatabasePlayer::by_name_or_create("stardust19703", &mut *connection).await.unwrap(); // has nationality, has subdivision
 
-    client.patch_player(player2.id, &moderator, serde_json::json!({"nationality": "GB"}))
+    client
+        .patch_player(player2.id, &moderator, serde_json::json!({"nationality": "GB"}))
         .await
         .execute()
         .await;
 
-    client.patch_player(player3.id, &moderator, serde_json::json!({"nationality": "GB", "subdivision": "ENG"}))
+    client
+        .patch_player(
+            player3.id,
+            &moderator,
+            serde_json::json!({"nationality": "GB", "subdivision": "ENG"}),
+        )
         .await
         .execute()
         .await;
 
     // test if all players are returned by the endpoint (without filters)
-    let players: Vec<Player> = client
-        .get("/api/v1/players")
-        .expect_status(Status::Ok)
-        .get_result()
-        .await;
+    let players: Vec<Player> = client.get("/api/v1/players").expect_status(Status::Ok).get_result().await;
 
     assert_eq!(players.len(), 3, "Not all players are listed");
-    
+
     assert_eq!(players[0].nationality, None);
-    assert_eq!(players[1].nationality, Some(Nationality {
-        iso_country_code: "GB".into(),
-        nation: "United Kingdom".into(),
-        subdivision: None,
-    }));
-    assert_eq!(players[2].nationality, Some(Nationality {
-        iso_country_code: "GB".into(),
-        nation: "United Kingdom".into(),
-        subdivision: Some(Subdivision {
-            iso_code: "ENG".into(),
-            name: "England".into(),
-        }),
-    }));
+    assert_eq!(
+        players[1].nationality,
+        Some(Nationality {
+            iso_country_code: "GB".into(),
+            nation: "United Kingdom".into(),
+            subdivision: None,
+        })
+    );
+    assert_eq!(
+        players[2].nationality,
+        Some(Nationality {
+            iso_country_code: "GB".into(),
+            nation: "United Kingdom".into(),
+            subdivision: Some(Subdivision {
+                iso_code: "ENG".into(),
+                name: "England".into(),
+            }),
+        })
+    );
 
     // test subdivision filter
     let subdivision_filtered_players: Vec<Player> = client
@@ -268,41 +275,54 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
         .get_result()
         .await;
 
-    assert_eq!(subdivision_filtered_players.len(), 1, "Subdivision filter did not return the correct number of players");
+    assert_eq!(
+        subdivision_filtered_players.len(),
+        1,
+        "Subdivision filter did not return the correct number of players"
+    );
 
     assert_eq!(subdivision_filtered_players[0].base.id, player3.id);
-    assert_eq!(subdivision_filtered_players[0].nationality, Some(Nationality {
-        iso_country_code: "GB".into(),
-        nation: "United Kingdom".into(),
-        subdivision: Some(Subdivision {
-            iso_code: "ENG".into(),
-            name: "England".into(),
-        }),
-    }));
+    assert_eq!(
+        subdivision_filtered_players[0].nationality,
+        Some(Nationality {
+            iso_country_code: "GB".into(),
+            nation: "United Kingdom".into(),
+            subdivision: Some(Subdivision {
+                iso_code: "ENG".into(),
+                name: "England".into(),
+            }),
+        })
+    );
 
     // test nation filter
-    let nation_filtered_players: Vec<Player> = client
-        .get("/api/v1/players?nation=GB")
-        .expect_status(Status::Ok)
-        .get_result()
-        .await;
+    let nation_filtered_players: Vec<Player> = client.get("/api/v1/players?nation=GB").expect_status(Status::Ok).get_result().await;
 
-    assert_eq!(nation_filtered_players.len(), 2, "Nation filter did not return the correct number of players");
+    assert_eq!(
+        nation_filtered_players.len(),
+        2,
+        "Nation filter did not return the correct number of players"
+    );
 
     assert_eq!(nation_filtered_players[0].base.id, player2.id);
     assert_eq!(nation_filtered_players[1].base.id, player3.id);
 
-    assert_eq!(nation_filtered_players[0].nationality, Some(Nationality {
-        iso_country_code: "GB".into(),
-        nation: "United Kingdom".into(),
-        subdivision: None,
-    }));
-    assert_eq!(nation_filtered_players[1].nationality, Some(Nationality {
-        iso_country_code: "GB".into(),
-        nation: "United Kingdom".into(),
-        subdivision: Some(Subdivision {
-            iso_code: "ENG".into(),
-            name: "England".into(),
-        }),
-    }));
+    assert_eq!(
+        nation_filtered_players[0].nationality,
+        Some(Nationality {
+            iso_country_code: "GB".into(),
+            nation: "United Kingdom".into(),
+            subdivision: None,
+        })
+    );
+    assert_eq!(
+        nation_filtered_players[1].nationality,
+        Some(Nationality {
+            iso_country_code: "GB".into(),
+            nation: "United Kingdom".into(),
+            subdivision: Some(Subdivision {
+                iso_code: "ENG".into(),
+                name: "England".into(),
+            }),
+        })
+    );
 }
