@@ -21,4 +21,6 @@ url = "2.5.4"
 serde_json = "1.0.137"
 
 [features]
+default = ["oauth2"]
 legacy_accounts = []
+oauth2 = []

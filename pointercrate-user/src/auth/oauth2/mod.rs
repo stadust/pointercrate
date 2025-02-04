@@ -1,10 +1,9 @@
 use crate::User;
 
-use super::AuthenticatedUser;
+use super::AuthenticationType;
 
 pub struct OAuth2AuthenticatedUser {
     user: User,
-    email_address: String,
     google_account_id: Option<String>,
     discord_account_id: Option<String>,
 }
@@ -20,13 +19,14 @@ impl OAuth2AuthenticatedUser {
     pub fn user(&self) -> &User {
         &self.user
     }
+}
 
-    pub fn oauth2(user: User, email_address: String, google_account_id: String) -> Self {
-        AuthenticatedUser::OAuth2(OAuth2AuthenticatedUser {
+impl AuthenticationType {
+    pub fn oauth2(user: User, google_account_id: Option<String>, discord_account_id: Option<String>) -> Self {
+        AuthenticationType::OAuth2(OAuth2AuthenticatedUser {
             user,
-            email_address,
-            google_account_id: Some(google_account_id),
-            discord_account_id: None,
+            google_account_id,
+            discord_account_id,
         })
     }
 }

@@ -150,12 +150,14 @@ impl<Auth> AuthenticatedUser<Auth> {
     pub fn into_user(self) -> User {
         match self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.into_user(),
+            AuthenticationType::OAuth2(oauth2) => oauth2.into_user(),
         }
     }
 
     pub fn user(&self) -> &User {
         match &self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.user(),
+            AuthenticationType::OAuth2(oauth2) => oauth2.user(),
         }
     }
 

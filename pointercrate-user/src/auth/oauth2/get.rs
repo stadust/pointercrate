@@ -21,6 +21,8 @@ struct GoogleUserInfo {
     pub name: String,
 }
 
+/*
+Nattie's code for reference:
 impl AuthenticatedUser {
     pub async fn oauth2_callback(credential: &str, connection: &mut PgConnection) -> Result<AuthenticatedUser> {
         info!("We are expected to perform Google OAuth2 authentication");
@@ -75,3 +77,4 @@ impl AuthenticatedUser {
         }
     }
 }
+*/

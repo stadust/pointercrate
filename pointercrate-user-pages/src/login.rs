@@ -1,5 +1,6 @@
 use maud::{html, Markup};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
+use pointercrate_user::config;
 
 pub fn login_page() -> PageFragment {
     PageFragment::new(
@@ -8,6 +9,7 @@ pub fn login_page() -> PageFragment {
     )
     .module("/static/user/js/login.js")
     .module("/static/core/js/modules/form.js")
+    .head(html!({ script src = "https://accounts.google.com/gsi/client" async; }))
     .stylesheet("/static/user/css/login.css")
     .body(login_page_body())
 }
@@ -45,6 +47,26 @@ fn login_page_body() -> Markup {
     } else {
         html!()
     };
+    let oauth2_login = if cfg!(feature = "oauth2") {
+        html! {
+            div.flex.col {
+                h2 {"Login with Google"}
+                p {
+                    "Log in or create a new pointercrate account with your Google account."
+                }
+                div .g_id_signin {}
+            }
+            div
+                #g_id_onload
+                data-ux_mode="redirect"
+                data-auto_select="true"
+                data-itp_support="true"
+                data-client_id=(config::google_client_id())
+                data-login_uri=(config::host_url() + "/auth/oauth/google") {}
+        }
+    } else {
+        html!()
+    };
     html! {
         div.m-center.flex.panel.fade.col.wrap style = "margin: 100px 0px;"{
             h1.underlined.pad {
@@ -75,6 +97,7 @@ fn login_page_body() -> Markup {
                         input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Log in";
                     }
                 }
+                (oauth2_login)
                 (legacy_register)
             }
         }
