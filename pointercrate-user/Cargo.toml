@@ -11,7 +11,7 @@ pointercrate-core = {path = "../pointercrate-core"}
 serde = "1.0.217"
 derive_more = "0.99.18"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
-jsonwebtoken = "9.3.0"
+jsonwebtoken = "9.3.1"
 log = "0.4.25"
 futures = "0.3.31"
 base64 = "0.22.1"
