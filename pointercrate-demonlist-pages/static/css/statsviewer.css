@@ -54,3 +54,14 @@
 .tooltip:hover .tooltiptext {
     opacity: 1 !important;
 }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+    #stats-viewer-pagination li i {
+        color: #e6e6e6;
+    }
+
+    #world-map-wrapper:after {
+        box-shadow: inset 0 -10px 23px 22px #292929;
+    }
+}

@@ -216,3 +216,18 @@ tr:nth-child(even) {
 .ct-series-a .ct-point {
   stroke: #0881c6;
 }
+
+/* dark mode */
+@media (prefers-color-scheme: dark) {
+  .dropdown {
+    background: #353434;
+  }
+
+  tr {
+    background: #4f4f4f;
+  }
+  
+  tr:nth-child(even) {
+    background: #3d3b3b;
+  }
+}
