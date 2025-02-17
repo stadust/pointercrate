@@ -6,7 +6,7 @@ use pointercrate_core_api::{
     response::Response2,
 };
 use pointercrate_user::{
-    auth::{ApiToken, PasswordOrBrowser, PatchMe},
+    auth::{ApiToken, AuthenticatedUser, PasswordOrBrowser, PatchMe},
     error::UserError,
     User,
 };
@@ -62,6 +62,26 @@ pub async fn login(
         }
     })
     .with_header("etag", auth.user.user().etag_string()))
+}
+
+#[cfg(feature = "oauth2")]
+#[rocket::post("/oauth2/google?<credentials>")]
+pub async fn oauth2(
+    credentials: String, ip: IpAddr, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,
+) -> Result<Response2<Json<serde_json::Value>>> {
+    ratelimits.login_attempts(ip)?;
+    let mut connection = pool.transaction().await?;
+    let user = AuthenticatedUser::by_google_account_id(&credentials, &mut connection).await?;
+    // TODO: Verify oauth2 and get user
+    // `AuthenticatedUser<NoAuth> -> `AuthenticatedUser<PasswordOrBrowser>`
+
+    Ok(Response2::json(serde_json::json! {
+        {
+            "data": user.user(),
+            "token": user.generate_programmatic_access_token()
+        }
+    })
+    .with_header("etag", user.user().etag_string()))
 }
 
 #[rocket::post("/invalidate")]
