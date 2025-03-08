@@ -24,6 +24,11 @@ class NationStatsViewer extends StatsViewer {
     let nationData = response.data.data;
 
     this.setName(nationData.nation.nation, nationData.nation);
+    this.populateStatsContainers();
+  }
+
+  populateStatsContainers() {
+    let nationData = this.currentObject;
 
     let beaten = [];
     let progress = [];
@@ -83,8 +88,47 @@ class NationStatsViewer extends StatsViewer {
     this.setHardest(hardest);
     this.setCompletionNumber(amountBeaten, extended, legacy);
 
+    if (this.demonSortingMode === "Alphabetical") {
+      beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+
+      $(this._main_beaten.parentElement.parentElement).hide();
+      $(this._extended_beaten.parentElement.parentElement).hide();
+      $(this._legacy_beaten.parentElement.parentElement).hide();
+      $(this._beaten.parentElement.parentElement).show();
+
+      formatInto(
+        this._beaten,
+        beaten.map((record) => this.formatDemonFromRecord(record))
+      );
+    } else if (this.demonSortingMode === "Position") {
+      beaten.sort((r1, r2) => r1.position - r2.position);
+
+      $(this._main_beaten.parentElement.parentElement).show();
+      $(this._extended_beaten.parentElement.parentElement).show();
+      $(this._legacy_beaten.parentElement.parentElement).show();
+      $(this._beaten.parentElement.parentElement).hide();
+
+      formatInto(
+        this._main_beaten,
+        beaten
+          .filter((record) => record.position <= this.list_size)
+          .map((record) => this.formatDemonFromRecord(record, true))
+      );
+      formatInto(
+        this._extended_beaten,
+        beaten
+          .filter((record) => record.position > this.list_size && record.position <= this.extended_list_size)
+          .map((record) => this.formatDemonFromRecord(record, true))
+      );
+      formatInto(
+        this._legacy_beaten,
+        beaten
+          .filter((record) => record.position > this.extended_list_size)
+          .map((record) => this.formatDemonFromRecord(record, true))
+      );
+    }
+
     nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
-    beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
     progress.sort((r1, r2) => r2.progress - r1.progress);
     nationData.created.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
 
@@ -93,10 +137,6 @@ class NationStatsViewer extends StatsViewer {
       nationData.unbeaten.map((demon) =>
         this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
       )
-    );
-    formatInto(
-      this._beaten,
-      beaten.map((record) => this.formatDemonFromRecord(record))
     );
     formatInto(
       this._progress,
@@ -166,10 +206,11 @@ class NationStatsViewer extends StatsViewer {
     return tooltip;
   }
 
-  formatDemonFromRecord(record) {
+  formatDemonFromRecord(record, dontStyle) {
     let baseElement = this.formatDemon(
       { name: record.demon, position: record.position },
-      "/demonlist/permalink/" + record.id + "/"
+      "/demonlist/permalink/" + record.id + "/",
+      dontStyle
     );
 
     if (record.progress !== 100)
@@ -185,7 +226,7 @@ class NationStatsViewer extends StatsViewer {
       (record.players.length === 1 ? "" : "s") +
       "&nbsp;in&nbsp;this&nbsp;country: ";
 
-    return this.makeTooltip(baseElement, title, record.players.join(", "));
+    return this.makeTooltip(baseElement, title, record.players.join(", "), dontStyle);
   }
 }
 

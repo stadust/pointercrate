@@ -18,8 +18,8 @@ pub fn nation_based_stats_viewer() -> PageFragment {
 fn nation_based_stats_viewer_html() -> Markup {
     let mut rows = super::standard_stats_viewer_rows();
 
-    rows[0].0.insert(1, ("Players", "players"));
-    rows.push(StatsViewerRow(vec![("Unbeaten demons", "unbeaten")]));
+    rows[0].0.insert(1, ("Players", vec!["players"]));
+    rows.push(StatsViewerRow(vec![("Unbeaten demons", vec!["unbeaten"])]));
 
     html! {
         nav.flex.wrap.m-center.fade #statsviewers style="text-align: center;" {
@@ -38,6 +38,7 @@ fn nation_based_stats_viewer_html() -> Markup {
                 (stats_viewer_html(None, rows))
             }
             aside.right {
+                (super::demon_sorting_panel())
                 (super::continent_panel())
             }
         }

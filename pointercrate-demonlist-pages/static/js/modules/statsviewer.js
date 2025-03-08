@@ -39,6 +39,9 @@ export class StatsViewer extends FilteredPaginator {
     this._name = document.getElementById("player-name");
     this._created = document.getElementById("created");
     this._beaten = document.getElementById("beaten");
+    this._main_beaten = document.getElementById("main-beaten");
+    this._extended_beaten = document.getElementById("extended-beaten");
+    this._legacy_beaten = document.getElementById("legacy-beaten");
     this._verified = document.getElementById("verified");
     this._published = document.getElementById("published");
     this._hardest = document.getElementById("hardest");
@@ -60,6 +63,23 @@ export class StatsViewer extends FilteredPaginator {
           this.updateQueryData("nation", selected);
         }
       });
+    }
+
+    let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"));
+    
+    if (demonSortingModeDropdown !== undefined) {
+      demonSortingModeDropdown.addEventListener(
+        (selected) => {
+          window.localStorage.setItem("demon_sorting_mode", selected);
+          this.demonSortingMode = selected;
+    
+          if (this.currentObject) { this.populateStatsContainers() };
+        }
+      );
+      
+      this.demonSortingMode = localStorage.getItem("demon_sorting_mode") ?? "Alphabetical"; // default to alphabetical
+
+      demonSortingModeDropdown.select(this.demonSortingMode);
     }
   }
 
@@ -128,16 +148,20 @@ export class StatsViewer extends FilteredPaginator {
       this.currentlySelected.getElementsByTagName("i")[0].innerHTML;
   }
 
-  formatDemon(demon, link) {
+  formatDemon(demon, link, dontStyle) {
     var element;
 
-    if (demon.position <= this.list_size) {
-      element = document.createElement("b");
-    } else if (demon.position <= this.extended_list_size) {
+    if (dontStyle) {
       element = document.createElement("span");
     } else {
-      element = document.createElement("i");
-      element.style.opacity = ".5";
+      if (demon.position <= this.list_size) {
+        element = document.createElement("b");
+      } else if (demon.position <= this.extended_list_size) {
+        element = document.createElement("span");
+      } else {
+        element = document.createElement("i");
+        element.style.opacity = ".5";
+      }
     }
 
     if (link) {
