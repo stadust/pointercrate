@@ -3,7 +3,7 @@ use crate::{
     head::{Head, HeadLike},
     navigation::NavigationBar,
 };
-use maud::{html, Markup, PreEscaped, Render, DOCTYPE};
+use maud::{html, Markup, PreEscaped};
 
 pub mod config;
 pub mod error;
@@ -111,21 +111,5 @@ impl PageFragment {
     pub fn body(mut self, body: Markup) -> Self {
         self.body = body;
         self
-    }
-}
-
-impl Render for PageFragment {
-    fn render(&self) -> Markup {
-        html! {
-            (DOCTYPE)
-            html lang="en" prefix="og: http://opg.me/ns#" {
-                head {
-                    (self.head)
-                }
-                body style="z-index:-10" {
-                    (self.body)
-                }
-            }
-        }
     }
 }
