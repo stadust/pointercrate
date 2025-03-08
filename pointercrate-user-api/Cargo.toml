@@ -21,4 +21,6 @@ serde_urlencoded = "0.7.0"
 governor = "0.8.0"
 
 [features]
+default = ["oauth2"]
+oauth2 = ["pointercrate-user/oauth2"]
 legacy_accounts = ["pointercrate-user/legacy_accounts"]
