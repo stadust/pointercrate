@@ -286,7 +286,7 @@ textarea:invalid {
   margin-bottom: 2px !important;
 }
 
-.form-input .error {
+p.error {
   font-size: 60% !important;
   color: coral;
 }
