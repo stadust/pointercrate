@@ -11,7 +11,7 @@ use pointercrate_user::{
     User,
 };
 use rocket::{
-    http::Status,
+    http::{CookieJar, Status},
     serde::json::{serde_json, Json},
     State,
 };
@@ -104,4 +104,12 @@ pub async fn delete_me(mut auth: Auth<PasswordOrBrowser>, pred: Precondition) ->
     auth.connection.commit().await.map_err(UserError::from)?;
 
     Ok(Status::NoContent)
+}
+
+#[cfg(feature = "oauth2")]
+#[rocket::post("/oauth/google", data = "<payload>")]
+pub async fn login_redirect_uri(payload: Json<pointercrate_user::auth::oauth::GoogleOauthPayload>, cookies: &CookieJar<'_>) -> Result<()> {
+    use pointercrate_core::error::CoreError;
+
+    Err(CoreError::Unauthorized.into())
 }

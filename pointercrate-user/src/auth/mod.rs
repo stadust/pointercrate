@@ -30,6 +30,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 mod delete;
 mod get;
 pub mod legacy;
+pub mod oauth;
 mod patch;
 mod post;
 

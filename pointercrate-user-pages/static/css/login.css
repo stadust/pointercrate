@@ -1,4 +1,4 @@
-#login-tabber p :not(.error){
+#login-tabber p:not(.error) {
   font-size: x-small;
   text-align: center;
 }
@@ -10,4 +10,30 @@
 
 #login-tabber {
   margin-bottom: 20px;
+}
+
+p.or {
+  overflow: hidden;
+  text-align: center;
+}
+
+p.or::before,
+p.or::after {
+  background-color: rgba(211, 211, 211, 1);
+  content: "";
+  display: inline-block;
+  height: 1px;
+  position: relative;
+  vertical-align: middle;
+  width: 50%;
+}
+
+p.or::before {
+  right: 0.5em;
+  margin-left: -50%;
+}
+
+p.or::after {
+  left: 0.5em;
+  margin-right: -50%;
 }
