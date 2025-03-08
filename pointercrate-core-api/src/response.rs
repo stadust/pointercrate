@@ -49,7 +49,8 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                     (page_config.footer)
                 }
             }
-        }.0;
+        }
+        .0;
 
         Response::build()
             .status(Status::Ok)
