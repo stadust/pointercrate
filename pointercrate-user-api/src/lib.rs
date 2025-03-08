@@ -23,6 +23,8 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     auth_routes.extend(rocket::routes![endpoints::auth::register]);
     #[cfg(feature = "legacy_accounts")]
     page_routes.extend(rocket::routes![pages::register]);
+    #[cfg(feature = "oauth2")]
+    auth_routes.extend(rocket::routes![endpoints::auth::login_redirect_uri]);
 
     rocket
         .manage(ratelimits)
