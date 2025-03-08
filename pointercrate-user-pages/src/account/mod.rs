@@ -95,7 +95,7 @@ impl AccountPage {
     fn body(&self) -> Markup {
         html! {
             div.tab-display #account-tabber {
-                div.tab-selection.flex.wrap.m-center.fade style="text-align: center;" {
+                div.flex.wrap.m-center.fade style="text-align: center;" {
                     @for (i, (tab, _, _, id)) in self.tabs.iter().enumerate() {
                         @if i == 0 {
                             div.tab.tab-active.button.white.hover.no-shadow data-tab-id=(id) {

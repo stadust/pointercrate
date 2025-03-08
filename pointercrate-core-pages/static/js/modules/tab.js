@@ -2,7 +2,7 @@ export class TabbedPane {
   /**
    * Creates an instance of TabbedPane.
    *
-   * These work the following way: Inside a `.tab-display` element we have a `.tab-selection` and an arbitrary amount of `.tab-content`s.
+   * These work the following way: Inside a `.tab-display` element we have an arbitrary amount of `.tab-content`s.
    * At any point in time, exactly one of those contents is shown.
    * The selection contains one `.tab` for each content, and these tabs can be clicked to selected them.
    * Only the selected tab is ever shown.
@@ -19,7 +19,7 @@ export class TabbedPane {
     this.storageKey = storageKey;
     this.selectedId = null;
 
-    for (var tab of htmlElement.querySelectorAll(".tab-selection .tab")) {
+    for (var tab of htmlElement.querySelectorAll(".tab")) {
       // We first need to check if this tab really is for this TabbedPane, or for another tabbed pane nested within this one:
       if (containingTabbedPane(tab) !== htmlElement) continue;
 
