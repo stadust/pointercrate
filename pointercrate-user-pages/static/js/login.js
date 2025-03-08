@@ -89,6 +89,19 @@ function intializeRegisterForm() {
   });
 }
 
+function googleOauthCallback (response) { 
+  let error = document.getElementById("g-signin-error");
+
+  post("/api/v1/auth/oauth/google", {}, response) 
+      .then(() => window.location = "/account/")
+      .catch(response => {
+        error.innerText = response.data.message;
+        error.style.display = "block";
+      });
+}
+
+window.googleOauthCallback = googleOauthCallback;
+
 $(document).ready(function () {
   new TabbedPane(document.getElementById("login-tabber"), null);
   initializeLoginForm();

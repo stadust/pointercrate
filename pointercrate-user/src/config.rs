@@ -19,3 +19,7 @@ pub(crate) fn secret() -> Vec<u8> {
         Err(err) => panic!("Unable to open secret file: {:?}", err),
     }
 }
+
+pub fn google_client_id() -> String {
+    std::env::var("GOOGLE_CLIENT_ID").expect("GOOGLE_CLIENT_ID is not set")
+}
