@@ -282,7 +282,8 @@ textarea:invalid {
   text-align: left;
   font-style: italic;
 
-  margin: 2px 10px !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
 }
 
 .form-input .error {
