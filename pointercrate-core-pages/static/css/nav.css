@@ -181,7 +181,6 @@ footer {
   flex-direction: column;
   justify-content: center;
 
-  margin-top: 2%;
   padding-top: 1% !important;
 
   width: 100%;
@@ -194,6 +193,9 @@ footer {
   color: #ddd;
 
   box-shadow: 0px -1px 10px 6px #171921;
+
+  position: relative;
+  z-index: 1;
 }
 
 footer .flex {
