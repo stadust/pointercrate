@@ -2,6 +2,14 @@ Note: All SVG's have been minimized using `scour`:
 
 > find flags -name "*.svg" -type f -exec scour -i {} -o {}.min \; -exec mv {}.min {} \;
 
+COUNTRIES:
+------------------------------------------
+New Zealand - https://upload.wikimedia.org/wikipedia/commons/3/3e/Flag_of_New_Zealand.svg
+
+
+
+REGIONS:
+------------------------------------------
 Argentina:
 Ciudad Autónomae Buenos Aires - TBA
 Buenos Aires - https://commons.wikimedia.org/wiki/File:Bandera_de_la_Provincia_de_Buenos_Aires.svg
