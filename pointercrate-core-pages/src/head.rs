@@ -66,6 +66,10 @@ pub trait HeadLike: Sized {
         self.with_script(Script::new(src))
     }
 
+    fn async_script(self, src: impl Into<String>) -> Self {
+        self.with_script(Script::r#async(src))
+    }
+
     fn module(self, module: impl Into<String>) -> Self {
         self.with_script(Script::module(module))
     }
@@ -85,6 +89,7 @@ impl HeadLike for Head {
 pub struct Script {
     src: String,
     module: bool,
+    r#async: bool,
 }
 
 impl Script {
@@ -92,6 +97,15 @@ impl Script {
         Script {
             src: src.into(),
             module: false,
+            r#async: false,
+        }
+    }
+
+    pub fn r#async<S: Into<String>>(src: S) -> Self {
+        Script {
+            src: src.into(),
+            module: false,
+            r#async: true,
         }
     }
 
@@ -99,6 +113,7 @@ impl Script {
         Script {
             src: src.into(),
             module: true,
+            r#async: false,
         }
     }
 }
@@ -108,6 +123,9 @@ impl Render for Script {
         html! {
             @if self.module {
                 script src = (self.src) type = "module" {}
+            }
+            @else if self.r#async {
+                script src = (self.src) async {};
             }
             @else {
                 script src = (self.src) {};
