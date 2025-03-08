@@ -1,4 +1,4 @@
-#login-tabber p {
+#login-tabber p :not(.error){
   font-size: x-small;
   text-align: center;
 }
