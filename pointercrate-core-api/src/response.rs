@@ -42,8 +42,10 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                     (fragment.head)
                 }
                 body style="z-index:-10" {
-                    (page_config.nav_bar)
-                    (fragment.body)
+                    div.content {
+                        (page_config.nav_bar)
+                        (fragment.body)
+                    }
                     (page_config.footer)
                 }
             }

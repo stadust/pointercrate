@@ -1,5 +1,23 @@
 /* Basic css classes that can be applied to various components to make them look fancy*/
 
+/* https://stackoverflow.com/questions/16679146/force-footer-on-bottom-on-pages-with-little-content */
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+}
+
 .bordered {
   border: 1px solid #ddd;
 }

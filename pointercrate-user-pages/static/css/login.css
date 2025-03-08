@@ -1,4 +1,4 @@
-*:not(.grow) {
+#login *:not(.grow) {
   flex-grow: 0 !important;
 }
 
