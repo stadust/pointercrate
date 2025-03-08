@@ -4,6 +4,7 @@ import {
   tooShort,
   post,
 } from "/static/core/js/modules/form.js";
+import { TabbedPane } from "/static/core/js/modules/tab.js";
 
 function initializeLoginForm() {
   var loginForm = new Form(document.getElementById("login-form"));
@@ -89,6 +90,7 @@ function intializeRegisterForm() {
 }
 
 $(document).ready(function () {
+  new TabbedPane(document.getElementById("login-tabber"), null);
   initializeLoginForm();
   intializeRegisterForm();
 });
