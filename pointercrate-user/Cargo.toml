@@ -19,3 +19,4 @@ url = "2.5.4"
 
 [features]
 legacy_accounts = []
+oauth2 = []
