@@ -441,8 +441,10 @@ textarea:invalid {
 }
 
 @media (min-width: 768px) {
-  body > div:first-child{
+  body {
     background-image: url(/static/images/squares3.png);
+    background-size: cover;
+    background-repeat: repeat-y;
   }
 
   .viewer .paginator {

@@ -42,9 +42,6 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                     (fragment.head)
                 }
                 body style="z-index:-10" {
-                    // target this element to get background image
-                    div style={"width: 100%;height: 100%;position: fixed;top: 0;left: 0;background-size: cover;background-repeat: repeat-y;pointer-events: none; z-index:-1"} {}
-
                     (page_config.nav_bar)
                     (fragment.body)
                     (page_config.footer)
