@@ -32,8 +32,6 @@ class NavigationBar {
     }
     navigation.appendChild(dropDown);
 
-    console.log(dropDown);
-
     this.dropDown = $(dropDown);
     this.button = this.ensureButton();
     this.registerHandlers();
