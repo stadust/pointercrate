@@ -41,7 +41,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                     (page_config.head)
                     (fragment.head)
                 }
-                body style="z-index:-10" {
+                body {
                     div.content {
                         (page_config.nav_bar)
                         (fragment.body)
