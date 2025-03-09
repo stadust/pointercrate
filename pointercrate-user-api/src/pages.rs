@@ -114,8 +114,8 @@ pub async fn logout(_auth: Auth<NonMutating>, cookies: &CookieJar<'_>) -> Redire
 #[cfg(feature = "oauth2")]
 #[rocket::post("/oauth/google", data = "<payload>")]
 pub async fn google_oauth_login(
-    payload: Json<GoogleOauthPayload>, key_store: &State<GoogleCertificateStore>, pool: &State<PointercratePool>,
-    cookies: &rocket::http::CookieJar<'_>,
+    payload: Json<GoogleOauthPayload>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
+    pool: &State<PointercratePool>, cookies: &rocket::http::CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
     if key_store.needs_refresh().await {
         key_store
@@ -129,7 +129,25 @@ pub async fn google_oauth_login(
         .await
         .ok_or(CoreError::Unauthorized)?;
 
-    let authenticated_user = AuthenticatedUser::by_validated_google_creds(&validated_credentials, &mut *pool.connection().await?).await?;
+    let maybe_linked_user = AuthenticatedUser::by_validated_google_creds(&validated_credentials, &mut *pool.connection().await?).await;
+
+    let authenticated_user = match auth {
+        None => maybe_linked_user?,
+        Some(mut signed_in_user) => {
+            // Unauthorized = No linked account found. But in the flow that is supposed to establish the link,
+            // that is exactly what we need.
+            if !matches!(maybe_linked_user, Err(UserError::Core(CoreError::Unauthorized))) {
+                return Err(CoreError::Unauthorized.into());
+            }
+
+            signed_in_user
+                .user
+                .link_google_account(&validated_credentials, &mut signed_in_user.connection)
+                .await?;
+            signed_in_user.connection.commit().await.map_err(UserError::from)?;
+            signed_in_user.user
+        },
+    };
 
     build_cookies(&authenticated_user, cookies)?;
 
