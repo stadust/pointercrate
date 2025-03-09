@@ -79,6 +79,7 @@ pub struct AuthenticatedUser<Auth> {
 
 pub enum AuthenticationType {
     Legacy(LegacyAuthenticatedUser),
+    Oauth2(oauth::OA2AuthenticatedUser),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -148,12 +149,14 @@ impl<Auth> AuthenticatedUser<Auth> {
     pub fn into_user(self) -> User {
         match self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.into_user(),
+            AuthenticationType::Oauth2(oauth) => oauth.into_user(),
         }
     }
 
     pub fn user(&self) -> &User {
         match &self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.user(),
+            AuthenticationType::Oauth2(oauth) => oauth.user(),
         }
     }
 
