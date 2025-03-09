@@ -1,7 +1,11 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
+use pointercrate_core_pages::head::Script;
+use pointercrate_user::{
+    auth::{AuthenticatedUser, NonMutating},
+    config,
+};
 use sqlx::PgConnection;
 
 pub struct ProfileTab;
@@ -14,6 +18,14 @@ impl AccountPageTab for ProfileTab {
 
     fn initialization_script(&self) -> String {
         "/static/user/js/account/profile.js".into()
+    }
+
+    fn additional_scripts(&self) -> Vec<Script> {
+        if cfg!(feature = "oauth2") {
+            vec![Script::r#async("https://accounts.google.com/gsi/client")]
+        } else {
+            Vec::new()
+        }
     }
 
     fn tab_id(&self) -> u8 {
@@ -112,6 +124,25 @@ impl AccountPageTab for ProfileTab {
                     }
                     a.red.hover.button href = "/logout" style = "margin: 15px auto 0px; display: inline-block" {
                         "Logout"
+                    }
+                }
+                @if cfg!(feature = "oauth2") && authenticated_user.is_legacy() {
+                    div.panel.fade {
+                        h2.underlined.pad {
+                            "Link With Google"
+                        }
+                        p {
+                            "Enable signing in to your pointercrate account via Google oauth. More secure than password login, and avoids account lock-outs due to forgotten passwords. Linking a Google account is irreversible, and you cannot change the linked Google account later on!"
+                        }
+                        div #g_id_onload
+                            data-ux_mode="popup"
+                            data-auto_select="true"
+                            data-itp_support="true"
+                            data-client_id=(config::google_client_id())
+                            data-callback="googleOauthCallback" {}
+
+                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" {}
+                        p.error #g-signin-error style="text-align: left" {}
                     }
                 }
                 div.panel.fade {
