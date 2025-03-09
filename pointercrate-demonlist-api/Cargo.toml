@@ -17,7 +17,7 @@ pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
 pointercrate-integrate = {path = "../pointercrate-integrate"}
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
-serde_json = "1.0.139"
+serde_json = "1.0.140"
 log = "0.4.26"
 serde_urlencoded = "0.7.0"
 nonzero_ext = "0.3.0"
