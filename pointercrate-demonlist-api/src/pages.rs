@@ -51,7 +51,7 @@ pub async fn overview(
     let is_april_1st = today.day() == 1 && today.month() == 4;
     if is_april_1st {
         let seconds_since_beginning_of_time = (today - beginning_of_time).num_seconds();
-        let go_back_by = chrono::Duration::seconds(rand::thread_rng().gen_range(0..seconds_since_beginning_of_time));
+        let go_back_by = chrono::Duration::seconds(rand::rng().random_range(0..seconds_since_beginning_of_time));
 
         if let Some(date) = today.checked_sub_signed(go_back_by) {
             // We do not neccessarily know the time zone of the user here (we get it from the 'when' cookie in the normal case).
