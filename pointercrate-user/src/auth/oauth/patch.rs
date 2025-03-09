@@ -3,7 +3,7 @@ use sqlx::PgConnection;
 use crate::auth::legacy::LegacyAuthenticatedUser;
 use crate::Result;
 
-use super::{ValidatedGoogleCredentials};
+use super::ValidatedGoogleCredentials;
 
 impl LegacyAuthenticatedUser {
     pub async fn set_linked_google_account(&mut self, creds: &ValidatedGoogleCredentials, connection: &mut PgConnection) -> Result<()> {
