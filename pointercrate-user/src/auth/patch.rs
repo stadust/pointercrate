@@ -86,6 +86,18 @@ impl AuthenticatedUser<PasswordOrBrowser> {
 
         Ok(())
     }
+
+    #[cfg(feature = "oauth2")]
+    pub async fn link_google_account(
+        &mut self, creds: &super::oauth::ValidatedGoogleCredentials, connection: &mut PgConnection,
+    ) -> Result<()> {
+        match &mut self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.set_linked_google_account(creds, connection).await?,
+            _ => return Err(CoreError::Unauthorized.into()),
+        }
+
+        self.increment_generation_id(connection).await
+    }
 }
 
 #[cfg(test)]
