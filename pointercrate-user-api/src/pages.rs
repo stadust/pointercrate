@@ -1,11 +1,11 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
+use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user::{
     auth::{NonMutating, PasswordOrBrowser},
     error::UserError,
 };
-use pointercrate_user::auth::AuthenticatedUser;
 use pointercrate_user_pages::account::AccountPageConfig;
 
 use rocket::{
@@ -15,15 +15,17 @@ use rocket::{
 };
 use std::net::IpAddr;
 
+#[cfg(any(feature = "legacy_accounts", feature = "oauth2"))]
+use {pointercrate_core::pool::PointercratePool, rocket::serde::json::Json};
+
 #[cfg(feature = "legacy_accounts")]
-use {
-    pointercrate_core::pool::PointercratePool,
-    pointercrate_user::{
-        auth::legacy::{LegacyAuthenticatedUser, Registration},
-        User,
-    },
-    rocket::serde::json::Json,
+use pointercrate_user::{
+    auth::legacy::{LegacyAuthenticatedUser, Registration},
+    User,
 };
+
+#[cfg(feature = "oauth2")]
+use {crate::oauth::GoogleCertificateStore, pointercrate_core::error::CoreError, pointercrate_user::auth::oauth::GoogleOauthPayload};
 
 fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJar<'_>) -> pointercrate_user::error::Result<()> {
     let (access_token, csrf_token) = user.generate_token_pair()?;
@@ -107,4 +109,29 @@ pub async fn logout(_auth: Auth<NonMutating>, cookies: &CookieJar<'_>) -> Redire
     cookies.remove("csrf_token");
 
     Redirect::to(rocket::uri!(login_page))
+}
+
+#[cfg(feature = "oauth2")]
+#[rocket::post("/oauth/google", data = "<payload>")]
+pub async fn google_oauth_login(
+    payload: Json<GoogleOauthPayload>, key_store: &State<GoogleCertificateStore>, pool: &State<PointercratePool>,
+    cookies: &rocket::http::CookieJar<'_>,
+) -> pointercrate_core_api::error::Result<Status> {
+    if key_store.needs_refresh().await {
+        key_store
+            .refresh()
+            .await
+            .map_err(|err| CoreError::internal_server_error(format!("Failed to retrieve signing certificates from Google! {:?}", err)))?;
+    }
+
+    let validated_credentials = key_store
+        .validate_credentials(&payload.into_inner().credential)
+        .await
+        .ok_or(CoreError::Unauthorized)?;
+
+    let authenticated_user = AuthenticatedUser::by_validated_google_creds(&validated_credentials, &mut *pool.connection().await?).await?;
+
+    build_cookies(&authenticated_user, cookies)?;
+
+    Ok(Status::NoContent)
 }

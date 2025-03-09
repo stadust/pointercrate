@@ -16,7 +16,8 @@ log = "0.4.26"
 futures = "0.3.31"
 bcrypt = "0.17.0"
 url = "2.5.4"
+chrono = { version = "0.4.40", optional = true }
 
 [features]
 legacy_accounts = []
-oauth2 = []
+oauth2 = ["chrono"]

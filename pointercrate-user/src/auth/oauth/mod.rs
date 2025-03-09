@@ -1,7 +1,10 @@
+#[cfg(feature = "oauth2")]
+mod get;
+#[cfg(feature = "oauth2")]
 mod post;
 
 #[cfg(feature = "oauth2")]
-pub use post::GoogleOauthPayload;
+pub use post::{GoogleCertificateDatabase, GoogleOauthPayload, ValidatedGoogleCredentials};
 
 use crate::User;
 
