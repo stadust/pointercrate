@@ -45,6 +45,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                     div.content {
                         (page_config.nav_bar)
                         (fragment.body)
+                        div #bg {}
                     }
                     (page_config.footer)
                 }

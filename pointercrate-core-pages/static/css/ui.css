@@ -438,13 +438,20 @@ textarea:invalid {
   margin-left: 10px;
 }
 
-@media (min-width: 768px) {
-  body {
+@media (min-width:1440px) {
+  #bg {
     background-image: url(/static/images/squares3.png);
     background-size: cover;
     background-repeat: repeat-y;
+    position: fixed;
+    top: 0;
+    pointer-events: none;
+    height: 100vh;
+    width: 100vw;
   }
+}
 
+@media (min-width: 768px) {
   .viewer .paginator {
     max-width: 35%;
   }

@@ -26,7 +26,7 @@ impl From<IndividualStatsViewer> for PageFragment {
 impl IndividualStatsViewer {
     fn body(&self) -> Markup {
         html! {
-            nav.flex.wrap.m-center.fade #statsviewers style="text-align: center;" {
+            nav.flex.wrap.m-center.fade #statsviewers style="text-align: center; z-index: 1" {
                 a.button.white.hover.no-shadow href="/demonlist/statsviewer/"{
                     b {"Individual"}
                 }

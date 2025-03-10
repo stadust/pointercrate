@@ -22,7 +22,7 @@ fn nation_based_stats_viewer_html() -> Markup {
     rows.push(StatsViewerRow(vec![("Unbeaten demons", "unbeaten")]));
 
     html! {
-        nav.flex.wrap.m-center.fade #statsviewers style="text-align: center;" {
+        nav.flex.wrap.m-center.fade #statsviewers style="text-align: center; z-index: 1" {
             a.button.white.hover.no-shadow href="/demonlist/statsviewer/"{
                 b {"Individual"}
             }
