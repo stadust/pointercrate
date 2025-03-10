@@ -230,11 +230,13 @@ pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection
         let row = row?;
 
         match records.last_mut() {
-            Some(record) if record.demon == row.demon_name => record.players.push(row.player_name),
+            Some(record) if record.demon.name == row.demon_name => record.players.push(row.player_name),
             _ => records.push(BestRecord {
-                id: row.demon_id,
-                demon: row.demon_name,
-                position: row.position,
+                demon: MinimalDemon {
+                    id: row.demon_id,
+                    name: row.demon_name,
+                    position: row.position,
+                },
                 progress: row.progress,
                 players: vec![row.player_name],
             }),

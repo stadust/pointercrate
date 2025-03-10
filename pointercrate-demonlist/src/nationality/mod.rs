@@ -18,10 +18,8 @@ pub struct Nationality {
 
 #[derive(Debug, Serialize, Hash)]
 pub struct BestRecord {
-    id: i32,
-    demon: String,
-    position: i16,
     progress: i16,
+    demon: MinimalDemon,
     players: Vec<String>,
 }
 
