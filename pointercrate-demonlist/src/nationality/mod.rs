@@ -27,9 +27,7 @@ pub struct BestRecord {
 
 #[derive(Debug, Serialize, Hash)]
 pub struct MiniDemonWithPlayers {
-    id: i32,
-    demon: String,
-    position: i16,
+    demon: MinimalDemon,
     players: Vec<String>,
 }
 

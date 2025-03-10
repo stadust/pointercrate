@@ -158,11 +158,13 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
         let row = row?;
 
         match creations.last_mut() {
-            Some(mini_demon) if mini_demon.demon == row.demon_name => mini_demon.players.push(row.player_name),
+            Some(mini_demon) if mini_demon.demon.name == row.demon_name => mini_demon.players.push(row.player_name),
             _ => creations.push(MiniDemonWithPlayers {
-                id: row.demon,
-                demon: row.demon_name,
-                position: row.position,
+                demon: MinimalDemon {
+                    id: row.demon,
+                    name: row.demon_name,
+                    position: row.position,
+                },
                 players: vec![row.player_name],
             }),
         }
@@ -181,9 +183,11 @@ pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) ->
         let row = row?;
 
         demons.push(MiniDemonWithPlayers {
-            id: row.demon,
-            demon: row.demon_name,
-            position: row.position,
+            demon: MinimalDemon {
+                id: row.demon,
+                name: row.demon_name,
+                position: row.position,
+            },
             players: vec![row.player_name],
         });
     }
@@ -201,9 +205,11 @@ pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -
         let row = row?;
 
         demons.push(MiniDemonWithPlayers {
-            id: row.demon,
-            demon: row.demon_name,
-            position: row.position,
+            demon: MinimalDemon {
+                id: row.demon,
+                name: row.demon_name,
+                position: row.position,
+            },
             players: vec![row.player_name],
         });
     }
