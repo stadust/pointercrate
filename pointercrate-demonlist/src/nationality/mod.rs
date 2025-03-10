@@ -26,14 +26,6 @@ pub struct BestRecord {
 }
 
 #[derive(Debug, Serialize, Hash)]
-pub struct MiniDemon {
-    id: i32,
-    demon: String,
-    position: i16,
-    player: String,
-}
-
-#[derive(Debug, Serialize, Hash)]
 pub struct MiniDemonWithPlayers {
     id: i32,
     demon: String,
@@ -48,8 +40,8 @@ pub struct NationalityRecord {
     #[serde(rename = "records")]
     pub best_records: Vec<BestRecord>,
     pub created: Vec<MiniDemonWithPlayers>,
-    pub verified: Vec<MiniDemon>,
-    pub published: Vec<MiniDemon>,
+    pub verified: Vec<MiniDemonWithPlayers>,
+    pub published: Vec<MiniDemonWithPlayers>,
     pub unbeaten: Vec<MinimalDemon>,
 }
 

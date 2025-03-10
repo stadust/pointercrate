@@ -1,7 +1,7 @@
 use crate::{
     demon::MinimalDemon,
     error::{DemonlistError, Result},
-    nationality::{BestRecord, MiniDemon, MiniDemonWithPlayers, Nationality, NationalityRecord, Subdivision},
+    nationality::{BestRecord, MiniDemonWithPlayers, Nationality, NationalityRecord, Subdivision},
 };
 use futures::stream::StreamExt;
 use sqlx::{Error, PgConnection};
@@ -171,7 +171,7 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
     Ok(creations)
 }
 
-pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemon>> {
+pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
     let mut stream = sqlx::query!(
         r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=verifier where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
@@ -180,18 +180,18 @@ pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) ->
     while let Some(row) = stream.next().await {
         let row = row?;
 
-        demons.push(MiniDemon {
+        demons.push(MiniDemonWithPlayers {
             id: row.demon,
             demon: row.demon_name,
             position: row.position,
-            player: row.player_name,
+            players: vec![row.player_name],
         });
     }
 
     Ok(demons)
 }
 
-pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemon>> {
+pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
     let mut stream = sqlx::query!(
         r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=publisher where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
@@ -200,11 +200,11 @@ pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -
     while let Some(row) = stream.next().await {
         let row = row?;
 
-        demons.push(MiniDemon {
+        demons.push(MiniDemonWithPlayers {
             id: row.demon,
             demon: row.demon_name,
             position: row.position,
-            player: row.player_name,
+            players: vec![row.player_name],
         });
     }
 
