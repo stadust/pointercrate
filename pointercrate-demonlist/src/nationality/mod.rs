@@ -29,8 +29,10 @@ pub struct MiniDemonWithPlayers {
     players: Vec<String>,
 }
 
+/// The [`Nationality`] equivalent of [`FullPlayer`], very roughly
 #[derive(Debug, Hash, Serialize)]
 pub struct NationalityRecord {
+    #[serde(flatten)]
     pub nation: Nationality,
 
     #[serde(rename = "records")]
