@@ -110,7 +110,7 @@ export class StatsViewer extends FilteredPaginator {
     this._hardest.appendChild(
       hardest === undefined
         ? document.createTextNode("None")
-        : this.formatDemon(hardest, "/demonlist/permalink/" + hardest.id + "/")
+        : this.formatDemon(hardest)
     );
   }
 
@@ -140,15 +140,11 @@ export class StatsViewer extends FilteredPaginator {
       element.style.opacity = ".5";
     }
 
-    if (link) {
-      let a = document.createElement("a");
-      a.href = link;
-      a.textContent = demon.name;
+    let a = document.createElement("a");
+    a.href = link ?? "/demonlist/permalink/" + demon.id + "/";
+    a.textContent = demon.name;
 
-      element.appendChild(a);
-    } else {
-      element.textContent = demon.name;
-    }
+    element.appendChild(a);
 
     return element;
   }

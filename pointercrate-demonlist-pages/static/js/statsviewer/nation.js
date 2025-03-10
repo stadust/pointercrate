@@ -83,7 +83,7 @@ class NationStatsViewer extends StatsViewer {
     formatInto(
       this._unbeaten,
       nationData.unbeaten.map((demon) =>
-        this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
+        this.formatDemon(demon)
       )
     );
     formatInto(
@@ -98,10 +98,7 @@ class NationStatsViewer extends StatsViewer {
       this._created,
       nationData.created.map((creation) => {
         return this.makeTooltip(
-          this.formatDemon(
-            creation.demon,
-            "/demonlist/permalink/" + creation.demon.id + "/"
-          ),
+          this.formatDemon(creation.demon),
           "(Co)created&nbsp;by&nbsp;" +
             creation.players.length +
             "&nbsp;player" +
@@ -115,12 +112,9 @@ class NationStatsViewer extends StatsViewer {
       this._verified,
       nationData.verified.map((verification) => {
         return this.makeTooltip(
-          this.formatDemon(
-            verification.demon,
-            "/demonlist/permalink/" + verification.demon.id + "/"
-          ),
+          this.formatDemon(verification.demon),
           "Verified&nbsp;by: ",
-          verification.player
+          verification.players.join(", ")
         );
       })
     );
@@ -128,12 +122,9 @@ class NationStatsViewer extends StatsViewer {
       this._published,
       nationData.published.map((publication) => {
         return this.makeTooltip(
-          this.formatDemon(
-            publication.demon,
-            "/demonlist/permalink/" + publication.demon.id + "/"
-          ),
+          this.formatDemon(publication.demon),
           "Published&nbsp;by: ",
-          publication.player
+          publication.players.join(", ")
         );
       })
     );
@@ -159,10 +150,7 @@ class NationStatsViewer extends StatsViewer {
   }
 
   formatDemonFromRecord(record) {
-    let baseElement = this.formatDemon(
-      record.demon,
-      "/demonlist/permalink/" + record.demon.id + "/"
-    );
+    let baseElement = this.formatDemon(record.demon);
 
     if (record.progress !== 100)
       baseElement.appendChild(
