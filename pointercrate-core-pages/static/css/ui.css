@@ -282,10 +282,11 @@ textarea:invalid {
   text-align: left;
   font-style: italic;
 
-  margin: 2px 10px !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
 }
 
-.form-input .error {
+p.error {
   font-size: 60% !important;
   color: coral;
 }
@@ -599,17 +600,6 @@ h2 .dropdown-menu ul {
 
 /* (Under)lines */
 .underlined {
-  margin-bottom: 5px;
-
-  /*border-bottom: 1px solid transparent;
-  border-image: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
   border-bottom: 1px solid rgba(211, 211, 211, 1);
 }
 
@@ -618,17 +608,6 @@ h2 .dropdown-menu ul {
 }
 
 .leftlined {
-  margin-left: 5px;
-
-  /*border-left: 1px solid transparent;
-  border-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
   border-left: 1px solid rgba(211, 211, 211, 1);
 }
 
@@ -637,17 +616,6 @@ h2 .dropdown-menu ul {
 }
 
 .rightlined {
-  margin-right: 5px;
-
-  /*border-right: 1px solid transparent;
-  border-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
   border-right: 1px solid rgba(211, 211, 211, 1);
 }
 
@@ -656,17 +624,6 @@ h2 .dropdown-menu ul {
 }
 
 .overlined {
-  margin-top: 5px;
-
-  /*border-top: 1px solid transparent;
-  border-image: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
   border-top: 1px solid rgba(211, 211, 211, 1);
 }
 

@@ -50,9 +50,6 @@ impl AuthenticatedUser<PasswordOrBrowser> {
             }
 
             self.set_password(password, connection).await?;
-
-            // needed to invalidate existing access tokens
-            self.increment_generation_id(connection).await?;
         }
 
         self.into_user()
@@ -69,9 +66,12 @@ impl AuthenticatedUser<PasswordOrBrowser> {
 
     async fn set_password(&mut self, password: String, connection: &mut PgConnection) -> Result<()> {
         match &mut self.auth_type {
-            AuthenticationType::Legacy(legacy) => legacy.set_password(password, connection).await,
-            _ => Err(UserError::NonLegacyAccount),
+            AuthenticationType::Legacy(legacy) => legacy.set_password(password, connection).await?,
+            _ => return Err(UserError::NonLegacyAccount),
         }
+
+        // needed to invalidate existing access tokens
+        self.increment_generation_id(connection).await
     }
 
     pub(super) async fn increment_generation_id(&mut self, connection: &mut PgConnection) -> Result<()> {
@@ -85,6 +85,18 @@ impl AuthenticatedUser<PasswordOrBrowser> {
         self.gen += 1;
 
         Ok(())
+    }
+
+    #[cfg(feature = "oauth2")]
+    pub async fn link_google_account(
+        &mut self, creds: &super::oauth::ValidatedGoogleCredentials, connection: &mut PgConnection,
+    ) -> Result<()> {
+        match &mut self.auth_type {
+            AuthenticationType::Legacy(legacy) => legacy.set_linked_google_account(creds, connection).await?,
+            _ => return Err(CoreError::Unauthorized.into()),
+        }
+
+        self.increment_generation_id(connection).await
     }
 }
 
