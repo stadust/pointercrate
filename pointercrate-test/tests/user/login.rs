@@ -100,3 +100,32 @@ pub async fn test_login_no_header(pool: Pool<Postgres>) {
         .execute()
         .await;
 }
+
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_no_login_if_google_account_linked(pool: Pool<Postgres>) {
+    let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
+
+    // Make sure the user we're trying to log in to exists
+    let user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut *connection).await;
+
+    client
+        .post("/api/v1/auth/", &())
+        .header("Authorization", "Basic UGF0cmljazpiYWQgcGFzc3dvcmQ=")
+        .header("X-Real-IP", "127.0.0.1")
+        .expect_status(Status::Ok)
+        .execute()
+        .await;
+
+    sqlx::query!("UPDATE members SET google_account_id='1' WHERE member_id=$1", user.user().id)
+        .execute(&mut *connection)
+        .await
+        .unwrap();
+
+    client
+        .post("/api/v1/auth/", &())
+        .header("Authorization", "Basic UGF0cmljazpiYWQgcGFzc3dvcmQ=")
+        .header("X-Real-IP", "127.0.0.1")
+        .expect_status(Status::Unauthorized)
+        .execute()
+        .await;
+}
