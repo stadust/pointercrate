@@ -65,27 +65,32 @@ export class StatsViewer extends FilteredPaginator {
       });
     }
 
-    let demonSortingModeDropdown = new Dropdown(document.getElementById("demon-sorting-mode-dropdown"));
-    
-    demonSortingModeDropdown.addEventListener(
-      (selected) => {
-        window.localStorage.setItem("demon_sorting_mode", selected);
-  
-        if (selected === "Alphabetical") {
-          this._main_beaten.parentElement.parentElement.style.display = "none";
-          this._extended_beaten.parentElement.parentElement.style.display = "none"
-          this._legacy_beaten.parentElement.parentElement.style.display = "none"
-          this._beaten.parentElement.parentElement.style.display = "block"
-        } else {
-          this._main_beaten.parentElement.parentElement.style.display = "block"
-          this._extended_beaten.parentElement.parentElement.style.display = "block"
-          this._legacy_beaten.parentElement.parentElement.style.display = "block"
-          this._beaten.parentElement.parentElement.style.display = "none"
-        }
-      }
-    ); 
+    let demonSortingModeDropdown = new Dropdown(
+      document.getElementById("demon-sorting-mode-dropdown")
+    );
 
-    demonSortingModeDropdown.select(localStorage.getItem("demon_sorting_mode") ?? "Alphabetical", true); // default to alphabetical
+    demonSortingModeDropdown.addEventListener((selected) => {
+      window.localStorage.setItem("demon_sorting_mode", selected);
+
+      if (selected === "Alphabetical") {
+        this._main_beaten.parentElement.parentElement.style.display = "none";
+        this._extended_beaten.parentElement.parentElement.style.display =
+          "none";
+        this._legacy_beaten.parentElement.parentElement.style.display = "none";
+        this._beaten.parentElement.parentElement.style.display = "block";
+      } else {
+        this._main_beaten.parentElement.parentElement.style.display = "block";
+        this._extended_beaten.parentElement.parentElement.style.display =
+          "block";
+        this._legacy_beaten.parentElement.parentElement.style.display = "block";
+        this._beaten.parentElement.parentElement.style.display = "none";
+      }
+    });
+
+    demonSortingModeDropdown.select(
+      localStorage.getItem("demon_sorting_mode") ?? "Alphabetical",
+      true
+    ); // default to alphabetical
   }
 
   initialize() {

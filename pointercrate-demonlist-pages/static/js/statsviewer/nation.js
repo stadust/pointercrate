@@ -91,7 +91,11 @@ class NationStatsViewer extends StatsViewer {
     formatInto(
       this._extended_beaten,
       beaten
-        .filter((record) => record.demon.position > this.list_size && record.demon.position <= this.extended_list_size)
+        .filter(
+          (record) =>
+            record.demon.position > this.list_size &&
+            record.demon.position <= this.extended_list_size
+        )
         .map((record) => this.formatDemonFromRecord(record, true))
     );
     formatInto(
@@ -186,7 +190,12 @@ class NationStatsViewer extends StatsViewer {
       (record.players.length === 1 ? "" : "s") +
       "&nbsp;in&nbsp;this&nbsp;country: ";
 
-    return this.makeTooltip(baseElement, title, record.players.join(", "), dontStyle);
+    return this.makeTooltip(
+      baseElement,
+      title,
+      record.players.join(", "),
+      dontStyle
+    );
   }
 }
 
