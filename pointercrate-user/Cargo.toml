@@ -8,7 +8,7 @@ edition.workspace = true
 
 [dependencies]
 pointercrate-core = {path = "../pointercrate-core"}
-serde = "1.0.218"
+serde = "1.0.219"
 derive_more = "0.99.18"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
 jsonwebtoken = "9.3.1"
@@ -18,7 +18,7 @@ base64 = "0.22.1"
 lazy_static = "1.5.0"
 bcrypt = "0.17.0"
 url = "2.5.4"
-serde_json = "1.0.139"
+serde_json = "1.0.140"
 
 [features]
 legacy_accounts = []
