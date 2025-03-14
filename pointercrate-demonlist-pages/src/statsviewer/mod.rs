@@ -37,6 +37,20 @@ fn continent_panel() -> Markup {
     }
 }
 
+fn demon_sorting_panel() -> Markup {
+    html! {
+        section.panel.fade style="overflow:initial" {
+            h3.underlined {
+                "Demon Sorting"
+            }
+            p {
+                "The order in which completed demons should be listed"
+            }
+            (simple_dropdown("demon-sorting-mode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
+        }
+    }
+}
+
 fn hide_subdivision_panel() -> Markup {
     html! {
         section.panel.fade {
@@ -62,6 +76,9 @@ fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
         StatsViewerRow(vec![("Demonlist rank", "rank"), ("Demonlist score", "score")]),
         StatsViewerRow(vec![("Demonlist stats", "stats"), ("Hardest demon", "hardest")]),
         StatsViewerRow(vec![("Demons completed", "beaten")]),
+        StatsViewerRow(vec![("Main Demons completed", "main-beaten")]),
+        StatsViewerRow(vec![("Extended Demons completed", "extended-beaten")]),
+        StatsViewerRow(vec![("Legacy Demons completed", "legacy-beaten")]),
         StatsViewerRow(vec![
             ("Demons created", "created"),
             ("Demons published", "published"),

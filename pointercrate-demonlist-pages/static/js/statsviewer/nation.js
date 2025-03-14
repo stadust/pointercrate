@@ -75,8 +75,33 @@ class NationStatsViewer extends StatsViewer {
     this.setHardest(hardest);
     this.setCompletionNumber(amountBeaten, extended, legacy);
 
-    nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
     beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    formatInto(
+      this._beaten,
+      beaten.map((record) => this.formatDemonFromRecord(record))
+    );
+
+    beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
+    formatInto(
+      this._main_beaten,
+      beaten
+        .filter((record) => record.demon.position <= this.list_size)
+        .map((record) => this.formatDemonFromRecord(record, true))
+    );
+    formatInto(
+      this._extended_beaten,
+      beaten
+        .filter((record) => record.demon.position > this.list_size && record.demon.position <= this.extended_list_size)
+        .map((record) => this.formatDemonFromRecord(record, true))
+    );
+    formatInto(
+      this._legacy_beaten,
+      beaten
+        .filter((record) => record.demon.position > this.extended_list_size)
+        .map((record) => this.formatDemonFromRecord(record, true))
+    );
+
+    nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
     progress.sort((r1, r2) => r2.progress - r1.progress);
     nationData.created.sort((r1, r2) =>
       r1.demon.name.localeCompare(r2.demon.name)
@@ -85,10 +110,6 @@ class NationStatsViewer extends StatsViewer {
     formatInto(
       this._unbeaten,
       nationData.unbeaten.map((demon) => this.formatDemon(demon))
-    );
-    formatInto(
-      this._beaten,
-      beaten.map((record) => this.formatDemonFromRecord(record))
     );
     formatInto(
       this._progress,
@@ -149,8 +170,8 @@ class NationStatsViewer extends StatsViewer {
     return tooltip;
   }
 
-  formatDemonFromRecord(record) {
-    let baseElement = this.formatDemon(record.demon);
+  formatDemonFromRecord(record, dontStyle) {
+    let baseElement = this.formatDemon(record.demon, null, dontStyle);
 
     if (record.progress !== 100)
       baseElement.appendChild(
@@ -165,7 +186,7 @@ class NationStatsViewer extends StatsViewer {
       (record.players.length === 1 ? "" : "s") +
       "&nbsp;in&nbsp;this&nbsp;country: ";
 
-    return this.makeTooltip(baseElement, title, record.players.join(", "));
+    return this.makeTooltip(baseElement, title, record.players.join(", "), dontStyle);
   }
 }
 

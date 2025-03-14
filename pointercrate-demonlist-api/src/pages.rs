@@ -153,7 +153,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 #[rocket::get("/statsviewer")]
 pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
-
+    
     Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut *connection).await?,
     }))
