@@ -60,7 +60,7 @@ class NationStatsViewer extends StatsViewer {
       record.players.forEach(players.add, players);
 
       if (hardest === undefined || record.demon.position < hardest.position) {
-        hardest = record.demon
+        hardest = record.demon;
       }
 
       if (!beaten.some((d) => d.demon.id === record.demon.id))
@@ -78,13 +78,13 @@ class NationStatsViewer extends StatsViewer {
     nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
     beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
     progress.sort((r1, r2) => r2.progress - r1.progress);
-    nationData.created.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    nationData.created.sort((r1, r2) =>
+      r1.demon.name.localeCompare(r2.demon.name)
+    );
 
     formatInto(
       this._unbeaten,
-      nationData.unbeaten.map((demon) =>
-        this.formatDemon(demon)
-      )
+      nationData.unbeaten.map((demon) => this.formatDemon(demon))
     );
     formatInto(
       this._beaten,
