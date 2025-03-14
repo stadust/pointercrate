@@ -1,7 +1,7 @@
 use crate::{
     demon::MinimalDemon,
     error::{DemonlistError, Result},
-    nationality::{BestRecord, MiniDemon, MiniDemonWithPlayers, Nationality, NationalityRecord, Subdivision},
+    nationality::{BestRecord, MiniDemonWithPlayers, Nationality, NationalityRecord, Subdivision},
 };
 use futures::stream::StreamExt;
 use sqlx::{Error, PgConnection};
@@ -158,11 +158,13 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
         let row = row?;
 
         match creations.last_mut() {
-            Some(mini_demon) if mini_demon.demon == row.demon_name => mini_demon.players.push(row.player_name),
+            Some(mini_demon) if mini_demon.demon.name == row.demon_name => mini_demon.players.push(row.player_name),
             _ => creations.push(MiniDemonWithPlayers {
-                id: row.demon,
-                demon: row.demon_name,
-                position: row.position,
+                demon: MinimalDemon {
+                    id: row.demon,
+                    name: row.demon_name,
+                    position: row.position,
+                },
                 players: vec![row.player_name],
             }),
         }
@@ -171,7 +173,7 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
     Ok(creations)
 }
 
-pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemon>> {
+pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
     let mut stream = sqlx::query!(
         r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=verifier where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
@@ -180,18 +182,20 @@ pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) ->
     while let Some(row) = stream.next().await {
         let row = row?;
 
-        demons.push(MiniDemon {
-            id: row.demon,
-            demon: row.demon_name,
-            position: row.position,
-            player: row.player_name,
+        demons.push(MiniDemonWithPlayers {
+            demon: MinimalDemon {
+                id: row.demon,
+                name: row.demon_name,
+                position: row.position,
+            },
+            players: vec![row.player_name],
         });
     }
 
     Ok(demons)
 }
 
-pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemon>> {
+pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
     let mut stream = sqlx::query!(
         r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=publisher where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
@@ -200,11 +204,13 @@ pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -
     while let Some(row) = stream.next().await {
         let row = row?;
 
-        demons.push(MiniDemon {
-            id: row.demon,
-            demon: row.demon_name,
-            position: row.position,
-            player: row.player_name,
+        demons.push(MiniDemonWithPlayers {
+            demon: MinimalDemon {
+                id: row.demon,
+                name: row.demon_name,
+                position: row.position,
+            },
+            players: vec![row.player_name],
         });
     }
 
@@ -224,11 +230,13 @@ pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection
         let row = row?;
 
         match records.last_mut() {
-            Some(record) if record.demon == row.demon_name => record.players.push(row.player_name),
+            Some(record) if record.demon.name == row.demon_name => record.players.push(row.player_name),
             _ => records.push(BestRecord {
-                id: row.demon_id,
-                demon: row.demon_name,
-                position: row.position,
+                demon: MinimalDemon {
+                    id: row.demon_id,
+                    name: row.demon_name,
+                    position: row.position,
+                },
                 progress: row.progress,
                 players: vec![row.player_name],
             }),

@@ -18,38 +18,28 @@ pub struct Nationality {
 
 #[derive(Debug, Serialize, Hash)]
 pub struct BestRecord {
-    id: i32,
-    demon: String,
-    position: i16,
     progress: i16,
+    demon: MinimalDemon,
     players: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Hash)]
-pub struct MiniDemon {
-    id: i32,
-    demon: String,
-    position: i16,
-    player: String,
 }
 
 #[derive(Debug, Serialize, Hash)]
 pub struct MiniDemonWithPlayers {
-    id: i32,
-    demon: String,
-    position: i16,
+    demon: MinimalDemon,
     players: Vec<String>,
 }
 
+/// The [`Nationality`] equivalent of [`FullPlayer`], very roughly
 #[derive(Debug, Hash, Serialize)]
 pub struct NationalityRecord {
+    #[serde(flatten)]
     pub nation: Nationality,
 
     #[serde(rename = "records")]
     pub best_records: Vec<BestRecord>,
     pub created: Vec<MiniDemonWithPlayers>,
-    pub verified: Vec<MiniDemon>,
-    pub published: Vec<MiniDemon>,
+    pub verified: Vec<MiniDemonWithPlayers>,
+    pub published: Vec<MiniDemonWithPlayers>,
     pub unbeaten: Vec<MinimalDemon>,
 }
 

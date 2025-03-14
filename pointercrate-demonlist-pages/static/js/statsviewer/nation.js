@@ -23,7 +23,7 @@ class NationStatsViewer extends StatsViewer {
 
     let nationData = response.data.data;
 
-    this.setName(nationData.nation.nation, nationData.nation);
+    this.setName(nationData.nation, nationData);
 
     let beaten = [];
     let progress = [];
@@ -44,16 +44,12 @@ class NationStatsViewer extends StatsViewer {
       } else {
         beaten.push(record);
 
-        if (hardest === undefined || record.position < hardest.position) {
-          hardest = {
-            name: record.demon,
-            position: record.position,
-            id: record.id,
-          };
+        if (hardest === undefined || record.demon.position < hardest.position) {
+          hardest = record.demon;
         }
 
-        if (record.position > this.list_size)
-          if (record.position <= this.extended_list_size) ++extended;
+        if (record.demon.position > this.list_size)
+          if (record.demon.position <= this.extended_list_size) ++extended;
           else ++legacy;
       }
     }
@@ -61,19 +57,15 @@ class NationStatsViewer extends StatsViewer {
     let amountBeaten = beaten.length - extended - legacy;
 
     for (let record of nationData.verified) {
-      players.add(record.player);
+      record.players.forEach(players.add, players);
 
-      if (hardest === undefined || record.position < hardest.position) {
-        hardest = {
-          name: record.demon,
-          position: record.position,
-          id: record.id,
-        };
+      if (hardest === undefined || record.demon.position < hardest.position) {
+        hardest = record.demon
       }
 
-      if (!beaten.some((d) => d.id === record.id))
-        if (record.position > this.list_size)
-          if (record.position <= this.extended_list_size) ++extended;
+      if (!beaten.some((d) => d.demon.id === record.demon.id))
+        if (record.demon.position > this.list_size)
+          if (record.demon.position <= this.extended_list_size) ++extended;
           else ++legacy;
         else ++amountBeaten;
     }
@@ -84,14 +76,14 @@ class NationStatsViewer extends StatsViewer {
     this.setCompletionNumber(amountBeaten, extended, legacy);
 
     nationData.unbeaten.sort((r1, r2) => r1.name.localeCompare(r2.name));
-    beaten.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
     progress.sort((r1, r2) => r2.progress - r1.progress);
-    nationData.created.sort((r1, r2) => r1.demon.localeCompare(r2.demon));
+    nationData.created.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
 
     formatInto(
       this._unbeaten,
       nationData.unbeaten.map((demon) =>
-        this.formatDemon(demon, "/demonlist/permalink/" + demon.id + "/")
+        this.formatDemon(demon)
       )
     );
     formatInto(
@@ -106,10 +98,7 @@ class NationStatsViewer extends StatsViewer {
       this._created,
       nationData.created.map((creation) => {
         return this.makeTooltip(
-          this.formatDemon(
-            { name: creation.demon, position: creation.position },
-            "/demonlist/permalink/" + creation.id + "/"
-          ),
+          this.formatDemon(creation.demon),
           "(Co)created&nbsp;by&nbsp;" +
             creation.players.length +
             "&nbsp;player" +
@@ -123,12 +112,9 @@ class NationStatsViewer extends StatsViewer {
       this._verified,
       nationData.verified.map((verification) => {
         return this.makeTooltip(
-          this.formatDemon(
-            { name: verification.demon, position: verification.position },
-            "/demonlist/permalink/" + verification.id + "/"
-          ),
+          this.formatDemon(verification.demon),
           "Verified&nbsp;by: ",
-          verification.player
+          verification.players.join(", ")
         );
       })
     );
@@ -136,12 +122,9 @@ class NationStatsViewer extends StatsViewer {
       this._published,
       nationData.published.map((publication) => {
         return this.makeTooltip(
-          this.formatDemon(
-            { name: publication.demon, position: publication.position },
-            "/demonlist/permalink/" + publication.id + "/"
-          ),
+          this.formatDemon(publication.demon),
           "Published&nbsp;by: ",
-          publication.player
+          publication.players.join(", ")
         );
       })
     );
@@ -167,10 +150,7 @@ class NationStatsViewer extends StatsViewer {
   }
 
   formatDemonFromRecord(record) {
-    let baseElement = this.formatDemon(
-      { name: record.demon, position: record.position },
-      "/demonlist/permalink/" + record.id + "/"
-    );
+    let baseElement = this.formatDemon(record.demon);
 
     if (record.progress !== 100)
       baseElement.appendChild(
@@ -197,7 +177,7 @@ $(window).on("load", function () {
   );
   window.statsViewer.initialize();
   window.statsViewer.addSelectionListener((selected) =>
-    map.select(selected.nation.country_code)
+    map.select(selected.country_code)
   );
 
   map.addSelectionListener((country, _) => {
