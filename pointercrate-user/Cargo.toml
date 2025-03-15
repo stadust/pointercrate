@@ -19,6 +19,8 @@ lazy_static = "1.5.0"
 bcrypt = "0.17.0"
 url = "2.5.4"
 serde_json = "1.0.140"
+chrono = { version = "0.4.40", optional = true }
 
 [features]
 legacy_accounts = []
+oauth2 = ["chrono"]
