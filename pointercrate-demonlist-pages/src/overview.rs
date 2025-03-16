@@ -12,12 +12,14 @@ use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, TimeShiftedDemon},
 };
+use unic_langid::LanguageIdentifier;
 
 pub struct OverviewPage {
     pub team: Team,
     pub demonlist: Vec<Demon>,
     pub time_machine: Tardis,
     pub submitter_initially_visible: bool,
+    pub lang: &'static LanguageIdentifier,
 }
 
 fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
@@ -123,7 +125,7 @@ impl OverviewPage {
             _ => self.demonlist.iter().collect(),
         };
 
-        let dropdowns = super::dropdowns(&demons_for_dropdown[..], None);
+        let dropdowns = super::dropdowns(&self.lang, &demons_for_dropdown[..], None);
 
         html! {
             (dropdowns)
@@ -153,10 +155,10 @@ impl OverviewPage {
 
                 aside.right {
                     (self.team)
-                    (super::rules_panel())
+                    (super::rules_panel(&self.lang))
                     (submit_panel())
                     (stats_viewer_panel())
-                    (super::discord_panel())
+                    (super::discord_panel(&self.lang))
                 }
             }
         }

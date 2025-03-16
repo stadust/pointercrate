@@ -6,6 +6,7 @@ use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
 use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
+    localization::ClientLocale,
     response::{Page, Response2},
 };
 use pointercrate_demonlist::{
@@ -32,7 +33,7 @@ pub fn stats_viewer_redirect() -> Redirect {
 
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
+    pool: &State<PointercratePool>, locale: ClientLocale, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
 ) -> Result<Page> {
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
@@ -79,10 +80,12 @@ pub async fn overview(
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
             helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            lang: locale.lang,
         },
         demonlist,
         time_machine: tardis,
         submitter_initially_visible: submitter.unwrap_or(false),
+        lang: locale.lang,
     }))
 }
 
@@ -96,7 +99,9 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[rocket::get("/<position>")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
+pub async fn demon_page(
+    locale: ClientLocale, position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>,
+) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut *connection).await?;
@@ -142,11 +147,13 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
             helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            lang: locale.lang,
         },
         demonlist: current_list(&mut *connection).await?,
         movements: modifications,
         integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
+        lang: locale.lang,
     }))
 }
 
