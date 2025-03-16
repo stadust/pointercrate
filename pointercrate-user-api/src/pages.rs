@@ -103,10 +103,12 @@ pub async fn register(
 
 #[rocket::get("/account")]
 pub async fn account_page(
-    auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
+    auth: Option<Auth<NonMutating>>, locale: ClientLocale, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
     match auth {
-        Some(mut auth) => Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await)),
+        Some(mut auth) => Ok(Page::new(
+            tabs.account_page(locale.lang, auth.user, permissions, &mut auth.connection).await,
+        )),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }

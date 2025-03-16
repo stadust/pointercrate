@@ -2180,6 +2180,7 @@ dependencies = [
  "async-trait",
  "maud",
  "pointercrate-core",
+ "pointercrate-core-api",
  "pointercrate-core-pages",
  "pointercrate-user",
  "sqlx",

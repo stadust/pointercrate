@@ -1,11 +1,13 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
+use pointercrate_core_api::localization::ClientLocale;
 use pointercrate_core_pages::{
     head::{HeadLike, Script},
     PageFragment,
 };
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use sqlx::PgConnection;
+use unic_langid::LanguageIdentifier;
 
 pub mod profile;
 pub mod users;
@@ -19,9 +21,10 @@ pub trait AccountPageTab {
     }
 
     fn tab_id(&self) -> u8;
-    fn tab(&self) -> Markup;
+    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup;
     async fn content(
-        &self, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, lang: &'static LanguageIdentifier, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager,
+        connection: &mut PgConnection,
     ) -> Markup;
 }
 
@@ -42,7 +45,8 @@ impl AccountPageConfig {
     }
 
     pub async fn account_page(
-        &self, user: AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, lang: &'static LanguageIdentifier, user: AuthenticatedUser<NonMutating>, permissions: &PermissionsManager,
+        connection: &mut PgConnection,
     ) -> AccountPage {
         let mut page = AccountPage {
             user,
@@ -52,8 +56,8 @@ impl AccountPageConfig {
 
         for tab_config in &self.tabs {
             if tab_config.should_display_for(page.user.user().permissions, permissions) {
-                let tab = tab_config.tab();
-                let content = tab_config.content(&page.user, permissions, connection).await;
+                let tab = tab_config.tab(lang);
+                let content = tab_config.content(lang, &page.user, permissions, connection).await;
 
                 page.scripts.extend(tab_config.additional_scripts());
                 page.scripts.push(Script::module(tab_config.initialization_script()));
