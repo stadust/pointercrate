@@ -1990,6 +1990,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
  "bcrypt",
+ "chrono",
  "derive_more",
  "futures",
  "jsonwebtoken",
@@ -2007,6 +2008,7 @@ name = "pointercrate-user-api"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
+ "chrono",
  "governor",
  "log",
  "nonzero_ext",
@@ -2015,6 +2017,7 @@ dependencies = [
  "pointercrate-core-pages",
  "pointercrate-user",
  "pointercrate-user-pages",
+ "reqwest",
  "rocket",
  "serde_urlencoded",
  "sqlx",
