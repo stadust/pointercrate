@@ -342,7 +342,7 @@ impl DemonPage {
                     @if position <= list_config::extended_list_size() {
                         span {
                             b {
-                                (ftr(&self.lang, "demon-score", vec![("percent", 100.0.into())]))
+                                (ftr(&self.lang, "demon-score", vec![("percent", 100.0)]))
                             }
                             br;
                             (format!("{:.2}", score100))
@@ -351,7 +351,7 @@ impl DemonPage {
                     @if position <= list_config::list_size(){
                         span {
                             b {
-                                (ftr(&self.lang, "demon-score", vec![("percent", self.data.demon.requirement.into())]))
+                                (ftr(&self.lang, "demon-score", vec![("percent", self.data.demon.requirement)]))
                             }
                             br;
                             (format!("{:.2}", score_requirement))
@@ -375,18 +375,18 @@ impl DemonPage {
                         }
                         @if position <= list_config::list_size() {
                             h3 {
-                                (ftr(&self.lang, "records-qualify", vec![("percent", self.data.demon.requirement.into())]))
+                                (ftr(&self.lang, "records-qualify", vec![("percent", self.data.demon.requirement)]))
                             }
                         }
                         @else if position <= list_config::extended_list_size() {
                             h3 {
-                                (ftr(&self.lang, "records-qualify", vec![("percent", 100.0.into())]))
+                                (ftr(&self.lang, "records-qualify", vec![("percent", 100.0)]))
                             }
                         }
                         @if !self.data.records.is_empty() {
                             h4 {
                                 @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
-                                (ftr(&self.lang, "records-total", vec![("numRecords", self.data.records.len().into()), ("numCompletions", records_registered_100_count.into())]))
+                                (ftr(&self.lang, "records-total", vec![("numRecords", self.data.records.len()), ("numCompletions", records_registered_100_count)]))
                             }
                         }
                     }
