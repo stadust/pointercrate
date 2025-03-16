@@ -41,7 +41,7 @@ fn login_page_body() -> Markup {
                         input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Sign In";
                     }
                 }
-                p {
+                p style = "text-align: center; padding: 0px 10px" {
                     "Don't have a pointercrate account yet? " a.link.tab data-tab-id="2" {"Sign up"} " for one!"
                 }
             }
@@ -76,7 +76,7 @@ fn login_page_body() -> Markup {
                         }
                     }
                 }
-                p {
+                p style = "text-align: center; padding: 0px 10px" {
                     "Already have a pointercrate account? " a.link.tab.tab-active data-tab-id="1" {"Sign in"} " instead."
                 }
             }
