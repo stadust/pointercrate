@@ -13,10 +13,10 @@ reqwest = "0.12.*"
 futures = "0.3.31"
 log = "0.4.26"
 chrono = "0.4.40"
-tokio = {version = "1.44.0", features = ["rt"]}
+tokio = {version = "1.44.1", features = ["rt"]}
 pointercrate-demonlist = { path = "../pointercrate-demonlist" }
 pointercrate-core = { path = "../pointercrate-core" }
-governor = "0.8.0"
+governor = "0.8.1"
 nonzero_ext = "0.3.0"
 
 [dependencies.dash-rs]
