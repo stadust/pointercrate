@@ -16,7 +16,7 @@ pub fn login_page() -> PageFragment {
 fn login_page_body() -> Markup {
     html! {
         div.tab-display.center #login-tabber style="display: flex; align-items: center; justify-content: center; height: calc(100% - 70px)" { // 70px = height of nav bar
-            div.tab-content.tab-content-active data-tab-id="1" {
+            div.tab-content.tab-content-active.flex.col data-tab-id="1" style="align-items: center" {
                 div.panel.fade {
                     h1.underlined.pad {
                         "Sign In"
@@ -45,7 +45,7 @@ fn login_page_body() -> Markup {
                     "Don't have a pointercrate account yet? " a.link.tab data-tab-id="2" {"Sign up"} " for one!"
                 }
             }
-            div.tab-content data-tab-id="2" {
+            div.tab-content.flex.col data-tab-id="2" style="align-items: center" {
                 div.panel.fade {
                     h1.underlined.pad {
                         "Sign Up"
