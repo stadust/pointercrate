@@ -31,6 +31,11 @@ class IndividualStatsViewer extends StatsViewer {
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
 
+    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
+    this.formatRecordsInto(this._beaten, beaten);
+
+    beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
+
     let legacy = beaten.filter(
       (record) => record.demon.position > this.extended_list_size
     );
@@ -43,10 +48,6 @@ class IndividualStatsViewer extends StatsViewer {
       (record) => record.demon.position <= this.list_size
     );
 
-    beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
-    this.formatRecordsInto(this._beaten, beaten);
-
-    beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
     this.formatRecordsInto(this._main_beaten, main, true);
     this.formatRecordsInto(this._extended_beaten, extended, true);
     this.formatRecordsInto(this._legacy_beaten, legacy, true);
