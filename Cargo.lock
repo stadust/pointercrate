@@ -2069,7 +2069,6 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
- "fluent",
  "log",
  "maud",
  "pointercrate-core",
@@ -2184,6 +2183,7 @@ dependencies = [
  "pointercrate-core-pages",
  "pointercrate-user",
  "sqlx",
+ "unic-langid",
 ]
 
 [[package]]

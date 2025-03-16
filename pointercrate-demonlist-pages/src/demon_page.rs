@@ -6,10 +6,6 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use chrono::NaiveDateTime;
-use fluent::{
-    types::{FluentNumber, FluentNumberOptions},
-    FluentValue,
-};
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::localization::{ftr, tr};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};

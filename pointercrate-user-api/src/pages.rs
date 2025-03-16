@@ -1,6 +1,6 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_api::response::Page;
+use pointercrate_core_api::{localization::ClientLocale, response::Page};
 use pointercrate_user::{
     auth::{NonMutating, PasswordOrBrowser},
     error::UserError,
@@ -26,9 +26,9 @@ use {
 };
 
 #[rocket::get("/login")]
-pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
+pub async fn login_page(auth: Option<Auth<NonMutating>>, locale: ClientLocale) -> Result<Redirect, Page> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
+        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page(locale.lang)))
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
