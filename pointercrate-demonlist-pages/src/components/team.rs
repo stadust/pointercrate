@@ -1,10 +1,13 @@
 use maud::{html, Markup, Render};
+use pointercrate_core::localization::tr;
 use pointercrate_user::User;
+use unic_langid::LanguageIdentifier;
 
 pub struct Team {
     pub admins: Vec<User>,
     pub moderators: Vec<User>,
     pub helpers: Vec<User>,
+    pub lang: &'static LanguageIdentifier,
 }
 
 impl Render for Team {
@@ -26,11 +29,11 @@ impl Render for Team {
             section.panel.fade.js-scroll-anim #editors data-anim = "fade" {
                 div.underlined {
                     h2 {
-                        "List Editors"
+                        (tr(&self.lang, "editors-panel"))
                     }
                 }
                 p {
-                    "Contact any of these people if you have problems with the list or want to see a specific thing changed."
+                    (tr(&self.lang, "editors-panel.info"))
                 }
                 ul style = "line-height: 30px" {
                     @for admin in &self.admins {
@@ -44,11 +47,11 @@ impl Render for Team {
                 }
                 div.underlined {
                     h2 {
-                        "List Helpers"
+                        (tr(&self.lang, "helpers-panel"))
                     }
                 }
                 p {
-                    "Contact these people if you have any questions regarding why a specific record was rejected. Do not needlessly bug them about checking submissions though!"
+                    (tr(&self.lang, "helpers-panel.info"))
                 }
                 ul style = "line-height: 30px" {
                     @for helper in &self.helpers {

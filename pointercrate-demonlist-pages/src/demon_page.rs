@@ -6,13 +6,19 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use chrono::NaiveDateTime;
+use fluent::{
+    types::{FluentNumber, FluentNumberOptions},
+    FluentValue,
+};
 use maud::{html, Markup, PreEscaped};
+use pointercrate_core::localization::{ftr, tr};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
     config::{self as list_config, extended_list_size},
     demon::{Demon, FullDemon},
 };
 use pointercrate_integrate::gd::{DemonRating, IntegrationLevel, LevelRating, Thunk};
+use unic_langid::LanguageIdentifier;
 use url::Url;
 
 #[derive(Debug)]
@@ -27,6 +33,7 @@ pub struct DemonPage {
     pub data: FullDemon,
     pub movements: Vec<DemonMovement>,
     pub integration: Option<IntegrationLevel>,
+    pub lang: &'static LanguageIdentifier,
 }
 
 impl From<DemonPage> for PageFragment {
@@ -117,7 +124,7 @@ impl DemonPage {
     }
 
     fn body(&self) -> Markup {
-        let dropdowns = super::dropdowns(&self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
+        let dropdowns = super::dropdowns(&self.lang, &self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
 
         let mut labels = Vec::new();
 
@@ -153,7 +160,7 @@ impl DemonPage {
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
-                            "Position History"
+                            (tr(&self.lang, "movements"))
                             span.arrow.hover #history-trigger {}
                         }
                         div.js-collapse-content style="display:none"  {
@@ -163,16 +170,16 @@ impl DemonPage {
                                 tbody #history-table-body {
                                     tr {
                                         th.blue {
-                                            "Date"
+                                            (tr(&self.lang, "movements.date"))
                                         }
                                         th.blue {
-                                            "Change"
+                                            (tr(&self.lang, "movements.change"))
                                         }
                                         th.blue {
-                                            "New Position"
+                                            (tr(&self.lang, "movements.newposition"))
                                         }
                                         th.blue {
-                                            "Reason"
+                                            (tr(&self.lang, "movements.reason"))
                                         }
                                     }
                                 }
@@ -191,10 +198,10 @@ impl DemonPage {
                 }
                 aside.right {
                     (self.team)
-                    (super::rules_panel())
+                    (super::rules_panel(&self.lang))
                     (submit_panel())
                     (stats_viewer_panel())
-                    (super::discord_panel())
+                    (super::discord_panel(&self.lang))
                 }
             }
         }
@@ -262,21 +269,21 @@ impl DemonPage {
                     @if let Some(ref level) = self.integration {
                         span {
                             b {
-                                "Level Password: "
+                                (tr(&self.lang, "demon-password"))
                             }
                             br;
                             (level.level_data.password.as_processed().map(|pw| pw.to_string()).unwrap_or("Unknown".to_string()))
                         }
                         span {
                             b {
-                                "Level ID: "
+                                (tr(&self.lang, "demon-id"))
                             }
                             br;
                             (level.level_id)
                         }
                         span {
                             b {
-                                "Level length: "
+                                (tr(&self.lang, "demon-length"))
                             }
                             br;
                             @match level.level_data.level_data {
@@ -290,7 +297,7 @@ impl DemonPage {
                         }
                         span {
                             b {
-                                "Object count: "
+                                (tr(&self.lang, "demon-objects"))
                             }
                             br;
                             @match level.level_data.level_data {
@@ -300,7 +307,7 @@ impl DemonPage {
                         }
                         span {
                             b {
-                                "In-Game Difficulty: "
+                                (tr(&self.lang, "demon-difficulty"))
                             }
                             br;
                             @match level.difficulty {
@@ -318,7 +325,7 @@ impl DemonPage {
                         }
                         span {
                             b {
-                                "Created in:"
+                                (tr(&self.lang, "demon-gdversion"))
                             }
                             br;
                             (level.gd_version)
@@ -326,7 +333,7 @@ impl DemonPage {
                         @if let Some(ref song) = level.custom_song {
                             span style = "width: 100%"{
                                 b {
-                                    "Newgrounds Song:"
+                                    (tr(&self.lang, "demon-ngsong"))
                                 }
                                 br;
                                 @match song.link {
@@ -339,7 +346,7 @@ impl DemonPage {
                     @if position <= list_config::extended_list_size() {
                         span {
                             b {
-                                "Demonlist score (100%): "
+                                (ftr(&self.lang, "demon-score", vec![("percent", 100.0.into())]))
                             }
                             br;
                             (format!("{:.2}", score100))
@@ -348,7 +355,7 @@ impl DemonPage {
                     @if position <= list_config::list_size(){
                         span {
                             b {
-                                "Demonlist score (" (self.data.demon.requirement) "%): "
+                                (ftr(&self.lang, "demon-score", vec![("percent", self.data.demon.requirement.into())]))
                             }
                             br;
                             (format!("{:.2}", score_requirement))
@@ -368,26 +375,22 @@ impl DemonPage {
                 section.records.panel.fade.js-scroll-anim data-anim = "fade" {
                     div.underlined.pad {
                         h2 {
-                            "Records"
+                            (tr(&self.lang, "records"))
                         }
                         @if position <= list_config::list_size() {
                             h3 {
-                                (self.data.demon.requirement) "% or better required to qualify"
+                                (ftr(&self.lang, "records-qualify", vec![("percent", self.data.demon.requirement.into())]))
                             }
                         }
                         @else if position <= list_config::extended_list_size() {
                             h3 {
-                                "100% required to qualify"
+                                (ftr(&self.lang, "records-qualify", vec![("percent", 100.0.into())]))
                             }
                         }
                         @if !self.data.records.is_empty() {
                             h4 {
                                 @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
-                                (self.data.records.len())
-                                " records registered, out of which "
-                                (records_registered_100_count)
-                                @if records_registered_100_count == 1 { " is" } @else { " are" }
-                                " 100%"
+                                (ftr(&self.lang, "records-total", vec![("numRecords", self.data.records.len().into()), ("numCompletions", records_registered_100_count.into())]))
                             }
                         }
                     }
