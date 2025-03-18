@@ -4,18 +4,24 @@ auth-password = Password
 auth-repeatpassword = Repeat Password
 
 ## Login/registration forms
-# .redirect attributes are pre-escaped
+#
+# The .redirect-link attributes will be turned into
+# clickable link, which will replace {$redirect-link}
+# in the .redirect attributes
+#
 login = Sign In
     .info = Sign in using your username and password. Sign in attempts are limited to 3 per 30 minutes.
     .submit = Sign In
 
-    .redirect = Already have a pointercrate account? <a class="link tab tab-active" data-tab-id="1">Sign in</a> instead.
+    .redirect = Already have a pointercrate account? {$redirect-link} instead.
+    .redirect-link = Sign in
 
 register = Sign Up
     .info = Create a new account. Please note that the username cannot be changed after account creation, so choose wisely!
     .submit = Sign Up
 
-    .redirect = Don't have a pointercrate account yet? <a class="link tab" data-tab-id="2">Sign up</a> for one!
+    .redirect = Don't have a pointercrate account yet? {$redirect-link} for one!
+    .redirect-link = Sign up
 
 ## Profile tab
 profile = Profile

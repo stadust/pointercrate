@@ -1,5 +1,5 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::localization::tr;
+use pointercrate_core::localization::{ftr, tr};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use unic_langid::LanguageIdentifier;
 
@@ -44,7 +44,15 @@ fn login_page_body(lang: &'static LanguageIdentifier) -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(tr(lang, "register.redirect")))
+                    (PreEscaped(ftr(lang, "register.redirect", vec![
+                        (
+                            "redirect-link",
+                            format!(
+                                "<a class=\"link tab\" data-tab-id=\"2\">{}</a>",
+                                tr(lang, "register.redirect-link")
+                            )
+                        )
+                    ])))
                 }
             }
             div.tab-content data-tab-id="2" {
@@ -79,7 +87,15 @@ fn login_page_body(lang: &'static LanguageIdentifier) -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(tr(lang, "login.redirect")))
+                    (PreEscaped(ftr(lang, "login.redirect", vec![
+                        (
+                            "redirect-link",
+                            format!(
+                                "<a class=\"link tab tab-active\" data-tab-id=\"1\">{}</a>",
+                                tr(lang, "login.redirect-link")
+                            )
+                        )
+                    ])))
                 }
             }
         }
