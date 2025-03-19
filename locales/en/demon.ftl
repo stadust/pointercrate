@@ -23,14 +23,14 @@ movement-reason = Reason
     .movedbelow = {$demon} was moved down past this demon
 
 ## Records table
-records = Records
+demon-records = Records
 
-records-qualify = {$percent}% { $percent ->
+demon-records-qualify = {$percent}% { $percent ->
     [100] required to qualify
     *[other] or better required to qualify
 }
 
-records-total = {$numRecords} { $numRecords ->
+demon-records-total = {$numRecords} { $numRecords ->
     [one] record registered
     *[other] records registered
 }, out of which {$numCompletions} { $numCompletions ->

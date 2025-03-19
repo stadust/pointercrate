@@ -24,11 +24,11 @@ pub fn tr(lang: &'static LanguageIdentifier, text_id: &str) -> String {
     LOCALES.lookup(lang, text_id)
 }
 
-pub fn ftr<'a>(lang: &'static LanguageIdentifier, text_id: &str, args: Vec<(&'static str, impl Into<FluentValue<'a>>)>) -> String {
+pub fn ftr<'a>(lang: &'static LanguageIdentifier, text_id: &str, args: &Vec<(&'static str, impl Into<FluentValue<'a>> + Clone)>) -> String {
     let mut args_map: HashMap<Cow<'static, str>, FluentValue<'_>> = HashMap::new();
 
     for arg in args {
-        args_map.insert(Cow::Borrowed(arg.0), arg.1.into());
+        args_map.insert(Cow::Borrowed(arg.0), arg.1.clone().into());
     }
 
     LOCALES.lookup_with_args(lang, text_id, &args_map)

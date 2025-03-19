@@ -44,7 +44,7 @@ fn login_page_body(lang: &'static LanguageIdentifier) -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(ftr(lang, "register.redirect", vec![
+                    (PreEscaped(ftr(lang, "register.redirect", &vec![
                         (
                             "redirect-link",
                             format!(
@@ -87,7 +87,7 @@ fn login_page_body(lang: &'static LanguageIdentifier) -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(ftr(lang, "login.redirect", vec![
+                    (PreEscaped(ftr(lang, "login.redirect", &vec![
                         (
                             "redirect-link",
                             format!(

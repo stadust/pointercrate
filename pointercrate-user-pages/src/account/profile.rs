@@ -47,7 +47,7 @@ impl AccountPageTab for ProfileTab {
             div.left {
                 div.panel.fade {
                     h1.underlined.pad {
-                        (ftr(lang, "profile.header", vec![("username", user.name())]))
+                        (ftr(lang, "profile.header", &vec![("username", user.name())]))
                     }
                     div.flex.space.wrap #things {
                         p.info-red.output style = "margin: 10px" {}
