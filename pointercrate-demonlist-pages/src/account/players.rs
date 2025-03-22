@@ -1,10 +1,11 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
+use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager};
 use pointercrate_core_pages::{error::ErrorFragment, util::filtered_paginator};
 use pointercrate_demonlist::{nationality::Nationality, LIST_MODERATOR};
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
+use unic_langid::LanguageIdentifier;
 
 pub struct PlayersPage;
 
@@ -22,10 +23,10 @@ impl AccountPageTab for PlayersPage {
         4
     }
 
-    fn tab(&self) -> Markup {
+    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup {
         html! {
             b {
-                "Players"
+                (tr(lang, "players"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-beer fa-2x" aria-hidden="true" {}
@@ -33,7 +34,8 @@ impl AccountPageTab for PlayersPage {
     }
 
     async fn content(
-        &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, lang: &'static LanguageIdentifier, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager,
+        connection: &mut PgConnection,
     ) -> Markup {
         let nationalities = match Nationality::all(connection).await {
             Ok(nationalities) => nationalities,
@@ -51,30 +53,30 @@ impl AccountPageTab for PlayersPage {
             div.left {
                 div.panel.fade style = "overflow: initial"{
                     h2.underlined.pad {
-                        "Player Manager"
+                        (tr(lang, "player-manager"))
                     }
                     div.flex.viewer {
                         (filtered_paginator("player-pagination", "/api/v1/players/"))
                         p.viewer-welcome {
-                            "Click on a player on the left to get started!"
+                            (tr(lang, "player-viewer.welcome"))
                         }
                         div.viewer-content {
                             div.flex.col{
                                 h3 style = "font-size:1.1em; margin: 10px 0" {
-                                    "Player #"
+                                    (tr(lang, "player-viewer"))
                                     i #player-player-id {}
                                     " - "
                                     i.fa.fa-pencil-alt.clickable #player-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i #player-player-name {}
                                 }
                                 p {
-                                    "Welcome to the player manager. Here you can ban or unban players. Banning a player will delete all records of theirs which are in the submitted or under consideration state. All approved records will instead be set to rejected."
+                                    (tr(lang, "player-viewer.info"))
                                 }
                                 p.info-red.output style = "margin: 10px" {}
                                 p.info-green.output style = "margin: 10px" {}
                                 div.stats-container.flex.space {
                                     span {
                                         b {
-                                            "Banned:"
+                                            (tr(lang, "player-banned")) ":"
                                         }
                                         br;
                                         div.dropdown-menu.js-search #edit-player-banned style = "max-width: 50px" {
@@ -83,19 +85,19 @@ impl AccountPageTab for PlayersPage {
                                             }
                                             div.menu {
                                                 ul {
-                                                    li.white.hover data-value="true" {"yes"}
-                                                    li.white.hover data-value="false" {"no"}
+                                                    li.white.hover data-value="true" {(tr(lang, "player-banned.yes"))}
+                                                    li.white.hover data-value="false" {(tr(lang, "player-banned.no"))}
                                                 }
                                             }
                                         }
                                     }
                                     span {
                                         b {
-                                            "Nationality:"
+                                            (tr(lang, "player-nationality")) ":"
                                         }
                                         br;
                                         p {
-                                            "Note that this is to be understood as 'Country of legal residency' and nothing else. No exceptions. "
+                                            (tr(lang, "player-nationality.info"))
                                         }
                                         div.dropdown-menu.js-search #edit-player-nationality data-default = "None" {
                                             div {
@@ -103,7 +105,7 @@ impl AccountPageTab for PlayersPage {
                                             }
                                             div.menu {
                                                 ul {
-                                                    li.white.hover.underlined data-value = "None" {"None"}
+                                                    li.white.hover.underlined data-value = "None" {(tr(lang, "player-nationality.none")) ":"}
                                                     @for nation in nationalities {
                                                         li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
                                                             span class = "flag-icon" style={"background-image: url(/static/demonlist/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
@@ -121,7 +123,7 @@ impl AccountPageTab for PlayersPage {
                                 div.stats-container.flex.space {
                                     span {
                                         b {
-                                            "Political Subdivision:"
+                                            (tr(lang, "player-subdivision")) ":"
                                         }
                                         br;
                                         div.dropdown-menu.js-search #edit-player-subdivision data-default = "None" {
@@ -130,13 +132,13 @@ impl AccountPageTab for PlayersPage {
                                             }
                                             div.menu {
                                                 ul {
-                                                    li.white.hover.underlined data-value = "None" {"None"}
+                                                    li.white.hover.underlined data-value = "None" {(tr(lang, "player-subdivision.none")) ":"}
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                span.button.blue.hover #player-list-records style = "margin: 15px auto 0px" {"Show records in record manager"};
+                                span.button.blue.hover #player-list-records style = "margin: 15px auto 0px" {(tr(lang, "player-viewer.records-redirect")) ":"};
                             }
                         }
                     }
@@ -144,55 +146,55 @@ impl AccountPageTab for PlayersPage {
                 div style="height: 50px" {} // to make sure that the footer doesnt float. if it floats, the user page is the only one without a scrollbar at the right, which causes jumpyness when switching tabs.
             }
             div.right {
-                (player_selector())
+                (player_selector(lang))
             }
-            (change_name_dialog())
+            (change_name_dialog(lang))
         }
     }
 }
 
-fn player_selector() -> Markup {
+fn player_selector(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         div.panel.fade {
             h2.underlined.pad {
-                "Search player by ID"
+                (tr(lang, "player-idsearch-panel"))
             }
             p {
-                "Players can be uniquely identified by ID. Entering a players's ID below will select it on the left (provided the player exists)"
+                (tr(lang, "player-idsearch-panel.info"))
             }
             form.flex.col #player-search-by-player-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #search-player-id {
-                    label for = "id" {"Player ID:"}
+                    label for = "id" {(tr(lang, "player-idsearch-panel.id-field")) ":"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%";
                     p.error {}
                 }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "player-idsearch-panel.submit"));
             }
         }
     }
 }
 
-fn change_name_dialog() -> Markup {
+fn change_name_dialog(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #player-name-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Change player name:"
+                    (tr(lang, "player-name-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    "Change the name of this player. This will update their name on every one of their records. If a player with the new name already exists, the player objects will be merged, with the new object receiving the ID of the player you are currently editing. In this case, the record lists of the players are merged and their creator/verifier/publisher information is updated. Internally, each record is moved to to the new player, an on conflicts the same rules apply as when editing a record's holder."
+                    (tr(lang, "player-name-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #player-name-edit {
-                        label for = "name" {"Name:"}
+                        label for = "name" {(tr(lang, "player-name-dialog.name-field")) ":"}
                         input name = "name" type = "text" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = "Edit";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "player-name-dialog.submit"));
                 }
             }
         }
