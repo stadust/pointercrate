@@ -41,7 +41,11 @@ impl AccountPageTab for ProfileTab {
         let user = authenticated_user.user();
 
         let permissions = permissions.bits_to_permissions(user.permissions);
-        let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");
+        let permission_string = permissions
+            .iter()
+            .map(|perm| tr(lang, perm.text_id()))
+            .collect::<Vec<_>>()
+            .join(", ");
 
         html! {
             div.left {

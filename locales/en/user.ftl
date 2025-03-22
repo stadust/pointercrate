@@ -1,3 +1,15 @@
+user-username = Username
+user-displayname = Display Name
+user-id = User ID
+
+user-permissions = Permissions
+    .moderator = Moderator
+    .administrator = Administrator
+
+    .list-helper = List Helper
+    .list-moderator = List Moderator
+    .list-administrator = List Administrator
+
 ## Auth input fields
 auth-username = Username
 auth-password = Password
@@ -22,6 +34,19 @@ register = Sign Up
 
     .redirect = Don't have a pointercrate account yet? {$redirect-link} for one!
     .redirect-link = Sign up
+
+## Users tab
+users = Users
+
+user-viewer = Pointercrate Account Manager
+    .welcome = Click on a user on the left to get started!
+    .delete-user = Delete user
+    .edit-user = Edit user
+
+user-idsearch-panel = Find users
+    .info = Users can be uniquely identified by name and ID. To modify a user's account, you need their ID. If you know neither, try looking in the list below
+    .id-field = User ID
+    .submit = Find by ID
 
 ## Profile tab
 profile = Profile
