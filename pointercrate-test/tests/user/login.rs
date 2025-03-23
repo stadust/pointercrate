@@ -9,7 +9,7 @@ use sqlx::{Pool, Postgres};
 pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
 
-    let mut user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut *connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut *connection).await;
 
     for _ in 0..3 {
         let response: serde_json::Value = client

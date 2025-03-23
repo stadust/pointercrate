@@ -3,7 +3,6 @@ use pointercrate_demonlist::{
     player::{DatabasePlayer, FullPlayer, Player},
     LIST_HELPER, LIST_MODERATOR,
 };
-use pointercrate_test::TestClient;
 use rocket::http::Status;
 use sqlx::{PgConnection, Pool, Postgres};
 
@@ -222,7 +221,7 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
     let moderator = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
 
     // create players
-    let player1 = DatabasePlayer::by_name_or_create("stardust19701", &mut *connection).await.unwrap(); // no nationality, no subdivision
+    let _ = DatabasePlayer::by_name_or_create("stardust19701", &mut *connection).await.unwrap(); // no nationality, no subdivision
     let player2 = DatabasePlayer::by_name_or_create("stardust19702", &mut *connection).await.unwrap(); // has nationality, no subdivision
     let player3 = DatabasePlayer::by_name_or_create("stardust19703", &mut *connection).await.unwrap(); // has nationality, has subdivision
 
