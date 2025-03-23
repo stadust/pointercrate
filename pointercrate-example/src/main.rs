@@ -116,7 +116,6 @@ async fn rocket() -> _ {
     // production environment, you will not want rocket to be responsible for this
     // and instead use a web server such as nginx as a reverse proxy to serve your
     // static files.
-    
 
     rocket
         .mount("/static/core", FileServer::from("pointercrate-core-pages/static"))

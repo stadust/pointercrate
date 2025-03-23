@@ -37,7 +37,10 @@ impl GeometryDashConnector {
     /// If the last time the data for this demon was sought on the Geomeetry Dash servers was over 24h ago,
     /// re-query them for updated data.
     pub async fn load_level_for_demon(&self, demon: &Demon) -> Option<IntegrationLevel> {
-        if self.ratelimits.throttle_throttle(demon.base.id).is_ok() && self.ratelimits.throttle().is_ok() && self.ratelimits.demon_refresh(demon.base.id).is_ok() {
+        if self.ratelimits.throttle_throttle(demon.base.id).is_ok()
+            && self.ratelimits.throttle().is_ok()
+            && self.ratelimits.demon_refresh(demon.base.id).is_ok()
+        {
             tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
         }
 

@@ -104,7 +104,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                     }
 
                     // update the previous entry's "new_position" field
-                    if let Some(entry) = movement_log.last_mut() { 
+                    if let Some(entry) = movement_log.last_mut() {
                         entry.new_position = Some(old_position);
                     }
 
@@ -171,8 +171,9 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
 
     // update the last entry with the current position
     MinimalDemon::by_id(demon_id, &mut *connection).await.map(|minimal_demon| {
-        if let Some(entry) = movement_log
-            .last_mut() {  entry.new_position = Some(minimal_demon.position) }
+        if let Some(entry) = movement_log.last_mut() {
+            entry.new_position = Some(minimal_demon.position)
+        }
     })?;
 
     Ok(movement_log)
