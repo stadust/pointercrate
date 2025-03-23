@@ -29,7 +29,7 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .manage(AccountPageConfig::default());
 
     // generate some data
-    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut *connection)
+    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut connection)
         .await
         .unwrap();
 
@@ -105,7 +105,7 @@ impl TestClient {
             .await;
 
         self.patch(format!("/api/v1/players/{}/", player_id), &patch)
-            .authorize_as(&auth_context)
+            .authorize_as(auth_context)
             .header("If-Match", player.etag_string())
             .expect_status(Status::Ok)
     }
@@ -116,7 +116,7 @@ impl TestClient {
     ) -> FullDemon {
         self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": []}))
             .expect_status(Status::Created)
-            .authorize_as(&auth_context)
+            .authorize_as(auth_context)
             .get_success_result()
             .await
     }

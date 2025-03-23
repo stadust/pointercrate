@@ -37,7 +37,7 @@ pub async fn register(
     LegacyAuthenticatedUser::validate_password(&body.password)?;
     User::validate_name(&body.name)?;
 
-    let user = AuthenticatedUser::register(body.0, &mut *connection).await?;
+    let user = AuthenticatedUser::register(body.0, &mut connection).await?;
 
     ratelimits.registrations(ip)?;
 

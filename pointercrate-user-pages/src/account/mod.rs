@@ -25,15 +25,11 @@ pub trait AccountPageTab {
     ) -> Markup;
 }
 
+#[derive(Default)]
 pub struct AccountPageConfig {
     tabs: Vec<Box<dyn AccountPageTab + Send + Sync + 'static>>,
 }
 
-impl Default for AccountPageConfig {
-    fn default() -> Self {
-        AccountPageConfig { tabs: Vec::new() }
-    }
-}
 
 impl AccountPageConfig {
     pub fn with_page(mut self, page: impl AccountPageTab + Send + Sync + 'static) -> Self {

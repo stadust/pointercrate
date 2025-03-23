@@ -39,12 +39,11 @@ pub async fn overview(
 
     let mut connection = pool.connection().await?;
 
-    let demonlist = current_list(&mut *connection).await?;
+    let demonlist = current_list(&mut connection).await?;
 
     let mut specified_when = cookies
         .get("when")
-        .map(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()).ok())
-        .flatten();
+        .and_then(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()).ok());
 
     // On april's fools, ignore the cookie and just pick a random day to display
     let today = Utc::now().naive_utc();
@@ -70,15 +69,15 @@ pub async fn overview(
     let mut tardis = Tardis::new(timemachine.unwrap_or(false));
 
     if let Some(destination) = specified_when {
-        let demons_then = list_at(&mut *connection, destination.naive_utc()).await?;
+        let demons_then = list_at(&mut connection, destination.naive_utc()).await?;
         tardis.activate(destination, demons_then, !is_april_1st)
     }
 
     Ok(Page::new(OverviewPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
         },
         demonlist,
         time_machine: tardis,
@@ -90,7 +89,7 @@ pub async fn overview(
 pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> Result<Redirect> {
     let mut connection = pool.connection().await?;
 
-    let position = MinimalDemon::by_id(demon_id, &mut *connection).await?.position;
+    let position = MinimalDemon::by_id(demon_id, &mut connection).await?.position;
 
     Ok(Redirect::to(rocket::uri!("/demonlist", demon_page(position))))
 }
@@ -99,9 +98,9 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
-    let full_demon = FullDemon::by_position(position, &mut *connection).await?;
+    let full_demon = FullDemon::by_position(position, &mut connection).await?;
 
-    let audit_log = audit_log_for_demon(full_demon.demon.base.id, &mut *connection).await?;
+    let audit_log = audit_log_for_demon(full_demon.demon.base.id, &mut connection).await?;
 
     let mut addition_time = None;
 
@@ -139,11 +138,11 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 
     Ok(Page::new(DemonPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
         },
-        demonlist: current_list(&mut *connection).await?,
+        demonlist: current_list(&mut connection).await?,
         movements: modifications,
         integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
@@ -155,7 +154,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
-        nationalities_in_use: Nationality::used(&mut *connection).await?,
+        nationalities_in_use: Nationality::used(&mut connection).await?,
     }))
 }
 

@@ -231,7 +231,7 @@ impl FullPlayer {
 impl Player {
     pub async fn set_nationality(&mut self, nationality: Option<Nationality>, connection: &mut PgConnection) -> Result<()> {
         let iso_country_code = nationality.as_ref().map(|n| &n.iso_country_code);
-        let subdivision_code = nationality.as_ref().map(|n| n.subdivision.as_ref().map(|s| &s.iso_code)).flatten();
+        let subdivision_code = nationality.as_ref().and_then(|n| n.subdivision.as_ref().map(|s| &s.iso_code));
 
         sqlx::query!(
             "UPDATE players SET nationality = $1, subdivision = $2 WHERE id = $3",

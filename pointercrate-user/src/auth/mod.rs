@@ -14,7 +14,7 @@
 //!      are not targettable. Additionally, we cannot set the X-CSRF-TOKEN header on GET requests that are triggered
 //!      by top-level browser navigation.
 //!    - non-`GET`: These are authenticated using the session token, which is validated using the csrf token.
-//!    Browser-based auth allows both administrative account actions (except changing password) and API access
+//!      Browser-based auth allows both administrative account actions (except changing password) and API access
 //! 3. HTTP Bearer Auth: Authenticating using a bearer token allows API access, but does not allow user account actions.
 //!
 //! See [`AuthenticatedUser`] for implementation details.
@@ -134,7 +134,7 @@ pub fn generate_jwt<C: Serialize>(claims: &C) -> String {
 }
 
 pub fn decode_jwt<C: DeserializeOwned>(jwt: &str, validation: &Validation) -> Result<C> {
-    jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), &validation)
+    jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), validation)
         .map_err(|_| CoreError::Unauthorized.into())
         .map(|token_data| token_data.claims)
 }

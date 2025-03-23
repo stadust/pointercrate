@@ -37,10 +37,8 @@ impl GeometryDashConnector {
     /// If the last time the data for this demon was sought on the Geomeetry Dash servers was over 24h ago,
     /// re-query them for updated data.
     pub async fn load_level_for_demon(&self, demon: &Demon) -> Option<IntegrationLevel> {
-        if self.ratelimits.throttle_throttle(demon.base.id).is_ok() {
-            if self.ratelimits.throttle().is_ok() && self.ratelimits.demon_refresh(demon.base.id).is_ok() {
-                tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
-            }
+        if self.ratelimits.throttle_throttle(demon.base.id).is_ok() && self.ratelimits.throttle().is_ok() && self.ratelimits.demon_refresh(demon.base.id).is_ok() {
+            tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
         }
 
         if let Some(level_id) = demon.level_id {
@@ -101,7 +99,7 @@ impl GeometryDashConnector {
             self.store_creator(creator).await;
         }
 
-        self.store_level(&mut hardest, level.creator, level.custom_song).await;
+        self.store_level(&hardest, level.creator, level.custom_song).await;
         self.store_level_data(level.level_id, &mut level.level_data).await;
 
         let _ = sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level.level_id as i64, demon_id)
@@ -158,7 +156,7 @@ impl GeometryDashConnector {
         })
     }
 
-    pub async fn store_creator<'a>(&self, creator: &Creator<'a>) {
+    pub async fn store_creator(&self, creator: &Creator<'_>) {
         let Ok(mut connection) = self.pool.begin().await else { return };
 
         let _ = sqlx::query!(
@@ -195,7 +193,7 @@ impl GeometryDashConnector {
         })
     }
 
-    pub async fn store_newgrounds_song<'a>(&self, song: &NewgroundsSong<'a>) {
+    pub async fn store_newgrounds_song(&self, song: &NewgroundsSong<'_>) {
         let Ok(mut connection) = self.pool.begin().await else { return };
 
         // FIXME: this
@@ -221,7 +219,7 @@ impl GeometryDashConnector {
         let _ = connection.commit().await;
     }
 
-    pub async fn lookup_level_data<'a>(&self, level_id: u64) -> Option<LevelData<'static>> {
+    pub async fn lookup_level_data(&self, level_id: u64) -> Option<LevelData<'static>> {
         let mut connection = self.pool.acquire().await.ok()?;
 
         let row = sqlx::query!("SELECT * FROM gj_level_data WHERE level_id = $1", level_id as i64)
@@ -246,7 +244,7 @@ impl GeometryDashConnector {
         })
     }
 
-    pub async fn store_level_data<'a>(&self, level_id: u64, data: &mut LevelData<'a>) {
+    pub async fn store_level_data(&self, level_id: u64, data: &mut LevelData<'_>) {
         let Ok(mut connection) = self.pool.begin().await else { return };
 
         // FIXME: this
@@ -320,7 +318,7 @@ impl GeometryDashConnector {
     }
 
     // This must be the most horrifying piece of code I have ever written.
-    async fn store_level<'a, T, U, V>(&self, level: &Level<'a, T, U, V>, creator_id: u64, custom_song_id: Option<u64>) {
+    async fn store_level<T, U, V>(&self, level: &Level<'_, T, U, V>, creator_id: u64, custom_song_id: Option<u64>) {
         let Ok(mut connection) = self.pool.begin().await else { return };
 
         let Ok(description) = level.description.as_ref().map(|thunk| thunk.as_processed()).transpose() else {

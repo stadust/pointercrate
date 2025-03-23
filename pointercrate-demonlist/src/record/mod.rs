@@ -47,7 +47,9 @@ mod patch;
 mod post;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Default)]
 pub enum RecordStatus {
+    #[default]
     Submitted,
     Approved,
     Rejected,
@@ -76,11 +78,6 @@ impl RecordStatus {
     }
 }
 
-impl Default for RecordStatus {
-    fn default() -> Self {
-        RecordStatus::Submitted
-    }
-}
 
 impl Display for RecordStatus {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {

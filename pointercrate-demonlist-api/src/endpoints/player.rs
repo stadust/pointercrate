@@ -54,11 +54,11 @@ pub async fn get_me(auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>
     let mut connection = pool.connection().await?;
 
     let user = auth.user.into_user();
-    let Some(player_claim) = PlayerClaim::by_user(user.id, &mut *connection).await? else {
+    let Some(player_claim) = PlayerClaim::by_user(user.id, &mut connection).await? else {
         return Err(CoreError::NotFound.into());
     };
-    let player = Player::by_id(player_claim.player.id, &mut *connection).await?;
-    let full_player = player.upgrade(&mut *connection).await?;
+    let player = Player::by_id(player_claim.player.id, &mut connection).await?;
+    let full_player = player.upgrade(&mut connection).await?;
 
     Ok(Tagged(full_player))
 }
@@ -68,7 +68,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
     let mut connection = pool.connection().await?;
 
     Ok(Tagged(
-        Player::by_id(player_id, &mut *connection).await?.upgrade(&mut *connection).await?,
+        Player::by_id(player_id, &mut connection).await?.upgrade(&mut connection).await?,
     ))
 }
 

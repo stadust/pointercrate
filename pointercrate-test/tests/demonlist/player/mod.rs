@@ -21,7 +21,7 @@ async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, Datab
 async fn test_unauthenticated_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (_, unbanned) = create_players(&mut *connection).await;
+    let (_, unbanned) = create_players(&mut connection).await;
 
     let json: Vec<Player> = client.get("/api/v1/players").expect_status(Status::Ok).get_result().await;
 
@@ -33,8 +33,8 @@ async fn test_unauthenticated_pagination(pool: Pool<Postgres>) {
 async fn test_authenticated_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (_, unbanned) = create_players(&mut *connection).await;
-    let user = pointercrate_test::user::add_normal_user(&mut *connection).await;
+    let (_, unbanned) = create_players(&mut connection).await;
+    let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     let json: Vec<Player> = client
         .get("/api/v1/players")
@@ -51,8 +51,8 @@ async fn test_authenticated_pagination(pool: Pool<Postgres>) {
 async fn test_list_helper_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let (banned, unbanned) = create_players(&mut *connection).await;
-    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
+    let (banned, unbanned) = create_players(&mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
 
     let json: Vec<Player> = client
         .get("/api/v1/players")
@@ -69,8 +69,8 @@ async fn test_list_helper_pagination(pool: Pool<Postgres>) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_patch_player_nationality(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
-    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut *connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
+    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
 
     // Try to set subdivision when no nation is set. Should fail.
     let result: serde_json::Value = client
@@ -176,7 +176,7 @@ async fn test_me(pool: Pool<Postgres>) {
     // Assert 401 without authentication
     client.get("/api/v1/players/me").expect_status(Status::Unauthorized).execute().await;
 
-    let authenticated_user = pointercrate_test::user::add_normal_user(&mut *connection).await;
+    let authenticated_user = pointercrate_test::user::add_normal_user(&mut connection).await;
     let user = authenticated_user.user();
 
     // Assert 404 when authorized, but claim doesn't exist
@@ -188,18 +188,18 @@ async fn test_me(pool: Pool<Postgres>) {
         .await;
 
     // Create claim
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
     player
-        .initiate_claim(user.id, &mut *connection)
+        .initiate_claim(user.id, &mut connection)
         .await
         .unwrap()
-        .set_verified(true, &mut *connection)
+        .set_verified(true, &mut connection)
         .await
         .unwrap();
-    let player = Player::by_id(player.id, &mut *connection)
+    let player = Player::by_id(player.id, &mut connection)
         .await
         .unwrap()
-        .upgrade(&mut *connection)
+        .upgrade(&mut connection)
         .await
         .unwrap();
 
@@ -218,12 +218,12 @@ async fn test_me(pool: Pool<Postgres>) {
 #[sqlx::test(migrations = "../migrations")]
 async fn test_players_pagination(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
-    let moderator = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let moderator = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
     // create players
-    let _ = DatabasePlayer::by_name_or_create("stardust19701", &mut *connection).await.unwrap(); // no nationality, no subdivision
-    let player2 = DatabasePlayer::by_name_or_create("stardust19702", &mut *connection).await.unwrap(); // has nationality, no subdivision
-    let player3 = DatabasePlayer::by_name_or_create("stardust19703", &mut *connection).await.unwrap(); // has nationality, has subdivision
+    let _ = DatabasePlayer::by_name_or_create("stardust19701", &mut connection).await.unwrap(); // no nationality, no subdivision
+    let player2 = DatabasePlayer::by_name_or_create("stardust19702", &mut connection).await.unwrap(); // has nationality, no subdivision
+    let player3 = DatabasePlayer::by_name_or_create("stardust19703", &mut connection).await.unwrap(); // has nationality, has subdivision
 
     client
         .patch_player(player2.id, &moderator, serde_json::json!({"nationality": "GB"}))

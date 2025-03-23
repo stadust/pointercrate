@@ -24,7 +24,7 @@ pub async fn register_new(pool: Pool<Postgres>) {
 pub async fn register_taken_username(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
 
-    let _ = pointercrate_test::user::add_normal_user(&mut *connection).await;
+    let _ = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     let _response = client
         .post(
