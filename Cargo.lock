@@ -1866,7 +1866,6 @@ name = "pointercrate-core-pages"
 version = "0.1.0"
 dependencies = [
  "maud",
- "pointercrate-core",
 ]
 
 [[package]]
@@ -1875,14 +1874,12 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "derive_more",
- "dotenv",
  "futures",
  "log",
  "pointercrate-core",
  "pointercrate-user",
  "serde",
  "sqlx",
- "tokio",
  "url",
 ]
 
@@ -1907,7 +1904,6 @@ dependencies = [
  "rocket",
  "serde",
  "serde_json",
- "serde_urlencoded",
  "sqlx",
 ]
 
@@ -1988,16 +1984,13 @@ dependencies = [
 name = "pointercrate-user"
 version = "0.1.0"
 dependencies = [
- "base64 0.22.1",
  "bcrypt",
  "derive_more",
  "futures",
  "jsonwebtoken",
- "lazy_static",
  "log",
  "pointercrate-core",
  "serde",
- "serde_json",
  "sqlx",
  "url",
 ]
@@ -2012,11 +2005,9 @@ dependencies = [
  "nonzero_ext",
  "pointercrate-core",
  "pointercrate-core-api",
- "pointercrate-core-pages",
  "pointercrate-user",
  "pointercrate-user-pages",
  "rocket",
- "serde_urlencoded",
  "sqlx",
 ]
 

@@ -8,4 +8,3 @@ edition.workspace = true
 
 [dependencies]
 maud = "0.27.0"
-pointercrate-core = {path = "../pointercrate-core"}
