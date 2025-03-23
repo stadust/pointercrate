@@ -3,9 +3,8 @@ use crate::{
     head::{Head, HeadLike},
     navigation::NavigationBar,
 };
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup};
 
-pub mod config;
 pub mod error;
 pub mod footer;
 pub mod head;
@@ -27,18 +26,6 @@ impl HeadLike for PageConfiguration {
 impl PageConfiguration {
     pub fn new(site_name: impl Into<String>, nav_bar: NavigationBar, footer: Footer) -> Self {
         let default_head_html = html! {
-            (PreEscaped(format!(r#"
-            <!-- Global site tag (gtag.js) - Google Analytics -->
-            <script async src="https://www.googletagmanager.com/gtag/js?id=G-2SGJ4S0TQM"></script>
-            <script>
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){{dataLayer.push(arguments);}}
-              gtag('js', new Date());
-            
-              gtag('config', '{}');
-            </script>
-            "#, config::google_analytics_tag())));
-
             meta http-equiv="Content-Type" content = "text/html; charset=utf-8";
             meta http-equiv="Content-Style-Type" content="text/css";
         };

@@ -73,10 +73,6 @@ export function initializeTimeMachine() {
       (offsetMinutes + "").padStart(2, "0");
 
     document.cookie = "when=" + when;
-    gtag("event", "time-machine-usage", {
-      "event-category": "demonlist",
-      label: when,
-    });
 
     window.location = "/demonlist/";
   });
@@ -123,11 +119,6 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
   rawFootage.addValidator(typeMismatch, "Please enter a valid URL");
 
-  submissionForm.onInvalid(() =>
-    gtag("event", "record-submit-failure-frontend", {
-      "event-category": "demonlist",
-    })
-  );
   submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
     let headers = {};
@@ -145,9 +136,6 @@ export function initializeRecordSubmitter(submitApproved = false) {
           );
         else submissionForm.setSuccess("Record successfully submitted.");
         submissionForm.clear();
-        gtag("event", "record-submit-success", {
-          "event-category": "demonlist",
-        });
       })
       .catch((response) => {
         switch (response.data.code) {
@@ -174,9 +162,6 @@ export function initializeRecordSubmitter(submitApproved = false) {
           default:
             submissionForm.setError(response.data.message);
         }
-        gtag("event", "record-submit-failure-backend", {
-          "event-category": "demonlist",
-        });
       }); // TODO: maybe specially handle some error codes
   });
 }
