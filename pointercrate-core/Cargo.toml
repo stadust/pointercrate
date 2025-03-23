@@ -12,4 +12,4 @@ derive_more = "0.99.18"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate"] }
 log = "0.4.26"
 chrono = {version = "0.4.40", features = ["serde"]}
-getrandom = "0.3.1"
+getrandom = "0.3.2"
