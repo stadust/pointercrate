@@ -128,6 +128,9 @@ pub struct RankingPagination {
 
     #[serde(default, deserialize_with = "non_nullable")]
     name_contains: Option<String>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    scoreless: Option<bool>,
 }
 
 impl PaginationQuery for RankingPagination {
@@ -145,7 +148,7 @@ impl PaginationQuery for RankingPagination {
 
 #[derive(Debug, Serialize)]
 pub struct RankedPlayer {
-    rank: i64,
+    rank: Option<i64>,
     #[serde(skip)]
     index: i64,
     #[serde(flatten)]
@@ -174,6 +177,7 @@ impl Paginatable<RankingPagination> for RankedPlayer {
             .bind(query.nation == Some(None))
             .bind(query.continent.as_ref().map(|c| c.to_sql()))
             .bind(&query.subdivision)
+            .bind(query.scoreless)
             .bind(query.params.limit + 1)
             .fetch(connection);
 

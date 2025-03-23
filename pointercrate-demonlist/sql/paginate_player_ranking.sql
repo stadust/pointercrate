@@ -6,5 +6,6 @@ WHERE (index < $1 OR $1 IS NULL)
   AND (nation = $4 OR iso_country_code = $4 OR (nation IS NULL AND $5) OR ($4 IS NULL AND NOT $5))
   AND (continent = CAST($6::TEXT AS continent) OR $6 IS NULL)
   AND (subdivision = $7 OR $7 IS NULL)
+  AND (score > 0.0 OR $8 = TRUE)
 ORDER BY rank {}, id
-LIMIT $8
+LIMIT $9
