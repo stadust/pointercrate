@@ -16,7 +16,6 @@ class IndividualStatsViewer extends StatsViewer {
       rankingEndpoint: "/api/v1/players/ranking/",
       entryGenerator: generateStatsViewerPlayer,
     });
-    this.updateQueryData("scoreless", true);
   }
 
   onReceive(response) {
@@ -199,12 +198,9 @@ function generateStatsViewerPlayer(player) {
 
   li.className = "white hover";
   li.dataset.id = player.id;
-  
-  if (player.rank) {
-    li.dataset.rank = player.rank;
-    b.appendChild(document.createTextNode("#" + player.rank + " "));
-  }
+  li.dataset.rank = player.rank;
 
+  b.appendChild(document.createTextNode("#" + player.rank + " "));
   i.appendChild(document.createTextNode(player.score.toFixed(2)));
 
   if (player.nationality) {
