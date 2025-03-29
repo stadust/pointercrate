@@ -155,15 +155,15 @@ function setupInvalidateToken() {
   });
 }
 
-function googleOauthCallback (response) { 
+function googleOauthCallback(response) {
   let error = document.getElementById("g-signin-error");
 
-  post("/api/v1/auth/oauth/google", {}, response) 
-      .then(() => window.location.reload())
-      .catch(response => {
-        error.innerText = response.data.message;
-        error.style.display = "block";
-      });
+  post("/api/v1/auth/oauth/google", {}, response)
+    .then(() => window.location.reload())
+    .catch((response) => {
+      error.innerText = response.data.message;
+      error.style.display = "block";
+    });
 }
 
 export function initialize() {
