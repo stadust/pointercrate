@@ -4,11 +4,13 @@ use rocket::{Build, Rocket};
 
 pub mod auth;
 mod endpoints;
+#[cfg(feature = "oauth2")]
+mod oauth;
 mod pages;
 mod ratelimits;
 
 #[allow(unused_mut)]
-pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
+pub fn setup(mut rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = UserRatelimits::new();
 
     let mut auth_routes = rocket::routes![
@@ -23,6 +25,13 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     auth_routes.extend(rocket::routes![endpoints::auth::register]);
     #[cfg(feature = "legacy_accounts")]
     page_routes.extend(rocket::routes![pages::register]);
+    #[cfg(feature = "oauth2")]
+    auth_routes.extend(rocket::routes![pages::google_oauth_login]);
+
+    #[cfg(feature = "oauth2")]
+    {
+        rocket = rocket.manage(oauth::GoogleCertificateStore::default());
+    }
 
     rocket
         .manage(ratelimits)

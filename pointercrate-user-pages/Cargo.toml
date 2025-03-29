@@ -16,3 +16,4 @@ sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-
 
 [features]
 legacy_accounts = ["pointercrate-user/legacy_accounts"]
+oauth2 = ["pointercrate-user/oauth2"]

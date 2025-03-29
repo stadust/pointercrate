@@ -19,3 +19,6 @@ pointercrate-user = { version = "0.1.0", path = "../pointercrate-user" }
 pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api", features = ["legacy_accounts"] }
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages", features = ["legacy_accounts"] }
 rocket = "0.5.1"
+
+[features]
+oauth2 = ["pointercrate-user-api/oauth2", "pointercrate-user-pages/oauth2"]
