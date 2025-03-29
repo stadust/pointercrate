@@ -166,10 +166,10 @@ function googleOauthCallback(response) {
     });
 }
 
+window.googleOauthCallback = googleOauthCallback;
+
 export function initialize() {
   setupGetAccessToken();
   setupEditAccount();
   setupInvalidateToken();
-
-  window.googleOauthCallback = googleOauthCallback;
 }
