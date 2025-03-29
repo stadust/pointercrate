@@ -7,10 +7,7 @@ async fn test_put_claim(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
     let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
-    let player_id = DatabasePlayer::by_name_or_create("stardust1971", &mut connection)
-        .await
-        .unwrap()
-        .id;
+    let player_id = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap().id;
 
     let json: PlayerClaim = client
         .put(format!("/api/v1/players/{}/claims/", player_id))
