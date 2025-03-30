@@ -1,7 +1,7 @@
 use pointercrate_core::{error::CoreError, localization::get_locale};
 use rocket::{
     request::{FromRequest, Outcome},
-    Request, State,
+    Request,
 };
 use unic_langid::LanguageIdentifier;
 
@@ -24,8 +24,8 @@ impl<'r> FromRequest<'r> for ClientPreferences {
     type Error = CoreError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let preference_manager = match request.guard::<&State<PreferenceManager>>().await {
-            Outcome::Success(preference_manager) => preference_manager,
+        let preference_manager = match request.rocket().state::<PreferenceManager>() {
+            Some(preference_manager) => preference_manager,
             _ => return Outcome::Success(ClientPreferences(Vec::new())), // return an empty preferences vec if this instance doesnt support preferences
         };
 
