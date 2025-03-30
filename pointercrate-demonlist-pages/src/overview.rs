@@ -125,7 +125,7 @@ impl OverviewPage {
             _ => self.demonlist.iter().collect(),
         };
 
-        let dropdowns = super::dropdowns(&self.lang, &demons_for_dropdown[..], None);
+        let dropdowns = super::dropdowns(self.lang, &demons_for_dropdown[..], None);
 
         html! {
             (dropdowns)
@@ -155,10 +155,10 @@ impl OverviewPage {
 
                 aside.right {
                     (self.team)
-                    (super::rules_panel(&self.lang))
+                    (super::rules_panel(self.lang))
                     (submit_panel())
-                    (stats_viewer_panel())
-                    (super::discord_panel(&self.lang))
+                    (stats_viewer_panel(self.lang))
+                    (super::discord_panel(self.lang))
                 }
             }
         }

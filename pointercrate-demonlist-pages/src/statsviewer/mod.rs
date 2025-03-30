@@ -1,67 +1,69 @@
 use maud::{html, Markup, PreEscaped};
+use pointercrate_core::localization::tr;
 use pointercrate_core_pages::util::{dropdown, filtered_paginator, simple_dropdown};
 use pointercrate_demonlist::nationality::Nationality;
+use unic_langid::LanguageIdentifier;
 
 pub mod individual;
 pub mod national;
 
-pub(crate) fn stats_viewer_panel() -> Markup {
+pub(crate) fn stats_viewer_panel(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "Stats Viewer"
+                    (tr(lang, "statsviewer-panel"))
                 }
             }
             p {
-                "Get a detailed overview of who completed the most, created the most demons or beat the hardest demons! There is even a leaderboard to compare yourself to the very best!"
+                (tr(lang, "statsviewer-panel.info"))
             }
             a.blue.hover.button #show-stats-viewer href = "/demonlist/statsviewer/ "{
-                "Open the stats viewer!"
+                (tr(lang, "statsviewer-panel.button"))
             }
         }
     }
 }
 
-fn continent_panel() -> Markup {
+fn continent_panel(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         section.panel.fade style="overflow:initial"{
             h3.underlined {
-                "Continent"
+                (tr(lang, "continent-panel"))
             }
             p {
-                "Select a continent below to focus the stats viewer to that continent. Select 'All' to reset selection."
+                (tr(lang, "continent-panel.info"))
             }
             (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Central America"].into_iter()))
         }
     }
 }
 
-fn demon_sorting_panel() -> Markup {
+fn demon_sorting_panel(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         section.panel.fade style="overflow:initial" {
             h3.underlined {
-                "Demon Sorting"
+                (tr(lang, "demon-sorting-panel"))
             }
             p {
-                "The order in which completed demons should be listed"
+                (tr(lang, "demon-sorting-panel.info"))
             }
             (simple_dropdown("demon-sorting-mode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
         }
     }
 }
 
-fn hide_subdivision_panel() -> Markup {
+fn hide_subdivision_panel(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         section.panel.fade {
             h3.underlined {
-                "Show subdivisions"
+                (tr(lang, "toggle-subdivision-panel"))
             }
             p {
-                "Whether the map should display political subdivisions"
+                (tr(lang, "toggle-subdivision-panel.info"))
             }
             div.cb-container.flex.no-stretch style="margin-bottom:10px" {
-                i {"Show political subdivisions"}
+                i {(tr(lang, "toggle-subdivision-panel.option-toggle"))}
                 input #show-subdivisions-checkbox type = "checkbox" checked="";
                 span.checkmark {}
             }
@@ -69,30 +71,38 @@ fn hide_subdivision_panel() -> Markup {
     }
 }
 
-struct StatsViewerRow(Vec<(&'static str, &'static str)>);
+struct StatsViewerRow(Vec<(String, &'static str)>);
 
-fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
+fn standard_stats_viewer_rows(lang: &'static LanguageIdentifier) -> Vec<StatsViewerRow> {
     vec![
-        StatsViewerRow(vec![("Demonlist rank", "rank"), ("Demonlist score", "score")]),
-        StatsViewerRow(vec![("Demonlist stats", "stats"), ("Hardest demon", "hardest")]),
-        StatsViewerRow(vec![("Demons completed", "beaten")]),
-        StatsViewerRow(vec![("Main List Demons completed", "main-beaten")]),
-        StatsViewerRow(vec![("Extended List Demons completed", "extended-beaten")]),
-        StatsViewerRow(vec![("Legacy List Demons completed", "legacy-beaten")]),
         StatsViewerRow(vec![
-            ("Demons created", "created"),
-            ("Demons published", "published"),
-            ("Demons verified", "verified"),
+            (tr(lang, "statsviewer.rank"), "rank"),
+            (tr(lang, "statsviewer.score"), "score"),
         ]),
-        StatsViewerRow(vec![("Progress on", "progress")]),
+        StatsViewerRow(vec![
+            (tr(lang, "statsviewer.stats"), "stats"),
+            (tr(lang, "statsviewer.hardest"), "hardest"),
+        ]),
+        StatsViewerRow(vec![(tr(lang, "statsviewer.completed"), "beaten")]),
+        StatsViewerRow(vec![(tr(lang, "statsviewer.completed-main"), "main-beaten")]),
+        StatsViewerRow(vec![(tr(lang, "statsviewer.completed-extended"), "extended-beaten")]),
+        StatsViewerRow(vec![(tr(lang, "statsviewer.completed-legacy"), "legacy-beaten")]),
+        StatsViewerRow(vec![
+            (tr(lang, "statsviewer.created"), "created"),
+            (tr(lang, "statsviewer.published"), "published"),
+            (tr(lang, "statsviewer.verified"), "verified"),
+        ]),
+        StatsViewerRow(vec![(tr(lang, "statsviewer.progress"), "progress")]),
     ]
 }
 
-fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>) -> Markup {
+fn stats_viewer_html(
+    lang: &'static LanguageIdentifier, nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>, is_nation_stats_viewer: bool,
+) -> Markup {
     html! {
         section.panel.fade #statsviewer style="overflow:initial" {
             h2.underlined.pad {
-                "Stats Viewer"
+                (tr(lang, "statsviewer"))
                 @if let Some(nations) = nations {
                     " - "
                     (dropdown("International",
@@ -120,7 +130,11 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
             div.flex.viewer {
                 (filtered_paginator("stats-viewer-pagination", "/api/v1/players/ranking/"))
                 p.viewer-welcome {
-                    "Click on a player's name on the left to get started!"
+                    @if is_nation_stats_viewer
+                        { (tr(lang, "statsviewer-nation.welcome")) }
+                    @else
+                        { (tr(lang, "statsviewer-individual.welcome")) }
+
                 }
                 div.viewer-content {
                     div {

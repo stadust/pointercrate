@@ -158,17 +158,20 @@ pub async fn demon_page(
 }
 
 #[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
+pub async fn stats_viewer(pool: &State<PointercratePool>, locale: ClientLocale) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut *connection).await?,
+        lang: locale.lang,
     }))
 }
 
 #[rocket::get("/statsviewer/nations")]
-pub async fn nation_stats_viewer() -> Page {
-    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
+pub async fn nation_stats_viewer(locale: ClientLocale) -> Page {
+    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(
+        locale.lang,
+    ))
 }
 
 #[rocket::get("/statsviewer/heatmap.css")]

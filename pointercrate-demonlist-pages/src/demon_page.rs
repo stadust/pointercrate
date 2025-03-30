@@ -120,7 +120,7 @@ impl DemonPage {
     }
 
     fn body(&self) -> Markup {
-        let dropdowns = super::dropdowns(&self.lang, &self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
+        let dropdowns = super::dropdowns(self.lang, &self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
 
         let mut labels = Vec::new();
 
@@ -156,7 +156,7 @@ impl DemonPage {
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
-                            (tr(&self.lang, "movements"))
+                            (tr(self.lang, "movements"))
                             span.arrow.hover #history-trigger {}
                         }
                         div.js-collapse-content style="display:none"  {
@@ -166,16 +166,16 @@ impl DemonPage {
                                 tbody #history-table-body {
                                     tr {
                                         th.blue {
-                                            (tr(&self.lang, "movements.date"))
+                                            (tr(self.lang, "movements.date"))
                                         }
                                         th.blue {
-                                            (tr(&self.lang, "movements.change"))
+                                            (tr(self.lang, "movements.change"))
                                         }
                                         th.blue {
-                                            (tr(&self.lang, "movements.newposition"))
+                                            (tr(self.lang, "movements.newposition"))
                                         }
                                         th.blue {
-                                            (tr(&self.lang, "movements.reason"))
+                                            (tr(self.lang, "movements.reason"))
                                         }
                                     }
                                 }
@@ -194,10 +194,10 @@ impl DemonPage {
                 }
                 aside.right {
                     (self.team)
-                    (super::rules_panel(&self.lang))
+                    (super::rules_panel(self.lang))
                     (submit_panel())
-                    (stats_viewer_panel())
-                    (super::discord_panel(&self.lang))
+                    (stats_viewer_panel(self.lang))
+                    (super::discord_panel(self.lang))
                 }
             }
         }
@@ -265,21 +265,21 @@ impl DemonPage {
                     @if let Some(ref level) = self.integration {
                         span {
                             b {
-                                (tr(&self.lang, "demon-password"))
+                                (tr(self.lang, "demon-password"))
                             }
                             br;
                             (level.level_data.password.as_processed().map(|pw| pw.to_string()).unwrap_or("Unknown".to_string()))
                         }
                         span {
                             b {
-                                (tr(&self.lang, "demon-id"))
+                                (tr(self.lang, "demon-id"))
                             }
                             br;
                             (level.level_id)
                         }
                         span {
                             b {
-                                (tr(&self.lang, "demon-length"))
+                                (tr(self.lang, "demon-length"))
                             }
                             br;
                             @match level.level_data.level_data {
@@ -293,7 +293,7 @@ impl DemonPage {
                         }
                         span {
                             b {
-                                (tr(&self.lang, "demon-objects"))
+                                (tr(self.lang, "demon-objects"))
                             }
                             br;
                             @match level.level_data.level_data {
@@ -303,7 +303,7 @@ impl DemonPage {
                         }
                         span {
                             b {
-                                (tr(&self.lang, "demon-difficulty"))
+                                (tr(self.lang, "demon-difficulty"))
                             }
                             br;
                             @match level.difficulty {
@@ -321,7 +321,7 @@ impl DemonPage {
                         }
                         span {
                             b {
-                                (tr(&self.lang, "demon-gdversion"))
+                                (tr(self.lang, "demon-gdversion"))
                             }
                             br;
                             (level.gd_version)
@@ -329,7 +329,7 @@ impl DemonPage {
                         @if let Some(ref song) = level.custom_song {
                             span style = "width: 100%"{
                                 b {
-                                    (tr(&self.lang, "demon-ngsong"))
+                                    (tr(self.lang, "demon-ngsong"))
                                 }
                                 br;
                                 @match song.link {
@@ -342,7 +342,7 @@ impl DemonPage {
                     @if position <= list_config::extended_list_size() {
                         span {
                             b {
-                                (ftr(&self.lang, "demon-score", &vec![("percent", 100.0)]))
+                                (ftr(self.lang, "demon-score", &vec![("percent", 100.0)]))
                             }
                             br;
                             (format!("{:.2}", score100))
@@ -351,7 +351,7 @@ impl DemonPage {
                     @if position <= list_config::list_size(){
                         span {
                             b {
-                                (ftr(&self.lang, "demon-score", &vec![("percent", self.data.demon.requirement)]))
+                                (ftr(self.lang, "demon-score", &vec![("percent", self.data.demon.requirement)]))
                             }
                             br;
                             (format!("{:.2}", score_requirement))
@@ -371,22 +371,22 @@ impl DemonPage {
                 section.records.panel.fade.js-scroll-anim data-anim = "fade" {
                     div.underlined.pad {
                         h2 {
-                            (tr(&self.lang, "demon-records"))
+                            (tr(self.lang, "demon-records"))
                         }
                         @if position <= list_config::list_size() {
                             h3 {
-                                (ftr(&self.lang, "demon-records-qualify", &vec![("percent", self.data.demon.requirement)]))
+                                (ftr(self.lang, "demon-records-qualify", &vec![("percent", self.data.demon.requirement)]))
                             }
                         }
                         @else if position <= list_config::extended_list_size() {
                             h3 {
-                                (ftr(&self.lang, "demon-records-qualify", &vec![("percent", 100.0)]))
+                                (ftr(self.lang, "demon-records-qualify", &vec![("percent", 100.0)]))
                             }
                         }
                         @if !self.data.records.is_empty() {
                             h4 {
                                 @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
-                                (ftr(&self.lang, "demon-records-total", &vec![("numRecords", self.data.records.len()), ("numCompletions", records_registered_100_count)]))
+                                (ftr(self.lang, "demon-records-total", &vec![("numRecords", self.data.records.len()), ("numCompletions", records_registered_100_count)]))
                             }
                         }
                     }
