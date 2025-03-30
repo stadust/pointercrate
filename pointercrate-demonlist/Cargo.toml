@@ -12,7 +12,7 @@ sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-
 derive_more = "0.99.18"
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-user = {path = "../pointercrate-user"}
-log = "0.4.26"
+log = "0.4.27"
 futures = "0.3.31"
 chrono = {version = "0.4.40", features = ["serde"]}
 url = "2.5.4"
