@@ -2061,6 +2061,7 @@ dependencies = [
  "serde_json",
  "serde_urlencoded",
  "sqlx",
+ "unic-langid",
 ]
 
 [[package]]
@@ -2171,6 +2172,7 @@ dependencies = [
  "rocket",
  "serde_urlencoded",
  "sqlx",
+ "unic-langid",
 ]
 
 [[package]]

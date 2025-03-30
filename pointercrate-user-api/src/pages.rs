@@ -1,6 +1,6 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_api::{localization::ClientLocale, response::Page};
+use pointercrate_core_api::{preferences::ClientPreferences, response::Page};
 use pointercrate_user::{
     auth::{NonMutating, PasswordOrBrowser},
     error::UserError,
@@ -13,6 +13,7 @@ use rocket::{
     State,
 };
 use std::net::IpAddr;
+use unic_langid::LanguageIdentifier;
 
 #[cfg(feature = "legacy_accounts")]
 use {
@@ -26,9 +27,11 @@ use {
 };
 
 #[rocket::get("/login")]
-pub async fn login_page(auth: Option<Auth<NonMutating>>, locale: ClientLocale) -> Result<Redirect, Page> {
+pub async fn login_page(auth: Option<Auth<NonMutating>>, preferences: ClientPreferences) -> Result<Redirect, Page> {
+    let lang: &'static LanguageIdentifier = preferences.get("locale");
+
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page(locale.lang)))
+        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page(lang)))
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
@@ -103,11 +106,14 @@ pub async fn register(
 
 #[rocket::get("/account")]
 pub async fn account_page(
-    auth: Option<Auth<NonMutating>>, locale: ClientLocale, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
+    auth: Option<Auth<NonMutating>>, preferences: ClientPreferences, permissions: &State<PermissionsManager>,
+    tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
+    let lang: &'static LanguageIdentifier = preferences.get("locale");
+
     match auth {
         Some(mut auth) => Ok(Page::new(
-            tabs.account_page(locale.lang, auth.user, permissions, &mut auth.connection).await,
+            tabs.account_page(lang, auth.user, permissions, &mut auth.connection).await,
         )),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }

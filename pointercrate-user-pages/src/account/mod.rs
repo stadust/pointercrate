@@ -1,6 +1,5 @@
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
-use pointercrate_core_api::localization::ClientLocale;
 use pointercrate_core_pages::{
     head::{HeadLike, Script},
     PageFragment,

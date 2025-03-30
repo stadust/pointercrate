@@ -6,7 +6,7 @@ use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
 use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
-    localization::ClientLocale,
+    preferences::ClientPreferences,
     response::{Page, Response2},
 };
 use pointercrate_demonlist::{
@@ -25,6 +25,7 @@ use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::User;
 use rand::Rng;
 use rocket::{futures::StreamExt, http::CookieJar};
+use unic_langid::LanguageIdentifier;
 
 #[rocket::get("/?statsviewer=true")]
 pub fn stats_viewer_redirect() -> Redirect {
@@ -33,8 +34,11 @@ pub fn stats_viewer_redirect() -> Redirect {
 
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, locale: ClientLocale, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
+    pool: &State<PointercratePool>, preferences: ClientPreferences, timemachine: Option<bool>, submitter: Option<bool>,
+    cookies: &CookieJar<'_>,
 ) -> Result<Page> {
+    let lang: &'static LanguageIdentifier = preferences.get("locale");
+
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
 
@@ -80,12 +84,12 @@ pub async fn overview(
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
             helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
-            lang: locale.lang,
+            lang,
         },
         demonlist,
         time_machine: tardis,
         submitter_initially_visible: submitter.unwrap_or(false),
-        lang: locale.lang,
+        lang,
     }))
 }
 
@@ -100,8 +104,10 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 
 #[rocket::get("/<position>")]
 pub async fn demon_page(
-    locale: ClientLocale, position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>,
+    preferences: ClientPreferences, position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>,
 ) -> Result<Page> {
+    let lang: &'static LanguageIdentifier = preferences.get("locale");
+
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut *connection).await?;
@@ -147,31 +153,33 @@ pub async fn demon_page(
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
             moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
             helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
-            lang: locale.lang,
+            lang,
         },
         demonlist: current_list(&mut *connection).await?,
         movements: modifications,
         integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
-        lang: locale.lang,
+        lang,
     }))
 }
 
 #[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>, locale: ClientLocale) -> Result<Page> {
+pub async fn stats_viewer(pool: &State<PointercratePool>, preferences: ClientPreferences) -> Result<Page> {
+    let lang: &'static LanguageIdentifier = preferences.get("locale");
+
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut *connection).await?,
-        lang: locale.lang,
+        lang,
     }))
 }
 
 #[rocket::get("/statsviewer/nations")]
-pub async fn nation_stats_viewer(locale: ClientLocale) -> Page {
-    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(
-        locale.lang,
-    ))
+pub async fn nation_stats_viewer(preferences: ClientPreferences) -> Page {
+    let lang: &'static LanguageIdentifier = preferences.get("locale");
+
+    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(lang))
 }
 
 #[rocket::get("/statsviewer/heatmap.css")]

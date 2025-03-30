@@ -1,7 +1,7 @@
 use maud::html;
 use pointercrate_core::error::CoreError;
 use pointercrate_core::pool::PointercratePool;
-use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing};
+use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
 use pointercrate_core_pages::{
     footer::{Footer, FooterColumn, Link},
     navigation::{NavigationBar, TopLevelNavigationBarItem},
@@ -78,7 +78,14 @@ async fn rocket() -> _ {
     let mut permissions_manager = pointercrate_user::default_permissions_manager();
     permissions_manager.merge_with(pointercrate_demonlist::default_permissions_manager());
 
-    let rocket = rocket.manage(permissions_manager);
+    // Define the preferences our website supports. Preferences are sent to us from
+    // the client via cookies.
+    // In this example, we can retrieve the `locale` preference from the
+    // `preference-locale` cookie, with a default value of `en` if the cookie
+    // was not sent to us.
+    let preference_manager = PreferenceManager::new().preference("locale", "en");
+
+    let rocket = rocket.manage(permissions_manager).manage(preference_manager);
 
     // Set up which tabs can show up in the "user area" of your website. Anything
     // that implements the [`AccountPageTab`] trait can be displayed here. Note that
