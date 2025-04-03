@@ -182,6 +182,29 @@ export class StatsViewer extends FilteredPaginator {
 
     return element;
   }
+  
+  /**
+   * Sort demons by the selected sorting option
+   * @param {string} sortOption - The sorting option ("Alphabetical" or "Position")
+   * @param data - Demon data to sort
+   * @returns Sorted data
+   */
+  sortStatsViewerRow(sortOption, data) {
+    if (sortOption === "Alphabetical") {
+      data.sort((r1, r2) => 
+        r1.demon?.name.localeCompare(r2.demon?.name) || 
+        // for nation unbeaten section
+        r1.name.localeCompare(r2.name)
+      );
+    } else if (sortOption === "Position") {
+      data.sort((r1, r2) => 
+        r1.demon?.position - r2.demon?.position || 
+        // for nation unbeaten section
+        r1.position - r2.position
+      );
+    }
+    return data;
+  }
 }
 
 export function formatInto(parent, childs) {
@@ -200,23 +223,6 @@ export function formatInto(parent, childs) {
   } else {
     parent.appendChild(document.createTextNode("None"));
   }
-}
-
-export function sortDemons(sortOption, data) {
-  if (sortOption === "Alphabetical") {
-    data.sort((r1, r2) => 
-      r1.demon?.name.localeCompare(r2.demon?.name) || 
-      // for nation unbeaten section
-      r1.name.localeCompare(r2.name)
-    );
-  } else if (sortOption === "Position") {
-    data.sort((r1, r2) => 
-      r1.demon?.position - r2.demon?.position || 
-      // for nation unbeaten section
-      r1.position - r2.position
-    );
-  }
-  return data;
 }
 
 export class InteractiveWorldMap {
