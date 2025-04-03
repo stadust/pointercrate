@@ -41,10 +41,8 @@ class NationStatsViewer extends StatsViewer {
       record.players.forEach(players.add, players);
 
       if (record.progress !== 100) {
-        if (!nationData.verified.some((d) => d.id === record.id)) {
-          console.log('hi')
+        if (!nationData.verified.some((d) => d.id === record.id))
           progress.push(record);
-        }
       } else {
         beaten.push(record);
 
