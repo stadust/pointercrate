@@ -125,7 +125,10 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
 
-  window.statsViewer.initialize();
+  window.statsViewer.initialize().then(() => {
+    const playerID = window.statsViewer.html.dataset.selectPlayer;
+    console.log(`Selected player: ${playerID}`);
+  });
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {

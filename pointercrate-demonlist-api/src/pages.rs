@@ -27,7 +27,7 @@ use rocket::{futures::StreamExt, http::CookieJar};
 
 #[rocket::get("/?statsviewer=true")]
 pub fn stats_viewer_redirect() -> Redirect {
-    Redirect::to(rocket::uri!(stats_viewer))
+    Redirect::to(rocket::uri!(stats_viewer(player = None::<i32>)))
 }
 
 #[rocket::get("/?<timemachine>&<submitter>")]
@@ -149,12 +149,14 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
     }))
 }
 
-#[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
+#[rocket::get("/statsviewer?<player>")]
+pub async fn stats_viewer(player: Option<i32>, pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut connection).await?,
+        player_to_select: player
+
     }))
 }
 
