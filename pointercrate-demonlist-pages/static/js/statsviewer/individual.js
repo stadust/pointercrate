@@ -161,7 +161,14 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
 
-  window.statsViewer.initialize();
+  window.statsViewer.initialize().then(() => {
+    let url = window.location.href;
+    let params = new URLSearchParams(url.split('?')[1]);
+    let playerId = params.get('player');
+    if (playerId) {
+      window.statsViewer.selectArbitrary(playerId)
+    }
+  });
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {
