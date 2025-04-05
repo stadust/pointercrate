@@ -149,12 +149,15 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
     }))
 }
 
+// accepts a "player" parameter containing a player ID to select
+// on the statsviewer page, handled entirely on the frontend
 #[rocket::get("/statsviewer")]
 pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
         nationalities_in_use: Nationality::used(&mut connection).await?,
+
     }))
 }
 

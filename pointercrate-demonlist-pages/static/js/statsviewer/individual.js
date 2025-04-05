@@ -125,7 +125,20 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
 
-  window.statsViewer.initialize();
+  window.statsViewer.initialize().then(() => {
+    let url = window.location.href;
+    let params = new URLSearchParams(url.split('?')[1]);
+    let playerId = params.get('player');
+    if (playerId) {
+      console.log(`Selecting player: ${playerId}`)
+      
+      /* TypeError: null is not an object (evaluating 'this.currentlySelected.dataset')
+       * (errors while setting the rank element text, because currentlySelected
+       * is not defined at this point)
+      */
+      window.statsViewer.selectArbitrary(playerId)
+    }
+  });
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {
