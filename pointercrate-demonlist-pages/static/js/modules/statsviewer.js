@@ -151,8 +151,7 @@ export class StatsViewer extends FilteredPaginator {
 
   onReceive(response) {
     super.onReceive(response);
-
-    // Using currentlySelected is O.K. here, as selection via clicking li-elements is the only possibility (well, not for the nation based one, but oh well)!
+    
     this._rank.innerText = this.currentlySelected.dataset.rank;
     this._score.innerHTML =
       this.currentlySelected.getElementsByTagName("i")[0].innerHTML;

@@ -6,7 +6,6 @@ use pointercrate_demonlist::nationality::Nationality;
 #[derive(Debug)]
 pub struct IndividualStatsViewer {
     pub nationalities_in_use: Vec<Nationality>,
-    pub player_to_select: Option<i32>,
 }
 
 impl From<IndividualStatsViewer> for PageFragment {
@@ -40,9 +39,7 @@ impl IndividualStatsViewer {
             }
             div.flex.m-center.container {
                 main.left {
-                    div #statsviewer data-select-player = (self.player_to_select.map(|id| id.to_string()).unwrap_or_default()) {
-                        (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows()))
-                    }
+                    (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows()))
                 }
                 aside.right {
                     (super::demon_sorting_panel())

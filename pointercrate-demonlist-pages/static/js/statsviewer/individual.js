@@ -126,8 +126,18 @@ $(window).on("load", function () {
   );
 
   window.statsViewer.initialize().then(() => {
-    const playerID = window.statsViewer.html.dataset.selectPlayer;
-    console.log(`Selected player: ${playerID}`);
+    let url = window.location.href;
+    let params = new URLSearchParams(url.split('?')[1]);
+    let playerId = params.get('player');
+    if (playerId) {
+      console.log(`Selecting player: ${playerId}`)
+      
+      /* TypeError: null is not an object (evaluating 'this.currentlySelected.dataset')
+       * (errors while setting the rank element text, because currentlySelected
+       * is not defined at this point)
+      */
+      window.statsViewer.selectArbitrary(playerId)
+    }
   });
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
