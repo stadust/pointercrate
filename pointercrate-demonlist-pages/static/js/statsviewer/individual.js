@@ -1,4 +1,4 @@
-import { Dropdown } from "/static/core/js/modules/form.js";
+import { Dropdown, get } from "/static/core/js/modules/form.js";
 import {
   getCountryFlag,
   populateSubdivisionDropdown,
@@ -107,6 +107,21 @@ class IndividualStatsViewer extends StatsViewer {
       })
     );
   }
+  async selectFromID(playerId) {
+    // pagination endpoint only contains top 50 players (duh),
+    // so this won't work for ppl #51+ :/
+    return get(`${this.endpoint}`)
+      .then(data => {
+        const playerData = data.data.find((player) => 
+          player.id === playerId
+        )
+        const playerElement = generateStatsViewerPlayer(playerData); // patrick what the hell
+        this.onSelect(playerElement);
+      })
+      .catch((e) => {
+        this.setError(`Unable to select player with ID ${playerId}`)
+      })
+  }
 }
 
 $(window).on("load", function () {
@@ -130,13 +145,8 @@ $(window).on("load", function () {
     let params = new URLSearchParams(url.split('?')[1]);
     let playerId = params.get('player');
     if (playerId) {
-      console.log(`Selecting player: ${playerId}`)
-      
-      /* TypeError: null is not an object (evaluating 'this.currentlySelected.dataset')
-       * (errors while setting the rank element text, because currentlySelected
-       * is not defined at this point)
-      */
-      window.statsViewer.selectArbitrary(playerId)
+      console.log(`Selecting player: ${playerId}`);
+      window.statsViewer.selectFromID(parseInt(playerId));
     }
   });
 
