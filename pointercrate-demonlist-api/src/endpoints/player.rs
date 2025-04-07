@@ -46,10 +46,10 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
 }
 
 #[rocket::get("/ranking/<player_id>")]
-pub async fn ranking_from_id(player_id: i32, pool: &State<PointercratePool>) -> Result<Json<RankedPlayer>> {
+pub async fn ranking_from_id(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagged<RankedPlayer>> {
     let mut connection = pool.connection().await?;
 
-    Ok(Json(RankedPlayer::by_id(player_id, &mut connection).await?))
+    Ok(Tagged(RankedPlayer::by_id(player_id, &mut connection).await?))
 }
 
 #[rocket::get("/me")]
