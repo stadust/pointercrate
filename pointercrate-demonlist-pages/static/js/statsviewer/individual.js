@@ -110,7 +110,10 @@ class IndividualStatsViewer extends StatsViewer {
   async selectFromID(playerId) {
     return get(`${this.endpoint}${playerId}`)
       .then(data => {
-        if (data.data.banned) return;
+        if (data.data.banned) {
+          this.setError("This player is banned!")
+          return;
+        };
 
         const playerElement = generateStatsViewerPlayer(data.data);
         this.onSelect(playerElement);
@@ -218,7 +221,7 @@ function generateStatsViewerPlayer(player) {
 
   li.className = "white hover";
   li.dataset.id = player.id;
-  li.dataset.rank = player.rank;
+  li.dataset.rank = player.rank > 0 ? player.rank : "-";
 
   b.appendChild(document.createTextNode("#" + player.rank + " "));
   i.appendChild(document.createTextNode(player.score.toFixed(2)));
