@@ -145,11 +145,11 @@ impl PaginationQuery for RankingPagination {
 
 #[derive(Debug, Serialize)]
 pub struct RankedPlayer {
-    rank: i64,
+    pub rank: i64,
     #[serde(skip)]
-    index: i64,
+    pub index: i64,
     #[serde(flatten)]
-    player: Player,
+    pub player: Player,
 }
 
 impl Paginatable<RankingPagination> for RankedPlayer {
