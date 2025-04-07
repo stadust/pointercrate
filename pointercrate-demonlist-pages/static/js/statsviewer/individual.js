@@ -108,18 +108,15 @@ class IndividualStatsViewer extends StatsViewer {
     );
   }
   async selectFromID(playerId) {
-    // pagination endpoint only contains top 50 players (duh),
-    // so this won't work for ppl #51+ :/
-    return get(`${this.endpoint}`)
+    return get(`${this.endpoint}${playerId}`)
       .then(data => {
-        const playerData = data.data.find((player) => 
-          player.id === playerId
-        )
-        const playerElement = generateStatsViewerPlayer(playerData); // patrick what the hell
+        if (data.data.banned) return;
+
+        const playerElement = generateStatsViewerPlayer(data.data);
         this.onSelect(playerElement);
       })
-      .catch((e) => {
-        this.setError(`Unable to select player with ID ${playerId}`)
+      .catch(() => {
+        this.setError(`Unable to select player with ID ${playerId}`);
       })
   }
 }
