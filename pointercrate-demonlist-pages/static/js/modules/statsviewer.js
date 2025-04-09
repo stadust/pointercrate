@@ -104,6 +104,7 @@ export class StatsViewer extends FilteredPaginator {
 
   setName(name, nationality) {
     if (nationality === null) {
+      this._name.classList.add("name-main-span")
       this._name.textContent = name;
     } else {
       while (this._name.lastChild) {
@@ -111,6 +112,7 @@ export class StatsViewer extends FilteredPaginator {
       }
 
       let nameSpan = document.createElement("span");
+      nameSpan.classList.add("name-main-span")
       nameSpan.style.padding = "0 8px";
       nameSpan.innerText = name;
 

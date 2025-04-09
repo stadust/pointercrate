@@ -170,6 +170,12 @@ $(window).on("load", function () {
     }
   });
 
+  document
+    .getElementById("player-name")
+    .addEventListener('click', () => 
+      navigator.clipboard.writeText(`https://pointercrate.com/demonlist/statsviewer?player=${window.statsViewer.currentObject.id}`)
+  )
+
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {
       if (selected === "All") {
