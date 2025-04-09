@@ -52,7 +52,8 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
                 endpoints::player::patch_claim,
                 endpoints::player::paginate_claims,
                 endpoints::player::delete_claim,
-                endpoints::player::geolocate_nationality
+                endpoints::player::geolocate_nationality,
+                endpoints::player::ranking_from_id
             ],
         )
         .mount(
