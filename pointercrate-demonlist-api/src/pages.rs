@@ -25,11 +25,6 @@ use pointercrate_user::User;
 use rand::Rng;
 use rocket::{futures::StreamExt, http::CookieJar};
 
-#[rocket::get("/?statsviewer=true")]
-pub fn stats_viewer_redirect() -> Redirect {
-    Redirect::to(rocket::uri!(stats_viewer))
-}
-
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
