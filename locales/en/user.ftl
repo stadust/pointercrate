@@ -25,15 +25,13 @@ login = Sign In
     .info = Sign in using your username and password. Sign in attempts are limited to 3 per 30 minutes.
     .submit = Sign In
 
-    .redirect = Already have a pointercrate account? {$redirect-link} instead.
-    .redirect-link = Sign in
+    .redirect = Already have a pointercrate account? { -redirect-login(text: "Sign in") } instead.
 
 register = Sign Up
     .info = Create a new account. Please note that the username cannot be changed after account creation, so choose wisely!
     .submit = Sign Up
 
-    .redirect = Don't have a pointercrate account yet? {$redirect-link} for one!
-    .redirect-link = Sign up
+    .redirect = Don't have a pointercrate account yet? { -redirect-register(text: "Sign up") } for one!
 
 ## Users tab
 users = Users

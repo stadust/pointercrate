@@ -35,22 +35,16 @@ claimed-player = Claimed Player
     .verified = Verified
     .unverified = Unverified
 
-# {$api} is replaced with .info-api, which becomes a clickable link to
-# the geolocation service pointercrate uses
 claim-geolocate = Geolocate statsviewer flag
-    .info = Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses {$api}. Clicking the above button also counts as your consent for pointercrate to send your IP to abstract.
-    .info-api = abstract's IP geolocation API
+    .info = Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses { -redirect-geolocation-api(text: "abstract's IP geolocation API") }. Clicking the above button also counts as your consent for pointercrate to send your IP to abstract.
 
     .submit = Go
 
 claim-lock-submissions = Lock submissions
     .info = Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)
 
-# the record states are replaced with the translated names of each 
-# record state (located in records.ftl), and will also be wrapped
-# in the proper styling
 claim-records = Your claimed player's records
-    .info = A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record tells you whether the record is {$approved}, {$submitted}, {$rejected} or {$underConsideration}.
+    .info = A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record tells you whether the record is { -record-approved-styled }, { -record-submitted-styled }, { -record-rejected-styled } or { -record-underconsideration-styled }.
 
 claim-manager = Manage Claims
     .info-a = Manage claims using the interface below. The list can be filtered by player and user using the panels on the right. Invalid claims should be deleted using the trash icon.

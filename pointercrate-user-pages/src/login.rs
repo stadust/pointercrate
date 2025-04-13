@@ -44,15 +44,7 @@ fn login_page_body(lang: &'static LanguageIdentifier) -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(ftr(lang, "register.redirect", &vec![
-                        (
-                            "redirect-link",
-                            format!(
-                                "<a class=\"link tab\" data-tab-id=\"2\">{}</a>",
-                                tr(lang, "register.redirect-link")
-                            )
-                        )
-                    ])))
+                    (PreEscaped(tr(lang, "register.redirect")))
                 }
             }
             div.tab-content data-tab-id="2" {
@@ -87,15 +79,7 @@ fn login_page_body(lang: &'static LanguageIdentifier) -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(ftr(lang, "login.redirect", &vec![
-                        (
-                            "redirect-link",
-                            format!(
-                                "<a class=\"link tab tab-active\" data-tab-id=\"1\">{}</a>",
-                                tr(lang, "login.redirect-link")
-                            )
-                        )
-                    ])))
+                    (PreEscaped(tr(lang, "login.redirect")))
                 }
             }
         }

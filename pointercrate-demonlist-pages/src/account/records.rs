@@ -188,13 +188,6 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
 }
 
 fn manager_help(lang: &'static LanguageIdentifier) -> Markup {
-    let states = vec![
-        ("submitted", tr(lang, "record-submitted")),
-        ("underConsideration", tr(lang, "record-underconsideration")),
-        ("approved", tr(lang, "record-approved")),
-        ("rejected", tr(lang, "record-rejected")),
-    ];
-
     html! {
         div.panel.fade {
             h1.underlined.pad {
@@ -204,29 +197,29 @@ fn manager_help(lang: &'static LanguageIdentifier) -> Markup {
                 (tr(lang, "record-manager-help.a"))
             }
             p {
-                (tr(lang, "record-manager-help.b"))
+                (PreEscaped(tr(lang, "record-manager-help.b")))
                 ul {
                     li {
-                        b {(tr(lang, "record-rejected")) ": "} (tr(lang, "record-manager-help.rejected"))
+                        b {(tr(lang, "record-rejected")) ": "} (PreEscaped(tr(lang, "record-manager-help.rejected")))
                     }
                     li {
-                        b {(tr(lang, "record-approved")) ": "} (tr(lang, "record-manager-help.approved"))
+                        b {(tr(lang, "record-approved")) ": "} (PreEscaped(tr(lang, "record-manager-help.approved")))
                     }
                     li {
-                        b {(tr(lang, "record-submitted")) ": "} (tr(lang, "record-manager-help.submitted"))
+                        b {(tr(lang, "record-submitted")) ": "} (PreEscaped(tr(lang, "record-manager-help.submitted")))
                     }
                     li {
-                        b {(tr(lang, "record-underconsideration")) ": "} (tr(lang, "record-manager-help.underconsideration"))
+                        b {(tr(lang, "record-underconsideration")) ": "} (PreEscaped(tr(lang, "record-manager-help.underconsideration")))
                     }
                 }
             }
             p {
                 b { (tr(lang, "record-manager-help.note")) ": " }
-                (tr(lang, "record-manager-help.note-a"))
+                (PreEscaped(tr(lang, "record-manager-help.note-a")))
             }
             p {
                 b { (tr(lang, "record-manager-help.note")) ": " }
-                (tr(lang, "record-manager-help.note-b"))
+                (PreEscaped(tr(lang, "record-manager-help.note-b")))
             }
         }
     }

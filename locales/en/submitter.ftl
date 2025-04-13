@@ -40,8 +40,7 @@ record-submission = Record Submission
     .notes-info = Provide any additional notes you'd like to pass on to the list moderator receiving your submission.
     .notes-placeholder = Your dreams and hopes for this record... or something like that
 
-    .guidelines = By submitting the record you acknowledge the {$guidelines-redirect}.
-    .guidelines-redirect = submission guidelines
+    .guidelines = By submitting the record you acknowledge the { -redirect-guidelines(text: "submission guidelines") }.
 
     .submit = Submit record
 
@@ -58,7 +57,7 @@ submitter-viewer = Submitter #
 
     .records-redirect = Show records in record manager
 
-submitter-listed = Submitter #{$submitterId}
+submitter-listed = Submitter #{$submitter-id}
 
 submitter-idsearch-panel = Search submitter by ID
     .info = Submitters can be uniquely identified by ID. Entering a submitters's ID below will select it on the left (provided the submitter exists)

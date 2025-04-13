@@ -112,12 +112,7 @@ impl AccountPageTab for ListIntegrationTab {
                                     }
                                 }
                                 p {
-                                    (PreEscaped(ftr(lang, "claim-geolocate.info", &vec![
-                                        (
-                                            "api",
-                                            format!("<a class=\"link\" href=\"https://www.abstractapi.com/ip-geolocation-api\">{}</a>", (tr(lang, "claim-geolocate.info-api"))),
-                                        )
-                                    ])))
+                                    (PreEscaped(tr(lang, "claim-geolocate.info")))
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
@@ -145,24 +140,7 @@ impl AccountPageTab for ListIntegrationTab {
                                 (tr(lang, "claim-records"))
                             }
                             p {
-                                (PreEscaped(ftr(lang, "claim-records.info", &vec![
-                                    (
-                                        "approved",
-                                        format!("<span style=\"background-color: #E9FAE3\">{}</span>", tr(lang, "record-approved")),
-                                    ),
-                                    (
-                                        "rejected",
-                                        format!("<span style=\"background-color: #F8DCE4\">{}</span>", tr(lang, "record-rejected")),
-                                    ),
-                                    (
-                                        "submitted",
-                                        format!("<span style=\"background-color: #F7F7E0\">{}</span>", tr(lang, "record-submitted")),
-                                    ),
-                                    (
-                                        "underConsideration",
-                                        format!("<span style=\"background-color: #D8EFF3\">{}</span>", tr(lang, "record-underconsideration")),
-                                    ),
-                                ])))
+                                (PreEscaped(tr(lang, "claim-records.info")))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
