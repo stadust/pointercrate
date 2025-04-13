@@ -133,7 +133,7 @@ impl OverviewPage {
             div.flex.m-center.container {
                 main.left {
                     (self.time_machine)
-                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist))
+                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist, &self.lang))
 
                     @match &self.time_machine {
                         Tardis::Activated { demons, ..} => {
@@ -156,7 +156,7 @@ impl OverviewPage {
                 aside.right {
                     (self.team)
                     (super::rules_panel(self.lang))
-                    (submit_panel())
+                    (submit_panel(self.lang))
                     (stats_viewer_panel(self.lang))
                     (super::discord_panel(self.lang))
                 }

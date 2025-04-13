@@ -65,7 +65,7 @@ impl AccountPageTab for RecordsPage {
 
         html! {
             div.left {
-                (RecordSubmitter::new(false, &demons[..]))
+                (RecordSubmitter::new(false, &demons[..], lang))
                 (record_manager(lang, &demons[..]))
                 (note_adder(lang))
                 div.panel.fade #record-notes-container style = "display:none" {
@@ -80,7 +80,7 @@ impl AccountPageTab for RecordsPage {
                 (status_selector(lang))
                 (record_selector(lang))
                 (player_selector(lang))
-                (submit_panel())
+                (submit_panel(lang))
             }
             (change_progress_dialog(lang))
             (change_video_dialog(lang))
@@ -97,7 +97,7 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
                 (tr(lang, "record-manager")) " - "
                 (dropdown("All", html! {
                     li.white.hover.underlined data-value = "All"
-                     {(tr(lang, "record-manager.all-selection"))}
+                     {(tr(lang, "record-manager.all-option"))}
                 }, demons.iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}))))
             }
             div.flex.viewer {
@@ -201,37 +201,32 @@ fn manager_help(lang: &'static LanguageIdentifier) -> Markup {
                 (tr(lang, "record-manager-help"))
             }
             p {
-                (ftr(lang, "record-manager-help.a", &vec![
-                    (
-                        "demonFilterAllSelection",
-                        tr(lang, "record-manager.all-selection")
-                    )
-                ]))
+                (tr(lang, "record-manager-help.a"))
             }
             p {
-                (ftr(lang, "record-manager-help.b", &states))
+                (tr(lang, "record-manager-help.b"))
                 ul {
                     li {
-                        b {(tr(lang, "record-rejected")) ": "} (ftr(lang, "record-manager-help.rejected", &states))
+                        b {(tr(lang, "record-rejected")) ": "} (tr(lang, "record-manager-help.rejected"))
                     }
                     li {
-                        b {(tr(lang, "record-approved")) ": "} (ftr(lang, "record-manager-help.approved", &states))
+                        b {(tr(lang, "record-approved")) ": "} (tr(lang, "record-manager-help.approved"))
                     }
                     li {
-                        b {(tr(lang, "record-submitted")) ": "} (ftr(lang, "record-manager-help.submitted", &states))
+                        b {(tr(lang, "record-submitted")) ": "} (tr(lang, "record-manager-help.submitted"))
                     }
                     li {
-                        b {(tr(lang, "record-underconsideration")) ": "} (ftr(lang, "record-manager-help.underconsideration", &states))
+                        b {(tr(lang, "record-underconsideration")) ": "} (tr(lang, "record-manager-help.underconsideration"))
                     }
                 }
             }
             p {
                 b { (tr(lang, "record-manager-help.note")) ": " }
-                (ftr(lang, "record-manager-help.note-a", &states))
+                (tr(lang, "record-manager-help.note-a"))
             }
             p {
-                b { "Note: " }
-                (ftr(lang, "record-manager-help.note-b", &states))
+                b { (tr(lang, "record-manager-help.note")) ": " }
+                (tr(lang, "record-manager-help.note-b"))
             }
         }
     }
@@ -263,7 +258,7 @@ fn status_selector(lang: &'static LanguageIdentifier) -> Markup {
                 (tr(lang, "record-status-filter-panel.info"))
             }
             (dropdown("All", html! {
-                li.white.hover.underlined data-value = "All" {(tr(lang, "record-status-filter-panel.all-selection"))}
+                li.white.hover.underlined data-value = "All" {(tr(lang, "record-status-filter-all"))}
             }, dropdown_items.into_iter()))
         }
     }

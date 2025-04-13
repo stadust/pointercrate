@@ -38,10 +38,10 @@ demon-records-qualify = {$percent}% { $percent ->
     *[other] or better required to qualify
 }
 
-demon-records-total = {$numRecords} { $numRecords ->
+demon-records-total = {$num-records} { $num-records ->
     [one] record registered
     *[other] records registered
-}, out of which {$numCompletions} { $numCompletions ->
+}, out of which {$num-completions} { $num-completions ->
     [one] is 100%
     *[other] are 100%
 }
@@ -50,7 +50,7 @@ demon-records-total = {$numRecords} { $numRecords ->
 demons = Demons
 demon-manager = Demon Manager
 
-demon-listed = {$demon} (ID: {$demonId})
+demon-listed = {$demon} (ID: {$demon-id})
     .publisher = by {$publisher}
 
 demon-viewer = Demon #
@@ -86,7 +86,7 @@ demon-name-dialog = Change demon name
 # {$videoId} will be replaced by https://i.ytimg.com/vi/{.info-videoid}/mqdefault.jpg, italicized
 # in english, this looks like https://i.ytimg.com/vi/VIDEO_ID/mqdefault.jpg
 demon-thumbnail-dialog = Change thumbnail link
-    .info = Change the thumbnail link for this record. To link it to the thumbnail of a youtube video, set it to {$videoId}.
+    .info = Change the thumbnail link for this record. To link it to the thumbnail of a youtube video, set it to {$video-id}.
     .info-videoid = VIDEO_ID
 
     .thumbnail-field = Thumbnail link

@@ -7,6 +7,7 @@ static_loader! {
     static LOCALES = {
         locales: "../locales",
         fallback_language: "en",
+        core_locales: "../locales/core.ftl",
     };
 }
 

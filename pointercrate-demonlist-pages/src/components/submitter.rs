@@ -1,17 +1,21 @@
 use crate::components::{demon_dropdown, player_selection_dropdown};
-use maud::{html, Markup, Render};
+use maud::{html, Markup, PreEscaped, Render};
+use pointercrate_core::localization::{ftr, tr};
 use pointercrate_demonlist::{config, demon::Demon};
+use unic_langid::LanguageIdentifier;
 
 pub struct RecordSubmitter<'a> {
     initially_visible: bool,
     demons: &'a [Demon],
+    lang: &'static LanguageIdentifier,
 }
 
-impl RecordSubmitter<'_> {
-    pub fn new(visible: bool, demons: &[Demon]) -> RecordSubmitter {
+impl<'a> RecordSubmitter<'a> {
+    pub fn new(visible: bool, demons: &'a [Demon], lang: &'static LanguageIdentifier) -> RecordSubmitter<'a> {
         RecordSubmitter {
             initially_visible: visible,
             demons,
+            lang,
         }
     }
 }
@@ -23,103 +27,113 @@ impl Render for RecordSubmitter<'_> {
                 span.plus.cross.hover {}
                 form #submission-form novalidate = "" {
                     div.underlined {
-                        h2 {"Record Submission"}
+                        h2 { (tr(&self.lang, "record-submission")) }
                     }
                     p.info-red.output {}
                     p.info-green.output {}
                     h3 {
-                        "Demon:"
+                        (tr(&self.lang, "record-submission.demon")) ":"
                     }
                     p {
-                        "The demon the record was made on. Only demons in the top " (config::extended_list_size()) " are accepted. This excludes legacy demons!"
+                        (ftr(&self.lang, "record-submission.demon-info", &vec![("list-size", config::extended_list_size())]))
                     }
                     span.form-input data-type = "dropdown" {
                         (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size())))
                         p.error {}
                     }
                     h3 {
-                        "Holder:"
+                        (tr(&self.lang, "record-submission.holder")) ":"
                     }
                     p {
-                        "The player holding the record. Start typing to see suggestions of existing players. If this is your first submission, write your name, as you wish it to appear on the website, into the text field (ignoring any suggestions)."
+                        (tr(&self.lang, "record-submission.holder-info"))
                     }
                     span.form-input.flex.col data-type = "dropdown" {
                         (player_selection_dropdown("id_player", "/api/v1/players/", "name", "player"))
                         p.error {}
                     }
                     h3 {
-                        "Progress:"
+                        (tr(&self.lang, "record-submission.progress")) ":"
                     }
                     p {
-                        "The progress made as percentage. Only values greater than or equal to the demons record requirement and smaller than or equal to 100 are accepted!"
+                        (tr(&self.lang, "record-submission.progress-info"))
                     }
                     span.form-input.flex.col #id_progress {
-                        input type = "number" name = "progress" required="" placeholder = "e. g. '50', '98'" min="0" max="100";
+                        input type = "number" name = "progress" required="" placeholder = (tr(&self.lang, "record-submission.progress-placeholder")) min="0" max="100";
                         p.error {}
                     }
                     h3 {
-                        "Video: "
+                        (tr(&self.lang, "record-submission.video")) ":"
                     }
                     p {
-                        "A proof video of the legitimacy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream."
+                        (tr(&self.lang, "record-submission.video-info"))
                         br {}
 
-                        i { "Note: " }
-                        "Please pay attention to only submit well-formed URLs!"
+                        i { (tr(&self.lang, "record-submission.note")) ":" }
+                        (tr(&self.lang, "record-submission.video-note"))
                     }
                     span.form-input.flex.col #id_video {
-                        input type = "url" name = "video" required = "" placeholder = "e.g. 'https://youtu.be/cHEGAqOgddA'" ;
+                        input type = "url" name = "video" required = "" placeholder = (tr(&self.lang, "record-submission.video-placeholder")) ;
                         p.error {}
                     }
                     h3 {
-                        "Raw footage: "
+                        (tr(&self.lang, "record-submission.raw-footage")) ":"
                     }
                     p {
-                        "The unedited and untrimmed video for this completion, uploaded to a non-compressing (e.g. not YouTube) file-sharing service such as google drive. If the record was achieved on stream (meaning there is no recording), please provide a link to the stream VOD"
+                        (tr(&self.lang, "record-submission.raw-footage-info-a"))
                     }
                     p {
-                        "Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator."
+                        (tr(&self.lang, "record-submission.raw-footage-info-b"))
                     }
                     p {
-                        i {"Note: "} "This is required for every record submitted to the list!"
+                        i {(tr(&self.lang, "record-submission.note")) ":"} (tr(&self.lang, "record-submission.raw-footage-note"))
                     }
                     span.form-input.flex.col #submit-raw-footage {
-                        input type = "url"  name = "raw_footage" required = "" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
+                        input type = "url"  name = "raw_footage" required = "" placeholder = (tr(&self.lang, "record-submission.raw-footage-placeholder")) {}
                         p.error {}
                     }
                     h3 {
-                        "Notes or comments: "
+                        (tr(&self.lang, "record-submission.notes")) ":"
                     }
                     p {
-                        "Provide any additional notes you'd like to pass on to the list moderator receiving your submission."
+                        (tr(&self.lang, "record-submission.notes-info"))
                     }
                     span.form-input.flex.col #submit-note {
-                        textarea name = "note" placeholder = "Your dreams and hopes for this record... or something like that" {}
+                        textarea name = "note" placeholder = (tr(&self.lang, "record-submission.notes-placeholder")) {}
                         p.error {}
                     }
                     p {
-                        "By submitting the record you acknowledge the " a.link href = "/guidelines" {"submission guidelines"} "."
+                        (PreEscaped(ftr(
+                            &self.lang,
+                            "record-submission.guidelines",
+                            &vec![
+                                (
+                                    "guidelines-redirect",
+                                    &format!(r#"<a class="link" href="/guidelines">{}</a>"#,
+                                    tr(&self.lang, "record-submission.guidelines-redirect"))
+                                )
+                            ]
+                        )))
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Submit record";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(&self.lang, "record-submission.submit"));
                 }
             }
         }
     }
 }
 
-pub(crate) fn submit_panel() -> Markup {
+pub(crate) fn submit_panel(lang: &'static LanguageIdentifier) -> Markup {
     html! {
         section #submit.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "Submit Records"
+                    (tr(lang, "record-submission-panel"))
                 }
             }
             p {
-                "Note: Please do not submit nonsense, it only makes it harder for us all and will get you banned. Also note that the form rejects duplicate submissions."
+                (tr(lang, "record-submission-panel.info"))
             }
             a.blue.hover.button.js-scroll data-destination = "submitter" data-reveal = "true" {
-                "Submit a record!"
+                (tr(lang, "record-submission-panel.redirect"))
             }
         }
     }

@@ -1,5 +1,6 @@
 use pointercrate_core::{error::CoreError, localization::get_locale};
 use rocket::{
+    http::CookieJar,
     request::{FromRequest, Outcome},
     Request,
 };
@@ -17,6 +18,22 @@ impl ClientPreferences {
     pub fn get<T: From<ClientPreference>>(self, name: &'static str) -> T {
         T::from(self.0.into_iter().find(|preference| preference.name == name).unwrap())
     }
+
+    pub fn from_cookies(cookies: &CookieJar<'_>, preference_manager: &PreferenceManager) -> Self {
+        let mut preferences: Vec<ClientPreference> = Vec::new();
+
+        for preference in preference_manager.0.iter() {
+            preferences.push(ClientPreference {
+                name: preference.name,
+                value: cookies
+                    .get(&format!("preference-{}", preference.name))
+                    .map(|cookie| cookie.value().to_string())
+                    .unwrap_or(preference.default.to_string()),
+            });
+        }
+
+        ClientPreferences(preferences)
+    }
 }
 
 #[rocket::async_trait]
@@ -29,20 +46,9 @@ impl<'r> FromRequest<'r> for ClientPreferences {
             _ => return Outcome::Success(ClientPreferences(Vec::new())), // return an empty preferences vec if this instance doesnt support preferences
         };
 
-        let mut preferences: Vec<ClientPreference> = Vec::new();
+        let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
 
-        for preference in preference_manager.0.iter() {
-            preferences.push(ClientPreference {
-                name: preference.name,
-                value: request
-                    .cookies()
-                    .get(&format!("preference-{}", preference.name))
-                    .map(|cookie| cookie.value().to_string())
-                    .unwrap_or(preference.default.to_string()),
-            });
-        }
-
-        Outcome::Success(ClientPreferences(preferences))
+        Outcome::Success(preferences)
     }
 }
 
@@ -66,7 +72,13 @@ impl PreferenceManager {
     }
 }
 
-// locale preference
+// type conversions
+impl From<ClientPreference> for String {
+    fn from(value: ClientPreference) -> Self {
+        value.value
+    }
+}
+
 impl From<ClientPreference> for &'static LanguageIdentifier {
     fn from(preference: ClientPreference) -> Self {
         get_locale(&preference.value)

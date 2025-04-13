@@ -9,6 +9,7 @@ pub mod config;
 pub mod error;
 pub mod footer;
 pub mod head;
+pub mod localization;
 pub mod navigation;
 pub mod util;
 
@@ -56,6 +57,7 @@ impl PageConfiguration {
                 .script("/static/core/js/ui.js")
                 .script("/static/core/js/nav.js")
                 .script("/static/core/js/misc.js")
+                .script("/static/core/js/localization.js")
                 .stylesheet("/static/core/css/icon.css")
                 .stylesheet("/static/core/css/nav.css")
                 .stylesheet("/static/core/css/main.css")

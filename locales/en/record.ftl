@@ -14,9 +14,9 @@ record-submitter = Submitter ID
 ## Records tab (user area)
 records = Records
 record-manager = Record Manager
-    .all-selection = All Demons
+    .all-option = All Demons
 
-record-listed = Record #{$recordId}
+record-listed = Record #{$record-id}
     .progress = {$percent}% on {$demon}
 
 record-viewer = Record #
@@ -31,7 +31,8 @@ record-note = Add Note
 
 record-status-filter-panel = Filter
     .info = Filter by record status
-    .all-selection = All
+
+record-status-filter-all = All
 
 record-idsearch-panel = Search record by ID
     .info = Records can be uniquely identified by ID. Entering a record's ID below will select it on the left (provided the record exists)
@@ -70,30 +71,27 @@ record-progress-dialog = Change record progress
 # The giant information box below the record manager, split
 # into different sections here
 #
-# {$approved}, {$rejected}, {$underConsideration}, and {$submitted} are all replaced
-# with their respective record states (at the top of this file)
-#
 # Each section (except .a and .b) will begin with a bolded version of
 # the appropriate record state, or a bolded version of .note for .note-a/b
 # attributes
 #
 record-manager-help = Manage Records
-    .a = Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by status, player, etc.. Clicking the '{$demonFilterAllSelection}' field at the top allows to filter by demon.
+    .a = Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by status, player, etc.. Clicking the '{record-status-filter-all}' field at the top allows to filter by demon.
 
-    .b = There are four possible record states a record can be in: '{$rejected}', '{$approved}', '{$submitted}' and '{$underConsideration}'. For simplicity of explanation we will assume that 'Bob' is a player and 'Cataclysm' is a demon he has a record on.
+    .b = There are four possible record states a record can be in: '{record-rejected}', '{record-approved}', '{record-submitted}' and '{record-underconsideration}'. For simplicity of explanation we will assume that 'Bob' is a player and 'Cataclysm' is a demon he has a record on.
 
-    .rejected = If the record is '{$rejected}', it means that Bob has no other record in other states on Cataclysm and no submissions for Bob on Cataclysm are possible. Conversely, this means if Bob has a record on Catalysm that's not rejected, we immediately know that no rejected record for Bob on Cataclysm exists.
+    .rejected = If the record is '{record-rejected}', it means that Bob has no other record in other states on Cataclysm and no submissions for Bob on Cataclysm are possible. Conversely, this means if Bob has a record on Catalysm that's not rejected, we immediately know that no rejected record for Bob on Cataclysm exists.
     Rejecting any record of Bob's on Cataclysm will delete all other record's of Bob on Cataclysm to ensure the above uniqueness.
 
-    .approved = If the record is '{$approved}', it means that no submissions with less progress than the '{$approved}' record exist or are permitted.
-    Changing a record to '{$approved}' will delete all submissions for Bob on Cataclysm with less progress.
+    .approved = If the record is '{record-approved}', it means that no submissions with less progress than the '{record-approved}' record exist or are permitted.
+    Changing a record to '{record-approved}' will delete all submissions for Bob on Cataclysm with less progress.
 
-    .submitted = If the record is '{$submitted}', no further constraints on uniqueness are in place. This means that multiple submissions for Bob on Cataclysm are possible, as long as they provide different video links. However, due to the above, all duplicates are deleted as soon as one of the submissions is accepted or rejected.
+    .submitted = If the record is '{record-submitted}', no further constraints on uniqueness are in place. This means that multiple submissions for Bob on Cataclysm are possible, as long as they provide different video links. However, due to the above, all duplicates are deleted as soon as one of the submissions is accepted or rejected.
 
-    .underconsideration = If the record is '{$underConsideration}' it is conceptually still a submission. The only difference is, that no more submissions for Bob on Cataclysm are allowed now.
+    .underconsideration = If the record is '{record-underconsideration}' it is conceptually still a submission. The only difference is, that no more submissions for Bob on Cataclysm are allowed now.
 
     .note = Note
 
-    .note-a = If a player is banned, they cannot have {$approved}/{$submitted} records on the list. All records marked as '{$submitted}' are deleted, all others are changed to '{$rejected}'.
+    .note-a = If a player is banned, they cannot have {record-approved}/{record-submitted} records on the list. All records marked as '{record-submitted}' are deleted, all others are changed to '{record-rejected}'.
 
-    .note-b = Banning a submitter will delete all their submissions that still have the status '{$submitted}'. Records submitted by them that were already {$approved}/{$rejected} will not be affected.
+    .note-b = Banning a submitter will delete all their submissions that still have the status '{record-submitted}'. Records submitted by them that were already {record-approved}/{record-rejected} will not be affected.

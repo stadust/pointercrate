@@ -1,19 +1,21 @@
 use maud::{html, Markup, Render};
 
 pub struct TopLevelNavigationBarItem {
+    id: Option<&'static str>,
     item: NavigationBarItem,
     sub_levels: Vec<NavigationBarItem>,
 }
 
 impl TopLevelNavigationBarItem {
-    pub fn new(link: &'static str, content: Markup) -> Self {
+    pub fn new(id: Option<&'static str>, link: Option<&'static str>, content: Markup) -> Self {
         TopLevelNavigationBarItem {
+            id,
             item: NavigationBarItem { link, content },
             sub_levels: vec![],
         }
     }
 
-    pub fn with_sub_item(mut self, link: &'static str, content: Markup) -> Self {
+    pub fn with_sub_item(mut self, link: Option<&'static str>, content: Markup) -> Self {
         self.sub_levels.push(NavigationBarItem { link, content });
         self
     }
@@ -21,7 +23,7 @@ impl TopLevelNavigationBarItem {
 
 struct NavigationBarItem {
     content: Markup,
-    link: &'static str,
+    link: Option<&'static str>,
 }
 
 pub struct NavigationBar {
@@ -43,8 +45,8 @@ impl NavigationBar {
 impl Render for &TopLevelNavigationBarItem {
     fn render(&self) -> Markup {
         html! {
-            div.nav-group {
-                a.nav-item.hover.white href = (self.item.link) {
+            div.nav-group id = [self.id] {
+                a.nav-item.hover.white href = [self.item.link] {
                     (self.item.content)
                     @if !self.sub_levels.is_empty() {
                         i.fas.fa-sort-down style = "height: 50%; padding-left: 5px" {}
@@ -54,7 +56,7 @@ impl Render for &TopLevelNavigationBarItem {
                     ul.nav-hover-dropdown {
                         @for sub_item in &self.sub_levels {
                             li {
-                                a.white.hover href = (sub_item.link) { (sub_item.content)}
+                                a.white.hover href = [sub_item.link] { (sub_item.content)}
                             }
                         }
                     }

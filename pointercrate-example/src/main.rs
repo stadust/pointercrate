@@ -4,6 +4,7 @@ use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
 use pointercrate_core_pages::{
     footer::{Footer, FooterColumn, Link},
+    localization::locale_selection_item,
     navigation::{NavigationBar, TopLevelNavigationBarItem},
     PageConfiguration,
 };
@@ -143,30 +144,45 @@ fn page_configuration() -> PageConfiguration {
     let nav_bar = NavigationBar::new("/static/images/path/to/your/logo.png")
         .with_item(
             TopLevelNavigationBarItem::new(
-            "/demonlist/",
-            // Pointercrate uses the "maud" create as its templating engine. 
-            // It allows you to describe HTML via Rust macros that allow you to dynamically generate content using
-            // a Rust-like syntax and by interpolating and Rust variables from surrounding scopes (as long as the
-            // implement the `Render` trait). See https://maud.lambda.xyz/ for details.
-            html! {
-                span {
-                    "Demonlist"
-                }
-            },
-        )
-        // Add a drop down to the demonlist item, just like on pointercrate.com
-        .with_sub_item("/demonlist/statsviewer/", html! {"Stats Viewer"})
-        .with_sub_item("/demonlist/?submitter=true", html! {"Record Submitter"})
-        .with_sub_item("/demonlist/?timemachine=true", html! {"Time Machine"}),
+                None,
+                Some("/demonlist/"),
+                // Pointercrate uses the "maud" create as its templating engine. 
+                // It allows you to describe HTML via Rust macros that allow you to dynamically generate content using
+                // a Rust-like syntax and by interpolating and Rust variables from surrounding scopes (as long as the
+                // implement the `Render` trait). See https://maud.lambda.xyz/ for details.
+                html! {
+                    span {
+                        "Demonlist"
+                    }
+                },
+            )
+            // Add a drop down to the demonlist item, just like on pointercrate.com
+            .with_sub_item(Some("/demonlist/statsviewer/"), html! {"Stats Viewer"})
+            .with_sub_item(Some("/demonlist/?submitter=true"), html! {"Record Submitter"})
+            .with_sub_item(Some("/demonlist/?timemachine=true"), html! {"Time Machine"}),
         )
         .with_item(TopLevelNavigationBarItem::new(
-            "/login/",
+            None,
+            Some("/login/"),
             html! {
                 span {
                     "User Area"
                 }
             },
-        ));
+        ))
+        .with_item(
+            TopLevelNavigationBarItem::new(
+                Some("language-selector"),
+                None,
+                html! {
+                    span.flex {
+                        span.flag-icon {}
+                        span #active-language style = "margin-left: 8px" { ".." }
+                    }
+                },
+            )
+            .with_sub_item(None, locale_selection_item("us", "en")),
+        );
 
     // A footer consists of a copyright notice, an arbitrary amount of columns
     // displayed below it, side-by-side, and potentially some social media links to

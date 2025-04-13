@@ -152,7 +152,7 @@ impl DemonPage {
 
             div.flex.m-center.container {
                 main.left {
-                    (RecordSubmitter::new(false, &self.demonlist))
+                    (RecordSubmitter::new(false, &self.demonlist, &self.lang))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
@@ -195,7 +195,7 @@ impl DemonPage {
                 aside.right {
                     (self.team)
                     (super::rules_panel(self.lang))
-                    (submit_panel())
+                    (submit_panel(self.lang))
                     (stats_viewer_panel(self.lang))
                     (super::discord_panel(self.lang))
                 }
@@ -386,7 +386,7 @@ impl DemonPage {
                         @if !self.data.records.is_empty() {
                             h4 {
                                 @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
-                                (ftr(self.lang, "demon-records-total", &vec![("numRecords", self.data.records.len()), ("numCompletions", records_registered_100_count)]))
+                                (ftr(self.lang, "demon-records-total", &vec![("num-records", self.data.records.len()), ("num-completions", records_registered_100_count)]))
                             }
                         }
                     }

@@ -1,4 +1,7 @@
-use crate::etag::Tagged;
+use crate::{
+    etag::Tagged,
+    preferences::{ClientPreferences, PreferenceManager},
+};
 use maud::{html, DOCTYPE};
 use pointercrate_core::etag::Taggable;
 use pointercrate_core_pages::{
@@ -31,12 +34,16 @@ impl HeadLike for Page {
 impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
         let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
+        let preference_manager = request.rocket().state::<PreferenceManager>().ok_or(Status::InternalServerError)?;
+
+        let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
+        let lang: String = preferences.get("locale");
 
         let fragment = self.0;
 
         let rendered_fragment = html! {
             (DOCTYPE)
-            html lang="en" prefix="og: http://opg.me/ns#" {
+            html lang=(lang) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)
