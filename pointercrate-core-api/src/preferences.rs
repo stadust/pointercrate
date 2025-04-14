@@ -61,14 +61,16 @@ pub struct Preference {
 pub struct PreferenceManager(Vec<Preference>);
 
 impl PreferenceManager {
-    pub fn new() -> Self {
-        PreferenceManager(Vec::new())
-    }
-
     pub fn preference(mut self, name: &'static str, default: &'static str) -> Self {
         self.0.push(Preference { name, default });
 
         self
+    }
+}
+
+impl Default for PreferenceManager {
+    fn default() -> Self {
+        PreferenceManager(Vec::new())
     }
 }
 

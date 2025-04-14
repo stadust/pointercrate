@@ -2,68 +2,67 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::localization::tr;
 use pointercrate_core_pages::util::{dropdown, filtered_paginator, simple_dropdown};
 use pointercrate_demonlist::nationality::Nationality;
-use unic_langid::LanguageIdentifier;
 
 pub mod individual;
 pub mod national;
 
-pub(crate) fn stats_viewer_panel(lang: &'static LanguageIdentifier) -> Markup {
+pub(crate) fn stats_viewer_panel() -> Markup {
     html! {
         section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    (tr(lang, "statsviewer-panel"))
+                    (tr("statsviewer-panel"))
                 }
             }
             p {
-                (tr(lang, "statsviewer-panel.info"))
+                (tr("statsviewer-panel.info"))
             }
             a.blue.hover.button #show-stats-viewer href = "/demonlist/statsviewer/ "{
-                (tr(lang, "statsviewer-panel.button"))
+                (tr("statsviewer-panel.button"))
             }
         }
     }
 }
 
-fn continent_panel(lang: &'static LanguageIdentifier) -> Markup {
+fn continent_panel() -> Markup {
     html! {
         section.panel.fade style="overflow:initial"{
             h3.underlined {
-                (tr(lang, "continent-panel"))
+                (tr("continent-panel"))
             }
             p {
-                (tr(lang, "continent-panel.info"))
+                (tr("continent-panel.info"))
             }
             (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Central America"].into_iter()))
         }
     }
 }
 
-fn demon_sorting_panel(lang: &'static LanguageIdentifier) -> Markup {
+fn demon_sorting_panel() -> Markup {
     html! {
         section.panel.fade style="overflow:initial" {
             h3.underlined {
-                (tr(lang, "demon-sorting-panel"))
+                (tr("demon-sorting-panel"))
             }
             p {
-                (tr(lang, "demon-sorting-panel.info"))
+                (tr("demon-sorting-panel.info"))
             }
             (simple_dropdown("demon-sorting-mode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
         }
     }
 }
 
-fn hide_subdivision_panel(lang: &'static LanguageIdentifier) -> Markup {
+fn hide_subdivision_panel() -> Markup {
     html! {
         section.panel.fade {
             h3.underlined {
-                (tr(lang, "toggle-subdivision-panel"))
+                (tr("toggle-subdivision-panel"))
             }
             p {
-                (tr(lang, "toggle-subdivision-panel.info"))
+                (tr("toggle-subdivision-panel.info"))
             }
             div.cb-container.flex.no-stretch style="margin-bottom:10px" {
-                i {(tr(lang, "toggle-subdivision-panel.option-toggle"))}
+                i {(tr("toggle-subdivision-panel.option-toggle"))}
                 input #show-subdivisions-checkbox type = "checkbox" checked="";
                 span.checkmark {}
             }
@@ -73,36 +72,28 @@ fn hide_subdivision_panel(lang: &'static LanguageIdentifier) -> Markup {
 
 struct StatsViewerRow(Vec<(String, &'static str)>);
 
-fn standard_stats_viewer_rows(lang: &'static LanguageIdentifier) -> Vec<StatsViewerRow> {
+fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
     vec![
+        StatsViewerRow(vec![(tr("statsviewer.rank"), "rank"), (tr("statsviewer.score"), "score")]),
+        StatsViewerRow(vec![(tr("statsviewer.stats"), "stats"), (tr("statsviewer.hardest"), "hardest")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed"), "beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed-main"), "main-beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed-extended"), "extended-beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed-legacy"), "legacy-beaten")]),
         StatsViewerRow(vec![
-            (tr(lang, "statsviewer.rank"), "rank"),
-            (tr(lang, "statsviewer.score"), "score"),
+            (tr("statsviewer.created"), "created"),
+            (tr("statsviewer.published"), "published"),
+            (tr("statsviewer.verified"), "verified"),
         ]),
-        StatsViewerRow(vec![
-            (tr(lang, "statsviewer.stats"), "stats"),
-            (tr(lang, "statsviewer.hardest"), "hardest"),
-        ]),
-        StatsViewerRow(vec![(tr(lang, "statsviewer.completed"), "beaten")]),
-        StatsViewerRow(vec![(tr(lang, "statsviewer.completed-main"), "main-beaten")]),
-        StatsViewerRow(vec![(tr(lang, "statsviewer.completed-extended"), "extended-beaten")]),
-        StatsViewerRow(vec![(tr(lang, "statsviewer.completed-legacy"), "legacy-beaten")]),
-        StatsViewerRow(vec![
-            (tr(lang, "statsviewer.created"), "created"),
-            (tr(lang, "statsviewer.published"), "published"),
-            (tr(lang, "statsviewer.verified"), "verified"),
-        ]),
-        StatsViewerRow(vec![(tr(lang, "statsviewer.progress"), "progress")]),
+        StatsViewerRow(vec![(tr("statsviewer.progress"), "progress")]),
     ]
 }
 
-fn stats_viewer_html(
-    lang: &'static LanguageIdentifier, nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>, is_nation_stats_viewer: bool,
-) -> Markup {
+fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>, is_nation_stats_viewer: bool) -> Markup {
     html! {
         section.panel.fade #statsviewer style="overflow:initial" {
             h2.underlined.pad {
-                (tr(lang, "statsviewer"))
+                (tr("statsviewer"))
                 @if let Some(nations) = nations {
                     " - "
                     (dropdown("International",
@@ -131,9 +122,9 @@ fn stats_viewer_html(
                 (filtered_paginator("stats-viewer-pagination", "/api/v1/players/ranking/"))
                 p.viewer-welcome {
                     @if is_nation_stats_viewer
-                        { (tr(lang, "statsviewer-nation.welcome")) }
+                        { (tr("statsviewer-nation.welcome")) }
                     @else
-                        { (tr(lang, "statsviewer-individual.welcome")) }
+                        { (tr("statsviewer-individual.welcome")) }
 
                 }
                 div.viewer-content {

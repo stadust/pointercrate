@@ -1,15 +1,11 @@
 use crate::components::{player_selection_dialog, player_selection_dropdown};
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{
-    localization::{ftr, tr},
-    permission::PermissionsManager,
-};
+use pointercrate_core::{localization::tr, permission::PermissionsManager, trp};
 use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
-use unic_langid::LanguageIdentifier;
 
 pub struct DemonsTab;
 
@@ -27,49 +23,48 @@ impl AccountPageTab for DemonsTab {
         5
     }
 
-    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup {
+    fn tab(&self) -> Markup {
         html! {
             i class = "fa fa-shower fa-2x" aria-hidden="true" {}
             (PreEscaped("&nbsp;&nbsp;"))
             b {
-                (tr(lang, "demons"))
+                (tr("demons"))
             }
         }
     }
 
     async fn content(
-        &self, lang: &'static LanguageIdentifier, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager,
-        _connection: &mut PgConnection,
+        &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
         html! {
             div.left {
-                (demon_submitter(lang))
+                (demon_submitter())
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr(lang, "demon-manager"))
+                        (tr("demon-manager"))
                     }
                     div.flex.viewer {
                         (filtered_paginator("demon-pagination", "/api/v2/demons/listed/"))
                         p.viewer-welcome {
-                            (tr(lang, "demon-viewer.welcome"))
+                            (tr("demon-viewer.welcome"))
                         }
 
                         div.viewer-content {
                             div.flex.col{
                                 h3 style = "font-size:1.1em; margin: 10px 0" {
-                                    (tr(lang, "demon-viewer"))
+                                    (tr("demon-viewer"))
                                     i #demon-demon-id {}
                                     " - "
                                     i.fa.fa-pencil-alt.clickable #demon-name-pen aria-hidden = "true" {} (PreEscaped("&nbsp;")) i #demon-demon-name {}
                                 }
 
-                                iframe."ratio-16-9"#demon-video style="width:90%; margin: 15px 5%" allowfullscreen="" {(tr(lang, "demon-video"))}
+                                iframe."ratio-16-9"#demon-video style="width:90%; margin: 15px 5%" allowfullscreen="" {(tr("demon-video"))}
                                 p.info-red.output style = "margin: 10px" {}
                                 p.info-green.output style = "margin: 10px" {}
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-video-pen aria-hidden = "true" {} " " (tr(lang, "demon-video")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-video-pen aria-hidden = "true" {} " " (tr("demon-video")) ":"
                                         }
                                         br;
                                         a.link #demon-video-link target = "_blank" {}
@@ -78,7 +73,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-thumbnail-pen aria-hidden = "true" {} " " (tr(lang, "demon-thumbnail")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-thumbnail-pen aria-hidden = "true" {} " " (tr("demon-thumbnail")) ":"
                                         }
                                         br;
                                         a.link #demon-thumbnail-link target = "_blank" {}
@@ -87,14 +82,14 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-position-pen aria-hidden = "true" {} " " (tr(lang, "demon-position")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-position-pen aria-hidden = "true" {} " " (tr("demon-position")) ":"
                                         }
                                         br;
                                         span #demon-position {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-requirement-pen aria-hidden = "true" {} " " (tr(lang, "demon-requirement")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-requirement-pen aria-hidden = "true" {} " " (tr("demon-requirement")) ":"
                                         }
                                         br;
                                         span #demon-requirement {}
@@ -103,14 +98,14 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-publisher-pen aria-hidden = "true" {} " " (tr(lang, "demon-publisher")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-publisher-pen aria-hidden = "true" {} " " (tr("demon-publisher")) ":"
                                         }
                                         br;
                                         span #demon-publisher {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-verifier-pen aria-hidden = "true" {} " " (tr(lang, "demon-verifier")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-verifier-pen aria-hidden = "true" {} " " (tr("demon-verifier")) ":"
                                         }
                                         br;
                                         span #demon-verifier {}
@@ -119,7 +114,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         i.fa.fa-plus.clickable #demon-add-creator-pen aria-hidden = "true" {} b {
-                                            " " (tr(lang, "demon-creators")) ":"
+                                            " " (tr("demon-creators")) ":"
                                         }
                                         br;
                                         span #demon-creators {}
@@ -133,268 +128,269 @@ impl AccountPageTab for DemonsTab {
                 div style="height: 50px" {} // to make sure that the footer doesnt float. if it floats, the user page is the only one without a scrollbar at the right, which causes jumpiness when switching tabs.
             }
             div.right {
-                (submit_panel(lang))
+                (submit_panel())
             }
-            (change_name_dialog(lang))
-            (change_position_dialog(lang))
-            (change_requirement_dialog(lang))
-            (change_video_dialog(lang))
-            (change_thumbnail_dialog(lang))
-            (change_verifier_dialog(lang))
-            (change_publisher_dialog(lang))
-            (add_creator_dialog(lang))
+            (change_name_dialog())
+            (change_position_dialog())
+            (change_requirement_dialog())
+            (change_video_dialog())
+            (change_thumbnail_dialog())
+            (change_verifier_dialog())
+            (change_publisher_dialog())
+            (add_creator_dialog())
         }
     }
 }
 
-pub(super) fn submit_panel(lang: &'static LanguageIdentifier) -> Markup {
+pub(super) fn submit_panel() -> Markup {
     html! {
         section.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    (tr(lang, "demon-add-panel")) ":"
+                    (tr("demon-add-panel")) ":"
                 }
             }
             a.blue.hover.button.js-scroll data-destination = "demon-submitter" data-reveal = "true" {
-                (tr(lang, "demon-add-panel.button"))
+                (tr("demon-add-panel.button"))
             }
         }
     }
 }
 
-fn change_name_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_name_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #demon-name-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "demon-name-dialog")) ":"
+                    (tr("demon-name-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (tr(lang, "demon-name-dialog.info"))
+                    (tr("demon-name-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-name-edit {
-                        label for = "name" {(tr(lang, "demon-name-dialog.name-field")) ":"}
+                        label for = "name" {(tr("demon-name-dialog.name-field")) ":"}
                         input name = "name" type = "text" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "demon-name-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("demon-name-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_requirement_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_requirement_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #demon-requirement-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "demon-requirement-dialog")) ":"
+                    (tr("demon-requirement-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (tr(lang, "demon-requirement-dialog.info"))
+                    (tr("demon-requirement-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-requirement-edit {
-                        label for = "requirement" {(tr(lang, "demon-requirement-dialog.requirement-field")) ":"}
+                        label for = "requirement" {(tr("demon-requirement-dialog.requirement-field")) ":"}
                         input name = "requirement" type = "number" min = "0" max="100" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "demon-requirement-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("demon-requirement-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_position_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_position_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #demon-position-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "demon-position-dialog")) ":"
+                    (tr("demon-position-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (tr(lang, "demon-position-dialog.info"))
+                    (tr("demon-position-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-position-edit {
-                        label for = "position" {(tr(lang, "demon-position-dialog.position-field")) ":"}
+                        label for = "position" {(tr("demon-position-dialog.position-field")) ":"}
                         input name = "position" type = "number" min = "1" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "demon-position-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("demon-position-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_video_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_video_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #demon-video-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "demon-video-dialog")) ":"
+                    (tr("demon-video-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (tr(lang, "demon-video-dialog.info"))
+                    (tr("demon-video-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-video-edit {
-                        label for = "video" {(tr(lang, "demon-video-dialog.video-field")) ":"}
+                        label for = "video" {(tr("demon-video-dialog.video-field")) ":"}
                         input name = "video" type = "url";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "demon-video-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("demon-video-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_thumbnail_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_thumbnail_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #demon-thumbnail-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "demon-thumbnail-dialog")) ":"
+                    (tr("demon-thumbnail-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (PreEscaped(ftr(lang, "demon-thumbnail-dialog.info", &vec![
+                    (PreEscaped(trp!(
+                        "demon-thumbnail-dialog.info",
                         (
                             "videoId",
-                            format!("<i>https://i.ytimg.com/vi/{}/mqdefault.jpg</i>", tr(lang, "demon-thumbnail-dialog.info-videoid")),
+                            format!("<i>https://i.ytimg.com/vi/{}/mqdefault.jpg</i>", tr("demon-thumbnail-dialog.info-videoid"))
                         ),
-                    ])))
+                    )))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-thumbnail-edit {
-                        label for = "thumbnail" {(tr(lang, "demon-thumbnail-dialog.thumbnail-field")) ":"}
+                        label for = "thumbnail" {(tr("demon-thumbnail-dialog.thumbnail-field")) ":"}
                         input required="" name = "thumbnail" type = "url";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "demon-thumbnail-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("demon-thumbnail-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_verifier_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_verifier_dialog() -> Markup {
     player_selection_dialog(
         "demon-verifier-dialog",
         "demon-verifier-edit",
-        &(tr(lang, "demon-verifier-dialog") + ":"),
-        &tr(lang, "demon-verifier-dialog.info"),
-        &tr(lang, "demon-verifier-dialog.submit"),
+        &(tr("demon-verifier-dialog") + ":"),
+        &tr("demon-verifier-dialog.info"),
+        &tr("demon-verifier-dialog.submit"),
         "verifier",
     )
 }
 
-fn change_publisher_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_publisher_dialog() -> Markup {
     player_selection_dialog(
         "demon-publisher-dialog",
         "demon-publisher-edit",
-        &(tr(lang, "demon-publisher-dialog") + ":"),
-        &tr(lang, "demon-publisher-dialog.info"),
-        &tr(lang, "demon-publisher-dialog.submit"),
+        &(tr("demon-publisher-dialog") + ":"),
+        &tr("demon-publisher-dialog.info"),
+        &tr("demon-publisher-dialog.submit"),
         "publisher",
     )
 }
 
-fn add_creator_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn add_creator_dialog() -> Markup {
     player_selection_dialog(
         "demon-add-creator-dialog",
         "demon-creator-add",
-        &(tr(lang, "demon-creator-dialog") + ":"),
-        &tr(lang, "demon-creator-dialog.info"),
-        &tr(lang, "demon-creator-dialog.submit"),
+        &(tr("demon-creator-dialog") + ":"),
+        &tr("demon-creator-dialog.info"),
+        &tr("demon-creator-dialog.submit"),
         "creator",
     )
 }
 
-fn demon_submitter(lang: &'static LanguageIdentifier) -> Markup {
+fn demon_submitter() -> Markup {
     html! {
         section.panel.fade.closable #demon-submitter style = "display: none" {
             span.plus.cross.hover {}
             div.flex {
                 form #demon-submission-form novalidate = "" {
                     div.underlined {
-                        h2 {(tr(lang, "demon-add-form")) ":"}
+                        h2 {(tr("demon-add-form")) ":"}
                     }
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input.flex.col #demon-add-name {
                         label for = "name" {
-                            (tr(lang, "demon-add-form.name-field")) ":"
+                            (tr("demon-add-form.name-field")) ":"
                         }
                         input type = "text" name = "name" required="";
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-level-id {
                         label for = "level_id" {
-                            (tr(lang, "demon-add-form.levelid-field")) ":"
+                            (tr("demon-add-form.levelid-field")) ":"
                         }
                         input type = "number" name = "level_id" min = "1";
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-position {
                         label for = "position" {
-                            (tr(lang, "demon-add-form.position-field")) ":"
+                            (tr("demon-add-form.position-field")) ":"
                         }
                         input type = "number" name = "position" required="" min="1";
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-requirement {
                         label for = "requirement" {
-                            (tr(lang, "demon-add-form.requirement-field")) ":"
+                            (tr("demon-add-form.requirement-field")) ":"
                         }
                         input type = "number" name = "requirement" required="" min="0" max = "100";
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        label{(tr(lang, "demon-add-form.verifier-field")) ":"}
+                        label{(tr("demon-add-form.verifier-field")) ":"}
                         br;
                         (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name", "verifier"))
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        label {(tr(lang, "demon-add-form.publisher-field")) ":"}
+                        label {(tr("demon-add-form.publisher-field")) ":"}
                         br;
                         (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher"))
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-video {
                         label for = "video" {
-                            (tr(lang, "demon-add-form.video-field")) ":"
+                            (tr("demon-add-form.video-field")) ":"
                         }
                         input type = "url" name = "video";
                         p.error {}
                     }
                     span {
                         i.fa.fa-plus.clickable #add-demon-add-creator-pen aria-hidden = "true" {} i {
-                            " " (tr(lang, "demon-add-form.creators-field")) ": "
+                            " " (tr("demon-add-form.creators-field")) ": "
                         }
                         span #demon-add-creators {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "demon-add-form.submit")) ":";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("demon-add-form.submit")) ":";
                 }
             }
         }

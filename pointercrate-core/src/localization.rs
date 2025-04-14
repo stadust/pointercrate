@@ -1,14 +1,16 @@
-use std::{borrow::Cow, collections::HashMap};
-
-use fluent::FluentValue;
 use fluent_templates::{static_loader, LanguageIdentifier, Loader};
+use tokio::task_local;
 
 static_loader! {
-    static LOCALES = {
+    pub static LOCALES = {
         locales: "../locales",
         fallback_language: "en",
         core_locales: "../locales/core.ftl",
     };
+}
+
+task_local! {
+    pub static LANGUAGE: &'static LanguageIdentifier;
 }
 
 pub fn get_locale(code: &str) -> &'static LanguageIdentifier {
@@ -21,16 +23,25 @@ pub fn get_locale(code: &str) -> &'static LanguageIdentifier {
     LOCALES.fallback()
 }
 
-pub fn tr(lang: &'static LanguageIdentifier, text_id: &str) -> String {
-    LOCALES.lookup(lang, text_id)
+pub fn tr(text_id: &str) -> String {
+    LANGUAGE.with(|lang| LOCALES.lookup(lang, text_id))
 }
 
-pub fn ftr<'a>(lang: &'static LanguageIdentifier, text_id: &str, args: &Vec<(&'static str, impl Into<FluentValue<'a>> + Clone)>) -> String {
-    let mut args_map: HashMap<Cow<'static, str>, FluentValue<'_>> = HashMap::new();
+#[macro_export]
+macro_rules! trp {
+    ($text_id:expr $(, ($key:expr, $value:expr) )* $(,)?) => {{
+        use std::borrow::Cow;
+        use fluent::FluentValue;
+        use std::collections::HashMap;
+        use fluent_templates::loader::Loader;
+        use pointercrate_core::localization::{LOCALES, LANGUAGE};
 
-    for arg in args {
-        args_map.insert(Cow::Borrowed(arg.0), arg.1.clone().into());
-    }
+        let mut args_map: HashMap<Cow<'static, str>, FluentValue<'_>> = HashMap::new();
 
-    LOCALES.lookup_with_args(lang, text_id, &args_map)
+        $(
+            args_map.insert(Cow::Borrowed($key), FluentValue::from($value.clone()));
+        )*
+
+        LANGUAGE.with(|lang| LOCALES.lookup_with_args(lang, $text_id, &args_map))
+    }};
 }

@@ -1,10 +1,6 @@
 use log::error;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{
-    error::PointercrateError,
-    localization::{ftr, tr},
-    permission::PermissionsManager,
-};
+use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
 use pointercrate_core_pages::{
     error::ErrorFragment,
     util::{filtered_paginator, paginator},
@@ -16,7 +12,6 @@ use pointercrate_user::{
 };
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
-use unic_langid::LanguageIdentifier;
 
 pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
 
@@ -34,10 +29,10 @@ impl AccountPageTab for ListIntegrationTab {
         7
     }
 
-    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup {
+    fn tab(&self) -> Markup {
         html! {
             b {
-                (tr(lang, "list-integration"))
+                (tr("list-integration"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-list fa-2x" aria-hidden="true" {}
@@ -45,8 +40,7 @@ impl AccountPageTab for ListIntegrationTab {
     }
 
     async fn content(
-        &self, lang: &'static LanguageIdentifier, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager,
-        connection: &mut PgConnection,
+        &self, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> Markup {
         let player_claim = match PlayerClaim::by_user(user.user().id, connection).await {
             Ok(player_claim) => player_claim,
@@ -70,7 +64,7 @@ impl AccountPageTab for ListIntegrationTab {
                         span style = "font-size: 1.3em" {
                             i.fa.fa-pencil-alt.clickable #player-claim-pen aria-hidden = "true" {} (PreEscaped("&nbsp;"))
                             b {
-                                (tr(lang, "claimed-player")) ": "
+                                (tr("claimed-player")) ": "
                             }
                             @match player_claim {
                                 Some(ref claim) => {
@@ -89,11 +83,11 @@ impl AccountPageTab for ListIntegrationTab {
                             @match player_claim {
                                 Some(ref claim) if claim.verified => {
                                     i style="margin-right: 15px;" {
-                                        (tr(lang, "claimed-player.verified"))
+                                        (tr("claimed-player.verified"))
                                     }
                                     span.arrow.hover {}
                                 },
-                                Some(_) => i{(tr(lang, "claimed-player.unverified"))},
+                                Some(_) => i{(tr("claimed-player.unverified"))},
                                 _ => {}
                             }
                         }
@@ -105,18 +99,18 @@ impl AccountPageTab for ListIntegrationTab {
                                 p.info-green.output style = "margin: 10px 0" {}
                                 div.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        (tr(lang, "claim-geolocate")) ":"
+                                        (tr("claim-geolocate")) ":"
                                     }
                                     a.button.blue.hover #claims-geolocate-nationality {
-                                        (tr(lang, "claim-geolocate.submit"))
+                                        (tr("claim-geolocate.submit"))
                                     }
                                 }
                                 p {
-                                    (PreEscaped(tr(lang, "claim-geolocate.info")))
+                                    (PreEscaped(tr("claim-geolocate.info")))
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        (tr(lang, "claim-lock-submissions")) ":"
+                                        (tr("claim-lock-submissions")) ":"
                                     }
                                     @if claim.lock_submissions {
                                         input #lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
@@ -127,7 +121,7 @@ impl AccountPageTab for ListIntegrationTab {
                                     span.checkmark {}
                                 }
                                 p {
-                                    (tr(lang, "claim-lock-submissions.info")) ":"
+                                    (tr("claim-lock-submissions.info")) ":"
                                 }
                             }
                         }
@@ -137,10 +131,10 @@ impl AccountPageTab for ListIntegrationTab {
                     @if claim.verified {
                         div.panel.fade {
                             h2.pad.underlined {
-                                (tr(lang, "claim-records"))
+                                (tr("claim-records"))
                             }
                             p {
-                                (PreEscaped(tr(lang, "claim-records.info")))
+                                (PreEscaped(tr("claim-records.info")))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
@@ -149,16 +143,16 @@ impl AccountPageTab for ListIntegrationTab {
                 @if is_moderator {
                     div.panel.fade {
                         h2.pad.underlined {
-                            (tr(lang, "claim-manager"))
+                            (tr("claim-manager"))
                         }
                         p {
-                            (tr(lang, "claim-manager.info-a"))
+                            (tr("claim-manager.info-a"))
                             br;
-                            (tr(lang, "claim-manager.info-b"))
+                            (tr("claim-manager.info-b"))
                             br;
-                            (tr(lang, "claim-manager.info-c"))
+                            (tr("claim-manager.info-c"))
                             br;
-                            (tr(lang, "claim-manager.info-d"))
+                            (tr("claim-manager.info-d"))
                         }
                         (filtered_paginator("claim-pagination", "/api/v1/players/claims/"))
                     }
@@ -167,37 +161,37 @@ impl AccountPageTab for ListIntegrationTab {
             div.right {
                 div.panel.fade style = "display: none;"{
                     h2.underlined.pad {
-                        (tr(lang, "claim-initiate-panel"))
+                        (tr("claim-initiate-panel"))
                     }
                     p {
-                        (tr(lang, "claim-initiate-panel.info"))
+                        (tr("claim-initiate-panel.info"))
                     }
                     (filtered_paginator("claims-initiate-claim-pagination", "/api/v1/players/"))
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr(lang, "claim-info-panel"))
+                        (tr("claim-info-panel"))
                     }
                     p {
-                        (tr(lang, "claim-info-panel.info-a"))
+                        (tr("claim-info-panel.info-a"))
                         br;
-                        (PreEscaped(ftr(lang, "claim-info-panel.info-b", &vec![
+                        (PreEscaped(trp!("claim-info-panel.info-b",
                             (
                                 "discord",
-                                format!("<a class=\"link\" href=\"{}\">{}</a>", &self.0, tr(lang, "claim-info-panel.info-discord"))
+                                format!("<a class=\"link\" href=\"{}\">{}</a>", &self.0, tr("claim-info-panel.info-discord"))
                             )
-                        ])))
+                        )))
                         br;
-                        (tr(lang, "claim-info-panel.info-c"))
+                        (tr("claim-info-panel.info-c"))
                     }
                 }
                 @if is_moderator {
                     div.panel.fade {
                         h2.underlined.pad {
-                            (tr(lang, "claim-video-panel"))
+                            (tr("claim-video-panel"))
                         }
                         p {
-                            (tr(lang, "claim-video-panel.info"))
+                            (tr("claim-video-panel.info"))
                         }
                         iframe."ratio-16-9"#claim-video style="width:100%;" allowfullscreen="" {}
                     }

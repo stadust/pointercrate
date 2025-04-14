@@ -5,7 +5,6 @@ use pointercrate_demonlist::LIST_MODERATOR;
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
-use unic_langid::LanguageIdentifier;
 
 pub struct SubmittersPage;
 
@@ -23,10 +22,10 @@ impl AccountPageTab for SubmittersPage {
         6
     }
 
-    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup {
+    fn tab(&self) -> Markup {
         html! {
             b {
-                (tr(lang, "submitters"))
+                (tr("submitters"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-eye fa-2x" aria-hidden="true" {}
@@ -34,38 +33,37 @@ impl AccountPageTab for SubmittersPage {
     }
 
     async fn content(
-        &self, lang: &'static LanguageIdentifier, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager,
-        _connection: &mut PgConnection,
+        &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
         html! {
             div.left {
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr(lang, "submitter-manager"))
+                        (tr("submitter-manager"))
                     }
                     div.flex.viewer {
                         (paginator("submitter-pagination", "/api/v1/submitters/"))
                         p.viewer-welcome {
-                            (tr(lang, "submitter-viewer.welcome"))
+                            (tr("submitter-viewer.welcome"))
                         }
                         div.viewer-content {
                             div.flex.col{
                                 h3 style = "font-size:1.1em; margin: 10px 0" {
-                                    (tr(lang, "submitter-viewer"))
+                                    (tr("submitter-viewer"))
                                     i #submitter-submitter-id {}
                                 }
                                 p {
-                                    (tr(lang, "submitter-viewer.info-a"))
+                                    (tr("submitter-viewer.info-a"))
                                 }
                                 p {
-                                    (tr(lang, "submitter-viewer.info-b"))
+                                    (tr("submitter-viewer.info-b"))
                                 }
                                 p.info-red.output style = "margin: 10px" {}
                                 p.info-green.output style = "margin: 10px" {}
                                 div.stats-container.flex.space {
                                     span {
                                         b {
-                                            (tr(lang, "submitter-banned")) ":"
+                                            (tr("submitter-banned")) ":"
                                         }
                                         br;
                                         div.dropdown-menu.js-search #edit-submitter-banned style = "max-width: 50px" {
@@ -74,14 +72,14 @@ impl AccountPageTab for SubmittersPage {
                                             }
                                             div.menu {
                                                 ul {
-                                                    li.white.hover data-value="true" {(tr(lang, "submitter-banned.yes"))}
-                                                    li.white.hover data-value="false" {(tr(lang, "submitter-banned.no"))}
+                                                    li.white.hover data-value="true" {(tr("submitter-banned.yes"))}
+                                                    li.white.hover data-value="false" {(tr("submitter-banned.no"))}
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                span.button.blue.hover #submitter-list-records style = "margin: 15px auto 0px" {(tr(lang, "submitter-viewer.records-redirect"))};
+                                span.button.blue.hover #submitter-list-records style = "margin: 15px auto 0px" {(tr("submitter-viewer.records-redirect"))};
                             }
                         }
                     }
@@ -89,29 +87,29 @@ impl AccountPageTab for SubmittersPage {
                 div style="height: 50px" {} // to make sure that the footer doesnt float. if it floats, the user page is the only one without a scrollbar at the right, which causes jumpyness when switching tabs.
             }
             div.right {
-                (submitter_selector(lang))
+                (submitter_selector())
             }
         }
     }
 }
 
-fn submitter_selector(lang: &'static LanguageIdentifier) -> Markup {
+fn submitter_selector() -> Markup {
     html! {
         div.panel.fade {
             h2.underlined.pad {
-                (tr(lang, "submitter-idsearch-panel"))
+                (tr("submitter-idsearch-panel"))
             }
             p {
-                (tr(lang, "submitter-idsearch-panel.info"))
+                (tr("submitter-idsearch-panel.info"))
             }
             form.flex.col #submitter-search-by-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #search-submitter-id {
-                    label for = "id" {(tr(lang, "submitter-idsearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("submitter-idsearch-panel.id-field")) ":"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%";
                     p.error {}
                 }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "submitter-idsearch-panel.submit"));
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("submitter-idsearch-panel.submit"));
             }
         }
     }

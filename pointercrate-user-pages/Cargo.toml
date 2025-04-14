@@ -15,6 +15,8 @@ pointercrate-core-pages = {path = "../pointercrate-core-pages"}
 async-trait = "0.1.87"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
 unic-langid = "0.9.5"
+fluent = "0.16.1"
+fluent-templates = "0.13.0"
 
 [features]
 legacy_accounts = ["pointercrate-user/legacy_accounts"]

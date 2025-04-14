@@ -79,18 +79,20 @@ pub async fn overview(
         tardis.activate(destination, demons_then, !is_april_1st)
     }
 
-    Ok(Page::new(OverviewPage {
-        team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
-            lang,
+    Ok(Page::new(
+        OverviewPage {
+            team: Team {
+                admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+                moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+                helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            },
+            demonlist,
+            time_machine: tardis,
+            submitter_initially_visible: submitter.unwrap_or(false),
         },
-        demonlist,
-        time_machine: tardis,
-        submitter_initially_visible: submitter.unwrap_or(false),
         lang,
-    }))
+    )
+    .await)
 }
 
 #[rocket::get("/permalink/<demon_id>")]
@@ -148,19 +150,21 @@ pub async fn demon_page(
         );
     }
 
-    Ok(Page::new(DemonPage {
-        team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
-            lang,
+    Ok(Page::new(
+        DemonPage {
+            team: Team {
+                admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+                moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+                helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            },
+            demonlist: current_list(&mut *connection).await?,
+            movements: modifications,
+            integration: gd.load_level_for_demon(&full_demon.demon).await,
+            data: full_demon,
         },
-        demonlist: current_list(&mut *connection).await?,
-        movements: modifications,
-        integration: gd.load_level_for_demon(&full_demon.demon).await,
-        data: full_demon,
         lang,
-    }))
+    )
+    .await)
 }
 
 #[rocket::get("/statsviewer")]
@@ -169,17 +173,24 @@ pub async fn stats_viewer(pool: &State<PointercratePool>, preferences: ClientPre
 
     let mut connection = pool.connection().await?;
 
-    Ok(Page::new(IndividualStatsViewer {
-        nationalities_in_use: Nationality::used(&mut *connection).await?,
+    Ok(Page::new(
+        IndividualStatsViewer {
+            nationalities_in_use: Nationality::used(&mut *connection).await?,
+        },
         lang,
-    }))
+    )
+    .await)
 }
 
 #[rocket::get("/statsviewer/nations")]
 pub async fn nation_stats_viewer(preferences: ClientPreferences) -> Page {
     let lang: &'static LanguageIdentifier = preferences.get("locale");
 
-    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(lang))
+    Page::new(
+        pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(),
+        lang,
+    )
+    .await
 }
 
 #[rocket::get("/statsviewer/heatmap.css")]

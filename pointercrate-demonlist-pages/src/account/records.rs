@@ -3,11 +3,7 @@ use crate::components::{
     submitter::{submit_panel, RecordSubmitter},
 };
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{
-    error::PointercrateError,
-    localization::{ftr, tr},
-    permission::PermissionsManager,
-};
+use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager};
 use pointercrate_core_pages::{
     error::ErrorFragment,
     util::{dropdown, paginator},
@@ -19,7 +15,6 @@ use pointercrate_demonlist::{
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
-use unic_langid::LanguageIdentifier;
 
 pub struct RecordsPage;
 
@@ -37,10 +32,10 @@ impl AccountPageTab for RecordsPage {
         3
     }
 
-    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup {
+    fn tab(&self) -> Markup {
         html! {
             b {
-                (tr(lang, "records"))
+                (tr("records"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-trophy fa-2x" aria-hidden="true" {}
@@ -48,8 +43,7 @@ impl AccountPageTab for RecordsPage {
     }
 
     async fn content(
-        &self, lang: &'static LanguageIdentifier, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager,
-        connection: &mut PgConnection,
+        &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> Markup {
         let demons = match current_list(connection).await {
             Ok(demons) => demons,
@@ -65,51 +59,51 @@ impl AccountPageTab for RecordsPage {
 
         html! {
             div.left {
-                (RecordSubmitter::new(false, &demons[..], lang))
-                (record_manager(lang, &demons[..]))
-                (note_adder(lang))
+                (RecordSubmitter::new(false, &demons[..]))
+                (record_manager(&demons[..]))
+                (note_adder())
                 div.panel.fade #record-notes-container style = "display:none" {
                     div.white.hover.clickable #add-record-note-open {
-                        b {(tr(lang, "record-note"))}
+                        b {(tr("record-note"))}
                     }
                     div #record-notes {} // populated by javascript when a record is clicked
                 }
-                (manager_help(lang))
+                (manager_help())
             }
             div.right {
-                (status_selector(lang))
-                (record_selector(lang))
-                (player_selector(lang))
-                (submit_panel(lang))
+                (status_selector())
+                (record_selector())
+                (player_selector())
+                (submit_panel())
             }
-            (change_progress_dialog(lang))
-            (change_video_dialog(lang))
-            (change_holder_dialog(lang))
-            (change_demon_dialog(lang, &demons[..]))
+            (change_progress_dialog())
+            (change_video_dialog())
+            (change_holder_dialog())
+            (change_demon_dialog(&demons[..]))
         }
     }
 }
 
-fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup {
+fn record_manager(demons: &[Demon]) -> Markup {
     html! {
         div.panel.fade #record-manager {
             h2.underlined.pad {
-                (tr(lang, "record-manager")) " - "
+                (tr("record-manager")) " - "
                 (dropdown("All", html! {
                     li.white.hover.underlined data-value = "All"
-                     {(tr(lang, "record-manager.all-option"))}
+                     {(tr("record-manager.all-option"))}
                 }, demons.iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}))))
             }
             div.flex.viewer {
                 (paginator("record-pagination", "/api/v1/records/"))
                 p.viewer-welcome {
-                    (tr(lang, "record-viewer.welcome"))
+                    (tr("record-viewer.welcome"))
                 }
                 div.viewer-content {
                     div.flex.col {
                         h3 style = "font-size:1.1em; margin-top: 10px" {
                             i.fa.fa-clipboard.clickable #record-copy-info aria-hidden = "true" {}
-                            " " (tr(lang, "record-viewer"))
+                            " " (tr("record-viewer"))
                             i #record-id {}
                             " - "
                             div.dropdown-menu.js-search #edit-record-status style = "max-width: 220px" {
@@ -118,10 +112,10 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
                                 }
                                 div.menu {
                                     ul {
-                                        li.white.hover data-value="approved" {(tr(lang, "record-approved"))}
-                                        li.white.hover data-value="rejected" {(tr(lang, "record-rejected"))}
-                                        li.white.hover data-value="under consideration" {(tr(lang, "record-underconsideration"))}
-                                        li.white.hover data-value="submitted" {(tr(lang, "record-submitted"))}
+                                        li.white.hover data-value="approved" {(tr("record-approved"))}
+                                        li.white.hover data-value="rejected" {(tr("record-rejected"))}
+                                        li.white.hover data-value="under consideration" {(tr("record-underconsideration"))}
+                                        li.white.hover data-value="submitted" {(tr("record-submitted"))}
                                     }
                                 }
                             }
@@ -133,7 +127,7 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
                         div.stats-container.flex.space  {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " " (tr(lang, "record-videolink")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " " (tr("record-videolink")) ":"
                                 }
                                 br;
                                 a.link #record-video-link target = "_blank" {}
@@ -141,7 +135,7 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
                         }
                         div.stats-container.flex.space {
                             span {
-                                b { (tr(lang, "record-rawfootage")) ":" }
+                                b { (tr("record-rawfootage")) ":" }
                                 br;
                                 a.link #record-raw-footage-link target = "_blank" {}
                             }
@@ -149,14 +143,14 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " " (tr(lang, "record-demon")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " " (tr("record-demon")) ":"
                                 }
                                 br;
                                 span #record-demon {}
                             }
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " " (tr(lang, "record-holder")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " " (tr("record-holder")) ":"
                                 }
                                 br;
                                 span #record-holder {}
@@ -165,20 +159,20 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-progress-pen aria-hidden = "true" {} " " (tr(lang, "record-progress")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-progress-pen aria-hidden = "true" {} " " (tr("record-progress")) ":"
                                 }
                                 br;
                                 span #record-progress {}
                             }
                             span {
                                 b {
-                                    (tr(lang, "record-submitter")) ":"
+                                    (tr("record-submitter")) ":"
                                 }
                                 br;
                                 span #record-submitter {}
                             }
                         }
-                        span.button.red.hover #record-delete style = "margin: 15px auto 0px" {(tr(lang, "record-viewer.delete"))};
+                        span.button.red.hover #record-delete style = "margin: 15px auto 0px" {(tr("record-viewer.delete"))};
                     }
                 }
 
@@ -187,225 +181,225 @@ fn record_manager(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup
     }
 }
 
-fn manager_help(lang: &'static LanguageIdentifier) -> Markup {
+fn manager_help() -> Markup {
     html! {
         div.panel.fade {
             h1.underlined.pad {
-                (tr(lang, "record-manager-help"))
+                (tr("record-manager-help"))
             }
             p {
-                (tr(lang, "record-manager-help.a"))
+                (tr("record-manager-help.a"))
             }
             p {
-                (PreEscaped(tr(lang, "record-manager-help.b")))
+                (PreEscaped(tr("record-manager-help.b")))
                 ul {
                     li {
-                        b {(tr(lang, "record-rejected")) ": "} (PreEscaped(tr(lang, "record-manager-help.rejected")))
+                        b {(tr("record-rejected")) ": "} (PreEscaped(tr("record-manager-help.rejected")))
                     }
                     li {
-                        b {(tr(lang, "record-approved")) ": "} (PreEscaped(tr(lang, "record-manager-help.approved")))
+                        b {(tr("record-approved")) ": "} (PreEscaped(tr("record-manager-help.approved")))
                     }
                     li {
-                        b {(tr(lang, "record-submitted")) ": "} (PreEscaped(tr(lang, "record-manager-help.submitted")))
+                        b {(tr("record-submitted")) ": "} (PreEscaped(tr("record-manager-help.submitted")))
                     }
                     li {
-                        b {(tr(lang, "record-underconsideration")) ": "} (PreEscaped(tr(lang, "record-manager-help.underconsideration")))
+                        b {(tr("record-underconsideration")) ": "} (PreEscaped(tr("record-manager-help.underconsideration")))
                     }
                 }
             }
             p {
-                b { (tr(lang, "record-manager-help.note")) ": " }
-                (PreEscaped(tr(lang, "record-manager-help.note-a")))
+                b { (tr("record-manager-help.note")) ": " }
+                (PreEscaped(tr("record-manager-help.note-a")))
             }
             p {
-                b { (tr(lang, "record-manager-help.note")) ": " }
-                (PreEscaped(tr(lang, "record-manager-help.note-b")))
+                b { (tr("record-manager-help.note")) ": " }
+                (PreEscaped(tr("record-manager-help.note-b")))
             }
         }
     }
 }
 
-fn status_selector(lang: &'static LanguageIdentifier) -> Markup {
+fn status_selector() -> Markup {
     // FIXME: no vec
     let dropdown_items = vec![
         html! {
-            li.white.hover data-value = "approved" {(tr(lang, "record-approved"))}
+            li.white.hover data-value = "approved" {(tr("record-approved"))}
         },
         html! {
-            li.white.hover data-value = "submitted" {(tr(lang, "record-submitted"))}
+            li.white.hover data-value = "submitted" {(tr("record-submitted"))}
         },
         html! {
-            li.white.hover data-value = "rejected" {(tr(lang, "record-rejected"))}
+            li.white.hover data-value = "rejected" {(tr("record-rejected"))}
         },
         html! {
-            li.white.hover data-value = "under consideration" {(tr(lang, "record-underconsideration"))}
+            li.white.hover data-value = "under consideration" {(tr("record-underconsideration"))}
         },
     ];
 
     html! {
         div.panel.fade #status-filter-panel style = "overflow: visible" {
             h2.underlined.pad {
-                (tr(lang, "record-status-filter-panel"))
+                (tr("record-status-filter-panel"))
             }
             p {
-                (tr(lang, "record-status-filter-panel.info"))
+                (tr("record-status-filter-panel.info"))
             }
             (dropdown("All", html! {
-                li.white.hover.underlined data-value = "All" {(tr(lang, "record-status-filter-all"))}
+                li.white.hover.underlined data-value = "All" {(tr("record-status-filter-all"))}
             }, dropdown_items.into_iter()))
         }
     }
 }
 
-fn player_selector(lang: &'static LanguageIdentifier) -> Markup {
+fn player_selector() -> Markup {
     html! {
         div.panel.fade {
             h2.underlined.pad {
-                (tr(lang, "record-playersearch-panel"))
+                (tr("record-playersearch-panel"))
             }
             p {
-                (tr(lang, "record-playersearch-panel.info"))
+                (tr("record-playersearch-panel.info"))
             }
             form.flex.col.underlined.pad #record-filter-by-player-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #record-player-id {
-                    label for = "id" {(tr(lang, "record-playersearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("record-playersearch-panel.id-field")) ":"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
                 }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "record-playersearch-panel.id-submit"));
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("record-playersearch-panel.id-submit"));
             }
             form.flex.col #record-filter-by-player-name-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #record-player-name {
-                    label for = "name" {(tr(lang, "record-playersearch-panel.name-field")) ":"}
+                    label for = "name" {(tr("record-playersearch-panel.name-field")) ":"}
                     input required = "" type = "text" name = "name";
                     p.error {}
                 }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "record-playersearch-panel.name-submit"));
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("record-playersearch-panel.name-submit"));
             }
         }
     }
 }
 
-fn record_selector(lang: &'static LanguageIdentifier) -> Markup {
+fn record_selector() -> Markup {
     html! {
         div.panel.fade {
             h2.underlined.pad {
-                (tr(lang, "record-idsearch-panel"))
+                (tr("record-idsearch-panel"))
             }
             p {
-                (tr(lang, "record-idsearch-panel.info"))
+                (tr("record-idsearch-panel.info"))
             }
             form.flex.col #record-search-by-record-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #record-record-id {
-                    label for = "id" {(tr(lang, "record-idsearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("record-idsearch-panel.id-field")) ":"}
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
                 }
-                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "record-idsearch-panel.submit"));
+                input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("record-idsearch-panel.submit"));
             }
         }
     }
 }
 
-fn note_adder(lang: &'static LanguageIdentifier) -> Markup {
+fn note_adder() -> Markup {
     html! {
         div.panel.fade.closable #add-record-note style = "display: none" {
             span.plus.cross.hover {}
             div style="display: flex;align-items: center;justify-content: space-between;" {
                 div.button.blue.hover.small style = "width: 100px; margin-bottom: 10px"{
-                    (tr(lang, "record-note.submit"))
+                    (tr("record-note.submit"))
                 }
                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                     b {
-                        (tr(lang, "record-note.public-checkbox")) ":"
+                        (tr("record-note.public-checkbox")) ":"
                     }
                     input #add-note-is-public-checkbox type = "checkbox" name = "is_public";
                     span.checkmark {}
                 }
             }
             p.info-red.output {}
-            textarea style = "width: 100%" placeholder = (tr(lang, "record-note.placeholder")) {}
+            textarea style = "width: 100%" placeholder = (tr("record-note.placeholder")) {}
         }
     }
 }
 
-fn change_progress_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_progress_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #record-progress-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "record-progress-dialog")) ":"
+                    (tr("record-progress-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (tr(lang, "record-progress-dialog.info"))
+                    (tr("record-progress-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #record-progress-edit {
-                        label for = "progress" {(tr(lang, "record-progress-dialog.progress-field")) ":"}
+                        label for = "progress" {(tr("record-progress-dialog.progress-field")) ":"}
                         input name = "progress" type = "number" min = "0" max="100" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "record-progress-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("record-progress-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_video_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_video_dialog() -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #record-video-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "record-videolink-dialog")) ":"
+                    (tr("record-videolink-dialog")) ":"
                 }
                 p style = "max-width: 400px"{
-                    (tr(lang, "record-videolink-dialog.info"))
+                    (tr("record-videolink-dialog.info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #record-video-edit {
-                        label for = "video" {(tr(lang, "record-videolink-dialog.videolink-field")) ":"}
+                        label for = "video" {(tr("record-videolink-dialog.videolink-field")) ":"}
                         input name = "video" type = "url";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr(lang, "record-videolink-dialog.submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("record-videolink-dialog.submit"));
                 }
             }
         }
     }
 }
 
-fn change_holder_dialog(lang: &'static LanguageIdentifier) -> Markup {
+fn change_holder_dialog() -> Markup {
     player_selection_dialog(
         "record-holder-dialog",
         "_edit-holder-record",
-        &(tr(lang, "record-holder-dialog") + ":"),
-        &tr(lang, "record-holder-dialog.info"),
-        &(tr(lang, "record-holder-dialog.submit")),
+        &(tr("record-holder-dialog") + ":"),
+        &tr("record-holder-dialog.info"),
+        &tr("record-holder-dialog.submit"),
         "player",
     )
 }
 
-fn change_demon_dialog(lang: &'static LanguageIdentifier, demons: &[Demon]) -> Markup {
+fn change_demon_dialog(demons: &[Demon]) -> Markup {
     html! {
         div.overlay.closable {
             div.dialog #record-demon-dialog style="overflow: initial;" {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr(lang, "record-demon-dialog")) ":"
+                    (tr("record-demon-dialog")) ":"
                 }
                 div.flex.col {
                     p {
-                        (tr(lang, "record-videolink-dialog.info"))
+                        (tr("record-videolink-dialog.info"))
                     }
                     (demon_dropdown("edit-demon-record", demons.iter()))
                 }

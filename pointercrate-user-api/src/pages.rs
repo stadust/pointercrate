@@ -30,8 +30,9 @@ use {
 pub async fn login_page(auth: Option<Auth<NonMutating>>, preferences: ClientPreferences) -> Result<Redirect, Page> {
     let lang: &'static LanguageIdentifier = preferences.get("locale");
 
-    auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page(lang)))
+    let login_page = Page::new(pointercrate_user_pages::login::login_page(lang).await, lang).await;
+
+    auth.map(|_| Redirect::to(rocket::uri!(account_page))).ok_or_else(|| login_page)
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
@@ -112,9 +113,7 @@ pub async fn account_page(
     let lang: &'static LanguageIdentifier = preferences.get("locale");
 
     match auth {
-        Some(mut auth) => Ok(Page::new(
-            tabs.account_page(lang, auth.user, permissions, &mut auth.connection).await,
-        )),
+        Some(mut auth) => Ok(Page::new(tabs.account_page(lang, auth.user, permissions, &mut auth.connection).await, lang).await),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }

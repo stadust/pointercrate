@@ -10,7 +10,6 @@ use pointercrate_user::{
     ADMINISTRATOR,
 };
 use sqlx::PgConnection;
-use unic_langid::LanguageIdentifier;
 
 pub struct UsersTab(pub Vec<Permission>);
 
@@ -34,10 +33,10 @@ impl AccountPageTab for UsersTab {
         2
     }
 
-    fn tab(&self, lang: &'static LanguageIdentifier) -> Markup {
+    fn tab(&self) -> Markup {
         html! {
             b {
-                (tr(lang, "users"))
+                (tr("users"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-users fa-2x" aria-hidden="true" {}
@@ -45,8 +44,7 @@ impl AccountPageTab for UsersTab {
     }
 
     async fn content(
-        &self, lang: &'static LanguageIdentifier, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager,
-        _connection: &mut PgConnection,
+        &self, user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
         let mut assignable_permissions = permissions
             .assignable_by_bits(user.user().permissions)
@@ -58,33 +56,33 @@ impl AccountPageTab for UsersTab {
             div.left {
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr(lang, "user-viewer"))
+                        (tr("user-viewer"))
                     }
 
                     div.flex.viewer {
                         (filtered_paginator("user-pagination", "/api/v1/users/"))
                         p.viewer-welcome {
-                            (tr(lang, "user-viewer.welcome"))
+                            (tr("user-viewer.welcome"))
                         }
                         div.viewer-content {
                             div.stats-container.flex.space {
                                 span {
                                     b {
-                                        (tr(lang, "user-username")) ":"
+                                        (tr("user-username")) ":"
                                     }
                                     br;
                                     span #user-user-name {}
                                 }
                                 span {
                                     b {
-                                        (tr(lang, "user-displayname")) ":"
+                                        (tr("user-displayname")) ":"
                                     }
                                     br;
                                     span #user-display-name {}
                                 }
                                 span {
                                     b {
-                                        (tr(lang, "user-id")) ":"
+                                        (tr("user-id")) ":"
                                     }
                                     br;
                                     span #user-user-id {}
@@ -97,10 +95,10 @@ impl AccountPageTab for UsersTab {
                                 @if !assignable_permissions.is_empty() {
                                     div.stats-container.flex.space.col style = "align-items: center" {
                                         b {
-                                            (tr(lang, "user-permissions")) ":"
+                                            (tr("user-permissions")) ":"
                                         }
                                         @for permission in assignable_permissions {
-                                            @let permission_name = tr(lang, permission.text_id());
+                                            @let permission_name = tr(permission.text_id());
 
                                             label.cb-container.form-input #(permission.text_id()) for = (permission.text_id()) data-bit = (permission.bit()) {
                                                 i {
@@ -114,9 +112,9 @@ impl AccountPageTab for UsersTab {
                                 }
                                 div.flex.no-stretch {
                                     @if user.user().has_permission(ADMINISTRATOR) {
-                                        input.button.red.hover #delete-user type = "button" style = "margin: 15px auto 0px;" value=(tr(lang, "user-viewer.delete-user"));
+                                        input.button.red.hover #delete-user type = "button" style = "margin: 15px auto 0px;" value=(tr("user-viewer.delete-user"));
                                     }
-                                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "user-viewer.edit-user"));
+                                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("user-viewer.edit-user"));
                                 }
                             }
                         }
@@ -127,19 +125,19 @@ impl AccountPageTab for UsersTab {
             div.right {
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr(lang, "user-idsearch-panel"))
+                        (tr("user-idsearch-panel"))
                     }
                     p {
-                        (tr(lang, "user-idsearch-panel.info"))
+                        (tr("user-idsearch-panel.info"))
                     }
                     form.flex.col.pad #find-id-form novalidate = "" {
                         p.info-red.output {}
                         span.form-input #find-id {
-                            label for = "id" {(tr(lang, "user-idsearch-panel.id-field")) ":"}
+                            label for = "id" {(tr("user-idsearch-panel.id-field")) ":"}
                             input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                             p.error {}
                         }
-                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr(lang, "user-idsearch-panel.submit"));
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("user-idsearch-panel.submit"));
                     }
                 }
             }
