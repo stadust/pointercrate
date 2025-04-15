@@ -1,3 +1,4 @@
+use std::{collections::hash_map::DefaultHasher, hash::{Hash, Hasher}};
 use crate::{
     nationality::{Continent, Nationality, Subdivision},
     player::{DatabasePlayer, Player},
@@ -7,6 +8,7 @@ use pointercrate_core::{
     first_and_last,
     pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
     util::{non_nullable, nullable},
+    etag::Taggable
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgConnection, Row};
@@ -143,13 +145,13 @@ impl PaginationQuery for RankingPagination {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Hash)]
 pub struct RankedPlayer {
-    rank: i64,
+    pub rank: i64,
     #[serde(skip)]
-    index: i64,
+    pub index: i64,
     #[serde(flatten)]
-    player: Player,
+    pub player: Player,
 }
 
 impl Paginatable<RankingPagination> for RankedPlayer {
@@ -213,5 +215,13 @@ impl Paginatable<RankingPagination> for RankedPlayer {
 
     fn pagination_id(&self) -> i32 {
         self.index as i32
+    }
+}
+
+impl Taggable for RankedPlayer {
+    fn patch_part(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.player.hash(&mut hasher);
+        hasher.finish()
     }
 }

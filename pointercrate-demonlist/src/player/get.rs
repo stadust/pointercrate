@@ -3,7 +3,7 @@ use crate::{
     demon::{published_by, verified_by},
     error::{DemonlistError, Result},
     nationality::{Nationality, Subdivision},
-    player::{DatabasePlayer, FullPlayer, Player},
+    player::{DatabasePlayer, FullPlayer, Player, RankedPlayer},
     record::approved_records_by,
 };
 use sqlx::{Error, PgConnection};
@@ -26,7 +26,7 @@ impl Player {
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Player> {
         let result = sqlx::query!(
-            r#"SELECT id, players.name, banned, players.score, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
+            r#"SELECT id, players.name, banned, players.score, nationalities.nation::text, nationalities.iso_country_code::text, subdivisions.iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
              players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"#,
             id
         )
@@ -111,6 +111,56 @@ impl DatabasePlayer {
                 })
             },
             result => result,
+        }
+    }
+}
+
+impl RankedPlayer {
+    pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<RankedPlayer> {
+        let result = sqlx::query!(
+            r#"SELECT players.id, players.name, banned, players.score, nationalities.nation::text, nationalities.iso_country_code::text, subdivisions.iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name, rank, index FROM players LEFT OUTER JOIN nationalities ON 
+             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code LEFT OUTER JOIN ranked_players ON players.id = ranked_players.id WHERE players.id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"#,
+            id
+        )
+        .fetch_one(connection)
+        .await;
+
+        match result {
+            Ok(row) => {
+                let nationality = if let (Some(nation), Some(iso_country_code)) = (row.nation, row.iso_country_code) {
+                    Some(Nationality {
+                        iso_country_code,
+                        nation,
+                        subdivision: if let (Some(subdivision), Some(subdivision_code)) = (row.subdivision_name, row.subdivision_code) {
+                            Some(Subdivision {
+                                iso_code: subdivision_code,
+                                name: subdivision,
+                            })
+                        } else {
+                            None
+                        },
+                    })
+                } else {
+                    None
+                };
+                let player = Player {
+                    base: DatabasePlayer {
+                        id: row.id,
+                        name: row.name,
+                        banned: row.banned,
+                    },
+                    score: row.score,
+                    nationality,
+                };
+
+                Ok(RankedPlayer {
+                    player,
+                    rank: row.rank.unwrap_or(0),
+                    index: row.index.unwrap_or(-1)
+                })
+            },
+            Err(Error::RowNotFound) => Err(DemonlistError::PlayerNotFound { player_id: id }),
+            Err(err) => Err(err.into()),
         }
     }
 }
