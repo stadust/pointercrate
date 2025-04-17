@@ -4,7 +4,7 @@ use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
 use pointercrate_core_pages::{
     footer::{Footer, FooterColumn, Link},
-    localization::locale_selection_item,
+    localization::LocalizationConfiguration,
     navigation::{NavigationBar, TopLevelNavigationBarItem},
     PageConfiguration,
 };
@@ -79,14 +79,29 @@ async fn rocket() -> _ {
     let mut permissions_manager = pointercrate_user::default_permissions_manager();
     permissions_manager.merge_with(pointercrate_demonlist::default_permissions_manager());
 
+    let rocket = rocket.manage(permissions_manager);
+
     // Define the preferences our website supports. Preferences are sent to us from
     // the client via cookies.
     // In this example, we can retrieve the `locale` preference from the
     // `preference-locale` cookie, with a default value of `en` if the cookie
     // was not sent to us.
-    let preference_manager = PreferenceManager::new().preference("locale", "en");
+    let preference_manager = PreferenceManager::default().preference("locale", "en");
 
-    let rocket = rocket.manage(permissions_manager).manage(preference_manager);
+    let rocket = rocket.manage(preference_manager);
+
+    // Define the languages our website supports. Ideally, every language present
+    // in the locales directory should be loaded into our [`LocalizationManager`]
+    // structure here.
+    //
+    // Additionally, specifying a fallback locale is optional but recommended,
+    // in case the client attempts to load the site in a language we don't
+    // support (otherwise 400 Bad Request will be raised).
+    //
+    // If overrides are present, be sure to add their cookies to the [`PreferenceManager`]!!!
+    let localization_config = LocalizationConfiguration::default().with_fallback("en", "us");
+
+    let rocket = rocket.manage(localization_config);
 
     // Set up which tabs can show up in the "user area" of your website. Anything
     // that implements the [`AccountPageTab`] trait can be displayed here. Note that
@@ -169,20 +184,7 @@ fn page_configuration() -> PageConfiguration {
                     "User Area"
                 }
             },
-        ))
-        .with_item(
-            TopLevelNavigationBarItem::new(
-                Some("language-selector"),
-                None,
-                html! {
-                    span.flex {
-                        span.flag-icon {}
-                        span #active-language style = "margin-left: 8px" { ".." }
-                    }
-                },
-            )
-            .with_sub_item(None, locale_selection_item("us", "en")),
-        );
+        ));
 
     // A footer consists of a copyright notice, an arbitrary amount of columns
     // displayed below it, side-by-side, and potentially some social media links to

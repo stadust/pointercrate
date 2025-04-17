@@ -1,5 +1,7 @@
 use maud::{html, Markup, Render};
 
+use crate::localization::{locale_selection_dropdown, Locale, LocaleSet};
+
 pub struct TopLevelNavigationBarItem {
     id: Option<&'static str>,
     item: NavigationBarItem,
@@ -40,9 +42,36 @@ impl NavigationBar {
         self.items.push(item);
         self
     }
+
+    pub fn render(&self, locale: Locale, locale_set: LocaleSet) -> Markup {
+        html! {
+            header {
+                nav.center.collapse.underlined.see-through {
+                    div.nav-icon style = "margin-right: auto" {
+                        a href = "/" aria-label = "Go to homepage" {
+                            img src = (self.logo_path) style="height:15px" alt="Logo";
+                        }
+                    }
+                    @for item in &self.items {
+                        (item)
+                    }
+                    (locale_selection_dropdown(locale, locale_set))
+                    div.nav-item.collapse-button {
+                        div.hamburger.hover {
+                            input type="checkbox"{}
+                            span{}
+                            span{}
+                            span{}
+                        }
+                    }
+                }
+                div {} // artificial spacing
+            }
+        }
+    }
 }
 
-impl Render for &TopLevelNavigationBarItem {
+impl Render for TopLevelNavigationBarItem {
     fn render(&self) -> Markup {
         html! {
             div.nav-group id = [self.id] {
@@ -61,34 +90,6 @@ impl Render for &TopLevelNavigationBarItem {
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-impl Render for NavigationBar {
-    fn render(&self) -> Markup {
-        html! {
-            header {
-                nav.center.collapse.underlined.see-through {
-                    div.nav-icon style = "margin-right: auto" {
-                        a href = "/" aria-label = "Go to homepage" {
-                            img src = (self.logo_path) style="height:15px" alt="Logo";
-                        }
-                    }
-                    @for item in &self.items {
-                        (item)
-                    }
-                    div.nav-item.collapse-button {
-                        div.hamburger.hover {
-                            input type="checkbox"{}
-                            span{}
-                            span{}
-                            span{}
-                        }
-                    }
-                }
-                div {} // artificial spacing
             }
         }
     }
