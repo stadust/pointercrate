@@ -63,7 +63,7 @@ impl AccountPageTab for SubmittersPage {
                                 div.stats-container.flex.space {
                                     span {
                                         b {
-                                            (tr("submitter-banned")) ":"
+                                            (tr("submitter-banned"))
                                         }
                                         br;
                                         div.dropdown-menu.js-search #edit-submitter-banned style = "max-width: 50px" {
@@ -105,7 +105,7 @@ fn submitter_selector() -> Markup {
             form.flex.col #submitter-search-by-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #search-submitter-id {
-                    label for = "id" {(tr("submitter-idsearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("submitter-idsearch-panel.id-field")) }
                     input required = "" type = "number" name = "id" min = "0" style="width:93%";
                     p.error {}
                 }

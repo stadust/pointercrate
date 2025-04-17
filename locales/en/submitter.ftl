@@ -31,7 +31,7 @@ record-submission = Record Submission
     .video-placeholder = e. g. https://youtu.be/cHEGAqOgddA
 
     .raw-footage = Raw footage
-    .raw-footage-info-a = The unedited and untrimmed video for this completion, uploaded to a non-compressing (e.g. not YouTube) file-sharing service such as google drive. If the record was achieved on stream (meaning there is no recording), please provide a link to the stream VOD
+    .raw-footage-info-a = The unedited and untrimmed video for this completion, uploaded to a non-compressing (e.g. not YouTube) file-sharing service such as google drive. If the record was achieved on stream (meaning there is no recording), please provide a link to the stream VOD.
     .raw-footage-info-b = Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator.
     .raw-footage-note = This is required for every record submitted to the list!
     .raw-footage-placeholder = https://drive.google.com/file/d/.../view?usp=sharing
@@ -62,5 +62,5 @@ submitter-listed = Submitter #{$submitter-id}
 submitter-idsearch-panel = Search submitter by ID
     .info = Submitters can be uniquely identified by ID. Entering a submitters's ID below will select it on the left (provided the submitter exists)
 
-    .id-field = Submitter ID
+    .id-field = Submitter ID:
     .submit = Find by ID

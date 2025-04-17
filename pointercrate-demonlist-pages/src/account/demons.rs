@@ -64,7 +64,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-video-pen aria-hidden = "true" {} " " (tr("demon-video")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-video-pen aria-hidden = "true" {} " " (tr("demon-video"))
                                         }
                                         br;
                                         a.link #demon-video-link target = "_blank" {}
@@ -73,7 +73,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-thumbnail-pen aria-hidden = "true" {} " " (tr("demon-thumbnail")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-thumbnail-pen aria-hidden = "true" {} " " (tr("demon-thumbnail"))
                                         }
                                         br;
                                         a.link #demon-thumbnail-link target = "_blank" {}
@@ -82,14 +82,14 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-position-pen aria-hidden = "true" {} " " (tr("demon-position")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-position-pen aria-hidden = "true" {} " " (tr("demon-position"))
                                         }
                                         br;
                                         span #demon-position {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-requirement-pen aria-hidden = "true" {} " " (tr("demon-requirement")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-requirement-pen aria-hidden = "true" {} " " (tr("demon-requirement"))
                                         }
                                         br;
                                         span #demon-requirement {}
@@ -98,14 +98,14 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-publisher-pen aria-hidden = "true" {} " " (tr("demon-publisher")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-publisher-pen aria-hidden = "true" {} " " (tr("demon-publisher"))
                                         }
                                         br;
                                         span #demon-publisher {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-verifier-pen aria-hidden = "true" {} " " (tr("demon-verifier")) ":"
+                                            i.fa.fa-pencil-alt.clickable #demon-verifier-pen aria-hidden = "true" {} " " (tr("demon-verifier"))
                                         }
                                         br;
                                         span #demon-verifier {}
@@ -114,7 +114,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         i.fa.fa-plus.clickable #demon-add-creator-pen aria-hidden = "true" {} b {
-                                            " " (tr("demon-creators")) ":"
+                                            " " (tr("demon-creators"))
                                         }
                                         br;
                                         span #demon-creators {}
@@ -147,7 +147,7 @@ pub(super) fn submit_panel() -> Markup {
         section.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    (tr("demon-add-panel")) ":"
+                    (tr("demon-add-panel"))
                 }
             }
             a.blue.hover.button.js-scroll data-destination = "demon-submitter" data-reveal = "true" {
@@ -163,7 +163,7 @@ fn change_name_dialog() -> Markup {
             div.dialog #demon-name-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("demon-name-dialog")) ":"
+                    (tr("demon-name-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (tr("demon-name-dialog.info"))
@@ -172,7 +172,7 @@ fn change_name_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-name-edit {
-                        label for = "name" {(tr("demon-name-dialog.name-field")) ":"}
+                        label for = "name" {(tr("demon-name-dialog.name-field")) }
                         input name = "name" type = "text" required = "";
                         p.error {}
                     }
@@ -189,7 +189,7 @@ fn change_requirement_dialog() -> Markup {
             div.dialog #demon-requirement-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("demon-requirement-dialog")) ":"
+                    (tr("demon-requirement-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (tr("demon-requirement-dialog.info"))
@@ -198,7 +198,7 @@ fn change_requirement_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-requirement-edit {
-                        label for = "requirement" {(tr("demon-requirement-dialog.requirement-field")) ":"}
+                        label for = "requirement" {(tr("demon-requirement-dialog.requirement-field")) }
                         input name = "requirement" type = "number" min = "0" max="100" required = "";
                         p.error {}
                     }
@@ -215,7 +215,7 @@ fn change_position_dialog() -> Markup {
             div.dialog #demon-position-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("demon-position-dialog")) ":"
+                    (tr("demon-position-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (tr("demon-position-dialog.info"))
@@ -224,7 +224,7 @@ fn change_position_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-position-edit {
-                        label for = "position" {(tr("demon-position-dialog.position-field")) ":"}
+                        label for = "position" {(tr("demon-position-dialog.position-field")) }
                         input name = "position" type = "number" min = "1" required = "";
                         p.error {}
                     }
@@ -241,7 +241,7 @@ fn change_video_dialog() -> Markup {
             div.dialog #demon-video-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("demon-video-dialog")) ":"
+                    (tr("demon-video-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (tr("demon-video-dialog.info"))
@@ -250,7 +250,7 @@ fn change_video_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-video-edit {
-                        label for = "video" {(tr("demon-video-dialog.video-field")) ":"}
+                        label for = "video" {(tr("demon-video-dialog.video-field")) }
                         input name = "video" type = "url";
                         p.error {}
                     }
@@ -267,7 +267,7 @@ fn change_thumbnail_dialog() -> Markup {
             div.dialog #demon-thumbnail-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("demon-thumbnail-dialog")) ":"
+                    (tr("demon-thumbnail-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (PreEscaped(trp!(
@@ -282,7 +282,7 @@ fn change_thumbnail_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #demon-thumbnail-edit {
-                        label for = "thumbnail" {(tr("demon-thumbnail-dialog.thumbnail-field")) ":"}
+                        label for = "thumbnail" {(tr("demon-thumbnail-dialog.thumbnail-field")) }
                         input required="" name = "thumbnail" type = "url";
                         p.error {}
                     }
@@ -297,7 +297,7 @@ fn change_verifier_dialog() -> Markup {
     player_selection_dialog(
         "demon-verifier-dialog",
         "demon-verifier-edit",
-        &(tr("demon-verifier-dialog") + ":"),
+        &tr("demon-verifier-dialog"),
         &tr("demon-verifier-dialog.info"),
         &tr("demon-verifier-dialog.submit"),
         "verifier",
@@ -308,7 +308,7 @@ fn change_publisher_dialog() -> Markup {
     player_selection_dialog(
         "demon-publisher-dialog",
         "demon-publisher-edit",
-        &(tr("demon-publisher-dialog") + ":"),
+        &tr("demon-publisher-dialog"),
         &tr("demon-publisher-dialog.info"),
         &tr("demon-publisher-dialog.submit"),
         "publisher",
@@ -319,7 +319,7 @@ fn add_creator_dialog() -> Markup {
     player_selection_dialog(
         "demon-add-creator-dialog",
         "demon-creator-add",
-        &(tr("demon-creator-dialog") + ":"),
+        &tr("demon-creator-dialog"),
         &tr("demon-creator-dialog.info"),
         &tr("demon-creator-dialog.submit"),
         "creator",
@@ -333,53 +333,53 @@ fn demon_submitter() -> Markup {
             div.flex {
                 form #demon-submission-form novalidate = "" {
                     div.underlined {
-                        h2 {(tr("demon-add-form")) ":"}
+                        h2 {(tr("demon-add-form")) }
                     }
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input.flex.col #demon-add-name {
                         label for = "name" {
-                            (tr("demon-add-form.name-field")) ":"
+                            (tr("demon-add-form.name-field"))
                         }
                         input type = "text" name = "name" required="";
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-level-id {
                         label for = "level_id" {
-                            (tr("demon-add-form.levelid-field")) ":"
+                            (tr("demon-add-form.levelid-field"))
                         }
                         input type = "number" name = "level_id" min = "1";
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-position {
                         label for = "position" {
-                            (tr("demon-add-form.position-field")) ":"
+                            (tr("demon-add-form.position-field"))
                         }
                         input type = "number" name = "position" required="" min="1";
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-requirement {
                         label for = "requirement" {
-                            (tr("demon-add-form.requirement-field")) ":"
+                            (tr("demon-add-form.requirement-field"))
                         }
                         input type = "number" name = "requirement" required="" min="0" max = "100";
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        label{(tr("demon-add-form.verifier-field")) ":"}
+                        label{(tr("demon-add-form.verifier-field")) }
                         br;
                         (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name", "verifier"))
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        label {(tr("demon-add-form.publisher-field")) ":"}
+                        label {(tr("demon-add-form.publisher-field")) }
                         br;
                         (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher"))
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-video {
                         label for = "video" {
-                            (tr("demon-add-form.video-field")) ":"
+                            (tr("demon-add-form.video-field"))
                         }
                         input type = "url" name = "video";
                         p.error {}
@@ -390,7 +390,7 @@ fn demon_submitter() -> Markup {
                         }
                         span #demon-add-creators {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("demon-add-form.submit")) ":";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("demon-add-form.submit")) ;
                 }
             }
         }

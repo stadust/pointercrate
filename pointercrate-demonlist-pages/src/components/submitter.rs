@@ -29,7 +29,7 @@ impl Render for RecordSubmitter<'_> {
                     p.info-red.output {}
                     p.info-green.output {}
                     h3 {
-                        (tr("record-submission.demon")) ":"
+                        (tr("record-submission.demon")) 
                     }
                     p {
                         (trp!("record-submission.demon-info", ("list-size", config::extended_list_size())))
@@ -39,7 +39,7 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     h3 {
-                        (tr("record-submission.holder")) ":"
+                        (tr("record-submission.holder")) 
                     }
                     p {
                         (tr("record-submission.holder-info"))
@@ -49,7 +49,7 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     h3 {
-                        (tr("record-submission.progress")) ":"
+                        (tr("record-submission.progress")) 
                     }
                     p {
                         (tr("record-submission.progress-info"))
@@ -59,13 +59,13 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     h3 {
-                        (tr("record-submission.video")) ":"
+                        (tr("record-submission.video")) 
                     }
                     p {
                         (tr("record-submission.video-info"))
                         br {}
 
-                        i { (tr("record-submission.note")) ":" }
+                        i { (tr("record-submission.note"))  }
                         (tr("record-submission.video-note"))
                     }
                     span.form-input.flex.col #id_video {
@@ -73,7 +73,7 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     h3 {
-                        (tr("record-submission.raw-footage")) ":"
+                        (tr("record-submission.raw-footage")) 
                     }
                     p {
                         (tr("record-submission.raw-footage-info-a"))
@@ -82,14 +82,14 @@ impl Render for RecordSubmitter<'_> {
                         (tr("record-submission.raw-footage-info-b"))
                     }
                     p {
-                        i {(tr("record-submission.note")) ":"} (tr("record-submission.raw-footage-note"))
+                        i {(tr("record-submission.note")) } (tr("record-submission.raw-footage-note"))
                     }
                     span.form-input.flex.col #submit-raw-footage {
                         input type = "url"  name = "raw_footage" required = "" placeholder = (tr("record-submission.raw-footage-placeholder")) {}
                         p.error {}
                     }
                     h3 {
-                        (tr("record-submission.notes")) ":"
+                        (tr("record-submission.notes")) 
                     }
                     p {
                         (tr("record-submission.notes-info"))

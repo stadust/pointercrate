@@ -9,13 +9,13 @@ demon-ngsong = Newgrounds Song
 
 demon-score = Demonlist score ({$percent}%)
 
-demon-video = Verification Video
-demon-thumbnail = Thumbnail
-demon-position = Position
-demon-requirement = Requirement
-demon-publisher = Publisher
-demon-verifier = Verifier
-demon-creators = Creators
+demon-video = Verification Video:
+demon-thumbnail = Thumbnail:
+demon-position = Position:
+demon-requirement = Requirement:
+demon-publisher = Publisher:
+demon-verifier = Verifier:
+demon-creators = Creators:
 
 ## Position history table
 movements = Position History
@@ -60,27 +60,27 @@ demon-add-panel = Add Demon
     .button = Add a demon!
 
 # Demon addition form
-demon-add-form = Add demon
-    .name-field = Demon name
-    .levelid-field = Geometry Dash Level ID
-    .position-field = Position
-    .requirement-field = Requirement
-    .verifier-field = Verifier
-    .publisher-field = Publisher
-    .video-field = Verification Video
-    .creators-field = Creators
+demon-add-form = Add Demon
+    .name-field = Demon name:
+    .levelid-field = Geometry Dash Level ID:
+    .position-field = Position:
+    .requirement-field = Requirement:
+    .verifier-field = Verifier:
+    .publisher-field = Publisher:
+    .video-field = Verification Video:
+    .creators-field = Creators:
 
     .submit = Add Demon
 
 # Demon viewer dialogs
 demon-video-dialog = Change verification video link
     .info = Change the verification video link for this record. Leave empty to remove the verification video.
-    .video-field = Video link
+    .video-field = Video link:
     .submit = Edit
 
 demon-name-dialog = Change demon name
     .info = Change the name of this demon. Multiple demons with the same name ARE supported!
-    .name-field = Name
+    .name-field = Name:
     .submit = Edit
 
 # {$videoId} will be replaced by https://i.ytimg.com/vi/{.info-videoid}/mqdefault.jpg, italicized
@@ -89,17 +89,17 @@ demon-thumbnail-dialog = Change thumbnail link
     .info = Change the thumbnail link for this record. To link it to the thumbnail of a youtube video, set it to {$video-id}.
     .info-videoid = VIDEO_ID
 
-    .thumbnail-field = Thumbnail link
+    .thumbnail-field = Thumbnail link:
     .submit = Edit
 
 demon-position-dialog = Change demon position
     .info = Change the position of this demon. Has be be greater than 0 and be at most the current list size.
-    .position-field = Position
+    .position-field = Position:
     .submit = Edit
 
 demon-requirement-dialog = Change demon requirement
     .info = Change the record requirement for this demon. Has be lie between 0 and and 100 (inclusive).
-    .requirement-field = Requirement
+    .requirement-field = Requirement:
     .submit = Edit
 
 demon-publisher-dialog = Change demon publisher

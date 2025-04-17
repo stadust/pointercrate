@@ -74,7 +74,7 @@ impl AccountPageTab for PlayersPage {
                                 div.stats-container.flex.space {
                                     span {
                                         b {
-                                            (tr("player-banned")) ":"
+                                            (tr("player-banned")) 
                                         }
                                         br;
                                         div.dropdown-menu.js-search #edit-player-banned style = "max-width: 50px" {
@@ -91,7 +91,7 @@ impl AccountPageTab for PlayersPage {
                                     }
                                     span {
                                         b {
-                                            (tr("player-nationality")) ":"
+                                            (tr("player-nationality")) 
                                         }
                                         br;
                                         p {
@@ -103,7 +103,7 @@ impl AccountPageTab for PlayersPage {
                                             }
                                             div.menu {
                                                 ul {
-                                                    li.white.hover.underlined data-value = "None" {(tr("player-nationality.none")) ":"}
+                                                    li.white.hover.underlined data-value = "None" {(tr("player-nationality.none")) }
                                                     @for nation in nationalities {
                                                         li.white.hover data-value = {(nation.iso_country_code)} data-display = {(nation.nation)} {
                                                             span class = "flag-icon" style={"background-image: url(/static/demonlist/images/flags/" (nation.iso_country_code.to_lowercase()) ".svg"} {}
@@ -121,7 +121,7 @@ impl AccountPageTab for PlayersPage {
                                 div.stats-container.flex.space {
                                     span {
                                         b {
-                                            (tr("player-subdivision")) ":"
+                                            (tr("player-subdivision")) 
                                         }
                                         br;
                                         div.dropdown-menu.js-search #edit-player-subdivision data-default = "None" {
@@ -130,13 +130,13 @@ impl AccountPageTab for PlayersPage {
                                             }
                                             div.menu {
                                                 ul {
-                                                    li.white.hover.underlined data-value = "None" {(tr("player-subdivision.none")) ":"}
+                                                    li.white.hover.underlined data-value = "None" {(tr("player-subdivision.none")) }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                span.button.blue.hover #player-list-records style = "margin: 15px auto 0px" {(tr("player-viewer.records-redirect")) ":"};
+                                span.button.blue.hover #player-list-records style = "margin: 15px auto 0px" {(tr("player-viewer.records-redirect")) };
                             }
                         }
                     }
@@ -163,7 +163,7 @@ fn player_selector() -> Markup {
             form.flex.col #player-search-by-player-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #search-player-id {
-                    label for = "id" {(tr("player-idsearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("player-idsearch-panel.id-field")) }
                     input required = "" type = "number" name = "id" min = "0" style="width:93%";
                     p.error {}
                 }
@@ -179,7 +179,7 @@ fn change_name_dialog() -> Markup {
             div.dialog #player-name-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("player-name-dialog")) ":"
+                    (tr("player-name-dialog")) 
                 }
                 p style = "max-width: 400px"{
                     (tr("player-name-dialog.info"))
@@ -188,7 +188,7 @@ fn change_name_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #player-name-edit {
-                        label for = "name" {(tr("player-name-dialog.name-field")) ":"}
+                        label for = "name" {(tr("player-name-dialog.name-field")) }
                         input name = "name" type = "text" required = "";
                         p.error {}
                     }

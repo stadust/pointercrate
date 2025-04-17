@@ -127,7 +127,7 @@ fn record_manager(demons: &[Demon]) -> Markup {
                         div.stats-container.flex.space  {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " " (tr("record-videolink")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-video-pen aria-hidden = "true" {} " " (tr("record-videolink"))
                                 }
                                 br;
                                 a.link #record-video-link target = "_blank" {}
@@ -135,7 +135,7 @@ fn record_manager(demons: &[Demon]) -> Markup {
                         }
                         div.stats-container.flex.space {
                             span {
-                                b { (tr("record-rawfootage")) ":" }
+                                b { (tr("record-rawfootage"))  }
                                 br;
                                 a.link #record-raw-footage-link target = "_blank" {}
                             }
@@ -143,14 +143,14 @@ fn record_manager(demons: &[Demon]) -> Markup {
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " " (tr("record-demon")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-demon-pen aria-hidden = "true" {} " " (tr("record-demon"))
                                 }
                                 br;
                                 span #record-demon {}
                             }
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " " (tr("record-holder")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-holder-pen aria-hidden = "true" {} " " (tr("record-holder"))
                                 }
                                 br;
                                 span #record-holder {}
@@ -159,14 +159,14 @@ fn record_manager(demons: &[Demon]) -> Markup {
                         div.stats-container.flex.space {
                             span {
                                 b {
-                                    i.fa.fa-pencil-alt.clickable #record-progress-pen aria-hidden = "true" {} " " (tr("record-progress")) ":"
+                                    i.fa.fa-pencil-alt.clickable #record-progress-pen aria-hidden = "true" {} " " (tr("record-progress"))
                                 }
                                 br;
                                 span #record-progress {}
                             }
                             span {
                                 b {
-                                    (tr("record-submitter")) ":"
+                                    (tr("record-submitter"))
                                 }
                                 br;
                                 span #record-submitter {}
@@ -263,7 +263,7 @@ fn player_selector() -> Markup {
             form.flex.col.underlined.pad #record-filter-by-player-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #record-player-id {
-                    label for = "id" {(tr("record-playersearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("record-playersearch-panel.id-field")) }
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
                 }
@@ -272,7 +272,7 @@ fn player_selector() -> Markup {
             form.flex.col #record-filter-by-player-name-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #record-player-name {
-                    label for = "name" {(tr("record-playersearch-panel.name-field")) ":"}
+                    label for = "name" {(tr("record-playersearch-panel.name-field")) }
                     input required = "" type = "text" name = "name";
                     p.error {}
                 }
@@ -294,7 +294,7 @@ fn record_selector() -> Markup {
             form.flex.col #record-search-by-record-id-form novalidate = "" {
                 p.info-red.output {}
                 span.form-input #record-record-id {
-                    label for = "id" {(tr("record-idsearch-panel.id-field")) ":"}
+                    label for = "id" {(tr("record-idsearch-panel.id-field")) }
                     input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                     p.error {}
                 }
@@ -314,7 +314,7 @@ fn note_adder() -> Markup {
                 }
                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                     b {
-                        (tr("record-note.public-checkbox")) ":"
+                        (tr("record-note.public-checkbox"))
                     }
                     input #add-note-is-public-checkbox type = "checkbox" name = "is_public";
                     span.checkmark {}
@@ -332,7 +332,7 @@ fn change_progress_dialog() -> Markup {
             div.dialog #record-progress-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("record-progress-dialog")) ":"
+                    (tr("record-progress-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (tr("record-progress-dialog.info"))
@@ -341,7 +341,7 @@ fn change_progress_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #record-progress-edit {
-                        label for = "progress" {(tr("record-progress-dialog.progress-field")) ":"}
+                        label for = "progress" {(tr("record-progress-dialog.progress-field")) }
                         input name = "progress" type = "number" min = "0" max="100" required = "";
                         p.error {}
                     }
@@ -358,7 +358,7 @@ fn change_video_dialog() -> Markup {
             div.dialog #record-video-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("record-videolink-dialog")) ":"
+                    (tr("record-videolink-dialog"))
                 }
                 p style = "max-width: 400px"{
                     (tr("record-videolink-dialog.info"))
@@ -367,7 +367,7 @@ fn change_video_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #record-video-edit {
-                        label for = "video" {(tr("record-videolink-dialog.videolink-field")) ":"}
+                        label for = "video" {(tr("record-videolink-dialog.videolink-field")) }
                         input name = "video" type = "url";
                         p.error {}
                     }
@@ -382,7 +382,7 @@ fn change_holder_dialog() -> Markup {
     player_selection_dialog(
         "record-holder-dialog",
         "_edit-holder-record",
-        &(tr("record-holder-dialog") + ":"),
+        &tr("record-holder-dialog"),
         &tr("record-holder-dialog.info"),
         &tr("record-holder-dialog.submit"),
         "player",
@@ -395,7 +395,7 @@ fn change_demon_dialog(demons: &[Demon]) -> Markup {
             div.dialog #record-demon-dialog style="overflow: initial;" {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("record-demon-dialog")) ":"
+                    (tr("record-demon-dialog"))
                 }
                 div.flex.col {
                     p {

@@ -68,21 +68,21 @@ impl AccountPageTab for UsersTab {
                             div.stats-container.flex.space {
                                 span {
                                     b {
-                                        (tr("user-username")) ":"
+                                        (tr("user-username")) 
                                     }
                                     br;
                                     span #user-user-name {}
                                 }
                                 span {
                                     b {
-                                        (tr("user-displayname")) ":"
+                                        (tr("user-displayname")) 
                                     }
                                     br;
                                     span #user-display-name {}
                                 }
                                 span {
                                     b {
-                                        (tr("user-id")) ":"
+                                        (tr("user-id")) 
                                     }
                                     br;
                                     span #user-user-id {}
@@ -95,7 +95,7 @@ impl AccountPageTab for UsersTab {
                                 @if !assignable_permissions.is_empty() {
                                     div.stats-container.flex.space.col style = "align-items: center" {
                                         b {
-                                            (tr("user-permissions")) ":"
+                                            (tr("user-permissions")) 
                                         }
                                         @for permission in assignable_permissions {
                                             @let permission_name = tr(permission.text_id());
@@ -133,7 +133,7 @@ impl AccountPageTab for UsersTab {
                     form.flex.col.pad #find-id-form novalidate = "" {
                         p.info-red.output {}
                         span.form-input #find-id {
-                            label for = "id" {(tr("user-idsearch-panel.id-field")) ":"}
+                            label for = "id" {(tr("user-idsearch-panel.id-field")) }
                             input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                             p.error {}
                         }

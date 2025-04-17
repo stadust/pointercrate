@@ -35,12 +35,12 @@ fn login_page_body() -> Markup {
                     form.flex.col #login-form novalidate = "" {
                         p.info-red.output {}
                         span.form-input #login-username {
-                            label for = "username" {(tr("auth-username")) ":"}
+                            label for = "username" {(tr("auth-username")) }
                             input required = "" type = "text" name = "username" minlength = "3";
                             p.error {}
                         }
                         span.form-input #login-password {
-                            label for = "password" {(tr("auth-password")) ":"}
+                            label for = "password" {(tr("auth-password")) }
                             input required = "" type = "password" name = "password" minlength = "10";
                             p.error {}
                         }
@@ -64,17 +64,17 @@ fn login_page_body() -> Markup {
                         form.flex.col #register-form novalidate = "" {
                             p.info-red.output {}
                             span.form-input #register-username {
-                                label for = "name" {(tr("auth-username")) ":"}
+                                label for = "name" {(tr("auth-username")) }
                                 input required = "" type = "text" name = "name";
                                 p.error {}
                             }
                             span.form-input #register-password {
-                                label for = "password" {(tr("auth-password")) ":"}
+                                label for = "password" {(tr("auth-password")) }
                                 input required = "" type = "password" name = "password" minlength = "10";
                                 p.error {}
                             }
                             span.form-input #register-password-repeat {
-                                label for = "password2" {(tr("auth-repeatpassword")) ":"}
+                                label for = "password2" {(tr("auth-repeatpassword")) }
                                 input required = "" type = "password" name = "password2" minlength = "10";
                                 p.error {}
                             }

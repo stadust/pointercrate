@@ -1,8 +1,8 @@
-user-username = Username
-user-displayname = Display Name
-user-id = User ID
+user-username = Username:
+user-displayname = Display Name:
+user-id = User ID:
 
-user-permissions = Permissions
+user-permissions = Permissions:
     .moderator = Moderator
     .administrator = Administrator
 
@@ -11,9 +11,9 @@ user-permissions = Permissions
     .list-administrator = List Administrator
 
 ## Auth input fields
-auth-username = Username
-auth-password = Password
-auth-repeatpassword = Repeat Password
+auth-username = Username:
+auth-password = Password:
+auth-repeatpassword = Repeat Password:
 
 ## Login/registration forms
 #
@@ -43,7 +43,7 @@ user-viewer = Pointercrate Account Manager
 
 user-idsearch-panel = Find users
     .info = Users can be uniquely identified by name and ID. To modify a user's account, you need their ID. If you know neither, try looking in the list below
-    .id-field = User ID
+    .id-field = User ID:
     .submit = Find by ID
 
 ## Profile tab
@@ -57,14 +57,14 @@ profile-display-name = Display name
     .info = If set, this name will be displayed instead of your username. Display names aren't unique and you cannot use your display name to login to your pointercrate account.
 
     .dialog-header = Edit Display Name
-    .dialog-newname = New display name
+    .dialog-newname = New display name:
     .dialog-submit = Edit
 
 profile-youtube = YouTube channel
     .info = A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it.
 
     .dialog-header = Edit YouTube Channel Link
-    .dialog-newlink = New YouTube link
+    .dialog-newlink = New YouTube link:
     .dialog-submit = Edit
 
 profile-permissions = Permissions
@@ -79,9 +79,9 @@ profile-change-password = Change Password
     .dialog-header = Change Password
     .dialog-info = To make profile related edits, re-entering your password below is required. Changing your password will log you out and redirect to the login page. It will further invalidate all access tokens to your account.
 
-    .dialog-newpassword = New password
-    .dialog-repeatnewpassword = Repeat new password
-    .dialog-authenticate = Authenticate
+    .dialog-newpassword = New password:
+    .dialog-repeatnewpassword = Repeat new password:
+    .dialog-authenticate = Authenticate:
 
     .dialog-submit = Edit
 

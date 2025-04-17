@@ -36,23 +36,23 @@ record-status-filter-all = All
 
 record-idsearch-panel = Search record by ID
     .info = Records can be uniquely identified by ID. Entering a record's ID below will select it on the left (provided the record exists)
-    .id-field = Record ID
+    .id-field = Record ID:
     .submit = Find by ID
 
 record-playersearch-panel = Filter by player
     .info = Players can be uniquely identified by name and ID. Entering either in the appropriate place below will filter the view on the left. Reset by clicking "Find ..." when the text field is empty.
 
-    .id-field = Player ID
+    .id-field = Player ID:
     .id-submit = Find by ID
 
-    .name-field = Player name
+    .name-field = Player name:
     .name-submit = Find by name
 
 # Record viewer dialogs
 record-videolink-dialog = Change video link
     .info = Change the video link for this record. Note that as a list mod, you can leave the text field empty to remove the video from this record.
 
-    .videolink-field = Video link
+    .videolink-field = Video link:
     .submit = Edit
 
 record-demon-dialog = Change record demon
@@ -65,7 +65,7 @@ record-holder-dialog = Change record holder
 record-progress-dialog = Change record progress
     .info = Change the progress value of this record. Has to be between the demon's record requirement and 100 (inclusive).
 
-    .progress-field = Progress
+    .progress-field = Progress:
     .submit = Edit
 
 # The giant information box below the record manager, split

@@ -99,7 +99,7 @@ impl AccountPageTab for ListIntegrationTab {
                                 p.info-green.output style = "margin: 10px 0" {}
                                 div.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        (tr("claim-geolocate")) ":"
+                                        (tr("claim-geolocate")) 
                                     }
                                     a.button.blue.hover #claims-geolocate-nationality {
                                         (tr("claim-geolocate.submit"))
@@ -110,7 +110,7 @@ impl AccountPageTab for ListIntegrationTab {
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        (tr("claim-lock-submissions")) ":"
+                                        (tr("claim-lock-submissions")) 
                                     }
                                     @if claim.lock_submissions {
                                         input #lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
@@ -121,7 +121,7 @@ impl AccountPageTab for ListIntegrationTab {
                                     span.checkmark {}
                                 }
                                 p {
-                                    (tr("claim-lock-submissions.info")) ":"
+                                    (tr("claim-lock-submissions.info")) 
                                 }
                             }
                         }

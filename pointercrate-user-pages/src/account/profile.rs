@@ -122,7 +122,7 @@ impl AccountPageTab for ProfileTab {
                         (tr("profile-get-token.info"))
                     }
                     div.overlined.pad #token-area style = "display: none" {
-                        b {(tr("profile-get-token.view-header")) ":"}
+                        b {(tr("profile-get-token.view-header")) }
                         textarea #access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                     }
                     form.flex.col #get-token-form novalidate = "" {
@@ -159,13 +159,13 @@ fn edit_display_name_dialog() -> Markup {
             div.dialog #edit-dn-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-display-name.dialog-header")) ":"
+                    (tr("profile-display-name.dialog-header")) 
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-dn {
-                        label for = "display_name" {(tr("profile-display-name.dialog-newname")) ":"}
+                        label for = "display_name" {(tr("profile-display-name.dialog-newname")) }
                         input type = "text" name = "display_name";
                         p.error {}
                     }
@@ -182,13 +182,13 @@ fn edit_youtube_link_dialog() -> Markup {
             div.dialog #edit-yt-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-youtube.dialog-header")) ":"
+                    (tr("profile-youtube.dialog-header")) 
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-yt {
-                        label for = "youtube_channel" {(tr("profile-youtube.dialog-newlink")) ":"}
+                        label for = "youtube_channel" {(tr("profile-youtube.dialog-newlink")) }
                         input type = "url" name = "youtube_channel";
                         p.error {}
                     }
@@ -205,7 +205,7 @@ fn change_password_dialog() -> Markup {
             div.dialog #edit-pw-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-change-password.dialog-header")) ":"
+                    (tr("profile-change-password.dialog-header")) 
                 }
                 p {
                     (tr("profile-change-password.dialog-info"))
@@ -214,17 +214,17 @@ fn change_password_dialog() -> Markup {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-pw {
-                        label for = "password" {(tr("profile-change-password.dialog-newpassword")) ":"}
+                        label for = "password" {(tr("profile-change-password.dialog-newpassword")) }
                         input type = "password" name = "password" minlength = "10";
                         p.error {}
                     }
                     span.form-input #edit-pw-repeat {
-                        label for = "password2" {(tr("profile-change-password.dialog-repeatnewpassword")) ":"}
+                        label for = "password2" {(tr("profile-change-password.dialog-repeatnewpassword")) }
                         input type = "password"  minlength = "10";
                         p.error {}
                     }
                     span.overlined.pad.form-input #auth-pw {
-                        label {(tr("profile-change-password.dialog-authenticate")) ":"}
+                        label {(tr("profile-change-password.dialog-authenticate")) }
                         input type = "password" minlength = "10" required = "";
                         p.error {}
                     }
@@ -241,7 +241,7 @@ fn delete_account_dialog() -> Markup {
             div.dialog #delete-acc-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-delete-account.dialog-header")) ":"
+                    (tr("profile-delete-account.dialog-header")) 
                 }
                 p {
                     (tr("profile-delete-account.dialog-info"))
