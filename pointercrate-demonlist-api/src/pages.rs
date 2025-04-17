@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
-use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
+use pointercrate_core::{audit::AuditLogEntryType, localization::LANGUAGE, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
     preferences::ClientPreferences,
@@ -186,11 +186,14 @@ pub async fn stats_viewer(pool: &State<PointercratePool>, preferences: ClientPre
 pub async fn nation_stats_viewer(preferences: ClientPreferences) -> Page {
     let lang: &'static LanguageIdentifier = preferences.get("locale");
 
-    Page::new(
-        pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(),
-        lang,
-    )
-    .await
+    let page_fragment = LANGUAGE
+        .scope(lang, async {
+            pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer()
+        })
+        .await;
+
+    // we already rendered the page in the correct language
+    Page::new_ignorelang(page_fragment)
 }
 
 #[rocket::get("/statsviewer/heatmap.css")]
