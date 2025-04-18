@@ -12,8 +12,10 @@ time-machine = Time Machine
     .info = Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is January 4th 2017. Note however that data before August 4th 2017 is only provided on a best-effort basis and not guaranteed to be 100% accurate. Particularly data from before April 4th 2017 contains significant errors!
 
     .destination-field = Destination:
-
     .submit = Go!
+
+    .active-info = You are currently looking at the demonlist how it was on
+    .return = Go to present
 
 ## Sidebar panels
 editors-panel = List Editors
