@@ -24,4 +24,4 @@ reqwest = {version = "0.12.*", features = ["json"]}
 chrono = "0.4.40"
 serde = "1.0.219"
 governor = "0.8.1"
-rand = "0.9.0"
+rand = "0.9.1"
