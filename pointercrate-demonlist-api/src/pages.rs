@@ -91,6 +91,7 @@ pub async fn overview(
             submitter_initially_visible: submitter.unwrap_or(false),
         },
         lang,
+        vec![],
     )
     .await)
 }
@@ -163,6 +164,7 @@ pub async fn demon_page(
             data: full_demon,
         },
         lang,
+        vec![],
     )
     .await)
 }
@@ -178,6 +180,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>, preferences: ClientPre
             nationalities_in_use: Nationality::used(&mut *connection).await?,
         },
         lang,
+        vec![],
     )
     .await)
 }
@@ -193,7 +196,7 @@ pub async fn nation_stats_viewer(preferences: ClientPreferences) -> Page {
         .await;
 
     // we already rendered the page in the correct language
-    Page::new_ignorelang(page_fragment)
+    Page::new_ignorelang(page_fragment, vec![])
 }
 
 #[rocket::get("/statsviewer/heatmap.css")]

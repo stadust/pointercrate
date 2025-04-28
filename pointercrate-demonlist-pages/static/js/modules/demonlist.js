@@ -17,6 +17,7 @@ import {
   setupEditorDialog,
   get,
 } from "/static/core/js/modules/form.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export function embedVideo(video) {
   if (!video) return;
@@ -277,10 +278,15 @@ export function generateDemon(demon) {
 
   li.appendChild(b);
   li.appendChild(
-    document.createTextNode(demon.name + " (ID: " + demon.id + ")")
+    document.createTextNode(trp("demon-listed", {
+      ["demon"]: demon.name,
+      ["demon-id"]: demon.id.toString(),
+    }))
   );
   li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode("by " + demon.publisher.name));
+  li.appendChild(document.createTextNode(trp("demon-listed.publisher", {
+    ["publisher"]: demon.publisher.name,
+  })));
 
   return li;
 }

@@ -21,6 +21,7 @@ import {
   setupEditorDialog,
   FormDialog,
 } from "/static/core/js/modules/form.js";
+import { loadResource, tr } from "/static/core/js/modules/localization.js";
 
 export let demonManager;
 
@@ -67,8 +68,8 @@ export class DemonManager extends FilteredPaginator {
 
     thumbnailForm.addValidators({
       "demon-thumbnail-edit": {
-        "Please enter a valid URL": typeMismatch,
-        "Please enter a URL": valueMissing,
+        [tr("demon-thumbnail.validator-typemismatch")]: typeMismatch,
+        [tr("demon-thumbnail.validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -85,11 +86,11 @@ export class DemonManager extends FilteredPaginator {
 
     requirementForm.addValidators({
       "demon-requirement-edit": {
-        "Record requirement cannot be negative": rangeUnderflow,
-        "Record requirement cannot be larger than 100%": rangeOverflow,
-        "Record requirement must be a valid integer": badInput,
-        "Record requirement mustn't be a decimal": stepMismatch,
-        "Please enter a requirement value": valueMissing,
+        [tr("demon-requirement.validator-underflow")]: rangeUnderflow,
+        [tr("demon-requirement.validator-rangeoverflow")]: rangeOverflow,
+        [tr("demon-requirement.validator-badinput")]: badInput,
+        [tr("demon-requirement.validator-stepmismatch")]: stepMismatch,
+        [tr("demon-requirement.validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -104,10 +105,10 @@ export class DemonManager extends FilteredPaginator {
 
     positionForm.addValidators({
       "demon-position-edit": {
-        "Demon position must be at least 1": rangeUnderflow,
-        "Demon position must be a valid integer": badInput,
-        "Demon position mustn't be a decimal": stepMismatch,
-        "Please enter a position": valueMissing,
+        [tr("demon-position.validator-rangeunderflow")]: rangeUnderflow,
+        [tr("demon-position.validator-badinput")]: badInput,
+        [tr("demon-position.validator-stepmismatch")]: stepMismatch,
+        [tr("demon-position.validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -122,7 +123,7 @@ export class DemonManager extends FilteredPaginator {
 
     nameForm.addValidators({
       "demon-name-edit": {
-        "Please provide a name for the demon": valueMissing,
+        [tr("demon-name.validator-valuemissing")]: valueMissing,
       },
     });
     setupEditorDialog(
@@ -252,36 +253,43 @@ function createCreatorHtml(creator) {
 
 function setupDemonAdditionForm() {
   let form = new Form(document.getElementById("demon-submission-form"));
-
   form.addValidators({
-    "demon-add-name": { "Please specify a name": valueMissing },
+    "demon-add-name": { [tr("demon-name.validator-valuemissing")]: valueMissing },
     "demon-add-level-id": {
-      "Level ID must be positive": rangeUnderflow,
+      [tr("demon-id.validator-rangeunderflow")]: rangeUnderflow,
     },
     "demon-add-position": {
-      "Please specify a position": valueMissing,
-      "Demon position cannot be smaller than 1": rangeUnderflow,
-      "Demon position must be a valid integer": badInput,
-      "Demon position must be integer": stepMismatch,
+      [tr("demon-position.validator-valuemissing")]: valueMissing,
+      [tr("demon-position.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon-position.validator-badinput")]: badInput,
+      [tr("demon-position.validator-stepmismatch")]: stepMismatch,
     },
     "demon-add-requirement": {
-      "Please specify a requirement for record progress on this demon":
+      [tr("demon-requirement.validator-valuemissing")]:
         valueMissing,
-      "Record requirement cannot be smaller than 0%": rangeUnderflow,
-      "Record requirement cannot be greater than 100%": rangeOverflow,
-      "Record requirement must be a valid integer": badInput,
-      "Record requirement must be integer": stepMismatch,
+      [tr("demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon-requirement.validator-overflow")]: rangeOverflow,
+      [tr("demon-requirement.validator-badinput")]: badInput,
+      [tr("demon-requirement.validator-stepmismatch")]: stepMismatch,
     },
-    "demon-add-verifier": { "Please specify a verifier": valueMissing },
-    "demon-add-publisher": { "Please specify a publisher": valueMissing },
-    "demon-add-video": { "Please enter a valid URL": typeMismatch },
+    "demon-add-requirement": {
+      [tr("demon-requirement.validator-valuemissing")]:
+        valueMissing,
+      [tr("demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon-requirement.validator-rangeoverflow")]: rangeOverflow,
+      [tr("demon-requirement.validator-badinput")]: badInput,
+      [tr("demon-requirement.validator-stepmismatch")]: stepMismatch,
+    },
+    "demon-add-verifier": { [tr("demon-verifier.validator-valuemissing")]: valueMissing },
+    "demon-add-publisher": { [tr("demon-publisher.validator-valuemissing")]: valueMissing },
+    "demon-add-video": { [tr("demon-video.validator-typemismatch")]: typeMismatch },
   });
 
   form.creators = [];
 
   form.onSubmit(() => {
     let data = form.serialize();
-
+    
     data["creators"] = form.creators;
 
     post("/api/v2/demons/", {}, data)
@@ -297,59 +305,61 @@ function setupDemonAdditionForm() {
 }
 
 export function initialize() {
-  demonManager = new DemonManager();
-  demonManager.initialize();
+  loadResource("demon").then(() => {
+    demonManager = new DemonManager();
+    demonManager.initialize();
 
-  let addDemonForm = setupDemonAdditionForm();
+    let addDemonForm = setupDemonAdditionForm();
 
-  let creatorFormDialog = new FormDialog("demon-add-creator-dialog");
-  let dialogCreators = document.getElementById("demon-add-creators");
+    let creatorFormDialog = new FormDialog("demon-add-creator-dialog");
+    let dialogCreators = document.getElementById("demon-add-creators");
 
-  let button1 = document.getElementById("demon-add-creator-pen");
-  let button2 = document.getElementById("add-demon-add-creator-pen");
+    let button1 = document.getElementById("demon-add-creator-pen");
+    let button2 = document.getElementById("add-demon-add-creator-pen");
 
-  button1.addEventListener("click", () => {
-    creatorFormDialog.submissionPredicateFactory = (data) => {
-      return post(
-        "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
-        {},
-        data
-      )
-        .then((response) => {
-          let location = response.headers["location"];
+    button1.addEventListener("click", () => {
+      creatorFormDialog.submissionPredicateFactory = (data) => {
+        return post(
+          "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
+          {},
+          data
+        )
+          .then((response) => {
+            let location = response.headers["location"];
 
-          demonManager.addCreator({
-            name: data.creator,
-            id: location.substring(
-              location.lastIndexOf("/", location.length - 2) + 1,
-              location.length - 1
-            ),
+            demonManager.addCreator({
+              name: data.creator,
+              id: location.substring(
+                location.lastIndexOf("/", location.length - 2) + 1,
+                location.length - 1
+              ),
+            });
+
+            demonManager.output.setSuccess(tr("demon-creator-dialog.edit-success"));
+          })
+          .catch((response) => {
+            displayError(creatorFormDialog.form)(response);
+            throw response;
           });
-
-          demonManager.output.setSuccess("Successfully added creator");
-        })
-        .catch((response) => {
-          displayError(creatorFormDialog.form)(response);
-          throw response;
-        });
-    };
-    creatorFormDialog.open();
-  });
-
-  button2.addEventListener("click", () => {
-    creatorFormDialog.submissionPredicateFactory = (data) =>
-      new Promise((resolve) => resolve(data));
-    creatorFormDialog.open().then((data) => {
-      let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
-      creator.children[0].addEventListener("click", () => {
-        addDemonForm.creators.splice(
-          addDemonForm.creators.indexOf(data.creator),
-          1
-        );
-        dialogCreators.removeChild(creator);
-      });
-
-      addDemonForm.creators.push(data.creator);
+      };
+      creatorFormDialog.open();
     });
-  });
+
+    button2.addEventListener("click", () => {
+      creatorFormDialog.submissionPredicateFactory = (data) =>
+        new Promise((resolve) => resolve(data));
+      creatorFormDialog.open().then((data) => {
+        let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
+        creator.children[0].addEventListener("click", () => {
+          addDemonForm.creators.splice(
+            addDemonForm.creators.indexOf(data.creator),
+            1
+          );
+          dialogCreators.removeChild(creator);
+        });
+
+        addDemonForm.creators.push(data.creator);
+      });
+    });
+  })
 }

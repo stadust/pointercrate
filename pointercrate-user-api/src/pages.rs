@@ -30,7 +30,7 @@ use {
 pub async fn login_page(auth: Option<Auth<NonMutating>>, preferences: ClientPreferences) -> Result<Redirect, Page> {
     let lang: &'static LanguageIdentifier = preferences.get("locale");
 
-    let login_page = Page::new(pointercrate_user_pages::login::login_page(lang).await, lang).await;
+    let login_page = Page::new(pointercrate_user_pages::login::login_page(lang).await, lang, vec!["form"]).await;
 
     auth.map(|_| Redirect::to(rocket::uri!(account_page))).ok_or_else(|| login_page)
 }
@@ -113,7 +113,12 @@ pub async fn account_page(
     let lang: &'static LanguageIdentifier = preferences.get("locale");
 
     match auth {
-        Some(mut auth) => Ok(Page::new(tabs.account_page(lang, auth.user, permissions, &mut auth.connection).await, lang).await),
+        Some(mut auth) => Ok(Page::new(
+            tabs.account_page(lang, auth.user, permissions, &mut auth.connection).await,
+            lang,
+            vec!["form"],
+        )
+        .await),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }

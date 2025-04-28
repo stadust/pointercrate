@@ -1,21 +1,52 @@
 ## Demon information, including information fetched by dash-rs
+## Fields included in forms may have validators
+demon-name = Demon Name
+    .validator-valuemissing = Please specify a name
+
 demon-password = Level Password
+
 demon-id = Level ID
+    .validator-rangeunderflow = Level ID must be positive
+
 demon-length = Level Length
+
 demon-objects = Object Count
+
 demon-difficulty = In-Game Difficulty
+
 demon-gdversion = Created In
+
 demon-ngsong = Newgrounds Song
 
 demon-score = Demonlist score ({$percent}%)
 
-demon-video = Verification Video:
-demon-thumbnail = Thumbnail:
-demon-position = Position:
-demon-requirement = Requirement:
-demon-publisher = Publisher:
-demon-verifier = Verifier:
-demon-creators = Creators:
+demon-video = Verification Video
+    .validator-typemismatch = Please enter a valid URL
+
+demon-thumbnail = Thumbnail
+    .validator-typemismatch = Please enter a valid URL
+    .validator-valuemissing = Please enter a URL
+
+demon-position = Position
+    .validator-rangeunderflow = Demon position must be at least 1
+    .validator-badinput = Demon position must be a valid integer
+    .validator-stepmismatch = Demon position mustn't be a decimal
+    .validator-valuemissing = Please specify a position
+
+demon-requirement = Requirement
+    .validator-rangeunderflow = Record requirement cannot be negative
+    .validator-rangeoverflow = Record requirement cannot be larger than 100%
+    .validator-badinput = Record requirement must be a valid integer
+    .validator-stepmismatch = Record requirement mustn't be a decimal
+    .validator-valuemissing = Please specify a requirement value
+
+demon-publisher = Publisher
+    .validator-valuemissing = Please specify a publisher
+
+demon-verifier = Verifier
+    .validator-valuemissing = Please specify a verifier
+
+demon-creators = Creators
 
 ## Position history table
 movements = Position History
@@ -56,21 +87,33 @@ demon-listed = {$demon} (ID: {$demon-id})
 demon-viewer = Demon #
     .welcome = Click on a demon on the left to get started!
 
+    .video-field = { demon-video }:
+    .thumbnail-field = { demon-thumbnail }:
+    .position-field = { demon-position }:
+    .requirement-field = { demon-requirement }:
+    .publisher-field = { demon-publisher }:
+    .verifier-field = { demon-verifier }:
+    .creators-field = { demon-creators }:
+
 demon-add-panel = Add Demon
     .button = Add a demon!
 
 # Demon addition form
 demon-add-form = Add Demon
-    .name-field = Demon name:
+    .name-field = { demon-name }:
+    .name-validator-valuemissing = Please provide a name for the demon
+
     .levelid-field = Geometry Dash Level ID:
-    .position-field = Position:
-    .requirement-field = Requirement:
-    .verifier-field = Verifier:
-    .publisher-field = Publisher:
-    .video-field = Verification Video:
-    .creators-field = Creators:
+    .position-field = { demon-position }:
+    .requirement-field = { demon-requirement }:
+    .verifier-field = { demon-verifier }:
+    .publisher-field = { demon-publisher }:
+    .video-field = { demon-video }:
+    .creators-field = { demon-creators }:
 
     .submit = Add Demon
+
+    .edit-success = Successfully added demon!
 
 # Demon viewer dialogs
 demon-video-dialog = Change verification video link
@@ -113,3 +156,5 @@ demon-verifier-dialog = Change demon verifier
 demon-creator-dialog = Add creator
     .info = Type the creator to add to this demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.
     .submit = Add Creator
+
+    .edit-success = Successfully added creator!

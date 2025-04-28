@@ -64,7 +64,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-video-pen aria-hidden = "true" {} " " (tr("demon-video"))
+                                            i.fa.fa-pencil-alt.clickable #demon-video-pen aria-hidden = "true" {} " " (tr("demon-viewer.video-field"))
                                         }
                                         br;
                                         a.link #demon-video-link target = "_blank" {}
@@ -73,7 +73,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-thumbnail-pen aria-hidden = "true" {} " " (tr("demon-thumbnail"))
+                                            i.fa.fa-pencil-alt.clickable #demon-thumbnail-pen aria-hidden = "true" {} " " (tr("demon-viewer.thumbnail-field"))
                                         }
                                         br;
                                         a.link #demon-thumbnail-link target = "_blank" {}
@@ -82,14 +82,14 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-position-pen aria-hidden = "true" {} " " (tr("demon-position"))
+                                            i.fa.fa-pencil-alt.clickable #demon-position-pen aria-hidden = "true" {} " " (tr("demon-viewer.position-field"))
                                         }
                                         br;
                                         span #demon-position {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-requirement-pen aria-hidden = "true" {} " " (tr("demon-requirement"))
+                                            i.fa.fa-pencil-alt.clickable #demon-requirement-pen aria-hidden = "true" {} " " (tr("demon-viewer.requirement-field"))
                                         }
                                         br;
                                         span #demon-requirement {}
@@ -98,14 +98,14 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-publisher-pen aria-hidden = "true" {} " " (tr("demon-publisher"))
+                                            i.fa.fa-pencil-alt.clickable #demon-publisher-pen aria-hidden = "true" {} " " (tr("demon-viewer.publisher-field"))
                                         }
                                         br;
                                         span #demon-publisher {}
                                     }
                                     span{
                                         b {
-                                            i.fa.fa-pencil-alt.clickable #demon-verifier-pen aria-hidden = "true" {} " " (tr("demon-verifier"))
+                                            i.fa.fa-pencil-alt.clickable #demon-verifier-pen aria-hidden = "true" {} " " (tr("demon-viewer.verifier-field"))
                                         }
                                         br;
                                         span #demon-verifier {}
@@ -114,7 +114,7 @@ impl AccountPageTab for DemonsTab {
                                 div.stats-container.flex.space  {
                                     span{
                                         i.fa.fa-plus.clickable #demon-add-creator-pen aria-hidden = "true" {} b {
-                                            " " (tr("demon-creators"))
+                                            " " (tr("demon-viewer.creators-field"))
                                         }
                                         br;
                                         span #demon-creators {}
@@ -386,7 +386,7 @@ fn demon_submitter() -> Markup {
                     }
                     span {
                         i.fa.fa-plus.clickable #add-demon-add-creator-pen aria-hidden = "true" {} i {
-                            " " (tr("demon-add-form.creators-field")) ": "
+                            " " (tr("demon-add-form.creators-field"))
                         }
                         span #demon-add-creators {}
                     }

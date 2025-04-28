@@ -1,3 +1,5 @@
+import { tr } from "/static/core/js/modules/localization.js";
+
 /**
  * Class for those dropdown selectors we use throughout the website
  */
@@ -300,8 +302,8 @@ export function setupDropdownEditor(
     backend
       .edit(data)
       .then((was304) => {
-        if (was304) output.setSuccess("Nothing changed!");
-        else output.setSuccess("Edit successful!");
+        if (was304) output.setSuccess( tr("edit-notmodified") );
+        else output.setSuccess( tr("edit-success") );
       })
       .catch((response) => displayError(output)(response));
   });
@@ -401,9 +403,9 @@ export function setupEditorDialog(
       .edit(dataTransform(data))
       .then((was304) => {
         if (was304) {
-          output.setSuccess("Nothing changed");
+          output.setSuccess( tr("edit-notmodified") );
         } else {
-          output.setSuccess("Edit successful!");
+          output.setSuccess( tr("edit-success") );
         }
       })
       .catch((response) => {

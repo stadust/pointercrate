@@ -2,7 +2,7 @@ use crate::{
     etag::Tagged,
     preferences::{ClientPreferences, PreferenceManager},
 };
-use maud::{html, DOCTYPE};
+use maud::{html, PreEscaped, DOCTYPE};
 use pointercrate_core::{etag::Taggable, localization::LANGUAGE};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
@@ -19,15 +19,15 @@ use serde::Serialize;
 use std::{borrow::Cow, io::Cursor};
 use unic_langid::LanguageIdentifier;
 
-pub struct Page(PageFragment);
+pub struct Page(PageFragment, Vec<&'static str>);
 
 impl Page {
-    pub fn new_ignorelang(fragment: impl Into<PageFragment>) -> Self {
-        Page(fragment.into())
+    pub fn new_ignorelang(fragment: impl Into<PageFragment>, resources: Vec<&'static str>) -> Self {
+        Page(fragment.into(), resources)
     }
 
-    pub async fn new(fragment: impl Into<PageFragment>, lang: &'static LanguageIdentifier) -> Self {
-        LANGUAGE.scope(lang, async { Page(fragment.into()) }).await
+    pub async fn new(fragment: impl Into<PageFragment>, lang: &'static LanguageIdentifier, resources: Vec<&'static str>) -> Self {
+        LANGUAGE.scope(lang, async { Page(fragment.into(), resources) }).await
     }
 }
 
@@ -54,12 +54,26 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let fragment = self.0;
 
+        // there has to be a better way to do this..
+        // this loads an array of ftl resources this page requires, accessible
+        // by the frontend js
+        let mut resource_array_pushes = String::new();
+        self.1
+            .iter()
+            .for_each(|resource| resource_array_pushes += &format!(r#"window.ftlResources.push("{}");"#, resource));
+
         let rendered_fragment = html! {
             (DOCTYPE)
             html lang=(locale.iso_code) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)
+                    (PreEscaped(format!(r#"
+                    <script>
+                        window.ftlResources = [];
+                        {}
+                    </script>
+                    "#, resource_array_pushes)))
                 }
                 body {
                     div.content {
