@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 
 use pointercrate_core_pages::localization::LocalizationConfiguration;
-use rocket::{fs::NamedFile, http::ContentType, State};
+use rocket::{
+    fs::NamedFile,
+    http::{ContentType, Status},
+    State,
+};
 
 use crate::preferences::ClientPreferences;
 
@@ -13,15 +17,15 @@ use crate::preferences::ClientPreferences;
 // This allows us to abide by overrides specified in [`LocalizationConfiguration`].
 #[rocket::get("/ftl/<resource>/<uri..>")]
 pub async fn get_ftl(
-    localization_config: &State<LocalizationConfiguration>, preferences: ClientPreferences, resource: String, uri: PathBuf,
-) -> Option<(ContentType, NamedFile)> {
-    let segments: Vec<&str> = uri.components().filter_map(|component| component.as_os_str().to_str()).collect();
-    let locale_set = localization_config.set_by_uri(segments);
+    localization_config: &State<LocalizationConfiguration>, preferences: ClientPreferences, resource: &str, uri: PathBuf,
+) -> Result<(ContentType, NamedFile), Status> {
+    let locale_set = localization_config.set_by_uri(uri);
+
     let locale = locale_set.by_code(preferences.get::<String>(locale_set.cookie)).unwrap();
 
     let file = NamedFile::open(format!("locales/{}/{}.ftl", locale.iso_code, resource))
         .await
-        .ok()?;
+        .map_err(|_| Status::NotFound)?;
 
-    Some((ContentType::Plain, file))
+    Ok((ContentType::Plain, file))
 }

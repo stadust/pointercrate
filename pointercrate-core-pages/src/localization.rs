@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use maud::{html, Markup};
 
@@ -21,7 +21,7 @@ impl Locale {
 /// Withholds the site's core localization information
 pub struct LocalizationConfiguration {
     default: LocaleSet,
-    overrides: HashMap<Vec<&'static str>, LocaleSet>,
+    overrides: HashMap<PathBuf, LocaleSet>,
 }
 
 #[derive(Clone)]
@@ -93,24 +93,20 @@ impl LocalizationConfiguration {
 
     // Override the [`LocaleSet`] for a specific URI. The demon page may
     // support 5 languages, but your guidelines pages might only support 2
-    pub fn with_override(mut self, uri_segments: Vec<&'static str>, locale_set: LocaleSet) -> Self {
-        self.overrides.insert(uri_segments, locale_set);
+    pub fn with_override(mut self, uri: PathBuf, locale_set: LocaleSet) -> Self {
+        self.overrides.insert(uri, locale_set);
 
         self
     }
 
     // Retrieve a [`LocaleSet`] associated with a specific URI. If one
     // is not found, then the default [`LocaleSet`] is returned.
-    pub fn set_by_uri(&self, uri_segments: Vec<&str>) -> LocaleSet {
-        let mut locale_set: Option<LocaleSet> = None;
-
-        self.overrides.keys().for_each(|key| {
-            if key == &uri_segments[..key.len()].to_vec() {
-                locale_set = self.overrides.get(key).cloned();
-            }
-        });
-
-        locale_set.unwrap_or(self.default.clone())
+    pub fn set_by_uri(&self, uri: PathBuf) -> LocaleSet {
+        self.overrides
+            .iter()
+            .find(|(key, _)| key.components().zip(uri.components()).all(|(a, b)| a == b))
+            .map(|(_, locale_set)| locale_set.clone())
+            .unwrap_or(self.default.clone())
     }
 }
 
