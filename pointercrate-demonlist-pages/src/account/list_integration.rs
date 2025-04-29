@@ -99,18 +99,26 @@ impl AccountPageTab for ListIntegrationTab {
                                 p.info-green.output style = "margin: 10px 0" {}
                                 div.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        (tr("claim-geolocate")) 
+                                        (tr("claim-geolocate"))
                                     }
                                     a.button.blue.hover #claims-geolocate-nationality {
                                         (tr("claim-geolocate.submit"))
                                     }
                                 }
                                 p {
-                                    (PreEscaped(tr("claim-geolocate.info")))
+                                    (PreEscaped(trp!(
+                                        "claim-geolocate.info",
+                                        (
+                                            "info-api-link",
+                                            html! {
+                                                a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
+                                            }.into_string()
+                                        )
+                                    )))
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        (tr("claim-lock-submissions")) 
+                                        (tr("claim-lock-submissions"))
                                     }
                                     @if claim.lock_submissions {
                                         input #lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
@@ -121,7 +129,7 @@ impl AccountPageTab for ListIntegrationTab {
                                     span.checkmark {}
                                 }
                                 p {
-                                    (tr("claim-lock-submissions.info")) 
+                                    (tr("claim-lock-submissions.info"))
                                 }
                             }
                         }
@@ -134,7 +142,32 @@ impl AccountPageTab for ListIntegrationTab {
                                 (tr("claim-records"))
                             }
                             p {
-                                (PreEscaped(tr("claim-records.info")))
+                                (PreEscaped(trp!(
+                                    "claim-records.info",
+                                    (
+                                        "record-approved-styled",
+                                        html! {
+                                            span style = "background-color: #E9FAE3" { (tr("record-approved")) }
+                                        }.into_string()
+                                    ),(
+                                        "record-submitted-styled",
+                                        html! {
+                                            span style = "background-color: #F7F7E0" { (tr("record-submitted")) }
+                                        }.into_string()
+                                    ),
+                                    (
+                                        "record-rejected-styled",
+                                        html! {
+                                            span style = "background-color: #F8DCE4" { (tr("record-rejected")) }
+                                        }.into_string()
+                                    ),
+                                    (
+                                        "record-underconsideration-styled",
+                                        html! {
+                                            span style = "background-color: #D8EFF3" { (tr("record-underconsideration")) }
+                                        }.into_string()
+                                    )
+                                )))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
@@ -175,10 +208,13 @@ impl AccountPageTab for ListIntegrationTab {
                     p {
                         (tr("claim-info-panel.info-a"))
                         br;
-                        (PreEscaped(trp!("claim-info-panel.info-b",
+                        (PreEscaped(trp!(
+                            "claim-info-panel.info-b",
                             (
                                 "discord",
-                                format!("<a class=\"link\" href=\"{}\">{}</a>", &self.0, tr("claim-info-panel.info-discord"))
+                                html! {
+                                    a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
+                                }.into_string()
                             )
                         )))
                         br;

@@ -16,8 +16,8 @@ records = Records
 record-manager = Record Manager
     .all-option = All Demons
 
-record-listed = Record #{$record-id}
-    .progress = {$percent}% on {$demon}
+record-listed = Record #{ $record-id }
+    .progress = { $percent }% on { $demon }
 
 record-viewer = Record #
     .welcome = Click on a record on the left to get started!
@@ -76,22 +76,22 @@ record-progress-dialog = Change record progress
 # attributes
 #
 record-manager-help = Manage Records
-    .a = Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by status, player, etc.. Clicking the {record-status-filter-all} field at the top allows to filter by demon.
+    .a = Use the list on the left to select records for editing/viewing. Use the panel on the right to filter the record list by status, player, etc.. Clicking the { record-status-filter-all } field at the top allows to filter by demon.
 
-    .b = There are four possible record states a record can be in: { -record-rejected-styled }, { -record-approved-styled }, { -record-submitted-styled } and { -record-underconsideration-styled }. For simplicity of explanation we will assume that Bob is a player and Cataclysm is a demon he has a record on.
+    .b = There are four possible record states a record can be in: { record-rejected }, { record-approved }, { record-submitted } and { record-underconsideration }. For simplicity of explanation we will assume that Bob is a player and Cataclysm is a demon he has a record on.
 
-    .rejected = If the record is { -record-rejected-styled }, it means that Bob has no other record in other states on Cataclysm and no submissions for Bob on Cataclysm are possible. Conversely, this means if Bob has a record on Catalysm thats not rejected, we immediately know that no rejected record for Bob on Cataclysm exists.
+    .rejected = If the record is { record-rejected }, it means that Bob has no other record in other states on Cataclysm and no submissions for Bob on Cataclysm are possible. Conversely, this means if Bob has a record on Catalysm thats not rejected, we immediately know that no rejected record for Bob on Cataclysm exists.
     Rejecting any record of Bobs on Cataclysm will delete all other records of Bob on Cataclysm to ensure the above uniqueness.
 
-    .approved = If the record is { -record-approved-styled }, it means that no submissions with less progress than the { -record-approved-styled } record exist or are permitted.
-    Changing a record to { -record-approved-styled } will delete all submissions for Bob on Cataclysm with less progress.
+    .approved = If the record is { record-approved }, it means that no submissions with less progress than the { record-approved } record exist or are permitted.
+    Changing a record to { record-approved } will delete all submissions for Bob on Cataclysm with less progress.
 
-    .submitted = If the record is { -record-submitted-styled }, no further constraints on uniqueness are in place. This means that multiple submissions for Bob on Cataclysm are possible, as long as they provide different video links. However, due to the above, all duplicates are deleted as soon as one of the submissions is accepted or rejected.
+    .submitted = If the record is { record-submitted }, no further constraints on uniqueness are in place. This means that multiple submissions for Bob on Cataclysm are possible, as long as they provide different video links. However, due to the above, all duplicates are deleted as soon as one of the submissions is accepted or rejected.
 
-    .underconsideration = If the record is { -record-underconsideration-styled } it is conceptually still a submission. The only difference is, that no more submissions for Bob on Cataclysm are allowed now.
+    .underconsideration = If the record is { record-underconsideration } it is conceptually still a submission. The only difference is, that no more submissions for Bob on Cataclysm are allowed now.
 
     .note = Note
 
-    .note-a = If a player is banned, they cannot have { -record-approved-styled }/{ -record-submitted-styled } records on the list. All records marked as { -record-submitted-styled } are deleted, all others are changed to { -record-rejected-styled }.
+    .note-a = If a player is banned, they cannot have { record-approved }/{ record-submitted } records on the list. All records marked as { record-submitted } are deleted, all others are changed to { record-rejected }.
 
-    .note-b = Banning a submitter will delete all their submissions that still have the status { -record-submitted-styled }. Records submitted by them that were already { -record-approved-styled }/{ -record-rejected-styled } will not be affected.
+    .note-b = Banning a submitter will delete all their submissions that still have the status { record-submitted }. Records submitted by them that were already { record-approved }/{ record-rejected } will not be affected.

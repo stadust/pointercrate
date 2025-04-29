@@ -39,10 +39,10 @@ toggle-subdivision-panel = Show Subdivisions
 
     .option-toggle = Show political subdivisions
 
-# {$countries} will be replaced with .info-countries, which will be
+# { $countries } will be replaced with .info-countries, which will be
 # turned into a tooltip listing all of the selectable countries
 subdivision-panel = Political Subdivision
-    .info = For the {$countries} you can select a state/province from the dropdown below to focus the stats viewer to that state/province.
+    .info = For the { $countries } you can select a state/province from the dropdown below to focus the stats viewer to that state/province.
     .info-countries = following countries
 
     .option-none = None

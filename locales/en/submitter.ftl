@@ -10,7 +10,7 @@ record-submission-panel = Submit Records
 # .note will prefix all notes in the record submission panel
 # (not to be confused with record notes)
 #
-# {$guidelinesRedirect} will be replaced by .guidelines-redirect,
+# { $guidelines-link } will be replaced by .guidelines-link,
 # which is turned into a clickable link to the submission guidelines
 record-submission = Record Submission
     .note = Note
@@ -40,7 +40,8 @@ record-submission = Record Submission
     .notes-info = Provide any additional notes you'd like to pass on to the list moderator receiving your submission.
     .notes-placeholder = Your dreams and hopes for this record... or something like that
 
-    .guidelines = By submitting the record you acknowledge the { -redirect-guidelines(text: "submission guidelines") }.
+    .guidelines = By submitting the record you acknowledge the { $guidelines-link }.
+    .guidelines-link = submission guidelines
 
     .submit = Submit record
 

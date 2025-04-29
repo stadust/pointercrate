@@ -18,20 +18,22 @@ auth-repeatpassword = Repeat Password:
 ## Login/registration forms
 #
 # The .redirect-link attributes will be turned into
-# clickable link, which will replace {$redirect-link}
+# clickable link, which will replace { $redirect-link }
 # in the .redirect attributes
 #
 login = Sign In
     .info = Sign in using your username and password. Sign in attempts are limited to 3 per 30 minutes.
     .submit = Sign In
 
-    .redirect = Already have a pointercrate account? { -redirect-login(text: "Sign in") } instead.
+    .redirect = Already have a pointercrate account? { $redirect-link } instead.
+    .redirect-link = Sign in
 
 register = Sign Up
     .info = Create a new account. Please note that the username cannot be changed after account creation, so choose wisely!
     .submit = Sign Up
 
-    .redirect = Don't have a pointercrate account yet? { -redirect-register(text: "Sign up") } for one!
+    .redirect = Don't have a pointercrate account yet? { $redirect-link } for one!
+    .redirect-link = Sign up
 
 ## Users tab
 users = Users

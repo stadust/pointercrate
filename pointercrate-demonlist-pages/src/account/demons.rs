@@ -273,8 +273,12 @@ fn change_thumbnail_dialog() -> Markup {
                     (PreEscaped(trp!(
                         "demon-thumbnail-dialog.info",
                         (
-                            "videoId",
-                            format!("<i>https://i.ytimg.com/vi/{}/mqdefault.jpg</i>", tr("demon-thumbnail-dialog.info-videoid"))
+                            "video-id",
+                            html! {
+                                "https://i.ytimg.com/vi/"
+                                i { (tr("demon-thumbnail-dialog.info-videoid")) }
+                                "/mqdefault.jpg"
+                            }.into_string()
                         ),
                     )))
                 }

@@ -126,10 +126,10 @@ demon-name-dialog = Change demon name
     .name-field = Name:
     .submit = Edit
 
-# {$videoId} will be replaced by https://i.ytimg.com/vi/{.info-videoid}/mqdefault.jpg, italicized
+# { $video-id } will be replaced by https://i.ytimg.com/vi/{.info-videoid}/mqdefault.jpg but italicized
 # in english, this looks like https://i.ytimg.com/vi/VIDEO_ID/mqdefault.jpg
 demon-thumbnail-dialog = Change thumbnail link
-    .info = Change the thumbnail link for this record. To link it to the thumbnail of a youtube video, set it to {$video-id}.
+    .info = Change the thumbnail link for this record. To link it to the thumbnail of a youtube video, set it to { $video-id }.
     .info-videoid = VIDEO_ID
 
     .thumbnail-field = Thumbnail link:
