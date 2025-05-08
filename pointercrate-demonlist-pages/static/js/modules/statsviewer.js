@@ -191,17 +191,23 @@ export class StatsViewer extends FilteredPaginator {
    */
   sortStatsViewerRow(sortOption, data) {
     if (sortOption === "Alphabetical") {
-      data.sort((r1, r2) => 
-        r1.demon?.name.localeCompare(r2.demon?.name) || 
-        // for nation unbeaten section
-        r1.name.localeCompare(r2.name)
-      );
+      data.sort((r1, r2) => {
+        if (r1.demon) {
+          return r1.demon.name.localeCompare(r2.demon.name)
+        } else {
+          // nation unbeaten section does not have "demon" key
+          return r1.name.localeCompare(r2.name)
+        }
+      });
     } else if (sortOption === "Position") {
-      data.sort((r1, r2) => 
-        r1.demon?.position - r2.demon?.position || 
-        // for nation unbeaten section
-        r1.position - r2.position
-      );
+      data.sort((r1, r2) => {
+        if (r1.demon) {
+          return r1.demon.position - r2.demon.position
+        } else {
+          // nation unbeaten section does not have "demon" key
+          return r1.position - r2.position
+        }
+      });
     }
     return data;
   }
