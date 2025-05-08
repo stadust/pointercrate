@@ -152,7 +152,6 @@ class NationStatsViewer extends StatsViewer {
     );
 
     this.demonSortingModeDropdown.addEventListener((selected) => {
-      console.log(nationData)
       if (nationData.created.length > 0) {
         formatInto(this._created, this.sortStatsViewerRow(selected, nationData.created).map((creation) => {
           return this.makeTooltip(
