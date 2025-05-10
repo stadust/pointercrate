@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
+use pointercrate_core_macros::localized;
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
-use pointercrate_core::{audit::AuditLogEntryType, localization::LANGUAGE, pool::PointercratePool};
+use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
-    preferences::ClientPreferences,
     response::{Page, Response2},
 };
 use pointercrate_demonlist::{
@@ -25,20 +25,17 @@ use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::User;
 use rand::Rng;
 use rocket::{futures::StreamExt, http::CookieJar};
-use unic_langid::LanguageIdentifier;
 
 #[rocket::get("/?statsviewer=true")]
 pub fn stats_viewer_redirect() -> Redirect {
     Redirect::to(rocket::uri!(stats_viewer))
 }
 
+#[localized]
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, preferences: ClientPreferences, timemachine: Option<bool>, submitter: Option<bool>,
-    cookies: &CookieJar<'_>,
+    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
 ) -> Result<Page> {
-    let lang: &'static LanguageIdentifier = preferences.get("locale");
-
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
 
@@ -90,10 +87,8 @@ pub async fn overview(
             time_machine: tardis,
             submitter_initially_visible: submitter.unwrap_or(false),
         },
-        lang,
         vec![],
-    )
-    .await)
+    ))
 }
 
 #[rocket::get("/permalink/<demon_id>")]
@@ -105,12 +100,9 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
     Ok(Redirect::to(rocket::uri!("/demonlist", demon_page(position))))
 }
 
+#[localized]
 #[rocket::get("/<position>")]
-pub async fn demon_page(
-    preferences: ClientPreferences, position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>,
-) -> Result<Page> {
-    let lang: &'static LanguageIdentifier = preferences.get("locale");
-
+pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut *connection).await?;
@@ -163,42 +155,33 @@ pub async fn demon_page(
             integration: gd.load_level_for_demon(&full_demon.demon).await,
             data: full_demon,
         },
-        lang,
         vec![],
-    )
-    .await)
+    ))
 }
 
+#[localized]
 #[rocket::get("/statsviewer")]
-pub async fn stats_viewer(pool: &State<PointercratePool>, preferences: ClientPreferences) -> Result<Page> {
-    let lang: &'static LanguageIdentifier = preferences.get("locale");
-
+pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(
         IndividualStatsViewer {
             nationalities_in_use: Nationality::used(&mut *connection).await?,
         },
-        lang,
+        vec![],
+    ))
+}
+
+#[localized]
+#[rocket::get("/statsviewer/nations")]
+pub async fn nation_stats_viewer() -> Page {
+    Page::new(
+        pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(),
         vec![],
     )
-    .await)
 }
 
-#[rocket::get("/statsviewer/nations")]
-pub async fn nation_stats_viewer(preferences: ClientPreferences) -> Page {
-    let lang: &'static LanguageIdentifier = preferences.get("locale");
-
-    let page_fragment = LANGUAGE
-        .scope(lang, async {
-            pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer()
-        })
-        .await;
-
-    // we already rendered the page in the correct language
-    Page::new_ignorelang(page_fragment, vec![])
-}
-
+#[localized]
 #[rocket::get("/statsviewer/heatmap.css")]
 pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<String>> {
     let mut connection = pool.connection().await?;

@@ -9,6 +9,7 @@ edition.workspace = true
 [dependencies]
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
+pointercrate-core-macros = {path = "../pointercrate-core-macros"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}
@@ -19,5 +20,3 @@ url = "2.5.4"
 async-trait = "0.1.87"
 log = "0.4.26"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
-fluent = "0.16.1"
-fluent-templates = "0.13.0"

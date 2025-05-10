@@ -7,11 +7,13 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
+use pointercrate_core_macros::localized;
 use pointercrate_user::{auth::ApiToken, error::UserError, PatchUser, User, UserPagination, ADMINISTRATOR, MODERATOR};
 use rocket::{http::Status, serde::json::Json};
 
 use crate::auth::Auth;
 
+#[localized]
 #[rocket::get("/")]
 pub async fn paginate(mut auth: Auth<ApiToken>, data: Query<UserPagination>) -> Result<Response2<Json<Vec<User>>>> {
     let mut pagination = data.0;
@@ -36,6 +38,7 @@ pub async fn paginate(mut auth: Auth<ApiToken>, data: Query<UserPagination>) -> 
     Ok(pagination_response("/api/v1/users", pagination, &mut auth.connection).await?)
 }
 
+#[localized]
 #[rocket::get("/<user_id>")]
 pub async fn get_user(mut auth: Auth<ApiToken>, user_id: i32) -> Result<Tagged<User>> {
     let user = User::by_id(user_id, &mut auth.connection).await?;
@@ -53,6 +56,7 @@ pub async fn get_user(mut auth: Auth<ApiToken>, user_id: i32) -> Result<Tagged<U
     Ok(Tagged(user))
 }
 
+#[localized]
 #[rocket::patch("/<user_id>", data = "<patch>")]
 pub async fn patch_user(
     mut auth: Auth<ApiToken>, precondition: Precondition, user_id: i32, mut patch: Json<PatchUser>,
@@ -107,6 +111,7 @@ pub async fn patch_user(
     Ok(Tagged(user))
 }
 
+#[localized]
 #[rocket::delete("/<user_id>")]
 pub async fn delete_user(mut auth: Auth<ApiToken>, precondition: Precondition, user_id: i32) -> Result<Status> {
     auth.require_permission(ADMINISTRATOR)?;

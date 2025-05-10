@@ -1,25 +1,17 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{
-    localization::{tr, LANGUAGE},
-    trp,
-};
+use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
-use unic_langid::LanguageIdentifier;
 
-pub async fn login_page(lang: &'static LanguageIdentifier) -> PageFragment {
-    LANGUAGE
-        .scope(lang, async {
-            PageFragment::new(
-                "Pointercrate - Login",
-                "Log in to an existing pointercrate account or register for a new one!",
-            )
-            .module("/static/user/js/login.js")
-            .module("/static/core/js/modules/form.js")
-            .module("/static/core/js/modules/tab.js")
-            .stylesheet("/static/user/css/login.css")
-            .body(login_page_body())
-        })
-        .await
+pub async fn login_page() -> PageFragment {
+    PageFragment::new(
+        "Pointercrate - Login",
+        "Log in to an existing pointercrate account or register for a new one!",
+    )
+    .module("/static/user/js/login.js")
+    .module("/static/core/js/modules/form.js")
+    .module("/static/core/js/modules/tab.js")
+    .stylesheet("/static/user/css/login.css")
+    .body(login_page_body())
 }
 
 fn login_page_body() -> Markup {

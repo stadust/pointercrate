@@ -8,6 +8,7 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
+use pointercrate_core_macros::localized;
 use pointercrate_demonlist::{
     error::DemonlistError,
     nationality::Nationality,
@@ -23,6 +24,7 @@ use rocket::{http::Status, serde::json::Json, State};
 use serde::Deserialize;
 use std::net::IpAddr;
 
+#[localized]
 #[rocket::get("/")]
 pub async fn paginate(
     pool: &State<PointercratePool>, query: Query<PlayerPagination>, auth: Option<Auth<ApiToken>>,
@@ -40,11 +42,13 @@ pub async fn paginate(
     Ok(pagination_response("/api/v1/players/", pagination, &mut *pool.connection().await?).await?)
 }
 
+#[localized]
 #[rocket::get("/ranking")]
 pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPagination>) -> Result<Response2<Json<Vec<RankedPlayer>>>> {
     Ok(pagination_response("/api/v1/players/ranking/", query.0, &mut *pool.connection().await?).await?)
 }
 
+#[localized]
 #[rocket::get("/me")]
 pub async fn get_me(auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
     let Some(auth) = auth else {
@@ -63,6 +67,7 @@ pub async fn get_me(auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>
     Ok(Tagged(full_player))
 }
 
+#[localized]
 #[rocket::get("/<player_id>")]
 pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
     let mut connection = pool.connection().await?;
@@ -72,6 +77,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
     ))
 }
 
+#[localized]
 #[rocket::patch("/<player_id>", data = "<patch>")]
 pub async fn patch(
     player_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchPlayer>,
@@ -89,6 +95,7 @@ pub async fn patch(
     Ok(Tagged(player))
 }
 
+#[localized]
 #[rocket::put("/<player_id>/claims")]
 pub async fn put_claim(player_id: i32, mut auth: Auth<ApiToken>) -> Result<Response2<Json<PlayerClaim>>> {
     let user_id = auth.user.user().id;
@@ -105,6 +112,7 @@ pub async fn put_claim(player_id: i32, mut auth: Auth<ApiToken>) -> Result<Respo
 /// The `verified` attribute can only be changed by moderator. All other attributes can only be
 /// changed by the person holding the claim, but only if the claim is verified (to claim a different
 /// player, put in a new `PUT` request)
+#[localized]
 #[rocket::patch("/<player_id>/claims/<user_id>", data = "<data>")]
 pub async fn patch_claim(
     player_id: i32, user_id: i32, mut auth: Auth<ApiToken>, data: Json<PatchPlayerClaim>,
@@ -148,6 +156,7 @@ pub async fn patch_claim(
     Ok(Json(claim))
 }
 
+#[localized]
 #[rocket::delete("/<player_id>/claims/<user_id>")]
 pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     auth.require_permission(MODERATOR)?;
@@ -160,6 +169,7 @@ pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: Auth<ApiToken>
     Ok(Status::NoContent)
 }
 
+#[localized]
 #[rocket::get("/claims")]
 pub async fn paginate_claims(
     mut auth: Auth<ApiToken>, pagination: Query<PlayerClaimPagination>,
@@ -181,6 +191,7 @@ struct GeolocationResponse {
     region_iso_code: Option<String>,
 }
 
+#[localized]
 #[rocket::post("/<player_id>/geolocate")]
 pub async fn geolocate_nationality(
     player_id: i32, ip: IpAddr, mut auth: Auth<ApiToken>, ratelimits: &State<DemonlistRatelimits>,

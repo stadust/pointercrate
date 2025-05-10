@@ -12,6 +12,7 @@ maud = "0.27.0"
 pointercrate-core = { version = "0.1.0", path = "../pointercrate-core" }
 pointercrate-core-api = { version = "0.1.0", path = "../pointercrate-core-api" }
 pointercrate-core-pages = { version = "0.1.0", path = "../pointercrate-core-pages" }
+pointercrate-core-macros = { version = "0.1.0", path = "../pointercrate-core-macros" }
 pointercrate-demonlist = { version = "0.1.0", path = "../pointercrate-demonlist" }
 pointercrate-demonlist-api = { version = "0.1.0", path = "../pointercrate-demonlist-api" }
 pointercrate-demonlist-pages = { version = "0.1.0", path = "../pointercrate-demonlist-pages" }

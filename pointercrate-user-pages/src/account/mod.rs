@@ -1,12 +1,11 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{etag::Taggable, localization::LANGUAGE, permission::PermissionsManager};
+use pointercrate_core::{etag::Taggable, permission::PermissionsManager};
 use pointercrate_core_pages::{
     head::{HeadLike, Script},
     PageFragment,
 };
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use sqlx::PgConnection;
-use unic_langid::LanguageIdentifier;
 
 pub mod profile;
 pub mod users;
@@ -43,32 +42,27 @@ impl AccountPageConfig {
     }
 
     pub async fn account_page(
-        &self, lang: &'static LanguageIdentifier, user: AuthenticatedUser<NonMutating>, permissions: &PermissionsManager,
-        connection: &mut PgConnection,
+        &self, user: AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> AccountPage {
-        LANGUAGE
-            .scope(lang, async {
-                let mut page = AccountPage {
-                    user,
-                    scripts: vec![],
-                    tabs: vec![],
-                };
+        let mut page = AccountPage {
+            user,
+            scripts: vec![],
+            tabs: vec![],
+        };
 
-                for tab_config in &self.tabs {
-                    if tab_config.should_display_for(page.user.user().permissions, permissions) {
-                        let tab = tab_config.tab();
-                        let content = tab_config.content(&page.user, permissions, connection).await;
+        for tab_config in &self.tabs {
+            if tab_config.should_display_for(page.user.user().permissions, permissions) {
+                let tab = tab_config.tab();
+                let content = tab_config.content(&page.user, permissions, connection).await;
 
-                        page.scripts.extend(tab_config.additional_scripts());
-                        page.scripts.push(Script::module(tab_config.initialization_script()));
-                        page.tabs
-                            .push((tab, content, tab_config.initialization_script(), tab_config.tab_id()));
-                    }
-                }
+                page.scripts.extend(tab_config.additional_scripts());
+                page.scripts.push(Script::module(tab_config.initialization_script()));
+                page.tabs
+                    .push((tab, content, tab_config.initialization_script(), tab_config.tab_id()));
+            }
+        }
 
-                page
-            })
-            .await
+        page
     }
 }
 

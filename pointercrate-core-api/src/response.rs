@@ -3,7 +3,7 @@ use crate::{
     preferences::{ClientPreferences, PreferenceManager},
 };
 use maud::{html, PreEscaped, DOCTYPE};
-use pointercrate_core::{etag::Taggable, localization::LANGUAGE};
+use pointercrate_core::etag::Taggable;
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
     localization::LocalizationConfiguration,
@@ -17,17 +17,12 @@ use rocket::{
 };
 use serde::Serialize;
 use std::{borrow::Cow, io::Cursor};
-use unic_langid::LanguageIdentifier;
 
 pub struct Page(PageFragment, Vec<&'static str>);
 
 impl Page {
-    pub fn new_ignorelang(fragment: impl Into<PageFragment>, resources: Vec<&'static str>) -> Self {
+    pub fn new(fragment: impl Into<PageFragment>, resources: Vec<&'static str>) -> Self {
         Page(fragment.into(), resources)
-    }
-
-    pub async fn new(fragment: impl Into<PageFragment>, lang: &'static LanguageIdentifier, resources: Vec<&'static str>) -> Self {
-        LANGUAGE.scope(lang, async { Page(fragment.into(), resources) }).await
     }
 }
 

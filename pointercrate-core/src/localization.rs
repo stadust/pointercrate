@@ -1,4 +1,5 @@
-use fluent_templates::{static_loader, LanguageIdentifier, Loader};
+pub use fluent::FluentValue;
+pub use fluent_templates::{static_loader, LanguageIdentifier, Loader};
 use tokio::task_local;
 
 static_loader! {
@@ -31,10 +32,8 @@ pub fn tr(text_id: &str) -> String {
 macro_rules! trp {
     ($text_id:expr $(, ($key:expr, $value:expr) )* $(,)?) => {{
         use std::borrow::Cow;
-        use fluent::FluentValue;
         use std::collections::HashMap;
-        use fluent_templates::loader::Loader;
-        use pointercrate_core::localization::{LOCALES, LANGUAGE};
+        use $crate::localization::{LOCALES, LANGUAGE, FluentValue, Loader};
 
         let mut args_map: HashMap<Cow<'static, str>, FluentValue<'_>> = HashMap::new();
 

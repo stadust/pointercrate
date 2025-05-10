@@ -1,6 +1,7 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::permission::PermissionsManager;
-use pointercrate_core_api::{preferences::ClientPreferences, response::Page};
+use pointercrate_core_api::response::Page;
+use pointercrate_core_macros::localized;
 use pointercrate_user::{
     auth::{NonMutating, PasswordOrBrowser},
     error::UserError,
@@ -13,7 +14,6 @@ use rocket::{
     State,
 };
 use std::net::IpAddr;
-use unic_langid::LanguageIdentifier;
 
 #[cfg(feature = "legacy_accounts")]
 use {
@@ -26,16 +26,16 @@ use {
     rocket::serde::json::Json,
 };
 
+#[localized]
 #[rocket::get("/login")]
-pub async fn login_page(auth: Option<Auth<NonMutating>>, preferences: ClientPreferences) -> Result<Redirect, Page> {
-    let lang: &'static LanguageIdentifier = preferences.get("locale");
-
-    let login_page = Page::new(pointercrate_user_pages::login::login_page(lang).await, lang, vec!["form"]).await;
+pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
+    let login_page = Page::new(pointercrate_user_pages::login::login_page().await, vec!["form"]);
 
     auth.map(|_| Redirect::to(rocket::uri!(account_page))).ok_or_else(|| login_page)
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
+#[localized]
 #[rocket::post("/login")]
 pub async fn login(
     auth: Result<Auth<PasswordOrBrowser>, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>,
@@ -66,6 +66,7 @@ pub async fn login(
 }
 
 #[cfg(feature = "legacy_accounts")]
+#[localized]
 #[rocket::post("/register", data = "<registration>")]
 pub async fn register(
     ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>, registration: Json<Registration>,
@@ -105,20 +106,16 @@ pub async fn register(
     Ok(Status::Created)
 }
 
+#[localized]
 #[rocket::get("/account")]
 pub async fn account_page(
-    auth: Option<Auth<NonMutating>>, preferences: ClientPreferences, permissions: &State<PermissionsManager>,
-    tabs: &State<AccountPageConfig>,
+    auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
-    let lang: &'static LanguageIdentifier = preferences.get("locale");
-
     match auth {
         Some(mut auth) => Ok(Page::new(
-            tabs.account_page(lang, auth.user, permissions, &mut auth.connection).await,
-            lang,
+            tabs.account_page(auth.user, permissions, &mut auth.connection).await,
             vec!["form"],
-        )
-        .await),
+        )),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }
