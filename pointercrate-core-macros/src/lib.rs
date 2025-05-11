@@ -41,16 +41,16 @@ pub fn localized(_: TokenStream, input: TokenStream) -> TokenStream {
 pub fn localized_catcher(_: TokenStream, input: TokenStream) -> TokenStream {
     let mut f = parse_macro_input!(input as ItemFn);
 
-    // modify the request handler to automatically take in our [`ClientLocale`] request
-    // guard (defined in pointercrate-core-api/src/localization.rs)
-    f.sig.inputs.push(parse_quote! { __req: &rocket::Request<'_> });
+    f.sig.inputs.push(parse_quote! { __request: &rocket::Request<'_> });
 
     let block = &f.block;
     let block = quote! {
         {
-            let __locale = match ClientLocale::from_request(__req).await {
-                Outcome::Success(locale) => locale,
-                _ => panic!("help"),
+            use rocket::request::FromRequest;
+
+            let __locale = match pointercrate_core_api::localization::ClientLocale::from_request(__request).await {
+                rocket::request::Outcome::Success(locale) => locale,
+                _ => todo!("this needs to be handled properly"),
             };
 
             pointercrate_core::localization::LANGUAGE.scope(__locale.into(), async {
