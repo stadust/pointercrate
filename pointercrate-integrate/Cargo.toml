@@ -12,8 +12,8 @@ bincode = "1.3.1"
 reqwest = "0.12.*"
 futures = "0.3.31"
 log = "0.4.27"
-chrono = "0.4.40"
-tokio = {version = "1.44.2", features = ["rt"]}
+chrono = "0.4.41"
+tokio = {version = "1.45.0", features = ["rt"]}
 pointercrate-demonlist = { path = "../pointercrate-demonlist" }
 pointercrate-core = { path = "../pointercrate-core" }
 governor = "0.8.1"
