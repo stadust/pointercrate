@@ -24,10 +24,27 @@ pub fn get_locale(code: &str) -> &'static LanguageIdentifier {
     LOCALES.fallback()
 }
 
+/// A utility function for fetching a translated message associated with the
+/// given `text_id`. The language of the returned message depends on the value
+/// of the `tokio::task_local!` `LANGUAGE` [`LocalKey`] variable. The translations
+/// are stored in the `locales` directory.
+///
+/// This function call must be nested inside of a [`LocalKey`] scope.
 pub fn tr(text_id: &str) -> String {
     LANGUAGE.with(|lang| LOCALES.lookup(lang, text_id))
 }
 
+/// Like [`tr`], except this function must be used for fetching translations
+/// containing variables.
+///
+/// Example with English translation:
+/// ```
+/// assert_eq!(
+///     trp!("demon-score", ("percent", 99)),
+///     "Demonlist score (99%)",
+/// );
+/// ```
+/// Source text: `demon-score = Demonlist score ({$percent}%)`
 #[macro_export]
 macro_rules! trp {
     ($text_id:expr $(, ($key:expr, $value:expr) )* $(,)?) => {{

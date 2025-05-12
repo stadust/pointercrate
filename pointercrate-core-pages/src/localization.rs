@@ -18,24 +18,33 @@ impl Locale {
     }
 }
 
-/// Withholds the site's core localization information
+/// Withholds the site's core localization information.
 pub struct LocalizationConfiguration {
     default: LocaleSet,
     overrides: HashMap<PathBuf, LocaleSet>,
 }
 
+/// Represents a collection of [`Locale`] objects associated with a specific
+/// URI in the [`LocalizationConfiguration`].
 #[derive(Clone)]
 pub struct LocaleSet {
-    // The preference cookie for this [`LocaleSet`] ("preference-{cookie}")
+    /// The preference cookie for this [`LocaleSet`] (`preference-{cookie}`)
     pub cookie: &'static str,
 
     locales: Vec<Locale>,
 
-    // Used to gracefully handle attempts at retrieving nonexistant locales
+    /// Used to gracefully handle attempts at retrieving nonexistant locales
     fallback: Option<Locale>,
 }
 
 impl LocaleSet {
+    /// Initialize a new [`LocaleSet`] with a `cookie`, which represents the
+    /// cookie name the client will send their selected language with.
+    ///
+    /// The cookie will automatically be prefixed with `preference-`, so passing
+    /// `guidelines-locale` as the cookie would result in the backend actually
+    /// handling `preference-guidelines-locale`, even though this [`LocaleSet`]'s
+    /// `cookie` value would remain unchanged.
     pub fn new(cookie: &'static str) -> Self {
         LocaleSet {
             cookie,
@@ -44,6 +53,7 @@ impl LocaleSet {
         }
     }
 
+    /// Append a new [`Locale`] to this [`LocaleSet`].
     pub fn with_locale(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
         self.locales.push(Locale { iso_code, flag_iso_code });
         self.locales.sort_by(|a, b| a.iso_code.cmp(b.iso_code)); // ensure set is sorted alphabetically
@@ -51,12 +61,18 @@ impl LocaleSet {
         self
     }
 
+    /// Specify the fallback [`Locale`] for this [`LocaleSet`]. This is used to gracefully
+    /// handle attempts at retrieving a non-existant language.
+    ///
+    /// If a fallback [`Locale`] is already set, it will be overridden.
     pub fn with_fallback(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
         self.fallback = Some(Locale { iso_code, flag_iso_code });
 
         self.with_locale(iso_code, flag_iso_code)
     }
 
+    /// Returns an owned [`Locale`] whose `iso_code` matches the given `code`.
+    /// If one is not found, the fallback [`Locale`] will be returned.
     pub fn by_code(&self, code: String) -> Option<Locale> {
         let locale = self.locales.iter().find(|locale| locale.iso_code == &code);
 
@@ -79,28 +95,45 @@ impl Default for LocaleSet {
 }
 
 impl LocalizationConfiguration {
+    /// Append a [`Locale`] to the default [`LocaleSet`].
     pub fn with_locale(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
         self.default = self.default.with_locale(iso_code, flag_iso_code);
 
         self
     }
 
+    /// Specify the fallback [`Locale`] for the default [`LocaleSet`]. If one is already
+    /// set, it will be overridden.
     pub fn with_fallback(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
         self.default = self.default.with_fallback(iso_code, flag_iso_code);
 
         self
     }
 
-    // Override the [`LocaleSet`] for a specific URI. The demon page may
-    // support 5 languages, but your guidelines pages might only support 2
+    /// Override the [`LocaleSet`] for a specific URI. The demon page may
+    /// support 5 languages, but your guidelines pages might only support 2.
+    ///
+    /// # Example
+    /// ```
+    /// let localization_config = LocalizationConfiguration::default()
+    ///     .with_fallback("en", "us")
+    ///     .with_locale("fr", "fr")
+    ///     .with_locale("es", "es")
+    ///     .with_override(
+    ///         PathBuf::from("guidelines/"),
+    ///         LocaleSet::new("guidelines-locale")
+    ///             .with_fallback("de", "de")
+    ///             .with_fallback("ru", "ru"),
+    ///     );
+    /// ```
     pub fn with_override(mut self, uri: PathBuf, locale_set: LocaleSet) -> Self {
         self.overrides.insert(uri, locale_set);
 
         self
     }
 
-    // Retrieve a [`LocaleSet`] associated with a specific URI. If one
-    // is not found, then the default [`LocaleSet`] is returned.
+    /// Retrieve the [`LocaleSet`] associated with a specific URI. If one
+    /// is not found, then the default [`LocaleSet`] is returned.
     pub fn set_by_uri(&self, uri: PathBuf) -> LocaleSet {
         self.overrides
             .iter()
@@ -111,6 +144,8 @@ impl LocalizationConfiguration {
 }
 
 impl Default for LocalizationConfiguration {
+    /// Initialize a [`LocalizationConfiguration`] with the default
+    /// [`LocaleSet`], whose `cookie` parameter is `locale`.
     fn default() -> Self {
         LocalizationConfiguration {
             default: LocaleSet::default(),
