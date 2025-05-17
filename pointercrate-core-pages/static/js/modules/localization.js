@@ -38,7 +38,7 @@ window.fluentBundle = new FluentBundle(document.documentElement.lang);
 // load a specific .ftl file
 // the correct language is retrieved thanks to cookies
 export function loadResource(resource) {
-    return fetch(`/static/core/ftl/${resource}${document.location.pathname}`)
+    return fetch(`/static/core/ftl/${resource}`)
         .then(response => response.text())
         .then(text => {
             let resource = new FluentResource(text);
