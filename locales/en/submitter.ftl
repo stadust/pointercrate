@@ -58,10 +58,12 @@ submitter-viewer = Submitter #
 
     .records-redirect = Show records in record manager
 
-submitter-listed = Submitter #{$submitter-id}
+submitter-listed = Submitter #{ $submitter-id }
 
 submitter-idsearch-panel = Search submitter by ID
     .info = Submitters can be uniquely identified by ID. Entering a submitters's ID below will select it on the left (provided the submitter exists)
-
     .id-field = Submitter ID:
+
     .submit = Find by ID
+
+    .id-validator-valuemissing = Submitter ID required
