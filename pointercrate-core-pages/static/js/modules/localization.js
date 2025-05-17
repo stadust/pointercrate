@@ -34,16 +34,22 @@ import { FluentBundle } from "https://cdn.jsdelivr.net/npm/@fluent/bundle@0.18.0
 import { FluentResource } from "https://cdn.jsdelivr.net/npm/@fluent/bundle@0.18.0/esm/resource.js";
 
 window.fluentBundle = new FluentBundle(document.documentElement.lang);
+window.loadedResources = [];
 
 // load a specific .ftl file
 // the correct language is retrieved thanks to cookies
-export function loadResource(resource) {
-    return fetch(`/static/core/ftl/${resource}`)
+export function loadResource(resourceName) {
+    if (window.loadedResources.includes(resourceName)) {
+        return Promise.resolve();
+    }
+
+    return fetch(`/static/core/ftl/${resourceName}`)
         .then(response => response.text())
         .then(text => {
             let resource = new FluentResource(text);
 
             window.fluentBundle.addResource(resource);
+            window.loadedResources.push(resourceName)
         })
         .catch(error => console.error(error))
 }
@@ -66,7 +72,7 @@ export function trp(text_id, args) {
 }
 
 // once all of the fluent resources specified in the <head> of this
-// page, this event will be dispatched
+// page finish loading, this event will be dispatched
 const resourcesLoadedEvent = new CustomEvent("fluentresourcesloaded");
 
 $(document).ready(function () {
