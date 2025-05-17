@@ -1,5 +1,6 @@
 user-username = Username:
 user-displayname = Display Name:
+    .none = None
 user-id = User ID:
 
 user-permissions = Permissions:
@@ -43,10 +44,22 @@ user-viewer = Pointercrate Account Manager
     .delete-user = Delete user
     .edit-user = Edit user
 
+    .edit-success = Successfully modified user!
+    .edit-notmodified = No changes made!
+    .delete-success = Successfully deleted user!
+
+    .own-account = This is your own account. You cannot modify your own account using this interface!
+
+user-listed = ID: { $user-id }
+    .displayname = Display name:
+
 user-idsearch-panel = Find users
     .info = Users can be uniquely identified by name and ID. To modify a user's account, you need their ID. If you know neither, try looking in the list below
     .id-field = User ID:
+
     .submit = Find by ID
+
+    .id-validator-valuemissing = User ID required
 
 ## Profile tab
 profile = Profile
@@ -60,6 +73,7 @@ profile-display-name = Display name
 
     .dialog-header = Edit Display Name
     .dialog-newname = New display name:
+
     .dialog-submit = Edit
 
 profile-youtube = YouTube channel
@@ -67,7 +81,10 @@ profile-youtube = YouTube channel
 
     .dialog-header = Edit YouTube Channel Link
     .dialog-newlink = New YouTube link:
+
     .dialog-submit = Edit
+
+    .newlink-validator-typemismatch = Please enter a valid URL
 
 profile-permissions = Permissions
     .info = The permissions you have on pointercrate. 'List ...' means you're a member of the demonlist team. 'Moderator' and 'Administrator' mean you're part of pointercrate's staff team.
@@ -86,6 +103,14 @@ profile-change-password = Change Password
     .dialog-authenticate = Authenticate:
 
     .dialog-submit = Edit
+
+    .authenticate-validator-valuemissing = Password required
+    .authenticate-validator-tooshort = Password too short. It needs to be at least 10 characters long.
+
+    .newpassword-validator-tooshort = Password too short. It needs to be at least 10 characters long.
+
+    .repeatnewpassword-validator-tooshort = Password too short. It needs to be at least 10 characters long.
+    .repeatnewpassword-validator-notmatching = Passwords don't match
 
 profile-logout = Logout
     .info = Log out of your pointercrate account in this browser.
