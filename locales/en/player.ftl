@@ -1,9 +1,11 @@
 player-banned = Banned
     .yes = Yes
     .no = No
+
 player-nationality = Nationality
     .info = Note that this is to be understood as 'Country of legal residency' and nothing else. No exceptions.
     .none = None
+
 player-subdivision = Political Subdivision
     .none = None
 
@@ -21,12 +23,18 @@ player-viewer = Player #
 player-idsearch-panel = Search player by ID
     .info = Players can be uniquely identified by ID. Entering a players's ID below will select it on the left (provided the player exists)
     .id-field = Player ID:
+
     .submit = Find by ID
+
+    .id-validator-valuemissing = Player ID required
 
 player-name-dialog = Change player name
     .info = Change the name of this player. This will update their name on every one of their records. If a player with the new name already exists, the player objects will be merged, with the new object receiving the ID of the player you are currently editing. In this case, the record lists of the players are merged and their creator/verifier/publisher information is updated. Internally, each record is moved to to the new player, an on conflicts the same rules apply as when editing a record's holder.
     .name-field = Name:
+
     .submit = Edit
+
+    .name-validator-valuemissing = Please provide a name for the player
 
 ## List integration tab
 list-integration = List Integration
