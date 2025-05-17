@@ -43,11 +43,19 @@ claim-geolocate = Geolocate statsviewer flag
 
     .submit = Go
 
+    .edit-success = Set nationality to { $nationality }
+    .edit-success-subdivision = Set nationality to { $nationality }/{ $subdivision }
+
 claim-lock-submissions = Lock submissions
     .info = Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)
 
+    .edit-success = Successfully applied change
+
 claim-records = Your claimed player's records
     .info = A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record tells you whether the record is { $record-approved-styled }, { $record-submitted-styled }, { $record-rejected-styled } or { $record-underconsideration-styled }.
+
+    .record-notes = Notes for record { $record-id }:
+    .record-notes-none = No public notes on this record!
 
 claim-manager = Manage Claims
     .info-a = Manage claims using the interface below. The list can be filtered by player and user using the panels on the right. Invalid claims should be deleted using the trash icon.
@@ -55,8 +63,10 @@ claim-manager = Manage Claims
     .info-c = Once a claim on a player is verified, all other unverified claims on that player are auto-deleted. Users cannot put new, unverified claims on players that have a verified claim on them.
     .info-d = A claim with a green background is verified, a claim with a blue background is unverified/unchecked.
 
-claim-listed-user = Claim by user
-claim-listed-player = Claim on player
+    .claim-no-records = The claimed player ({ $player-id }) does not have an approved record on the list
+
+claim-listed-user = Claim by user:
+claim-listed-player = Claim on player:
 
 claim-initiate-panel = Initiate Claim
     .info = Select the player you wish to claim below
