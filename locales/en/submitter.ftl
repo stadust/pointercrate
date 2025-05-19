@@ -18,23 +18,39 @@ record-submission = Record Submission
     .demon = Demon
     .demon-info = The demon the record was made on. Only demons in the top {$list-size} are accepted. This excludes legacy demons!
 
+    .demon-validator-valuemissing = Please specify a demon
+
     .holder = Holder
     .holder-info = The player holding the record. Start typing to see suggestions of existing players. If this is your first submission, write your name, as you wish it to appear on the website, into the text field (ignoring any suggestions).
+
+    .holder-validator-valuemissing = Please specify a record holder
+    .holder-validator-rangeoverflow = Due to Geometry Dash's limitations I know that no player has such a long name
 
     .progress = Progress
     .progress-info = The progress made as percentage. Only values greater than or equal to the demons record requirement and smaller than or equal to 100 are accepted!
     .progress-placeholder = e. g. '50', '98'
+
+    .progress-validator-valuemissing = Please specify the record's progress
+    .progress-validator-rangeunderflow = Record progress cannot be negative
+    .progress-validator-rangeoverflow = Record progress cannot be larger than 100%
+    .progress-validator-badinput = Record progress must be a valid integer
+    .progress-validator-stepmismatch = Record progress mustn't be a decimal
 
     .video = Video
     .video-info = A proof video of the legitimacy of the given record. If the record was achieved on stream, but wasn't uploaded anywhere else, please provide a twitch link to that stream.
     .video-note = Please pay attention to only submit well-formed URLs!
     .video-placeholder = e. g. https://youtu.be/cHEGAqOgddA
 
+    .video-validator-valuemissing = Please specify a video so we can check the record's validity
+    .video-validator-typemismatch = Please enter a valid URL
+
     .raw-footage = Raw footage
     .raw-footage-info-a = The unedited and untrimmed video for this completion, uploaded to a non-compressing (e.g. not YouTube) file-sharing service such as google drive. If the record was achieved on stream (meaning there is no recording), please provide a link to the stream VOD.
     .raw-footage-info-b = Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator.
     .raw-footage-note = This is required for every record submitted to the list!
     .raw-footage-placeholder = https://drive.google.com/file/d/.../view?usp=sharing
+
+    .raw-footage-validator-typemismatch = Please enter a valid URL
 
     .notes = Notes or comments
     .notes-info = Provide any additional notes you'd like to pass on to the list moderator receiving your submission.
@@ -44,6 +60,9 @@ record-submission = Record Submission
     .guidelines-link = submission guidelines
 
     .submit = Submit record
+
+    .submission-success = Record successfully submitted.
+    .submission-success-queue = Record successfully submitted. It is { $queue-position } in the queue!
 
 ## Submitters tab
 submitters = Submitters

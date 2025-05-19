@@ -14,6 +14,9 @@ time-machine = Time Machine
     .destination-field = Destination:
     .submit = Go!
 
+    .destination-validator-valuemissing = Please specify a value
+    .destination-validator-rangeunderflow = You cannot go back in time that far!
+
     .active-info = You are currently looking at the demonlist how it was on
     .return = Go to present
 

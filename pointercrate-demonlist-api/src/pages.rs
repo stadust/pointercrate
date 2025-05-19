@@ -87,7 +87,7 @@ pub async fn overview(
             time_machine: tardis,
             submitter_initially_visible: submitter.unwrap_or(false),
         },
-        vec![],
+        vec!["overview", "submitter"],
     ))
 }
 
