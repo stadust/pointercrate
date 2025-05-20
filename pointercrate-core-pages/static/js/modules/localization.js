@@ -49,7 +49,7 @@ export function loadResource(resourceName) {
             let resource = new FluentResource(text);
 
             window.fluentBundle.addResource(resource);
-            window.loadedResources.push(resourceName)
+            window.loadedResources.push(resourceName);
         })
         .catch(error => console.error(error))
 }
@@ -75,15 +75,15 @@ export function trp(text_id, args) {
 // page finish loading, this event will be dispatched
 const resourcesLoadedEvent = new CustomEvent("fluentresourcesloaded");
 
-$(document).ready(function () {
+$(window).on("load", function () {
     new LanguageSelector(document.getElementById("language-selector"));
 
     let resourcePromises = [];
     window.ftlResources.forEach((resource) => {
         resourcePromises.push(loadResource(resource));
-    })
+    });
     
     Promise.all(resourcePromises).then(() => {
         document.dispatchEvent(resourcesLoadedEvent);
-    })
+    });
 });
