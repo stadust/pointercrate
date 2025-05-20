@@ -168,7 +168,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
         IndividualStatsViewer {
             nationalities_in_use: Nationality::used(&mut *connection).await?,
         },
-        vec![],
+        vec!["statsviewer"],
     ))
 }
 
@@ -177,7 +177,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
 pub async fn nation_stats_viewer() -> Page {
     Page::new(
         pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(),
-        vec![],
+        vec!["statsviewer"],
     )
 }
 

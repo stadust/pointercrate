@@ -5,6 +5,7 @@ import {
 } from "/static/demonlist/js/modules/statsviewer.js";
 import { Dropdown } from "/static/core/js/modules/form.js";
 import { getCountryFlag } from "/static/demonlist/js/modules/demonlist.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 class NationStatsViewer extends StatsViewer {
   constructor(html) {
@@ -124,11 +125,9 @@ class NationStatsViewer extends StatsViewer {
       nationData.created.map((creation) => {
         return this.makeTooltip(
           this.formatDemon(creation.demon),
-          "(Co)created&nbsp;by&nbsp;" +
-            creation.players.length +
-            "&nbsp;player" +
-            (creation.players.length === 1 ? "" : "s") +
-            "&nbsp;in&nbsp;this&nbsp;country: ",
+          trp("statsviewer-nation.created-tooltip", {
+            ["players"]: creation.players.length,
+          }).replaceAll(" ", "&nbsp;") + " ",
           creation.players.join(", ")
         );
       })
@@ -138,7 +137,7 @@ class NationStatsViewer extends StatsViewer {
       nationData.verified.map((verification) => {
         return this.makeTooltip(
           this.formatDemon(verification.demon),
-          "Verified&nbsp;by: ",
+          tr("statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
           verification.players.join(", ")
         );
       })
@@ -148,7 +147,7 @@ class NationStatsViewer extends StatsViewer {
       nationData.published.map((publication) => {
         return this.makeTooltip(
           this.formatDemon(publication.demon),
-          "Published&nbsp;by: ",
+          tr("statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
           publication.players.join(", ")
         );
       })
@@ -176,19 +175,20 @@ class NationStatsViewer extends StatsViewer {
 
   formatDemonFromRecord(record, dontStyle) {
     let baseElement = this.formatDemon(record.demon, null, dontStyle);
-
+  
     if (record.progress !== 100)
       baseElement.appendChild(
         document.createTextNode(" (" + record.progress + "%)")
       );
 
     let title =
-      (record.progress === 100 ? "Beaten" : "Achieved") +
-      "&nbsp;by&nbsp;" +
-      record.players.length +
-      "&nbsp;player" +
-      (record.players.length === 1 ? "" : "s") +
-      "&nbsp;in&nbsp;this&nbsp;country: ";
+      (record.progress === 100 
+        ? trp("statsviewer-nation.beaten-tooltip", {
+          ["players"]: record.players.length,
+        })
+        : trp("statsviewer-nation.progress-tooltip", {
+          ["players"]: record.players.length,
+        })).replaceAll(" ", "&nbsp;") + " ";
 
     return this.makeTooltip(
       baseElement,
@@ -202,31 +202,33 @@ class NationStatsViewer extends StatsViewer {
 $(window).on("load", function () {
   let map = new InteractiveWorldMap();
 
-  window.statsViewer = new NationStatsViewer(
-    document.getElementById("statsviewer")
-  );
-  window.statsViewer.initialize();
-  window.statsViewer.addSelectionListener((selected) =>
-    map.select(selected.country_code)
-  );
+  document.addEventListener("fluentresourcesloaded", () => {
+    window.statsViewer = new NationStatsViewer(
+      document.getElementById("statsviewer")
+    );
+    window.statsViewer.initialize();
+    window.statsViewer.addSelectionListener((selected) =>
+      map.select(selected.country_code)
+    );
 
-  map.addSelectionListener((country, _) => {
-    for (let li of window.statsViewer.list.children) {
-      if (li.dataset.id === country) window.statsViewer.onSelect(li);
-    }
-  });
-
-  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
-    (selected) => {
-      if (selected === "All") {
-        window.statsViewer.updateQueryData("continent", undefined);
-        map.resetContinentHighlight();
-      } else {
-        window.statsViewer.updateQueryData("continent", selected);
-        map.highlightContinent(selected);
+    map.addSelectionListener((country, _) => {
+      for (let li of window.statsViewer.list.children) {
+        if (li.dataset.id === country) window.statsViewer.onSelect(li);
       }
-    }
-  );
+    });
+
+    new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
+      (selected) => {
+        if (selected === "All") {
+          window.statsViewer.updateQueryData("continent", undefined);
+          map.resetContinentHighlight();
+        } else {
+          window.statsViewer.updateQueryData("continent", selected);
+          map.highlightContinent(selected);
+        }
+      }
+    );
+  })
 });
 
 function generateStatsViewerNation(nation) {

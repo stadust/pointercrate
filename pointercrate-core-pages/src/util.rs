@@ -55,13 +55,16 @@ pub fn dropdown(default_entry: &str, default_item: Markup, filter_items: impl It
     }
 }
 
-pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, items: impl Iterator<Item = T1>) -> Markup {
+/// Items should be structured as `(<internal value>, <displayed value>)` where the internal value is consistent across languages
+pub fn simple_dropdown<T1: Display, T2: Display>(
+    dropdown_id: &str, default: Option<(T1, T2)>, items: impl Iterator<Item = (T1, T2)>,
+) -> Markup {
     html! {
         div.dropdown-menu.js-search.no-stretch #(dropdown_id) {
             div {
                 @match default {
                     Some(ref default) => {
-                        input type="text" autocomplete="off" data-default=(default) style = "color: #444446; font-weight: bold;";
+                        input type="text" autocomplete="off" data-default=(default.0) style = "color: #444446; font-weight: bold;";
                     }
                     None => {
                         input type="text" autocomplete="off" style = "color: #444446; font-weight: bold;";
@@ -72,16 +75,16 @@ pub fn simple_dropdown<T1: Display>(dropdown_id: &str, default: Option<T1>, item
             div.menu {
                 ul {
                     @if let Some(ref default) = default {
-                        li.white.underlined.hover data-value=(default) data-display=(default) {
+                        li.white.underlined.hover data-value=(default.0) data-display=(default.1) {
                             b {
-                                (default)
+                                (default.1)
                             }
                         }
                     }
                     @for item in items {
-                        li.white.hover data-value=(item) data-display = (item)  {
+                        li.white.hover data-value=(item.0) data-display = (item.1)  {
                             b {
-                                (item)
+                                (item.1)
                             }
                         }
                     }

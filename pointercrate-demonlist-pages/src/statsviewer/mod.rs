@@ -33,7 +33,17 @@ fn continent_panel() -> Markup {
             p {
                 (tr("continent-panel.info"))
             }
-            (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Central America"].into_iter()))
+            (simple_dropdown("continent-dropdown",
+                Some(("All", tr("continent-panel.option-all"))),
+                vec![
+                    ("Asia", tr("continent-panel.option-asia")),
+                    ("Europe", tr("continent-panel.option-europe")),
+                    ("Australia", tr("continent-panel.option-australia")),
+                    ("Africa", tr("continent-panel.option-africa")),
+                    ("North America", tr("continent-panel.option-northamerica")),
+                    ("South America", tr("continent-panel.option-southamerica")),
+                    ("Central America", tr("continent-panel.option-centralamerica"))
+                ].into_iter()))
         }
     }
 }
@@ -47,7 +57,11 @@ fn demon_sorting_panel() -> Markup {
             p {
                 (tr("demon-sorting-panel.info"))
             }
-            (simple_dropdown("demon-sorting-mode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
+            (simple_dropdown("demon-sorting-mode-dropdown",
+                Some(("Alphabetical", tr("demon-sorting-panel.option-alphabetical"))),
+                vec![
+                    ("Position", tr("demon-sorting-panel.option-position"))
+                ].into_iter()))
         }
     }
 }
@@ -90,6 +104,8 @@ fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
 }
 
 fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>, is_nation_stats_viewer: bool) -> Markup {
+    let international = &tr("statsviewer-individual.option-international");
+
     html! {
         section.panel.fade #statsviewer style="overflow:initial" {
             h2.underlined.pad {
@@ -98,12 +114,12 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>,
                     " - "
                     (dropdown("International",
                         html! {
-                            li.white.hover.underlined data-value = "International" data-display = "International" {
+                            li.white.hover.underlined data-value = "International" data-display = (international) {
                                 span.em.em-world_map {}
                                 (PreEscaped("&nbsp;"))
                                 b {"WORLD"}
                                 br;
-                                span style = "font-size: 90%; font-style: italic" { "International" }
+                                span style = "font-size: 90%; font-style: italic" { (international) }
                             }
                         },
                         nations.iter().map(|nation| html! {
