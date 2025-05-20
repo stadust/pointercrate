@@ -52,14 +52,16 @@ demon-creators = Creators
 movements = Position History
     .date = Date
     .change = Change
-    .newposition = New Position
 
-movement-reason = Reason
+movements-newposition = New Position
+    .legacy = Legacy
+
+movements-reason = Reason
     .added = Added to list
-    .addedabove = {$demon} was added above
+    .addedabove = { $demon } was added above
     .moved = Moved
-    .movedabove = {$demon} was moved up past this demon
-    .movedbelow = {$demon} was moved down past this demon
+    .movedabove = { $demon } was moved up past this demon
+    .movedbelow = { $demon } was moved down past this demon
 
 ## Records table
 demon-records = Records

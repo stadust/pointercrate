@@ -170,10 +170,10 @@ impl DemonPage {
                                             (tr("movements.change"))
                                         }
                                         th.blue {
-                                            (tr("movements.newposition"))
+                                            (tr("movements-newposition"))
                                         }
                                         th.blue {
-                                            (tr("movement-reason"))
+                                            (tr("movements-reason"))
                                         }
                                     }
                                 }

@@ -155,7 +155,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
             integration: gd.load_level_for_demon(&full_demon.demon).await,
             data: full_demon,
         },
-        vec![],
+        vec!["demon"],
     ))
 }
 
