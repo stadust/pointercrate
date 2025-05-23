@@ -107,53 +107,22 @@ class NationStatsViewer extends StatsViewer {
         .map((record) => this.formatDemonFromRecord(record, true))
     );
 
-
     formatInto(
       this._unbeaten,
-      this.sortStatsViewerRow(selectedSort, nationData.unbeaten).map((demon) => this.formatDemon(demon))
+      this.sortStatsViewerRow(selectedSort, nationData.unbeaten).map((demon) =>
+        this.formatDemon(demon)
+      )
     );
     formatInto(
       this._progress,
-      this.sortStatsViewerRow(selectedSort, progress).map((record) => this.formatDemonFromRecord(record))
+      this.sortStatsViewerRow(selectedSort, progress).map((record) =>
+        this.formatDemonFromRecord(record)
+      )
     );
     formatInto(
       this._created,
-      this.sortStatsViewerRow(selectedSort, nationData.created).map((creation) => {
-        return this.makeTooltip(
-          this.formatDemon(creation.demon),
-          "(Co)created&nbsp;by&nbsp;" +
-            creation.players.length +
-            "&nbsp;player" +
-            (creation.players.length === 1 ? "" : "s") +
-            "&nbsp;in&nbsp;this&nbsp;country: ",
-          creation.players.join(", ")
-        );
-      })
-    );
-    formatInto(
-      this._verified,
-      this.sortStatsViewerRow(selectedSort, nationData.verified).map((verification) => {
-        return this.makeTooltip(
-          this.formatDemon(verification.demon),
-          "Verified&nbsp;by: ",
-          verification.players.join(", ")
-        );
-      })
-    );
-    formatInto(
-      this._published,
-      this.sortStatsViewerRow(selectedSort, nationData.published).map((publication) => {
-        return this.makeTooltip(
-          this.formatDemon(publication.demon),
-          "Published&nbsp;by: ",
-          publication.players.join(", ")
-        );
-      })
-    );
-
-    this.demonSortingModeDropdown.addEventListener((selected) => {
-      if (nationData.created.length > 0) {
-        formatInto(this._created, this.sortStatsViewerRow(selected, nationData.created).map((creation) => {
+      this.sortStatsViewerRow(selectedSort, nationData.created).map(
+        (creation) => {
           return this.makeTooltip(
             this.formatDemon(creation.demon),
             "(Co)created&nbsp;by&nbsp;" +
@@ -163,32 +132,97 @@ class NationStatsViewer extends StatsViewer {
               "&nbsp;in&nbsp;this&nbsp;country: ",
             creation.players.join(", ")
           );
-        }));
-      }
-
-      if (nationData.published.length > 0) {
-        formatInto(this._published, this.sortStatsViewerRow(selected, nationData.published).map((publication) => {
-          return this.makeTooltip(
-            this.formatDemon(publication.demon),
-            "Published&nbsp;by: ",
-            publication.players.join(", ")
-          );
-        }));
-      }
-      if (nationData.verified.length > 0) {
-        formatInto(this._verified, this.sortStatsViewerRow(selected, nationData.verified).map((verification) => {
+        }
+      )
+    );
+    formatInto(
+      this._verified,
+      this.sortStatsViewerRow(selectedSort, nationData.verified).map(
+        (verification) => {
           return this.makeTooltip(
             this.formatDemon(verification.demon),
             "Verified&nbsp;by: ",
             verification.players.join(", ")
           );
-        }));
+        }
+      )
+    );
+    formatInto(
+      this._published,
+      this.sortStatsViewerRow(selectedSort, nationData.published).map(
+        (publication) => {
+          return this.makeTooltip(
+            this.formatDemon(publication.demon),
+            "Published&nbsp;by: ",
+            publication.players.join(", ")
+          );
+        }
+      )
+    );
+
+    this.demonSortingModeDropdown.addEventListener((selected) => {
+      if (nationData.created.length > 0) {
+        formatInto(
+          this._created,
+          this.sortStatsViewerRow(selected, nationData.created).map(
+            (creation) => {
+              return this.makeTooltip(
+                this.formatDemon(creation.demon),
+                "(Co)created&nbsp;by&nbsp;" +
+                  creation.players.length +
+                  "&nbsp;player" +
+                  (creation.players.length === 1 ? "" : "s") +
+                  "&nbsp;in&nbsp;this&nbsp;country: ",
+                creation.players.join(", ")
+              );
+            }
+          )
+        );
+      }
+
+      if (nationData.published.length > 0) {
+        formatInto(
+          this._published,
+          this.sortStatsViewerRow(selected, nationData.published).map(
+            (publication) => {
+              return this.makeTooltip(
+                this.formatDemon(publication.demon),
+                "Published&nbsp;by: ",
+                publication.players.join(", ")
+              );
+            }
+          )
+        );
+      }
+      if (nationData.verified.length > 0) {
+        formatInto(
+          this._verified,
+          this.sortStatsViewerRow(selected, nationData.verified).map(
+            (verification) => {
+              return this.makeTooltip(
+                this.formatDemon(verification.demon),
+                "Verified&nbsp;by: ",
+                verification.players.join(", ")
+              );
+            }
+          )
+        );
       }
       if (progress.length > 0)
-        formatInto(this._progress, this.sortStatsViewerRow(selected, progress).map((record) => this.formatDemonFromRecord(record)));
+        formatInto(
+          this._progress,
+          this.sortStatsViewerRow(selected, progress).map((record) =>
+            this.formatDemonFromRecord(record)
+          )
+        );
 
       if (nationData.unbeaten.length > 0)
-        formatInto(this._unbeaten, this.sortStatsViewerRow(selected, nationData.unbeaten).map((demon) => this.formatDemon(demon)));
+        formatInto(
+          this._unbeaten,
+          this.sortStatsViewerRow(selected, nationData.unbeaten).map((demon) =>
+            this.formatDemon(demon)
+          )
+        );
     });
   }
 

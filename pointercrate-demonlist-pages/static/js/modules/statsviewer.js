@@ -182,7 +182,7 @@ export class StatsViewer extends FilteredPaginator {
 
     return element;
   }
-  
+
   /**
    * Sort demons by the selected sorting option
    * @param {string} sortOption - The sorting option ("Alphabetical" or "Position")
@@ -193,19 +193,19 @@ export class StatsViewer extends FilteredPaginator {
     if (sortOption === "Alphabetical") {
       data.sort((r1, r2) => {
         if (r1.demon) {
-          return r1.demon.name.localeCompare(r2.demon.name)
+          return r1.demon.name.localeCompare(r2.demon.name);
         } else {
           // nation unbeaten section does not have "demon" key
-          return r1.name.localeCompare(r2.name)
+          return r1.name.localeCompare(r2.name);
         }
       });
     } else if (sortOption === "Position") {
       data.sort((r1, r2) => {
         if (r1.demon) {
-          return r1.demon.position - r2.demon.position
+          return r1.demon.position - r2.demon.position;
         } else {
           // nation unbeaten section does not have "demon" key
-          return r1.position - r2.position
+          return r1.position - r2.position;
         }
       });
     }

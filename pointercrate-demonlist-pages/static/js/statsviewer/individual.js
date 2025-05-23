@@ -25,11 +25,20 @@ class IndividualStatsViewer extends StatsViewer {
 
     this.setName(playerData.name, playerData.nationality);
 
-    const selectedSort = this.demonSortingModeDropdown.selected
+    const selectedSort = this.demonSortingModeDropdown.selected;
 
-    this.formatDemonsInto(this._created, this.sortStatsViewerRow(selectedSort, playerData.created));
-    this.formatDemonsInto(this._published, this.sortStatsViewerRow(selectedSort, playerData.published));
-    this.formatDemonsInto(this._verified, this.sortStatsViewerRow(selectedSort, playerData.verified));
+    this.formatDemonsInto(
+      this._created,
+      this.sortStatsViewerRow(selectedSort, playerData.created)
+    );
+    this.formatDemonsInto(
+      this._published,
+      this.sortStatsViewerRow(selectedSort, playerData.published)
+    );
+    this.formatDemonsInto(
+      this._verified,
+      this.sortStatsViewerRow(selectedSort, playerData.verified)
+    );
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
 
@@ -81,16 +90,32 @@ class IndividualStatsViewer extends StatsViewer {
 
     this.setHardest(hardest.name === "None" ? undefined : hardest);
 
-    let non100Records = playerData.records
-      .filter((record) => record.progress !== 100);
+    let non100Records = playerData.records.filter(
+      (record) => record.progress !== 100
+    );
 
-    this.formatRecordsInto(this._progress, this.sortStatsViewerRow(selectedSort, non100Records));
+    this.formatRecordsInto(
+      this._progress,
+      this.sortStatsViewerRow(selectedSort, non100Records)
+    );
 
     this.demonSortingModeDropdown.addEventListener((selected) => {
-      this.formatDemonsInto(this._created, this.sortStatsViewerRow(selected, playerData.created))
-      this.formatDemonsInto(this._published, this.sortStatsViewerRow(selected, playerData.published))
-      this.formatDemonsInto(this._verified, this.sortStatsViewerRow(selected, playerData.verified))
-      this.formatRecordsInto(this._progress, this.sortStatsViewerRow(selected, non100Records))
+      this.formatDemonsInto(
+        this._created,
+        this.sortStatsViewerRow(selected, playerData.created)
+      );
+      this.formatDemonsInto(
+        this._published,
+        this.sortStatsViewerRow(selected, playerData.published)
+      );
+      this.formatDemonsInto(
+        this._verified,
+        this.sortStatsViewerRow(selected, playerData.verified)
+      );
+      this.formatRecordsInto(
+        this._progress,
+        this.sortStatsViewerRow(selected, non100Records)
+      );
     });
   }
 
