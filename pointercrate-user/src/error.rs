@@ -11,59 +11,59 @@ pub type Result<T> = std::result::Result<T, UserError>;
 
 #[derive(Debug, Display, Serialize, Eq, PartialEq, Clone)]
 pub enum UserError {
-    #[display( "{}", _0)]
+    #[display("{}", _0)]
     Core(CoreError),
 
-    #[display( "Malformed channel URL")]
+    #[display("Malformed channel URL")]
     MalformedChannelUrl,
 
     /// `403 FORBIDDEN` error returned when a user attempts to delete his own account via the admin
     /// panel
     ///
     /// Error Code `40302`
-    #[display( "You cannot delete your own account via this endpoint. Use DELETE /api/v1/auth/me/")]
+    #[display("You cannot delete your own account via this endpoint. Use DELETE /api/v1/auth/me/")]
     DeleteSelf,
 
     /// `403 FORBIDDEN` error returned when a user attempts to patch his own account via the admin
     /// panel
     ///
     /// Error Code `40303`
-    #[display( "You cannot modify your own account via this endpoint. Use PATCH /api/v1/auth/me/")]
+    #[display("You cannot modify your own account via this endpoint. Use PATCH /api/v1/auth/me/")]
     PatchSelf,
 
-    #[display( "You cannot assign the following permissions: {:?}", non_assignable)]
+    #[display("You cannot assign the following permissions: {:?}", non_assignable)]
     PermissionNotAssignable { non_assignable: HashSet<Permission> },
 
-    #[display( "No user with id {} found", user_id)]
+    #[display("No user with id {} found", user_id)]
     UserNotFound { user_id: i32 },
 
-    #[display( "No user with name {} found", user_name)]
+    #[display("No user with name {} found", user_name)]
     UserNotFoundName { user_name: String },
 
     /// `409 CONFLICT` error returned if a user tries to register with a name that's already taken
     ///
     /// Error Code `40902`
-    #[display( "The chosen username is already taken")]
+    #[display("The chosen username is already taken")]
     NameTaken,
 
     /// `422 UNPROCESSABLE ENTITIY` variant returned if the username provided during registration
     /// is either shorter than 3 letters of contains trailing or leading whitespaces
     ///
     /// Error Code: `42202`
-    #[display( "Invalid display- or username! The name must be at least 3 characters long and not start/end with a space")]
+    #[display("Invalid display- or username! The name must be at least 3 characters long and not start/end with a space")]
     InvalidUsername,
 
     /// `422 UNPROCESSABLE ENTITY` variant returned if the password provided during registration
     /// (or account update) is shorter than 10 characters
     ///
     /// Error Code `42204`
-    #[display( "Invalid password! The password must be at least 10 characters long")]
+    #[display("Invalid password! The password must be at least 10 characters long")]
     InvalidPassword,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42226`
-    #[display( "The given URL is no YouTube URL")]
+    #[display("The given URL is no YouTube URL")]
     NotYouTube,
 
     /// `422 UNPROCESSABL ENTITY` variant indicating that the attempted operation can only be
@@ -71,9 +71,7 @@ pub enum UserError {
     /// for a non-legacy account).
     ///
     /// Error Code `42234`
-    #[display(
-         "The given operation (change password) is invalid on non-legacy account, as password login is not supported for these"
-    )]
+    #[display("The given operation (change password) is invalid on non-legacy account, as password login is not supported for these")]
     NonLegacyAccount,
 }
 

@@ -33,7 +33,7 @@ pub struct TimeShiftedDemon {
 
 /// Struct modelling a demon. These objects are returned from the paginating `/demons/` endpoint
 #[derive(Debug, Deserialize, Serialize, Hash, Display, Eq, PartialEq)]
-#[display( "{}", base)]
+#[display("{}", base)]
 pub struct Demon {
     #[serde(flatten)]
     pub base: MinimalDemon,
@@ -61,7 +61,7 @@ pub struct Demon {
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
 #[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq, Clone)]
-#[display( "{} (at {})", name, position)]
+#[display("{} (at {})", name, position)]
 pub struct MinimalDemon {
     /// The [`Demon`]'s unique internal pointercrate ID
     pub id: i32,
@@ -82,7 +82,7 @@ pub struct MinimalDemon {
 /// In addition to containing publisher/verifier information it also contains a list of the demon's
 /// creators and a list of accepted records
 #[derive(Debug, Serialize, Deserialize, Display, PartialEq, Eq, Hash)]
-#[display( "{}", demon)]
+#[display("{}", demon)]
 pub struct FullDemon {
     #[serde(flatten)]
     pub demon: Demon,

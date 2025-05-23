@@ -18,7 +18,7 @@ mod paginate;
 mod patch;
 
 #[derive(Debug, Hash, Eq, PartialEq, Serialize, Display, Clone, Deserialize)]
-#[display( "{} (ID: {})", name, id)]
+#[display("{} (ID: {})", name, id)]
 pub struct DatabasePlayer {
     pub id: i32,
     pub name: String,
@@ -26,7 +26,7 @@ pub struct DatabasePlayer {
 }
 
 #[derive(Debug, Serialize, Deserialize, Display, PartialEq, Hash)]
-#[display( "{}", player)]
+#[display("{}", player)]
 pub struct FullPlayer {
     #[serde(flatten)]
     pub player: Player,
@@ -37,7 +37,7 @@ pub struct FullPlayer {
 }
 
 #[derive(Debug, PartialEq, Serialize, Display, Deserialize)]
-#[display( "{}", base)]
+#[display("{}", base)]
 pub struct Player {
     #[serde(flatten)]
     pub base: DatabasePlayer,
