@@ -1,4 +1,4 @@
-import { Dropdown } from "/static/core/js/modules/form.js";
+import { Dropdown, get } from "/static/core/js/modules/form.js";
 import {
   getCountryFlag,
   populateSubdivisionDropdown,
@@ -140,6 +140,21 @@ class IndividualStatsViewer extends StatsViewer {
       })
     );
   }
+  async selectFromID(playerId) {
+    return get(`${this.endpoint}${playerId}`)
+      .then(data => {
+        if (data.data.banned) {
+          this.setError("This player is banned!")
+          return;
+        };
+
+        const playerElement = generateStatsViewerPlayer(data.data);
+        this.onSelect(playerElement);
+      })
+      .catch(() => {
+        this.setError(`Unable to select player with ID ${playerId}`);
+      })
+  }
 }
 
 $(window).on("load", function () {
@@ -158,7 +173,21 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
 
-  window.statsViewer.initialize();
+  window.statsViewer.initialize().then(() => {
+    let url = window.location.href;
+    let params = new URLSearchParams(url.split('?')[1]);
+    let playerId = params.get('player');
+    if (playerId) {
+      console.log(`Selecting player: ${playerId}`);
+      window.statsViewer.selectFromID(parseInt(playerId));
+    }
+  });
+
+  document
+    .getElementById("player-name")
+    .addEventListener('click', () => 
+      navigator.clipboard.writeText(`https://pointercrate.com/demonlist/statsviewer?player=${window.statsViewer.currentObject.id}`)
+  )
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {
@@ -231,7 +260,7 @@ function generateStatsViewerPlayer(player) {
 
   li.className = "white hover";
   li.dataset.id = player.id;
-  li.dataset.rank = player.rank;
+  li.dataset.rank = player.rank > 0 ? player.rank : "-";
 
   b.appendChild(document.createTextNode("#" + player.rank + " "));
   i.appendChild(document.createTextNode(player.score.toFixed(2)));
