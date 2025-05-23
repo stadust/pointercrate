@@ -118,7 +118,7 @@ impl<'de> Deserialize<'de> for RecordStatus {
 }
 
 #[derive(Debug, Deserialize, Serialize, Display, Hash)]
-#[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
+#[display( "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct FullRecord {
     pub id: i32,
     pub progress: i16,
@@ -147,7 +147,7 @@ impl Taggable for FullRecord {
 }
 
 #[derive(Debug, Hash, Serialize, Display)]
-#[display(fmt = "{} {}% on {} (ID: {})", player, progress, demon, id)]
+#[display( "{} {}% on {} (ID: {})", player, progress, demon, id)]
 pub struct MinimalRecordPD {
     pub id: i32,
     pub progress: i16,
@@ -158,7 +158,7 @@ pub struct MinimalRecordPD {
 }
 
 #[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq)]
-#[display(fmt = "{}% on {} (ID: {})", progress, demon, id)]
+#[display( "{}% on {} (ID: {})", progress, demon, id)]
 pub struct MinimalRecordD {
     pub id: i32,
     pub progress: i16,
@@ -168,7 +168,7 @@ pub struct MinimalRecordD {
 }
 
 #[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq)]
-#[display(fmt = "{} - {}% (ID: {})", player, progress, id)]
+#[display("{} - {}% (ID: {})", player, progress, id)]
 pub struct MinimalRecordP {
     pub id: i32,
     pub progress: i16,

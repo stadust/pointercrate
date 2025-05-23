@@ -8,7 +8,7 @@ edition.workspace = true
 
 [dependencies]
 serde = "1.0.219"
-derive_more = "0.99.18"
+derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate"] }
 log = "0.4.27"
 chrono = {version = "0.4.41", features = ["serde"]}

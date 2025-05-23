@@ -19,13 +19,13 @@ pub enum CoreError {
     /// Generic `400 BAD REQUEST` error
     ///
     /// Error Code `40000`
-    #[display(fmt = "The browser (or proxy) sent a request that this server could not understand.")]
+    #[display("The browser (or proxy) sent a request that this server could not understand.")]
     BadRequest,
 
     /// `400 BAD REQUEST' error returned when a header value was malformed
     ///
     /// Error Code `40002`
-    #[display(fmt = "The value for the header '{}' could not be processed", header)]
+    #[display( "The value for the header '{}' could not be processed", header)]
     InvalidHeaderValue {
         /// The name of the malformed header
         header: &'static str,
@@ -35,7 +35,7 @@ pub enum CoreError {
     ///
     /// Error code 40100
     #[display(
-        fmt = "The server could not verify that you are authorized to access the URL requested. You either supplied the wrong credentials \
+         "The server could not verify that you are authorized to access the URL requested. You either supplied the wrong credentials \
                (e.g. a bad password) or your browser doesn't understand how to supply the credentials required."
     )]
     Unauthorized,
@@ -44,7 +44,7 @@ pub enum CoreError {
     ///
     /// Error Code `40300`
     #[display(
-        fmt = "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."
+         "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."
     )]
     Forbidden,
 
@@ -53,7 +53,7 @@ pub enum CoreError {
     ///
     /// Error Code `40301`
     #[display(
-        fmt = "You do not have the pointercrate permissions to perform this request. Required is: {}, which isn't contained in any of \
+         "You do not have the pointercrate permissions to perform this request. Required is: {}, which isn't contained in any of \
                your permissions",
         required
     )]
@@ -66,14 +66,14 @@ pub enum CoreError {
     ///
     /// Error Code `40400`
     #[display(
-        fmt = "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+         "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     )]
     NotFound,
 
     /// `405 METHOD NOT ALLOWED`
     ///
     /// Error Code `40500`
-    #[display(fmt = "The method is not allowed for the requested URL.")]
+    #[display( "The method is not allowed for the requested URL.")]
     MethodNotAllowed,
 
     /// `409 CONFLICT`. This variant is returned if a `DELETE` or `PATCH` request is being handled,
@@ -82,7 +82,7 @@ pub enum CoreError {
     ///
     /// Error Code `40900`
     #[display(
-        fmt = "A conflict happened while processing the request. The resource might have been modified while the request was being \
+         "A conflict happened while processing the request. The resource might have been modified while the request was being \
                processed."
     )]
     Conflict,
@@ -90,7 +90,7 @@ pub enum CoreError {
     /// `411 LENGTH REQUIRED`
     ///
     /// Error Code `41100`
-    #[display(fmt = "A request with this methods requires a valid 'Content-Length' header")]
+    #[display( "A request with this methods requires a valid 'Content-Length' header")]
     LengthRequired,
 
     /// `412 PRECONDITION FAILED`. This variant is returned if a `DELETE` or `PATCH` request is
@@ -98,20 +98,20 @@ pub enum CoreError {
     /// in the database
     ///
     /// Error Code `41200`
-    #[display(fmt = "The precondition on the request for the URL failed positive evaluation")]
+    #[display( "The precondition on the request for the URL failed positive evaluation")]
     PreconditionFailed,
 
     /// `413 PAYLOAD TOO LARGE`
     ///
     /// Error Code `41300`
-    #[display(fmt = "The data value transmitted exceeds the capacity limit.")]
+    #[display( "The data value transmitted exceeds the capacity limit.")]
     PayloadTooLarge,
 
     /// `415 UNSUPPORTED MEDIA TYPE`
     ///
     /// Error Code `41500`
     #[display(
-        fmt = "The server does not support the media type transmitted in the request/no media type was specified. Expected one '{}'",
+         "The server does not support the media type transmitted in the request/no media type was specified. Expected one '{}'",
         expected
     )]
     UnsupportedMediaType {
@@ -122,33 +122,33 @@ pub enum CoreError {
     /// `422 UNPROCESSABLE ENTITY`
     ///
     /// Error Code `42200`
-    #[display(fmt = "The request was well-formed but was unable to be followed due to semantic errors.")]
+    #[display( "The request was well-formed but was unable to be followed due to semantic errors.")]
     UnprocessableEntity,
 
     /// `422 UNPRECESSABLE ENTITY` variant returned if the `limit` parameter provided for
     /// pagination is too large or too small
     ///
     /// Error Code `42207`
-    #[display(fmt = "Invalid value for the 'limit' parameter. It must be between 1 and 100")]
+    #[display( "Invalid value for the 'limit' parameter. It must be between 1 and 100")]
     InvalidPaginationLimit,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42222`
-    #[display(fmt = "Invalid URL scheme. Only 'http' and 'https' are supported")]
+    #[display( "Invalid URL scheme. Only 'http' and 'https' are supported")]
     InvalidUrlScheme,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42223`
-    #[display(fmt = "The provided URL contains authentication information. For security reasons it has been rejected")]
+    #[display( "The provided URL contains authentication information. For security reasons it has been rejected")]
     UrlAuthenticated,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42225`
     #[display(
-        fmt = "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
+         "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
         expected
     )]
     InvalidUrlFormat {
@@ -160,7 +160,7 @@ pub enum CoreError {
     ///
     /// Error Code `42227`
     #[display(
-        fmt = "The 'after' value provided for pagination is smaller than the 'before' value. This would result in an empty response is \
+         "The 'after' value provided for pagination is smaller than the 'before' value. This would result in an empty response is \
                most likely a bug"
     )]
     AfterSmallerBefore,
@@ -168,19 +168,19 @@ pub enum CoreError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42229`
-    #[display(fmt = "Your request contains mutually exclusive fields. Please restrict yourself to one of them")]
+    #[display( "Your request contains mutually exclusive fields. Please restrict yourself to one of them")]
     MutuallyExclusive,
 
     /// `428 PRECONDITION REQUIRED`
     ///
     /// Error Code `42800`
-    #[display(fmt = "This request is required to be conditional; try using \"If-Match\"")]
+    #[display( "This request is required to be conditional; try using \"If-Match\"")]
     PreconditionRequired,
 
     /// `429 TOO MANY REQUESTS`
     ///
     /// Error Code `42900`
-    #[display(fmt = "{} Try again in {:.2?}", message, remaining)]
+    #[display( "{} Try again in {:.2?}", message, remaining)]
     Ratelimited {
         #[serde(skip)]
         message: String,
@@ -190,7 +190,7 @@ pub enum CoreError {
 
     /// `500 INTERNAL SERVER ERROR`
     #[display(
-        fmt = "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there \
+         "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there \
                is an error in the application. Please notify a server administrator and have them look at the server logs!"
     )]
     InternalServerError,
@@ -199,7 +199,7 @@ pub enum CoreError {
     ///
     /// Error Code `50003`
     #[display(
-        fmt = "Internally, an invalid database access has been made. Please notify a server administrator and have them look at the \
+         "Internally, an invalid database access has been made. Please notify a server administrator and have them look at the \
                server logs!"
     )]
     DatabaseError,
@@ -208,7 +208,7 @@ pub enum CoreError {
     ///
     /// Error Code `50004`
     #[display(
-        fmt = "Internally, a database query timed out. This could be due to high server load, or because of a logic error resulting in a deadlock. If this issue persists after retrying, please notify a server administrator!"
+         "Internally, a database query timed out. This could be due to high server load, or because of a logic error resulting in a deadlock. If this issue persists after retrying, please notify a server administrator!"
     )]
     QueryTimeout,
 
@@ -216,13 +216,13 @@ pub enum CoreError {
     /// connection
     ///
     /// Error Code `50005`
-    #[display(fmt = "Failed to retrieve connection to the database. The server might be temporarily overloaded.")]
+    #[display( "Failed to retrieve connection to the database. The server might be temporarily overloaded.")]
     DatabaseConnectionError,
 
     /// `503 SERVICE UNAVAILABLE` variant returned by all non-GET (e.g. all possible mutating) requests if the server is in maintenance mode.
     ///
     /// Error Core `50301`
-    #[display(fmt = "The website is currently in read-only maintenance mode.")]
+    #[display( "The website is currently in read-only maintenance mode.")]
     ReadOnlyMaintenance,
 }
 
