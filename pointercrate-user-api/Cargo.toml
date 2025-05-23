@@ -20,7 +20,7 @@ governor = "0.8.1"
 
 # Dependencies needed only for oauth2
 reqwest = { version = "0.12.12", optional = true, features = ["json"] }
-chrono = { version = "0.4.40", optional = true }
+chrono = { version = "0.4.41", optional = true }
 
 [features]
 legacy_accounts = ["pointercrate-user/legacy_accounts"]
