@@ -1,4 +1,5 @@
 use maud::{html, Markup};
+use pointercrate_core::localization::tr;
 use std::fmt::Display;
 
 // FIXME: these should probably be turned into proper structs as well at some point
@@ -12,8 +13,8 @@ pub fn paginator(id: &str, endpoint: &str) -> Markup {
                 ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
             }
             div.flex.no-stretch style = "font-variant: small-caps; font-weight: bolder; justify-content: space-around"{
-                div.button.small.prev { "Previous" }
-                div.button.small.next { "Next" }
+                div.button.small.prev { (tr("paginator-previous")) }
+                div.button.small.next { (tr("paginator-next")) }
             }
         }
     }
@@ -23,15 +24,15 @@ pub fn filtered_paginator(id: &str, endpoint: &str) -> Markup {
     html! {
         div.flex.col.paginator #(id) data-endpoint=(endpoint) {
             div.search.seperated.no-stretch {
-                input placeholder = "Enter to search..." type = "text" style = "height: 1em";
+                input placeholder = (tr("filtered-paginator-placeholder")) type = "text" style = "height: 1em";
             }
             p.info-red.output style = "margin: 5px 0px"{}
             div style="min-height: 400px; position:relative; flex-grow:1" {
                 ul.selection-list style = "position: absolute; top: 0px; bottom:0px; left: 0px; right:0px" {}
             }
             div.flex.no-stretch style = "font-variant: small-caps; font-weight: bolder; justify-content: space-around"{
-                div.button.small.prev { "Previous" }
-                div.button.small.next { "Next" }
+                div.button.small.prev { (tr("paginator-previous")) }
+                div.button.small.next { (tr("paginator-next")) }
             }
         }
     }

@@ -26,6 +26,8 @@ record-submission = Record Submission
     .holder = Holder
     .holder-info = The player holding the record. Start typing to see suggestions of existing players. If this is your first submission, write your name, as you wish it to appear on the website, into the text field (ignoring any suggestions).
 
+    .holder-input-placeholder = Start typing for suggestions...
+
     .holder-validator-valuemissing = Please specify a record holder
     .holder-validator-rangeoverflow = Due to Geometry Dash's limitations I know that no player has such a long name
 
@@ -51,7 +53,6 @@ record-submission = Record Submission
     .raw-footage-info-a = The unedited and untrimmed video for this completion, uploaded to a non-compressing (e.g. not YouTube) file-sharing service such as google drive. If the record was achieved on stream (meaning there is no recording), please provide a link to the stream VOD.
     .raw-footage-info-b = Any personal information possibly contained within raw footage (e.g. names, sensitive conversations) will be kept strictly confidential and will not be shared outside of the demonlist team. Conversely, you acknowledge that you might inadvertently share such information by providing raw footage. You have the right to request deletion of your record note by contacting a list administrator.
     .raw-footage-note = This is required for every record submitted to the list!
-    .raw-footage-placeholder = https://drive.google.com/file/d/.../view?usp=sharing
 
     .raw-footage-validator-typemismatch = Please enter a valid URL
 

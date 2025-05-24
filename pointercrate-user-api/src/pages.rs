@@ -29,7 +29,7 @@ use {
 #[localized]
 #[rocket::get("/login")]
 pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
-    let login_page = Page::new(pointercrate_user_pages::login::login_page().await, vec!["form"]);
+    let login_page = Page::new(pointercrate_user_pages::login::login_page().await, vec!["ui"]);
 
     auth.map(|_| Redirect::to(rocket::uri!(account_page))).ok_or_else(|| login_page)
 }
@@ -114,7 +114,7 @@ pub async fn account_page(
     match auth {
         Some(mut auth) => Ok(Page::new(
             tabs.account_page(auth.user, permissions, &mut auth.connection).await,
-            vec!["form"],
+            vec!["ui"],
         )),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }

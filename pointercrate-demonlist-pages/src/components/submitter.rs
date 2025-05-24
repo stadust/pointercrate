@@ -85,7 +85,7 @@ impl Render for RecordSubmitter<'_> {
                         i {(tr("record-submission.note")) } (tr("record-submission.raw-footage-note"))
                     }
                     span.form-input.flex.col #submit-raw-footage {
-                        input type = "url"  name = "raw_footage" required = "" placeholder = (tr("record-submission.raw-footage-placeholder")) {}
+                        input type = "url"  name = "raw_footage" required = "" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
                         p.error {}
                     }
                     h3 {

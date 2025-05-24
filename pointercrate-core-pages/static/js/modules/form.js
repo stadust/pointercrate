@@ -24,7 +24,7 @@ export class Dropdown {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
     if (this.input.dataset.default === undefined && !this.input.placeholder)
-      this.input.placeholder = "Click to select";
+      this.input.placeholder = tr("dropdown-placeholder");
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
     this.ul = this.html.getElementsByTagName("ul")[0];
 

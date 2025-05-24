@@ -87,7 +87,7 @@ pub async fn overview(
             time_machine: tardis,
             submitter_initially_visible: submitter.unwrap_or(false),
         },
-        vec!["overview", "submitter"],
+        vec!["overview", "submitter", "ui"],
     ))
 }
 
@@ -168,7 +168,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
         IndividualStatsViewer {
             nationalities_in_use: Nationality::used(&mut *connection).await?,
         },
-        vec!["statsviewer"],
+        vec!["statsviewer", "ui"],
     ))
 }
 
