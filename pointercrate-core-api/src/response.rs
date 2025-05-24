@@ -1,24 +1,32 @@
-use crate::etag::Tagged;
-use maud::{html, DOCTYPE};
-use pointercrate_core::etag::Taggable;
+use crate::{
+    etag::Tagged,
+    preferences::{ClientPreferences, PreferenceManager},
+};
+use maud::{html, PreEscaped, DOCTYPE};
+use pointercrate_core::{
+    etag::Taggable,
+    localization::{get_locale, LANGUAGE},
+};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
+    localization::LocalizationConfiguration,
     PageConfiguration, PageFragment,
 };
 use rocket::{
+    futures,
     http::{ContentType, Header, Status},
     response::Responder,
     serde::json::Json,
     Request, Response,
 };
 use serde::Serialize;
-use std::{borrow::Cow, io::Cursor};
+use std::{borrow::Cow, io::Cursor, sync::Arc};
 
-pub struct Page(PageFragment);
+pub struct Page(PageFragment, Vec<&'static str>);
 
 impl Page {
-    pub fn new(fragment: impl Into<PageFragment>) -> Self {
-        Page(fragment.into())
+    pub fn new(fragment: impl Into<PageFragment>, resources: Vec<&'static str>) -> Self {
+        Page(fragment.into(), resources)
     }
 }
 
@@ -30,20 +38,55 @@ impl HeadLike for Page {
 
 impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
-        let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
+        let preference_manager = request.rocket().state::<PreferenceManager>().ok_or(Status::InternalServerError)?;
+        let localization_config = request
+            .rocket()
+            .state::<LocalizationConfiguration>()
+            .ok_or(Status::InternalServerError)?;
+
+        let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
+        let locale_set = localization_config.set_by_uri(request.uri().path().segments().collect());
+        let locale = locale_set
+            .by_code(preferences.get::<String>(locale_set.cookie))
+            .ok_or(Status::BadRequest)?;
+
+        let page_config = futures::executor::block_on(async {
+            LANGUAGE
+                .scope(get_locale(locale.iso_code), async {
+                    Ok(request
+                        .rocket()
+                        .state::<Arc<fn() -> PageConfiguration>>()
+                        .ok_or(Status::InternalServerError)?())
+                })
+                .await
+        })?;
 
         let fragment = self.0;
 
+        // there has to be a better way to do this..
+        // this loads an array of ftl resources this page requires, accessible
+        // by the frontend js
+        let mut resource_array_pushes = String::new();
+        self.1
+            .iter()
+            .for_each(|resource| resource_array_pushes += &format!(r#"window.ftlResources.push("{}");"#, resource));
+
         let rendered_fragment = html! {
             (DOCTYPE)
-            html lang="en" prefix="og: http://opg.me/ns#" {
+            html lang=(locale.iso_code) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)
+                    (PreEscaped(format!(r#"
+                    <script>
+                        window.ftlResources = [];
+                        {}
+                    </script>
+                    "#, resource_array_pushes)))
                 }
                 body {
                     div.content {
-                        (page_config.nav_bar)
+                        (page_config.nav_bar.render(locale, locale_set))
                         (fragment.body)
                         div #bg {}
                     }

@@ -17,6 +17,7 @@ import {
   setupEditorDialog,
   get,
 } from "/static/core/js/modules/form.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export function embedVideo(video) {
   if (!video) return;
@@ -43,10 +44,10 @@ export function initializeTimeMachine() {
   var timeMachineForm = new Form(formHtml);
   var destination = timeMachineForm.input("time-machine-destination");
 
-  destination.addValidator(valueMissing, "Please specify a value");
+  destination.addValidator(valueMissing, tr("time-machine.destination-validator-valuemissing"));
   destination.addValidator(
     rangeUnderflow,
-    "You cannot go back in time that far!"
+    tr("time-machine.destination-validator-rangeunderflow")
   );
 
   var now = new Date();
@@ -89,35 +90,35 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
   demon.addValidator(
     (input) => input.dropdown.selected !== undefined,
-    "Please specify a demon"
+    tr("record-submission.demon-validator-valuemissing")
   );
   demon.setTransform(parseInt);
 
   player.addValidator(
     (input) => input.value !== undefined,
-    "Please specify a record holder"
+    tr("record-submission.holder-validator-valuemissing")
   );
   player.addValidator(
     (input) => input.value === undefined || input.value.length <= 50,
-    "Due to Geometry Dash's limitations I know that no player has such a long name"
+    tr("record-submission.holder-validator-rangeoverflow")
   );
 
-  progress.addValidator(valueMissing, "Please specify the record's progress");
-  progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
+  progress.addValidator(valueMissing, tr("record-submission.progress-validator-valuemissing"));
+  progress.addValidator(rangeUnderflow, tr("record-submission.progress-validator-rangeunderflow"));
   progress.addValidator(
     rangeOverflow,
-    "Record progress cannot be larger than 100%"
+    tr("record-submission.progress-validator-rangeoverflow")
   );
-  progress.addValidator(badInput, "Record progress must be a valid integer");
-  progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+  progress.addValidator(badInput, tr("record-submission.progress-validator-badinput"));
+  progress.addValidator(stepMismatch, tr("record-submission.progress-validator-stepmismatch"));
 
   video.addValidator(
     valueMissing,
-    "Please specify a video so we can check the records validity"
+    tr("record-submission.video-validator-valuemissing")
   );
-  video.addValidator(typeMismatch, "Please enter a valid URL");
+  video.addValidator(typeMismatch, tr("record-submission.video-validator-typemismatch"));
 
-  rawFootage.addValidator(typeMismatch, "Please enter a valid URL");
+  rawFootage.addValidator(typeMismatch, tr("record-submission.raw-footage-validator-typemismatch"));
 
   submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
@@ -132,9 +133,11 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
         if (queue_position)
           submissionForm.setSuccess(
-            `Record successfully submitted. It is #${queue_position} in the queue!`
+            trp("record-submission.submission-success.queue", {
+              ["queue-position"]: queue_position,
+            })
           );
-        else submissionForm.setSuccess("Record successfully submitted.");
+        else submissionForm.setSuccess(tr("record-submission.submission-success"));
         submissionForm.clear();
       })
       .catch((response) => {
@@ -262,10 +265,15 @@ export function generateDemon(demon) {
 
   li.appendChild(b);
   li.appendChild(
-    document.createTextNode(demon.name + " (ID: " + demon.id + ")")
+    document.createTextNode(trp("demon-listed", {
+      ["demon"]: demon.name,
+      ["demon-id"]: demon.id.toString(),
+    }))
   );
   li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode("by " + demon.publisher.name));
+  li.appendChild(document.createTextNode(trp("demon-listed.publisher", {
+    ["publisher"]: demon.publisher.name,
+  })));
 
   return li;
 }
@@ -294,7 +302,9 @@ export function generateRecord(record) {
       break;
   }
 
-  recordId.appendChild(document.createTextNode("Record #" + record.id));
+  recordId.appendChild(document.createTextNode(trp("record-listed", {
+    ["record-id"]: record.id.toString(),
+  })));
 
   li.appendChild(recordId);
   li.appendChild(document.createElement("br"));
@@ -303,7 +313,10 @@ export function generateRecord(record) {
   );
   li.appendChild(document.createElement("br"));
   li.appendChild(
-    document.createTextNode(record.progress + "% on " + record.demon.name)
+    document.createTextNode(trp("record-listed.progress", {
+      ["percent"]: record.progress,
+      ["demon"]: record.demon.name,
+    }))
   );
   li.appendChild(document.createElement("br"));
 

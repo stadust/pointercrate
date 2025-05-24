@@ -9,6 +9,7 @@ edition.workspace = true
 [dependencies]
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
+pointercrate-core-macros = {path = "../pointercrate-core-macros"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}

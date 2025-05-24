@@ -8,6 +8,7 @@ import {
   PaginatorEditorBackend,
 } from "/static/core/js/modules/form.js";
 import { recordManager, initialize as initRecords } from "./records.js";
+import { loadResource, tr, trp } from "/static/core/js/modules/localization.js";
 
 export let submitterManager;
 
@@ -25,7 +26,9 @@ function generateSubmitter(submitter) {
     li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
   }
 
-  b.innerText = "Submitter #" + submitter.id;
+  b.innerText = trp("submitter-listed", {
+    ["submitter-id"]: submitter.id,
+  });
 
   li.appendChild(b);
   return li;
@@ -68,7 +71,9 @@ function setupSubmitterSearchSubmitterIdForm() {
   );
   var submitterId = submitterSearchByIdForm.input("search-submitter-id");
 
-  submitterId.addValidator(valueMissing, "Submitter ID required");
+  submitterSearchByIdForm.addErrorOverride(40401, "search-submitter-id");
+
+  submitterId.addValidator(valueMissing, tr("submitter-idsearch-panel.id-validator-valuemissing"));
   submitterSearchByIdForm.onSubmit(function () {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))
@@ -77,29 +82,32 @@ function setupSubmitterSearchSubmitterIdForm() {
 }
 
 export function initialize(tabber) {
-  setupSubmitterSearchSubmitterIdForm();
+  loadResource("submitter").then(() => {
+    setupSubmitterSearchSubmitterIdForm();
 
-  submitterManager = new SubmitterManager();
-  submitterManager.initialize();
+    submitterManager = new SubmitterManager();
+    submitterManager.initialize();
 
-  document
-    .getElementById("submitter-list-records")
-    .addEventListener("click", () => {
-      if (recordManager == null) {
-        // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
-        initRecords().then(() => {
+    document
+      .getElementById("submitter-list-records")
+      .addEventListener("click", () => {
+        if (recordManager == null) {
+          // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
+          initRecords().then(() => {
+            recordManager.updateQueryData(
+              "submitter",
+              submitterManager.currentObject.id
+            );
+            tabber.selectPane("3");
+          });
+        } else {
           recordManager.updateQueryData(
             "submitter",
             submitterManager.currentObject.id
           );
           tabber.selectPane("3");
-        });
-      } else {
-        recordManager.updateQueryData(
-          "submitter",
-          submitterManager.currentObject.id
-        );
-        tabber.selectPane("3");
+        }
       }
-    });
+    );
+  })
 }

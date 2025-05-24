@@ -1,4 +1,5 @@
-use maud::{html, Markup};
+use maud::{html, Markup, PreEscaped};
+use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_user::config;
 
@@ -26,7 +27,7 @@ fn login_page_body() -> Markup {
             div.tab-content.tab-content-active.flex.col data-tab-id="1" style="align-items: center" {
                 div.panel.fade {
                     h1.underlined.pad {
-                        "Sign In"
+                        (tr("login"))
                     }
 
                     @if cfg!(feature = "oauth2") {
@@ -47,61 +48,77 @@ fn login_page_body() -> Markup {
                     }
 
                     p {
-                        "Sign in using your username and password. Sign in attempts are limited to 3 per 30 minutes."
+                        (tr("login.info"))
                     }
 
                     form.flex.col #login-form novalidate = "" {
                         p.info-red.output {}
                         span.form-input #login-username {
-                            label for = "username" {"Username:"}
+                            label for = "username" {(tr("auth-username")) }
                             input required = "" type = "text" name = "username" minlength = "3";
                             p.error {}
                         }
                         span.form-input #login-password {
-                            label for = "password" {"Password:"}
+                            label for = "password" {(tr("auth-password")) }
                             input required = "" type = "password" name = "password" minlength = "10";
                             p.error {}
                         }
-                        input.button.blue.hover type = "submit" style = "margin-top: 15px" value="Sign In";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("login.submit"));
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    "Don't have a pointercrate account yet? " a.link.tab data-tab-id="2" {"Sign up"} " for one!"
+                    (PreEscaped(trp!(
+                        "register.redirect",
+                        (
+                            "redirect-link",
+                            html! {
+                                a.link.tab data-tab-id = "2" { (tr("register.redirect-link")) }
+                            }.into_string()
+                        )
+                    )))
                 }
             }
             div.tab-content.flex.col data-tab-id="2" style="align-items: center" {
                 div.panel.fade {
                     h1.underlined.pad {
-                        "Sign Up"
+                        (tr("register"))
                     }
                     @if cfg!(feature = "legacy_accounts") {
                         p {
-                            "Create a new account. Please note that the username cannot be changed after account creation, so choose wisely!"
+                            (tr("register.info"))
                         }
 
                         form.flex.col #register-form novalidate = "" {
                             p.info-red.output {}
                             span.form-input #register-username {
-                                label for = "name" {"Username:"}
+                                label for = "name" {(tr("auth-username")) }
                                 input required = "" type = "text" name = "name";
                                 p.error {}
                             }
                             span.form-input #register-password {
-                                label for = "password" {"Password:"}
+                                label for = "password" {(tr("auth-password")) }
                                 input required = "" type = "password" name = "password" minlength = "10";
                                 p.error {}
                             }
                             span.form-input #register-password-repeat {
-                                label for = "password2" {"Repeat Password:"}
+                                label for = "password2" {(tr("auth-repeatpassword")) }
                                 input required = "" type = "password" name = "password2" minlength = "10";
                                 p.error {}
                             }
-                            input.button.blue.hover type = "submit" style = "margin-top: 15px" value = "Sign Up";
+                            input.button.blue.hover type = "submit" style = "margin-top: 15px" value = (tr("register.submit"));
                         }
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    "Already have a pointercrate account? " a.link.tab.tab-active data-tab-id="1" {"Sign in"} " instead."
+                    (PreEscaped(trp!(
+                        "login.redirect",
+                        (
+                            "redirect-link",
+                            html! {
+                                a.link.tab.tab-active data-tab-id = "1" { (tr("login.redirect-link")) }
+                            }.into_string()
+                        )
+                    )))
                 }
             }
         }

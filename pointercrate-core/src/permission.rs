@@ -5,21 +5,21 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Debug, Display, Eq, PartialEq, Clone, Copy, Hash)]
 #[serde(transparent)]
-#[display("{}", name)]
+#[display("{}", text_id)]
 pub struct Permission {
-    name: &'static str,
+    text_id: &'static str,
 
     #[serde(skip)]
     bit: u16,
 }
 
 impl Permission {
-    pub const fn new(name: &'static str, bit: u16) -> Permission {
-        Permission { name, bit }
+    pub const fn new(text_id: &'static str, bit: u16) -> Permission {
+        Permission { text_id, bit }
     }
 
-    pub fn name(&self) -> &str {
-        self.name
+    pub fn text_id(&self) -> &str {
+        self.text_id
     }
 
     pub fn bit(&self) -> u16 {

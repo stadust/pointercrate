@@ -1,9 +1,9 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
-use pointercrate_user::auth::AuthenticatedUser;
+use pointercrate_core_macros::localized;
 use pointercrate_user::{
-    auth::{NonMutating, PasswordOrBrowser},
+    auth::{AuthenticatedUser, NonMutating, PasswordOrBrowser},
     error::UserError,
 };
 use pointercrate_user_pages::account::AccountPageConfig;
@@ -49,13 +49,15 @@ fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJa
     Ok(())
 }
 
+#[localized]
 #[rocket::get("/login")]
 pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
+        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page(), vec!["ui"]))
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
+#[localized]
 #[rocket::post("/login")]
 pub async fn login(
     auth: Result<Auth<PasswordOrBrowser>, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>,
@@ -70,6 +72,7 @@ pub async fn login(
 }
 
 #[cfg(feature = "legacy_accounts")]
+#[localized]
 #[rocket::post("/register", data = "<registration>")]
 pub async fn register(
     ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>, registration: Json<Registration>,
@@ -93,12 +96,16 @@ pub async fn register(
     Ok(Status::Created)
 }
 
+#[localized]
 #[rocket::get("/account")]
 pub async fn account_page(
     auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
     match auth {
-        Some(mut auth) => Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await)),
+        Some(mut auth) => Ok(Page::new(
+            tabs.account_page(auth.user, permissions, &mut auth.connection).await,
+            vec!["ui"],
+        )),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }
@@ -112,6 +119,7 @@ pub async fn logout(_auth: Auth<NonMutating>, cookies: &CookieJar<'_>) -> Redire
 }
 
 #[cfg(feature = "oauth2")]
+#[localized]
 #[rocket::post("/oauth/google", data = "<payload>")]
 pub async fn google_oauth_login(
     payload: Json<GoogleOauthPayload>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
