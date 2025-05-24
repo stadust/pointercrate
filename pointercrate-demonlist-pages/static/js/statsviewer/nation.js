@@ -167,11 +167,9 @@ class NationStatsViewer extends StatsViewer {
             (creation) => {
               return this.makeTooltip(
                 this.formatDemon(creation.demon),
-                "(Co)created&nbsp;by&nbsp;" +
-                  creation.players.length +
-                  "&nbsp;player" +
-                  (creation.players.length === 1 ? "" : "s") +
-                  "&nbsp;in&nbsp;this&nbsp;country: ",
+                trp("statsviewer-nation.created-tooltip", {
+                    ["players"]: creation.players.length,
+                  }).replaceAll(" ", "&nbsp;") + " ",
                 creation.players.join(", ")
               );
             }
@@ -186,7 +184,7 @@ class NationStatsViewer extends StatsViewer {
             (publication) => {
               return this.makeTooltip(
                 this.formatDemon(publication.demon),
-                "Published&nbsp;by: ",
+                tr("statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
                 publication.players.join(", ")
               );
             }
@@ -200,7 +198,7 @@ class NationStatsViewer extends StatsViewer {
             (verification) => {
               return this.makeTooltip(
                 this.formatDemon(verification.demon),
-                "Verified&nbsp;by: ",
+                tr("statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
                 verification.players.join(", ")
               );
             }
