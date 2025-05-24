@@ -145,13 +145,12 @@ async fn rocket() -> _ {
     // production environment, you will not want rocket to be responsible for this
     // and instead use a web server such as nginx as a reverse proxy to serve your
     // static files.
-    let rocket = rocket
+
+    rocket
         .mount("/static/core", FileServer::from("pointercrate-core-pages/static"))
         .mount("/static/demonlist", FileServer::from("pointercrate-demonlist-pages/static"))
         .mount("/static/user", FileServer::from("pointercrate-user-pages/static"))
-        .mount("/static/core", rocket::routes![pointercrate_core_api::localization::get_ftl]);
-
-    rocket
+        .mount("/static/core", rocket::routes![pointercrate_core_api::localization::get_ftl])
 }
 
 /// Constructs a [`PageConfiguration`] for your site.

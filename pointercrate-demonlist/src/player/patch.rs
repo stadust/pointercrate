@@ -81,7 +81,7 @@ impl FullPlayer {
         let name = name.trim().to_string();
 
         // Nothing to be done
-        if name == self.player.base.name.as_ref() {
+        if name == self.player.base.name {
             return Ok(());
         } else if name.to_lowercase() != self.player.base.name.to_lowercase() {
             // If they are equal case insensitively, we're only doing a cosmetic rename, which won't
@@ -231,7 +231,7 @@ impl FullPlayer {
 impl Player {
     pub async fn set_nationality(&mut self, nationality: Option<Nationality>, connection: &mut PgConnection) -> Result<()> {
         let iso_country_code = nationality.as_ref().map(|n| &n.iso_country_code);
-        let subdivision_code = nationality.as_ref().map(|n| n.subdivision.as_ref().map(|s| &s.iso_code)).flatten();
+        let subdivision_code = nationality.as_ref().and_then(|n| n.subdivision.as_ref().map(|s| &s.iso_code));
 
         sqlx::query!(
             "UPDATE players SET nationality = $1, subdivision = $2 WHERE id = $3",

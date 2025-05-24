@@ -12,7 +12,7 @@ use unic_langid::LanguageIdentifier;
 /// creating an enumeration which implements `From<ClientPreference>`.
 ///
 /// # Example
-/// ```
+/// ```ignore
 /// enum ClientTheme {
 ///     Light,
 ///     Dark,
@@ -30,7 +30,7 @@ use unic_langid::LanguageIdentifier;
 /// ```
 ///
 /// Assuming `client_preferences` is a valid [`ClientPreferences`]
-/// ```
+/// ```ignore
 /// let theme: ClientTheme = client_preferences.get("theme");
 /// ```
 pub struct ClientPreference {

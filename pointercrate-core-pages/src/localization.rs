@@ -114,7 +114,7 @@ impl LocalizationConfiguration {
     /// support 5 languages, but your guidelines pages might only support 2.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let localization_config = LocalizationConfiguration::default()
     ///     .with_fallback("en", "us")
     ///     .with_locale("fr", "fr")

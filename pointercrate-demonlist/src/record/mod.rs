@@ -46,8 +46,9 @@ mod paginate;
 mod patch;
 mod post;
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Default)]
 pub enum RecordStatus {
+    #[default]
     Submitted,
     Approved,
     Rejected,
@@ -73,12 +74,6 @@ impl RecordStatus {
             "UNDER_CONSIDERATION" => RecordStatus::UnderConsideration,
             _ => panic!("invalid record state: {}", sql),
         }
-    }
-}
-
-impl Default for RecordStatus {
-    fn default() -> Self {
-        RecordStatus::Submitted
     }
 }
 

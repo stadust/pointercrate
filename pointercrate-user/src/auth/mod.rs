@@ -14,7 +14,7 @@
 //!      are not targettable. Additionally, we cannot set the X-CSRF-TOKEN header on GET requests that are triggered
 //!      by top-level browser navigation.
 //!    - non-`GET`: These are authenticated using the session token, which is validated using the csrf token.
-//!    Browser-based auth allows both administrative account actions (except changing password) and API access
+//!      Browser-based auth allows both administrative account actions (except changing password) and API access
 //! 3. HTTP Bearer Auth: Authenticating using a bearer token allows API access, but does not allow user account actions.
 //!
 //! See [`AuthenticatedUser`] for implementation details.
@@ -30,6 +30,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 mod delete;
 mod get;
 pub mod legacy;
+pub mod oauth;
 mod patch;
 mod post;
 
@@ -78,6 +79,7 @@ pub struct AuthenticatedUser<Auth> {
 
 pub enum AuthenticationType {
     Legacy(LegacyAuthenticatedUser),
+    Oauth2(oauth::OA2AuthenticatedUser),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -134,7 +136,7 @@ pub fn generate_jwt<C: Serialize>(claims: &C) -> String {
 }
 
 pub fn decode_jwt<C: DeserializeOwned>(jwt: &str, validation: &Validation) -> Result<C> {
-    jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), &validation)
+    jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), validation)
         .map_err(|_| CoreError::Unauthorized.into())
         .map(|token_data| token_data.claims)
 }
@@ -147,12 +149,14 @@ impl<Auth> AuthenticatedUser<Auth> {
     pub fn into_user(self) -> User {
         match self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.into_user(),
+            AuthenticationType::Oauth2(oauth) => oauth.into_user(),
         }
     }
 
     pub fn user(&self) -> &User {
         match &self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.user(),
+            AuthenticationType::Oauth2(oauth) => oauth.user(),
         }
     }
 

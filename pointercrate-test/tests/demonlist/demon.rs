@@ -12,7 +12,7 @@ use sqlx::{Pool, Postgres};
 async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
     let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": [], "level_id": 10565740}};
 
@@ -41,7 +41,7 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
 
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
 
     // Pagination on an empty table results in an empty response with empty links header.
     //
@@ -52,9 +52,9 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
     assert_eq!(links, LinksBuilder::new(URL).generate(&DemonPositionPagination::default()).unwrap());
 
     // Let's add some data to the database and do actual tests!
-    let id1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 100, player.id, player.id, &mut *connection).await;
-    let id2 = pointercrate_test::demonlist::add_demon("Bloodbath 2", 2, 100, player.id, player.id, &mut *connection).await;
-    let id3 = pointercrate_test::demonlist::add_demon("Bloodbath 3", 3, 100, player.id, player.id, &mut *connection).await;
+    let id1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 100, player.id, player.id, &mut connection).await;
+    let id2 = pointercrate_test::demonlist::add_demon("Bloodbath 2", 2, 100, player.id, player.id, &mut connection).await;
+    let id3 = pointercrate_test::demonlist::add_demon("Bloodbath 3", 3, 100, player.id, player.id, &mut connection).await;
 
     // Test only the limit parameter in isolation. Off-by-one errors in the limit are hard to catch due to how the "next" parameter
     // is computed internally, so make sure that if limit is ignored, at least 2 more elements would be returned

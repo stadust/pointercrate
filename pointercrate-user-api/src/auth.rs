@@ -120,7 +120,7 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
                 let user = try_outcome!(AuthenticatedUser::by_id(try_outcome!(access_claims.id()), &mut connection).await);
                 let authenticated_user = try_outcome!(user.validate_api_access(access_claims));
 
-                try_outcome!(audit_connection(&mut *connection, authenticated_user.user().id).await);
+                try_outcome!(audit_connection(&mut connection, authenticated_user.user().id).await);
 
                 return Outcome::Success(Auth {
                     user: authenticated_user,
@@ -137,7 +137,7 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
             let authenticated_for_get = try_outcome!(user.validate_cookie_claims(access_claims));
             let authenticated = try_outcome!(authenticated_for_get.validate_csrf_token(csrf_token));
 
-            try_outcome!(audit_connection(&mut *connection, authenticated.user().id).await);
+            try_outcome!(audit_connection(&mut connection, authenticated.user().id).await);
 
             return Outcome::Success(Auth {
                 user: authenticated.downgrade_auth_type().unwrap(), // cannot fail: we are not password authenticated
@@ -188,7 +188,7 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
                     let user = try_outcome!(AuthenticatedUser::by_name(username, &mut connection).await);
                     let authenticated = try_outcome!(user.verify_password(password));
 
-                    try_outcome!(audit_connection(&mut *connection, authenticated.user().id).await);
+                    try_outcome!(audit_connection(&mut connection, authenticated.user().id).await);
 
                     return Outcome::Success(Auth {
                         user: authenticated,
@@ -205,7 +205,7 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
             let authenticated_for_get = try_outcome!(user.validate_cookie_claims(access_claims));
             let authenticated = try_outcome!(authenticated_for_get.validate_csrf_token(csrf_token));
 
-            try_outcome!(audit_connection(&mut *connection, authenticated.user().id).await);
+            try_outcome!(audit_connection(&mut connection, authenticated.user().id).await);
 
             return Outcome::Success(Auth {
                 user: authenticated,

@@ -79,7 +79,7 @@ impl LinksBuilder {
 
         for (rel, param) in &self.rels {
             if !is_first {
-                buf.push_str(",");
+                buf.push(',');
             }
             is_first = false;
 

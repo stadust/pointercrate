@@ -131,12 +131,12 @@ impl PermissionsManager {
     // we should probably verify that added permissions are all part of what was in
     // the constructor but whatever
     pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {
-        self.assignable_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
+        self.assignable_map.entry(perm1).or_default().insert(perm2);
         self
     }
 
     pub fn implies(mut self, perm1: Permission, perm2: Permission) -> Self {
-        self.implication_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
+        self.implication_map.entry(perm1).or_default().insert(perm2);
         self
     }
 

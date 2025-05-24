@@ -13,8 +13,8 @@ use sqlx::{PgConnection, Pool, Postgres};
 pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1972", "stardust1972").await;
 
     let submission = serde_json::json! {{"progress": 100, "demon": demon.demon.base.id, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
@@ -57,7 +57,7 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
 pub async fn test_verifications_give_score(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     let player: FullPlayer = clnt
@@ -93,7 +93,7 @@ async fn subdivision_score(nation: &str, iso_code: &str, connection: &mut PgConn
 pub async fn test_player_score_reflects_to_nationality(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     clnt.patch_player(
@@ -131,8 +131,8 @@ pub async fn test_player_score_reflects_to_nationality(pool: Pool<Postgres>) {
 pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
 
     let list_size = std::env::var("LIST_SIZE").unwrap().parse::<i16>().unwrap();
 
@@ -171,8 +171,8 @@ pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) 
 pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
 
     let list_size = std::env::var("LIST_SIZE").unwrap().parse::<i16>().unwrap();
 

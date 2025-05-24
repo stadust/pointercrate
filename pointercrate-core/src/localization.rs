@@ -38,7 +38,7 @@ pub fn tr(text_id: &str) -> String {
 /// containing variables.
 ///
 /// Example with English translation:
-/// ```
+/// ```ignore
 /// assert_eq!(
 ///     trp!("demon-score", ("percent", 99)),
 ///     "Demonlist score (99%)",

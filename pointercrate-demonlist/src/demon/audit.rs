@@ -104,7 +104,9 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                     }
 
                     // update the previous entry's "new_position" field
-                    movement_log.last_mut().map(|entry| entry.new_position = Some(old_position));
+                    if let Some(entry) = movement_log.last_mut() {
+                        entry.new_position = Some(old_position);
+                    }
 
                     // if the time part of the datetime object is just zeros, the log entry was generated from deltas,
                     // meaning we can't figure out reasons accurately
@@ -169,9 +171,9 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
 
     // update the last entry with the current position
     MinimalDemon::by_id(demon_id, &mut *connection).await.map(|minimal_demon| {
-        movement_log
-            .last_mut()
-            .map(|entry| entry.new_position = Some(minimal_demon.position));
+        if let Some(entry) = movement_log.last_mut() {
+            entry.new_position = Some(minimal_demon.position)
+        }
     })?;
 
     Ok(movement_log)

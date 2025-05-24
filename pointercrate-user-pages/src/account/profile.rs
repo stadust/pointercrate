@@ -1,7 +1,11 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, permission::PermissionsManager, trp};
-use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
+use pointercrate_core_pages::head::Script;
+use pointercrate_user::{
+    auth::{AuthenticatedUser, NonMutating},
+    config,
+};
 use sqlx::PgConnection;
 
 pub struct ProfileTab;
@@ -14,6 +18,14 @@ impl AccountPageTab for ProfileTab {
 
     fn initialization_script(&self) -> String {
         "/static/user/js/account/profile.js".into()
+    }
+
+    fn additional_scripts(&self) -> Vec<Script> {
+        if cfg!(feature = "oauth2") {
+            vec![Script::r#async("https://accounts.google.com/gsi/client")]
+        } else {
+            Vec::new()
+        }
     }
 
     fn tab_id(&self) -> u8 {
@@ -114,6 +126,25 @@ impl AccountPageTab for ProfileTab {
                         (tr("profile-logout.button"))
                     }
                 }
+                @if cfg!(feature = "oauth2") && authenticated_user.is_legacy() {
+                    div.panel.fade {
+                        h2.underlined.pad {
+                            "Link With Google"
+                        }
+                        p {
+                            "Enable signing in to your pointercrate account via Google oauth. More secure than password login, and avoids account lock-outs due to forgotten passwords. Linking a Google account is irreversible, and you cannot change the linked Google account later on!"
+                        }
+                        div #g_id_onload
+                            data-ux_mode="popup"
+                            data-auto_select="true"
+                            data-itp_support="true"
+                            data-client_id=(config::google_client_id())
+                            data-callback="googleOauthCallback" {}
+
+                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" {}
+                        p.error #g-signin-error style="text-align: left" {}
+                    }
+                }
                 div.panel.fade {
                     h2.underlined.pad {
                         (tr("profile-get-token"))
@@ -159,7 +190,7 @@ fn edit_display_name_dialog() -> Markup {
             div.dialog #edit-dn-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-display-name.dialog-header")) 
+                    (tr("profile-display-name.dialog-header"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
@@ -182,7 +213,7 @@ fn edit_youtube_link_dialog() -> Markup {
             div.dialog #edit-yt-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-youtube.dialog-header")) 
+                    (tr("profile-youtube.dialog-header"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
@@ -205,7 +236,7 @@ fn change_password_dialog() -> Markup {
             div.dialog #edit-pw-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-change-password.dialog-header")) 
+                    (tr("profile-change-password.dialog-header"))
                 }
                 p {
                     (tr("profile-change-password.dialog-info"))
@@ -241,7 +272,7 @@ fn delete_account_dialog() -> Markup {
             div.dialog #delete-acc-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-delete-account.dialog-header")) 
+                    (tr("profile-delete-account.dialog-header"))
                 }
                 p {
                     (tr("profile-delete-account.dialog-info"))

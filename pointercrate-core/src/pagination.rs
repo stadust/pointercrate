@@ -233,7 +233,7 @@ where
     S::Err: Display,
 {
     let s = <&str as serde::Deserialize>::deserialize(deserializer)?;
-    S::from_str(&s).map_err(|err| D::Error::custom(err.to_string()))
+    S::from_str(s).map_err(|err| D::Error::custom(err.to_string()))
 }
 
 fn from_str_non_nullable<'de, S, D>(deserializer: D) -> Result<Option<S>, D::Error>
@@ -243,6 +243,6 @@ where
     S::Err: Display,
 {
     non_nullable::<'de, &'de str, D>(deserializer)?
-        .map(|s| S::from_str(&s).map_err(|err| D::Error::custom(err.to_string())))
+        .map(|s| S::from_str(s).map_err(|err| D::Error::custom(err.to_string())))
         .transpose()
 }
