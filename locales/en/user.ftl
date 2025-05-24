@@ -1,3 +1,6 @@
+nav-userarea = User Area
+    .overline = POINTERCRATE
+
 user-username = Username:
 user-displayname = Display Name:
     .none = None

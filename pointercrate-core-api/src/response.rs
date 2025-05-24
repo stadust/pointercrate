@@ -3,20 +3,24 @@ use crate::{
     preferences::{ClientPreferences, PreferenceManager},
 };
 use maud::{html, PreEscaped, DOCTYPE};
-use pointercrate_core::etag::Taggable;
+use pointercrate_core::{
+    etag::Taggable,
+    localization::{get_locale, LANGUAGE},
+};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
     localization::LocalizationConfiguration,
     PageConfiguration, PageFragment,
 };
 use rocket::{
+    futures,
     http::{ContentType, Header, Status},
     response::Responder,
     serde::json::Json,
     Request, Response,
 };
 use serde::Serialize;
-use std::{borrow::Cow, io::Cursor};
+use std::{borrow::Cow, io::Cursor, sync::Arc};
 
 pub struct Page(PageFragment, Vec<&'static str>);
 
@@ -34,7 +38,6 @@ impl HeadLike for Page {
 
 impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
-        let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
         let preference_manager = request.rocket().state::<PreferenceManager>().ok_or(Status::InternalServerError)?;
         let localization_config = request
             .rocket()
@@ -46,6 +49,17 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
         let locale = locale_set
             .by_code(preferences.get::<String>(locale_set.cookie))
             .ok_or(Status::BadRequest)?;
+
+        let page_config = futures::executor::block_on(async {
+            LANGUAGE
+                .scope(get_locale(locale.iso_code), async {
+                    Ok(request
+                        .rocket()
+                        .state::<Arc<fn() -> PageConfiguration>>()
+                        .ok_or(Status::InternalServerError)?())
+                })
+                .await
+        })?;
 
         let fragment = self.0;
 

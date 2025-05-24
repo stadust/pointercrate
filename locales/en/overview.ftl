@@ -7,6 +7,8 @@ extended-list = Extended List
 legacy-list = Legacy List
     .info = These are demons that used to be on the list, but got pushed off as new demons were added. They are here for nostalgic reasons. This list is in no order whatsoever and will not be maintained any longer at all. This means no new records will be added for these demons.
 
+nav-timemachine = Time Machine
+
 ## Time machine
 time-machine = Time Machine
     .info = Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is January 4th 2017. Note however that data before August 4th 2017 is only provided on a best-effort basis and not guaranteed to be 100% accurate. Particularly data from before April 4th 2017 contains significant errors!
