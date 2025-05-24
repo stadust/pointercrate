@@ -26,8 +26,8 @@ impl Player {
 
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<Player> {
         let result = sqlx::query!(
-            r#"SELECT id, players.name, banned, players.score, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name FROM players LEFT OUTER JOIN nationalities ON 
-             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code WHERE id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"#,
+            r#"SELECT players.id, players.name, banned, players.score, nationalities.nation::text, iso_country_code::text, iso_code::text as subdivision_code, subdivisions.name::text as subdivision_name, player_ranks.rank FROM players LEFT OUTER JOIN nationalities ON 
+             players.nationality = nationalities.iso_country_code LEFT OUTER JOIN subdivisions ON players.subdivision = subdivisions.iso_code LEFT OUTER JOIN player_ranks ON player_ranks.id = players.id WHERE players.id = $1 AND (subdivisions.nation=nationalities.iso_country_code or players.subdivision is null)"#,
             id
         )
         .fetch_one(connection)
@@ -58,6 +58,7 @@ impl Player {
                         banned: row.banned,
                     },
                     score: row.score,
+                    rank: row.rank,
                     nationality,
                 })
             },

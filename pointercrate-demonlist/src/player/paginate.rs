@@ -100,6 +100,7 @@ impl Paginatable<PlayerPagination> for Player {
                     banned: row.get("banned"),
                 },
                 score: row.get("score"),
+                rank: row.get("rank"),
                 nationality,
             })
         }
@@ -145,7 +146,6 @@ impl PaginationQuery for RankingPagination {
 
 #[derive(Debug, Serialize)]
 pub struct RankedPlayer {
-    rank: i64,
     #[serde(skip)]
     index: i64,
     #[serde(flatten)]
@@ -198,11 +198,11 @@ impl Paginatable<RankingPagination> for RankedPlayer {
                     banned: false,
                 },
                 score: row.get("score"),
+                rank: row.get("rank"),
                 nationality,
             };
 
             players.push(RankedPlayer {
-                rank: row.get("rank"),
                 index: row.get("index"),
                 player,
             })
