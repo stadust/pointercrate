@@ -59,6 +59,7 @@ pub struct Player {
     ///   * Player banned
     ///   * Player objects merged
     pub score: f64,
+    pub rank: Option<i64>,
     pub nationality: Option<Nationality>,
 }
 
