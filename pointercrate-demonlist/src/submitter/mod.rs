@@ -12,7 +12,7 @@ mod patch;
 mod post;
 
 #[derive(Debug, Deserialize, Serialize, Hash, Display, Copy, Clone, PartialEq, Eq)]
-#[display(fmt = "{} (Banned: {})", id, banned)]
+#[display("{} (Banned: {})", id, banned)]
 pub struct Submitter {
     pub id: i32,
     pub banned: bool,

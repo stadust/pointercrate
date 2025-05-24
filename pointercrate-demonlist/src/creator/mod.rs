@@ -8,7 +8,7 @@ mod get;
 mod post;
 
 #[derive(Debug, Display, Hash)]
-#[display(fmt = "creator with id {} on demon {}", creator, demon)]
+#[display("creator with id {} on demon {}", creator, demon)]
 pub struct Creator {
     demon: i32,
     creator: i32,

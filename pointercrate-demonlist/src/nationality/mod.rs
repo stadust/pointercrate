@@ -1,5 +1,4 @@
 use crate::demon::MinimalDemon;
-use derive_more::Constructor;
 pub use paginate::{NationalityRankingPagination, RankedNation};
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -8,7 +7,7 @@ use sqlx::PgConnection;
 mod get;
 mod paginate;
 
-#[derive(Debug, PartialEq, Eq, Serialize, Hash, Constructor, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Eq, Serialize, Hash, Deserialize, Clone)]
 pub struct Nationality {
     #[serde(rename = "country_code")]
     pub iso_country_code: String,
@@ -45,7 +44,7 @@ pub struct NationalityRecord {
 
 impl Taggable for NationalityRecord {}
 
-#[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Constructor, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Hash, Deserialize)]
 pub struct Subdivision {
     pub iso_code: String,
     pub name: String,

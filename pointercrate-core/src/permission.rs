@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Debug, Display, Eq, PartialEq, Clone, Copy, Hash)]
 #[serde(transparent)]
-#[display(fmt = "{}", text_id)]
+#[display("{}", text_id)]
 pub struct Permission {
     text_id: &'static str,
 

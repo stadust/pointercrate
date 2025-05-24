@@ -20,7 +20,7 @@ unic-langid = "0.9.5"
 log = "0.4.27"
 base64 = "0.22.1"
 nonzero_ext = "0.3.0"
-governor = "0.8.1"
+governor = "0.10.0"
 
 # Dependencies needed only for oauth2
 reqwest = { version = "0.12.12", optional = true, features = ["json"] }

@@ -12,7 +12,7 @@ use sqlx::PgConnection;
 use url::Url;
 
 #[derive(Deserialize, Debug, Display)]
-#[display(fmt = "{}% on {} by {} [status: {}]", progress, demon, player, status)]
+#[display("{}% on {} by {} [status: {}]", progress, demon, player, status)]
 pub struct Submission {
     progress: i16,
     player: String,
