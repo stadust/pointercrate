@@ -21,6 +21,10 @@ class NationStatsViewer extends StatsViewer {
   onReceive(response) {
     super.onReceive(response);
 
+    this._rank.innerText = this.currentlySelected.dataset.rank;
+    this._score.innerHTML =
+        this.currentlySelected.getElementsByTagName("i")[0].innerHTML;
+
     let nationData = response.data.data;
 
     let selectedSort = this.demonSortingModeDropdown.selected;
