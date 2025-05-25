@@ -19,9 +19,14 @@ use crate::preferences::{ClientPreferences, PreferenceManager};
 pub async fn get_ftl(locale: ClientLocale, resource: &str) -> Result<(ContentType, NamedFile), Status> {
     let iso_code = locale.0.iso_code;
 
-    let file = NamedFile::open(format!("locales/{}/{}.ftl", iso_code, resource))
-        .await
-        .map_err(|_| Status::NotFound)?;
+    let file = NamedFile::open(format!(
+        "{}/{}/{}.ftl",
+        std::env::var("LOCALES_DIR").expect("LOCALES_DIR is not set"),
+        iso_code,
+        resource
+    ))
+    .await
+    .map_err(|_| Status::NotFound)?;
 
     Ok((ContentType::Plain, file))
 }
