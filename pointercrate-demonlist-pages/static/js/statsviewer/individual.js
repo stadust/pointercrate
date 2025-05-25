@@ -23,6 +23,9 @@ class IndividualStatsViewer extends StatsViewer {
 
     var playerData = response.data.data;
 
+    this._rank.innerText = playerData.rank;
+    this._score.innerText = playerData.score.toFixed(2);
+
     this.setName(playerData.name, playerData.nationality);
 
     const selectedSort = this.demonSortingModeDropdown.selected;
@@ -231,7 +234,6 @@ function generateStatsViewerPlayer(player) {
 
   li.className = "white hover";
   li.dataset.id = player.id;
-  li.dataset.rank = player.rank;
 
   b.appendChild(document.createTextNode("#" + player.rank + " "));
   i.appendChild(document.createTextNode(player.score.toFixed(2)));
