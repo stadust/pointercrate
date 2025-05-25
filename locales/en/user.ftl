@@ -26,6 +26,10 @@ auth-repeatpassword = Repeat Password:
 # in the .redirect attributes
 #
 login = Sign In
+    .oauth-info = If you have linked your pointercrate account with a Google account, you must sign in via Google oauth by clicking the button below:
+
+    .methods-separator = otherwise
+
     .info = Sign in using your username and password. Sign in attempts are limited to 3 per 30 minutes.
     .submit = Sign In
 
@@ -128,3 +132,6 @@ profile-get-token = Get access token
 profile-invalidate-tokens = Invalidate tokens
     .info = If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action!
     .button = Invalidate all access tokens
+
+profile-oauth = Link With Google
+    .info = Enable signing in to your pointercrate account via Google oauth. More secure than password login, and avoids account lock-outs due to forgotten passwords. Linking a Google account is irreversible, and you cannot change the linked Google account later on!

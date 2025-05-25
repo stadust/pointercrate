@@ -24,6 +24,12 @@ pub fn get_locale(code: &str) -> &'static LanguageIdentifier {
     LOCALES.fallback()
 }
 
+/// Utility function for easily retrieving the current [`LanguageIdentifier`] inside the
+/// `task_local!` [`LocalKey`] scope of wherever this is called from.
+pub fn task_lang() -> &'static LanguageIdentifier {
+    LANGUAGE.with(|lang| *lang)
+}
+
 /// A utility function for fetching a translated message associated with the
 /// given `text_id`. The language of the returned message depends on the value
 /// of the `tokio::task_local!` `LANGUAGE` [`LocalKey`] variable. The translations

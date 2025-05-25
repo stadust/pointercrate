@@ -1,6 +1,10 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{localization::tr, permission::PermissionsManager, trp};
+use pointercrate_core::{
+    localization::{task_lang, tr},
+    permission::PermissionsManager,
+    trp,
+};
 use pointercrate_core_pages::head::Script;
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating},
@@ -49,6 +53,8 @@ impl AccountPageTab for ProfileTab {
 
         let permissions = permissions.bits_to_permissions(user.permissions);
         let permission_string = permissions.iter().map(|perm| tr(perm.text_id())).collect::<Vec<_>>().join(", ");
+
+        let lang = task_lang().language.to_string();
 
         html! {
             div.left {
@@ -129,10 +135,10 @@ impl AccountPageTab for ProfileTab {
                 @if cfg!(feature = "oauth2") && authenticated_user.is_legacy() {
                     div.panel.fade {
                         h2.underlined.pad {
-                            "Link With Google"
+                            (tr("profile-oauth"))
                         }
                         p {
-                            "Enable signing in to your pointercrate account via Google oauth. More secure than password login, and avoids account lock-outs due to forgotten passwords. Linking a Google account is irreversible, and you cannot change the linked Google account later on!"
+                            (tr("profile-oauth.info"))
                         }
                         div #g_id_onload
                             data-ux_mode="popup"
@@ -141,7 +147,8 @@ impl AccountPageTab for ProfileTab {
                             data-client_id=(config::google_client_id())
                             data-callback="googleOauthCallback" {}
 
-                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" {}
+                        script src=(format!("https://accounts.google.com/gsi/client?hl={}", &lang)) async {}
+                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" data-locale=(lang) {}
                         p.error #g-signin-error style="text-align: left" {}
                     }
                 }

@@ -1,5 +1,8 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{localization::tr, trp};
+use pointercrate_core::{
+    localization::{task_lang, tr},
+    trp,
+};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_user::config;
 
@@ -22,6 +25,8 @@ pub fn login_page() -> PageFragment {
 }
 
 fn login_page_body() -> Markup {
+    let lang = task_lang().language.to_string();
+
     html! {
         div.tab-display.center #login-tabber style="display: flex; align-items: center; justify-content: center; height: calc(100% - 70px)" { // 70px = height of nav bar
             div.tab-content.tab-content-active.flex.col data-tab-id="1" style="align-items: center" {
@@ -32,7 +37,7 @@ fn login_page_body() -> Markup {
 
                     @if cfg!(feature = "oauth2") {
                         p {
-                            "If you have linked your pointercrate account with a Google account, you must sign in via Google oauth by clicking the button below:"
+                            (tr("login.oauth-info"))
                         }
                         div #g_id_onload
                             data-ux_mode="popup"
@@ -41,10 +46,11 @@ fn login_page_body() -> Markup {
                             data-client_id=(config::google_client_id())
                             data-callback="googleOauthCallback" {}
 
-                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" {}
+                        script src=(format!("https://accounts.google.com/gsi/client?hl={}", &lang)) async {}
+                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" data-locale=(lang) {}
                         p.error #g-signin-error style="text-align: left" {}
 
-                        p.or style="text-size: small; margin: 0px" {"otherwise"}
+                        p.or style="text-size: small; margin: 0px" { (tr("login.methods-separator")) }
                     }
 
                     p {
