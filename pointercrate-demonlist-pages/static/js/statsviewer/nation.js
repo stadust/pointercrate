@@ -23,7 +23,7 @@ class NationStatsViewer extends StatsViewer {
 
     this._rank.innerText = this.currentlySelected.dataset.rank;
     this._score.innerHTML =
-        this.currentlySelected.getElementsByTagName("i")[0].innerHTML;
+      this.currentlySelected.getElementsByTagName("i")[0].innerHTML;
 
     let nationData = response.data.data;
 

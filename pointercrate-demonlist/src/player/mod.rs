@@ -94,7 +94,9 @@ impl DatabasePlayer {
 
         sqlx::query!("UPDATE nationalities SET score = coalesce(score_of_nation(nationalities.iso_country_code), 0) FROM players WHERE players.id = $1 AND players.nationality = nationalities.iso_country_code", self.id).execute(&mut *connection).await?;
         sqlx::query!("UPDATE subdivisions SET score = coalesce(score_of_subdivision(subdivisions.nation, subdivisions.iso_code), 0) FROM players WHERE players.id = $1 AND players.nationality = subdivisions.nation AND players.subdivision = subdivisions.iso_code", self.id).execute(&mut *connection).await?;
-        sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;").execute(&mut *connection).await?;
+        sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;")
+            .execute(&mut *connection)
+            .await?;
 
         Ok(new_score.score)
     }
@@ -103,7 +105,11 @@ impl DatabasePlayer {
 pub async fn recompute_scores(connection: &mut PgConnection) -> Result<(), CoreError> {
     sqlx::query!("SELECT recompute_player_scores();").execute(&mut *connection).await?;
     sqlx::query!("SELECT recompute_nation_scores();").execute(&mut *connection).await?;
-    sqlx::query!("SELECT recompute_subdivision_scores();").execute(&mut *connection).await?;
-    sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;").execute(&mut *connection).await?;
+    sqlx::query!("SELECT recompute_subdivision_scores();")
+        .execute(&mut *connection)
+        .await?;
+    sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;")
+        .execute(&mut *connection)
+        .await?;
     Ok(())
 }

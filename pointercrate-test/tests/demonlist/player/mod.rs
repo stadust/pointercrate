@@ -1,3 +1,4 @@
+use pointercrate_demonlist::record::RecordStatus;
 use pointercrate_demonlist::{
     nationality::{Nationality, Subdivision},
     player::{DatabasePlayer, FullPlayer, Player},
@@ -6,7 +7,6 @@ use pointercrate_demonlist::{
 use rocket::http::Status;
 use serde_json::json;
 use sqlx::{PgConnection, Pool, Postgres};
-use pointercrate_demonlist::record::RecordStatus;
 
 mod score;
 
@@ -328,7 +328,6 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
     );
 }
 
-
 #[sqlx::test(migrations = "../migrations")]
 async fn test_player_merge(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
@@ -347,7 +346,8 @@ async fn test_player_merge(pool: Pool<Postgres>) {
     pointercrate_test::demonlist::add_simple_record(90, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
     pointercrate_test::demonlist::add_simple_record(95, player2.id, demon1, RecordStatus::Approved, &mut connection).await;
 
-    let patched: FullPlayer = client.patch_player(player2.id, &moderator, json!{{"name": "stardust1971"}})
+    let patched: FullPlayer = client
+        .patch_player(player2.id, &moderator, json! {{"name": "stardust1971"}})
         .await
         .get_success_result()
         .await;
@@ -356,7 +356,8 @@ async fn test_player_merge(pool: Pool<Postgres>) {
     assert_eq!(patched.records[0].progress, 95);
     assert_eq!(patched.player.base.id, player2.id);
 
-    client.get(&format!("/api/v1/players/{}/", player1.id))
+    client
+        .get(&format!("/api/v1/players/{}/", player1.id))
         .expect_status(Status::NotFound)
         .execute()
         .await;
