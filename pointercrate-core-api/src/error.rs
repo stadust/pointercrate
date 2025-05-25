@@ -36,7 +36,6 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
 
         if *accept == MediaType::HTML {
             Response::build_from(
-                // For now, error messages will always be in english
                 Page::new(
                     ErrorFragment {
                         status: self.error_code / 100,
