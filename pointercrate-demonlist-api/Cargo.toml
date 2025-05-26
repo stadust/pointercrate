@@ -25,3 +25,6 @@ chrono = "0.4.41"
 serde = "1.0.219"
 governor = "0.10.0"
 rand = "0.9.1"
+
+[features]
+geolocation = ["pointercrate-demonlist-pages/geolocation"]
