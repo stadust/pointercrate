@@ -221,7 +221,9 @@ pub async fn geolocate_nationality(
             .inspect_err(|err| {
                 log::warn!(
                     "No subdivision {} for nation {}, or nation does not support subdivisions: {:?}",
-                    region, nationality.iso_country_code, err
+                    region,
+                    nationality.iso_country_code,
+                    err
                 )
             })
             .ok();
