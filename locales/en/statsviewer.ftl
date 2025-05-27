@@ -1,5 +1,3 @@
-nav-statsviewer = Stats Viewer
-
 statsviewer = Stats Viewer
     .rank = Demonlist rank
     .score = Demonlist score

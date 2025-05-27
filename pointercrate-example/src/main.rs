@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use maud::html;
-use pointercrate_core::error::CoreError;
 use pointercrate_core::pool::PointercratePool;
+use pointercrate_core::{error::CoreError, localization::tr};
 use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
 use pointercrate_core_macros::localized_catcher;
 use pointercrate_core_pages::{
@@ -173,19 +173,19 @@ fn page_configuration() -> PageConfiguration {
                 // implement the `Render` trait). See https://maud.lambda.xyz/ for details.
                 html! {
                     span {
-                        "Demonlist"
+                        (tr("nav-demonlist"))
                     }
                 },
             )
             // Add a drop down to the demonlist item, just like on pointercrate.com
-            .with_sub_item(Some("/demonlist/statsviewer/"), html! { "Stats Viewer" })
-            .with_sub_item(Some("/demonlist/?submitter=true"), html! { "Record Submitter" })
-            .with_sub_item(Some("/demonlist/?timemachine=true"), html! { "Time Machine" }),
+            .with_sub_item(Some("/demonlist/statsviewer/"), html! { (tr("nav-demonlist.stats-viewer")) })
+            .with_sub_item(Some("/demonlist/?submitter=true"), html! { (tr("nav-demonlist.record-submitter")) })
+            .with_sub_item(Some("/demonlist/?timemachine=true"), html! { (tr("nav-demonlist.time-machine")) }),
         )
         .with_item(TopLevelNavigationBarItem::new(None, Some("/login/"), {
             html! {
                 span {
-                    "User Area"
+                    (tr("nav-userarea"))
                 }
             }
         }));
@@ -202,16 +202,16 @@ fn page_configuration() -> PageConfiguration {
     })
     // Add a column with links for various list-related highlights
     .with_column(FooterColumn::LinkList {
-        heading: "Demonlist",
+        heading: tr("footer-demonlist"),
         links: vec![
-            Link::new("/demonlist/1/", "Current Top Demon"),
+            Link::new("/demonlist/1/", tr("footer-demonlist.top-demon")),
             Link::new(
                 format!("/demonlist/{}/", pointercrate_demonlist::config::list_size() + 1),
-                "Extended List",
+                tr("footer-demonlist.extended-list"),
             ),
             Link::new(
                 format!("/demonlist/{}/", pointercrate_demonlist::config::extended_list_size() + 1),
-                "Legacy List",
+                tr("footer-demonlist.legacy-list"),
             ),
         ],
     })

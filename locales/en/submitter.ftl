@@ -1,6 +1,3 @@
-nav-recordsubmitter = Record Submitter
-nav-guidelines = Guidelines
-
 submitter-banned = Banned
     .yes = Yes
     .no = No

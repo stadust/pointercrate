@@ -1,6 +1,3 @@
-nav-demonlist = DEMONLIST
-    .overline = Geometry Dash
-
 ## Demon information, including information fetched by dash-rs
 ## Fields included in forms may have validators
 demon-name = Demon Name
