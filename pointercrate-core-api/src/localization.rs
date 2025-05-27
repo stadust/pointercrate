@@ -6,7 +6,7 @@ use rocket::{
     fs::NamedFile,
     http::{ContentType, Status},
     request::{FromRequest, Outcome},
-    Request,
+    Request, State,
 };
 use unic_langid::LanguageIdentifier;
 
@@ -15,14 +15,20 @@ use crate::preferences::{ClientPreferences, PreferenceManager};
 // Serve our translation files to the frontend
 //
 // <resource> refers to the translation file name
-#[rocket::get("/ftl/<resource>")]
-pub async fn get_ftl(locale: ClientLocale, resource: &str) -> Result<(ContentType, NamedFile), Status> {
-    let iso_code = locale.0.iso_code;
+// <uri> refers to the uri that requested this resource
+#[rocket::get("/ftl/<resource>/<uri..>")]
+pub async fn get_ftl(
+    localization_config: &State<LocalizationConfiguration>, preferences: ClientPreferences, resource: &str, uri: PathBuf,
+) -> Result<(ContentType, NamedFile), Status> {
+    let locale_set = localization_config.set_by_uri(uri);
+    let locale = locale_set
+        .by_code(preferences.get::<String>(locale_set.cookie))
+        .ok_or(Status::InternalServerError)?;
 
     let file = NamedFile::open(format!(
         "{}/{}/{}.ftl",
         std::env::var("LOCALES_DIR").expect("LOCALES_DIR is not set"),
-        iso_code,
+        locale.iso_code,
         resource
     ))
     .await
@@ -54,11 +60,9 @@ impl<'r> FromRequest<'r> for ClientLocale {
         };
 
         let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
+        let locale_set = localization_config.set_by_uri(request.uri().path().segments().collect());
 
-        let locale_set = localization_config.set_by_uri(PathBuf::from(request.uri().path().as_str()));
-        let iso_code: String = preferences.get(locale_set.cookie);
-
-        if let Some(locale) = locale_set.by_code(iso_code) {
+        if let Some(locale) = locale_set.by_code(preferences.get::<String>(locale_set.cookie)) {
             return Outcome::Success(ClientLocale(locale));
         } else {
             return Outcome::Forward(Status::BadRequest);

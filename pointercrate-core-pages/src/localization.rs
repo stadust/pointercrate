@@ -31,7 +31,7 @@ pub struct LocaleSet {
     /// The preference cookie for this [`LocaleSet`] (`preference-{cookie}`)
     pub cookie: &'static str,
 
-    locales: Vec<Locale>,
+    pub locales: Vec<Locale>,
 
     /// Used to gracefully handle attempts at retrieving nonexistant locales
     fallback: Option<Locale>,

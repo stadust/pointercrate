@@ -43,7 +43,7 @@ export function loadResource(resourceName) {
         return Promise.resolve();
     }
 
-    return fetch(`/static/core/ftl/${resourceName}`)
+    return fetch(`/static/core/ftl/${resourceName}${document.location.pathname}`)
         .then(response => response.text())
         .then(text => {
             let resource = new FluentResource(text);
