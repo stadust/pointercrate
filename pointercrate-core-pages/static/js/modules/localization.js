@@ -76,7 +76,11 @@ export function trp(text_id, args) {
 const resourcesLoadedEvent = new CustomEvent("fluentresourcesloaded");
 
 $(window).on("load", function () {
-    new LanguageSelector(document.getElementById("language-selector"));
+    let languageSelector = document.getElementById("language-selector");
+
+    if (languageSelector) {
+        new LanguageSelector(languageSelector);
+    }
 
     let resourcePromises = [];
     window.ftlResources.forEach((resource) => {
