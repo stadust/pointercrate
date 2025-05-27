@@ -154,7 +154,11 @@ impl Default for LocalizationConfiguration {
     }
 }
 
-pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -> TopLevelNavigationBarItem {
+pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -> Option<TopLevelNavigationBarItem> {
+    if locale_set.locales.len() < 2 {
+        return None;
+    }
+
     let mut dropdown = TopLevelNavigationBarItem::new(
         Some("language-selector"),
         None,
@@ -183,5 +187,5 @@ pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -
         );
     }
 
-    dropdown
+    Some(dropdown)
 }

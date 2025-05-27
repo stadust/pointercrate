@@ -55,7 +55,9 @@ impl NavigationBar {
                     @for item in &self.items {
                         (item)
                     }
-                    (locale_selection_dropdown(locale, locale_set))
+                    @if let Some(locales_dropdown) = locale_selection_dropdown(locale, locale_set) {
+                        (locales_dropdown)
+                    }
                     div.nav-item.collapse-button {
                         div.hamburger.hover {
                             input type="checkbox"{}
