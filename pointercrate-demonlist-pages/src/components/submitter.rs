@@ -65,7 +65,7 @@ impl Render for RecordSubmitter<'_> {
                         (tr("record-submission.video-info"))
                         br {}
 
-                        i { (tr("record-submission.note"))  }
+                        i { (tr("record-submission.note")) ": "  }
                         (tr("record-submission.video-note"))
                     }
                     span.form-input.flex.col #id_video {
@@ -82,7 +82,7 @@ impl Render for RecordSubmitter<'_> {
                         (tr("record-submission.raw-footage-info-b"))
                     }
                     p {
-                        i {(tr("record-submission.note")) } (tr("record-submission.raw-footage-note"))
+                        i { (tr("record-submission.note")) ": " } (tr("record-submission.raw-footage-note"))
                     }
                     span.form-input.flex.col #submit-raw-footage {
                         input type = "url"  name = "raw_footage" required = "" placeholder = "https://drive.google.com/file/d/.../view?usp=sharing" {}
