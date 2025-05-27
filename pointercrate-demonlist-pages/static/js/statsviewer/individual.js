@@ -1,4 +1,4 @@
-import { Dropdown } from "/static/core/js/modules/form.js";
+import { displayError, Dropdown, get } from "/static/core/js/modules/form.js";
 import {
   getCountryFlag,
   populateSubdivisionDropdown,
@@ -143,6 +143,16 @@ class IndividualStatsViewer extends StatsViewer {
       })
     );
   }
+
+  selectPlayerByID(id) {
+    return get(this.retrievalEndpoint + parseInt(id) + "/").then((data) => {
+      if (data.data.data.banned) { // wtf
+        this.setError("This player is banned!")
+        return;
+      }
+      this.onReceive(data);
+    });
+  }
 }
 
 $(window).on("load", function () {
@@ -166,14 +176,22 @@ $(window).on("load", function () {
     let params = new URLSearchParams(url.split('?')[1]);
     let playerId = params.get('player');
     if (playerId) {
-      window.statsViewer.selectArbitrary(playerId)
+      window.statsViewer.selectPlayerByID(playerId)
+        .catch((err) => {
+          displayError(window.statsViewer)(err)
+          
+          // set the URL bar's value to the same location, but with the "player" parameter removed
+          params.delete("player");
+          const urlWithoutParam = `${window.location.origin}${window.location.pathname}?${params.toString()}`
+          window.history.replaceState({}, '', urlWithoutParam)
+      })
     }
   });
 
   document
     .getElementById("player-name")
     .addEventListener('click', () => 
-      navigator.clipboard.writeText(`https://pointercrate.com/demonlist/statsviewer?player=${window.statsViewer.currentObject.id}`)
+      navigator.clipboard.writeText(`${window.location.href}?player=${window.statsViewer.currentObject.id}`)
   )
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
