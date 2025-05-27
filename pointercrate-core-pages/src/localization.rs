@@ -137,7 +137,7 @@ impl LocalizationConfiguration {
     pub fn set_by_uri(&self, uri: PathBuf) -> LocaleSet {
         self.overrides
             .iter()
-            .find(|(key, _)| key.components().zip(uri.components()).all(|(a, b)| a == b))
+            .find(|(key, _)| uri.components().zip(key.components()).all(|(a, b)| a == b))
             .map(|(_, locale_set)| locale_set.clone())
             .unwrap_or(self.default.clone())
     }
