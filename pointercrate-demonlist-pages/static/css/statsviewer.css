@@ -51,7 +51,7 @@
 
 .name-main-span:hover {
     cursor: pointer;
-    text-decoration: underline;
+    border-bottom: 1px dotted #555;
 }
 
 .tooltip:hover .tooltiptext {
