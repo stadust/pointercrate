@@ -424,12 +424,7 @@ impl DemonPage {
                                             }
                                         }
                                         td {
-                                            @if let Some(ref video) = record.video {
-                                                 a href = (video) target = "_blank"{
-                                                    (record.player.name)
-                                                 }
-                                            }
-                                            @else {
+                                            a href = {"/demonlist/statsviewer?player="(record.player.id)} target = "_blank" {
                                                 (record.player.name)
                                             }
                                         }
