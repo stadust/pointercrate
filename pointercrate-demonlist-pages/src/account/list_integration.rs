@@ -95,20 +95,22 @@ impl AccountPageTab for ListIntegrationTab {
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
                             div.overlined.pad.js-collapse-content #claims-claim-panel style="display:none" {
-                                p.info-red.output style = "margin: 10px 0" {}
-                                p.info-green.output style = "margin: 10px 0" {}
-                                div.flex.no-stretch style="justify-content: space-between; align-items: center" {
-                                    b {
-                                        "Geolocate statsviewer flag:"
+                                @if cfg!(feature = "geolocation") {
+                                    p.info-red.output style = "margin: 10px 0" {}
+                                    p.info-green.output style = "margin: 10px 0" {}
+                                    div.flex.no-stretch style="justify-content: space-between; align-items: center" {
+                                        b {
+                                            "Geolocate statsviewer flag:"
+                                        }
+                                        a.button.blue.hover #claims-geolocate-nationality {
+                                            "Go"
+                                        }
                                     }
-                                    a.button.blue.hover #claims-geolocate-nationality {
-                                        "Go"
+                                    p {
+                                        "Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses "
+                                        a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
+                                        ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
                                     }
-                                }
-                                p {
-                                    "Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses "
-                                    a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
-                                    ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {

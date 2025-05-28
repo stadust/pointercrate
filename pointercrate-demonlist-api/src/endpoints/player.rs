@@ -1,5 +1,3 @@
-use crate::{config, ratelimits::DemonlistRatelimits};
-use log::warn;
 use pointercrate_core::{error::CoreError, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
@@ -10,7 +8,6 @@ use pointercrate_core_api::{
 };
 use pointercrate_demonlist::{
     error::DemonlistError,
-    nationality::Nationality,
     player::{
         claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
         DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
@@ -20,8 +17,6 @@ use pointercrate_demonlist::{
 use pointercrate_user::{auth::ApiToken, MODERATOR};
 use pointercrate_user_api::auth::Auth;
 use rocket::{http::Status, serde::json::Json, State};
-use serde::Deserialize;
-use std::net::IpAddr;
 
 #[rocket::get("/")]
 pub async fn paginate(
@@ -169,22 +164,27 @@ pub async fn paginate_claims(
     Ok(pagination_response("/api/v1/players/claims/", pagination.0, &mut auth.connection).await?)
 }
 
-#[derive(Deserialize, Debug)]
+#[cfg(feature = "geolocation")]
+#[derive(serde::Deserialize, Debug)]
 struct Security {
     is_vpn: bool,
 }
 
-#[derive(Deserialize, Debug)]
+#[cfg(feature = "geolocation")]
+#[derive(serde::Deserialize, Debug)]
 struct GeolocationResponse {
     security: Security,
     country_code: String,
     region_iso_code: Option<String>,
 }
 
+#[cfg(feature = "geolocation")]
 #[rocket::post("/<player_id>/geolocate")]
 pub async fn geolocate_nationality(
-    player_id: i32, ip: IpAddr, mut auth: Auth<ApiToken>, ratelimits: &State<DemonlistRatelimits>,
-) -> Result<Json<Nationality>> {
+    player_id: i32, ip: std::net::IpAddr, mut auth: Auth<ApiToken>, ratelimits: &State<crate::DemonlistRatelimits>,
+) -> Result<Json<pointercrate_demonlist::nationality::Nationality>> {
+    use pointercrate_demonlist::nationality::Nationality;
+
     let mut player = Player::by_id(player_id, &mut auth.connection).await?;
     let claim = PlayerClaim::get(auth.user.user().id, player_id, &mut auth.connection).await?;
 
@@ -196,7 +196,7 @@ pub async fn geolocate_nationality(
 
     let response = reqwest::get(format!(
         "https://ipgeolocation.abstractapi.com/v1/?api_key={}&ip_address={}&fields=security,country_code,region_iso_code",
-        config::abstract_api_key().ok_or_else(|| CoreError::internal_server_error("No API key for abstract configured"))?,
+        crate::config::abstract_api_key().ok_or_else(|| CoreError::internal_server_error("No API key for abstract configured"))?,
         ip
     ))
     .await
@@ -219,9 +219,11 @@ pub async fn geolocate_nationality(
             .subdivision_by_code(&region, &mut auth.connection)
             .await
             .inspect_err(|err| {
-                warn!(
+                log::warn!(
                     "No subdivision {} for nation {}, or nation does not support subdivisions: {:?}",
-                    region, nationality.iso_country_code, err
+                    region,
+                    nationality.iso_country_code,
+                    err
                 )
             })
             .ok();
