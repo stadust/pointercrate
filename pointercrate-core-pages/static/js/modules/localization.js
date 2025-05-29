@@ -8,7 +8,7 @@ class LanguageSelector {
         // add selection listeners to language items
         Array.from(group.querySelectorAll("ul > li > a > span"))
             .map(language => {
-                this.addSelectionListener(language.parentNode);
+                this.addSelectionListener(language.parentNode, "click");
             });
     }
 
@@ -21,12 +21,13 @@ class LanguageSelector {
         window.location.reload();
     }
 
-    addSelectionListener(button) {
+    addSelectionListener(button, event) {
+        console.log(button, event)
         let code = button.querySelector("[data-lang]").dataset.lang;
 
-        button.addEventListener("click", () => {
+        button.addEventListener(event, () => {
             this.setLanguage(code);
-        })
+        });
     }
 }
 
@@ -76,10 +77,14 @@ export function trp(text_id, args) {
 const resourcesLoadedEvent = new CustomEvent("fluentresourcesloaded");
 
 $(window).on("load", function () {
-    let languageSelector = document.getElementById("language-selector");
+    let languageSelectorGroup = document.getElementById("language-selector");
 
-    if (languageSelector) {
-        new LanguageSelector(languageSelector);
+    if (languageSelectorGroup) {
+        let languageSelector = new LanguageSelector(languageSelectorGroup);
+
+        Array.from(document.querySelectorAll("span[data-lang]"))
+            .map((element) => element.parentElement)
+            .forEach((button) => languageSelector.addSelectionListener(button, "touchend"))
     }
 
     let resourcePromises = [];
