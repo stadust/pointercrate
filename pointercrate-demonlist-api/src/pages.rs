@@ -24,10 +24,15 @@ use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::User;
 use rand::Rng;
 use rocket::{futures::StreamExt, http::CookieJar};
+use sqlx::PgConnection;
+use pointercrate_demonlist::player::claim::PlayerClaim;
+use pointercrate_demonlist::player::{FullPlayer, Player};
+use pointercrate_user::auth::{NonMutating};
+use pointercrate_user_api::auth::Auth;
 
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
+    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>, auth: Option<Auth<NonMutating>>
 ) -> Result<Page> {
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
@@ -77,7 +82,18 @@ pub async fn overview(
         demonlist,
         time_machine: tardis,
         submitter_initially_visible: submitter.unwrap_or(false),
+        claimed_player: match auth {
+            Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
+            None => None
+        }
     }))
+}
+
+async fn claimed_full_player(user: &User, connection: &mut PgConnection) -> Option<FullPlayer> {
+    let claim = PlayerClaim::by_user(user.id, connection).await.ok().flatten()?;
+    let player = Player::by_id(claim.player.id, connection).await.ok()?;
+
+    player.upgrade(connection).await.ok()
 }
 
 #[rocket::get("/permalink/<demon_id>")]
