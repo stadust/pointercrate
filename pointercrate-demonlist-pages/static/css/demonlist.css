@@ -67,16 +67,6 @@ tr:nth-child(even) {
   font-weight: normal;
 }
 
-#outofboundsad {
-  width: 200px;
-}
-
-@media (max-width: 1359px) {
-  #outofboundsad {
-    display: none;
-  }
-}
-
 @media (max-width: 1071px) {
   #rules,
   #discord {
