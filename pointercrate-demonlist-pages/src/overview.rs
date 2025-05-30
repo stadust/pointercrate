@@ -128,6 +128,9 @@ impl OverviewPage {
 
     fn demon_panel(&self, demon: &Demon, current_position: Option<i16>) -> Markup {
         let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        let total_score = format!("{:.2}", demon.score(100));
+        let minimal_score = format!("{:.2}", demon.score(demon.requirement));
+
         html! {
              section.panel.fade style="overflow:hidden" {
                  div.flex style = "align-items: center" {
@@ -139,19 +142,21 @@ impl OverviewPage {
                              }
                          }
                          h3 style = "text-align: left" {
-                             span {
-                                 "published by " a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
-                             }
-                             @if let Some(current_position) = current_position {
-                                 br;
+                             "published by " a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
+                         }
+                        div style="text-align: left; font-size: 0.8em" {
+                            @if let Some(current_position) = current_position {
                                  @if current_position > list_config::extended_list_size() {
                                      "Currently Legacy"
                                  }
                                  @else {
                                      "Currently #"(current_position)
                                  }
-                             }
-                         }
+                            }
+                            @else {
+                                (minimal_score) " (" (demon.requirement) "%) — " (total_score) " (100%) points"
+                            }
+                        }
                      }
                  }
              }
