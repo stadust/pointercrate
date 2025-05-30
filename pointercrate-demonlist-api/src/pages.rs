@@ -8,6 +8,8 @@ use pointercrate_core_api::{
     error::Result,
     response::{Page, Response2},
 };
+use pointercrate_demonlist::player::claim::PlayerClaim;
+use pointercrate_demonlist::player::{FullPlayer, Player};
 use pointercrate_demonlist::{
     demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
     error::DemonlistError,
@@ -21,18 +23,17 @@ use pointercrate_demonlist_pages::{
     statsviewer::individual::IndividualStatsViewer,
 };
 use pointercrate_integrate::gd::GeometryDashConnector;
+use pointercrate_user::auth::NonMutating;
 use pointercrate_user::User;
+use pointercrate_user_api::auth::Auth;
 use rand::Rng;
 use rocket::{futures::StreamExt, http::CookieJar};
 use sqlx::PgConnection;
-use pointercrate_demonlist::player::claim::PlayerClaim;
-use pointercrate_demonlist::player::{FullPlayer, Player};
-use pointercrate_user::auth::{NonMutating};
-use pointercrate_user_api::auth::Auth;
 
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>, auth: Option<Auth<NonMutating>>
+    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
+    auth: Option<Auth<NonMutating>>,
 ) -> Result<Page> {
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
@@ -84,8 +85,8 @@ pub async fn overview(
         submitter_initially_visible: submitter.unwrap_or(false),
         claimed_player: match auth {
             Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
-            None => None
-        }
+            None => None,
+        },
     }))
 }
 

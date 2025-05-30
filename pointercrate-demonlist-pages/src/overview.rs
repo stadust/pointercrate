@@ -8,18 +8,18 @@ use crate::{
 };
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
+use pointercrate_demonlist::player::FullPlayer;
 use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, TimeShiftedDemon},
 };
-use pointercrate_demonlist::player::FullPlayer;
 
 pub struct OverviewPage {
     pub team: Team,
     pub demonlist: Vec<Demon>,
     pub time_machine: Tardis,
     pub submitter_initially_visible: bool,
-    pub claimed_player: Option<FullPlayer>
+    pub claimed_player: Option<FullPlayer>,
 }
 
 impl From<OverviewPage> for PageFragment {
@@ -129,20 +129,24 @@ impl OverviewPage {
     fn demon_panel(&self, demon: &Demon, current_position: Option<i16>) -> Markup {
         let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 
-        let progress = self.claimed_player.as_ref().and_then(|player| {
-            if player.verified.iter().any(|d| d.id == demon.base.id) {
-                Some(100)
-            }  else {
-                player.records.iter().find(|r| r.demon.id == demon.base.id).map(|r| r.progress)
-            }
-        }).unwrap_or_default();
+        let progress = self
+            .claimed_player
+            .as_ref()
+            .and_then(|player| {
+                if player.verified.iter().any(|d| d.id == demon.base.id) {
+                    Some(100)
+                } else {
+                    player.records.iter().find(|r| r.demon.id == demon.base.id).map(|r| r.progress)
+                }
+            })
+            .unwrap_or_default();
 
         let total_score = format!("{:.2}", demon.score(100));
         let progress_score = format!("{:.2}", demon.score(progress));
         let minimal_score = format!("{:.2}", demon.score(demon.requirement));
 
-        let bg_color = if progress == 100 { "#ddffdd;"} else {"white"};
-        
+        let bg_color = if progress == 100 { "#ddffdd;" } else { "white" };
+
         html! {
              section.panel.fade style={"overflow:hidden; background:"(bg_color)} {
                  div.flex style = "align-items: center" {
