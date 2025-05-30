@@ -172,7 +172,7 @@ $(window).on("load", function () {
     let url = window.location.href;
     let params = new URLSearchParams(url.split('?')[1]);
     let playerId = parseInt(params.get('player'));
-    if (playerId) {
+    if (playerId !== undefined && !isNaN(playerId)) {
       window.statsViewer.selectArbitrary(playerId)
         .catch((err) => {
           displayError(window.statsViewer)(err)
