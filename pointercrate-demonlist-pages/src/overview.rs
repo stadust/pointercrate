@@ -21,17 +21,11 @@ pub struct OverviewPage {
 }
 
 fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
+    let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     html! {
          section.panel.fade style="overflow:hidden" {
              div.flex style = "align-items: center" {
-                 div.thumb."ratio-16-9"."js-delay-css" style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {
-                     @if let Some(video) = &demon.video {
-                         a.play href = (video) {}
-                     }
-                     @else {
-                         a.play href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" {}
-                     }
-                 }
+                 a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
                  div style = "padding-left: 15px" {
                      h2 style = "text-align: left; margin-bottom: 0px" {
                          a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
