@@ -143,6 +143,13 @@ class IndividualStatsViewer extends StatsViewer {
       })
     );
   }
+  onSelect(selected) {
+    let params = new URLSearchParams(window.location.href.split('?')[1]);
+    params.set("player", selected.dataset.id);
+    const urlWithoutParam = `${window.location.origin}${window.location.pathname}?${params.toString()}`
+    window.history.replaceState({}, '', urlWithoutParam);
+    super.onSelect(selected);
+  }
 }
 
 $(window).on("load", function () {
