@@ -46,6 +46,26 @@ a.link:after {
   text-decoration: none;
 }
 
+@media (max-width: 768px) {
+  a.mobile-only-link {
+    color: blue;
+  }
+
+  a.mobile-only-link:after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 600;
+    font-style: normal;
+    display: inline-block;
+    text-decoration: inherit;
+    margin: auto 3px;
+  }
+
+  a.mobile-only-link:after {
+    content: "\f35d";
+    text-decoration: none;
+  }
+}
+
 /* Default header styles */
 
 body,

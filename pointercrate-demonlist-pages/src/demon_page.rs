@@ -429,7 +429,13 @@ impl DemonPage {
                                             }
                                         }
                                         td {
-                                            (record.progress) "%"
+                                            @if let Some(ref video) = record.video {
+                                                a.mobile-only-link href = (video) target = "_blank" {
+                                                    (record.progress) "%"
+                                                }
+                                            } @else {
+                                                (record.progress) "%"
+                                            }
                                         }
                                         td.video-link {
                                             @if let Some(ref video) = record.video {
