@@ -22,38 +22,6 @@ pub struct OverviewPage {
     pub claimed_player: Option<FullPlayer>
 }
 
-fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
-    let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-    html! {
-         section.panel.fade style="overflow:hidden" {
-             div.flex style = "align-items: center" {
-                 a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
-                 div style = "padding-left: 15px" {
-                     h2 style = "text-align: left; margin-bottom: 0px" {
-                         a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
-                             "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
-                         }
-                     }
-                     h3 style = "text-align: left" {
-                         i {
-                             (demon.publisher.name)
-                         }
-                         @if let Some(current_position) = current_position {
-                             br;
-                             @if current_position > list_config::extended_list_size() {
-                                 "Currently Legacy"
-                             }
-                             @else {
-                                 "Currently #"(current_position)
-                             }
-                         }
-                     }
-                 }
-             }
-         }
-    }
-}
-
 impl From<OverviewPage> for PageFragment {
     fn from(page: OverviewPage) -> Self {
         PageFragment::new("Geometry Dash Demonlist", "The official pointercrate Demonlist!")
@@ -133,14 +101,14 @@ impl OverviewPage {
                         Tardis::Activated { demons, ..} => {
                             @for TimeShiftedDemon {current_demon, position_now} in demons {
                                 @if current_demon.base.position <= list_config::extended_list_size() {
-                                    (demon_panel(current_demon, Some(*position_now)))
+                                    (self.demon_panel(current_demon, Some(*position_now)))
                                 }
                             }
                         },
                         _ => {
                             @for demon in &self.demonlist {
                                 @if demon.base.position <= list_config::extended_list_size() {
-                                    (demon_panel(demon, None))
+                                    (self.demon_panel(demon, None))
                                 }
                             }
                         }
@@ -155,6 +123,38 @@ impl OverviewPage {
                     (super::discord_panel())
                 }
             }
+        }
+    }
+
+    fn demon_panel(&self, demon: &Demon, current_position: Option<i16>) -> Markup {
+        let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        html! {
+             section.panel.fade style="overflow:hidden" {
+                 div.flex style = "align-items: center" {
+                     a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
+                     div style = "padding-left: 15px" {
+                         h2 style = "text-align: left; margin-bottom: 0px" {
+                             a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
+                                 "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
+                             }
+                         }
+                         h3 style = "text-align: left" {
+                             i {
+                                 (demon.publisher.name)
+                             }
+                             @if let Some(current_position) = current_position {
+                                 br;
+                                 @if current_position > list_config::extended_list_size() {
+                                     "Currently Legacy"
+                                 }
+                                 @else {
+                                     "Currently #"(current_position)
+                                 }
+                             }
+                         }
+                     }
+                 }
+             }
         }
     }
 }
