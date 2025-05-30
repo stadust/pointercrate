@@ -12,12 +12,14 @@ use pointercrate_demonlist::{
     config as list_config,
     demon::{Demon, TimeShiftedDemon},
 };
+use pointercrate_demonlist::player::FullPlayer;
 
 pub struct OverviewPage {
     pub team: Team,
     pub demonlist: Vec<Demon>,
     pub time_machine: Tardis,
     pub submitter_initially_visible: bool,
+    pub claimed_player: Option<FullPlayer>
 }
 
 fn demon_panel(demon: &Demon, current_position: Option<i16>) -> Markup {
