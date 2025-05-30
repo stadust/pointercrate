@@ -1,69 +1,64 @@
-use derive_more::Display;
-
 use pointercrate_core::{
     error::{CoreError, PointercrateError},
+    localization::tr,
     permission::Permission,
+    trp,
 };
 use serde::Serialize;
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt::Display};
 
 pub type Result<T> = std::result::Result<T, UserError>;
 
-#[derive(Debug, Display, Serialize, Eq, PartialEq, Clone)]
+#[derive(Debug, Serialize, Eq, PartialEq, Clone)]
 pub enum UserError {
-    #[display("{}", _0)]
     Core(CoreError),
 
-    #[display("Malformed channel URL")]
     MalformedChannelUrl,
 
     /// `403 FORBIDDEN` error returned when a user attempts to delete his own account via the admin
     /// panel
     ///
     /// Error Code `40302`
-    #[display("You cannot delete your own account via this endpoint. Use DELETE /api/v1/auth/me/")]
     DeleteSelf,
 
     /// `403 FORBIDDEN` error returned when a user attempts to patch his own account via the admin
     /// panel
     ///
     /// Error Code `40303`
-    #[display("You cannot modify your own account via this endpoint. Use PATCH /api/v1/auth/me/")]
     PatchSelf,
 
-    #[display("You cannot assign the following permissions: {:?}", non_assignable)]
-    PermissionNotAssignable { non_assignable: HashSet<Permission> },
+    PermissionNotAssignable {
+        non_assignable: HashSet<Permission>,
+    },
 
-    #[display("No user with id {} found", user_id)]
-    UserNotFound { user_id: i32 },
+    UserNotFound {
+        user_id: i32,
+    },
 
-    #[display("No user with name {} found", user_name)]
-    UserNotFoundName { user_name: String },
+    UserNotFoundName {
+        user_name: String,
+    },
 
     /// `409 CONFLICT` error returned if a user tries to register with a name that's already taken
     ///
     /// Error Code `40902`
-    #[display("The chosen username is already taken")]
     NameTaken,
 
     /// `422 UNPROCESSABLE ENTITIY` variant returned if the username provided during registration
     /// is either shorter than 3 letters of contains trailing or leading whitespaces
     ///
     /// Error Code: `42202`
-    #[display("Invalid display- or username! The name must be at least 3 characters long and not start/end with a space")]
     InvalidUsername,
 
     /// `422 UNPROCESSABLE ENTITY` variant returned if the password provided during registration
     /// (or account update) is shorter than 10 characters
     ///
     /// Error Code `42204`
-    #[display("Invalid password! The password must be at least 10 characters long")]
     InvalidPassword,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42226`
-    #[display("The given URL is no YouTube URL")]
     NotYouTube,
 
     /// `422 UNPROCESSABL ENTITY` variant indicating that the attempted operation can only be
@@ -71,7 +66,6 @@ pub enum UserError {
     /// for a non-legacy account).
     ///
     /// Error Code `42234`
-    #[display("The given operation (change password) is invalid on non-legacy account, as password login is not supported for these")]
     NonLegacyAccount,
 }
 
@@ -102,6 +96,41 @@ impl PointercrateError for UserError {
             NotYouTube => 42226,
             NonLegacyAccount => 42234,
         }
+    }
+}
+
+impl Display for UserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                UserError::Core(core) => {
+                    return core.fmt(f);
+                },
+                UserError::MalformedChannelUrl => tr("error-user-malformedchannelurl"),
+                UserError::DeleteSelf => tr("error-user-deleteself"),
+                UserError::PatchSelf => tr("error-user-patchself"),
+                UserError::PermissionNotAssignable { non_assignable } => trp!(
+                    "error-user-permissionnotassignable",
+                    (
+                        "non-assignable",
+                        non_assignable
+                            .iter()
+                            .map(|permission| tr(permission.text_id()))
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    )
+                ),
+                UserError::UserNotFound { user_id } => trp!("error-user-usernotfound", ("user-id", user_id)),
+                UserError::UserNotFoundName { user_name } => trp!("error-user-usernotfoundname", ("user-name", user_name)),
+                UserError::NameTaken => tr("error-user-nametaken"),
+                UserError::InvalidUsername => tr("error-user-invalidusername"),
+                UserError::InvalidPassword => tr("error-user-invalidpassword"),
+                UserError::NotYouTube => tr("error-user-notyoutube"),
+                UserError::NonLegacyAccount => tr("error-user-nonlegacyaccount"),
+            }
+        )
     }
 }
 

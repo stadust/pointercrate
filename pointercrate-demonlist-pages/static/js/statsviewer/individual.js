@@ -1,3 +1,4 @@
+import { tr } from "/static/core/js/modules/localization.js";
 import { displayError, Dropdown, get } from "/static/core/js/modules/form.js";
 import {
   getCountryFlag,
@@ -87,11 +88,11 @@ class IndividualStatsViewer extends StatsViewer {
     let hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
-        name: "None",
-        position: 321321321321,
+        name: tr("statsviewer.value-none"),
+        position: 321321321,
       });
 
-    this.setHardest(hardest.name === "None" ? undefined : hardest);
+    this.setHardest(hardest.name === tr("statsviewer.value-none") ? undefined : hardest);
 
     let non100Records = playerData.records.filter(
       (record) => record.progress !== 100
@@ -166,91 +167,145 @@ $(window).on("load", function () {
     else map.hideSubdivisions();
   });
 
-  window.statsViewer = new IndividualStatsViewer(
-    document.getElementById("statsviewer")
-  );
-
-  window.statsViewer.initialize().then(() => {
-    let url = window.location.href;
-    let params = new URLSearchParams(url.split("?")[1]);
-    let playerId = parseInt(params.get("player"));
-    if (playerId !== undefined && !isNaN(playerId)) {
-      window.statsViewer.selectArbitrary(playerId).catch((err) => {
-        displayError(window.statsViewer)(err);
-
-        // if the param failed, set the URL bar's value to the same location, but with the
-        // "player" parameter removed
-        params.delete("player");
-        const urlWithoutParam = `${window.location.origin}${
-          window.location.pathname
-        }?${params.toString()}`;
-        window.history.replaceState({}, "", urlWithoutParam);
-      });
-    }
-  });
-
-  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
-    (selected) => {
-      if (selected === "All") {
-        window.statsViewer.updateQueryData("continent", undefined);
-        map.resetContinentHighlight();
-      } else {
-        window.statsViewer.updateQueryData("continent", selected);
-        map.highlightContinent(selected);
-      }
-    }
-  );
-
-  let subdivisionDropdown = new Dropdown(
-    document.getElementById("subdivision-dropdown")
-  );
-
-  subdivisionDropdown.addEventListener((selected) => {
-    if (selected === "None") {
-      map.deselectSubdivision();
-      statsViewer.updateQueryData("subdivision", undefined);
-    } else {
-      let countryCode = statsViewer.queryData["nation"];
-
-      map.select(countryCode, selected);
-      statsViewer.updateQueryData2({
-        nation: countryCode,
-        subdivision: selected,
-      });
-    }
-  });
-
-  statsViewer.dropdown.addEventListener((selected) => {
-    if (selected === "International") {
-      map.deselect();
-    } else {
-      map.select(selected);
-    }
-
-    // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
-    populateSubdivisionDropdown(subdivisionDropdown, selected);
-
-    statsViewer.updateQueryData("subdivision", undefined);
-  });
-
-  map.addSelectionListener((countryCode, subdivisionCode) => {
-    populateSubdivisionDropdown(subdivisionDropdown, countryCode).then(() =>
-      subdivisionDropdown.selectSilently(subdivisionCode)
+  document.addEventListener("fluentresourcesloaded", () => {
+    window.statsViewer = new IndividualStatsViewer(
+      document.getElementById("statsviewer")
     );
 
-    statsViewer.dropdown.selectSilently(countryCode);
+    window.statsViewer.initialize().then(() => {
+      let url = window.location.href;
+      let params = new URLSearchParams(url.split("?")[1]);
+      let playerId = parseInt(params.get("player"));
+      if (playerId !== undefined && !isNaN(playerId)) {
+        window.statsViewer.selectArbitrary(playerId).catch((err) => {
+          displayError(window.statsViewer)(err);
 
-    statsViewer.updateQueryData2({
-      nation: countryCode,
-      subdivision: subdivisionCode,
+          // if the param failed, set the URL bar's value to the same location, but with the
+          // "player" parameter removed
+          params.delete("player");
+          const urlWithoutParam = `${window.location.origin}${
+            window.location.pathname
+          }?${params.toString()}`;
+          window.history.replaceState({}, "", urlWithoutParam);
+        });
+      }
     });
-  });
 
-  map.addDeselectionListener(() => {
-    statsViewer.dropdown.selectSilently("International");
-    subdivisionDropdown.clearOptions();
-    statsViewer.updateQueryData2({ nation: undefined, subdivision: undefined });
-  });
+    new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
+      (selected) => {
+        if (selected === "All") {
+          window.statsViewer.updateQueryData("continent", undefined);
+          map.resetContinentHighlight();
+        } else {
+          window.statsViewer.updateQueryData("continent", selected);
+          map.highlightContinent(selected);
+        }
+      }
+    );
+
+    let subdivisionDropdown = new Dropdown(
+      document.getElementById("subdivision-dropdown")
+    );
+
+    subdivisionDropdown.addEventListener((selected) => {
+      if (selected === "None") {
+        map.deselectSubdivision();
+        statsViewer.updateQueryData("subdivision", undefined);
+      } else {
+        let countryCode = statsViewer.queryData["nation"];
+
+        map.select(countryCode, selected);
+        statsViewer.updateQueryData2({
+          nation: countryCode,
+          subdivision: selected,
+        });
+      }
+    });
+
+    statsViewer.dropdown.addEventListener((selected) => {
+      if (selected === "International") {
+        map.deselect();
+      } else {
+        map.select(selected);
+      }
+
+      // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
+      populateSubdivisionDropdown(subdivisionDropdown, selected);
+
+      statsViewer.updateQueryData("subdivision", undefined);
+    });
+
+    map.addSelectionListener((countryCode, subdivisionCode) => {
+      populateSubdivisionDropdown(subdivisionDropdown, countryCode).then(() =>
+        subdivisionDropdown.selectSilently(subdivisionCode)
+      );
+
+      window.statsViewer.initialize();
+
+      new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
+        (selected) => {
+          if (selected === "All") {
+            window.statsViewer.updateQueryData("continent", undefined);
+            map.resetContinentHighlight();
+          } else {
+            window.statsViewer.updateQueryData("continent", selected);
+            map.highlightContinent(selected);
+          }
+        }
+      );
+
+      let subdivisionDropdown = new Dropdown(
+        document.getElementById("subdivision-dropdown")
+      );
+
+      subdivisionDropdown.addEventListener((selected) => {
+        if (selected === "None") {
+          map.deselectSubdivision();
+          statsViewer.updateQueryData("subdivision", undefined);
+        } else {
+          let countryCode = statsViewer.queryData["nation"];
+
+          map.select(countryCode, selected);
+          statsViewer.updateQueryData2({
+            nation: countryCode,
+            subdivision: selected,
+          });
+        }
+      });
+
+      statsViewer.dropdown.addEventListener((selected) => {
+        if (selected === "International") {
+          map.deselect();
+        } else {
+          map.select(selected);
+        }
+
+        // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
+        populateSubdivisionDropdown(subdivisionDropdown, selected);
+
+        statsViewer.updateQueryData("subdivision", undefined);
+      });
+
+      map.addSelectionListener((countryCode, subdivisionCode) => {
+        populateSubdivisionDropdown(subdivisionDropdown, countryCode).then(() =>
+          subdivisionDropdown.selectSilently(subdivisionCode)
+        );
+
+        statsViewer.dropdown.selectSilently(countryCode);
+
+        statsViewer.updateQueryData2({
+          nation: countryCode,
+          subdivision: subdivisionCode,
+        });
+      });
+
+      map.addDeselectionListener(() => {
+        statsViewer.dropdown.selectSilently("International");
+        subdivisionDropdown.clearOptions();
+        statsViewer.updateQueryData2({ nation: undefined, subdivision: undefined });
+      });
+    })
+  })
 });
 
 function generateStatsViewerPlayer(player) {

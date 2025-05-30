@@ -11,7 +11,7 @@ use crate::{
 };
 use derive_more::Display;
 use log::info;
-use pointercrate_core::etag::Taggable;
+use pointercrate_core::{etag::Taggable, localization::tr, trp};
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use std::{
@@ -123,16 +123,19 @@ impl FullDemon {
         let verifier = &self.demon.verifier.name;
 
         let creator = match &self.creators[..] {
-            [] => "Unknown".to_string(),
+            [] => tr("demon-headline.unknown-creator"),
             [creator] => creator.name.to_string(),
             many => {
                 let mut iter = many.iter();
                 let fst = iter.next().unwrap();
 
-                format!(
-                    "{} and {}",
-                    iter.map(|player| player.name.to_string()).collect::<Vec<_>>().join(", "),
-                    fst.name
+                trp!(
+                    "demon-headline.multiple-creators",
+                    ("creator1", fst.name),
+                    (
+                        "other-creators",
+                        iter.map(|player| player.name.to_string()).collect::<Vec<_>>().join(", ")
+                    )
                 )
             },
         };
@@ -141,15 +144,20 @@ impl FullDemon {
         let creator = &creator;
 
         if creator == verifier && creator == publisher {
-            format!("by {}", creator)
+            trp!("demon-headline", ("creator", creator))
         } else if creator != verifier && verifier == publisher {
-            format!("by {}, verified and published by {}", creator, verifier)
+            trp!("demon-headline.unique-creator", ("creator", creator), ("verifier", verifier))
         } else if creator != verifier && creator != publisher && publisher != verifier {
-            format!("by {}, verified by {}, published by {}", creator, verifier, publisher)
+            trp!(
+                "demon-headline.unique-creator-verifier-publisher",
+                ("creator", creator),
+                ("verifier", verifier),
+                ("publisher", publisher)
+            )
         } else if creator == verifier && creator != publisher {
-            format!("by {}, published by {}", creator, publisher)
+            trp!("demon-headline.unique-publisher", ("creator", creator), ("publisher", publisher))
         } else if creator == publisher && creator != verifier {
-            format!("by {}, verified by {}", creator, verifier)
+            trp!("demon-headline.unique-verifier", ("creator", creator), ("verifier", verifier))
         } else {
             "If you're seeing this, file a bug report".to_string()
         }
@@ -159,9 +167,13 @@ impl FullDemon {
         let demon = &self.demon;
 
         if demon.publisher == demon.verifier {
-            format!("verified and published by {}", demon.verifier.name)
+            trp!("demon-headline.short-same-verifier-publisher", ("verifier", demon.verifier.name))
         } else {
-            format!("published by {}, verified by {}", demon.publisher.name, demon.verifier.name)
+            trp!(
+                "demon-headline.short-unique-verifier-publisher",
+                ("verifier", demon.verifier.name),
+                ("publisher", demon.publisher.name)
+            )
         }
     }
 }

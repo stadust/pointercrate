@@ -7,6 +7,7 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use maud::{html, Markup, PreEscaped};
+use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::player::FullPlayer;
 use pointercrate_demonlist::{
@@ -158,26 +159,47 @@ impl OverviewPage {
                              }
                          }
                          h3 style = "text-align: left" {
-                             "published by " a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
+                            (PreEscaped(trp!(
+                                "demon-info",
+                                (
+                                    "publisher",
+                                    html! {
+                                        a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
+                                    }.into_string()
+                                )
+                            )))
                          }
                         div style="text-align: left; font-size: 0.8em" {
                             @if let Some(current_position) = current_position {
                                  @if current_position > list_config::extended_list_size() {
-                                     "Currently Legacy"
+                                     (tr("time-machine.active-position-legacy"))
                                  }
                                  @else {
-                                     "Currently #"(current_position)
+                                    (trp!(
+                                        "time-machine.active-position",
+                                        ("position", current_position)
+                                    ))
                                  }
                             }
                             @else {
-                                (minimal_score) " (" (demon.requirement) "%) — " (total_score) " (100%) points"
+                                (trp!(
+                                    "demon-info.score",
+                                    ("minimal-score", minimal_score),
+                                    ("requirement", demon.requirement),
+                                    ("total-score", total_score)
+                                ))
                             }
                         }
                      }
                     @if self.claimed_player.is_some() {
                         div.flex.col.no-mobile style = "font-weight: bold; text-align: right" {
                             span style = "font-size: 300%" { (progress) "%" }
-                            span style = "font-size: 0.8em"{ (progress_score) " points"}
+                            span style = "font-size: 0.8em"{
+                                (trp!(
+                                    "demon-info.personal-score",
+                                    ("score", progress_score)
+                                ))
+                            }
                         }
                     }
                  }

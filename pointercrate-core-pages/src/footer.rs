@@ -20,15 +20,15 @@ impl Footer {
         self
     }
 
-    pub fn with_link(mut self, href: &'static str, text: &'static str) -> Self {
+    pub fn with_link<T: Into<String>>(mut self, href: &'static str, text: T) -> Self {
         self.twitter_links.push(Link::new(href, text));
         self
     }
 }
 
 pub enum FooterColumn {
-    LinkList { heading: &'static str, links: Vec<Link> },
-    Arbitrary { heading: &'static str, content: Markup },
+    LinkList { heading: String, links: Vec<Link> },
+    Arbitrary { heading: String, content: Markup },
 }
 
 pub struct Link {
