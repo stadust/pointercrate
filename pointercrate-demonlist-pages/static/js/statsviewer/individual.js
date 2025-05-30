@@ -23,7 +23,7 @@ class IndividualStatsViewer extends StatsViewer {
 
     var playerData = response.data.data;
 
-    this._rank.innerText = playerData.rank;
+    this._rank.innerText = playerData.rank || "-";
     this._score.innerText = playerData.score.toFixed(2);
 
     this.setName(playerData.name, playerData.nationality);
