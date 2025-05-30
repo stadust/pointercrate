@@ -128,7 +128,17 @@ impl OverviewPage {
 
     fn demon_panel(&self, demon: &Demon, current_position: Option<i16>) -> Markup {
         let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+
+        let progress = self.claimed_player.as_ref().and_then(|player| {
+            if player.verified.iter().any(|d| d.id == demon.base.id) {
+                Some(100)
+            }  else {
+                player.records.iter().find(|r| r.demon.id == demon.base.id).map(|r| r.progress)
+            }
+        }).unwrap_or_default();
+
         let total_score = format!("{:.2}", demon.score(100));
+        let progress_score = format!("{:.2}", demon.score(progress));
         let minimal_score = format!("{:.2}", demon.score(demon.requirement));
 
         html! {
@@ -158,6 +168,12 @@ impl OverviewPage {
                             }
                         }
                      }
+                    @if self.claimed_player.is_some() {
+                        div.flex.col style = "font-weight: bold; text-align: right" {
+                            span style = "font-size: 300%" { (progress) "%" }
+                            span style = "font-size: 0.8em"{ (progress_score) " points"}
+                        }
+                    }
                  }
              }
         }
