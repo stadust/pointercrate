@@ -218,6 +218,10 @@ impl Demon {
     }
 
     pub fn score(&self, progress: i16) -> f64 {
+        if progress < self.requirement {
+            return 0.0
+        }
+        
         let position = self.base.position;
 
         let beaten_score = match position {
