@@ -493,6 +493,10 @@ p.error {
   .viewer {
     flex-wrap: wrap;
   }
+  
+  .no-mobile {
+    display: none
+  }
 }
 
 .stats-container {

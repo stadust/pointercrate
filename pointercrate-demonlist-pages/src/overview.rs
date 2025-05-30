@@ -171,7 +171,7 @@ impl OverviewPage {
                         }
                      }
                     @if self.claimed_player.is_some() {
-                        div.flex.col style = "font-weight: bold; text-align: right" {
+                        div.flex.col.no-mobile style = "font-weight: bold; text-align: right" {
                             span style = "font-size: 300%" { (progress) "%" }
                             span style = "font-size: 0.8em"{ (progress_score) " points"}
                         }
