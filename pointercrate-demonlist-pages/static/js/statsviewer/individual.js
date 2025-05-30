@@ -1,4 +1,4 @@
-import { Dropdown } from "/static/core/js/modules/form.js";
+import { displayError, Dropdown, get } from "/static/core/js/modules/form.js";
 import {
   getCountryFlag,
   populateSubdivisionDropdown,
@@ -23,7 +23,7 @@ class IndividualStatsViewer extends StatsViewer {
 
     var playerData = response.data.data;
 
-    this._rank.innerText = playerData.rank;
+    this._rank.innerText = playerData.rank || "-";
     this._score.innerText = playerData.score.toFixed(2);
 
     this.setName(playerData.name, playerData.nationality);
@@ -143,6 +143,13 @@ class IndividualStatsViewer extends StatsViewer {
       })
     );
   }
+  onSelect(selected) {
+    let params = new URLSearchParams(window.location.href.split('?')[1]);
+    params.set("player", selected.dataset.id);
+    const urlWithoutParam = `${window.location.origin}${window.location.pathname}?${params.toString()}`
+    window.history.replaceState({}, '', urlWithoutParam);
+    super.onSelect(selected);
+  }
 }
 
 $(window).on("load", function () {
@@ -161,7 +168,23 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
 
-  window.statsViewer.initialize();
+  window.statsViewer.initialize().then(() => {
+    let url = window.location.href;
+    let params = new URLSearchParams(url.split('?')[1]);
+    let playerId = parseInt(params.get('player'));
+    if (playerId !== undefined && !isNaN(playerId)) {
+      window.statsViewer.selectArbitrary(playerId)
+        .catch((err) => {
+          displayError(window.statsViewer)(err)
+          
+          // if the param failed, set the URL bar's value to the same location, but with the 
+          // "player" parameter removed
+          params.delete("player");
+          const urlWithoutParam = `${window.location.origin}${window.location.pathname}?${params.toString()}`
+          window.history.replaceState({}, '', urlWithoutParam)
+      })
+    }
+  });
 
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {

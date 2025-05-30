@@ -145,6 +145,9 @@ impl AccountPageTab for ListIntegrationTab {
                                 span style = "background-color: #D8EFF3" { "Under Consideration" } "."
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
+                            a.button.blue.hover.no-stretch style = "margin: 10px 37% 5px;" href = (format!("/demonlist/statsviewer?player={}", claim.player.id)) target = "_blank" {
+                                "Go to statsviewer"
+                            }
                         }
                     }
                 }

@@ -46,6 +46,26 @@ a.link:after {
   text-decoration: none;
 }
 
+@media (max-width: 768px) {
+  a.mobile-only-link {
+    color: blue;
+  }
+
+  a.mobile-only-link:after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 600;
+    font-style: normal;
+    display: inline-block;
+    text-decoration: inherit;
+    margin: auto 3px;
+  }
+
+  a.mobile-only-link:after {
+    content: "\f35d";
+    text-decoration: none;
+  }
+}
+
 /* Default header styles */
 
 body,
@@ -575,7 +595,6 @@ h2 .dropdown-menu ul {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted #555;
 }
 
 .tooltip .tooltiptext {
@@ -636,6 +655,10 @@ h2 .dropdown-menu ul {
 
 .overlined.pad {
   padding-top: 10px;
+}
+
+.underdotted {
+  border-bottom: 1px dotted #555;
 }
 
 .info-green {
@@ -701,4 +724,8 @@ ul.selection-list li {
 
 .tab-active {
   color: #0881c6;
+}
+
+#claims-claim-panel > a.button {
+  width: fit-content;
 }
