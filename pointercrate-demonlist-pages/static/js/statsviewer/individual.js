@@ -186,12 +186,6 @@ $(window).on("load", function () {
     }
   });
 
-  document
-    .getElementById("player-name")
-    .addEventListener('click', () => 
-      navigator.clipboard.writeText(`${window.location.href}?player=${window.statsViewer.currentObject.id}`)
-  )
-
   new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
     (selected) => {
       if (selected === "All") {

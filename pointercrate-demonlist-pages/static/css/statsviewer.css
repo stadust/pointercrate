@@ -49,11 +49,6 @@
     flex-grow: 2;
 }
 
-.name-main-span:hover {
-    cursor: pointer;
-    border-bottom: 1px dotted #555;
-}
-
 .tooltip:hover .tooltiptext {
     opacity: 1 !important;
 }

@@ -595,7 +595,6 @@ h2 .dropdown-menu ul {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted #555;
 }
 
 .tooltip .tooltiptext {
@@ -656,6 +655,10 @@ h2 .dropdown-menu ul {
 
 .overlined.pad {
   padding-top: 10px;
+}
+
+.underdotted {
+  border-bottom: 1px dotted #555;
 }
 
 .info-green {

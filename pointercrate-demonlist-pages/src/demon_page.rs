@@ -424,7 +424,7 @@ impl DemonPage {
                                             }
                                         }
                                         td {
-                                            a href = {"/demonlist/statsviewer?player="(record.player.id)} target = "_blank" {
+                                            a.underdotted href = {"/demonlist/statsviewer?player="(record.player.id)} target = "_blank" {
                                                 (record.player.name)
                                             }
                                         }
