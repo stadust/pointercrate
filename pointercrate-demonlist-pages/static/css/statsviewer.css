@@ -49,7 +49,6 @@
     flex-grow: 2;
 }
 
-
 .tooltip:hover .tooltiptext {
     opacity: 1 !important;
 }

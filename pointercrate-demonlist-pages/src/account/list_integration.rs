@@ -95,26 +95,28 @@ impl AccountPageTab for ListIntegrationTab {
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
                             div.overlined.pad.js-collapse-content #claims-claim-panel style="display:none" {
-                                p.info-red.output style = "margin: 10px 0" {}
-                                p.info-green.output style = "margin: 10px 0" {}
-                                div.flex.no-stretch style="justify-content: space-between; align-items: center" {
-                                    b {
-                                        (tr("claim-geolocate"))
+                                @if cfg!(feature = "geolocation") {
+                                    p.info-red.output style = "margin: 10px 0" {}
+                                    p.info-green.output style = "margin: 10px 0" {}
+                                    div.flex.no-stretch style="justify-content: space-between; align-items: center" {
+                                        b {
+                                            (tr("claim-geolocate"))
+                                        }
+                                        a.button.blue.hover #claims-geolocate-nationality {
+                                            (tr("claim-geolocate.submit"))
+                                        }
                                     }
-                                    a.button.blue.hover #claims-geolocate-nationality {
-                                        (tr("claim-geolocate.submit"))
+                                    p {
+                                        (PreEscaped(trp!(
+                                            "claim-geolocate.info",
+                                            (
+                                                "info-api-link",
+                                                html! {
+                                                    a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
+                                                }.into_string()
+                                            )
+                                        )))
                                     }
-                                }
-                                p {
-                                    (PreEscaped(trp!(
-                                        "claim-geolocate.info",
-                                        (
-                                            "info-api-link",
-                                            html! {
-                                                a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
-                                            }.into_string()
-                                        )
-                                    )))
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
@@ -170,6 +172,9 @@ impl AccountPageTab for ListIntegrationTab {
                                 )))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
+                            a.button.blue.hover.no-stretch style = "margin: 10px 37% 5px;" href = (format!("/demonlist/statsviewer?player={}", claim.player.id)) target = "_blank" {
+                                (tr("claimed-player.statsviewer-redirect"))
+                            }
                         }
                     }
                 }

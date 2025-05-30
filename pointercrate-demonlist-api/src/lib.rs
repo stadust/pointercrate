@@ -12,6 +12,22 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
     let dash_rs = GeometryDashConnector::new(rocket.state::<PointercratePool>().unwrap().clone_inner());
 
+    #[cfg_attr(not(feature = "geolocation"), allow(unused_mut))]
+    let mut player_routes = rocket::routes![
+        endpoints::player::get,
+        endpoints::player::get_me,
+        endpoints::player::paginate,
+        endpoints::player::patch,
+        endpoints::player::ranking,
+        endpoints::player::put_claim,
+        endpoints::player::patch_claim,
+        endpoints::player::paginate_claims,
+        endpoints::player::delete_claim,
+    ];
+
+    #[cfg(feature = "geolocation")]
+    player_routes.extend(rocket::routes![endpoints::player::geolocate_nationality]);
+
     rocket
         .manage(ratelimits)
         .manage(dash_rs)
@@ -40,21 +56,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
                 endpoints::record::submit
             ],
         )
-        .mount(
-            "/api/v1/players/",
-            rocket::routes![
-                endpoints::player::get,
-                endpoints::player::get_me,
-                endpoints::player::paginate,
-                endpoints::player::patch,
-                endpoints::player::ranking,
-                endpoints::player::put_claim,
-                endpoints::player::patch_claim,
-                endpoints::player::paginate_claims,
-                endpoints::player::delete_claim,
-                endpoints::player::geolocate_nationality
-            ],
-        )
+        .mount("/api/v1/players/", player_routes)
         .mount(
             "/api/v1/nationalities/",
             rocket::routes![
