@@ -48,6 +48,18 @@ demon-verifier = Verifier
 
 demon-creators = Creators
 
+demon-headline = by { $creator }
+    .unknown-creator = Unknown
+    .multiple-creators = { $creator1 } and { $other-creators }
+
+    .unique-creator = by { $creator }, verified and published by { $verifier }
+    .unique-creator-verifier-publisher = by { $creator }, verified by { $verifier }, published by { $publisher }
+    .unique-publisher = by { $creator }, published by { $publisher }
+    .unique-verifier = by { $creator }, verified by { $verifier }
+
+    .short-same-verifier-publisher = verified and publisher by { $verifier }
+    .short-unique-verifier-publisher = published by { $publisher }, verified by { $verifier }
+
 ## Position history table
 movements = Position History
     .date = Date
