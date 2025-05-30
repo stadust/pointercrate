@@ -139,8 +139,8 @@ impl OverviewPage {
                              }
                          }
                          h3 style = "text-align: left" {
-                             i {
-                                 (demon.publisher.name)
+                             span {
+                                 "published by " a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
                              }
                              @if let Some(current_position) = current_position {
                                  br;
