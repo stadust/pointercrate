@@ -493,8 +493,10 @@ export class Paginator extends Output {
    * @returns A promise
    */
   selectArbitrary(id) {
-    return get(this.retrievalEndpoint + id + "/").then(
-      this.onReceive.bind(this)
+    return get(this.retrievalEndpoint + id + "/").then(response => {
+          this.setError(null);
+          this.onReceive(response);
+        }
     );
   }
 
@@ -608,6 +610,7 @@ export class Paginator extends Output {
    * @memberof Paginator
    */
   refresh() {
+    this.setError(null);
     return get(this.currentLink)
       .then(this.handleResponse.bind(this))
       .catch(displayError(this));
@@ -615,6 +618,7 @@ export class Paginator extends Output {
 
   onPreviousClick() {
     if (this.links.prev) {
+      this.setError(null);
       get(this.links.prev)
         .then(this.handleResponse.bind(this))
         .catch(displayError(this));
@@ -623,6 +627,7 @@ export class Paginator extends Output {
 
   onNextClick() {
     if (this.links.next) {
+      this.setError(null);
       get(this.links.next)
         .then(this.handleResponse.bind(this))
         .catch(displayError(this));
