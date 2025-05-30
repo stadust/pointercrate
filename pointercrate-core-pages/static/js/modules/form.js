@@ -493,11 +493,10 @@ export class Paginator extends Output {
    * @returns A promise
    */
   selectArbitrary(id) {
-    return get(this.retrievalEndpoint + id + "/").then(response => {
-          this.setError(null);
-          this.onReceive(response);
-        }
-    );
+    return get(this.retrievalEndpoint + id + "/").then((response) => {
+      this.setError(null);
+      this.onReceive(response);
+    });
   }
 
   /**
