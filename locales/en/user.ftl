@@ -13,8 +13,14 @@ user-permissions = Permissions:
 
 ## Auth input fields
 auth-username = Username:
+    .validator-valuemissing = Username required
+    .validator-tooshort = Username too short. It needs to be at least 3 characters long.
+    .error-alreadytaken = This username is already taken. Please choose another one
 auth-password = Password:
+    .validator-valuemissing = Password required
+    .validator-tooshort = Password too short. It needs to be at least 10 characters long.
 auth-repeatpassword = Repeat Password:
+    .validator-notmatching = Passwords don't match
 
 ## Login/registration forms
 #
@@ -29,6 +35,8 @@ login = Sign In
 
     .info = Sign in using your username and password. Sign in attempts are limited to 3 per 30 minutes.
     .submit = Sign In
+
+    .error-invalidcredentials = Invalid credentials
 
     .redirect = Already have a pointercrate account? { $redirect-link } instead.
     .redirect-link = Sign in

@@ -4,6 +4,7 @@ import {
   tooShort,
   post,
 } from "/static/core/js/modules/form.js";
+import { tr } from "/static/core/js/modules/localization.js";
 import { TabbedPane } from "/static/core/js/modules/tab.js";
 
 function initializeLoginForm() {
@@ -12,17 +13,17 @@ function initializeLoginForm() {
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
-  loginUsername.addValidator(valueMissing, "Username required");
+  loginUsername.addValidator(valueMissing, tr("user", "auth-username.validator-valuemissing"));
   loginUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long."
+    tr("user", "auth-username.validator-tooshort")
   );
 
   loginPassword.clearOnInvalid = true;
-  loginPassword.addValidator(valueMissing, "Password required");
+  loginPassword.addValidator(valueMissing, tr("user", "auth-password.validator-valuemissing"));
   loginPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "auth-password.validator-tooshort")
   );
 
   loginForm.onSubmit(function (event) {
@@ -36,7 +37,7 @@ function initializeLoginForm() {
       .catch((response) => {
         console.log(response);
         if (response.status === 401) {
-          loginPassword.errorText = "Invalid credentials";
+          loginPassword.errorText = tr("user", "login.error-invalidcredentials");
         } else {
           loginForm.setError(response.data.message);
         }
@@ -51,26 +52,26 @@ function intializeRegisterForm() {
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
 
-  registerUsername.addValidator(valueMissing, "Username required");
+  registerUsername.addValidator(valueMissing, tr("user", "auth-username.validator-valuemissing"));
   registerUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long."
+    tr("user", "auth-username.validator-tooshort")
   );
 
-  registerPassword.addValidator(valueMissing, "Password required");
+  registerPassword.addValidator(valueMissing, tr("user", "auth-password.validator-valuemissing"));
   registerPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "auth-password.validator-tooshort")
   );
 
-  registerPasswordRepeat.addValidator(valueMissing, "Password required");
+  registerPasswordRepeat.addValidator(valueMissing, tr("user", "auth-password.validator-valuemissing"));
   registerPasswordRepeat.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "auth-password.validator-valuemissing")
   );
   registerPasswordRepeat.addValidator(
     (rpp) => rpp.value == registerPassword.value,
-    "Passwords don't match"
+    tr("user", "auth-repeatpassword.validator-notmatching")
   );
 
   registerForm.onSubmit(function (event) {
@@ -81,7 +82,7 @@ function intializeRegisterForm() {
       .catch((response) => {
         if (response.status === 409) {
           registerUsername.errorText =
-            "This username is already taken. Please choose another one";
+            tr("user", "auth-username.error-alreadytaken");
         } else {
           registerForm.setError(response.data.message);
         }
