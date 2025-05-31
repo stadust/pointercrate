@@ -148,10 +148,29 @@ tr:nth-child(even) {
 }
 
 .thumb {
-  max-width: 30%;
-  min-width: 30%;
   background: black;
   background-size: cover;
+}
+
+@media (max-width: 767px) {
+  .thumb {
+    width: 100%;
+  }
+
+  .demon-byline {
+    font-size: 80%;
+  }
+}
+
+@media (min-width: 768px) {
+  .thumb {
+    max-width: 30%;
+    min-width: 30%;
+  }
+
+  .demon-byline {
+    padding-left: 15px;
+  }
 }
 
 .ct-series-a .ct-line,

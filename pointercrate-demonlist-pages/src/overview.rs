@@ -148,10 +148,10 @@ impl OverviewPage {
         let bg_color = if progress == 100 { "#ddffdd;" } else { "white" };
 
         html! {
-             section.panel.fade style={"overflow:hidden; background:"(bg_color)} {
+             section.panel.fade.flex.mobile-col style={"overflow:hidden; background:"(bg_color)} {
+                 a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
                  div.flex style = "align-items: center" {
-                     a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
-                     div style = "padding-left: 15px" {
+                     div.demon-byline {
                          h2 style = "text-align: left; margin-bottom: 0px" {
                              a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
                                  "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
@@ -160,7 +160,7 @@ impl OverviewPage {
                          h3 style = "text-align: left" {
                              "published by " a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
                          }
-                        div style="text-align: left; font-size: 0.8em" {
+                         div style="text-align: left; font-size: 0.8em" {
                             @if let Some(current_position) = current_position {
                                  @if current_position > list_config::extended_list_size() {
                                      "Currently Legacy"
@@ -172,16 +172,16 @@ impl OverviewPage {
                             @else {
                                 (minimal_score) " (" (demon.requirement) "%) — " (total_score) " (100%) points"
                             }
-                        }
+                         }
                      }
-                    @if self.claimed_player.is_some() && current_position.is_none() {
-                        div.flex.col.no-mobile style = "font-weight: bold; text-align: right" {
-                            span style = "font-size: 300%" { (progress) "%" }
+                     @if self.claimed_player.is_some() && current_position.is_none() {
+                        div.flex.col style = "font-weight: bold; text-align: right" {
+                            span style = "font-size: 3em" { (progress) "%" }
                             span style = "font-size: 0.8em" { (progress_score) " points" }
                         }
                     }
-                 }
-             }
+                }
+            }
         }
     }
 }

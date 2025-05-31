@@ -162,6 +162,12 @@ a {
   flex-direction: column;
 }
 
+@media (max-width: 767px) {
+  .flex.mobile-col {
+    flex-direction: column;
+  }
+}
+
 .flex.space {
   justify-content: space-between;
 }
