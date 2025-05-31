@@ -20,7 +20,7 @@ use rocket::{
     Request, Response,
 };
 use serde::Serialize;
-use std::{borrow::Cow, io::Cursor, sync::Arc};
+use std::{borrow::Cow, io::Cursor};
 
 pub struct Page(PageFragment, Vec<&'static str>);
 
@@ -55,7 +55,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                 .scope(get_locale(locale.iso_code), async {
                     Ok(request
                         .rocket()
-                        .state::<Arc<fn() -> PageConfiguration>>()
+                        .state::<fn() -> PageConfiguration>()
                         .ok_or(Status::InternalServerError)?())
                 })
                 .await

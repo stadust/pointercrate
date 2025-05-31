@@ -69,7 +69,7 @@ async fn rocket() -> _ {
         // Tell it about the connection pool to use (individual handlers can get hold of this pool by declaring an argument of type `&State<PointercratePool>`)
         .manage(pool)
         // Tell pointercrate's core components about navigation bar and footers, so that it knows how to render the website
-        .manage(Arc::new(page_configuration as fn() -> PageConfiguration))
+        .manage(page_configuration as fn() -> PageConfiguration)
         // Register our 404 catcher
         .register("/", rocket::catchers![catch_401, catch_404, catch_422])
         // Register our home page
