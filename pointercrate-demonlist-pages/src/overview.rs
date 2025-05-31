@@ -9,10 +9,7 @@ use crate::{
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::player::FullPlayer;
-use pointercrate_demonlist::{
-    config as list_config,
-    demon::{Demon, TimeShiftedDemon},
-};
+use pointercrate_demonlist::{config as list_config, config, demon::{Demon, TimeShiftedDemon}};
 
 pub struct OverviewPage {
     pub team: Team,
@@ -170,7 +167,12 @@ impl OverviewPage {
                                  }
                             }
                             @else {
-                                (minimal_score) " (" (demon.requirement) "%) — " (total_score) " (100%) points"
+                                @if demon.base.position > config::list_size() {
+                                    (total_score) " points"
+                                }
+                                @ else {
+                                    (minimal_score) " (" (demon.requirement) "%) — " (total_score) " (100%) points"
+                                }
                             }
                          }
                      }
