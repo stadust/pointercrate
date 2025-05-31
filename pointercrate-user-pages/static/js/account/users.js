@@ -34,9 +34,9 @@ function setupPatchUserPermissionsForm() {
           selectedUser = response.data.data;
           selectedUser.etag = response.headers["etag"];
 
-          editForm.setSuccess(tr("user-viewer.edit-success"));
+          editForm.setSuccess(tr("user", "user-viewer.edit-success"));
         } else {
-          editForm.setSuccess(tr("user-viewer.edit-notmodified"));
+          editForm.setSuccess(tr("user", "user-viewer.edit-notmodified"));
         }
       })
       .catch(displayError(editForm));
@@ -50,7 +50,7 @@ function setupPatchUserPermissionsForm() {
       del("/api/v1/users/" + selectedUser.id + "/", {
         "If-Match": selectedUser.etag,
       })
-        .then(() => editForm.setSuccess(tr("user-viewer.delete-success")))
+        .then(() => editForm.setSuccess(tr("user", "user-viewer.delete-success")))
         .catch(displayError(editForm));
     });
   }
@@ -60,7 +60,7 @@ function setupUserByIdForm() {
   var userByIdForm = new Form(document.getElementById("find-id-form"));
   var userId = userByIdForm.input("find-id");
 
-  userId.addValidator(valueMissing, tr("user-idsearch-panel.id-validator-valuemissing"));
+  userId.addValidator(valueMissing, tr("user", "user-idsearch-panel.id-validator-valuemissing"));
 
   userByIdForm.onSubmit(function () {
     userPaginator.selectArbitrary(userId.value).catch((response) => {
@@ -83,12 +83,12 @@ function generateUser(userData) {
   b.appendChild(document.createTextNode(userData.name));
   i.appendChild(
     document.createTextNode(
-      tr("user-listed.displayname") + " " + (userData.display_name || tr("user-displayname.none"))
+      tr("user", "user-listed.displayname") + " " + (userData.display_name || tr("user", "user-displayname.none"))
     )
   );
 
   li.appendChild(b);
-  li.appendChild(document.createTextNode(" (" + trp("user-listed", {
+  li.appendChild(document.createTextNode(" (" + trp("user", "user-listed", {
     ["user-id"]: userData.id
   }) + ")"));
   li.appendChild(document.createElement("br"));
@@ -117,7 +117,7 @@ class UserPaginator extends FilteredPaginator {
 
     if (selectedUser.name == window.username) {
       editForm.setError(
-        tr("user-viewer.own-account")
+        tr("user", "user-viewer.own-account")
       );
       for (let btn of this.output.html.getElementsByTagName("input")) {
         btn.classList.add("disabled");
@@ -133,7 +133,7 @@ class UserPaginator extends FilteredPaginator {
     document.getElementById("user-user-name").innerText = selectedUser.name;
     document.getElementById("user-user-id").innerText = selectedUser.id;
     document.getElementById("user-display-name").innerText =
-      selectedUser.display_name || tr("user-displayname.none");
+      selectedUser.display_name || tr("user", "user-displayname.none");
 
     let bitmask = selectedUser.permissions;
 
@@ -148,11 +148,9 @@ class UserPaginator extends FilteredPaginator {
 }
 
 export function initialize() {
-  loadResource("user").then(() => {
-    setupPatchUserPermissionsForm();
-    setupUserByIdForm();
+  setupPatchUserPermissionsForm();
+  setupUserByIdForm();
 
-    userPaginator = new UserPaginator();
-    userPaginator.initialize();
-  })
+  userPaginator = new UserPaginator();
+  userPaginator.initialize();
 }

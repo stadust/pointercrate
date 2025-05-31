@@ -26,7 +26,7 @@ import {
   generateRecord,
   embedVideo,
 } from "/static/demonlist/js/modules/demonlist.js";
-import { loadResource, tr, trp } from "/static/core/js/modules/localization.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export let recordManager;
 
@@ -97,9 +97,9 @@ class RecordManager extends Paginator {
               this.currentObject.video
           )
           .then(() =>
-            this.output.setSuccess(tr("record-viewer.copy-data-success"))
+            this.output.setSuccess(tr("record", "record-viewer.copy-data-success"))
           )
-          .catch(() => this.output.setError(tr("record-viewer.copy-data-error")));
+          .catch(() => this.output.setError(tr("record", "record-viewer.copy-data-error")));
       });
   }
 
@@ -113,11 +113,11 @@ class RecordManager extends Paginator {
 
     form.addValidators({
       "record-progress-edit": {
-        [tr("record-progress-dialog.progress-validator-rangeunderflow")]: rangeUnderflow,
-        [tr("record-progress-dialog.progress-validator-rangeoverflow")]: rangeOverflow,
-        [tr("record-progress-dialog.progress-validator-badinput")]: badInput,
-        [tr("record-progress-dialog.progress-validator-stepmismatch")]: stepMismatch,
-        [tr("record-progress-dialog.progress-validator-valuemissing")]: valueMissing,
+        [tr("record", "record-progress-dialog.progress-validator-rangeunderflow")]: rangeUnderflow,
+        [tr("record", "record-progress-dialog.progress-validator-rangeoverflow")]: rangeOverflow,
+        [tr("record", "record-progress-dialog.progress-validator-badinput")]: badInput,
+        [tr("record", "record-progress-dialog.progress-validator-stepmismatch")]: stepMismatch,
+        [tr("record", "record-progress-dialog.progress-validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -134,7 +134,7 @@ class RecordManager extends Paginator {
 
     form.addValidators({
       "record-video-edit": {
-        [tr("record-videolink-dialog.videolink-validator-typemismatch")]: typeMismatch,
+        [tr("record", "record-videolink-dialog.videolink-validator-typemismatch")]: typeMismatch,
       },
     });
 
@@ -234,7 +234,7 @@ function createNoteHtml(note) {
     closeX.style.transform = "scale(0.75)";
 
     closeX.addEventListener("click", () => {
-      if (confirm(tr("record-note-listed.confirm-delete"))) {
+      if (confirm(tr("record", "record-note-listed.confirm-delete"))) {
         del(
           "/api/v1/records/" +
             recordManager.currentObject.id +
@@ -247,7 +247,7 @@ function createNoteHtml(note) {
   }
 
   let b = document.createElement("b");
-  b.innerText = trp("record-note-listed", {
+  b.innerText = trp("record", "record-note-listed", {
     ["note-id"]: note.id,
   })
 
@@ -260,27 +260,27 @@ function createNoteHtml(note) {
 
   if (note.author === null) {
     furtherInfo.innerText =
-      tr("record-note-listed.author-submitter");
+      tr("record", "record-note-listed.author-submitter");
   } else {
-    furtherInfo.innerText = trp("record-note-listed.author", {
+    furtherInfo.innerText = trp("record", "record-note-listed.author", {
       ["author"]: note.author,
     });
   }
   furtherInfo.innerText += " ";
 
   if (note.editors.length) {
-    furtherInfo.innerText += trp("record-note-listed.editors", {
+    furtherInfo.innerText += trp("record", "record-note-listed.editors", {
       ["editors"]: note.editors.join(", ")
     }) + " ";
   }
 
   if (note.transferred) {
     furtherInfo.innerText +=
-      tr("record-note-listed.transferred") + " ";
+      tr("record", "record-note-listed.transferred") + " ";
   }
 
   if (note.is_public) {
-    furtherInfo.innerText += tr("record-note-listed.public") + " ";
+    furtherInfo.innerText += tr("record", "record-note-listed.public") + " ";
   }
 
   if (isAdmin) noteDiv.appendChild(closeX);
@@ -342,7 +342,7 @@ function setupRecordSearchRecordIdForm() {
   );
   var recordId = recordSearchByIdForm.input("record-record-id");
 
-  recordId.addValidator(valueMissing, tr("record-idsearch-panel.id-validator-valuemissing"));
+  recordId.addValidator(valueMissing, tr("record", "record-idsearch-panel.id-validator-valuemissing"));
   recordSearchByIdForm.onSubmit(function () {
     recordManager
       .selectArbitrary(parseInt(recordId.value))
@@ -366,7 +366,7 @@ function setupRecordFilterPlayerNameForm() {
           let json = response.data;
 
           if (!json || json.length == 0) {
-            playerName.errorText = trp("error-demonlist-playernotfoundname", {
+            playerName.errorText = trp("error", "error-demonlist-playernotfoundname", {
               ["player-name"]: playerName.value,
             });
           } else {
@@ -382,7 +382,7 @@ function setupEditRecordForm() {
   document.getElementById("record-delete").addEventListener("click", () => {
     if (
       confirm(
-        tr("record-viewer.confirm-delete")
+        tr("record", "record-viewer.confirm-delete")
       )
     ) {
       del("/api/v1/records/" + recordManager.currentObject.id + "/", {
@@ -396,16 +396,14 @@ function setupEditRecordForm() {
 }
 
 export function initialize() {
-  Promise.all([loadResource("record"), loadResource("error")]).then(() => {
-    setupRecordFilterPlayerIdForm();
-    setupRecordFilterPlayerNameForm();
-    setupAddNote();
-    setupEditRecordForm();
-    setupRecordSearchRecordIdForm();
+  setupRecordFilterPlayerIdForm();
+  setupRecordFilterPlayerNameForm();
+  setupAddNote();
+  setupEditRecordForm();
+  setupRecordSearchRecordIdForm();
 
-    initializeRecordSubmitter(true);
+  initializeRecordSubmitter(true);
 
-    recordManager = new RecordManager();
-    return recordManager.initialize();
-  })
+  recordManager = new RecordManager();
+  return recordManager.initialize();
 }

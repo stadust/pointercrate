@@ -76,23 +76,20 @@ pub async fn overview(
         tardis.activate(destination, demons_then, !is_april_1st)
     }
 
-    Ok(Page::new(
-        OverviewPage {
-            team: Team {
-                admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-                moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-                helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
-            },
-            demonlist,
-            time_machine: tardis,
-            submitter_initially_visible: submitter.unwrap_or(false),
-            claimed_player: match auth {
-                Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
-                None => None,
-            },
+    Ok(Page::new(OverviewPage {
+        team: Team {
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
         },
-        vec!["overview", "submitter", "ui"],
-    ))
+        demonlist,
+        time_machine: tardis,
+        submitter_initially_visible: submitter.unwrap_or(false),
+        claimed_player: match auth {
+            Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
+            None => None,
+        },
+    }))
 }
 
 async fn claimed_full_player(user: &User, connection: &mut PgConnection) -> Option<FullPlayer> {
@@ -154,20 +151,17 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         );
     }
 
-    Ok(Page::new(
-        DemonPage {
-            team: Team {
-                admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-                moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-                helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
-            },
-            demonlist: current_list(&mut *connection).await?,
-            movements: modifications,
-            integration: gd.load_level_for_demon(&full_demon.demon).await,
-            data: full_demon,
+    Ok(Page::new(DemonPage {
+        team: Team {
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
         },
-        vec!["demon"],
-    ))
+        demonlist: current_list(&mut *connection).await?,
+        movements: modifications,
+        integration: gd.load_level_for_demon(&full_demon.demon).await,
+        data: full_demon,
+    }))
 }
 
 #[localized]
@@ -175,21 +169,15 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
-    Ok(Page::new(
-        IndividualStatsViewer {
-            nationalities_in_use: Nationality::used(&mut *connection).await?,
-        },
-        vec!["statsviewer", "ui"],
-    ))
+    Ok(Page::new(IndividualStatsViewer {
+        nationalities_in_use: Nationality::used(&mut *connection).await?,
+    }))
 }
 
 #[localized]
 #[rocket::get("/statsviewer/nations")]
 pub async fn nation_stats_viewer() -> Page {
-    Page::new(
-        pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer(),
-        vec!["statsviewer"],
-    )
+    Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
 }
 
 #[localized]

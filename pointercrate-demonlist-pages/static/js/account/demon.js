@@ -68,8 +68,8 @@ export class DemonManager extends FilteredPaginator {
 
     thumbnailForm.addValidators({
       "demon-thumbnail-edit": {
-        [tr("demon-thumbnail.validator-typemismatch")]: typeMismatch,
-        [tr("demon-thumbnail.validator-valuemissing")]: valueMissing,
+        [tr("demon", "demon-thumbnail.validator-typemismatch")]: typeMismatch,
+        [tr("demon", "demon-thumbnail.validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -86,11 +86,11 @@ export class DemonManager extends FilteredPaginator {
 
     requirementForm.addValidators({
       "demon-requirement-edit": {
-        [tr("demon-requirement.validator-underflow")]: rangeUnderflow,
-        [tr("demon-requirement.validator-rangeoverflow")]: rangeOverflow,
-        [tr("demon-requirement.validator-badinput")]: badInput,
-        [tr("demon-requirement.validator-stepmismatch")]: stepMismatch,
-        [tr("demon-requirement.validator-valuemissing")]: valueMissing,
+        [tr("demon", "demon-requirement.validator-underflow")]: rangeUnderflow,
+        [tr("demon", "demon-requirement.validator-rangeoverflow")]: rangeOverflow,
+        [tr("demon", "demon-requirement.validator-badinput")]: badInput,
+        [tr("demon", "demon-requirement.validator-stepmismatch")]: stepMismatch,
+        [tr("demon", "demon-requirement.validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -105,10 +105,10 @@ export class DemonManager extends FilteredPaginator {
 
     positionForm.addValidators({
       "demon-position-edit": {
-        [tr("demon-position.validator-rangeunderflow")]: rangeUnderflow,
-        [tr("demon-position.validator-badinput")]: badInput,
-        [tr("demon-position.validator-stepmismatch")]: stepMismatch,
-        [tr("demon-position.validator-valuemissing")]: valueMissing,
+        [tr("demon", "demon-position.validator-rangeunderflow")]: rangeUnderflow,
+        [tr("demon", "demon-position.validator-badinput")]: badInput,
+        [tr("demon", "demon-position.validator-stepmismatch")]: stepMismatch,
+        [tr("demon", "demon-position.validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -123,7 +123,7 @@ export class DemonManager extends FilteredPaginator {
 
     nameForm.addValidators({
       "demon-name-edit": {
-        [tr("demon-name.validator-valuemissing")]: valueMissing,
+        [tr("demon", "demon-name.validator-valuemissing")]: valueMissing,
       },
     });
     setupEditorDialog(
@@ -254,35 +254,35 @@ function createCreatorHtml(creator) {
 function setupDemonAdditionForm() {
   let form = new Form(document.getElementById("demon-submission-form"));
   form.addValidators({
-    "demon-add-name": { [tr("demon-name.validator-valuemissing")]: valueMissing },
+    "demon-add-name": { [tr("demon", "demon-name.validator-valuemissing")]: valueMissing },
     "demon-add-level-id": {
-      [tr("demon-id.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon", "demon-id.validator-rangeunderflow")]: rangeUnderflow,
     },
     "demon-add-position": {
-      [tr("demon-position.validator-valuemissing")]: valueMissing,
-      [tr("demon-position.validator-rangeunderflow")]: rangeUnderflow,
-      [tr("demon-position.validator-badinput")]: badInput,
-      [tr("demon-position.validator-stepmismatch")]: stepMismatch,
+      [tr("demon", "demon-position.validator-valuemissing")]: valueMissing,
+      [tr("demon", "demon-position.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon", "demon-position.validator-badinput")]: badInput,
+      [tr("demon", "demon-position.validator-stepmismatch")]: stepMismatch,
     },
     "demon-add-requirement": {
-      [tr("demon-requirement.validator-valuemissing")]:
+      [tr("demon", "demon-requirement.validator-valuemissing")]:
         valueMissing,
-      [tr("demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
-      [tr("demon-requirement.validator-overflow")]: rangeOverflow,
-      [tr("demon-requirement.validator-badinput")]: badInput,
-      [tr("demon-requirement.validator-stepmismatch")]: stepMismatch,
+      [tr("demon", "demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon", "demon-requirement.validator-overflow")]: rangeOverflow,
+      [tr("demon", "demon-requirement.validator-badinput")]: badInput,
+      [tr("demon", "demon-requirement.validator-stepmismatch")]: stepMismatch,
     },
     "demon-add-requirement": {
-      [tr("demon-requirement.validator-valuemissing")]:
+      [tr("demon", "demon-requirement.validator-valuemissing")]:
         valueMissing,
-      [tr("demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
-      [tr("demon-requirement.validator-rangeoverflow")]: rangeOverflow,
-      [tr("demon-requirement.validator-badinput")]: badInput,
-      [tr("demon-requirement.validator-stepmismatch")]: stepMismatch,
+      [tr("demon", "demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demon", "demon-requirement.validator-rangeoverflow")]: rangeOverflow,
+      [tr("demon", "demon-requirement.validator-badinput")]: badInput,
+      [tr("demon", "demon-requirement.validator-stepmismatch")]: stepMismatch,
     },
-    "demon-add-verifier": { [tr("demon-verifier.validator-valuemissing")]: valueMissing },
-    "demon-add-publisher": { [tr("demon-publisher.validator-valuemissing")]: valueMissing },
-    "demon-add-video": { [tr("demon-video.validator-typemismatch")]: typeMismatch },
+    "demon-add-verifier": { [tr("demon", "demon-verifier.validator-valuemissing")]: valueMissing },
+    "demon-add-publisher": { [tr("demon", "demon-publisher.validator-valuemissing")]: valueMissing },
+    "demon-add-video": { [tr("demon", "demon-video.validator-typemismatch")]: typeMismatch },
   });
 
   form.creators = [];
@@ -305,61 +305,59 @@ function setupDemonAdditionForm() {
 }
 
 export function initialize() {
-  loadResource("demon").then(() => {
-    demonManager = new DemonManager();
-    demonManager.initialize();
+  demonManager = new DemonManager();
+  demonManager.initialize();
 
-    let addDemonForm = setupDemonAdditionForm();
+  let addDemonForm = setupDemonAdditionForm();
 
-    let creatorFormDialog = new FormDialog("demon-add-creator-dialog");
-    let dialogCreators = document.getElementById("demon-add-creators");
+  let creatorFormDialog = new FormDialog("demon-add-creator-dialog");
+  let dialogCreators = document.getElementById("demon-add-creators");
 
-    let button1 = document.getElementById("demon-add-creator-pen");
-    let button2 = document.getElementById("add-demon-add-creator-pen");
+  let button1 = document.getElementById("demon-add-creator-pen");
+  let button2 = document.getElementById("add-demon-add-creator-pen");
 
-    button1.addEventListener("click", () => {
-      creatorFormDialog.submissionPredicateFactory = (data) => {
-        return post(
-          "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
-          {},
-          data
-        )
-          .then((response) => {
-            let location = response.headers["location"];
+  button1.addEventListener("click", () => {
+    creatorFormDialog.submissionPredicateFactory = (data) => {
+      return post(
+        "/api/v2/demons/" + demonManager.currentObject.id + "/creators/",
+        {},
+        data
+      )
+        .then((response) => {
+          let location = response.headers["location"];
 
-            demonManager.addCreator({
-              name: data.creator,
-              id: location.substring(
-                location.lastIndexOf("/", location.length - 2) + 1,
-                location.length - 1
-              ),
-            });
-
-            demonManager.output.setSuccess(tr("demon-creator-dialog.edit-success"));
-          })
-          .catch((response) => {
-            displayError(creatorFormDialog.form)(response);
-            throw response;
+          demonManager.addCreator({
+            name: data.creator,
+            id: location.substring(
+              location.lastIndexOf("/", location.length - 2) + 1,
+              location.length - 1
+            ),
           });
-      };
-      creatorFormDialog.open();
-    });
 
-    button2.addEventListener("click", () => {
-      creatorFormDialog.submissionPredicateFactory = (data) =>
-        new Promise((resolve) => resolve(data));
-      creatorFormDialog.open().then((data) => {
-        let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
-        creator.children[0].addEventListener("click", () => {
-          addDemonForm.creators.splice(
-            addDemonForm.creators.indexOf(data.creator),
-            1
-          );
-          dialogCreators.removeChild(creator);
+          demonManager.output.setSuccess(tr("demon-creator-dialog.edit-success"));
+        })
+        .catch((response) => {
+          displayError(creatorFormDialog.form)(response);
+          throw response;
         });
+    };
+    creatorFormDialog.open();
+  });
 
-        addDemonForm.creators.push(data.creator);
+  button2.addEventListener("click", () => {
+    creatorFormDialog.submissionPredicateFactory = (data) =>
+      new Promise((resolve) => resolve(data));
+    creatorFormDialog.open().then((data) => {
+      let creator = insertCreatorInto({ name: data.creator }, dialogCreators);
+      creator.children[0].addEventListener("click", () => {
+        addDemonForm.creators.splice(
+          addDemonForm.creators.indexOf(data.creator),
+          1
+        );
+        dialogCreators.removeChild(creator);
       });
+
+      addDemonForm.creators.push(data.creator);
     });
-  })
+  });
 }

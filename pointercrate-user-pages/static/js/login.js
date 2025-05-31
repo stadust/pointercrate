@@ -102,7 +102,7 @@ function googleOauthCallback(response) {
 
 window.googleOauthCallback = googleOauthCallback;
 
-$(document).ready(function () {
+$(window).on("load", function () {
   new TabbedPane(document.getElementById("login-tabber"), null);
   initializeLoginForm();
   intializeRegisterForm();

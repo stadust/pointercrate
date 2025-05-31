@@ -130,7 +130,7 @@ class NationStatsViewer extends StatsViewer {
         (creation) => {
           return this.makeTooltip(
             this.formatDemon(creation.demon),
-            trp("statsviewer-nation.created-tooltip", {
+            trp("statsviewer", "statsviewer-nation.created-tooltip", {
                 ["players"]: creation.players.length,
               }).replaceAll(" ", "&nbsp;") + " ",
             creation.players.join(", ")
@@ -144,7 +144,7 @@ class NationStatsViewer extends StatsViewer {
         (verification) => {
           return this.makeTooltip(
             this.formatDemon(verification.demon),
-            tr("statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
+            tr("statsviewer", "statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
             verification.players.join(", ")
           );
         }
@@ -156,7 +156,7 @@ class NationStatsViewer extends StatsViewer {
         (publication) => {
           return this.makeTooltip(
             this.formatDemon(publication.demon),
-            tr("statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
+            tr("statsviewer", "statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
             publication.players.join(", ")
           );
         }
@@ -171,7 +171,7 @@ class NationStatsViewer extends StatsViewer {
             (creation) => {
               return this.makeTooltip(
                 this.formatDemon(creation.demon),
-                trp("statsviewer-nation.created-tooltip", {
+                trp("statsviewer", "statsviewer-nation.created-tooltip", {
                     ["players"]: creation.players.length,
                   }).replaceAll(" ", "&nbsp;") + " ",
                 creation.players.join(", ")
@@ -188,7 +188,7 @@ class NationStatsViewer extends StatsViewer {
             (publication) => {
               return this.makeTooltip(
                 this.formatDemon(publication.demon),
-                tr("statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
+                tr("statsviewer", "statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
                 publication.players.join(", ")
               );
             }
@@ -202,7 +202,7 @@ class NationStatsViewer extends StatsViewer {
             (verification) => {
               return this.makeTooltip(
                 this.formatDemon(verification.demon),
-                tr("statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
+                tr("statsviewer", "statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
                 verification.players.join(", ")
               );
             }
@@ -256,10 +256,10 @@ class NationStatsViewer extends StatsViewer {
 
     let title =
       (record.progress === 100 
-        ? trp("statsviewer-nation.beaten-tooltip", {
+        ? trp("statsviewer", "statsviewer-nation.beaten-tooltip", {
           ["players"]: record.players.length,
         })
-        : trp("statsviewer-nation.progress-tooltip", {
+        : trp("statsviewer", "statsviewer-nation.progress-tooltip", {
           ["players"]: record.players.length,
         })).replaceAll(" ", "&nbsp;") + " ";
 
@@ -275,33 +275,31 @@ class NationStatsViewer extends StatsViewer {
 $(window).on("load", function () {
   let map = new InteractiveWorldMap();
 
-  document.addEventListener("fluentresourcesloaded", () => {
-    window.statsViewer = new NationStatsViewer(
-      document.getElementById("statsviewer")
-    );
-    window.statsViewer.initialize();
-    window.statsViewer.addSelectionListener((selected) =>
-      map.select(selected.country_code)
-    );
+  window.statsViewer = new NationStatsViewer(
+    document.getElementById("statsviewer")
+  );
+  window.statsViewer.initialize();
+  window.statsViewer.addSelectionListener((selected) =>
+    map.select(selected.country_code)
+  );
 
-    map.addSelectionListener((country, _) => {
-      for (let li of window.statsViewer.list.children) {
-        if (li.dataset.id === country) window.statsViewer.onSelect(li);
-      }
-    });
+  map.addSelectionListener((country, _) => {
+    for (let li of window.statsViewer.list.children) {
+      if (li.dataset.id === country) window.statsViewer.onSelect(li);
+    }
+  });
 
-    new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
-      (selected) => {
-        if (selected === "All") {
-          window.statsViewer.updateQueryData("continent", undefined);
-          map.resetContinentHighlight();
-        } else {
-          window.statsViewer.updateQueryData("continent", selected);
-          map.highlightContinent(selected);
-        }
+  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
+    (selected) => {
+      if (selected === "All") {
+        window.statsViewer.updateQueryData("continent", undefined);
+        map.resetContinentHighlight();
+      } else {
+        window.statsViewer.updateQueryData("continent", selected);
+        map.highlightContinent(selected);
       }
-    );
-  })
+    }
+  );
 });
 
 function generateStatsViewerNation(nation) {

@@ -24,7 +24,7 @@ export class Dropdown {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
     if (this.input.dataset.default === undefined && !this.input.placeholder)
-      this.input.placeholder = tr("dropdown-placeholder");
+      this.input.placeholder = tr("ui", "dropdown-placeholder");
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
     this.ul = this.html.getElementsByTagName("ul")[0];
 
@@ -302,8 +302,8 @@ export function setupDropdownEditor(
     backend
       .edit(data)
       .then((was304) => {
-        if (was304) output.setSuccess( tr("edit-notmodified") );
-        else output.setSuccess( tr("edit-success") );
+        if (was304) output.setSuccess( tr("ui", "edit-notmodified") );
+        else output.setSuccess( tr("ui", "edit-success") );
       })
       .catch((response) => displayError(output)(response));
   });
@@ -403,9 +403,9 @@ export function setupEditorDialog(
       .edit(dataTransform(data))
       .then((was304) => {
         if (was304) {
-          output.setSuccess( tr("edit-notmodified") );
+          output.setSuccess( tr("ui", "edit-notmodified") );
         } else {
-          output.setSuccess( tr("edit-success") );
+          output.setSuccess( tr("ui", "edit-success") );
         }
       })
       .catch((response) => {
@@ -1234,6 +1234,7 @@ export function displayError(output, specialCodes = {}) {
       output.setError(
         "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!"
       );
+      console.error(response);
       throw new Error("FrontendError");
     }
   };

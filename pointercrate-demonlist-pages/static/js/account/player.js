@@ -80,7 +80,7 @@ class PlayerManager extends FilteredPaginator {
         this.currentObject.nationality.country_code
       ).then(() => {
         if (!this.currentObject.nationality.subdivision) {
-          this._subdivision.selectSilently(tr("player-subdivision.none"));
+          this._subdivision.selectSilently(tr("player", "player-subdivision.none"));
         } else {
           this._subdivision.selectSilently(
             this.currentObject.nationality.subdivision.iso_code
@@ -88,8 +88,8 @@ class PlayerManager extends FilteredPaginator {
         }
       });
     } else {
-      this._nationality.selectSilently(tr("player-nationality.none"));
-      this._subdivision.selectSilently(tr("player-subdivision.none"));
+      this._nationality.selectSilently(tr("player", "player-nationality.none"));
+      this._subdivision.selectSilently(tr("player", "player-subdivision.none"));
     }
   }
 
@@ -103,7 +103,7 @@ class PlayerManager extends FilteredPaginator {
 
     form.addValidators({
       "player-name-edit": {
-        [tr("player-name-dialog.name-validator-valuemissing")]: valueMissing,
+        [tr("player", "player-name-dialog.name-validator-valuemissing")]: valueMissing,
       },
     });
   }
@@ -115,7 +115,7 @@ function setupPlayerSearchPlayerIdForm() {
   );
   var playerId = playerSearchByIdForm.input("search-player-id");
 
-  playerId.addValidator(valueMissing, tr("player-idsearch-panel.id-validator-valuemissing"));
+  playerId.addValidator(valueMissing, tr("player", "player-idsearch-panel.id-validator-valuemissing"));
   playerSearchByIdForm.onSubmit(function () {
     playerManager
       .selectArbitrary(parseInt(playerId.value))
@@ -124,29 +124,27 @@ function setupPlayerSearchPlayerIdForm() {
 }
 
 export function initialize(tabber) {
-  loadResource("player").then(() => {
-    setupPlayerSearchPlayerIdForm();
+  setupPlayerSearchPlayerIdForm();
 
-    playerManager = new PlayerManager();
-    playerManager.initialize();
+  playerManager = new PlayerManager();
+  playerManager.initialize();
 
-    document
-      .getElementById("player-list-records")
-      .addEventListener("click", () => {
-        if (recordManager == null) {
-          // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
-          initRecords().then(() => {
-            recordManager.updateQueryData(
-              "player",
-              playerManager.currentObject.id
-            );
-            tabber.selectPane("3");
-          });
-        } else {
-          recordManager.updateQueryData("player", playerManager.currentObject.id);
-          tabber.selectPane("3"); // definitely initializes the record manager
-        }
+  document
+    .getElementById("player-list-records")
+    .addEventListener("click", () => {
+      if (recordManager == null) {
+        // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
+        initRecords().then(() => {
+          recordManager.updateQueryData(
+            "player",
+            playerManager.currentObject.id
+          );
+          tabber.selectPane("3");
+        });
+      } else {
+        recordManager.updateQueryData("player", playerManager.currentObject.id);
+        tabber.selectPane("3"); // definitely initializes the record manager
       }
-    );
-  })
+    }
+  );
 }

@@ -26,7 +26,7 @@ function generateSubmitter(submitter) {
     li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
   }
 
-  b.innerText = trp("submitter-listed", {
+  b.innerText = trp("submitter", "submitter-listed", {
     ["submitter-id"]: submitter.id,
   });
 
@@ -73,7 +73,7 @@ function setupSubmitterSearchSubmitterIdForm() {
 
   submitterSearchByIdForm.addErrorOverride(40401, "search-submitter-id");
 
-  submitterId.addValidator(valueMissing, tr("submitter-idsearch-panel.id-validator-valuemissing"));
+  submitterId.addValidator(valueMissing, tr("submitter", "submitter-idsearch-panel.id-validator-valuemissing"));
   submitterSearchByIdForm.onSubmit(function () {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))
@@ -82,32 +82,30 @@ function setupSubmitterSearchSubmitterIdForm() {
 }
 
 export function initialize(tabber) {
-  loadResource("submitter").then(() => {
-    setupSubmitterSearchSubmitterIdForm();
+  setupSubmitterSearchSubmitterIdForm();
 
-    submitterManager = new SubmitterManager();
-    submitterManager.initialize();
+  submitterManager = new SubmitterManager();
+  submitterManager.initialize();
 
-    document
-      .getElementById("submitter-list-records")
-      .addEventListener("click", () => {
-        if (recordManager == null) {
-          // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
-          initRecords().then(() => {
-            recordManager.updateQueryData(
-              "submitter",
-              submitterManager.currentObject.id
-            );
-            tabber.selectPane("3");
-          });
-        } else {
+  document
+    .getElementById("submitter-list-records")
+    .addEventListener("click", () => {
+      if (recordManager == null) {
+        // Prevent race conditions between initialization request and the request caused by 'updateQueryData'
+        initRecords().then(() => {
           recordManager.updateQueryData(
             "submitter",
             submitterManager.currentObject.id
           );
           tabber.selectPane("3");
-        }
+        });
+      } else {
+        recordManager.updateQueryData(
+          "submitter",
+          submitterManager.currentObject.id
+        );
+        tabber.selectPane("3");
       }
-    );
-  })
+    }
+  );
 }

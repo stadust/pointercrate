@@ -37,28 +37,25 @@ import { FluentResource } from "https://cdn.jsdelivr.net/npm/@fluent/bundle@0.18
 window.fluentBundle = new FluentBundle(document.documentElement.lang);
 window.loadedResources = [];
 
-// load a specific .ftl file
-// the correct language is retrieved thanks to cookies
 export function loadResource(resource) {
     if (window.loadedResources.includes(resource)) {
-        return Promise.resolve();
+        return;
     }
 
-    return fetch(`/static/ftl/${document.documentElement.lang}/${resource}.ftl`)
-        .then(response => response.text())
-        .then(text => {
-            let resource = new FluentResource(text);
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", `/static/ftl/${document.documentElement.lang}/${resource}.ftl`, false);
+    xhr.send();
 
-            window.fluentBundle.addResource(resource);
-            window.loadedResources.push(resource);
-        })
-        .catch(error => console.error(error))
+    let fluentResource = new FluentResource(xhr.responseText);
+
+    window.fluentBundle.addResource(fluentResource);
+    window.loadedResources.push(resource);
 }
 
-// utility function for loading a specific translation
-export function tr(text_id) {
-    let [id, attribute] = text_id.split(".");
+export function tr(resource, text_id) {
+    loadResource(resource);
 
+    let [id, attribute] = text_id.split(".");
     let message = window.fluentBundle.getMessage(id);
 
     return message ?
@@ -66,15 +63,12 @@ export function tr(text_id) {
         : undefined;
 }
 
-// utility function for loading a specific translation with variable text
-export function trp(text_id, args) {
-    let pattern = tr(text_id);
+export function trp(resource, text_id, args) {
+    loadResource(resource);
+
+    let pattern = tr(resource, text_id);
     return window.fluentBundle.formatPattern(pattern, args);
 }
-
-// once all of the fluent resources specified in the <head> of this
-// page finish loading, this event will be dispatched
-const resourcesLoadedEvent = new CustomEvent("fluentresourcesloaded");
 
 $(window).on("load", function () {
     let languageSelectorGroup = document.getElementById("language-selector");
@@ -86,13 +80,4 @@ $(window).on("load", function () {
             .map((element) => element.parentElement)
             .forEach((button) => languageSelector.addSelectionListener(button, "touchend"))
     }
-
-    let resourcePromises = [];
-    window.ftlResources.forEach((resource) => {
-        resourcePromises.push(loadResource(resource));
-    });
-    
-    Promise.all(resourcePromises).then(() => {
-        document.dispatchEvent(resourcesLoadedEvent);
-    });
 });

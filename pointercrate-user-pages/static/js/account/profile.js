@@ -91,7 +91,7 @@ function setupEditAccount() {
 
   editYoutubeForm.addValidators({
     "edit-yt": {
-      [tr("profile-youtube.newlink-validator-typemismatch")]: typeMismatch,
+      [tr("user", "profile-youtube.newlink-validator-typemismatch")]: typeMismatch,
     },
   });
 
@@ -110,18 +110,18 @@ function setupEditAccount() {
 
     changePasswordForm.addValidators({
       "auth-pw": {
-        [tr("profile-change-password.authenticate-validator-valuemissing")]: valueMissing,
-        [tr("profile-change-password.authenticate-validator-tooshort")]:
+        [tr("user", "profile-change-password.authenticate-validator-valuemissing")]: valueMissing,
+        [tr("user", "profile-change-password.authenticate-validator-tooshort")]:
           tooShort,
       },
       "edit-pw": {
-        [tr("profile-change-password.newpassword-validator-tooshort")]:
+        [tr("user", "profile-change-password.newpassword-validator-tooshort")]:
           tooShort,
       },
       "edit-pw-repeat": {
-        [tr("profile-change-password.repeatnewpassword-validator-tooshort")]:
+        [tr("user", "profile-change-password.repeatnewpassword-validator-tooshort")]:
           tooShort,
-        [tr("profile-change-password.repeatnewpassword-validator-notmatching")]: (rpp) => rpp.value == editPw.value,
+        [tr("user", "profile-change-password.repeatnewpassword-validator-notmatching")]: (rpp) => rpp.value == editPw.value,
       },
     });
 
@@ -170,9 +170,7 @@ function googleOauthCallback(response) {
 window.googleOauthCallback = googleOauthCallback;
 
 export function initialize() {
-  loadResource("user").then(() => {
-    setupGetAccessToken();
-    setupEditAccount();
-    setupInvalidateToken();
-  })
+  setupGetAccessToken();
+  setupEditAccount();
+  setupInvalidateToken();
 }

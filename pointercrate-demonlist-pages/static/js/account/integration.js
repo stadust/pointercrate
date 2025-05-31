@@ -34,7 +34,7 @@ class ClaimManager extends FilteredPaginator {
       {}
     ).then((response) => {
       if (response.data.length === 0) {
-        this.setError(trp("claim-manager.claim-no-records", {
+        this.setError(trp("player", "claim-manager.claim-no-records", {
           ["player-id"]: selected.dataset.playerId,
         }))
         document.getElementById("claim-video").removeAttribute("src");
@@ -59,7 +59,7 @@ function generateClaim(claim) {
   let playerSpan = document.createElement("span");
 
   let uname = document.createElement("b");
-  uname.innerText = tr("claim-listed-user") + " ";
+  uname.innerText = tr("player", "claim-listed-user") + " ";
 
   userSpan.appendChild(uname);
   userSpan.appendChild(
@@ -67,7 +67,7 @@ function generateClaim(claim) {
   );
 
   let pname = document.createElement("b");
-  pname.innerText = tr("claim-listed-player") + " ";
+  pname.innerText = tr("player", "claim-listed-player") + " ";
 
   playerSpan.appendChild(pname);
   playerSpan.appendChild(
@@ -171,7 +171,7 @@ class ClaimedPlayerRecordPaginator extends Paginator {
           }
 
           let title = document.createElement("b");
-          title.innerText = trp("claim-records.record-notes", {
+          title.innerText = trp("player", "claim-records.record-notes", {
             ["record-id"]: recordId,
           });
 
@@ -190,7 +190,7 @@ class ClaimedPlayerRecordPaginator extends Paginator {
 
           this.successOutput.style.display = "block";
         } else {
-          this.setSuccess(tr("claim-records.record-notes-none"));
+          this.setSuccess(tr("player", "claim-records.record-notes-none"));
         }
       })
       .catch(displayError(this));
@@ -198,73 +198,71 @@ class ClaimedPlayerRecordPaginator extends Paginator {
 }
 
 export function initialize() {
-  loadResource("player").then(() => {
-    if (document.getElementById("claim-pagination")) {
-      claimManager = new ClaimManager();
-      claimManager.initialize();
-    }
+  if (document.getElementById("claim-pagination")) {
+    claimManager = new ClaimManager();
+    claimManager.initialize();
+  }
 
-    let claimedPlayer = document.getElementById("claimed-player");
+  let claimedPlayer = document.getElementById("claimed-player");
 
-    let playerPaginator = new ClaimPlayerPaginator();
-    playerPaginator.initialize();
-    playerPaginator.addSelectionListener((selected) => {
-      put("/api/v1/players/" + selected.id + "/claims/")
-        .then(() => {
-          window.location.reload();
+  let playerPaginator = new ClaimPlayerPaginator();
+  playerPaginator.initialize();
+  playerPaginator.addSelectionListener((selected) => {
+    put("/api/v1/players/" + selected.id + "/claims/")
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(displayError(playerPaginator));
+  });
+
+  document.getElementById("player-claim-pen").addEventListener("click", () => {
+    playerPaginator.html.parentElement.style.display = "block";
+  });
+
+  let claimPanel = document.getElementById("claims-claim-panel");
+
+  if (claimPanel) {
+    let geolocationButton = document.getElementById(
+      "claims-geolocate-nationality"
+    );
+    let output = new Output(claimPanel);
+
+    let playerId = claimedPlayer.dataset.id;
+
+    geolocationButton.addEventListener("click", () => {
+      post("/api/v1/players/" + playerId + "/geolocate")
+        .then((response) => {
+          let nationality = response.data;
+          if (nationality.subdivision) {
+            output.setSuccess(trp("player", "claim-geolocate.edit-success-subdivision", {
+              ["nationality"]: nationality.nation,
+              ["subdivision"]: nationality.subdivision.name,
+            }))
+          } else {
+            output.setSuccess(trp("player", "claim-geolocate.edit-success", {
+              ["nationality"]: nationality.nation,
+            }))
+          }
         })
-        .catch(displayError(playerPaginator));
+        .catch(displayError(output));
     });
 
-    document.getElementById("player-claim-pen").addEventListener("click", () => {
-      playerPaginator.html.parentElement.style.display = "block";
+    let lockSubmissionsCheckbox = document.getElementById(
+      "lock-submissions-checkbox"
+    );
+    lockSubmissionsCheckbox.addEventListener("change", () => {
+      patch(
+        "/api/v1/players/" + playerId + "/claims/" + window.userId + "/",
+        {},
+        { lock_submissions: lockSubmissionsCheckbox.checked }
+      )
+        .then((_) => {
+          output.setSuccess(tr("player", "claim-lock-submissions.edit-success"));
+        })
+        .catch(displayError(output));
     });
 
-    let claimPanel = document.getElementById("claims-claim-panel");
-
-    if (claimPanel) {
-      let geolocationButton = document.getElementById(
-        "claims-geolocate-nationality"
-      );
-      let output = new Output(claimPanel);
-
-      let playerId = claimedPlayer.dataset.id;
-
-      geolocationButton.addEventListener("click", () => {
-        post("/api/v1/players/" + playerId + "/geolocate")
-          .then((response) => {
-            let nationality = response.data;
-            if (nationality.subdivision) {
-              output.setSuccess(trp("claim-geolocate.edit-success-subdivision", {
-                ["nationality"]: nationality.nation,
-                ["subdivision"]: nationality.subdivision.name,
-              }))
-            } else {
-              output.setSuccess(trp("claim-geolocate.edit-success", {
-                ["nationality"]: nationality.nation,
-              }))
-            }
-          })
-          .catch(displayError(output));
-      });
-
-      let lockSubmissionsCheckbox = document.getElementById(
-        "lock-submissions-checkbox"
-      );
-      lockSubmissionsCheckbox.addEventListener("change", () => {
-        patch(
-          "/api/v1/players/" + playerId + "/claims/" + window.userId + "/",
-          {},
-          { lock_submissions: lockSubmissionsCheckbox.checked }
-        )
-          .then((_) => {
-            output.setSuccess(tr("claim-lock-submissions.edit-success"));
-          })
-          .catch(displayError(output));
-      });
-
-      let recordPaginator = new ClaimedPlayerRecordPaginator(playerId);
-      recordPaginator.initialize();
-    }
-  })
+    let recordPaginator = new ClaimedPlayerRecordPaginator(playerId);
+    recordPaginator.initialize();
+  }
 }

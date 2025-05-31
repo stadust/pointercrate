@@ -36,14 +36,11 @@ impl<'r> Responder<'r, 'static> for ErrorResponder {
 
         if *accept == MediaType::HTML {
             Response::build_from(
-                Page::new(
-                    ErrorFragment {
-                        status: self.error_code / 100,
-                        reason: status.reason_lossy().to_string(),
-                        message: self.message,
-                    },
-                    vec![],
-                )
+                Page::new(ErrorFragment {
+                    status: self.error_code / 100,
+                    reason: status.reason_lossy().to_string(),
+                    message: self.message,
+                })
                 .respond_to(request)?,
             )
             .status(status)

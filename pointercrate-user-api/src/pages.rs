@@ -53,7 +53,7 @@ fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJa
 #[rocket::get("/login")]
 pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page(), vec!["ui"]))
+        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
@@ -102,10 +102,7 @@ pub async fn account_page(
     auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
 ) -> Result<Page, Redirect> {
     match auth {
-        Some(mut auth) => Ok(Page::new(
-            tabs.account_page(auth.user, permissions, &mut auth.connection).await,
-            vec!["ui"],
-        )),
+        Some(mut auth) => Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await)),
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }

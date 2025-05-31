@@ -2,7 +2,7 @@ use crate::{
     etag::Tagged,
     preferences::{ClientPreferences, PreferenceManager},
 };
-use maud::{html, PreEscaped, DOCTYPE};
+use maud::{html, DOCTYPE};
 use pointercrate_core::{
     etag::Taggable,
     localization::{get_locale, LANGUAGE},
@@ -22,11 +22,11 @@ use rocket::{
 use serde::Serialize;
 use std::{borrow::Cow, io::Cursor};
 
-pub struct Page(PageFragment, Vec<&'static str>);
+pub struct Page(PageFragment);
 
 impl Page {
-    pub fn new(fragment: impl Into<PageFragment>, resources: Vec<&'static str>) -> Self {
-        Page(fragment.into(), resources)
+    pub fn new(fragment: impl Into<PageFragment>) -> Self {
+        Page(fragment.into())
     }
 }
 
@@ -63,26 +63,12 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let fragment = self.0;
 
-        // there has to be a better way to do this..
-        // this loads an array of ftl resources this page requires, accessible
-        // by the frontend js
-        let mut resource_array_pushes = String::new();
-        self.1
-            .iter()
-            .for_each(|resource| resource_array_pushes += &format!(r#"window.ftlResources.push("{}");"#, resource));
-
         let rendered_fragment = html! {
             (DOCTYPE)
             html lang=(locale.iso_code) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)
-                    (PreEscaped(format!(r#"
-                    <script>
-                        window.ftlResources = [];
-                        {}
-                    </script>
-                    "#, resource_array_pushes)))
                 }
                 body {
                     div.content {
