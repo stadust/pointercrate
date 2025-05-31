@@ -1,7 +1,8 @@
 //! Module containing various UI components that are used across a variety of demonlist pages
 
-use maud::{html, Markup};
+use maud::{html, Markup, Render};
 use pointercrate_demonlist::demon::Demon;
+use pointercrate_demonlist::player::DatabasePlayer;
 
 pub mod submitter;
 pub mod team;
@@ -57,6 +58,26 @@ pub fn player_selection_dialog(
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (button_text);
+                }
+            }
+        }
+    }
+}
+
+pub struct P<'a>(pub &'a DatabasePlayer, pub Option<&'static str>);
+
+impl Render for  P<'_> {
+    fn render(&self) -> Markup {
+        if let Some(id) = self.1 {
+            html! {
+                a.underdotted #(id) href = {"/demonlist/statsviewer?player="(self.0.id)} data-id = (self.0.id) target = "_blank" {
+                    (self.0.name)
+                }
+            }
+        } else {
+            html! {
+                a.underdotted href = {"/demonlist/statsviewer?player="(self.0.id)} data-id = (self.0.id) target = "_blank" {
+                    (self.0.name)
                 }
             }
         }

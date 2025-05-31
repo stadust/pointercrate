@@ -12,6 +12,7 @@ use pointercrate_user::{
 };
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
+use crate::components::P;
 
 pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
 
@@ -68,9 +69,7 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i #claimed-player data-id = (claim.player.id) {
-                                        (claim.player.name)
-                                    }
+                                    (P(&claim.player, Some("claimed-player")))
                                 },
                                 None => {
                                     i {
@@ -145,9 +144,6 @@ impl AccountPageTab for ListIntegrationTab {
                                 span style = "background-color: #D8EFF3" { "Under Consideration" } "."
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
-                            a.button.blue.hover.no-stretch style = "margin: 10px 37% 5px;" href = (format!("/demonlist/statsviewer?player={}", claim.player.id)) target = "_blank" {
-                                "Go to statsviewer"
-                            }
                         }
                     }
                 }

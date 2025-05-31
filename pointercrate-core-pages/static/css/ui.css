@@ -735,7 +735,3 @@ ul.selection-list li {
 .tab-active {
   color: #0881c6;
 }
-
-#claims-claim-panel > a.button {
-  width: fit-content;
-}

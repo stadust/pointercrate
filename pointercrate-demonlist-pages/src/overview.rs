@@ -13,6 +13,7 @@ use pointercrate_demonlist::{
     config as list_config, config,
     demon::{Demon, TimeShiftedDemon},
 };
+use crate::components::P;
 
 pub struct OverviewPage {
     pub team: Team,
@@ -158,7 +159,7 @@ impl OverviewPage {
                              }
                          }
                          h3 style = "text-align: left" {
-                             "published by " a.underdotted href = {"/demonlist/statsviewer?player="(demon.publisher.id)} {(demon.publisher.name)}
+                             "published by " (P(&demon.publisher, None))
                          }
                          div style="text-align: left; font-size: 0.8em" {
                             @if let Some(current_position) = current_position {

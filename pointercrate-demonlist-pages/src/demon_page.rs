@@ -14,6 +14,7 @@ use pointercrate_demonlist::{
 };
 use pointercrate_integrate::gd::{DemonRating, IntegrationLevel, LevelRating, Thunk};
 use url::Url;
+use crate::components::P;
 
 #[derive(Debug)]
 pub struct DemonMovement {
@@ -424,9 +425,7 @@ impl DemonPage {
                                             }
                                         }
                                         td {
-                                            a.underdotted href = {"/demonlist/statsviewer?player="(record.player.id)} target = "_blank" {
-                                                (record.player.name)
-                                            }
+                                            (P(&record.player, None))
                                         }
                                         td {
                                             @if let Some(ref video) = record.video {
