@@ -1,3 +1,4 @@
+use crate::components::P;
 use log::error;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
@@ -12,7 +13,6 @@ use pointercrate_user::{
 };
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
-use crate::components::P;
 
 pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
 

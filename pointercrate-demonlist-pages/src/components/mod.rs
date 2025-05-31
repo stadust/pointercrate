@@ -66,7 +66,7 @@ pub fn player_selection_dialog(
 
 pub struct P<'a>(pub &'a DatabasePlayer, pub Option<&'static str>);
 
-impl Render for  P<'_> {
+impl Render for P<'_> {
     fn render(&self) -> Markup {
         if let Some(id) = self.1 {
             html! {

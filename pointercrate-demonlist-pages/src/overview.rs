@@ -1,3 +1,4 @@
+use crate::components::P;
 use crate::{
     components::{
         submitter::{submit_panel, RecordSubmitter},
@@ -13,7 +14,6 @@ use pointercrate_demonlist::{
     config as list_config, config,
     demon::{Demon, TimeShiftedDemon},
 };
-use crate::components::P;
 
 pub struct OverviewPage {
     pub team: Team,

@@ -1,3 +1,4 @@
+use crate::components::P;
 use crate::{
     components::{
         submitter::{submit_panel, RecordSubmitter},
@@ -14,7 +15,6 @@ use pointercrate_demonlist::{
 };
 use pointercrate_integrate::gd::{DemonRating, IntegrationLevel, LevelRating, Thunk};
 use url::Url;
-use crate::components::P;
 
 #[derive(Debug)]
 pub struct DemonMovement {
