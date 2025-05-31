@@ -146,10 +146,8 @@ impl OverviewPage {
         let progress_score = format!("{:.2}", demon.score(progress));
         let minimal_score = format!("{:.2}", demon.score(demon.requirement));
 
-        let bg_color = if progress == 100 { "#ddffdd;" } else { "white" };
-
         html! {
-             section.panel.fade.flex.mobile-col style={"overflow:hidden; background:"(bg_color)} {
+             section.panel.fade.flex.mobile-col.completed[progress==100] style="overflow:hidden" {
                  a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
                  div.flex.demon-info style = "align-items: center" {
                      div.demon-byline {

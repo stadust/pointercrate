@@ -152,10 +152,18 @@ tr:nth-child(even) {
   background-size: cover;
 }
 
+.completed {
+  background: #ddffdd;
+}
+
 @media (max-width: 767px) {
   .thumb {
     width: 100%;
     box-shadow: 1px -53px 26px -20px rgba(255,255,255,1) inset;
+  }
+
+  .completed .thumb {
+    box-shadow: 1px -53px 26px -20px #ddffdd inset;
   }
 
   .demon-byline {
