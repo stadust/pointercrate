@@ -179,7 +179,7 @@ impl OverviewPage {
                             }
                          }
                      }
-                     @if self.claimed_player.is_some() && current_position.is_none() {
+                     @if progress > 0 && current_position.is_none() {
                         div.flex.col style = "font-weight: bold; text-align: right" {
                             span style = "font-size: 3em" { (progress) "%" }
                             span style = "font-size: 0.8em" { (progress_score) " points" }
