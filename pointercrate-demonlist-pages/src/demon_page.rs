@@ -208,6 +208,15 @@ impl DemonPage {
         let score100 = self.data.demon.score(100);
         let score_requirement = self.data.demon.score(self.data.demon.requirement);
 
+        let verified_and_published = html! {
+            @if self.data.demon.publisher == self.data.demon.verifier {
+                "verified and published by " (P(&self.data.demon.publisher, None))
+            }
+            @else {
+                "published by " (P(&self.data.demon.publisher, None)) ", verified by " (P(&self.data.demon.verifier, None))
+            }
+        };
+
         html! {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
                 div.underlined {
@@ -230,18 +239,36 @@ impl DemonPage {
                     </script>
                     "#, self.data.demon.base.id)))
                     h3 {
-                        @if self.data.creators.len() > 3 {
-                            "by " (self.data.creators[0].name) " and "
-                            div.tooltip {
-                                "more"
-                                div.tooltiptext.fade {
-                                    (self.data.creators.iter().map(|player| player.name.to_string()).collect::<Vec<_>>().join(", "))
+                        "by "
+                        @match &self.data.creators[..] {
+                            [] => { "Unknown, " (verified_and_published) },
+                            [creator] => {
+                                (P(creator, None))
+                                @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier { /* Nothing */ }
+                                @else if creator != &self.data.demon.publisher && creator != &self.data.demon.verifier {
+                                    ", " (verified_and_published)
                                 }
+                                @else if creator == &self.data.demon.publisher {
+                                    ", verified by " (P(&self.data.demon.verifier, None))
+                                }
+                                @else {
+                                    ", published by " (P(&self.data.demon.publisher, None))
+                                }
+                            },
+                            [creator1, creator2] => {
+                                (P(creator1, None)) " and " (P(creator2, None))
+                                ", " (verified_and_published)
+                            },
+                            [creator1, rest @ ..] => {
+                                (creator1.name) " and "
+                                div.tooltip.underdotted {
+                                    "more"
+                                    div.tooltiptext.fade {
+                                        (rest.iter().map(|player| player.name.as_ref()).collect::<Vec<_>>().join(", "))
+                                    }
+                                }
+                                ", " (verified_and_published)
                             }
-                            ", " (self.data.short_headline())
-                        }
-                        @else {
-                            (self.data.headline())
                         }
                     }
                 }
