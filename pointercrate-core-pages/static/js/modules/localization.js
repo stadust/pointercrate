@@ -39,18 +39,18 @@ window.loadedResources = [];
 
 // load a specific .ftl file
 // the correct language is retrieved thanks to cookies
-export function loadResource(resourceName) {
-    if (window.loadedResources.includes(resourceName)) {
+export function loadResource(resource) {
+    if (window.loadedResources.includes(resource)) {
         return Promise.resolve();
     }
 
-    return fetch(`/static/core/ftl/${resourceName}${document.location.pathname}`)
+    return fetch(`/static/ftl/${document.documentElement.lang}/${resource}.ftl`)
         .then(response => response.text())
         .then(text => {
             let resource = new FluentResource(text);
 
             window.fluentBundle.addResource(resource);
-            window.loadedResources.push(resourceName);
+            window.loadedResources.push(resource);
         })
         .catch(error => console.error(error))
 }

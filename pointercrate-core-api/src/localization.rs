@@ -1,41 +1,13 @@
-use std::path::PathBuf;
-
 use pointercrate_core::{error::CoreError, localization::get_locale};
 use pointercrate_core_pages::localization::{Locale, LocalizationConfiguration};
 use rocket::{
-    fs::NamedFile,
-    http::{ContentType, Status},
+    http::Status,
     request::{FromRequest, Outcome},
-    Request, State,
+    Request,
 };
 use unic_langid::LanguageIdentifier;
 
 use crate::preferences::{ClientPreferences, PreferenceManager};
-
-// Serve our translation files to the frontend
-//
-// <resource> refers to the translation file name
-// <uri> refers to the uri that requested this resource
-#[rocket::get("/ftl/<resource>/<uri..>")]
-pub async fn get_ftl(
-    localization_config: &State<LocalizationConfiguration>, preferences: ClientPreferences, resource: &str, uri: PathBuf,
-) -> Result<(ContentType, NamedFile), Status> {
-    let locale_set = localization_config.set_by_uri(uri);
-    let locale = locale_set
-        .by_code(preferences.get::<String>(locale_set.cookie))
-        .ok_or(Status::InternalServerError)?;
-
-    let file = NamedFile::open(format!(
-        "{}/{}/{}.ftl",
-        std::env::var("LOCALES_DIR").expect("LOCALES_DIR is not set"),
-        locale.iso_code,
-        resource
-    ))
-    .await
-    .map_err(|_| Status::NotFound)?;
-
-    Ok((ContentType::Plain, file))
-}
 
 pub struct ClientLocale(pub Locale);
 
