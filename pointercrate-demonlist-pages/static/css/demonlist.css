@@ -155,10 +155,15 @@ tr:nth-child(even) {
 @media (max-width: 767px) {
   .thumb {
     width: 100%;
+    box-shadow: 1px -53px 26px -20px rgba(255,255,255,1) inset;
   }
 
   .demon-byline {
     font-size: 80%;
+  }
+
+  .demon-info {
+      margin-top: -10px;
   }
 }
 

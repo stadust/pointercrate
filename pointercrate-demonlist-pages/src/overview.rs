@@ -150,7 +150,7 @@ impl OverviewPage {
         html! {
              section.panel.fade.flex.mobile-col style={"overflow:hidden; background:"(bg_color)} {
                  a.thumb."ratio-16-9"."js-delay-css" href = (video_link) style = "position: relative" data-property = "background-image" data-property-value = {"url('" (demon.thumbnail) "')"} {}
-                 div.flex style = "align-items: center" {
+                 div.flex.demon-info style = "align-items: center" {
                      div.demon-byline {
                          h2 style = "text-align: left; margin-bottom: 0px" {
                              a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
