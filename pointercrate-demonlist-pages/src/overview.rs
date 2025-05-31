@@ -174,10 +174,10 @@ impl OverviewPage {
                             }
                         }
                      }
-                    @if self.claimed_player.is_some() {
+                    @if self.claimed_player.is_some() && current_position.is_none() {
                         div.flex.col.no-mobile style = "font-weight: bold; text-align: right" {
                             span style = "font-size: 300%" { (progress) "%" }
-                            span style = "font-size: 0.8em"{ (progress_score) " points"}
+                            span style = "font-size: 0.8em" { (progress_score) " points" }
                         }
                     }
                  }
