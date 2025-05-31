@@ -148,10 +148,7 @@ async fn rocket() -> _ {
         .mount("/static/core", FileServer::from("pointercrate-core-pages/static"))
         .mount("/static/demonlist", FileServer::from("pointercrate-demonlist-pages/static"))
         .mount("/static/user", FileServer::from("pointercrate-user-pages/static"))
-        .mount(
-            "/static/ftl",
-            FileServer::from(std::env::var("LOCALES_DIR").expect("LOCALES_DIR is not set")),
-        )
+        .mount("/static/ftl", FileServer::from("locales"))
 }
 
 /// Constructs a [`PageConfiguration`] for your site.
