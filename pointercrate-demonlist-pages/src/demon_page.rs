@@ -1,3 +1,4 @@
+use crate::components::P;
 use crate::{
     components::{
         submitter::{submit_panel, RecordSubmitter},
@@ -6,7 +7,7 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use chrono::NaiveDateTime;
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup, PreEscaped, Render};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::{
@@ -208,6 +209,22 @@ impl DemonPage {
         let score100 = self.data.demon.score(100);
         let score_requirement = self.data.demon.score(self.data.demon.requirement);
 
+        let verified_and_published = html! {
+            @if self.data.demon.publisher == self.data.demon.verifier {
+                (PreEscaped(trp!(
+                    "demon-headline.same-verifier-publisher",
+                    ("publisher", P(&self.data.demon.publisher, None).render().into_string())
+                )))
+            }
+            @else {
+                (PreEscaped(trp!(
+                    "demon-headline.unique-verifier-publisher",
+                    ("publisher", P(&self.data.demon.publisher, None).render().into_string()),
+                    ("verifier", P(&self.data.demon.verifier, None).render().into_string())
+                )))
+            }
+        };
+
         html! {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
                 div.underlined {
@@ -230,18 +247,58 @@ impl DemonPage {
                     </script>
                     "#, self.data.demon.base.id)))
                     h3 {
-                        @if self.data.creators.len() > 3 {
-                            "by " (self.data.creators[0].name) " and "
-                            div.tooltip {
-                                "more"
-                                div.tooltiptext.fade {
-                                    (self.data.creators.iter().map(|player| player.name.to_string()).collect::<Vec<_>>().join(", "))
+                        @match &self.data.creators[..] {
+                            [] => { (PreEscaped(trp!(
+                                "demon-headline.no-creators",
+                                ("verified-and-published", verified_and_published.into_string())
+                            ))) },
+                            [creator] => {
+                                @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier { /* Nothing */ }
+                                @else if creator != &self.data.demon.publisher && creator != &self.data.demon.verifier {
+                                    (PreEscaped(trp!(
+                                        "demon-headline.one-creator",
+                                        ("creator", P(creator, None).render().into_string()),
+                                        ("verified-and-published", verified_and_published.into_string())
+                                    )))
                                 }
+                                @else if creator == &self.data.demon.publisher {
+                                    (PreEscaped(trp!(
+                                        "demon-headline.one-creator-is-publisher",
+                                        ("creator", P(creator, None).render().into_string()),
+                                        ("verifier", P(&self.data.demon.verifier, None).render().into_string())
+                                    )))
+                                }
+                                @else {
+                                    (PreEscaped(trp!(
+                                        "demon-headline.one-creator-is-verifier",
+                                        ("creator", P(creator, None).render().into_string()),
+                                        ("publisher", P(&self.data.demon.publisher, None).render().into_string())
+                                    )))
+                                }
+                            },
+                            [creator1, creator2] => {
+                                (PreEscaped(trp!(
+                                    "demon-headline.two-creators",
+                                    ("creator1", P(creator1, None).render().into_string()),
+                                    ("creator2", P(creator2, None).render().into_string()),
+                                    ("verified-and-published", verified_and_published.into_string())
+                                )))
+                            },
+                            [creator1, rest @ ..] => {
+                                (PreEscaped(trp!(
+                                    "demon-headline.more-creators",
+                                    ("creator", P(creator1, None).render().into_string()),
+                                    ("more", html! {
+                                      div.tooltip.underdotted {
+                                            (tr("demon-headline.more-creators-tooltip"))
+                                            div.tooltiptext.fade {
+                                                (rest.iter().map(|player| player.name.as_ref()).collect::<Vec<_>>().join(", "))
+                                            }
+                                        }
+                                    }.into_string()),
+                                    ("verified-and-published", verified_and_published.into_string())
+                                )))
                             }
-                            ", " (self.data.short_headline())
-                        }
-                        @else {
-                            (self.data.headline())
                         }
                     }
                 }
@@ -421,9 +478,7 @@ impl DemonPage {
                                             }
                                         }
                                         td {
-                                            a.underdotted href = {"/demonlist/statsviewer?player="(record.player.id)} target = "_blank" {
-                                                (record.player.name)
-                                            }
+                                            (P(&record.player, None))
                                         }
                                         td {
                                             @if let Some(ref video) = record.video {

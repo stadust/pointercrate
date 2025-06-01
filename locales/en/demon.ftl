@@ -48,17 +48,29 @@ demon-verifier = Verifier
 
 demon-creators = Creators
 
+demon-headline-by = by { $creator }
+demon-headline-verified-by = verified by { $verifier }
+demon-headline-published-by = published by { $publisher }
+
+# { $verified-and-published } represents two possible variations of text
+# either .same-verifier-publisher OR .unique-verifier-publisher
+#
+# { $more } in .more-creators is transformed into a tooltip listing all of
+# a demon's creators, with the text being .more-creators-tooltip
 demon-headline = by { $creator }
-    .unknown-creator = Unknown
-    .multiple-creators = { $creator1 } and { $other-creators }
+    .same-verifier-publisher = verified and published by { $publisher }
+    .unique-verifier-publisher = { demon-headline-published-by }, { demon-headline-verified-by }
 
-    .unique-creator = by { $creator }, verified and published by { $verifier }
-    .unique-creator-verifier-publisher = by { $creator }, verified by { $verifier }, published by { $publisher }
-    .unique-publisher = by { $creator }, published by { $publisher }
-    .unique-verifier = by { $creator }, verified by { $verifier }
+    .no-creators = by Unknown, { $verified-and-published }
 
-    .short-same-verifier-publisher = verified and publisher by { $verifier }
-    .short-unique-verifier-publisher = published by { $publisher }, verified by { $verifier }
+    .one-creator = { demon-headline-by }, { $verified-and-published }
+    .one-creator-is-publisher = { demon-headline-by }, verified by { $verifier }
+    .one-creator-is-verifier = { demon-headline-by }, published by { $publisher }
+
+    .two-creators = by { $creator1 } and { $creator2 }, { $verified-and-published }
+
+    .more-creators = { demon-headline-by } and { $more }, { $verified-and-published }
+    .more-creators-tooltip = more
 
 ## Position history table
 movements = Position History

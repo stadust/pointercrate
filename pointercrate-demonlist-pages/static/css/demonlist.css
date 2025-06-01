@@ -148,10 +148,42 @@ tr:nth-child(even) {
 }
 
 .thumb {
-  max-width: 30%;
-  min-width: 30%;
   background: black;
   background-size: cover;
+}
+
+.completed {
+  background: #ddffdd;
+}
+
+@media (max-width: 767px) {
+  .thumb {
+    width: 100%;
+    box-shadow: 1px -53px 26px -20px rgba(255,255,255,1) inset;
+  }
+
+  .completed .thumb {
+    box-shadow: 1px -53px 26px -20px #ddffdd inset;
+  }
+
+  .demon-byline {
+    font-size: 80%;
+  }
+
+  .demon-info {
+      margin-top: -10px;
+  }
+}
+
+@media (min-width: 768px) {
+  .thumb {
+    max-width: 30%;
+    min-width: 30%;
+  }
+
+  .demon-byline {
+    padding-left: 15px;
+  }
 }
 
 .ct-series-a .ct-line,

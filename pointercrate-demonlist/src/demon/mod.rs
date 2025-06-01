@@ -11,7 +11,7 @@ use crate::{
 };
 use derive_more::Display;
 use log::info;
-use pointercrate_core::{etag::Taggable, localization::tr, trp};
+use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use std::{
@@ -116,65 +116,6 @@ impl FullDemon {
 
     pub fn name(&self) -> &str {
         self.demon.base.name.as_ref()
-    }
-
-    pub fn headline(&self) -> String {
-        let publisher = &self.demon.publisher.name;
-        let verifier = &self.demon.verifier.name;
-
-        let creator = match &self.creators[..] {
-            [] => tr("demon-headline.unknown-creator"),
-            [creator] => creator.name.to_string(),
-            many => {
-                let mut iter = many.iter();
-                let fst = iter.next().unwrap();
-
-                trp!(
-                    "demon-headline.multiple-creators",
-                    ("creator1", fst.name),
-                    (
-                        "other-creators",
-                        iter.map(|player| player.name.to_string()).collect::<Vec<_>>().join(", ")
-                    )
-                )
-            },
-        };
-
-        // no comparison between &String and String, so just make it a reference
-        let creator = &creator;
-
-        if creator == verifier && creator == publisher {
-            trp!("demon-headline", ("creator", creator))
-        } else if creator != verifier && verifier == publisher {
-            trp!("demon-headline.unique-creator", ("creator", creator), ("verifier", verifier))
-        } else if creator != verifier && creator != publisher && publisher != verifier {
-            trp!(
-                "demon-headline.unique-creator-verifier-publisher",
-                ("creator", creator),
-                ("verifier", verifier),
-                ("publisher", publisher)
-            )
-        } else if creator == verifier && creator != publisher {
-            trp!("demon-headline.unique-publisher", ("creator", creator), ("publisher", publisher))
-        } else if creator == publisher && creator != verifier {
-            trp!("demon-headline.unique-verifier", ("creator", creator), ("verifier", verifier))
-        } else {
-            "If you're seeing this, file a bug report".to_string()
-        }
-    }
-
-    pub fn short_headline(&self) -> String {
-        let demon = &self.demon;
-
-        if demon.publisher == demon.verifier {
-            trp!("demon-headline.short-same-verifier-publisher", ("verifier", demon.verifier.name))
-        } else {
-            trp!(
-                "demon-headline.short-unique-verifier-publisher",
-                ("verifier", demon.verifier.name),
-                ("publisher", demon.publisher.name)
-            )
-        }
     }
 }
 

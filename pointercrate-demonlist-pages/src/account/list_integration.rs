@@ -1,3 +1,4 @@
+use crate::components::P;
 use log::error;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
@@ -68,9 +69,7 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i #claimed-player data-id = (claim.player.id) {
-                                        (claim.player.name)
-                                    }
+                                    (P(&claim.player, Some("claimed-player")))
                                 },
                                 None => {
                                     i {
@@ -172,9 +171,6 @@ impl AccountPageTab for ListIntegrationTab {
                                 )))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
-                            a.button.blue.hover.no-stretch style = "margin: 10px 37% 5px;" href = (format!("/demonlist/statsviewer?player={}", claim.player.id)) target = "_blank" {
-                                (tr("claimed-player.statsviewer-redirect"))
-                            }
                         }
                     }
                 }

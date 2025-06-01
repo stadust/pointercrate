@@ -43,8 +43,6 @@ claimed-player = Claimed Player
     .verified = Verified
     .unverified = Unverified
 
-    .statsviewer-redirect = Go to statsviewer
-
 # .info-api-link is turned into a clickable link to the geolocation API
 # pointercrate uses, and replaces { $info-api-link }
 claim-geolocate = Geolocate statsviewer flag

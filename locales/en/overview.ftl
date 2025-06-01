@@ -9,7 +9,7 @@ legacy-list = Legacy List
 
 demon-info = published by { $publisher }
     .score = { $minimal-score } ({ $requirement }%) — { $total-score } (100%) points
-    .personal-score = { $score } points
+    .score-short = { $score } points
 
 ## Time machine
 time-machine = Time Machine
