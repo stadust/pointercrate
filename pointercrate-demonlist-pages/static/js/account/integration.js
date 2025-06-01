@@ -228,23 +228,25 @@ export function initialize() {
 
     let playerId = claimedPlayer.dataset.id;
 
-    geolocationButton.addEventListener("click", () => {
-      post("/api/v1/players/" + playerId + "/geolocate")
-        .then((response) => {
-          let nationality = response.data;
-          if (nationality.subdivision) {
-            output.setSuccess(
-              "Set nationality to " +
-                nationality.nation +
-                "/" +
-                nationality.subdivision.name
-            );
-          } else {
-            output.setSuccess("Set nationality to " + nationality.nation);
-          }
-        })
-        .catch(displayError(output));
-    });
+    if (geolocationButton) {
+      geolocationButton.addEventListener("click", () => {
+        post("/api/v1/players/" + playerId + "/geolocate")
+            .then((response) => {
+              let nationality = response.data;
+              if (nationality.subdivision) {
+                output.setSuccess(
+                    "Set nationality to " +
+                    nationality.nation +
+                    "/" +
+                    nationality.subdivision.name
+                );
+              } else {
+                output.setSuccess("Set nationality to " + nationality.nation);
+              }
+            })
+            .catch(displayError(output));
+      });
+    }
 
     let lockSubmissionsCheckbox = document.getElementById(
       "lock-submissions-checkbox"
