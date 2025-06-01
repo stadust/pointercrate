@@ -68,7 +68,7 @@ impl AccountPageTab for SubmittersPage {
                                         br;
                                         div.dropdown-menu.js-search #edit-submitter-banned style = "max-width: 50px" {
                                             div{
-                                                input type="text" style = "color: #444446; font-weight: bold;";
+                                                input type="text" style = "font-weight: bold;";
                                             }
                                             div.menu {
                                                 ul {

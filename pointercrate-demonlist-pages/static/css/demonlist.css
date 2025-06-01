@@ -28,19 +28,19 @@ tr:nth-child(even) {
 }
 
 #history-table tr {
-  background: #fffadd;
-  color: #4d4707;
+  background: var(--color-warn-bg);
+  color: var(--color-warn-text);
 }
 
 /* same colors as info boxes! */
 #history-table tr.moved-up {
-  background: #ddffdd;
-  color: #074d07;
+  background: var(--color-ok-bg);
+  color: var(--color-ok-text);
 }
 
 #history-table tr.moved-down {
-  background: #fdd;
-  color: #4d0707;
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
 }
 
 #editors li {
@@ -99,7 +99,7 @@ tr:nth-child(even) {
 }
 
 .dropdown {
-  background: white;
+  background: var(--color-bg);
   text-align: center;
 }
 
@@ -153,17 +153,17 @@ tr:nth-child(even) {
 }
 
 .completed {
-  background: #ddffdd;
+  background: var(--color-ok-bg);
 }
 
 @media (max-width: 767px) {
   .thumb {
     width: 100%;
-    box-shadow: 1px -53px 26px -20px rgba(255,255,255,1) inset;
+    box-shadow: 1px -53px 26px -20px var(--color-bg) inset;
   }
 
   .completed .thumb {
-    box-shadow: 1px -53px 26px -20px #ddffdd inset;
+    box-shadow: 1px -53px 26px -20px var(--color-ok-bg) inset;
   }
 
   .demon-byline {

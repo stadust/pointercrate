@@ -15,14 +15,12 @@ function generateSubmitter(submitter) {
   var li = document.createElement("li");
   var b = document.createElement("b");
 
-  li.className = "white";
-
   li.dataset.id = submitter.id;
 
   if (submitter.banned) {
-    li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+    li.classList.add("err");
   } else {
-    li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+    li.classList.add("ok");
   }
 
   b.innerText = "Submitter #" + submitter.id;

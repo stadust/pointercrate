@@ -10,7 +10,7 @@ header nav {
 
   z-index: 999;
 
-  background: white;
+  background: var(--color-bg);
 
   font-size: 1.2em;
   font-weight: 600;
@@ -209,7 +209,7 @@ footer .flex > * {
 }
 
 footer a.link {
-  color: #f77e39;
+  color: var(--color-link-dark);
 }
 
 footer h2 {

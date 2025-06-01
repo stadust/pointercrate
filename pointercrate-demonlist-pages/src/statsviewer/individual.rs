@@ -61,7 +61,7 @@ impl IndividualStatsViewer {
                         }
                         div.dropdown-menu.js-search #subdivision-dropdown data-default = "None" {
                             div{
-                                input type="text" style = "color: #444446; font-weight: bold;";
+                                input type="text" style = "cfont-weight: bold;";
                             }
                             div.menu {
                                 ul {

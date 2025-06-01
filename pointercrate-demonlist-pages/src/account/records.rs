@@ -108,7 +108,7 @@ fn record_manager(demons: &[Demon]) -> Markup {
                             " - "
                             div.dropdown-menu.js-search #edit-record-status style = "max-width: 220px" {
                                 div{
-                                    input type="text" style = "color: #444446; font-weight: bold;";
+                                    input type="text" style = "font-weight: bold;";
                                 }
                                 div.menu {
                                     ul {

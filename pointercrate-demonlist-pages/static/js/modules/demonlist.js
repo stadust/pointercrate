@@ -222,12 +222,10 @@ export function generatePlayer(player) {
   var b = document.createElement("b");
   var b2 = document.createElement("b");
 
-  li.className = "white";
-
   if (player.banned) {
-    li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+    li.classList.add("err");
   } else {
-    li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+    li.classList.add("ok");
   }
 
   li.dataset.name = player.name;
@@ -274,21 +272,20 @@ export function generateRecord(record) {
   var li = document.createElement("li");
   var recordId = document.createElement("b");
 
-  li.className = "white";
   li.dataset.id = record.id;
 
   switch (record.status) {
     case "approved":
-      li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+      li.classList.add("ok");
       break;
     case "rejected":
-      li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+      li.classList.add("err");
       break;
     case "submitted":
-      li.style.backgroundColor = "rgba(255, 255, 161, .3)";
+      li.classList.add("warn");
       break;
     case "under consideration":
-      li.style.backgroundColor = "rgba(142, 230, 230, .3)";
+      li.classList.add("consider");
       break;
     default:
       break;

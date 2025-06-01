@@ -86,9 +86,9 @@ function generateClaim(claim) {
   rightDiv.classList.add("flex");
 
   if (claim.verified) {
-    li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+    li.classList.add("ok");
   } else {
-    li.style.backgroundColor = "rgba(142, 230, 230, .3)";
+    li.classList.add("consider");
     let button = makeButton("check");
     button.style.marginRight = "5px";
 
