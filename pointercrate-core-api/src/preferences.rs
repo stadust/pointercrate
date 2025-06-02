@@ -94,6 +94,7 @@ pub struct Preference {
 
 /// A configuration state to manage all of your pointercrate instance's
 /// client preferences.
+#[derive(Default)]
 pub struct PreferenceManager(Vec<Preference>);
 
 impl PreferenceManager {
@@ -109,12 +110,6 @@ impl PreferenceManager {
         self.0.push(Preference { name, default });
 
         self
-    }
-}
-
-impl Default for PreferenceManager {
-    fn default() -> Self {
-        PreferenceManager(Vec::new())
     }
 }
 
