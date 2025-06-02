@@ -67,6 +67,7 @@ async fn rocket() -> _ {
         // Tell it about the connection pool to use (individual handlers can get hold of this pool by declaring an argument of type `&State<PointercratePool>`)
         .manage(pool)
         // Tell pointercrate's core components about navigation bar and footers, so that it knows how to render the website
+        // We are passing is as a function pointer so the page can load it in a different language each time a page is rendered
         .manage(page_configuration as fn() -> PageConfiguration)
         // Register our 404 catcher
         .register("/", rocket::catchers![catch_401, catch_404, catch_422])
