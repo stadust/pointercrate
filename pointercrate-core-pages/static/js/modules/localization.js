@@ -22,7 +22,6 @@ class LanguageSelector {
     }
 
     addSelectionListener(button, event) {
-        console.log(button, event)
         let code = button.querySelector("[data-lang]").dataset.lang;
 
         button.addEventListener(event, () => {
