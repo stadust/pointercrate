@@ -19,7 +19,7 @@ nonzero_ext = "0.3.0"
 governor = "0.10.0"
 
 # Dependencies needed only for oauth2
-reqwest = { version = "0.12.18", optional = true, features = ["json"] }
+reqwest = { version = "0.12.19", optional = true, features = ["json"] }
 chrono = { version = "0.4.41", optional = true }
 
 [features]
