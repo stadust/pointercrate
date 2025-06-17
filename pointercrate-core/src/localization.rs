@@ -15,13 +15,11 @@ task_local! {
 }
 
 pub fn get_locale(code: &str) -> &'static LanguageIdentifier {
-    for locale in LOCALES.locales() {
-        if locale.language == code {
-            return locale;
-        }
-    }
-
-    LOCALES.fallback()
+    LOCALES
+        .locales()
+        .into_iter()
+        .find(|locale| locale.language == code)
+        .unwrap_or(LOCALES.fallback())
 }
 
 /// Utility function for easily retrieving the current [`LanguageIdentifier`] inside the
