@@ -35,7 +35,9 @@ pub fn task_lang() -> &'static LanguageIdentifier {
 ///
 /// This function call must be nested inside of a [`LocalKey`] scope.
 pub fn tr(text_id: &str) -> String {
-    LANGUAGE.with(|lang| LOCALES.lookup(lang, text_id))
+    LANGUAGE
+        .try_with(|lang| LOCALES.lookup(lang, text_id))
+        .unwrap_or(format!("Invalid context {}", text_id))
 }
 
 /// Like [`tr`], except this function must be used for fetching translations
@@ -62,6 +64,6 @@ macro_rules! trp {
             args_map.insert(Cow::Borrowed($key), FluentValue::from($value.clone()));
         )*
 
-        LANGUAGE.with(|lang| LOCALES.lookup_with_args(lang, $text_id, &args_map))
+        LANGUAGE.try_with(|lang| LOCALES.lookup_with_args(lang, $text_id, &args_map)).unwrap_or(format!("Invalid context {}", $text_id))
     }};
 }
