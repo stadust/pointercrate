@@ -19,6 +19,7 @@ impl Locale {
 }
 
 /// Withholds the site's core localization information.
+#[derive(Default)]
 pub struct LocalizationConfiguration {
     default: LocaleSet,
     overrides: HashMap<PathBuf, LocaleSet>,
@@ -143,17 +144,6 @@ impl LocalizationConfiguration {
             })
             .map(|(_, locale_set)| locale_set.clone())
             .unwrap_or(self.default.clone())
-    }
-}
-
-impl Default for LocalizationConfiguration {
-    /// Initialize a [`LocalizationConfiguration`] with the default
-    /// [`LocaleSet`], whose `cookie` parameter is `locale`.
-    fn default() -> Self {
-        LocalizationConfiguration {
-            default: LocaleSet::default(),
-            overrides: HashMap::new(),
-        }
     }
 }
 
