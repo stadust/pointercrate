@@ -1,69 +1,40 @@
-use pointercrate_core::{error::CoreError, localization::get_locale};
+use std::collections::HashMap;
+
+use pointercrate_core::error::CoreError;
 use rocket::{
     http::CookieJar,
     request::{FromRequest, Outcome},
     Request,
 };
-use unic_langid::LanguageIdentifier;
-
-/// Represents a single preference received from the client.
-///
-/// In order to map the cookie value to a group of particular values, consider
-/// creating an enumeration which implements `From<ClientPreference>`.
-///
-/// # Example
-/// ```ignore
-/// enum ClientTheme {
-///     Light,
-///     Dark,
-/// }
-///
-/// impl From<ClientPreference> for ClientTheme {
-///     fn from(preference: ClientPreference) -> Self {
-///         match preference.value.as_str() {
-///             "light" => ClientTheme::Light,
-///             "dark" => ClientTheme::Dark,
-///             _ => ClientTheme::Light, // defaults to light mode
-///         }
-///     }
-/// }
-/// ```
-///
-/// Assuming `client_preferences` is a valid [`ClientPreferences`]
-/// ```ignore
-/// let theme: ClientTheme = client_preferences.get("theme");
-/// ```
-pub struct ClientPreference {
-    pub name: &'static str,
-    pub value: String,
-}
 
 /// A request guard which stores the preferences sent from the client.
-pub struct ClientPreferences(Vec<ClientPreference>);
+pub struct ClientPreferences(HashMap<&'static str, String>);
 
 impl ClientPreferences {
     /// Retrieve a particular preference which was sent to us from the client.
     ///
     /// `T` must implement `From<ClientPreference>`, which [`String`] already
     /// implements, in case the untouched cookie value is what needs to be handled.
-    pub fn get<T: From<ClientPreference>>(self, name: &'static str) -> T {
-        T::from(self.0.into_iter().find(|preference| preference.name == name).unwrap())
+    pub fn get<T: From<String>>(self, name: &'static str) -> T {
+        T::from(self.0.get(name).cloned().unwrap_or_default())
     }
 
     pub fn from_cookies(cookies: &CookieJar<'_>, preference_manager: &PreferenceManager) -> Self {
-        let mut preferences: Vec<ClientPreference> = Vec::new();
-
-        for preference in preference_manager.0.iter() {
-            preferences.push(ClientPreference {
-                name: preference.name,
-                value: cookies
-                    .get(&format!("preference-{}", preference.name))
-                    .map(|cookie| cookie.value().to_string())
-                    .unwrap_or(preference.default.to_string()),
-            });
-        }
-
-        ClientPreferences(preferences)
+        ClientPreferences(
+            preference_manager
+                .0
+                .iter()
+                .map(|(name, default)| {
+                    (
+                        *name,
+                        cookies
+                            .get(&format!("preference-{}", name))
+                            .map(|cookie| cookie.value().to_string())
+                            .unwrap_or(default.to_string()),
+                    )
+                })
+                .collect(),
+        )
     }
 }
 
@@ -74,7 +45,7 @@ impl<'r> FromRequest<'r> for ClientPreferences {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let preference_manager = match request.rocket().state::<PreferenceManager>() {
             Some(preference_manager) => preference_manager,
-            _ => return Outcome::Success(ClientPreferences(Vec::new())), // return an empty preferences vec if this instance doesnt support preferences
+            _ => return Outcome::Success(ClientPreferences(HashMap::new())), // return an empty preferences hashmap if this instance doesnt support preferences
         };
 
         let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
@@ -95,7 +66,7 @@ pub struct Preference {
 /// A configuration state to manage all of your pointercrate instance's
 /// client preferences.
 #[derive(Default)]
-pub struct PreferenceManager(Vec<Preference>);
+pub struct PreferenceManager(HashMap<&'static str, &'static str>);
 
 impl PreferenceManager {
     /// Append a new preference to this [`PreferenceManager`]. `name` represents
@@ -107,21 +78,8 @@ impl PreferenceManager {
     ///
     /// If the cookie was not received, its value will default to `default`.
     pub fn preference(mut self, name: &'static str, default: &'static str) -> Self {
-        self.0.push(Preference { name, default });
+        self.0.insert(name, default);
 
         self
-    }
-}
-
-// type conversions
-impl From<ClientPreference> for String {
-    fn from(value: ClientPreference) -> Self {
-        value.value
-    }
-}
-
-impl From<ClientPreference> for &'static LanguageIdentifier {
-    fn from(preference: ClientPreference) -> Self {
-        get_locale(&preference.value)
     }
 }
