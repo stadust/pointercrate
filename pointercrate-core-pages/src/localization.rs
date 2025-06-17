@@ -139,8 +139,7 @@ impl LocalizationConfiguration {
         self.overrides
             .iter()
             .find(|(key, _)| {
-                uri.components().collect::<Vec<_>>().len() >= key.components().collect::<Vec<_>>().len()
-                    && key.components().zip(uri.components()).all(|(a, b)| a == b)
+                uri.components().count() >= key.components().count() && key.components().zip(uri.components()).all(|(a, b)| a == b)
             })
             .map(|(_, locale_set)| locale_set.clone())
             .unwrap_or(self.default.clone())
