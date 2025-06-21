@@ -1,4 +1,5 @@
 use maud::html;
+use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::pool::PointercratePool;
 use pointercrate_core::{error::CoreError, localization::tr};
 use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
@@ -16,6 +17,7 @@ use pointercrate_demonlist_pages::account::{
 use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
 use rocket::{fs::FileServer, response::Redirect, uri};
+use unic_langid::{langid, LanguageIdentifier};
 
 /// A catcher for 404 errors (e.g. when a user tried to navigate to a URL that
 /// does not exist)
@@ -53,10 +55,30 @@ fn home() -> Redirect {
     Redirect::to(uri!("/demonlist/"))
 }
 
+const SUPPORTED_LOCALES: &[LanguageIdentifier] = &[langid!("en-US")];
+
 #[rocket::launch]
 async fn rocket() -> _ {
     // Load the configuration from your .env file
     dotenv::dotenv().unwrap();
+
+    LocalesLoader::new(&SUPPORTED_LOCALES[0])
+        .locale(
+            &SUPPORTED_LOCALES[0],
+            vec![
+                "pointercrate-core-pages/static/ftl/en/error.ftl",
+                "pointercrate-core-pages/static/ftl/en/nav.ftl",
+                "pointercrate-core-pages/static/ftl/en/ui.ftl",
+                "pointercrate-demonlist-pages/static/ftl/en/demon.ftl",
+                "pointercrate-demonlist-pages/static/ftl/en/overview.ftl",
+                "pointercrate-demonlist-pages/static/ftl/en/player.ftl",
+                "pointercrate-demonlist-pages/static/ftl/en/record.ftl",
+                "pointercrate-demonlist-pages/static/ftl/en/statsviewer.ftl",
+                "pointercrate-demonlist-pages/static/ftl/en/submitter.ftl",
+                "pointercrate-user-pages/static/ftl/en/user.ftl",
+            ],
+        )
+        .commit();
 
     // Initialize a database connection pool to the database specified by the
     // DATABASE_URL environment variable
@@ -149,7 +171,6 @@ async fn rocket() -> _ {
         .mount("/static/core", FileServer::from("pointercrate-core-pages/static"))
         .mount("/static/demonlist", FileServer::from("pointercrate-demonlist-pages/static"))
         .mount("/static/user", FileServer::from("pointercrate-user-pages/static"))
-        .mount("/static/ftl", FileServer::from("locales"))
 }
 
 /// Constructs a [`PageConfiguration`] for your site.

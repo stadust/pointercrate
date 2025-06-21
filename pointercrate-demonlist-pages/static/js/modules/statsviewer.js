@@ -140,14 +140,14 @@ export class StatsViewer extends FilteredPaginator {
       this._hardest.removeChild(this._hardest.lastChild);
     this._hardest.appendChild(
       hardest === undefined
-        ? document.createTextNode(tr("statsviewer", "statsviewer.value-none"))
+        ? document.createTextNode(tr("demonlist", "statsviewer", "statsviewer.value-none"))
         : this.formatDemon(hardest)
     );
   }
 
   setCompletionNumber(main, extended, legacy) {
     this._amountBeaten.textContent =
-      trp("statsviewer", "statsviewer.stats-value", {
+      trp("demonlist", "statsviewer", "statsviewer.stats-value", {
         ["main"]: main,
         ["extended"]: extended,
         ["legacy"]: legacy,
@@ -223,7 +223,7 @@ export function formatInto(parent, childs) {
     // remove trailing dash
     parent.removeChild(parent.lastChild);
   } else {
-    parent.appendChild(document.createTextNode(tr("statsviewer", "statsviewer.value-none")));
+    parent.appendChild(document.createTextNode(tr("demonlist", "statsviewer", "statsviewer.value-none")));
   }
 }
 

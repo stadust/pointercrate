@@ -91,7 +91,7 @@ function setupEditAccount() {
 
   editYoutubeForm.addValidators({
     "edit-yt": {
-      [tr("user", "profile-youtube.newlink-validator-typemismatch")]: typeMismatch,
+      [tr("user", "user", "profile-youtube.newlink-validator-typemismatch")]: typeMismatch,
     },
   });
 
@@ -110,18 +110,18 @@ function setupEditAccount() {
 
     changePasswordForm.addValidators({
       "auth-pw": {
-        [tr("user", "profile-change-password.authenticate-validator-valuemissing")]: valueMissing,
-        [tr("user", "profile-change-password.authenticate-validator-tooshort")]:
+        [tr("user", "user", "profile-change-password.authenticate-validator-valuemissing")]: valueMissing,
+        [tr("user", "user", "profile-change-password.authenticate-validator-tooshort")]:
           tooShort,
       },
       "edit-pw": {
-        [tr("user", "profile-change-password.newpassword-validator-tooshort")]:
+        [tr("user", "user", "profile-change-password.newpassword-validator-tooshort")]:
           tooShort,
       },
       "edit-pw-repeat": {
-        [tr("user", "profile-change-password.repeatnewpassword-validator-tooshort")]:
+        [tr("user", "user", "profile-change-password.repeatnewpassword-validator-tooshort")]:
           tooShort,
-        [tr("user", "profile-change-password.repeatnewpassword-validator-notmatching")]: (rpp) => rpp.value == editPw.value,
+        [tr("user", "user", "profile-change-password.repeatnewpassword-validator-notmatching")]: (rpp) => rpp.value == editPw.value,
       },
     });
 

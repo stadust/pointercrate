@@ -88,11 +88,11 @@ class IndividualStatsViewer extends StatsViewer {
     let hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
-        name: tr("statsviewer", "statsviewer.value-none"),
+        name: tr("demonlist", "statsviewer", "statsviewer.value-none"),
         position: 321321321,
       });
 
-    this.setHardest(hardest.name === tr("statsviewer", "statsviewer.value-none") ? undefined : hardest);
+    this.setHardest(hardest.name === tr("demonlist", "statsviewer", "statsviewer.value-none") ? undefined : hardest);
 
     let non100Records = playerData.records.filter(
       (record) => record.progress !== 100

@@ -34,7 +34,7 @@ class ClaimManager extends FilteredPaginator {
       {}
     ).then((response) => {
       if (response.data.length === 0) {
-        this.setError(trp("player", "claim-manager.claim-no-records", {
+        this.setError(trp("demonlist", "player", "claim-manager.claim-no-records", {
           ["player-id"]: selected.dataset.playerId,
         }))
         document.getElementById("claim-video").removeAttribute("src");
@@ -59,7 +59,7 @@ function generateClaim(claim) {
   let playerSpan = document.createElement("span");
 
   let uname = document.createElement("b");
-  uname.innerText = tr("player", "claim-listed-user") + " ";
+  uname.innerText = tr("demonlist", "player", "claim-listed-user") + " ";
 
   userSpan.appendChild(uname);
   userSpan.appendChild(
@@ -67,7 +67,7 @@ function generateClaim(claim) {
   );
 
   let pname = document.createElement("b");
-  pname.innerText = tr("player", "claim-listed-player") + " ";
+  pname.innerText = tr("demonlist", "player", "claim-listed-player") + " ";
 
   playerSpan.appendChild(pname);
   playerSpan.appendChild(
@@ -171,7 +171,7 @@ class ClaimedPlayerRecordPaginator extends Paginator {
           }
 
           let title = document.createElement("b");
-          title.innerText = trp("player", "claim-records.record-notes", {
+          title.innerText = trp("demonlist", "player", "claim-records.record-notes", {
             ["record-id"]: recordId,
           });
 
@@ -190,7 +190,7 @@ class ClaimedPlayerRecordPaginator extends Paginator {
 
           this.successOutput.style.display = "block";
         } else {
-          this.setSuccess(tr("player", "claim-records.record-notes-none"));
+          this.setSuccess(tr("demonlist", "player", "claim-records.record-notes-none"));
         }
       })
       .catch(displayError(this));
@@ -234,12 +234,12 @@ export function initialize() {
         .then((response) => {
           let nationality = response.data;
           if (nationality.subdivision) {
-            output.setSuccess(trp("player", "claim-geolocate.edit-success-subdivision", {
+            output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success-subdivision", {
               ["nationality"]: nationality.nation,
               ["subdivision"]: nationality.subdivision.name,
             }))
           } else {
-            output.setSuccess(trp("player", "claim-geolocate.edit-success", {
+            output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success", {
               ["nationality"]: nationality.nation,
             }))
           }
@@ -257,7 +257,7 @@ export function initialize() {
         { lock_submissions: lockSubmissionsCheckbox.checked }
       )
         .then((_) => {
-          output.setSuccess(tr("player", "claim-lock-submissions.edit-success"));
+          output.setSuccess(tr("demonlist", "player", "claim-lock-submissions.edit-success"));
         })
         .catch(displayError(output));
     });

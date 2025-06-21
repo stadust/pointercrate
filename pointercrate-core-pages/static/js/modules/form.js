@@ -24,7 +24,7 @@ export class Dropdown {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
     if (this.input.dataset.default === undefined && !this.input.placeholder)
-      this.input.placeholder = tr("ui", "dropdown-placeholder");
+      this.input.placeholder = tr("core", "ui", "dropdown-placeholder");
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
     this.ul = this.html.getElementsByTagName("ul")[0];
 
@@ -302,8 +302,8 @@ export function setupDropdownEditor(
     backend
       .edit(data)
       .then((was304) => {
-        if (was304) output.setSuccess( tr("ui", "edit-notmodified") );
-        else output.setSuccess( tr("ui", "edit-success") );
+        if (was304) output.setSuccess( tr("core", "ui", "edit-notmodified") );
+        else output.setSuccess( tr("core", "ui", "edit-success") );
       })
       .catch((response) => displayError(output)(response));
   });
@@ -403,9 +403,9 @@ export function setupEditorDialog(
       .edit(dataTransform(data))
       .then((was304) => {
         if (was304) {
-          output.setSuccess( tr("ui", "edit-notmodified") );
+          output.setSuccess( tr("core", "ui", "edit-notmodified") );
         } else {
-          output.setSuccess( tr("ui", "edit-success") );
+          output.setSuccess( tr("core", "ui", "edit-success") );
         }
       })
       .catch((response) => {

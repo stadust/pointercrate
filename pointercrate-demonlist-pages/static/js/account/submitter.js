@@ -26,7 +26,7 @@ function generateSubmitter(submitter) {
     li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
   }
 
-  b.innerText = trp("submitter", "submitter-listed", {
+  b.innerText = trp("demonlist", "submitter", "submitter-listed", {
     ["submitter-id"]: submitter.id,
   });
 
@@ -73,7 +73,7 @@ function setupSubmitterSearchSubmitterIdForm() {
 
   submitterSearchByIdForm.addErrorOverride(40401, "search-submitter-id");
 
-  submitterId.addValidator(valueMissing, tr("submitter", "submitter-idsearch-panel.id-validator-valuemissing"));
+  submitterId.addValidator(valueMissing, tr("demonlist", "submitter", "submitter-idsearch-panel.id-validator-valuemissing"));
   submitterSearchByIdForm.onSubmit(function () {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))

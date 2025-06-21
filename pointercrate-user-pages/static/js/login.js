@@ -13,17 +13,17 @@ function initializeLoginForm() {
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
-  loginUsername.addValidator(valueMissing, tr("user", "auth-username.validator-valuemissing"));
+  loginUsername.addValidator(valueMissing, tr("user", "user", "auth-username.validator-valuemissing"));
   loginUsername.addValidator(
     tooShort,
-    tr("user", "auth-username.validator-tooshort")
+    tr("user", "user", "auth-username.validator-tooshort")
   );
 
   loginPassword.clearOnInvalid = true;
-  loginPassword.addValidator(valueMissing, tr("user", "auth-password.validator-valuemissing"));
+  loginPassword.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
   loginPassword.addValidator(
     tooShort,
-    tr("user", "auth-password.validator-tooshort")
+    tr("user", "user", "auth-password.validator-tooshort")
   );
 
   loginForm.onSubmit(function (event) {
@@ -37,7 +37,7 @@ function initializeLoginForm() {
       .catch((response) => {
         console.log(response);
         if (response.status === 401) {
-          loginPassword.errorText = tr("user", "login.error-invalidcredentials");
+          loginPassword.errorText = tr("user", "user", "login.error-invalidcredentials");
         } else {
           loginForm.setError(response.data.message);
         }
@@ -52,26 +52,26 @@ function intializeRegisterForm() {
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
 
-  registerUsername.addValidator(valueMissing, tr("user", "auth-username.validator-valuemissing"));
+  registerUsername.addValidator(valueMissing, tr("user", "user", "auth-username.validator-valuemissing"));
   registerUsername.addValidator(
     tooShort,
-    tr("user", "auth-username.validator-tooshort")
+    tr("user", "user", "auth-username.validator-tooshort")
   );
 
-  registerPassword.addValidator(valueMissing, tr("user", "auth-password.validator-valuemissing"));
+  registerPassword.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
   registerPassword.addValidator(
     tooShort,
-    tr("user", "auth-password.validator-tooshort")
+    tr("user", "user", "auth-password.validator-tooshort")
   );
 
-  registerPasswordRepeat.addValidator(valueMissing, tr("user", "auth-password.validator-valuemissing"));
+  registerPasswordRepeat.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
   registerPasswordRepeat.addValidator(
     tooShort,
-    tr("user", "auth-password.validator-valuemissing")
+    tr("user", "user", "auth-password.validator-valuemissing")
   );
   registerPasswordRepeat.addValidator(
     (rpp) => rpp.value == registerPassword.value,
-    tr("user", "auth-repeatpassword.validator-notmatching")
+    tr("user", "user", "auth-repeatpassword.validator-notmatching")
   );
 
   registerForm.onSubmit(function (event) {
@@ -82,7 +82,7 @@ function intializeRegisterForm() {
       .catch((response) => {
         if (response.status === 409) {
           registerUsername.errorText =
-            tr("user", "auth-username.error-alreadytaken");
+            tr("user", "user", "auth-username.error-alreadytaken");
         } else {
           registerForm.setError(response.data.message);
         }

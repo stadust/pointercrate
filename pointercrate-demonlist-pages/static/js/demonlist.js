@@ -54,7 +54,7 @@ function initializeHistoryTable() {
             entry["new_position"] > window.extended_list_length ||
             lastPosition > window.extended_list_length
           ) {
-            cells[1].appendChild(document.createTextNode(tr("demon", "movements-newposition.legacy")));
+            cells[1].appendChild(document.createTextNode(tr("demonlist", "demon", "movements-newposition.legacy")));
           } else {
             cells[1].appendChild(arrow);
             cells[1].appendChild(
@@ -74,15 +74,15 @@ function initializeHistoryTable() {
         let reason = null;
 
         if (entry["reason"] === "Added") {
-          reason = tr("demon", "movements-reason.added");
+          reason = tr("demonlist", "demon", "movements-reason.added");
         } else if (entry["reason"] === "Moved") {
-          reason = tr("demon", "movements-reason.moved");
+          reason = tr("demonlist", "demon", "movements-reason.moved");
         } else {
           if (entry["reason"]["OtherAddedAbove"] !== undefined) {
             let other = entry["reason"]["OtherAddedAbove"]["other"];
             let name = other.name === null ? "A demon" : other["name"];
 
-            reason = trp("demon", "movements-reason.addedabove", {
+            reason = trp("demonlist", "demon", "movements-reason.addedabove", {
               ["demon"]: name,
             });
           } else if (entry["reason"]["OtherMoved"] !== undefined) {
@@ -90,10 +90,10 @@ function initializeHistoryTable() {
             let name = other.name === null ? "A demon" : other["name"];
 
             reason = positionChange < 0
-              ? trp("demon", "movements-reason.movedbelow", {
+              ? trp("demonlist", "demon", "movements-reason.movedbelow", {
                 ["demon"]: name,
               })
-              : trp("demon", "movements-reason.movedabove", {
+              : trp("demonlist", "demon", "movements-reason.movedabove", {
                 ["demon"]: name,
               })
           }

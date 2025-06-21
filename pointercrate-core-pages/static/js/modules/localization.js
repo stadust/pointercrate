@@ -36,13 +36,13 @@ import { FluentResource } from "https://cdn.jsdelivr.net/npm/@fluent/bundle@0.18
 window.fluentBundle = new FluentBundle(document.documentElement.lang);
 window.loadedResources = [];
 
-export function loadResource(resource) {
+export function loadResource(category, resource) {
     if (window.loadedResources.includes(resource)) {
         return;
     }
 
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", `/static/ftl/${document.documentElement.lang}/${resource}.ftl`, false);
+    xhr.open("GET", `/static${category ? "/" + category : ""}/ftl/${document.documentElement.lang}/${resource}.ftl`, false);
     xhr.send();
 
     let fluentResource = new FluentResource(xhr.responseText);
@@ -51,8 +51,8 @@ export function loadResource(resource) {
     window.loadedResources.push(resource);
 }
 
-export function tr(resource, text_id) {
-    loadResource(resource);
+export function tr(category, resource, text_id) {
+    loadResource(category, resource);
 
     let [id, attribute] = text_id.split(".");
     let message = window.fluentBundle.getMessage(id);
@@ -62,10 +62,10 @@ export function tr(resource, text_id) {
         : undefined;
 }
 
-export function trp(resource, text_id, args) {
-    loadResource(resource);
+export function trp(category, resource, text_id, args) {
+    loadResource(category, resource);
 
-    let pattern = tr(resource, text_id);
+    let pattern = tr(category, resource, text_id);
     return window.fluentBundle.formatPattern(pattern, args);
 }
 
