@@ -34,21 +34,24 @@ import { FluentBundle } from "https://cdn.jsdelivr.net/npm/@fluent/bundle@0.18.0
 import { FluentResource } from "https://cdn.jsdelivr.net/npm/@fluent/bundle@0.18.0/esm/resource.js";
 
 window.fluentBundle = new FluentBundle(document.documentElement.lang);
-window.loadedResources = [];
+window.requestedResources = [];
 
 export function loadResource(category, resource) {
-    if (window.loadedResources.includes(resource)) {
+    // check if the resource file for this category/resource pair was already requested, so we
+    // dont request it again
+    if (window.requestedResources.some(item => item[0] == category && item[1] == resource)) {
         return;
     }
 
     let xhr = new XMLHttpRequest();
     xhr.open("GET", `/static${category ? "/" + category : ""}/ftl/${document.documentElement.lang}/${resource}.ftl`, false);
     xhr.send();
+    window.requestedResources.push([category, resource]);
+
+    if (xhr.status != 200) return console.error(xhr.status, xhr.statusText);
 
     let fluentResource = new FluentResource(xhr.responseText);
-
     window.fluentBundle.addResource(fluentResource);
-    window.loadedResources.push(resource);
 }
 
 export function tr(category, resource, text_id) {
@@ -57,9 +60,10 @@ export function tr(category, resource, text_id) {
     let [id, attribute] = text_id.split(".");
     let message = window.fluentBundle.getMessage(id);
 
-    return message ?
-        attribute ? message.attributes[attribute] : message.value
-        : undefined;
+    if (message) {
+        return attribute ? message.attributes[attribute] : message.value;
+    }
+    return text_id;
 }
 
 export function trp(category, resource, text_id, args) {
