@@ -20,10 +20,6 @@ impl LocalesLoader {
     ) -> Self {
         let mut locales: HashMap<&'static LanguageIdentifier, FluentBundle<FluentResource>> = HashMap::new();
 
-        langs.iter().for_each(|lang| {
-            locales.insert(lang, FluentBundle::new_concurrent(vec![lang.clone()]));
-        });
-
         for path in resource_dirs {
             let locale_dirs: Vec<(&LanguageIdentifier, DirEntry)> = read_dir(path)
                 .unwrap()
@@ -45,7 +41,7 @@ impl LocalesLoader {
                 .collect();
 
             for (lang, locale_dir) in locale_dirs {
-                let bundle = locales.get_mut(lang).unwrap();
+                let bundle = locales.entry(lang).or_insert(FluentBundle::new_concurrent(vec![lang.clone()]));
                 let resources: Vec<PathBuf> = read_dir(locale_dir.path())
                     .unwrap()
                     .filter_map(|s| s.ok())
