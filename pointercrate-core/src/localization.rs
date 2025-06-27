@@ -1,6 +1,11 @@
 pub use fluent::FluentValue;
 use fluent::{concurrent::FluentBundle, FluentArgs, FluentResource};
-use std::{collections::HashMap, fs, path::Path, sync::OnceLock};
+use std::{
+    collections::HashMap,
+    fs::{read_dir, read_to_string, DirEntry},
+    path::{Path, PathBuf},
+    sync::OnceLock,
+};
 use tokio::task_local;
 use unic_langid::LanguageIdentifier;
 
@@ -10,25 +15,55 @@ pub struct LocalesLoader {
 }
 
 impl LocalesLoader {
-    pub fn new(fallback: &'static LanguageIdentifier) -> Self {
-        LocalesLoader {
-            locales: HashMap::new(),
-            fallback,
-        }
-    }
+    pub fn load<P: AsRef<Path>>(
+        fallback: &'static LanguageIdentifier, langs: &'static [LanguageIdentifier], resource_dirs: Vec<P>,
+    ) -> Self {
+        let mut locales: HashMap<&'static LanguageIdentifier, FluentBundle<FluentResource>> = HashMap::new();
 
-    /// Load a [`Vec`] of fluent resources for a particular language
-    pub fn locale<P: AsRef<Path>>(mut self, lang: &'static LanguageIdentifier, resources: Vec<P>) -> Self {
-        let mut bundle = FluentBundle::new_concurrent(vec![lang.clone()]);
-
-        resources.iter().for_each(|path| {
-            let source = fs::read_to_string(path).unwrap();
-            bundle.add_resource(FluentResource::try_new(source).unwrap()).unwrap();
+        langs.iter().for_each(|lang| {
+            locales.insert(lang, FluentBundle::new_concurrent(vec![lang.clone()]));
         });
 
-        self.locales.insert(&lang, bundle);
+        for path in resource_dirs {
+            let locale_dirs: Vec<(&LanguageIdentifier, DirEntry)> = read_dir(path)
+                .unwrap()
+                .filter_map(|s| s.ok())
+                .filter(|entry| {
+                    entry.path().is_dir()
+                        && langs // ensure we only search through the directories which contain ftl files for a language in `langs`
+                            .iter()
+                            .any(|lang| entry.file_name().to_str().unwrap() == lang.language.as_str())
+                })
+                .filter_map(|entry| {
+                    Some((
+                        langs
+                            .iter()
+                            .find(|lang| entry.file_name().to_str() == Some(lang.language.as_str()))?,
+                        entry,
+                    ))
+                })
+                .collect();
 
-        self
+            for (lang, locale_dir) in locale_dirs {
+                let bundle = locales.get_mut(lang).unwrap();
+                let resources: Vec<PathBuf> = read_dir(locale_dir.path())
+                    .unwrap()
+                    .filter_map(|s| s.ok())
+                    .map(|entry| entry.path())
+                    .filter(|path| path.is_file())
+                    .collect();
+
+                resources.iter().for_each(|path| {
+                    let source = read_to_string(path).unwrap();
+
+                    // overriding is enabled so it's possible to have one directory's ftl file's keys override the
+                    // keys of files in another loaded directory
+                    bundle.add_resource_overriding(FluentResource::try_new(source).unwrap());
+                });
+            }
+        }
+
+        LocalesLoader { locales, fallback }
     }
 
     /// Set the `LOCALES` [`OnceLock`] to use this set of loaded locales

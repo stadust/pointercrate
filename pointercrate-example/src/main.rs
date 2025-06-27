@@ -55,30 +55,25 @@ fn home() -> Redirect {
     Redirect::to(uri!("/demonlist/"))
 }
 
-const SUPPORTED_LOCALES: &[LanguageIdentifier] = &[langid!("en-US")];
+// Store the languages our pointercrate instance supports
+const SUPPORTED_LOCALES: &[LanguageIdentifier] = &[langid!("en")];
 
 #[rocket::launch]
 async fn rocket() -> _ {
     // Load the configuration from your .env file
     dotenv::dotenv().unwrap();
 
-    LocalesLoader::new(&SUPPORTED_LOCALES[0])
-        .locale(
-            &SUPPORTED_LOCALES[0],
-            vec![
-                "pointercrate-core-pages/static/ftl/en/error.ftl",
-                "pointercrate-core-pages/static/ftl/en/nav.ftl",
-                "pointercrate-core-pages/static/ftl/en/ui.ftl",
-                "pointercrate-demonlist-pages/static/ftl/en/demon.ftl",
-                "pointercrate-demonlist-pages/static/ftl/en/overview.ftl",
-                "pointercrate-demonlist-pages/static/ftl/en/player.ftl",
-                "pointercrate-demonlist-pages/static/ftl/en/record.ftl",
-                "pointercrate-demonlist-pages/static/ftl/en/statsviewer.ftl",
-                "pointercrate-demonlist-pages/static/ftl/en/submitter.ftl",
-                "pointercrate-user-pages/static/ftl/en/user.ftl",
-            ],
-        )
-        .commit();
+    // Load the translation files
+    LocalesLoader::load(
+        &SUPPORTED_LOCALES[0],
+        SUPPORTED_LOCALES,
+        vec![
+            "pointercrate-core-pages/static/ftl/",
+            "pointercrate-demonlist-pages/static/ftl/",
+            "pointercrate-user-pages/static/ftl/",
+        ],
+    )
+    .commit();
 
     // Initialize a database connection pool to the database specified by the
     // DATABASE_URL environment variable
