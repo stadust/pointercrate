@@ -112,8 +112,8 @@ impl LocalizationConfiguration {
     ///             .with_fallback("ru", "ru"),
     ///     );
     /// ```
-    pub fn with_override(mut self, uri: PathBuf, locale_set: LocaleSet) -> Self {
-        self.overrides.insert(uri, locale_set);
+    pub fn with_override<T: Into<PathBuf>>(mut self, uri: T, locale_set: LocaleSet) -> Self {
+        self.overrides.insert(uri.into(), locale_set);
 
         self
     }
