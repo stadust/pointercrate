@@ -16,7 +16,7 @@ impl ClientPreferences {
     ///
     /// `T` must implement `From<ClientPreference>`, which [`String`] already
     /// implements, in case the untouched cookie value is what needs to be handled.
-    pub fn get<T: From<String>>(self, name: &'static str) -> T {
+    pub fn get<T: From<String>>(&self, name: &'static str) -> T {
         T::from(self.0.get(name).cloned().unwrap_or_default())
     }
 

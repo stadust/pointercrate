@@ -71,10 +71,10 @@ impl LocaleSet {
 
     /// Returns an owned [`Locale`] whose `iso_code` matches the given `code`.
     /// If one is not found, the fallback [`Locale`] will be returned.
-    pub fn by_code(&self, code: String) -> Locale {
+    pub fn by_code(&self, code: &str) -> Locale {
         self.locales
             .iter()
-            .find(|locale| locale.lang.language.as_str() == &code)
+            .find(|locale| locale.lang.language.as_str() == code)
             .unwrap_or(&self.fallback)
             .to_owned()
     }
@@ -131,7 +131,7 @@ impl LocalizationConfiguration {
     }
 }
 
-pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -> Option<TopLevelNavigationBarItem> {
+pub fn locale_selection_dropdown(active_locale: &Locale, locale_set: &LocaleSet) -> Option<TopLevelNavigationBarItem> {
     if locale_set.locales.len() < 2 {
         return None;
     }
@@ -147,7 +147,7 @@ pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -
         },
     );
 
-    for locale in locale_set.locales {
+    for locale in locale_set.clone().locales {
         if locale.lang == active_locale.lang {
             // this locale is currently selected, don't add it to the dropdown
             continue;

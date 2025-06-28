@@ -43,7 +43,7 @@ impl NavigationBar {
         self
     }
 
-    pub fn render(&self, locale: Locale, locale_set: LocaleSet) -> Markup {
+    pub fn render(&self, locale: &Locale, locale_set: &LocaleSet) -> Markup {
         html! {
             header {
                 nav.center.collapse.underlined.see-through {
