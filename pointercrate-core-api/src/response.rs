@@ -43,9 +43,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
         let locale_set = localization_config.set_by_uri(request.uri().path().segments().collect());
-        let locale = locale_set
-            .by_code(preferences.get::<String>(locale_set.cookie))
-            .ok_or(Status::BadRequest)?;
+        let locale = locale_set.by_code(preferences.get::<String>(locale_set.cookie));
 
         let page_config = futures::executor::block_on(async {
             LANGUAGE

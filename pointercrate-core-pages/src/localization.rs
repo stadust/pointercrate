@@ -20,7 +20,6 @@ impl Locale {
 }
 
 /// Withholds the site's core localization information.
-#[derive(Default)]
 pub struct LocalizationConfiguration {
     default: LocaleSet,
     overrides: HashMap<PathBuf, LocaleSet>,
@@ -36,7 +35,7 @@ pub struct LocaleSet {
     pub locales: Vec<Locale>,
 
     /// Used to gracefully handle attempts at retrieving nonexistant locales
-    fallback: Option<Locale>,
+    fallback: Locale,
 }
 
 impl LocaleSet {
@@ -47,12 +46,19 @@ impl LocaleSet {
     /// `guidelines-locale` as the cookie would result in the backend actually
     /// handling `preference-guidelines-locale`, even though this [`LocaleSet`]'s
     /// `cookie` value would remain unchanged.
-    pub fn new(cookie: &'static str) -> Self {
+    ///
+    /// `fallback_lang` specifies the fallback [`Locale`] for this [`LocaleSet`].
+    /// This is used to gracefully handle attempts at retrieving an unsupported language.
+    pub fn new(cookie: &'static str, fallback_lang: &'static LanguageIdentifier, fallback_flag_iso_code: &'static str) -> Self {
         LocaleSet {
             cookie,
             locales: Vec::new(),
-            fallback: None,
+            fallback: Locale {
+                lang: fallback_lang,
+                flag_iso_code: fallback_flag_iso_code,
+            },
         }
+        .with_locale(fallback_lang, fallback_flag_iso_code)
     }
 
     /// Append a new [`Locale`] to this [`LocaleSet`].
@@ -63,51 +69,29 @@ impl LocaleSet {
         self
     }
 
-    /// Specify the fallback [`Locale`] for this [`LocaleSet`]. This is used to gracefully
-    /// handle attempts at retrieving a non-existant language.
-    ///
-    /// If a fallback [`Locale`] is already set, it will be overridden.
-    pub fn with_fallback(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
-        self.fallback = Some(Locale { lang, flag_iso_code });
-
-        self.with_locale(lang, flag_iso_code)
-    }
-
     /// Returns an owned [`Locale`] whose `iso_code` matches the given `code`.
     /// If one is not found, the fallback [`Locale`] will be returned.
-    pub fn by_code(&self, code: String) -> Option<Locale> {
-        let locale = self.locales.iter().find(|locale| locale.lang.language.as_str() == &code);
-
-        if locale.is_some() {
-            return locale.cloned();
-        }
-
-        self.fallback.clone()
-    }
-}
-
-impl Default for LocaleSet {
-    fn default() -> Self {
-        LocaleSet {
-            cookie: "locale",
-            locales: Vec::new(),
-            fallback: None,
-        }
+    pub fn by_code(&self, code: String) -> Locale {
+        self.locales
+            .iter()
+            .find(|locale| locale.lang.language.as_str() == &code)
+            .unwrap_or(&self.fallback)
+            .to_owned()
     }
 }
 
 impl LocalizationConfiguration {
+    /// `fallback_lang` specifies the fallback [`Locale`] for the default [`LocaleSet`].
+    pub fn new(cookie: &'static str, fallback_lang: &'static LanguageIdentifier, fallback_flag_iso_code: &'static str) -> Self {
+        LocalizationConfiguration {
+            default: LocaleSet::new(cookie, fallback_lang, fallback_flag_iso_code),
+            overrides: HashMap::new(),
+        }
+    }
+
     /// Append a [`Locale`] to the default [`LocaleSet`].
     pub fn with_locale(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
         self.default = self.default.with_locale(lang, flag_iso_code);
-
-        self
-    }
-
-    /// Specify the fallback [`Locale`] for the default [`LocaleSet`]. If one is already
-    /// set, it will be overridden.
-    pub fn with_fallback(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
-        self.default = self.default.with_fallback(lang, flag_iso_code);
 
         self
     }

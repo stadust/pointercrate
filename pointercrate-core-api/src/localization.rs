@@ -33,11 +33,8 @@ impl<'r> FromRequest<'r> for ClientLocale {
 
         let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
         let locale_set = localization_config.set_by_uri(request.uri().path().segments().collect());
+        let locale = locale_set.by_code(preferences.get::<String>(locale_set.cookie));
 
-        if let Some(locale) = locale_set.by_code(preferences.get::<String>(locale_set.cookie)) {
-            return Outcome::Success(ClientLocale(locale));
-        } else {
-            return Outcome::Forward(Status::BadRequest);
-        }
+        return Outcome::Success(ClientLocale(locale));
     }
 }
