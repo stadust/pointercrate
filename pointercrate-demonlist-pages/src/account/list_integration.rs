@@ -148,24 +148,24 @@ impl AccountPageTab for ListIntegrationTab {
                                     (
                                         "record-approved-styled",
                                         html! {
-                                            span style = "background-color: #E9FAE3" { (tr("record-approved")) }
+                                            span.ok { (tr("record-approved")) }
                                         }.into_string()
                                     ),(
                                         "record-submitted-styled",
                                         html! {
-                                            span style = "background-color: #F7F7E0" { (tr("record-submitted")) }
+                                            span.warn { (tr("record-submitted")) }
                                         }.into_string()
                                     ),
                                     (
                                         "record-rejected-styled",
                                         html! {
-                                            span style = "background-color: #F8DCE4" { (tr("record-rejected")) }
+                                            span.err { (tr("record-rejected")) }
                                         }.into_string()
                                     ),
                                     (
                                         "record-underconsideration-styled",
                                         html! {
-                                            span style = "background-color: #D8EFF3" { (tr("record-underconsideration")) }
+                                            span.consider { (tr("record-underconsideration")) }
                                         }.into_string()
                                     )
                                 )))

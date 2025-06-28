@@ -85,9 +85,9 @@ function generateClaim(claim) {
   rightDiv.classList.add("flex");
 
   if (claim.verified) {
-    li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+    li.classList.add("ok");
   } else {
-    li.style.backgroundColor = "rgba(142, 230, 230, .3)";
+    li.classList.add("consider");
     let button = makeButton("check");
     button.style.marginRight = "5px";
 
@@ -229,23 +229,25 @@ export function initialize() {
 
     let playerId = claimedPlayer.dataset.id;
 
-    geolocationButton.addEventListener("click", () => {
-      post("/api/v1/players/" + playerId + "/geolocate")
-        .then((response) => {
-          let nationality = response.data;
-          if (nationality.subdivision) {
-            output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success-subdivision", {
-              ["nationality"]: nationality.nation,
-              ["subdivision"]: nationality.subdivision.name,
-            }))
-          } else {
-            output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success", {
-              ["nationality"]: nationality.nation,
-            }))
-          }
-        })
-        .catch(displayError(output));
-    });
+    if (geolocationButton) {
+      geolocationButton.addEventListener("click", () => {
+        post("/api/v1/players/" + playerId + "/geolocate")
+          .then((response) => {
+            let nationality = response.data;
+            if (nationality.subdivision) {
+              output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success-subdivision", {
+                ["nationality"]: nationality.nation,
+                ["subdivision"]: nationality.subdivision.name,
+              }))
+            } else {
+              output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success", {
+                ["nationality"]: nationality.nation,
+              }))
+            }
+          })
+          .catch(displayError(output));
+      });
+    }
 
     let lockSubmissionsCheckbox = document.getElementById(
       "lock-submissions-checkbox"
