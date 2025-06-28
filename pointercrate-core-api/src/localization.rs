@@ -1,4 +1,4 @@
-use pointercrate_core::{error::CoreError, localization::get_locale};
+use pointercrate_core::error::CoreError;
 use pointercrate_core_pages::localization::{Locale, LocalizationConfiguration};
 use rocket::{
     http::Status,
@@ -13,7 +13,7 @@ pub struct ClientLocale(pub Locale);
 
 impl Into<&LanguageIdentifier> for ClientLocale {
     fn into(self) -> &'static LanguageIdentifier {
-        get_locale(self.0.iso_code)
+        self.0.lang
     }
 }
 

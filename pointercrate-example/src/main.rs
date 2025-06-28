@@ -65,7 +65,6 @@ async fn rocket() -> _ {
 
     // Load the translation files
     LocalesLoader::load(
-        &SUPPORTED_LOCALES[0],
         SUPPORTED_LOCALES,
         vec![
             "pointercrate-core-pages/static/ftl/",
@@ -121,7 +120,7 @@ async fn rocket() -> _ {
     // support (otherwise 400 Bad Request will be raised).
     //
     // If overrides are present, be sure to add their cookies to the [`PreferenceManager`]!!!
-    let localization_config = LocalizationConfiguration::default().with_fallback("en", "us");
+    let localization_config = LocalizationConfiguration::default().with_fallback(&SUPPORTED_LOCALES[0], "us");
 
     let rocket = rocket.manage(localization_config);
 

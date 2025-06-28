@@ -12,6 +12,9 @@ use pointercrate_user::{
 use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::local::asynchronous::Client;
 use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
+use unic_langid::{langid, LanguageIdentifier};
+
+const SUPPORTED_LOCALES: &[LanguageIdentifier] = &[langid!("en")];
 
 pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
     let _ = dotenv::dotenv();
@@ -27,7 +30,7 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .manage(permissions)
         .manage(AccountPageConfig::default())
         .manage(PreferenceManager::default().preference("locale", "en"))
-        .manage(LocalizationConfiguration::default().with_fallback("en", "en"));
+        .manage(LocalizationConfiguration::default().with_fallback(&SUPPORTED_LOCALES[0], "en"));
 
     (TestClient::new(Client::tracked(rocket).await.unwrap()), connection)
 }

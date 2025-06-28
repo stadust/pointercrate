@@ -11,13 +11,10 @@ use unic_langid::LanguageIdentifier;
 
 pub struct LocalesLoader {
     locales: HashMap<&'static LanguageIdentifier, FluentBundle<FluentResource>>,
-    fallback: &'static LanguageIdentifier,
 }
 
 impl LocalesLoader {
-    pub fn load<P: AsRef<Path>>(
-        fallback: &'static LanguageIdentifier, langs: &'static [LanguageIdentifier], resource_dirs: Vec<P>,
-    ) -> Self {
+    pub fn load<P: AsRef<Path>>(langs: &'static [LanguageIdentifier], resource_dirs: Vec<P>) -> Self {
         let mut locales: HashMap<&'static LanguageIdentifier, FluentBundle<FluentResource>> = HashMap::new();
 
         for path in resource_dirs {
@@ -59,7 +56,7 @@ impl LocalesLoader {
             }
         }
 
-        LocalesLoader { locales, fallback }
+        LocalesLoader { locales }
     }
 
     /// Set the `LOCALES` [`OnceLock`] to use this set of loaded locales
@@ -74,7 +71,7 @@ impl LocalesLoader {
     }
 
     pub fn get_bundle(&self, lang: &'static LanguageIdentifier) -> Option<&FluentBundle<FluentResource>> {
-        self.locales.get(lang).or_else(|| self.locales.get(self.fallback))
+        self.locales.get(lang)
     }
 
     pub fn lookup<'a>(
@@ -124,13 +121,8 @@ task_local! {
     pub static LANGUAGE: &'static LanguageIdentifier;
 }
 
-pub fn get_locale(code: &str) -> &'static LanguageIdentifier {
-    let locales_loader = LocalesLoader::get();
-    locales_loader
-        .locales
-        .keys()
-        .find(|locale| locale.language == code)
-        .unwrap_or(&locales_loader.fallback)
+pub fn get_locale(code: &str) -> Option<&'static LanguageIdentifier> {
+    LocalesLoader::get().locales.keys().copied().find(|locale| locale.language == code)
 }
 
 /// Utility function for easily retrieving the current [`LanguageIdentifier`] inside the

@@ -50,7 +50,7 @@ pub fn localized_catcher(_: TokenStream, input: TokenStream) -> TokenStream {
 
             let __locale = match pointercrate_core_api::localization::ClientLocale::from_request(__request).await {
                 rocket::request::Outcome::Success(locale) => locale,
-                _ => return pointercrate_core_api::error::ErrorResponder::from(pointercrate_core::error::CoreError::internal_server_error("An error occurred while trying to extract requested locale")),
+                _ => return pointercrate_core_api::error::ErrorResponder::from(pointercrate_core::error::CoreError::internal_server_error("An error occurred while trying to extract requested locale. Check your locale fallbacks!")),
             };
 
             pointercrate_core::localization::LANGUAGE.scope(__locale.into(), async {

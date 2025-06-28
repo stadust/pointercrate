@@ -3,10 +3,7 @@ use crate::{
     preferences::{ClientPreferences, PreferenceManager},
 };
 use maud::{html, DOCTYPE};
-use pointercrate_core::{
-    etag::Taggable,
-    localization::{get_locale, LANGUAGE},
-};
+use pointercrate_core::{etag::Taggable, localization::LANGUAGE};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
     localization::LocalizationConfiguration,
@@ -52,7 +49,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let page_config = futures::executor::block_on(async {
             LANGUAGE
-                .scope(get_locale(locale.iso_code), async {
+                .scope(locale.lang, async {
                     Ok(request
                         .rocket()
                         .state::<fn() -> PageConfiguration>()
@@ -65,7 +62,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let rendered_fragment = html! {
             (DOCTYPE)
-            html lang=(locale.iso_code) prefix="og: http://opg.me/ns#" {
+            html lang=(locale.lang.language.as_str()) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)

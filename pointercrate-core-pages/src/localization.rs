@@ -1,12 +1,13 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use maud::{html, Markup};
+use unic_langid::LanguageIdentifier;
 
 use crate::navigation::TopLevelNavigationBarItem;
 
 #[derive(Clone)]
 pub struct Locale {
-    pub iso_code: &'static str,
+    pub lang: &'static LanguageIdentifier,
     pub flag_iso_code: &'static str,
 }
 
@@ -55,9 +56,9 @@ impl LocaleSet {
     }
 
     /// Append a new [`Locale`] to this [`LocaleSet`].
-    pub fn with_locale(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
-        self.locales.push(Locale { iso_code, flag_iso_code });
-        self.locales.sort_by(|a, b| a.iso_code.cmp(b.iso_code)); // ensure set is sorted alphabetically
+    pub fn with_locale(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
+        self.locales.push(Locale { lang, flag_iso_code });
+        self.locales.sort_by(|a, b| a.lang.language.cmp(&b.lang.language)); // ensure set is sorted alphabetically
 
         self
     }
@@ -66,16 +67,16 @@ impl LocaleSet {
     /// handle attempts at retrieving a non-existant language.
     ///
     /// If a fallback [`Locale`] is already set, it will be overridden.
-    pub fn with_fallback(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
-        self.fallback = Some(Locale { iso_code, flag_iso_code });
+    pub fn with_fallback(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
+        self.fallback = Some(Locale { lang, flag_iso_code });
 
-        self.with_locale(iso_code, flag_iso_code)
+        self.with_locale(lang, flag_iso_code)
     }
 
     /// Returns an owned [`Locale`] whose `iso_code` matches the given `code`.
     /// If one is not found, the fallback [`Locale`] will be returned.
     pub fn by_code(&self, code: String) -> Option<Locale> {
-        let locale = self.locales.iter().find(|locale| locale.iso_code == &code);
+        let locale = self.locales.iter().find(|locale| locale.lang.language.as_str() == &code);
 
         if locale.is_some() {
             return locale.cloned();
@@ -97,16 +98,16 @@ impl Default for LocaleSet {
 
 impl LocalizationConfiguration {
     /// Append a [`Locale`] to the default [`LocaleSet`].
-    pub fn with_locale(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
-        self.default = self.default.with_locale(iso_code, flag_iso_code);
+    pub fn with_locale(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
+        self.default = self.default.with_locale(lang, flag_iso_code);
 
         self
     }
 
     /// Specify the fallback [`Locale`] for the default [`LocaleSet`]. If one is already
     /// set, it will be overridden.
-    pub fn with_fallback(mut self, iso_code: &'static str, flag_iso_code: &'static str) -> Self {
-        self.default = self.default.with_fallback(iso_code, flag_iso_code);
+    pub fn with_fallback(mut self, lang: &'static LanguageIdentifier, flag_iso_code: &'static str) -> Self {
+        self.default = self.default.with_fallback(lang, flag_iso_code);
 
         self
     }
@@ -157,13 +158,13 @@ pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -
         html! {
             span.flex data-cookie = (locale_set.cookie) {
                 (active_locale.flag())
-                span #active-language style = "margin-left: 8px" { (active_locale.iso_code.to_uppercase()) }
+                span #active-language style = "margin-left: 8px" { (active_locale.lang.language.as_str().to_uppercase()) }
             }
         },
     );
 
     for locale in locale_set.locales {
-        if locale.iso_code == active_locale.iso_code {
+        if locale.lang == active_locale.lang {
             // this locale is currently selected, don't add it to the dropdown
             continue;
         }
@@ -171,9 +172,9 @@ pub fn locale_selection_dropdown(active_locale: Locale, locale_set: LocaleSet) -
         dropdown = dropdown.with_sub_item(
             None,
             html! {
-                span data-flag = (locale.flag_iso_code) data-lang = (locale.iso_code) {
+                span data-flag = (locale.flag_iso_code) data-lang = (locale.lang.language.as_str()) {
                     (locale.flag())
-                    span style = "margin-left: 10px" { (locale.iso_code.to_uppercase()) }
+                    span style = "margin-left: 10px" { (locale.lang.language.as_str().to_uppercase()) }
                 }
             },
         );
