@@ -3,7 +3,7 @@ use crate::components::{
     submitter::{submit_panel, RecordSubmitter},
 };
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager};
+use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
 use pointercrate_core_pages::{
     error::ErrorFragment,
     util::{dropdown, paginator},
@@ -92,7 +92,7 @@ fn record_manager(demons: &[Demon]) -> Markup {
                 (dropdown("All", html! {
                     li.white.hover.underlined data-value = "All"
                      {(tr("record-manager.all-option"))}
-                }, demons.iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {"by "(demon.publisher.name)}}))))
+                }, demons.iter().map(|demon| html!(li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; {(trp!("demon-listed.publisher", ("publisher", demon.publisher.name)))}}))))
             }
             div.flex.viewer {
                 (paginator("record-pagination", "/api/v1/records/"))

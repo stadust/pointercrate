@@ -84,7 +84,7 @@ impl Render for Tardis {
                             p.error {}
                         }
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Go!";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("time-machine.submit"));
                 }
             }
         }

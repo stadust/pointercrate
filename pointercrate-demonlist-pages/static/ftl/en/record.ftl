@@ -5,6 +5,7 @@ record-approved = Approved
 record-rejected = Rejected
 
 record-videolink = Video Link
+record-videoproof = Video Proof
 record-rawfootage = Raw Footage
 record-demon = Demon
 record-holder = Record Holder

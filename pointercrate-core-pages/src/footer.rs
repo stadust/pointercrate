@@ -1,4 +1,5 @@
 use maud::{html, Markup, PreEscaped, Render};
+use pointercrate_core::localization::tr;
 
 pub struct Footer {
     copyright_notice: Markup,
@@ -91,7 +92,9 @@ impl Render for Footer {
                 }
                 div style="display: flex; justify-content: center; align-items: center" {
                     i class = "fab fa-twitter fa-2x" {}
-                    (PreEscaped("&nbsp;&nbsp;Tweet Us:"))
+                    (PreEscaped(
+                        format!("&nbsp;&nbsp;{}", tr("footer-tweet"))
+                    ))
                     @for link in &self.twitter_links {
                         (PreEscaped("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"))
                         a href=(link.href) target="_blank" style = "color:#666" {(link.text)}

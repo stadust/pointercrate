@@ -461,13 +461,13 @@ impl DemonPage {
                                 tr {
                                     th.blue {}
                                     th.blue {
-                                        "Record Holder"
+                                        (tr("record-holder"))
                                     }
                                     th.blue {
-                                        "Progress"
+                                        (tr("record-progress"))
                                     }
                                     th.video-link.blue {
-                                        "Video Proof"
+                                        (tr("record-videoproof"))
                                     }
                                 }
                                 @for record in &self.data.records {
