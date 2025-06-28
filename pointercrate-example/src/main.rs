@@ -102,27 +102,19 @@ async fn rocket() -> _ {
 
     let rocket = rocket.manage(permissions_manager);
 
-    // Define the preferences our website supports. Preferences are sent to us from
-    // the client via cookies.
-    // In this example, we can retrieve the `locale` preference from the
-    // `preference-locale` cookie, with a default value of `en` if the cookie
-    // was not sent to us.
-    let preference_manager = PreferenceManager::default().preference("locale", "en");
-
-    let rocket = rocket.manage(preference_manager);
-
-    // Define the languages our website supports. Ideally, every language present
-    // in the locales directory should be loaded into our [`LocalizationManager`]
-    // structure here.
+    // Define the languages our website supports, along with a corresponding flag.
     //
-    // Additionally, specifying a fallback locale is optional but recommended,
-    // in case the client attempts to load the site in a language we don't
-    // support (otherwise 400 Bad Request will be raised).
-    //
-    // If overrides are present, be sure to add their cookies to the [`PreferenceManager`]!!!
+    // The `cookie` parameter specifies the name of the cookie which stores the user's
+    // active language. Similar to all other preference cookies, this gets prefixed with
+    // "preference-" (so passing "locale" would result in the cookie name being
+    // "preference-locale")
     let localization_config = LocalizationConfiguration::new("locale", &SUPPORTED_LOCALES[0], "us");
 
-    let rocket = rocket.manage(localization_config);
+    // Define the preferences our website supports. Preferences are sent to us from
+    // the client via cookies.
+    let preference_manager = PreferenceManager::default().with_localization_preferences(&localization_config);
+
+    let rocket = rocket.manage(preference_manager).manage(localization_config);
 
     // Set up which tabs can show up in the "user area" of your website. Anything
     // that implements the [`AccountPageTab`] trait can be displayed here. Note that

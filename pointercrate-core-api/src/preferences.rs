@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use pointercrate_core::error::CoreError;
+use pointercrate_core_pages::localization::LocalizationConfiguration;
 use rocket::{
     http::CookieJar,
     request::{FromRequest, Outcome},
@@ -81,5 +82,17 @@ impl PreferenceManager {
         self.0.insert(name, default);
 
         self
+    }
+
+    /// Automatically register the preferences needed to store active locales.
+    pub fn with_localization_preferences(mut self, config: &LocalizationConfiguration) -> Self {
+        self.0.insert(config.default.cookie, config.default.fallback.lang.language.as_str());
+
+        for locale_set in config.overrides.values() {
+            self.0.insert(locale_set.cookie, locale_set.fallback.lang.language.as_str());
+        }
+
+        self
+        //self.preference(config.default.cookie, config.default.fallback.lang.language.as_str())
     }
 }

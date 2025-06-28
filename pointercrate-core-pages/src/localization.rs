@@ -21,8 +21,8 @@ impl Locale {
 
 /// Withholds the site's core localization information.
 pub struct LocalizationConfiguration {
-    default: LocaleSet,
-    overrides: HashMap<PathBuf, LocaleSet>,
+    pub default: LocaleSet,
+    pub overrides: HashMap<PathBuf, LocaleSet>,
 }
 
 /// Represents a collection of [`Locale`] objects associated with a specific
@@ -35,7 +35,7 @@ pub struct LocaleSet {
     pub locales: Vec<Locale>,
 
     /// Used to gracefully handle attempts at retrieving nonexistant locales
-    fallback: Locale,
+    pub fallback: Locale,
 }
 
 impl LocaleSet {
