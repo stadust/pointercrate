@@ -266,7 +266,7 @@ impl PointercrateError for CoreError {
             CoreError::MutuallyExclusive => 42229,
             CoreError::PreconditionRequired => 42800,
             CoreError::Ratelimited { .. } => 42900,
-            CoreError::InternalServerError { .. } => 50000,
+            CoreError::InternalServerError => 50000,
             CoreError::DatabaseError => 50003,
             CoreError::QueryTimeout => 50004,
             CoreError::DatabaseConnectionError => 50005,
