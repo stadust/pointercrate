@@ -25,7 +25,9 @@ use pointercrate_user::{
 };
 
 #[cfg(feature = "oauth2")]
-use {crate::oauth::GoogleCertificateStore, pointercrate_core::error::CoreError, pointercrate_user::auth::oauth::GoogleOauthPayload};
+use {
+    crate::oauth::GoogleCertificateStore, pointercrate_core::error::CoreError, pointercrate_user::auth::oauth::UnvalidatedOauthCredential,
+};
 
 fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJar<'_>) -> pointercrate_user::error::Result<()> {
     let (access_token, csrf_token) = user.generate_token_pair()?;
@@ -114,13 +116,10 @@ pub async fn logout(_auth: Auth<NonMutating>, cookies: &CookieJar<'_>) -> Redire
 #[cfg(feature = "oauth2")]
 #[rocket::post("/oauth/google", data = "<payload>")]
 pub async fn google_oauth_login(
-    payload: Json<GoogleOauthPayload>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
+    payload: Json<UnvalidatedOauthCredential>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
     pool: &State<PointercratePool>, cookies: &rocket::http::CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
-    let validated_credentials = key_store
-        .validate_with_refresh(&payload.credential)
-        .await
-        .ok_or(CoreError::Unauthorized)?;
+    let validated_credentials = key_store.validate_with_refresh(payload.0).await.ok_or(CoreError::Unauthorized)?;
 
     let maybe_linked_user = AuthenticatedUser::by_validated_google_creds(&validated_credentials, &mut *pool.connection().await?).await;
 

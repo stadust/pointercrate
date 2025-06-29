@@ -5,8 +5,8 @@ use serde::Deserialize;
 use crate::config;
 
 #[derive(Debug, Deserialize)]
-pub struct GoogleOauthPayload {
-    pub credential: String,
+pub struct UnvalidatedOauthCredential {
+    credential: String,
 }
 
 #[derive(Deserialize)]
@@ -44,8 +44,8 @@ impl GoogleCertificateDatabase {
         }
     }
 
-    pub fn validate_credentials(&self, creds: &str) -> Option<ValidatedGoogleCredentials> {
-        let header = jsonwebtoken::decode_header(creds).ok()?;
+    pub fn validate_credentials(&self, creds: UnvalidatedOauthCredential) -> Option<ValidatedGoogleCredentials> {
+        let header = jsonwebtoken::decode_header(&creds.credential).ok()?;
         let key = self.keys.iter().find(|key| Some(key.kid.as_ref()) == header.kid.as_deref())?;
 
         let mut validation = Validation::new(key.alg);
@@ -53,32 +53,36 @@ impl GoogleCertificateDatabase {
         validation.set_audience(&[config::google_client_id()]);
         validation.required_spec_claims.extend(["iss".to_string(), "aud".to_string()]);
 
-        jsonwebtoken::decode(creds, &DecodingKey::from_rsa_components(&key.n, &key.e).ok()?, &validation)
-            .map(|data| data.claims)
-            .inspect_err(|err| {
-                use jsonwebtoken::errors::ErrorKind::*;
+        jsonwebtoken::decode(
+            &creds.credential,
+            &DecodingKey::from_rsa_components(&key.n, &key.e).ok()?,
+            &validation,
+        )
+        .map(|data| data.claims)
+        .inspect_err(|err| {
+            use jsonwebtoken::errors::ErrorKind::*;
 
-                match err.kind() {
-                    // With these, we don't run into any danger of accidentally logging credentials
-                    InvalidToken
-                    | InvalidSignature
-                    | InvalidEcdsaKey
-                    | InvalidRsaKey(_)
-                    | RsaFailedSigning
-                    | InvalidAlgorithmName
-                    | InvalidKeyFormat
-                    | MissingRequiredClaim(_)
-                    | ExpiredSignature
-                    | InvalidIssuer
-                    | InvalidAudience
-                    | InvalidSubject
-                    | ImmatureSignature
-                    | InvalidAlgorithm
-                    | MissingAlgorithm => log::warn!("Failure to validate credentials allegedly received from google: {:?}", err),
-                    // All others, better be on the safe side and not log the actual error
-                    _ => log::warn!("Failure to parse/validate credentials allegedly received from google"),
-                }
-            })
-            .ok()
+            match err.kind() {
+                // With these, we don't run into any danger of accidentally logging credentials
+                InvalidToken
+                | InvalidSignature
+                | InvalidEcdsaKey
+                | InvalidRsaKey(_)
+                | RsaFailedSigning
+                | InvalidAlgorithmName
+                | InvalidKeyFormat
+                | MissingRequiredClaim(_)
+                | ExpiredSignature
+                | InvalidIssuer
+                | InvalidAudience
+                | InvalidSubject
+                | ImmatureSignature
+                | InvalidAlgorithm
+                | MissingAlgorithm => log::warn!("Failure to validate credentials allegedly received from google: {:?}", err),
+                // All others, better be on the safe side and not log the actual error
+                _ => log::warn!("Failure to parse/validate credentials allegedly received from google"),
+            }
+        })
+        .ok()
     }
 }
