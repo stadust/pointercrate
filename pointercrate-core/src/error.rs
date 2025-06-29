@@ -277,7 +277,7 @@ impl PointercrateError for CoreError {
 
 impl From<sqlx::Error> for CoreError {
     fn from(error: sqlx::Error) -> Self {
-        error!("Database error: {:?}. Backtrace:\n {}", error, std::backtrace::Backtrace::capture());
+        log_internal_server_error(format!("Database error: {:?}", error));
 
         match error {
             sqlx::Error::Database(err) if err.code().as_deref() == Some("57014") => CoreError::QueryTimeout,
