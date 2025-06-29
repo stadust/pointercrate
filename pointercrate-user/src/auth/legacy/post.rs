@@ -1,15 +1,12 @@
 #[cfg(feature = "legacy_accounts")]
 pub use register::Registration;
 
-use crate::Result;
-
 #[cfg(feature = "legacy_accounts")]
 mod register {
-    use super::*;
     use crate::{
         auth::{AuthenticatedUser, AuthenticationType, PasswordOrBrowser},
         error::UserError,
-        User,
+        User, Result
     };
     use serde::{Deserialize, Serialize};
     use sqlx::PgConnection;
