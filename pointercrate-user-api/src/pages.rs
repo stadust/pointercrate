@@ -117,15 +117,8 @@ pub async fn google_oauth_login(
     payload: Json<GoogleOauthPayload>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
     pool: &State<PointercratePool>, cookies: &rocket::http::CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
-    if key_store.needs_refresh().await {
-        key_store
-            .refresh()
-            .await
-            .map_err(|err| CoreError::internal_server_error(format!("Failed to retrieve signing certificates from Google! {:?}", err)))?;
-    }
-
     let validated_credentials = key_store
-        .validate_credentials(&payload.into_inner().credential)
+        .validate_with_refresh(&payload.credential)
         .await
         .ok_or(CoreError::Unauthorized)?;
 

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use chrono::{Duration, Utc};
+use pointercrate_core::error::log_internal_server_error;
 use pointercrate_user::auth::oauth::{GoogleCertificateDatabase, ValidatedGoogleCredentials};
 use reqwest::Client;
 use rocket::tokio::sync::RwLock;
@@ -27,8 +28,19 @@ impl From<reqwest::Error> for CertificateRefreshError {
 }
 
 impl GoogleCertificateStore {
-    pub async fn validate_credentials(&self, creds: &str) -> Option<ValidatedGoogleCredentials> {
+    pub async fn validate(&self, creds: &str) -> Option<ValidatedGoogleCredentials> {
         self.db.read().await.validate_credentials(creds)
+    }
+
+    pub async fn validate_with_refresh(&self, creds: &str) -> Option<ValidatedGoogleCredentials> {
+        if self.needs_refresh().await {
+            self.refresh()
+                .await
+                .inspect_err(|err| log_internal_server_error(format!("Failed to retrieve signing certificates from Google! {:?}", err)))
+                .ok()?;
+        }
+
+        self.validate(creds).await
     }
 
     pub async fn needs_refresh(&self) -> bool {
