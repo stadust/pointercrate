@@ -6,7 +6,7 @@ mod register {
     use crate::{
         auth::{AuthenticatedUser, AuthenticationType, PasswordOrBrowser},
         error::UserError,
-        User, Result
+        Result, User,
     };
     use serde::{Deserialize, Serialize};
     use sqlx::PgConnection;
