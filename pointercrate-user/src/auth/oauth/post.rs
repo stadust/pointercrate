@@ -114,10 +114,14 @@ impl AuthenticatedUser<PasswordOrBrowser> {
             Err(err) => return Err(err),
         }
 
-        let id = sqlx::query!("INSERT INTO members (name, google_account_id) VALUES ($1, $2) RETURNING member_id", &username, credentials.sub)
-            .fetch_one(connection)
-            .await?
-            .member_id;
+        let id = sqlx::query!(
+            "INSERT INTO members (name, google_account_id) VALUES ($1, $2) RETURNING member_id",
+            &username,
+            credentials.sub
+        )
+        .fetch_one(connection)
+        .await?
+        .member_id;
 
         Ok(AuthenticatedUser {
             gen: 0,
