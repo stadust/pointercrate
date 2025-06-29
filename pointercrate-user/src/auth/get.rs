@@ -25,7 +25,7 @@ impl AuthenticatedUser<NoAuth> {
 
                 let auth_type = match row.google_account_id {
                     Some(_) => AuthenticationType::oauth(user),
-                    None => AuthenticationType::legacy(user, row.password_hash),
+                    None => AuthenticationType::legacy(user, row.password_hash.ok_or_else(|| CoreError::internal_server_error("Non-oauth user without password in database!"))?),
                 };
 
                 Ok(AuthenticatedUser {
@@ -53,7 +53,7 @@ impl AuthenticatedUser<NoAuth> {
 
                 let auth_type = match row.google_account_id {
                     Some(_) => AuthenticationType::oauth(user),
-                    None => AuthenticationType::legacy(user, row.password_hash),
+                    None => AuthenticationType::legacy(user, row.password_hash.ok_or_else(|| CoreError::internal_server_error("Non-oauth user without password in database!"))?),
                 };
 
                 Ok(AuthenticatedUser {
