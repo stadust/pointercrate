@@ -1,10 +1,12 @@
 use base64::{engine::general_purpose::STANDARD, Engine};
 use log::warn;
 use pointercrate_core::{
-    error::{CoreError, PointercrateError},
+    error::CoreError,
     permission::{Permission, PermissionsManager},
     pool::{audit_connection, PointercratePool},
 };
+use pointercrate_core_api::error::IntoOutcome2;
+use pointercrate_core_api::{tryo_result, tryo_state};
 use pointercrate_user::{
     auth::{AccessClaims, ApiToken, AuthenticatedUser, NonMutating, PasswordOrBrowser},
     error::UserError,
@@ -12,7 +14,7 @@ use pointercrate_user::{
 use rocket::{
     http::{Method, Status},
     request::{FromRequest, Outcome},
-    Request, State,
+    Request,
 };
 use sqlx::{Postgres, Transaction};
 use std::collections::HashSet;
@@ -44,29 +46,6 @@ impl<A> Auth<A> {
     }
 }
 
-macro_rules! try_outcome {
-    ($outcome:expr) => {
-        match $outcome {
-            Ok(success) => success,
-            Err(error) => return Outcome::Error((Status::from_code(error.status_code()).unwrap(), error.into())),
-        }
-    };
-}
-
-macro_rules! try_state {
-    ($request: expr, $typ: ty) => {
-        match $request.guard::<&State<$typ>>().await {
-            Outcome::Success(state) => state.inner(),
-            _ => {
-                return Outcome::Error((
-                    Status::InternalServerError,
-                    CoreError::internal_server_error(format!("Missing required state: '{}'", stringify!($typ))).into(),
-                ))
-            },
-        }
-    };
-}
-
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<NonMutating> {
     type Error = UserError;
@@ -76,17 +55,17 @@ impl<'r> FromRequest<'r> for Auth<NonMutating> {
             return Outcome::Forward(Status::NotFound);
         }
 
-        let pool = try_state!(request, PointercratePool);
-        let permission_manager = try_state!(request, PermissionsManager).clone();
+        let pool = tryo_state!(request, PointercratePool);
+        let permission_manager = tryo_state!(request, PermissionsManager).clone();
 
-        let mut connection = try_outcome!(pool.transaction().await);
+        let mut connection = tryo_result!(pool.transaction().await);
 
         if let Some(access_token) = request.cookies().get("access_token") {
-            let access_claims = try_outcome!(AccessClaims::decode(access_token.value()));
-            let user = try_outcome!(AuthenticatedUser::by_id(try_outcome!(access_claims.id()), &mut connection).await);
-            let authenticated_for_get = try_outcome!(user.validate_cookie_claims(access_claims));
+            let access_claims = tryo_result!(AccessClaims::decode(access_token.value()));
+            let user = tryo_result!(AuthenticatedUser::by_id(tryo_result!(access_claims.id()), &mut connection).await);
+            let authenticated_for_get = tryo_result!(user.validate_cookie_claims(access_claims));
 
-            try_outcome!(audit_connection(&mut connection, authenticated_for_get.user().id).await);
+            tryo_result!(audit_connection(&mut connection, authenticated_for_get.user().id).await);
 
             return Outcome::Success(Auth {
                 user: authenticated_for_get,
@@ -95,7 +74,7 @@ impl<'r> FromRequest<'r> for Auth<NonMutating> {
             });
         }
 
-        Outcome::Error((Status::Unauthorized, CoreError::Unauthorized.into()))
+        CoreError::Unauthorized.into_outcome()
     }
 }
 
@@ -109,18 +88,18 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
             return Outcome::Forward(Status::NotFound);
         }
 
-        let pool = try_state!(request, PointercratePool);
-        let permission_manager = try_state!(request, PermissionsManager).clone();
+        let pool = tryo_state!(request, PointercratePool);
+        let permission_manager = tryo_state!(request, PermissionsManager).clone();
 
-        let mut connection = try_outcome!(pool.transaction().await);
+        let mut connection = tryo_result!(pool.transaction().await);
 
         for authorization in request.headers().get("Authorization") {
             if let ["Bearer", token] = authorization.split(' ').collect::<Vec<_>>()[..] {
-                let access_claims = try_outcome!(AccessClaims::decode(token));
-                let user = try_outcome!(AuthenticatedUser::by_id(try_outcome!(access_claims.id()), &mut connection).await);
-                let authenticated_user = try_outcome!(user.validate_api_access(access_claims));
+                let access_claims = tryo_result!(AccessClaims::decode(token));
+                let user = tryo_result!(AuthenticatedUser::by_id(tryo_result!(access_claims.id()), &mut connection).await);
+                let authenticated_user = tryo_result!(user.validate_api_access(access_claims));
 
-                try_outcome!(audit_connection(&mut connection, authenticated_user.user().id).await);
+                tryo_result!(audit_connection(&mut connection, authenticated_user.user().id).await);
 
                 return Outcome::Success(Auth {
                     user: authenticated_user,
@@ -132,12 +111,12 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
 
         // no matching auth header, lets try the cookie
         if let (Some(access_token), Some(csrf_token)) = (request.cookies().get("access_token"), request.headers().get_one("X-CSRF-TOKEN")) {
-            let access_claims = try_outcome!(AccessClaims::decode(access_token.value()));
-            let user = try_outcome!(AuthenticatedUser::by_id(try_outcome!(access_claims.id()), &mut connection).await);
-            let authenticated_for_get = try_outcome!(user.validate_cookie_claims(access_claims));
-            let authenticated = try_outcome!(authenticated_for_get.validate_csrf_token(csrf_token));
+            let access_claims = tryo_result!(AccessClaims::decode(access_token.value()));
+            let user = tryo_result!(AuthenticatedUser::by_id(tryo_result!(access_claims.id()), &mut connection).await);
+            let authenticated_for_get = tryo_result!(user.validate_cookie_claims(access_claims));
+            let authenticated = tryo_result!(authenticated_for_get.validate_csrf_token(csrf_token));
 
-            try_outcome!(audit_connection(&mut connection, authenticated.user().id).await);
+            tryo_result!(audit_connection(&mut connection, authenticated.user().id).await);
 
             return Outcome::Success(Auth {
                 user: authenticated.downgrade_auth_type().unwrap(), // cannot fail: we are not password authenticated
@@ -146,7 +125,7 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
             });
         }
 
-        Outcome::Error((Status::Unauthorized, CoreError::Unauthorized.into()))
+        CoreError::Unauthorized.into_outcome()
     }
 }
 
@@ -156,10 +135,7 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         if request.method() == Method::Get {
-            return Outcome::Error((
-                Status::InternalServerError,
-                CoreError::internal_server_error("Requiring higher authentication on a GET request. This is nonsense").into(),
-            ));
+            return CoreError::internal_server_error("Requiring higher authentication on a GET request. This is nonsense").into_outcome();
         }
 
         // No auth header set, forward to the request handler that doesnt require authorization (if one exists)
@@ -167,14 +143,14 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
             return Outcome::Forward(Status::NotFound);
         }
 
-        let pool = try_state!(request, PointercratePool);
-        let permission_manager = try_state!(request, PermissionsManager).clone();
+        let pool = tryo_state!(request, PointercratePool);
+        let permission_manager = tryo_state!(request, PermissionsManager).clone();
 
-        let mut connection = try_outcome!(pool.transaction().await);
+        let mut connection = tryo_result!(pool.transaction().await);
 
         for authorization in request.headers().get("Authorization") {
             if let ["Basic", basic_auth] = authorization.split(' ').collect::<Vec<_>>()[..] {
-                let decoded = try_outcome!(STANDARD
+                let decoded = tryo_result!(STANDARD
                     .decode(basic_auth)
                     .map_err(|_| ())
                     .and_then(|bytes| String::from_utf8(bytes).map_err(|_| ()))
@@ -185,10 +161,10 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
                     }));
 
                 if let [username, password] = &decoded.splitn(2, ':').collect::<Vec<_>>()[..] {
-                    let user = try_outcome!(AuthenticatedUser::by_name(username, &mut connection).await);
-                    let authenticated = try_outcome!(user.verify_password(password));
+                    let user = tryo_result!(AuthenticatedUser::by_name(username, &mut connection).await);
+                    let authenticated = tryo_result!(user.verify_password(password));
 
-                    try_outcome!(audit_connection(&mut connection, authenticated.user().id).await);
+                    tryo_result!(audit_connection(&mut connection, authenticated.user().id).await);
 
                     return Outcome::Success(Auth {
                         user: authenticated,
@@ -200,12 +176,12 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
         }
         // no matching auth header, lets try the cookie
         if let (Some(access_token), Some(csrf_token)) = (request.cookies().get("access_token"), request.headers().get_one("X-CSRF-TOKEN")) {
-            let access_claims = try_outcome!(AccessClaims::decode(access_token.value()));
-            let user = try_outcome!(AuthenticatedUser::by_id(try_outcome!(access_claims.id()), &mut connection).await);
-            let authenticated_for_get = try_outcome!(user.validate_cookie_claims(access_claims));
-            let authenticated = try_outcome!(authenticated_for_get.validate_csrf_token(csrf_token));
+            let access_claims = tryo_result!(AccessClaims::decode(access_token.value()));
+            let user = tryo_result!(AuthenticatedUser::by_id(tryo_result!(access_claims.id()), &mut connection).await);
+            let authenticated_for_get = tryo_result!(user.validate_cookie_claims(access_claims));
+            let authenticated = tryo_result!(authenticated_for_get.validate_csrf_token(csrf_token));
 
-            try_outcome!(audit_connection(&mut connection, authenticated.user().id).await);
+            tryo_result!(audit_connection(&mut connection, authenticated.user().id).await);
 
             return Outcome::Success(Auth {
                 user: authenticated,
@@ -214,6 +190,6 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
             });
         }
 
-        Outcome::Error((Status::Unauthorized, CoreError::Unauthorized.into()))
+        CoreError::Unauthorized.into_outcome()
     }
 }
