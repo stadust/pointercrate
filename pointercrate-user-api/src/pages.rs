@@ -16,17 +16,16 @@ use rocket::{
 use std::net::IpAddr;
 
 #[cfg(any(feature = "legacy_accounts", feature = "oauth2"))]
-use {pointercrate_core::pool::PointercratePool, rocket::serde::json::Json};
+use {pointercrate_core::pool::PointercratePool, pointercrate_user::User, rocket::serde::json::Json};
 
 #[cfg(feature = "legacy_accounts")]
-use pointercrate_user::{
-    auth::legacy::{LegacyAuthenticatedUser, Registration},
-    User,
-};
+use pointercrate_user::auth::legacy::{LegacyAuthenticatedUser, Registration};
 
 #[cfg(feature = "oauth2")]
 use {
-    crate::oauth::GoogleCertificateStore, pointercrate_core::error::CoreError, pointercrate_user::auth::oauth::UnvalidatedOauthCredential,
+    crate::oauth::GoogleCertificateStore,
+    pointercrate_core::error::CoreError,
+    pointercrate_user::auth::oauth::{OauthRegistration, UnvalidatedOauthCredential},
 };
 
 fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJar<'_>) -> pointercrate_user::error::Result<()> {
@@ -142,6 +141,31 @@ pub async fn google_oauth_login(
     };
 
     build_cookies(&authenticated_user, cookies)?;
+
+    Ok(Status::NoContent)
+}
+
+#[cfg(feature = "oauth2")]
+#[rocket::post("/oauth/google/register", data = "<payload>")]
+pub async fn google_oauth_register(
+    payload: Json<OauthRegistration>, key_store: &State<GoogleCertificateStore>, ip: IpAddr, pool: &State<PointercratePool>,
+    cookies: &rocket::http::CookieJar<'_>, ratelimits: &State<UserRatelimits>,
+) -> pointercrate_core_api::error::Result<Status> {
+    let OauthRegistration { credential, username } = payload.0;
+    let validated_credentials = key_store.validate_with_refresh(credential).await.ok_or(CoreError::Unauthorized)?;
+
+    let mut connection = pool.transaction().await.map_err(UserError::from)?;
+    ratelimits.soft_registrations(ip)?;
+
+    User::validate_name(&username)?;
+
+    let user = AuthenticatedUser::register_oauth(username, validated_credentials, &mut connection).await?;
+
+    ratelimits.registrations(ip)?;
+
+    connection.commit().await.map_err(UserError::from)?;
+
+    build_cookies(&user, cookies)?;
 
     Ok(Status::NoContent)
 }

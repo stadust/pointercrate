@@ -26,7 +26,7 @@ pub fn setup(mut rocket: Rocket<Build>) -> Rocket<Build> {
     #[cfg(feature = "legacy_accounts")]
     page_routes.extend(rocket::routes![pages::register]);
     #[cfg(feature = "oauth2")]
-    auth_routes.extend(rocket::routes![pages::google_oauth_login]);
+    auth_routes.extend(rocket::routes![pages::google_oauth_login, pages::google_oauth_register]);
 
     #[cfg(feature = "oauth2")]
     {

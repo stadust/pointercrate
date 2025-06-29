@@ -289,7 +289,7 @@ impl From<sqlx::Error> for CoreError {
         */
         if let sqlx::Error::Database(ref err) = error {
             if err.kind() == sqlx::error::ErrorKind::UniqueViolation {
-                return CoreError::Conflict
+                return CoreError::Conflict;
             }
         }
 
