@@ -277,6 +277,22 @@ impl PointercrateError for CoreError {
 
 impl From<sqlx::Error> for CoreError {
     fn from(error: sqlx::Error) -> Self {
+        /*
+         When creating resources that are subject to a unique constraint, there will
+         always be a TOCTOU-style race condition. For example, creating new account
+         has a check along the lines of "if username exists in database, return UsernameTaken error,
+         else do insert into db". Check and insert are different queries, so concurrent creation
+         of an account with this name is possible (at which point successful creation comes down to
+         which connection commit()s first). These are not really internal server errors, so don't
+         log and report them as such. HTTP 409 CONFLICT seems like the most appropriate response
+         here.
+        */
+        if let sqlx::Error::Database(ref err) = error {
+            if err.kind() == sqlx::error::ErrorKind::UniqueViolation {
+                return CoreError::Conflict
+            }
+        }
+
         log_internal_server_error(format!("Database error: {:?}", error));
 
         match error {
