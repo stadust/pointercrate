@@ -1,14 +1,14 @@
-#login-tabber p:not(.error) {
+#login p:not(.error),#register p:not(.error) {
   font-size: x-small;
   text-align: center;
 }
 
-#login-tabber .panel {
+#login .panel,#register .panel {
   margin-bottom: 0px;
   max-width: 300px;
 }
 
-#login-tabber {
+#login,#register {
   margin-bottom: 20px;
 }
 

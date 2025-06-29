@@ -70,6 +70,11 @@ pub async fn login(
     Ok(Status::NoContent)
 }
 
+#[rocket::get("/register")]
+pub async fn register_page() -> Page {
+    Page::new(pointercrate_user_pages::register::registration_page())
+}
+
 #[cfg(feature = "legacy_accounts")]
 #[rocket::post("/register", data = "<registration>")]
 pub async fn register(
