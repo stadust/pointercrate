@@ -75,7 +75,6 @@ fn register_page_body() -> Markup {
     }
 }
 
-
 fn oauth_registration_dialog() -> Markup {
     html! {
         div.overlay.closable {
