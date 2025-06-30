@@ -1,6 +1,7 @@
 use maud::{html, Markup};
 use pointercrate_core_pages::head::HeadLike;
 use pointercrate_core_pages::PageFragment;
+use pointercrate_user::config;
 
 pub fn registration_page() -> PageFragment {
     let mut frag = PageFragment::new("Pointercrate - Registration", "Register for a new pointercrate account!")
@@ -25,11 +26,23 @@ fn register_page_body() -> Markup {
                     h1.underlined.pad {
                         "Sign Up"
                     }
-                    @if cfg!(feature = "legacy_accounts") {
-                        p {
-                            "Create a new account. Please note that the username cannot be changed after account creation, so choose wisely!"
-                        }
+                    p {
+                        "Create a new account. Please note that the username cannot be changed after account creation, so choose wisely!"
+                    }
+                    @if cfg!(feature = "oauth2") {
+                        div #g_id_onload
+                            data-ux_mode="popup"
+                            data-auto_select="true"
+                            data-itp_support="true"
+                            data-client_id=(config::google_client_id())
+                            data-callback="googleOauthRegisterCallback" {}
 
+                        div .g_id_signin data-text="signup_with" style="margin: 10px 0px" {}
+                        @if cfg!(feature = "legacy_accounts") {
+                            p.or style="text-size: small; margin: 0px" {"or"}
+                        }
+                    }
+                    @if cfg!(feature = "legacy_accounts") {
                         form.flex.col #register-form novalidate = "" {
                             p.info-red.output {}
                             span.form-input #register-username {
@@ -53,6 +66,32 @@ fn register_page_body() -> Markup {
                 }
                 p style = "text-align: center; padding: 0px 10px" {
                     "Already have a pointercrate account? " a.link href="/login" {"Sign in"} " instead."
+                }
+            }
+        }
+        @if cfg!(feature = "oauth2") {
+            (oauth_registration_dialog())
+        }
+    }
+}
+
+
+fn oauth_registration_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog #oauth-registration-pick-username style="width: 400px" {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    "Pick your username:"
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    span.form-input #oauth-username {
+                        label for = "username" {"Username:"}
+                        input type = "text" name = "username";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Sign Up!";
                 }
             }
         }

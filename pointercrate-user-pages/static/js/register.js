@@ -1,4 +1,4 @@
-import {Form, post, tooShort, valueMissing} from "/static/core/js/modules/form";
+import {displayError, Form, FormDialog, post, tooShort, valueMissing} from "/static/core/js/modules/form.js";
 
 
 function intializeRegisterForm() {
@@ -46,7 +46,21 @@ function intializeRegisterForm() {
     });
 }
 
-$(document).ready(function () {
+function googleOauthRegisterCallback(response) {
+    let dialog = new FormDialog("oauth-registration-pick-username");
+    dialog.form.addErrorOverride(40902, "oauth-username");
+    dialog.form.onSubmit(() => {
+        let formData = dialog.form.serialize();
+        formData['credential'] = response['credential'];
+        post("/api/v1/auth/oauth/google/register", {}, formData)
+            .then(() => window.location = "/account/")
+            .catch(displayError(dialog.form))
+    })
+    dialog.open();
+}
 
+window.googleOauthRegisterCallback = googleOauthRegisterCallback;
+
+$(document).ready(function () {
     intializeRegisterForm();
 })
