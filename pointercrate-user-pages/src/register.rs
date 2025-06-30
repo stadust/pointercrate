@@ -1,4 +1,5 @@
 use maud::{html, Markup, PreEscaped};
+use pointercrate_core::localization::task_lang;
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::head::HeadLike;
 use pointercrate_core_pages::PageFragment;
@@ -20,6 +21,8 @@ pub fn registration_page() -> PageFragment {
 }
 
 fn register_page_body() -> Markup {
+    let lang = task_lang().language.to_string();
+
     html! {
         div.center #register style="display: flex; align-items: center; justify-content: center; height: calc(100% - 70px)" { // 70px = height of nav bar
             div.flex.col style="align-items: center" {
@@ -38,6 +41,7 @@ fn register_page_body() -> Markup {
                             data-client_id=(config::google_client_id())
                             data-callback="googleOauthRegisterCallback" {}
 
+                        script src=(format!("https://accounts.google.com/gsi/client?hl={}", &lang)) async {}
                         div .g_id_signin data-text="signup_with" style="margin: 10px 0px" {}
                         @if cfg!(feature = "legacy_accounts") {
                             p.or style="text-size: small; margin: 0px" { (tr("login.methods-separator")) }
@@ -90,16 +94,16 @@ fn oauth_registration_dialog() -> Markup {
             div.dialog #oauth-registration-pick-username style="width: 400px" {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Pick your username:"
+                    (tr("register-oauth"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     span.form-input #oauth-username {
-                        label for = "username" {"Username:"}
+                        label for = "username" { (tr("auth-username")) }
                         input type = "text" name = "username";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Sign Up!";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("register-oauth.submit"));
                 }
             }
         }

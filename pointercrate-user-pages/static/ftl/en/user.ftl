@@ -48,6 +48,9 @@ register = Sign Up
     .redirect = Don't have a pointercrate account yet? { $redirect-link } for one!
     .redirect-link = Sign up
 
+register-oauth = Pick your username:
+    .submit = Sign up!
+
 ## Users tab
 users = Users
 

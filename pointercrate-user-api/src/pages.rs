@@ -157,6 +157,7 @@ pub async fn google_oauth_login(
 }
 
 #[cfg(feature = "oauth2")]
+#[localized]
 #[rocket::post("/oauth/google/register", data = "<payload>")]
 pub async fn google_oauth_register(
     payload: Json<OauthRegistration>, key_store: &State<GoogleCertificateStore>, ip: IpAddr, pool: &State<PointercratePool>,
