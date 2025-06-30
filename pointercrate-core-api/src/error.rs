@@ -2,6 +2,7 @@ use crate::response::Page;
 use log::info;
 use pointercrate_core::error::PointercrateError;
 use pointercrate_core_pages::error::ErrorFragment;
+use rocket::outcome::Outcome;
 use rocket::{
     http::{MediaType, Status},
     response::Responder,
@@ -59,4 +60,41 @@ impl<E: PointercrateError> From<E> for ErrorResponder {
             data: serde_json::to_value(error).expect("failed to serialize error to json"),
         }
     }
+}
+
+/// A version of [`IntoOutcome`](rocket::outcome::IntoOutcome) specially crafted for [`PointercrateError`]s
+pub trait IntoOutcome2<S, E> {
+    fn into_outcome<F, E2: From<E>>(self) -> Outcome<S, (Status, E2), F>;
+}
+
+impl<S, E: PointercrateError> IntoOutcome2<S, E> for std::result::Result<S, E> {
+    fn into_outcome<F, E2: From<E>>(self) -> Outcome<S, (Status, E2), F> {
+        self.map(Outcome::Success).unwrap_or_else(|e| e.into_outcome())
+    }
+}
+
+impl<S, E: PointercrateError> IntoOutcome2<S, E> for E {
+    fn into_outcome<F, E2: From<E>>(self) -> Outcome<S, (Status, E2), F> {
+        Outcome::Error((Status::new(self.status_code()), self.into()))
+    }
+}
+
+#[macro_export]
+macro_rules! tryo_result {
+    ($result: expr) => {
+        rocket::outcome::try_outcome!($crate::error::IntoOutcome2::into_outcome($result))
+    };
+}
+
+#[macro_export]
+macro_rules! tryo_state {
+    ($request: expr, $typ: ty) => {
+        $crate::tryo_result!($request
+            .rocket()
+            .state::<$typ>()
+            .ok_or_else(|| pointercrate_core::error::CoreError::internal_server_error(format!(
+                "Missing required state: '{}'",
+                stringify!($typ)
+            ))))
+    };
 }

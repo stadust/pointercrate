@@ -28,8 +28,8 @@ fn login_page_body() -> Markup {
     let lang = task_lang().language.to_string();
 
     html! {
-        div.tab-display.center #login-tabber style="display: flex; align-items: center; justify-content: center; height: calc(100% - 70px)" { // 70px = height of nav bar
-            div.tab-content.tab-content-active.flex.col data-tab-id="1" style="align-items: center" {
+        div.center #login style="display: flex; align-items: center; justify-content: center; height: calc(100% - 70px)" { // 70px = height of nav bar
+            div.flex.col style="align-items: center" {
                 div.panel.fade {
                     h1.underlined.pad {
                         (tr("login"))
@@ -78,50 +78,7 @@ fn login_page_body() -> Markup {
                         (
                             "redirect-link",
                             html! {
-                                a.link.tab data-tab-id = "2" { (tr("register.redirect-link")) }
-                            }.into_string()
-                        )
-                    )))
-                }
-            }
-            div.tab-content.flex.col data-tab-id="2" style="align-items: center" {
-                div.panel.fade {
-                    h1.underlined.pad {
-                        (tr("register"))
-                    }
-                    @if cfg!(feature = "legacy_accounts") {
-                        p {
-                            (tr("register.info"))
-                        }
-
-                        form.flex.col #register-form novalidate = "" {
-                            p.info-red.output {}
-                            span.form-input #register-username {
-                                label for = "name" {(tr("auth-username")) }
-                                input required = "" type = "text" name = "name";
-                                p.error {}
-                            }
-                            span.form-input #register-password {
-                                label for = "password" {(tr("auth-password")) }
-                                input required = "" type = "password" name = "password" minlength = "10";
-                                p.error {}
-                            }
-                            span.form-input #register-password-repeat {
-                                label for = "password2" {(tr("auth-repeatpassword")) }
-                                input required = "" type = "password" name = "password2" minlength = "10";
-                                p.error {}
-                            }
-                            input.button.blue.hover type = "submit" style = "margin-top: 15px" value = (tr("register.submit"));
-                        }
-                    }
-                }
-                p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(trp!(
-                        "login.redirect",
-                        (
-                            "redirect-link",
-                            html! {
-                                a.link.tab.tab-active data-tab-id = "1" { (tr("login.redirect-link")) }
+                                a.link href="/register" { (tr("register.redirect-link")) }
                             }.into_string()
                         )
                     )))

@@ -1,3 +1,4 @@
+use crate::error::IntoOutcome2;
 use crate::response::Response2;
 use pointercrate_core::{error::CoreError, etag::Taggable};
 use rocket::{
@@ -35,10 +36,12 @@ impl<'r> FromRequest<'r> for Precondition {
     type Error = CoreError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match request.headers().get_one("if-match") {
-            Some(if_match) => Outcome::Success(Precondition(if_match.split(',').map(ToString::to_string).collect())),
-            None => Outcome::Error((Status::PreconditionRequired, CoreError::PreconditionRequired)),
-        }
+        request
+            .headers()
+            .get_one("if-match")
+            .map(|if_match| Precondition(if_match.split(',').map(ToString::to_string).collect()))
+            .ok_or(CoreError::PreconditionFailed)
+            .into_outcome()
     }
 }
 

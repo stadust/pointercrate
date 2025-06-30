@@ -16,16 +16,17 @@ use rocket::{
 use std::net::IpAddr;
 
 #[cfg(any(feature = "legacy_accounts", feature = "oauth2"))]
-use {pointercrate_core::pool::PointercratePool, rocket::serde::json::Json};
+use {pointercrate_core::pool::PointercratePool, pointercrate_user::User, rocket::serde::json::Json};
 
 #[cfg(feature = "legacy_accounts")]
-use pointercrate_user::{
-    auth::legacy::{LegacyAuthenticatedUser, Registration},
-    User,
-};
+use pointercrate_user::auth::legacy::{LegacyAuthenticatedUser, Registration};
 
 #[cfg(feature = "oauth2")]
-use {crate::oauth::GoogleCertificateStore, pointercrate_core::error::CoreError, pointercrate_user::auth::oauth::GoogleOauthPayload};
+use {
+    crate::oauth::GoogleCertificateStore,
+    pointercrate_core::error::CoreError,
+    pointercrate_user::auth::oauth::{OauthRegistration, UnvalidatedOauthCredential},
+};
 
 fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJar<'_>) -> pointercrate_user::error::Result<()> {
     let (access_token, csrf_token) = user.generate_token_pair()?;
@@ -69,6 +70,12 @@ pub async fn login(
     build_cookies(&auth.user, cookies)?;
 
     Ok(Status::NoContent)
+}
+
+#[localized]
+#[rocket::get("/register")]
+pub async fn register_page() -> Page {
+    Page::new(pointercrate_user_pages::register::registration_page())
 }
 
 #[cfg(feature = "legacy_accounts")]
@@ -119,20 +126,10 @@ pub async fn logout(_auth: Auth<NonMutating>, cookies: &CookieJar<'_>) -> Redire
 #[localized]
 #[rocket::post("/oauth/google", data = "<payload>")]
 pub async fn google_oauth_login(
-    payload: Json<GoogleOauthPayload>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
+    payload: Json<UnvalidatedOauthCredential>, auth: Option<Auth<PasswordOrBrowser>>, key_store: &State<GoogleCertificateStore>,
     pool: &State<PointercratePool>, cookies: &rocket::http::CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
-    if key_store.needs_refresh().await {
-        key_store
-            .refresh()
-            .await
-            .map_err(|err| CoreError::internal_server_error(format!("Failed to retrieve signing certificates from Google! {:?}", err)))?;
-    }
-
-    let validated_credentials = key_store
-        .validate_credentials(&payload.into_inner().credential)
-        .await
-        .ok_or(CoreError::Unauthorized)?;
+    let validated_credentials = key_store.validate_with_refresh(payload.0).await.ok_or(CoreError::Unauthorized)?;
 
     let maybe_linked_user = AuthenticatedUser::by_validated_google_creds(&validated_credentials, &mut *pool.connection().await?).await;
 
@@ -155,6 +152,31 @@ pub async fn google_oauth_login(
     };
 
     build_cookies(&authenticated_user, cookies)?;
+
+    Ok(Status::NoContent)
+}
+
+#[cfg(feature = "oauth2")]
+#[rocket::post("/oauth/google/register", data = "<payload>")]
+pub async fn google_oauth_register(
+    payload: Json<OauthRegistration>, key_store: &State<GoogleCertificateStore>, ip: IpAddr, pool: &State<PointercratePool>,
+    cookies: &rocket::http::CookieJar<'_>, ratelimits: &State<UserRatelimits>,
+) -> pointercrate_core_api::error::Result<Status> {
+    let OauthRegistration { credential, username } = payload.0;
+    let validated_credentials = key_store.validate_with_refresh(credential).await.ok_or(CoreError::Unauthorized)?;
+
+    let mut connection = pool.transaction().await.map_err(UserError::from)?;
+    ratelimits.soft_registrations(ip)?;
+
+    User::validate_name(&username)?;
+
+    let user = AuthenticatedUser::register_oauth(username, validated_credentials, &mut connection).await?;
+
+    ratelimits.registrations(ip)?;
+
+    connection.commit().await.map_err(UserError::from)?;
+
+    build_cookies(&user, cookies)?;
 
     Ok(Status::NoContent)
 }

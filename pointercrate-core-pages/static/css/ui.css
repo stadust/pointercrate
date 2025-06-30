@@ -316,6 +316,7 @@ textarea:invalid {
 p.error {
   font-size: 60% !important;
   color: var(--color-link-dark);
+  margin: 0;
 }
 
 .form-input {
@@ -680,7 +681,7 @@ h2 .dropdown-menu ul {
 
 .info-green {
   padding: 5px 15px;
-  margin: 25px 0px;
+  margin: 5px 0px;
   border-width: 1px;
   border-style:  solid;
 }
@@ -697,7 +698,7 @@ h2 .dropdown-menu ul {
 
 .info-yellow {
   padding: 5px 15px;
-  margin: 25px 0px;
+  margin: 5px 0px;
   border-width: 1px;
   border-style:  solid;
 }
@@ -710,7 +711,7 @@ h2 .dropdown-menu ul {
 
 .info-red {
   padding: 5px 15px;
-  margin: 25px 0px;
+  margin: 5px 0px;
   border-width: 1px;
   border-style:  solid;
 }
@@ -724,10 +725,6 @@ h2 .dropdown-menu ul {
   font-style: italic;
   font-size: 80%;
   margin: 0px;
-}
-
-form .output {
-  margin: 0px 10px;
 }
 
 ul.selection-list {

@@ -170,14 +170,18 @@ pub enum CoreError {
 
 impl CoreError {
     pub fn internal_server_error(message: impl AsRef<str>) -> CoreError {
-        error!(
-            "INTERNAL SERVER ERROR: {}. Backtrace:\n {}",
-            message.as_ref(),
-            std::backtrace::Backtrace::capture()
-        );
+        log_internal_server_error(message);
 
         CoreError::InternalServerError
     }
+}
+
+pub fn log_internal_server_error(message: impl AsRef<str>) {
+    error!(
+        "INTERNAL SERVER ERROR: {}. Backtrace:\n {}",
+        message.as_ref(),
+        std::backtrace::Backtrace::capture()
+    );
 }
 
 impl Error for CoreError {}
@@ -206,7 +210,7 @@ impl PointercrateError for CoreError {
             CoreError::MutuallyExclusive => 42229,
             CoreError::PreconditionRequired => 42800,
             CoreError::Ratelimited { .. } => 42900,
-            CoreError::InternalServerError { .. } => 50000,
+            CoreError::InternalServerError => 50000,
             CoreError::DatabaseError => 50003,
             CoreError::QueryTimeout => 50004,
             CoreError::DatabaseConnectionError => 50005,
@@ -259,7 +263,23 @@ impl Display for CoreError {
 
 impl From<sqlx::Error> for CoreError {
     fn from(error: sqlx::Error) -> Self {
-        error!("Database error: {:?}. Backtrace:\n {}", error, std::backtrace::Backtrace::capture());
+        /*
+         When creating resources that are subject to a unique constraint, there will
+         always be a TOCTOU-style race condition. For example, creating new account
+         has a check along the lines of "if username exists in database, return UsernameTaken error,
+         else do insert into db". Check and insert are different queries, so concurrent creation
+         of an account with this name is possible (at which point successful creation comes down to
+         which connection commit()s first). These are not really internal server errors, so don't
+         log and report them as such. HTTP 409 CONFLICT seems like the most appropriate response
+         here.
+        */
+        if let sqlx::Error::Database(ref err) = error {
+            if err.kind() == sqlx::error::ErrorKind::UniqueViolation {
+                return CoreError::Conflict;
+            }
+        }
+
+        log_internal_server_error(format!("Database error: {:?}", error));
 
         match error {
             sqlx::Error::Database(err) if err.code().as_deref() == Some("57014") => CoreError::QueryTimeout,
