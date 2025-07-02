@@ -26,6 +26,7 @@ import {
   generateRecord,
   embedVideo,
 } from "/static/demonlist/js/modules/demonlist.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export let recordManager;
 
@@ -96,9 +97,9 @@ class RecordManager extends Paginator {
               this.currentObject.video
           )
           .then(() =>
-            this.output.setSuccess("Copied record data to clipboard!")
+            this.output.setSuccess(tr("demonlist", "record", "record-viewer.copy-data-success"))
           )
-          .catch(() => this.output.setError("Error copying to clipboard"));
+          .catch(() => this.output.setError(tr("demonlist", "record", "record-viewer.copy-data-error")));
       });
   }
 
@@ -112,11 +113,11 @@ class RecordManager extends Paginator {
 
     form.addValidators({
       "record-progress-edit": {
-        "Record progress cannot be negative": rangeUnderflow,
-        "Record progress cannot be larger than 100%": rangeOverflow,
-        "Record progress must be a valid integer": badInput,
-        "Record progress mustn't be a decimal": stepMismatch,
-        "Please enter a progress value": valueMissing,
+        [tr("demonlist", "record", "record-progress-dialog.progress-validator-rangeunderflow")]: rangeUnderflow,
+        [tr("demonlist", "record", "record-progress-dialog.progress-validator-rangeoverflow")]: rangeOverflow,
+        [tr("demonlist", "record", "record-progress-dialog.progress-validator-badinput")]: badInput,
+        [tr("demonlist", "record", "record-progress-dialog.progress-validator-stepmismatch")]: stepMismatch,
+        [tr("demonlist", "record", "record-progress-dialog.progress-validator-valuemissing")]: valueMissing,
       },
     });
 
@@ -133,7 +134,7 @@ class RecordManager extends Paginator {
 
     form.addValidators({
       "record-video-edit": {
-        "Please enter a valid URL": typeMismatch,
+        [tr("demonlist", "record", "record-videolink-dialog.videolink-validator-typemismatch")]: typeMismatch,
       },
     });
 
@@ -233,7 +234,7 @@ function createNoteHtml(note) {
     closeX.style.transform = "scale(0.75)";
 
     closeX.addEventListener("click", () => {
-      if (confirm("This action will irrevocably delete this note. Proceed?")) {
+      if (confirm(tr("demonlist", "record", "record-note-listed.confirm-delete"))) {
         del(
           "/api/v1/records/" +
             recordManager.currentObject.id +
@@ -246,7 +247,9 @@ function createNoteHtml(note) {
   }
 
   let b = document.createElement("b");
-  b.innerText = "Record Note #" + note.id;
+  b.innerText = trp("demonlist", "record", "record-note-listed", {
+    ["note-id"]: note.id,
+  })
 
   let i = document.createElement("i");
   i.innerText = note.content;
@@ -257,25 +260,27 @@ function createNoteHtml(note) {
 
   if (note.author === null) {
     furtherInfo.innerText =
-      "This note was left as a comment by the submitter. ";
+      tr("demonlist", "record", "record-note-listed.author-submitter");
   } else {
-    furtherInfo.innerText = "This note was left by " + note.author + ". ";
+    furtherInfo.innerText = trp("demonlist", "record", "record-note-listed.author", {
+      ["author"]: note.author,
+    });
   }
+  furtherInfo.innerText += " ";
 
   if (note.editors.length) {
-    furtherInfo.innerText +=
-      "This note was subsequently modified by: " +
-      note.editors.join(", ") +
-      ". ";
+    furtherInfo.innerText += trp("demonlist", "record", "record-note-listed.editors", {
+      ["editors"]: note.editors.join(", ")
+    }) + " ";
   }
 
   if (note.transferred) {
     furtherInfo.innerText +=
-      "This not was not originally left on this record. ";
+      tr("demonlist", "record", "record-note-listed.transferred") + " ";
   }
 
   if (note.is_public) {
-    furtherInfo.innerText += "This note is public. ";
+    furtherInfo.innerText += tr("demonlist", "record", "record-note-listed.public") + " ";
   }
 
   if (isAdmin) noteDiv.appendChild(closeX);
@@ -337,7 +342,7 @@ function setupRecordSearchRecordIdForm() {
   );
   var recordId = recordSearchByIdForm.input("record-record-id");
 
-  recordId.addValidator(valueMissing, "Record ID required");
+  recordId.addValidator(valueMissing, tr("demonlist", "record", "record-idsearch-panel.id-validator-valuemissing"));
   recordSearchByIdForm.onSubmit(function () {
     recordManager
       .selectArbitrary(parseInt(recordId.value))
@@ -361,7 +366,9 @@ function setupRecordFilterPlayerNameForm() {
           let json = response.data;
 
           if (!json || json.length == 0) {
-            playerName.errorText = "No player with that name found!";
+            playerName.errorText = trp("core", "error", "error-demonlist-playernotfoundname", {
+              ["player-name"]: playerName.value,
+            });
           } else {
             recordManager.updateQueryData("player", json[0].id);
           }
@@ -375,7 +382,7 @@ function setupEditRecordForm() {
   document.getElementById("record-delete").addEventListener("click", () => {
     if (
       confirm(
-        "Are you sure? This will irrevocably delete this record and all notes made on it!"
+        tr("demonlist", "record", "record-viewer.confirm-delete")
       )
     ) {
       del("/api/v1/records/" + recordManager.currentObject.id + "/", {

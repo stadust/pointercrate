@@ -1,5 +1,6 @@
 use chrono::{DateTime, Datelike, FixedOffset};
 use maud::{html, Markup, Render};
+use pointercrate_core::localization::tr;
 use pointercrate_demonlist::demon::TimeShiftedDemon;
 
 pub enum Tardis {
@@ -51,7 +52,7 @@ impl Render for Tardis {
                 Tardis::Activated { destination, show_destination, ..} if *show_destination => {
                     div.panel.fade.blue.flex style="align-items: center;" {
                         span style = "text-align: end"{
-                            "You are currently looking at the demonlist how it was on"
+                            (tr("time-machine.active-info"))
                             br;
                             b {
                                 @match destination.day() {
@@ -62,7 +63,7 @@ impl Render for Tardis {
                                 }
                             }
                         }
-                        a.white.button href = "/demonlist/" onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{"Go to present" }}
+                        a.white.button href = "/demonlist/" onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{ (tr("time-machine.return")) }}
                     }
                 },
                 _ => {}
@@ -71,19 +72,19 @@ impl Render for Tardis {
                 span.plus.cross.hover {}
                 form #time-machine-form novalidate = "" {
                     div.underlined {
-                        h2 {"Time Machine"}
+                        h2 { (tr("time-machine")) }
                     }
                     p {
-                        "Enter the date you want to view the demonlist at below. For technical reasons, the earliest possible date is January 4th 2017. Note however that data before August 4th 2017 is only provided on a best-effort basis and not guaranteed to be 100% accurate. Particularly data from before April 4th 2017 contains significant errors!"
+                        (tr("time-machine.info"))
                     }
                     div.flex {
                         span.form-input #time-machine-destination data-type = "datetime-local" {
-                            h3 {"Destination:"}
+                            h3 { (tr("time-machine.destination-field")) }
                             input name="time-machine-destination" type="datetime-local" min="2017-01-04T00:00" required;
                             p.error {}
                         }
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Go!";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("time-machine.submit"));
                 }
             }
         }

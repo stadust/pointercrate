@@ -1,7 +1,7 @@
 //! Module providing a "maintenance mode" fairing (middleware)
 
-use crate::error::Result;
-use pointercrate_core::error::CoreError;
+use crate::{error::Result, localization::ClientLocale};
+use pointercrate_core::{error::CoreError, localization::LANGUAGE};
 use rocket::{
     fairing::{Fairing, Info, Kind},
     http::Method,
@@ -49,7 +49,9 @@ impl Fairing for MaintenanceFairing {
     }
 }
 
+// we can't use the #[localized] proc-macro here due to issues related to imports
+// (https://github.com/stadust/pointercrate/pull/232#discussion_r2118293806)
 #[rocket::get("/maintenance")]
-async fn maintenance() -> Result<()> {
-    Err(CoreError::ReadOnlyMaintenance.into())
+async fn maintenance(locale: ClientLocale) -> Result<()> {
+    LANGUAGE.scope(locale.0, async { Err(CoreError::ReadOnlyMaintenance.into()) }).await
 }

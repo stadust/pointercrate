@@ -1,4 +1,5 @@
 use maud::{html, Markup, Render};
+use pointercrate_core::localization::tr;
 use pointercrate_user::User;
 
 pub struct Team {
@@ -26,11 +27,11 @@ impl Render for Team {
             section.panel.fade.js-scroll-anim #editors data-anim = "fade" {
                 div.underlined {
                     h2 {
-                        "List Editors"
+                        (tr("editors-panel"))
                     }
                 }
                 p {
-                    "Contact any of these people if you have problems with the list or want to see a specific thing changed."
+                    (tr("editors-panel.info"))
                 }
                 ul style = "line-height: 30px" {
                     @for admin in &self.admins {
@@ -44,11 +45,11 @@ impl Render for Team {
                 }
                 div.underlined {
                     h2 {
-                        "List Helpers"
+                        (tr("helpers-panel"))
                     }
                 }
                 p {
-                    "Contact these people if you have any questions regarding why a specific record was rejected. Do not needlessly bug them about checking submissions though!"
+                    (tr("helpers-panel.info"))
                 }
                 ul style = "line-height: 30px" {
                     @for helper in &self.helpers {

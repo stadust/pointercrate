@@ -1,8 +1,7 @@
-use crate::permission::Permission;
-use derive_more::Display;
+use crate::{localization::tr, permission::Permission, trp};
 use log::error;
 use serde::Serialize;
-use std::{error::Error, time::Duration};
+use std::{error::Error, fmt::Display, time::Duration};
 
 pub type Result<T> = std::result::Result<T, CoreError>;
 
@@ -13,19 +12,17 @@ pub trait PointercrateError: Error + Serialize + From<CoreError> {
     }
 }
 
-#[derive(Serialize, Display, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum CoreError {
     /// Generic `400 BAD REQUEST` error
     ///
     /// Error Code `40000`
-    #[display("The browser (or proxy) sent a request that this server could not understand.")]
     BadRequest,
 
     /// `400 BAD REQUEST' error returned when a header value was malformed
     ///
     /// Error Code `40002`
-    #[display("The value for the header '{}' could not be processed", header)]
     InvalidHeaderValue {
         /// The name of the malformed header
         header: &'static str,
@@ -34,29 +31,17 @@ pub enum CoreError {
     /// `401 UNAUTHORIZED`
     ///
     /// Error code 40100
-    #[display(
-        "The server could not verify that you are authorized to access the URL requested. You either supplied the wrong credentials \
-               (e.g. a bad password) or your browser doesn't understand how to supply the credentials required."
-    )]
     Unauthorized,
 
     /// `403 FORBIDDEN`
     ///
     /// Error Code `40300`
-    #[display(
-        "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."
-    )]
     Forbidden,
 
     /// `403 FORBIDDEN` error that contains the permissions the client needs to have to perform the
     /// request
     ///
     /// Error Code `40301`
-    #[display(
-        "You do not have the pointercrate permissions to perform this request. Required is: {}, which isn't contained in any of \
-               your permissions",
-        required
-    )]
     MissingPermissions {
         /// The permissions required to perform the request
         required: Permission,
@@ -65,13 +50,11 @@ pub enum CoreError {
     /// `404 NOT FOUND`
     ///
     /// Error Code `40400`
-    #[display("The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.")]
     NotFound,
 
     /// `405 METHOD NOT ALLOWED`
     ///
     /// Error Code `40500`
-    #[display("The method is not allowed for the requested URL.")]
     MethodNotAllowed,
 
     /// `409 CONFLICT`. This variant is returned if a `DELETE` or `PATCH` request is being handled,
@@ -79,16 +62,11 @@ pub enum CoreError {
     /// concurrent modification.
     ///
     /// Error Code `40900`
-    #[display(
-        "A conflict happened while processing the request. The resource might have been modified while the request was being \
-               processed."
-    )]
     Conflict,
 
     /// `411 LENGTH REQUIRED`
     ///
     /// Error Code `41100`
-    #[display("A request with this methods requires a valid 'Content-Length' header")]
     LengthRequired,
 
     /// `412 PRECONDITION FAILED`. This variant is returned if a `DELETE` or `PATCH` request is
@@ -96,22 +74,16 @@ pub enum CoreError {
     /// in the database
     ///
     /// Error Code `41200`
-    #[display("The precondition on the request for the URL failed positive evaluation")]
     PreconditionFailed,
 
     /// `413 PAYLOAD TOO LARGE`
     ///
     /// Error Code `41300`
-    #[display("The data value transmitted exceeds the capacity limit.")]
     PayloadTooLarge,
 
     /// `415 UNSUPPORTED MEDIA TYPE`
     ///
     /// Error Code `41500`
-    #[display(
-        "The server does not support the media type transmitted in the request/no media type was specified. Expected one '{}'",
-        expected
-    )]
     UnsupportedMediaType {
         /// The expected media type for the request body
         expected: &'static str,
@@ -120,35 +92,27 @@ pub enum CoreError {
     /// `422 UNPROCESSABLE ENTITY`
     ///
     /// Error Code `42200`
-    #[display("The request was well-formed but was unable to be followed due to semantic errors.")]
     UnprocessableEntity,
 
     /// `422 UNPRECESSABLE ENTITY` variant returned if the `limit` parameter provided for
     /// pagination is too large or too small
     ///
     /// Error Code `42207`
-    #[display("Invalid value for the 'limit' parameter. It must be between 1 and 100")]
     InvalidPaginationLimit,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42222`
-    #[display("Invalid URL scheme. Only 'http' and 'https' are supported")]
     InvalidUrlScheme,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42223`
-    #[display("The provided URL contains authentication information. For security reasons it has been rejected")]
     UrlAuthenticated,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42225`
-    #[display(
-        "The given URL does not lead to a video. The URL format for the given host has to be '{}'",
-        expected
-    )]
     InvalidUrlFormat {
         /// A hint as to how the format is expected to look
         expected: &'static str,
@@ -157,28 +121,21 @@ pub enum CoreError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42227`
-    #[display(
-        "The 'after' value provided for pagination is smaller than the 'before' value. This would result in an empty response is \
-               most likely a bug"
-    )]
     AfterSmallerBefore,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42229`
-    #[display("Your request contains mutually exclusive fields. Please restrict yourself to one of them")]
     MutuallyExclusive,
 
     /// `428 PRECONDITION REQUIRED`
     ///
     /// Error Code `42800`
-    #[display("This request is required to be conditional; try using \"If-Match\"")]
     PreconditionRequired,
 
     /// `429 TOO MANY REQUESTS`
     ///
     /// Error Code `42900`
-    #[display("{} Try again in {:.2?}", message, remaining)]
     Ratelimited {
         #[serde(skip)]
         message: String,
@@ -187,40 +144,27 @@ pub enum CoreError {
     },
 
     /// `500 INTERNAL SERVER ERROR`
-    #[display(
-        "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there \
-               is an error in the application. Please notify a server administrator and have them look at the server logs!"
-    )]
     InternalServerError,
 
     /// `500 INTERNAL SERVER ERROR`
     ///
     /// Error Code `50003`
-    #[display(
-        "Internally, an invalid database access has been made. Please notify a server administrator and have them look at the \
-               server logs!"
-    )]
     DatabaseError,
 
     /// `500 INTERNAL SERVER ERROR` reported when postgres terminates a query due to hitting `statement_timeout`
     ///
     /// Error Code `50004`
-    #[display(
-         "Internally, a database query timed out. This could be due to high server load, or because of a logic error resulting in a deadlock. If this issue persists after retrying, please notify a server administrator!"
-    )]
     QueryTimeout,
 
     /// `500 INTERNAL SERVER ERROR` variant returned if the server fails to acquire a database
     /// connection
     ///
     /// Error Code `50005`
-    #[display("Failed to retrieve connection to the database. The server might be temporarily overloaded.")]
     DatabaseConnectionError,
 
     /// `503 SERVICE UNAVAILABLE` variant returned by all non-GET (e.g. all possible mutating) requests if the server is in maintenance mode.
     ///
     /// Error Core `50301`
-    #[display("The website is currently in read-only maintenance mode.")]
     ReadOnlyMaintenance,
 }
 
@@ -272,6 +216,48 @@ impl PointercrateError for CoreError {
             CoreError::DatabaseConnectionError => 50005,
             CoreError::ReadOnlyMaintenance => 50301,
         }
+    }
+}
+
+impl Display for CoreError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                CoreError::BadRequest => tr("error-core-badrequest"),
+                CoreError::InvalidHeaderValue { header } => trp!("error-core-badrequest", ("header", header)),
+                CoreError::Unauthorized => tr("error-core-unauthorized"),
+                CoreError::Forbidden => tr("error-core-badrequest"),
+                CoreError::MissingPermissions { required } =>
+                    trp!("error-core-missingpermissions", ("required-permission", tr(required.text_id()))),
+                CoreError::NotFound => tr("error-core-notfound"),
+                CoreError::MethodNotAllowed => tr("error-core-methodnotallowed"),
+                CoreError::Conflict => tr("error-core-conflict"),
+                CoreError::LengthRequired => tr("error-core-lengthrequired"),
+                CoreError::PreconditionFailed => tr("error-core-preconditionfailed"),
+                CoreError::PayloadTooLarge => tr("error-core-payloadtoolarge"),
+                CoreError::UnsupportedMediaType { expected } => trp!("error-core-unsupportedmediatype", ("expected-type", expected)),
+                CoreError::UnprocessableEntity => tr("error-core-unprocessableentity"),
+                CoreError::InvalidPaginationLimit => tr("error-core-invalidpaginationlimit"),
+                CoreError::InvalidUrlScheme => tr("error-core-invalidurlscheme"),
+                CoreError::UrlAuthenticated => tr("error-core-urlauthenticated"),
+                CoreError::InvalidUrlFormat { expected } => trp!("error-core-invalidurlformat", ("expected-format", expected)),
+                CoreError::AfterSmallerBefore => tr("error-core-aftersmallerbefore"),
+                CoreError::MutuallyExclusive => tr("error-core-mutuallyexclusive"),
+                CoreError::PreconditionRequired => tr("error-core-preconditionrequired"),
+                CoreError::Ratelimited { message, remaining } => trp!(
+                    "error-core-ratelimited",
+                    ("message", message),
+                    ("remaining-duration", format!("{:.2?}", remaining))
+                ),
+                CoreError::InternalServerError { .. } => tr("error-core-internalservererror"),
+                CoreError::DatabaseError => tr("error-core-databaseerror"),
+                CoreError::QueryTimeout => tr("error-core-querytimeout"),
+                CoreError::DatabaseConnectionError => tr("error-core-databaseconnectionerror"),
+                CoreError::ReadOnlyMaintenance => tr("error-core-readonlymaintenance"),
+            }
+        )
     }
 }
 
