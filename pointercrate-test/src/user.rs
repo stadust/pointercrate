@@ -1,8 +1,10 @@
 use crate::TestClient;
+use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::{
     permission::{Permission, PermissionsManager},
     pool::PointercratePool,
 };
+use pointercrate_core_api::preferences::PreferenceManager;
 use pointercrate_user::{
     auth::{legacy::Registration, AuthenticatedUser, PasswordOrBrowser},
     ADMINISTRATOR, MODERATOR,
@@ -20,10 +22,13 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .assigns(ADMINISTRATOR, MODERATOR)
         .implies(ADMINISTRATOR, MODERATOR);
 
+    LocalesLoader::empty();
+
     let rocket = pointercrate_user_api::setup(rocket::build())
         .manage(PointercratePool::from(pool))
         .manage(permissions)
-        .manage(AccountPageConfig::default());
+        .manage(AccountPageConfig::default())
+        .manage(PreferenceManager::default().preference("locale", "en"));
 
     (TestClient::new(Client::tracked(rocket).await.unwrap()), connection)
 }

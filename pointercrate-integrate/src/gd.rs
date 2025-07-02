@@ -21,6 +21,7 @@ pub use dash_rs::{
 };
 use reqwest::header::HeaderMap;
 
+// No need to localize these, they are internal only and never returned to the user
 ratelimits! {
     IntegrationRatelimits {
         demon_refresh[1u32 per 86400 per i32] => "Only one refresh per day per demon",

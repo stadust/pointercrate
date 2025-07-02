@@ -1,31 +1,31 @@
-use crate::{demon::MinimalDemon, record::RecordStatus};
-use derive_more::Display;
+use std::fmt::Display;
 
-use pointercrate_core::error::{CoreError, PointercrateError};
+use crate::{demon::MinimalDemon, record::RecordStatus};
+
+use pointercrate_core::{
+    error::{CoreError, PointercrateError},
+    localization::tr,
+    trp,
+};
 use serde::Serialize;
 
 pub type Result<T> = std::result::Result<T, DemonlistError>;
 
-#[derive(Serialize, Display, Debug, Eq, PartialEq, Clone)]
+#[derive(Serialize, Debug, Eq, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum DemonlistError {
-    #[display("{}", _0)]
     Core(CoreError),
 
-    #[display("Malformed video URL")]
     MalformedVideoUrl,
 
     /// `403 FORBIDDEN` error returned if someone with an IP-address that's banned from submitting
     /// records tries to submit a record
     ///
     /// Error Code `40304`
-    #[display("You are banned from submitting records to the demonlist!")]
     BannedFromSubmissions,
 
-    #[display("You claim on this player is unverified")]
     ClaimUnverified,
 
-    #[display("IP Geolocation attempt through VPS detected")]
     VpsDetected,
 
     /// `403 FORBIDDEN` variant returned when someone tries to submit a records for a player who
@@ -35,75 +35,89 @@ pub enum DemonlistError {
     /// can submit records for this player.
     ///
     /// Error Code `40308`
-    #[display("This player has requested that only they themselves can submit their records")]
     NoThirdPartySubmissions,
 
-    #[display("No submitter with id {} found", id)]
-    SubmitterNotFound { id: i32 },
+    SubmitterNotFound {
+        id: i32,
+    },
 
-    #[display("No note with id {} found on record with id {}", note_id, record_id)]
-    NoteNotFound { note_id: i32, record_id: i32 },
+    NoteNotFound {
+        note_id: i32,
+        record_id: i32,
+    },
 
-    #[display("Player with id {} is no creator of demon with id {}", player_id, demon_id)]
-    CreatorNotFound { demon_id: i32, player_id: i32 },
+    CreatorNotFound {
+        demon_id: i32,
+        player_id: i32,
+    },
 
-    #[display("No nationality with iso code {} found", iso_code)]
-    NationalityNotFound { iso_code: String },
+    NationalityNotFound {
+        iso_code: String,
+    },
 
-    #[display("No subdivision with code {} found in nation {}", subdivision_code, nation_code)]
-    SubdivisionNotFound { subdivision_code: String, nation_code: String },
+    SubdivisionNotFound {
+        subdivision_code: String,
+        nation_code: String,
+    },
 
-    #[display("No player with id {} found", player_id)]
-    PlayerNotFound { player_id: i32 },
+    PlayerNotFound {
+        player_id: i32,
+    },
 
-    #[display("No player with name {} found", player_name)]
-    PlayerNotFoundName { player_name: String },
+    PlayerNotFoundName {
+        player_name: String,
+    },
 
-    #[display("No demon with id {} found", demon_id)]
-    DemonNotFound { demon_id: i32 },
+    DemonNotFound {
+        demon_id: i32,
+    },
 
-    #[display("No demon with name {} found", demon_name)]
-    DemonNotFoundName { demon_name: String },
+    DemonNotFoundName {
+        demon_name: String,
+    },
 
-    #[display("No demon at position {} found", demon_position)]
-    DemonNotFoundPosition { demon_position: i16 },
+    DemonNotFoundPosition {
+        demon_position: i16,
+    },
 
-    #[display("No record with id {} found", record_id)]
-    RecordNotFound { record_id: i32 },
+    RecordNotFound {
+        record_id: i32,
+    },
 
-    #[display("No claim by user {} on player {} found", member_id, player_id)]
-    ClaimNotFound { member_id: i32, player_id: i32 },
+    ClaimNotFound {
+        member_id: i32,
+        player_id: i32,
+    },
 
-    #[display("This player is already registered as a creator on this demon")]
     CreatorExists,
 
     /// `409 CONFLICT` variant
     ///
     /// Error Code `40906`
-    #[display("This video is already used by record #{}", id)]
-    DuplicateVideo { id: i32 },
+    DuplicateVideo {
+        id: i32,
+    },
 
     /// `409 CONFLICT` variant
     ///
     /// Error Code `40907`
-    #[display("Attempt to set subdivision without nation")]
     NoNationSet,
 
-    #[display("The players '{}' and '{}' have verified claims by different pointercrate users", player1, player2)]
-    ConflictingClaims { player1: String, player2: String },
+    ConflictingClaims {
+        player1: String,
+        player2: String,
+    },
 
     /// `422 UNPROCESSABLE ENTITY` variant returned if attempted to create a demon with a record
     /// requirements outside of [0, 100]
     ///
     /// Error Code `42212`
-    #[display("Record requirement needs to be greater than -1 and smaller than 101")]
     InvalidRequirement,
 
     /// `422 UNPROCESSABLE ENTITY` variant returned if attempted to create a demon with a position,
     /// that would leave "holes" in the list, or is smaller than 1
     ///
     /// Error Code `42213`
-    #[display("Demon position needs to be greater than or equal to 1 and smaller than or equal to {}", maximal)]
     InvalidPosition {
         /// The maximal position a new demon can be added at
         maximal: i16,
@@ -112,7 +126,6 @@ pub enum DemonlistError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42215`
-    #[display("Record progress must lie between {} and 100%!", requirement)]
     InvalidProgress {
         /// The [`Demon`]'s record requirement
         requirement: i16,
@@ -120,7 +133,6 @@ pub enum DemonlistError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42217`
-    #[display("This record is already {} (existing record: {})", status, existing)]
     SubmissionExists {
         /// The [`RecordStatus`] of the existing [`Record`]
         status: RecordStatus,
@@ -132,61 +144,53 @@ pub enum DemonlistError {
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42218`
-    #[display("The given player is banned and thus cannot have non-rejected records on the list!")]
     PlayerBanned,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code 42219
-    #[display("You cannot submit records for legacy demons")]
     SubmitLegacy,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code 42220
-    #[display("Only 100% records can be submitted for the extended section of the list")]
     Non100Extended,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42224`
-    #[display("The given video host is not supported. Supported are 'youtube', 'vimeo', 'everyplay', 'twitch' and 'bilibili'")]
     UnsupportedVideoHost,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42228`
-    #[display("There are multiple demons with the given name")]
-    DemonNameNotUnique { demons: Vec<MinimalDemon> },
+    DemonNameNotUnique {
+        demons: Vec<MinimalDemon>,
+    },
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42230`
-    #[display("Notes mustn't be empty!")]
     NoteEmpty,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42231`
-    #[display("This player already have a verified claim associated with them")]
     AlreadyClaimed,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42232`
-    #[display("Raw footage much be provided to submit this record")]
     RawRequired, //hehe
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42233`
-    #[display("Raw footage needs to be a valid URL")]
     MalformedRawUrl,
 
     /// `422 UNPROCESSABLE ENTITY` variant
     ///
     /// Error Code `42235`
-    #[display("Level ID needs to be positive")]
     InvalidLevelId,
 }
 
@@ -234,6 +238,74 @@ impl PointercrateError for DemonlistError {
             MalformedRawUrl => 42233,
             InvalidLevelId => 42235,
         }
+    }
+}
+
+impl Display for DemonlistError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                DemonlistError::Core(core) => {
+                    return core.fmt(f);
+                },
+                DemonlistError::MalformedVideoUrl => tr("error-demonlist-malformedvideourl"),
+                DemonlistError::BannedFromSubmissions => tr("error-demonlist-bannedfromsubmissions"),
+                DemonlistError::ClaimUnverified => tr("error-demonlist-claimunverified"),
+                DemonlistError::VpsDetected => tr("error-demonlist-vpsdetected"),
+                DemonlistError::NoThirdPartySubmissions => tr("nothirdpartysubmissions-error-malformedvideourl"),
+                DemonlistError::SubmitterNotFound { id } => trp!("error-demonlist-submitternotfound", ("id", id)),
+                DemonlistError::NoteNotFound { note_id, record_id } => {
+                    trp!("error-demonlist-notenotfound", ("note-id", note_id), ("record-id", record_id))
+                },
+                DemonlistError::CreatorNotFound { demon_id, player_id } => {
+                    trp!("error-demonlist-creatornotfound", ("player-id", player_id), ("demon-id", demon_id))
+                },
+                DemonlistError::NationalityNotFound { iso_code } => trp!("error-demonlist-nationalitynotfound", ("iso-code", iso_code)),
+                DemonlistError::SubdivisionNotFound {
+                    subdivision_code,
+                    nation_code,
+                } => trp!(
+                    "error-demonlist-subdivisionnotfound",
+                    ("subdivision-code", subdivision_code),
+                    ("nation-code", nation_code)
+                ),
+                DemonlistError::PlayerNotFound { player_id } => trp!("error-demonlist-playernotfound", ("player-id", player_id)),
+                DemonlistError::PlayerNotFoundName { player_name } =>
+                    trp!("error-demonlist-playernotfoundname", ("player-name", player_name)),
+                DemonlistError::DemonNotFound { demon_id } => trp!("error-demonlist-demonnotfound", ("demon-id", demon_id)),
+                DemonlistError::DemonNotFoundName { demon_name } => trp!("error-demonlist-demonnotfoundname", ("demon-name", demon_name)),
+                DemonlistError::DemonNotFoundPosition { demon_position } =>
+                    trp!("error-demonlist-demonnotfoundposition", ("demon-position", demon_position)),
+                DemonlistError::RecordNotFound { record_id } => trp!("error-demonlist-recordnotfound", ("record-id", record_id)),
+                DemonlistError::ClaimNotFound { member_id, player_id } =>
+                    trp!("error-demonlist-claimnotfound", ("member-id", member_id), ("player-id", player_id)),
+                DemonlistError::CreatorExists => tr("error-demonlist-creatorexists"),
+                DemonlistError::DuplicateVideo { id } => trp!("error-demonlist-duplicatevideo", ("record-id", id)),
+                DemonlistError::NoNationSet => tr("error-demonlist-nonationset"),
+                DemonlistError::ConflictingClaims { player1, player2 } =>
+                    trp!("error-demonlist-conflictingclaims", ("player-1", player1), ("player-2", player2)),
+                DemonlistError::InvalidRequirement => tr("error-demonlist-invalidrequirement"),
+                DemonlistError::InvalidPosition { maximal } => trp!("error-demonlist-invalidposition", ("maximal", maximal)),
+                DemonlistError::InvalidProgress { requirement } => trp!("error-demonlist-invalidprogress", ("requirement", requirement)),
+                DemonlistError::SubmissionExists { status, existing } => trp!(
+                    "error-demonlist-submissionexists",
+                    ("record-status", format!("{}", status)),
+                    ("record-id", existing)
+                ),
+                DemonlistError::PlayerBanned => tr("error-demonlist-playerbanned"),
+                DemonlistError::SubmitLegacy => tr("error-demonlist-submitlegacy"),
+                DemonlistError::Non100Extended => tr("error-demonlist-non100extended"),
+                DemonlistError::UnsupportedVideoHost => tr("error-demonlist-unsupportedvideohost"),
+                DemonlistError::DemonNameNotUnique { .. } => tr("error-demonlist-demonnamenotunique"),
+                DemonlistError::NoteEmpty => tr("error-demonlist-noteempty"),
+                DemonlistError::AlreadyClaimed => tr("error-demonlist-alreadyclaimed"),
+                DemonlistError::RawRequired => tr("error-demonlist-rawrequired"),
+                DemonlistError::MalformedRawUrl => tr("error-demonlist-malformedrawurl"),
+                DemonlistError::InvalidLevelId => tr("error-demonlist-invalidlevelid"),
+            }
+        )
     }
 }
 

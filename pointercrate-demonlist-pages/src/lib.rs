@@ -1,5 +1,6 @@
 use maud::{html, Markup};
 
+use pointercrate_core::localization::tr;
 use pointercrate_demonlist::{config, demon::Demon};
 
 pub mod account;
@@ -9,37 +10,11 @@ pub mod overview;
 pub mod statsviewer;
 
 struct ListSection {
-    name: &'static str,
-    description: &'static str,
+    name: String,
+    description: String,
     id: &'static str,
     numbered: bool,
 }
-
-static MAIN_SECTION: ListSection = ListSection {
-    name: "Main List",
-    description: "The main section of the Demonlist. These demons are the hardest rated levels in the game. Records are accepted above a \
-                  given threshold and award a large amount of points!",
-    id: "mainlist",
-    numbered: true,
-};
-
-static EXTENDED_SECTION: ListSection = ListSection {
-    name: "Extended List",
-    description: "These are demons that dont qualify for the main section of the list, but are still of high relevance. Only 100% records \
-                  are accepted for these demons! Note that non-100% that were submitted/approved before a demon fell off the main list \
-                  will be retained",
-    id: "extended",
-    numbered: true,
-};
-
-static LEGACY_SECTION: ListSection = ListSection {
-    name: "Legacy List",
-    description: "These are demons that used to be on the list, but got pushed off as new demons were added. They are here for nostalgic \
-                  reasons. This list is in no order whatsoever and will not be maintained any longer at all. This means no new records \
-                  will be added for these demons.",
-    id: "legacy",
-    numbered: false,
-};
 
 fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < config::list_size() as usize {
@@ -60,11 +35,11 @@ fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     html! {
         nav.flex.wrap.m-center.fade #lists style="text-align: center;" {
             // The drop down for the main list:
-            (dropdown(&MAIN_SECTION, main, current))
+            (dropdown(&ListSection { name: tr("main-list"), description: tr("main-list.info"), id: "mainlist", numbered: true }, main, current))
             // The drop down for the extended list:
-            (dropdown(&EXTENDED_SECTION, extended, current))
+            (dropdown(&ListSection { name: tr("extended-list"), description: tr("extended-list.info"), id: "extended", numbered: true }, extended, current))
             // The drop down for the legacy list:
-            (dropdown(&LEGACY_SECTION, legacy, current))
+            (dropdown(&ListSection { name: tr("legacy-list"), description: tr("legacy-list.info"), id: "legacy", numbered: false }, legacy, current))
         }
     }
 }
@@ -127,13 +102,13 @@ fn rules_panel() -> Markup {
     html! {
         section #rules.panel.fade.js-scroll-anim data-anim = "fade" {
             h2.underlined.pad.clickable {
-                "Guidelines"
+                (tr("guidelines-panel"))
             }
             p {
-                "All demonlist operations are carried out in accordance to our guidelines. Be sure to check them before submitting a record to ensure a flawless experience!"
+                (tr("guidelines-panel.info"))
             }
             a.blue.hover.button href = "/guidelines/" {
-                "Read the guidelines!"
+                (tr("guidelines-panel.button"))
             }
         }
     }
@@ -144,7 +119,7 @@ fn discord_panel() -> Markup {
         section.panel.fade.js-scroll-anim #discord data-anim = "fade" {
             iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
             p {
-                "Join the official Demonlist discord server, where you can get in touch with the demonlist team!"
+                (tr("discord-panel-info"))
             }
         }
     }

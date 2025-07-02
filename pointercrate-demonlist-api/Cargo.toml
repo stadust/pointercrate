@@ -13,6 +13,7 @@ pointercrate-demonlist-pages = {path = "../pointercrate-demonlist-pages"}
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
+pointercrate-core-macros = {path = "../pointercrate-core-macros"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
 pointercrate-integrate = {path = "../pointercrate-integrate"}

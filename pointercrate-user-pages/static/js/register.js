@@ -6,6 +6,7 @@ import {
   tooShort,
   valueMissing,
 } from "/static/core/js/modules/form.js";
+import { tr } from "/static/core/js/modules/localization.js";
 
 function intializeRegisterForm() {
   var registerForm = new Form(document.getElementById("register-form"));
@@ -14,26 +15,26 @@ function intializeRegisterForm() {
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
 
-  registerUsername.addValidator(valueMissing, "Username required");
+  registerUsername.addValidator(valueMissing, tr("user", "user", "auth-username.validator-valuemissing"));
   registerUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long."
+    tr("user", "user", "auth-username.validator-tooshort")
   );
 
-  registerPassword.addValidator(valueMissing, "Password required");
+  registerPassword.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
   registerPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "user", "auth-password.validator-tooshort")
   );
 
-  registerPasswordRepeat.addValidator(valueMissing, "Password required");
+  registerPasswordRepeat.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
   registerPasswordRepeat.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "user", "auth-password.validator-valuemissing")
   );
   registerPasswordRepeat.addValidator(
     (rpp) => rpp.value == registerPassword.value,
-    "Passwords don't match"
+    tr("user", "user", "auth-repeatpassword.validator-notmatching")
   );
 
   registerForm.onSubmit(function (event) {
@@ -44,7 +45,7 @@ function intializeRegisterForm() {
       .catch((response) => {
         if (response.status === 409) {
           registerUsername.errorText =
-            "This username is already taken. Please choose another one";
+            tr("user", "user", "auth-username.error-alreadytaken");
         } else {
           registerForm.setError(response.data.message);
         }

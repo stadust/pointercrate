@@ -81,7 +81,7 @@ impl FullPlayer {
         let name = name.trim().to_string();
 
         // Nothing to be done
-        if name == self.player.base.name.as_ref() {
+        if name == self.player.base.name {
             return Ok(());
         } else if name.to_lowercase() != self.player.base.name.to_lowercase() {
             // If they are equal case insensitively, we're only doing a cosmetic rename, which won't

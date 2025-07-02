@@ -10,6 +10,7 @@ import {
   get,
   Viewer,
 } from "/static/core/js/modules/form.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export class StatsViewer extends FilteredPaginator {
   /**
@@ -139,14 +140,18 @@ export class StatsViewer extends FilteredPaginator {
       this._hardest.removeChild(this._hardest.lastChild);
     this._hardest.appendChild(
       hardest === undefined
-        ? document.createTextNode("None")
+        ? document.createTextNode(tr("demonlist", "statsviewer", "statsviewer.value-none"))
         : this.formatDemon(hardest)
     );
   }
 
   setCompletionNumber(main, extended, legacy) {
     this._amountBeaten.textContent =
-      main + " Main, " + extended + " Extended, " + legacy + " Legacy ";
+      trp("demonlist", "statsviewer", "statsviewer.stats-value", {
+        ["main"]: main,
+        ["extended"]: extended,
+        ["legacy"]: legacy,
+      });
   }
 
   formatDemon(demon, link, dontStyle) {
@@ -218,7 +223,7 @@ export function formatInto(parent, childs) {
     // remove trailing dash
     parent.removeChild(parent.lastChild);
   } else {
-    parent.appendChild(document.createTextNode("None"));
+    parent.appendChild(document.createTextNode(tr("demonlist", "statsviewer", "statsviewer.value-none")));
   }
 }
 

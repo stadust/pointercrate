@@ -3,6 +3,7 @@ members = [
     "pointercrate-core",
     "pointercrate-core-api",
     "pointercrate-core-pages",
+    "pointercrate-core-macros",
     "pointercrate-demonlist",
     "pointercrate-demonlist-api",
     "pointercrate-demonlist-pages",

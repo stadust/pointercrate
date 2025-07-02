@@ -1,6 +1,8 @@
 use crate::{TestClient, TestRequest};
 use pointercrate_core::etag::Taggable;
+use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core_api::preferences::PreferenceManager;
 use pointercrate_demonlist::demon::FullDemon;
 use pointercrate_demonlist::{
     player::{claim::PlayerClaim, FullPlayer},
@@ -24,9 +26,12 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .implies(LIST_ADMINISTRATOR, LIST_MODERATOR)
         .implies(LIST_MODERATOR, LIST_HELPER);
 
+    LocalesLoader::empty();
+
     let rocket = pointercrate_demonlist_api::setup(rocket::build().manage(PointercratePool::from(pool)))
         .manage(permissions)
-        .manage(AccountPageConfig::default());
+        .manage(AccountPageConfig::default())
+        .manage(PreferenceManager::default().preference("locale", "en"));
 
     // generate some data
     Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut connection)
