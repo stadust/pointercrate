@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use pointercrate_core_macros::localized;
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
@@ -30,6 +31,7 @@ use rand::Rng;
 use rocket::{futures::StreamExt, http::CookieJar};
 use sqlx::PgConnection;
 
+#[localized]
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
@@ -76,9 +78,9 @@ pub async fn overview(
 
     Ok(Page::new(OverviewPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
         },
         demonlist,
         time_machine: tardis,
@@ -106,6 +108,7 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
     Ok(Redirect::to(rocket::uri!("/demonlist", demon_page(position))))
 }
 
+#[localized]
 #[rocket::get("/<position>")]
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
     let mut connection = pool.connection().await?;
@@ -150,31 +153,34 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 
     Ok(Page::new(DemonPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
         },
-        demonlist: current_list(&mut connection).await?,
+        demonlist: current_list(&mut *connection).await?,
         movements: modifications,
         integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
     }))
 }
 
+#[localized]
 #[rocket::get("/statsviewer")]
 pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
-        nationalities_in_use: Nationality::used(&mut connection).await?,
+        nationalities_in_use: Nationality::used(&mut *connection).await?,
     }))
 }
 
+#[localized]
 #[rocket::get("/statsviewer/nations")]
 pub async fn nation_stats_viewer() -> Page {
     Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
 }
 
+#[localized]
 #[rocket::get("/statsviewer/heatmap.css")]
 pub async fn heatmap_css(pool: &State<PointercratePool>) -> Result<Response2<String>> {
     let mut connection = pool.connection().await?;

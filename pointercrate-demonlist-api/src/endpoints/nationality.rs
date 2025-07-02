@@ -1,8 +1,10 @@
 use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{error::Result, etag::Tagged, query::Query};
+use pointercrate_core_macros::localized;
 use pointercrate_demonlist::nationality::{Nationality, NationalityRankingPagination, NationalityRecord, RankedNation, Subdivision};
 use rocket::{serde::json::Json, State};
 
+#[localized]
 #[rocket::get("/<iso_code>/subdivisions")]
 pub async fn subdivisions(pool: &State<PointercratePool>, iso_code: String) -> Result<Json<Vec<Subdivision>>> {
     let mut connection = pool.connection().await?;
@@ -13,11 +15,13 @@ pub async fn subdivisions(pool: &State<PointercratePool>, iso_code: String) -> R
     Ok(Json(nationality.subdivisions(&mut connection).await?))
 }
 
+#[localized]
 #[rocket::get("/ranking")]
 pub async fn ranking(pool: &State<PointercratePool>, pagination: Query<NationalityRankingPagination>) -> Result<Json<Vec<RankedNation>>> {
     Ok(Json(pagination.0.page(&mut *pool.connection().await?).await?))
 }
 
+#[localized]
 #[rocket::get("/<iso_code>")]
 pub async fn nation(pool: &State<PointercratePool>, iso_code: String) -> Result<Tagged<NationalityRecord>> {
     let mut connection = pool.connection().await?;

@@ -2,6 +2,7 @@ pub mod audit;
 pub mod config;
 pub mod error;
 pub mod etag;
+pub mod localization;
 pub mod pagination;
 pub mod permission;
 pub mod pool;

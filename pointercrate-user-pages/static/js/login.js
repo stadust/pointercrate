@@ -4,6 +4,7 @@ import {
   tooShort,
   post,
 } from "/static/core/js/modules/form.js";
+import { tr } from "/static/core/js/modules/localization.js";
 
 function initializeLoginForm() {
   var loginForm = new Form(document.getElementById("login-form"));
@@ -11,17 +12,17 @@ function initializeLoginForm() {
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
-  loginUsername.addValidator(valueMissing, "Username required");
+  loginUsername.addValidator(valueMissing, tr("user", "user", "auth-username.validator-valuemissing"));
   loginUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long."
+    tr("user", "user", "auth-username.validator-tooshort")
   );
 
   loginPassword.clearOnInvalid = true;
-  loginPassword.addValidator(valueMissing, "Password required");
+  loginPassword.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
   loginPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "user", "auth-password.validator-tooshort")
   );
 
   loginForm.onSubmit(function (event) {
@@ -35,7 +36,7 @@ function initializeLoginForm() {
       .catch((response) => {
         console.log(response);
         if (response.status === 401) {
-          loginPassword.errorText = "Invalid credentials";
+          loginPassword.errorText = tr("user", "user", "login.error-invalidcredentials");
         } else {
           loginForm.setError(response.data.message);
         }
@@ -56,6 +57,6 @@ function googleOauthCallback(response) {
 
 window.googleOauthCallback = googleOauthCallback;
 
-$(document).ready(function () {
+$(window).on("load", function () {
   initializeLoginForm();
 });

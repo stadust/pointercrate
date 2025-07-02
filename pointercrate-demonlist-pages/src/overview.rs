@@ -7,7 +7,8 @@ use crate::{
     },
     statsviewer::stats_viewer_panel,
 };
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup, PreEscaped, Render};
+use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, PageFragment};
 use pointercrate_demonlist::player::FullPlayer;
 use pointercrate_demonlist::{
@@ -157,23 +158,40 @@ impl OverviewPage {
                              }
                          }
                          h3 style = "text-align: left" {
-                             "published by " (P(&demon.publisher, None))
+                            (PreEscaped(trp!(
+                                "demon-info",
+                                (
+                                    "publisher",
+                                    P(&demon.publisher, None).render().into_string()
+                                )
+                            )))
                          }
                          div style="text-align: left; font-size: 0.8em" {
                             @if let Some(current_position) = current_position {
                                  @if current_position > list_config::extended_list_size() {
-                                     "Currently Legacy"
+                                     (tr("time-machine.active-position-legacy"))
                                  }
                                  @else {
-                                     "Currently #"(current_position)
+                                    (trp!(
+                                        "time-machine.active-position",
+                                        ("position", current_position)
+                                    ))
                                  }
                             }
                             @else {
                                 @if demon.base.position > config::list_size() {
-                                    (total_score) " points"
+                                    (trp!(
+                                        "demon-info.score-short",
+                                        ("score", total_score)
+                                    ))
                                 }
                                 @ else {
-                                    (minimal_score) " (" (demon.requirement) "%) — " (total_score) " (100%) points"
+                                    (trp!(
+                                        "demon-info.score",
+                                        ("minimal-score", minimal_score),
+                                        ("requirement", demon.requirement),
+                                        ("total-score", total_score)
+                                    ))
                                 }
                             }
                          }
@@ -181,7 +199,12 @@ impl OverviewPage {
                      @if progress > 0 && current_position.is_none() {
                         div.flex.col style = "font-weight: bold; text-align: right" {
                             span style = "font-size: 3em" { (progress) "%" }
-                            span style = "font-size: 0.8em" { (progress_score) " points" }
+                            span style = "font-size: 0.8em" {
+                                (trp!(
+                                    "demon-info.score-short",
+                                    ("score", progress_score)
+                                ))
+                            }
                         }
                     }
                 }

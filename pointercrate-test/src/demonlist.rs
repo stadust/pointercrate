@@ -1,6 +1,8 @@
 use crate::{TestClient, TestRequest};
 use pointercrate_core::etag::Taggable;
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core_api::preferences::PreferenceManager;
+use pointercrate_core_pages::localization::LocalizationConfiguration;
 use pointercrate_demonlist::demon::FullDemon;
 use pointercrate_demonlist::{
     player::{claim::PlayerClaim, FullPlayer},
@@ -13,6 +15,9 @@ use pointercrate_user_pages::account::AccountPageConfig;
 use rocket::{http::Status, local::asynchronous::Client};
 use sqlx::{pool::PoolConnection, PgConnection, Pool, Postgres};
 use std::{net::IpAddr, str::FromStr};
+use unic_langid::{langid, LanguageIdentifier};
+
+const SUPPORTED_LOCALES: &[LanguageIdentifier] = &[langid!("en")];
 
 pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<Postgres>) {
     let _ = dotenv::dotenv();
@@ -26,7 +31,9 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
 
     let rocket = pointercrate_demonlist_api::setup(rocket::build().manage(PointercratePool::from(pool)))
         .manage(permissions)
-        .manage(AccountPageConfig::default());
+        .manage(AccountPageConfig::default())
+        .manage(PreferenceManager::default().preference("locale", "en"))
+        .manage(LocalizationConfiguration::new("locale", &SUPPORTED_LOCALES[0], "us"));
 
     // generate some data
     Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut connection)

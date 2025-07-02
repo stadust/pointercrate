@@ -1,4 +1,5 @@
 use maud::{html, Markup, PreEscaped};
+use pointercrate_core::localization::tr;
 use pointercrate_core_pages::util::{dropdown, filtered_paginator, simple_dropdown};
 use pointercrate_demonlist::nationality::Nationality;
 
@@ -10,14 +11,14 @@ pub(crate) fn stats_viewer_panel() -> Markup {
         section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
                 h2 {
-                    "Stats Viewer"
+                    (tr("statsviewer-panel"))
                 }
             }
             p {
-                "Get a detailed overview of who completed the most, created the most demons or beat the hardest demons! There is even a leaderboard to compare yourself to the very best!"
+                (tr("statsviewer-panel.info"))
             }
             a.blue.hover.button #show-stats-viewer href = "/demonlist/statsviewer/ "{
-                "Open the stats viewer!"
+                (tr("statsviewer-panel.button"))
             }
         }
     }
@@ -27,12 +28,22 @@ fn continent_panel() -> Markup {
     html! {
         section.panel.fade style="overflow:initial"{
             h3.underlined {
-                "Continent"
+                (tr("continent-panel"))
             }
             p {
-                "Select a continent below to focus the stats viewer to that continent. Select 'All' to reset selection."
+                (tr("continent-panel.info"))
             }
-            (simple_dropdown("continent-dropdown", Some("All"), vec!["Asia", "Europe", "Australia", "Africa", "North America", "South America", "Central America"].into_iter()))
+            (simple_dropdown("continent-dropdown",
+                Some(("All", tr("continent-panel.option-all"))),
+                vec![
+                    ("Asia", tr("continent-panel.option-asia")),
+                    ("Europe", tr("continent-panel.option-europe")),
+                    ("Australia", tr("continent-panel.option-australia")),
+                    ("Africa", tr("continent-panel.option-africa")),
+                    ("North America", tr("continent-panel.option-northamerica")),
+                    ("South America", tr("continent-panel.option-southamerica")),
+                    ("Central America", tr("continent-panel.option-centralamerica"))
+                ].into_iter()))
         }
     }
 }
@@ -41,12 +52,16 @@ fn demon_sorting_panel() -> Markup {
     html! {
         section.panel.fade style="overflow:initial" {
             h3.underlined {
-                "Demon Sorting"
+                (tr("demon-sorting-panel"))
             }
             p {
-                "The order in which completed demons should be listed"
+                (tr("demon-sorting-panel.info"))
             }
-            (simple_dropdown("demon-sorting-mode-dropdown", Some("Alphabetical"), vec!["Position"].into_iter()))
+            (simple_dropdown("demon-sorting-mode-dropdown",
+                Some(("Alphabetical", tr("demon-sorting-panel.option-alphabetical"))),
+                vec![
+                    ("Position", tr("demon-sorting-panel.option-position"))
+                ].into_iter()))
         }
     }
 }
@@ -55,13 +70,13 @@ fn hide_subdivision_panel() -> Markup {
     html! {
         section.panel.fade {
             h3.underlined {
-                "Show subdivisions"
+                (tr("toggle-subdivision-panel"))
             }
             p {
-                "Whether the map should display political subdivisions"
+                (tr("toggle-subdivision-panel.info"))
             }
             div.cb-container.flex.no-stretch style="margin-bottom:10px" {
-                i {"Show political subdivisions"}
+                i {(tr("toggle-subdivision-panel.option-toggle"))}
                 input #show-subdivisions-checkbox type = "checkbox" checked="";
                 span.checkmark {}
             }
@@ -69,40 +84,42 @@ fn hide_subdivision_panel() -> Markup {
     }
 }
 
-struct StatsViewerRow(Vec<(&'static str, &'static str)>);
+struct StatsViewerRow(Vec<(String, &'static str)>);
 
 fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
     vec![
-        StatsViewerRow(vec![("Demonlist rank", "rank"), ("Demonlist score", "score")]),
-        StatsViewerRow(vec![("Demonlist stats", "stats"), ("Hardest demon", "hardest")]),
-        StatsViewerRow(vec![("Demons completed", "beaten")]),
-        StatsViewerRow(vec![("Main List Demons completed", "main-beaten")]),
-        StatsViewerRow(vec![("Extended List Demons completed", "extended-beaten")]),
-        StatsViewerRow(vec![("Legacy List Demons completed", "legacy-beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.rank"), "rank"), (tr("statsviewer.score"), "score")]),
+        StatsViewerRow(vec![(tr("statsviewer.stats"), "stats"), (tr("statsviewer.hardest"), "hardest")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed"), "beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed-main"), "main-beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed-extended"), "extended-beaten")]),
+        StatsViewerRow(vec![(tr("statsviewer.completed-legacy"), "legacy-beaten")]),
         StatsViewerRow(vec![
-            ("Demons created", "created"),
-            ("Demons published", "published"),
-            ("Demons verified", "verified"),
+            (tr("statsviewer.created"), "created"),
+            (tr("statsviewer.published"), "published"),
+            (tr("statsviewer.verified"), "verified"),
         ]),
-        StatsViewerRow(vec![("Progress on", "progress")]),
+        StatsViewerRow(vec![(tr("statsviewer.progress"), "progress")]),
     ]
 }
 
-fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>) -> Markup {
+fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>, is_nation_stats_viewer: bool) -> Markup {
+    let international = &tr("statsviewer-individual.option-international");
+
     html! {
         section.panel.fade #statsviewer style="overflow:initial" {
             h2.underlined.pad {
-                "Stats Viewer"
+                (tr("statsviewer"))
                 @if let Some(nations) = nations {
                     " - "
                     (dropdown("International",
                         html! {
-                            li.white.hover.underlined data-value = "International" data-display = "International" {
+                            li.white.hover.underlined data-value = "International" data-display = (international) {
                                 span.em.em-world_map {}
                                 (PreEscaped("&nbsp;"))
                                 b {"WORLD"}
                                 br;
-                                span style = "font-size: 90%; font-style: italic" { "International" }
+                                span style = "font-size: 90%; font-style: italic" { (international) }
                             }
                         },
                         nations.iter().map(|nation| html! {
@@ -120,7 +137,11 @@ fn stats_viewer_html(nations: Option<&[Nationality]>, rows: Vec<StatsViewerRow>)
             div.flex.viewer {
                 (filtered_paginator("stats-viewer-pagination", "/api/v1/players/ranking/"))
                 p.viewer-welcome {
-                    "Click on a player's name on the left to get started!"
+                    @if is_nation_stats_viewer
+                        { (tr("statsviewer-nation.welcome")) }
+                    @else
+                        { (tr("statsviewer-individual.welcome")) }
+
                 }
                 div.viewer-content {
                     div {

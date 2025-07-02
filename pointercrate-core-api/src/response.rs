@@ -1,11 +1,16 @@
-use crate::etag::Tagged;
-use maud::{html, DOCTYPE};
-use pointercrate_core::etag::Taggable;
+use crate::{
+    etag::Tagged,
+    preferences::{ClientPreferences, PreferenceManager},
+};
+use maud::{html, Render, DOCTYPE};
+use pointercrate_core::{etag::Taggable, localization::LANGUAGE};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
+    localization::LocalizationConfiguration,
     PageConfiguration, PageFragment,
 };
 use rocket::{
+    futures,
     http::{ContentType, Header, Status},
     response::Responder,
     serde::json::Json,
@@ -30,24 +35,52 @@ impl HeadLike for Page {
 
 impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
-        let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
+        let preference_manager = request.rocket().state::<PreferenceManager>().ok_or(Status::InternalServerError)?;
+        let localization_config = request
+            .rocket()
+            .state::<LocalizationConfiguration>()
+            .ok_or(Status::InternalServerError)?;
+
+        let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
+
+        let default_locale_set = localization_config.default.clone();
+        let default_locale = default_locale_set.by_code(&preferences.get::<String>(default_locale_set.cookie));
+
+        let locale_set = localization_config.set_by_uri(request.uri().path().segments().collect());
+        let locale = locale_set.by_code(&preferences.get::<String>(locale_set.cookie));
+
+        let (page_config, nav_bar, footer) = futures::executor::block_on(async {
+            LANGUAGE
+                .scope(default_locale.lang, async {
+                    let page_config = request
+                        .rocket()
+                        .state::<fn() -> PageConfiguration>()
+                        .ok_or(Status::InternalServerError)?();
+
+                    let nav_bar = page_config.nav_bar.render(&locale, &locale_set);
+                    let footer = page_config.footer.render();
+
+                    Ok((page_config, nav_bar, footer))
+                })
+                .await
+        })?;
 
         let fragment = self.0;
 
         let rendered_fragment = html! {
             (DOCTYPE)
-            html lang="en" prefix="og: http://opg.me/ns#" {
+            html lang=(locale.lang.language.as_str()) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)
                 }
                 body {
                     div.content {
-                        (page_config.nav_bar)
+                        (nav_bar)
                         (fragment.body)
                         div #bg {}
                     }
-                    (page_config.footer)
+                    (footer)
                 }
             }
         }

@@ -1,0 +1,15 @@
+[package]
+name = "pointercrate-core-macros"
+version = "0.1.0"
+authors.workspace = true
+description.workspace = true
+homepage.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2.0.101", features = ["full"] }
+quote = "1.0.40"

@@ -3,15 +3,16 @@ import {
   initializeTimeMachine,
 } from "/static/demonlist/js/modules/demonlist.js";
 import { get } from "/static/core/js/modules/form.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
-$(document).ready(function () {
-  if (window.demon_id) {
-    initializePositionChart();
-    initializeHistoryTable();
-  }
+$(window).on("load", function () {
+    if (window.demon_id) {
+      initializePositionChart();
+      initializeHistoryTable();
+    }
 
-  initializeRecordSubmitter();
-  initializeTimeMachine();
+    initializeRecordSubmitter();
+    initializeTimeMachine();
 });
 
 function initializeHistoryTable() {
@@ -53,7 +54,7 @@ function initializeHistoryTable() {
             entry["new_position"] > window.extended_list_length ||
             lastPosition > window.extended_list_length
           ) {
-            cells[1].appendChild(document.createTextNode("Legacy"));
+            cells[1].appendChild(document.createTextNode(tr("demonlist", "demon", "movements-newposition.legacy")));
           } else {
             cells[1].appendChild(arrow);
             cells[1].appendChild(
@@ -73,21 +74,28 @@ function initializeHistoryTable() {
         let reason = null;
 
         if (entry["reason"] === "Added") {
-          reason = "Added to list";
+          reason = tr("demonlist", "demon", "movements-reason.added");
         } else if (entry["reason"] === "Moved") {
-          reason = "Moved";
+          reason = tr("demonlist", "demon", "movements-reason.moved");
         } else {
           if (entry["reason"]["OtherAddedAbove"] !== undefined) {
             let other = entry["reason"]["OtherAddedAbove"]["other"];
             let name = other.name === null ? "A demon" : other["name"];
 
-            reason = name + " was added above";
+            reason = trp("demonlist", "demon", "movements-reason.addedabove", {
+              ["demon"]: name,
+            });
           } else if (entry["reason"]["OtherMoved"] !== undefined) {
             let other = entry["reason"]["OtherMoved"]["other"];
-            let verb = positionChange < 0 ? "down" : "up";
             let name = other.name === null ? "A demon" : other["name"];
 
-            reason = name + " was moved " + verb + " past this demon";
+            reason = positionChange < 0
+              ? trp("demonlist", "demon", "movements-reason.movedbelow", {
+                ["demon"]: name,
+              })
+              : trp("demonlist", "demon", "movements-reason.movedabove", {
+                ["demon"]: name,
+              })
           }
         }
 
