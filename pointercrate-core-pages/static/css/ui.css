@@ -8,6 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  text-wrap: wrap;
 }
 
 .button.disabled,
