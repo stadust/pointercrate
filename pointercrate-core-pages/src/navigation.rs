@@ -40,22 +40,32 @@ impl NavigationBar {
     }
 }
 
-impl Render for &TopLevelNavigationBarItem {
+struct NavGroup<T>(T);
+
+impl<T: Render> Render for NavGroup<T> {
     fn render(&self) -> Markup {
         html! {
             div.nav-group {
-                a.nav-item.hover.white href = (self.item.link) {
-                    (self.item.content)
-                    @if !self.sub_levels.is_empty() {
-                        i.fas.fa-sort-down style = "height: 50%; padding-left: 5px" {}
-                    }
-                }
+                (self.0)
+            }
+        }
+    }
+} 
+
+impl Render for TopLevelNavigationBarItem {
+    fn render(&self) -> Markup {
+        html! {
+            a.nav-item.hover.white href = (self.item.link) {
+                (self.item.content)
                 @if !self.sub_levels.is_empty() {
-                    ul.nav-hover-dropdown {
-                        @for sub_item in &self.sub_levels {
-                            li {
-                                a.white.hover href = (sub_item.link) { (sub_item.content)}
-                            }
+                    i.fas.fa-sort-down style = "height: 50%; padding-left: 5px" {}
+                }
+            }
+            @if !self.sub_levels.is_empty() {
+                ul.nav-hover-dropdown {
+                    @for sub_item in &self.sub_levels {
+                        li {
+                            a.white.hover href = (sub_item.link) { (sub_item.content)}
                         }
                     }
                 }
@@ -69,20 +79,25 @@ impl Render for NavigationBar {
         html! {
             header {
                 nav.center.collapse.underlined.see-through {
-                    div.nav-icon style = "margin-right: auto" {
+                    div.nav-icon.nav-nohide style = "margin-right: auto" {
                         a href = "/" aria-label = "Go to homepage" {
                             img src = (self.logo_path) style="height:15px" alt="Logo";
                         }
                     }
                     @for item in &self.items {
-                        (item)
+                        (NavGroup(item))
                     }
-                    div.nav-item.collapse-button {
+                    div.nav-item.collapse-button.nav-nohide {
                         div.hamburger.hover {
                             input type="checkbox"{}
                             span{}
                             span{}
                             span{}
+                        }
+                    }
+                    div.nav-drop-down {
+                        @for item in &self.items {
+                            (item)
                         }
                     }
                 }
