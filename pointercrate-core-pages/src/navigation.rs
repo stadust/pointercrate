@@ -50,7 +50,7 @@ impl<T: Render> Render for NavGroup<T> {
             }
         }
     }
-} 
+}
 
 impl Render for TopLevelNavigationBarItem {
     fn render(&self) -> Markup {
