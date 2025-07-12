@@ -7,7 +7,7 @@ error-user-usernotfoundname = Пользователь с именем { $user-n
 error-user-nametaken = Выбранный никнейм уже занят
 error-user-invalidusername = Неправильное отображаемое имя или логин! Имя должно быть как минимум 3 символа в длину и не начинаться либо заканчиваться пробелом
 error-user-invalidpassword = Неверный пароль! Пароль должен быть минимум 10 символов в длину
-error-user-notyoutube = Данная ссылка не является ссылкой YouTube
+error-user-notyoutube = Данная ссылка не является YouTube-ссылкой
 error-user-nonlegacyaccount = Данная операция (изменение пароля) не является валидной на новом типе аккаунтов, так как вход по паролю для них не поддерживается
 
 error-user-ratelimit-registration = Слишком много попыток регистрации!
