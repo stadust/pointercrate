@@ -52,7 +52,7 @@ impl<'r> FromRequest<'r> for Auth<NonMutating> {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let Some(access_token) = request.cookies().get("access_token") else {
-            return Outcome::Forward(Status::Unauthorized)
+            return Outcome::Forward(Status::Unauthorized);
         };
 
         let pool = tryo_state!(request, PointercratePool);
