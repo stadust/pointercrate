@@ -1,7 +1,7 @@
 error-demonlist-malformedvideourl = Неправильная ссылка на видео
 error-demonlist-bannedfromsubmissions = Вы забанены в демонлисте!
 error-demonlist-claimunverified = Ваш запрос на присвоение профиля не подтвержден
-error-demonlist-vpsdetected = Была обнаружена попытка IP геолокации через VPS
+error-demonlist-vpsdetected = Была обнаружена попытка IP-геолокации через VPS
 error-demonlist-nothirdpartysubmissions = Этот игрок указал, что только он сам может отправлять свои рекорды
 error-demonlist-submitternotfound = Отправитель с id { $id } не был найден
 error-demonlist-notenotfound = Записка с id { $note-id } не была найдена на рекорде с id { $record-id }
@@ -26,7 +26,7 @@ error-demonlist-submissionexists = Такой рекорд со статусом
 error-demonlist-playerbanned = Данный игрок забанен и потому не может иметь неотклоненные рекорды!
 error-demonlist-submitlegacy = Вы не можете отправлять рекорды для legacy-демонов
 error-demonlist-non100extended = Для extended-части листа можно отправлять только прохождения
-error-demonlist-unsupportedvideohost = Переданный видеохостинг не поддерживается. Поддерживаются следующие: 'youtube', 'vimeo', 'everyplay', 'twitch' и 'bilibili'
+error-demonlist-unsupportedvideohost = Данный видеохостинг не поддерживается. Поддерживаются следующие: 'youtube', 'vimeo', 'everyplay', 'twitch' и 'bilibili'
 error-demonlist-demonnamenotunique = С данным названием существует сразу несколько демонов
 error-demonlist-noteempty = Записки не должны быть пустыми!
 error-demonlist-alreadyclaimed = Этот игрок уже имеет связанное с собой присвоение профиля
