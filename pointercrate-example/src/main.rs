@@ -1,7 +1,9 @@
 use maud::html;
-use pointercrate_core::error::CoreError;
+use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::pool::PointercratePool;
-use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing};
+use pointercrate_core::{error::CoreError, localization::tr};
+use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
+use pointercrate_core_macros::localized_catcher;
 use pointercrate_core_pages::{
     footer::{Footer, FooterColumn, Link},
     navigation::{NavigationBar, TopLevelNavigationBarItem},
@@ -14,14 +16,17 @@ use pointercrate_demonlist_pages::account::{
 use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
 use rocket::{fs::FileServer, response::Redirect, uri};
+use unic_langid::lang;
+use unic_langid::subtags::Language;
 
 /// A catcher for 404 errors (e.g. when a user tried to navigate to a URL that
 /// does not exist)
 ///
 /// An [`ErrorResponder`] will return either a JSON or an HTML error page,
 /// depending on what `Accept` headers are set on the request.
+#[localized_catcher]
 #[rocket::catch(404)]
-fn catch_404() -> ErrorResponder {
+async fn catch_404() -> ErrorResponder {
     // `CoreError` contains various generic error conditions that might happen
     // anywhere across the website. `CoreError::NotFound` is a generic 404 NOT FOUND
     // error with code 40400.
@@ -31,14 +36,16 @@ fn catch_404() -> ErrorResponder {
 /// Failures in json deserialization of request bodies will just return
 /// an immediate 422 response. This catcher is needed to translate them into a pointercrate
 /// error response.
+#[localized_catcher]
 #[rocket::catch(422)]
-fn catch_422() -> ErrorResponder {
+async fn catch_422() -> ErrorResponder {
     CoreError::UnprocessableEntity.into()
 }
 
 /// Failures from the authorization FromRequest implementations can return 401s
+#[localized_catcher]
 #[rocket::catch(401)]
-fn catch_401() -> ErrorResponder {
+async fn catch_401() -> ErrorResponder {
     CoreError::Unauthorized.into()
 }
 
@@ -48,10 +55,22 @@ fn home() -> Redirect {
     Redirect::to(uri!("/demonlist/"))
 }
 
+const DEFAULT_LOCALE: Language = lang!("en");
+
 #[rocket::launch]
 async fn rocket() -> _ {
     // Load the configuration from your .env file
     dotenv::dotenv().unwrap();
+
+    // Load the translation files
+    LocalesLoader::load(&[
+        "pointercrate-core-pages/static/ftl/",
+        "pointercrate-demonlist-pages/static/ftl/",
+        "pointercrate-user-pages/static/ftl/",
+        "pointercrate-example/static/ftl/",
+    ])
+    .expect("Failed to load localization files")
+    .commit(DEFAULT_LOCALE);
 
     // Initialize a database connection pool to the database specified by the
     // DATABASE_URL environment variable
@@ -62,7 +81,8 @@ async fn rocket() -> _ {
         // Tell it about the connection pool to use (individual handlers can get hold of this pool by declaring an argument of type `&State<PointercratePool>`)
         .manage(pool)
         // Tell pointercrate's core components about navigation bar and footers, so that it knows how to render the website
-        .manage(page_configuration())
+        // We are passing is as a function pointer so the page can load it in a different language each time a page is rendered
+        .manage(page_configuration as fn() -> PageConfiguration)
         // Register our 404 catcher
         .register("/", rocket::catchers![catch_401, catch_404, catch_422])
         // Register our home page
@@ -79,6 +99,12 @@ async fn rocket() -> _ {
     permissions_manager.merge_with(pointercrate_demonlist::default_permissions_manager());
 
     let rocket = rocket.manage(permissions_manager);
+
+    // Define the preferences our website supports. Preferences are sent to us from
+    // the client via cookies.
+    let preference_manager = PreferenceManager::default().with_localization();
+
+    let rocket = rocket.manage(preference_manager);
 
     // Set up which tabs can show up in the "user area" of your website. Anything
     // that implements the [`AccountPageTab`] trait can be displayed here. Note that
@@ -121,6 +147,7 @@ async fn rocket() -> _ {
         .mount("/static/core", FileServer::from("pointercrate-core-pages/static"))
         .mount("/static/demonlist", FileServer::from("pointercrate-demonlist-pages/static"))
         .mount("/static/user", FileServer::from("pointercrate-user-pages/static"))
+        .mount("/static/example", FileServer::from("pointercrate-example/static"))
 }
 
 /// Constructs a [`PageConfiguration`] for your site.
@@ -135,30 +162,29 @@ fn page_configuration() -> PageConfiguration {
     let nav_bar = NavigationBar::new("/static/images/path/to/your/logo.png")
         .with_item(
             TopLevelNavigationBarItem::new(
-            "/demonlist/",
-            // Pointercrate uses the "maud" create as its templating engine. 
-            // It allows you to describe HTML via Rust macros that allow you to dynamically generate content using
-            // a Rust-like syntax and by interpolating and Rust variables from surrounding scopes (as long as the
-            // implement the `Render` trait). See https://maud.lambda.xyz/ for details.
+                Some("/demonlist/"),
+                // Pointercrate uses the "maud" create as its templating engine. 
+                // It allows you to describe HTML via Rust macros that allow you to dynamically generate content using
+                // a Rust-like syntax and by interpolating and Rust variables from surrounding scopes (as long as the
+                // implement the `Render` trait). See https://maud.lambda.xyz/ for details.
+                html! {
+                    span {
+                        (tr("nav-demonlist"))
+                    }
+                },
+            )
+            // Add a drop down to the demonlist item, just like on pointercrate.com
+            .with_sub_item(Some("/demonlist/statsviewer/"), html! { (tr("nav-demonlist.stats-viewer")) })
+            .with_sub_item(Some("/demonlist/?submitter=true"), html! { (tr("nav-demonlist.record-submitter")) })
+            .with_sub_item(Some("/demonlist/?timemachine=true"), html! { (tr("nav-demonlist.time-machine")) }),
+        )
+        .with_item(TopLevelNavigationBarItem::new(Some("/login/"), {
             html! {
                 span {
-                    "Demonlist"
+                    (tr("nav-userarea"))
                 }
-            },
-        )
-        // Add a drop down to the demonlist item, just like on pointercrate.com
-        .with_sub_item("/demonlist/statsviewer/", html! {"Stats Viewer"})
-        .with_sub_item("/demonlist/?submitter=true", html! {"Record Submitter"})
-        .with_sub_item("/demonlist/?timemachine=true", html! {"Time Machine"}),
-        )
-        .with_item(TopLevelNavigationBarItem::new(
-            "/login/",
-            html! {
-                span {
-                    "User Area"
-                }
-            },
-        ));
+            }
+        }));
 
     // A footer consists of a copyright notice, an arbitrary amount of columns
     // displayed below it, side-by-side, and potentially some social media links to
@@ -172,21 +198,21 @@ fn page_configuration() -> PageConfiguration {
     })
     // Add a column with links for various list-related highlights
     .with_column(FooterColumn::LinkList {
-        heading: "Demonlist",
+        heading: tr("footer-demonlist"),
         links: vec![
-            Link::new("/demonlist/1/", "Current Top Demon"),
+            Link::new("/demonlist/1/", tr("footer-demonlist.top-demon")),
             Link::new(
                 format!("/demonlist/{}/", pointercrate_demonlist::config::list_size() + 1),
-                "Extended List",
+                tr("footer-demonlist.extended-list"),
             ),
             Link::new(
                 format!("/demonlist/{}/", pointercrate_demonlist::config::extended_list_size() + 1),
-                "Legacy List",
+                tr("footer-demonlist.legacy-list"),
             ),
         ],
     })
     // Some links to social media, for example your twitter
-    .with_link("https://twitter.com/stadust1971", "Pointercrate Developer");
+    .with_link("https://twitter.com/stadust1971", tr("footer-developer"));
 
     // Stitching it all together into a page configuration
     PageConfiguration::new("<your website name here>", nav_bar, footer)

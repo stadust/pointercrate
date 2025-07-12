@@ -1,6 +1,10 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::permission::PermissionsManager;
+use pointercrate_core::{
+    localization::{task_lang, tr},
+    permission::PermissionsManager,
+    trp,
+};
 use pointercrate_core_pages::head::Script;
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating},
@@ -35,7 +39,7 @@ impl AccountPageTab for ProfileTab {
     fn tab(&self) -> Markup {
         html! {
             b {
-                "Profile"
+                (tr("profile"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-user fa-2x" aria-hidden="true" {}
@@ -48,29 +52,31 @@ impl AccountPageTab for ProfileTab {
         let user = authenticated_user.user();
 
         let permissions = permissions.bits_to_permissions(user.permissions);
-        let permission_string = permissions.iter().map(|perm| perm.name()).collect::<Vec<_>>().join(", ");
+        let permission_string = permissions.iter().map(|perm| tr(perm.text_id())).collect::<Vec<_>>().join(", ");
+
+        let lang = task_lang();
 
         html! {
             div.left {
                 div.panel.fade {
                     h1.underlined.pad {
-                        "Profile - " (user.name())
+                        (trp!("profile.header", ("username", user.name())))
                     }
                     div.flex.space.wrap #things {
                         p.info-red.output style = "margin: 10px" {}
                         p.info-green.output style = "margin: 10px" {}
                         span {
                             b {
-                                "Username: "
+                                (tr("profile-username")) ": "
                             }
                             (user.name)
                             p {
-                                "The name you registered under and which you use to log in to pointercrate. This name is unique to your account, and cannot be changed"
+                                (tr("profile-username.info"))
                             }
                         }
                         span {
                             b {
-                                i.fa.fa-pencil-alt.clickable #display-name-pen aria-hidden = "true" {} " Display name: "
+                                i.fa.fa-pencil-alt.clickable #display-name-pen aria-hidden = "true" {} " " (tr("profile-display-name")) ": "
                             }
                             i #profile-display-name {
                                 @match user.display_name {
@@ -79,12 +85,12 @@ impl AccountPageTab for ProfileTab {
                                 }
                             }
                             p {
-                                "If set, this name will be displayed instead of your username. Display names aren't unique and you cannot use your display name to login to your pointercrate account."
+                                (tr("profile-display-name.info"))
                             }
                         }
                         span {
                             b {
-                                i.fa.fa-pencil-alt.clickable #youtube-pen aria-hidden = "true" {} " YouTube channel: "
+                                i.fa.fa-pencil-alt.clickable #youtube-pen aria-hidden = "true" {} " " (tr("profile-youtube")) ": "
                             }
                             i #profile-youtube-channel {
                                 @match user.youtube_channel {
@@ -93,23 +99,23 @@ impl AccountPageTab for ProfileTab {
                                 }
                             }
                             p {
-                                "A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it."
+                                (tr("profile-youtube.info"))
                             }
                         }
                         span {
                             b {
-                                "Permissions: "
+                                (tr("profile-permissions")) ": "
                             }
                             (permission_string)
                             p {
-                                "The permissions you have on pointercrate. 'List ...' means you're a member of the demonlist team. 'Moderator'  and 'Administrator' mean you're part of pointercrate's staff team."
+                                (tr("profile-permissions.info"))
                             }
                         }
                     }
                     div.flex.no-stretch {
-                        input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value="Delete My Account";
+                        input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value=(tr("profile-delete-account"));
                         @if authenticated_user.is_legacy() {
-                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value="Change Password";
+                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value=(tr("profile-change-password"));
                         }
                     }
                 }
@@ -117,22 +123,22 @@ impl AccountPageTab for ProfileTab {
             div.right {
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Logout"
+                        (tr("profile-logout"))
                     }
                     p {
-                        "Log out of your pointercrate account in this browser."
+                        (tr("profile-logout.info"))
                     }
                     a.red.hover.button href = "/logout" style = "margin: 15px auto 0px; display: inline-block" {
-                        "Logout"
+                        (tr("profile-logout.button"))
                     }
                 }
                 @if cfg!(feature = "oauth2") && authenticated_user.is_legacy() {
                     div.panel.fade {
                         h2.underlined.pad {
-                            "Link With Google"
+                            (tr("profile-oauth"))
                         }
                         p {
-                            "Enable signing in to your pointercrate account via Google oauth. More secure than password login, and avoids account lock-outs due to forgotten passwords. Linking a Google account is irreversible, and you cannot change the linked Google account later on!"
+                            (tr("profile-oauth.info"))
                         }
                         div #g_id_onload
                             data-ux_mode="popup"
@@ -141,36 +147,37 @@ impl AccountPageTab for ProfileTab {
                             data-client_id=(config::google_client_id())
                             data-callback="googleOauthCallback" {}
 
-                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" {}
+                        script src=(format!("https://accounts.google.com/gsi/client?hl={}", &lang)) async {}
+                        div .g_id_signin data-text="continue_with" style="margin: 10px 0px" data-locale=(lang) {}
                         p.error #g-signin-error style="text-align: left" {}
                     }
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Get access token"
+                        (tr("profile-get-token"))
                     }
                     p {
-                        "Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. They do not allow modifications of your account however."
+                        (tr("profile-get-token.info"))
                     }
                     div.overlined.pad #token-area style = "display: none" {
-                        b {"Your access token is:"}
+                        b {(tr("profile-get-token.view-header")) }
                         textarea #access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                     }
                     form.flex.col #get-token-form novalidate = "" {
                         p.info-red.output {}
-                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value="Get access token";
+                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-get-token.button"));
                     }
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Invalidate tokens"
+                        (tr("profile-invalidate-tokens"))
                     }
                     p {
-                        "If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action!"
+                        (tr("profile-invalidate-tokens.info"))
                     }
                     form.flex.col #invalidate-form novalidate = "" {
                         p.info-red.output {}
-                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value="Invalidate all access tokens";
+                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-invalidate-tokens.button"));
                     }
                 }
             }
@@ -190,17 +197,17 @@ fn edit_display_name_dialog() -> Markup {
             div.dialog #edit-dn-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Edit Display Name:"
+                    (tr("profile-display-name.dialog-header"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-dn {
-                        label for = "display_name" {"New display name:"}
+                        label for = "display_name" {(tr("profile-display-name.dialog-newname")) }
                         input type = "text" name = "display_name";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-display-name.dialog-submit"));
                 }
             }
         }
@@ -213,17 +220,17 @@ fn edit_youtube_link_dialog() -> Markup {
             div.dialog #edit-yt-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Edit YouTube Channel Link:"
+                    (tr("profile-youtube.dialog-header"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-yt {
-                        label for = "youtube_channel" {"New YouTube link:"}
+                        label for = "youtube_channel" {(tr("profile-youtube.dialog-newlink")) }
                         input type = "url" name = "youtube_channel";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-youtube.dialog-submit"));
                 }
             }
         }
@@ -236,30 +243,30 @@ fn change_password_dialog() -> Markup {
             div.dialog #edit-pw-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Change Password:"
+                    (tr("profile-change-password.dialog-header"))
                 }
                 p {
-                    "To make profile related edits, re-entering your password below is required. " i{"Changing"} " your password will log you out and redirect to the login page. It will further invalidate all access tokens to your account"
+                    (tr("profile-change-password.dialog-info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-pw {
-                        label for = "password" {"New password:"}
+                        label for = "password" {(tr("profile-change-password.dialog-newpassword")) }
                         input type = "password" name = "password" minlength = "10";
                         p.error {}
                     }
                     span.form-input #edit-pw-repeat {
-                        label for = "password2" {"Repeat new password:"}
+                        label for = "password2" {(tr("profile-change-password.dialog-repeatnewpassword")) }
                         input type = "password"  minlength = "10";
                         p.error {}
                     }
                     span.overlined.pad.form-input #auth-pw {
-                        label {"Authenticate:"}
+                        label {(tr("profile-change-password.dialog-authenticate")) }
                         input type = "password" minlength = "10" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit";
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-change-password.dialog-submit"));
                 }
             }
         }
@@ -272,14 +279,14 @@ fn delete_account_dialog() -> Markup {
             div.dialog #delete-acc-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    "Delete Account:"
+                    (tr("profile-delete-account.dialog-header"))
                 }
                 p {
-                    "Deletion of your account is irreversible!"
+                    (tr("profile-delete-account.dialog-info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
-                    input.button.red.hover type = "submit" style = "margin: 15px auto 0px;" value="Delete";
+                    input.button.red.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-delete-account.dialog-submit"));
                 }
             }
         }

@@ -14,6 +14,7 @@ import {
 } from "/static/demonlist/js/modules/demonlist.js";
 import { Paginator } from "/static/core/js/modules/form.js";
 import { generateRecord } from "/static/demonlist/js/modules/demonlist.js";
+import { loadResource, tr, trp } from "/static/core/js/modules/localization.js";
 
 export let claimManager;
 
@@ -33,11 +34,9 @@ class ClaimManager extends FilteredPaginator {
       {}
     ).then((response) => {
       if (response.data.length === 0) {
-        this.setError(
-          "The claimed player (" +
-            selected.dataset.playerId +
-            ") does not have an approved record on the list"
-        );
+        this.setError(trp("demonlist", "player", "claim-manager.claim-no-records", {
+          ["player-id"]: selected.dataset.playerId,
+        }))
         document.getElementById("claim-video").removeAttribute("src");
       } else {
         document.getElementById("claim-video").src = embedVideo(
@@ -60,7 +59,7 @@ function generateClaim(claim) {
   let playerSpan = document.createElement("span");
 
   let uname = document.createElement("b");
-  uname.innerText = "Claim by user: ";
+  uname.innerText = tr("demonlist", "player", "claim-listed-user") + " ";
 
   userSpan.appendChild(uname);
   userSpan.appendChild(
@@ -68,7 +67,7 @@ function generateClaim(claim) {
   );
 
   let pname = document.createElement("b");
-  pname.innerText = "Claim on player: ";
+  pname.innerText = tr("demonlist", "player", "claim-listed-player") + " ";
 
   playerSpan.appendChild(pname);
   playerSpan.appendChild(
@@ -172,7 +171,9 @@ class ClaimedPlayerRecordPaginator extends Paginator {
           }
 
           let title = document.createElement("b");
-          title.innerText = "Notes for record " + recordId + ":";
+          title.innerText = trp("demonlist", "player", "claim-records.record-notes", {
+            ["record-id"]: recordId,
+          });
 
           this.successOutput.appendChild(title);
           this.successOutput.appendChild(document.createElement("br"));
@@ -189,7 +190,7 @@ class ClaimedPlayerRecordPaginator extends Paginator {
 
           this.successOutput.style.display = "block";
         } else {
-          this.setSuccess("No public notes on this record!");
+          this.setSuccess(tr("demonlist", "player", "claim-records.record-notes-none"));
         }
       })
       .catch(displayError(this));
@@ -234,14 +235,14 @@ export function initialize() {
           .then((response) => {
             let nationality = response.data;
             if (nationality.subdivision) {
-              output.setSuccess(
-                "Set nationality to " +
-                  nationality.nation +
-                  "/" +
-                  nationality.subdivision.name
-              );
+              output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success-subdivision", {
+                ["nationality"]: nationality.nation,
+                ["subdivision"]: nationality.subdivision.name,
+              }))
             } else {
-              output.setSuccess("Set nationality to " + nationality.nation);
+              output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success", {
+                ["nationality"]: nationality.nation,
+              }))
             }
           })
           .catch(displayError(output));
@@ -258,7 +259,7 @@ export function initialize() {
         { lock_submissions: lockSubmissionsCheckbox.checked }
       )
         .then((_) => {
-          output.setSuccess("Successfully applied changed");
+          output.setSuccess(tr("demonlist", "player", "claim-lock-submissions.edit-success"));
         })
         .catch(displayError(output));
     });

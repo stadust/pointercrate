@@ -8,6 +8,7 @@ import {
   PaginatorEditorBackend,
 } from "/static/core/js/modules/form.js";
 import { recordManager, initialize as initRecords } from "./records.js";
+import { loadResource, tr, trp } from "/static/core/js/modules/localization.js";
 
 export let submitterManager;
 
@@ -23,7 +24,9 @@ function generateSubmitter(submitter) {
     li.classList.add("ok");
   }
 
-  b.innerText = "Submitter #" + submitter.id;
+  b.innerText = trp("demonlist", "submitter", "submitter-listed", {
+    ["submitter-id"]: submitter.id,
+  });
 
   li.appendChild(b);
   return li;
@@ -66,7 +69,9 @@ function setupSubmitterSearchSubmitterIdForm() {
   );
   var submitterId = submitterSearchByIdForm.input("search-submitter-id");
 
-  submitterId.addValidator(valueMissing, "Submitter ID required");
+  submitterSearchByIdForm.addErrorOverride(40401, "search-submitter-id");
+
+  submitterId.addValidator(valueMissing, tr("demonlist", "submitter", "submitter-idsearch-panel.id-validator-valuemissing"));
   submitterSearchByIdForm.onSubmit(function () {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))
@@ -99,5 +104,6 @@ export function initialize(tabber) {
         );
         tabber.selectPane("3");
       }
-    });
+    }
+  );
 }

@@ -1,6 +1,9 @@
 use crate::account::AccountPageTab;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::permission::{Permission, PermissionsManager};
+use pointercrate_core::{
+    localization::tr,
+    permission::{Permission, PermissionsManager},
+};
 use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating},
@@ -33,7 +36,7 @@ impl AccountPageTab for UsersTab {
     fn tab(&self) -> Markup {
         html! {
             b {
-                "Users"
+                (tr("users"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-users fa-2x" aria-hidden="true" {}
@@ -53,33 +56,33 @@ impl AccountPageTab for UsersTab {
             div.left {
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Pointercrate Account Manager"
+                        (tr("user-viewer"))
                     }
 
                     div.flex.viewer {
                         (filtered_paginator("user-pagination", "/api/v1/users/"))
                         p.viewer-welcome {
-                            "Click on a user on the left to get started!"
+                            (tr("user-viewer.welcome"))
                         }
                         div.viewer-content {
                             div.stats-container.flex.space {
                                 span {
                                     b {
-                                        "Username:"
+                                        (tr("user-username"))
                                     }
                                     br;
                                     span #user-user-name {}
                                 }
                                 span {
                                     b {
-                                        "Display Name:"
+                                        (tr("user-displayname"))
                                     }
                                     br;
                                     span #user-display-name {}
                                 }
                                 span {
                                     b {
-                                        "User ID:"
+                                        (tr("user-id"))
                                     }
                                     br;
                                     span #user-user-id {}
@@ -92,16 +95,16 @@ impl AccountPageTab for UsersTab {
                                 @if !assignable_permissions.is_empty() {
                                     div.stats-container.flex.space.col style = "align-items: center" {
                                         b {
-                                            "Permissions:"
+                                            (tr("user-permissions"))
                                         }
                                         @for permission in assignable_permissions {
-                                            @let name_in_snake_case = permission.name().to_lowercase().replace(' ', "-");
+                                            @let permission_name = tr(permission.text_id());
 
-                                            label.cb-container.form-input #(name_in_snake_case) for = (name_in_snake_case) data-bit = (permission.bit()) {
+                                            label.cb-container.form-input #(permission.text_id()) for = (permission.text_id()) data-bit = (permission.bit()) {
                                                 i {
-                                                    (permission.name())
+                                                    (permission_name)
                                                 }
-                                                input type = "checkbox" name = (name_in_snake_case);
+                                                input type = "checkbox" name = (permission.text_id());
                                                 span.checkmark {}
                                             }
                                         }
@@ -109,9 +112,9 @@ impl AccountPageTab for UsersTab {
                                 }
                                 div.flex.no-stretch {
                                     @if user.user().has_permission(ADMINISTRATOR) {
-                                        input.button.red.hover #delete-user type = "button" style = "margin: 15px auto 0px;" value="Delete user";
+                                        input.button.red.hover #delete-user type = "button" style = "margin: 15px auto 0px;" value=(tr("user-viewer.delete-user"));
                                     }
-                                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Edit user";
+                                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("user-viewer.edit-user"));
                                 }
                             }
                         }
@@ -122,19 +125,19 @@ impl AccountPageTab for UsersTab {
             div.right {
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Find users"
+                        (tr("user-idsearch-panel"))
                     }
                     p {
-                        "Users can be uniquely identified by name and ID. To modify a user's account, you need their ID. If you know neither, try looking in the list below"
+                        (tr("user-idsearch-panel.info"))
                     }
                     form.flex.col.pad #find-id-form novalidate = "" {
                         p.info-red.output {}
                         span.form-input #find-id {
-                            label for = "id" {"User ID:"}
+                            label for = "id" {(tr("user-idsearch-panel.id-field")) }
                             input required = "" type = "number" name = "id" min = "0" style="width:93%"; // FIXME: I have no clue why the input thinks it's a special snowflake and fucks up its width, but I dont have the time to fix it
                             p.error {}
                         }
-                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value="Find by ID";
+                        input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("user-idsearch-panel.submit"));
                     }
                 }
             }

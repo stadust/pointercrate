@@ -16,3 +16,5 @@ sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-
 log = "0.4.27"
 serde_urlencoded = "0.7.0"
 maud = "0.27.0"
+unic-langid = "0.9.5"
+tokio = "1.46.1"
