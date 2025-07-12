@@ -71,7 +71,14 @@ function setupSubmitterSearchSubmitterIdForm() {
 
   submitterSearchByIdForm.addErrorOverride(40401, "search-submitter-id");
 
-  submitterId.addValidator(valueMissing, tr("demonlist", "submitter", "submitter-idsearch-panel.id-validator-valuemissing"));
+  submitterId.addValidator(
+    valueMissing,
+    tr(
+      "demonlist",
+      "submitter",
+      "submitter-idsearch-panel.id-validator-valuemissing"
+    )
+  );
   submitterSearchByIdForm.onSubmit(function () {
     submitterManager
       .selectArbitrary(parseInt(submitterId.value))
@@ -104,6 +111,5 @@ export function initialize(tabber) {
         );
         tabber.selectPane("3");
       }
-    }
-  );
+    });
 }

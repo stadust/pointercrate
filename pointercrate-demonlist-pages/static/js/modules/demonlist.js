@@ -44,10 +44,21 @@ export function initializeTimeMachine() {
   var timeMachineForm = new Form(formHtml);
   var destination = timeMachineForm.input("time-machine-destination");
 
-  destination.addValidator(valueMissing, tr("demonlist", "overview", "time-machine.destination-validator-valuemissing"));
+  destination.addValidator(
+    valueMissing,
+    tr(
+      "demonlist",
+      "overview",
+      "time-machine.destination-validator-valuemissing"
+    )
+  );
   destination.addValidator(
     rangeUnderflow,
-    tr("demonlist", "overview", "time-machine.destination-validator-rangeunderflow")
+    tr(
+      "demonlist",
+      "overview",
+      "time-machine.destination-validator-rangeunderflow"
+    )
   );
 
   var now = new Date();
@@ -90,35 +101,97 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
   demon.addValidator(
     (input) => input.dropdown.selected !== undefined,
-    tr("demonlist", "submitter", "record-submission.demon-validator-valuemissing")
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.demon-validator-valuemissing"
+    )
   );
   demon.setTransform(parseInt);
 
   player.addValidator(
     (input) => input.value !== undefined,
-    tr("demonlist", "submitter", "record-submission.holder-validator-valuemissing")
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.holder-validator-valuemissing"
+    )
   );
   player.addValidator(
     (input) => input.value === undefined || input.value.length <= 50,
-    tr("demonlist", "submitter", "record-submission.holder-validator-rangeoverflow")
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.holder-validator-rangeoverflow"
+    )
   );
 
-  progress.addValidator(valueMissing, tr("demonlist", "submitter", "record-submission.progress-validator-valuemissing"));
-  progress.addValidator(rangeUnderflow, tr("demonlist", "submitter", "record-submission.progress-validator-rangeunderflow"));
+  progress.addValidator(
+    valueMissing,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-valuemissing"
+    )
+  );
+  progress.addValidator(
+    rangeUnderflow,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-rangeunderflow"
+    )
+  );
   progress.addValidator(
     rangeOverflow,
-    tr("demonlist", "submitter", "record-submission.progress-validator-rangeoverflow")
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-rangeoverflow"
+    )
   );
-  progress.addValidator(badInput, tr("demonlist", "submitter", "record-submission.progress-validator-badinput"));
-  progress.addValidator(stepMismatch, tr("demonlist", "submitter", "record-submission.progress-validator-stepmismatch"));
+  progress.addValidator(
+    badInput,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-badinput"
+    )
+  );
+  progress.addValidator(
+    stepMismatch,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-stepmismatch"
+    )
+  );
 
   video.addValidator(
     valueMissing,
-    tr("demonlist", "submitter", "record-submission.video-validator-valuemissing")
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.video-validator-valuemissing"
+    )
   );
-  video.addValidator(typeMismatch, tr("demonlist", "submitter", "record-submission.video-validator-typemismatch"));
+  video.addValidator(
+    typeMismatch,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.video-validator-typemismatch"
+    )
+  );
 
-  rawFootage.addValidator(typeMismatch, tr("demonlist", "submitter", "record-submission.raw-footage-validator-typemismatch"));
+  rawFootage.addValidator(
+    typeMismatch,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.raw-footage-validator-typemismatch"
+    )
+  );
 
   submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
@@ -133,11 +206,19 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
         if (queue_position)
           submissionForm.setSuccess(
-            trp("demonlist", "submitter", "record-submission.submission-success.queue", {
-              ["queue-position"]: queue_position,
-            })
+            trp(
+              "demonlist",
+              "submitter",
+              "record-submission.submission-success.queue",
+              {
+                ["queue-position"]: queue_position,
+              }
+            )
           );
-        else submissionForm.setSuccess(tr("demonlist", "submitter", "record-submission.submission-success"));
+        else
+          submissionForm.setSuccess(
+            tr("demonlist", "submitter", "record-submission.submission-success")
+          );
         submissionForm.clear();
       })
       .catch((response) => {
@@ -263,15 +344,21 @@ export function generateDemon(demon) {
 
   li.appendChild(b);
   li.appendChild(
-    document.createTextNode(trp("demonlist", "demon", "demon-listed", {
-      ["demon"]: demon.name,
-      ["demon-id"]: demon.id.toString(),
-    }))
+    document.createTextNode(
+      trp("demonlist", "demon", "demon-listed", {
+        ["demon"]: demon.name,
+        ["demon-id"]: demon.id.toString(),
+      })
+    )
   );
   li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode(trp("demonlist", "demon", "demon-listed.publisher", {
-    ["publisher"]: demon.publisher.name,
-  })));
+  li.appendChild(
+    document.createTextNode(
+      trp("demonlist", "demon", "demon-listed.publisher", {
+        ["publisher"]: demon.publisher.name,
+      })
+    )
+  );
 
   return li;
 }
@@ -299,9 +386,13 @@ export function generateRecord(record) {
       break;
   }
 
-  recordId.appendChild(document.createTextNode(trp("demonlist", "record", "record-listed", {
-    ["record-id"]: record.id.toString(),
-  })));
+  recordId.appendChild(
+    document.createTextNode(
+      trp("demonlist", "record", "record-listed", {
+        ["record-id"]: record.id.toString(),
+      })
+    )
+  );
 
   li.appendChild(recordId);
   li.appendChild(document.createElement("br"));
@@ -310,10 +401,12 @@ export function generateRecord(record) {
   );
   li.appendChild(document.createElement("br"));
   li.appendChild(
-    document.createTextNode(trp("demonlist", "record", "record-listed.progress", {
-      ["percent"]: record.progress,
-      ["demon"]: record.demon.name,
-    }))
+    document.createTextNode(
+      trp("demonlist", "record", "record-listed.progress", {
+        ["percent"]: record.progress,
+        ["demon"]: record.demon.name,
+      })
+    )
   );
   li.appendChild(document.createElement("br"));
 

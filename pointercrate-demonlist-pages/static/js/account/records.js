@@ -97,9 +97,15 @@ class RecordManager extends Paginator {
               this.currentObject.video
           )
           .then(() =>
-            this.output.setSuccess(tr("demonlist", "record", "record-viewer.copy-data-success"))
+            this.output.setSuccess(
+              tr("demonlist", "record", "record-viewer.copy-data-success")
+            )
           )
-          .catch(() => this.output.setError(tr("demonlist", "record", "record-viewer.copy-data-error")));
+          .catch(() =>
+            this.output.setError(
+              tr("demonlist", "record", "record-viewer.copy-data-error")
+            )
+          );
       });
   }
 
@@ -113,11 +119,31 @@ class RecordManager extends Paginator {
 
     form.addValidators({
       "record-progress-edit": {
-        [tr("demonlist", "record", "record-progress-dialog.progress-validator-rangeunderflow")]: rangeUnderflow,
-        [tr("demonlist", "record", "record-progress-dialog.progress-validator-rangeoverflow")]: rangeOverflow,
-        [tr("demonlist", "record", "record-progress-dialog.progress-validator-badinput")]: badInput,
-        [tr("demonlist", "record", "record-progress-dialog.progress-validator-stepmismatch")]: stepMismatch,
-        [tr("demonlist", "record", "record-progress-dialog.progress-validator-valuemissing")]: valueMissing,
+        [tr(
+          "demonlist",
+          "record",
+          "record-progress-dialog.progress-validator-rangeunderflow"
+        )]: rangeUnderflow,
+        [tr(
+          "demonlist",
+          "record",
+          "record-progress-dialog.progress-validator-rangeoverflow"
+        )]: rangeOverflow,
+        [tr(
+          "demonlist",
+          "record",
+          "record-progress-dialog.progress-validator-badinput"
+        )]: badInput,
+        [tr(
+          "demonlist",
+          "record",
+          "record-progress-dialog.progress-validator-stepmismatch"
+        )]: stepMismatch,
+        [tr(
+          "demonlist",
+          "record",
+          "record-progress-dialog.progress-validator-valuemissing"
+        )]: valueMissing,
       },
     });
 
@@ -134,7 +160,11 @@ class RecordManager extends Paginator {
 
     form.addValidators({
       "record-video-edit": {
-        [tr("demonlist", "record", "record-videolink-dialog.videolink-validator-typemismatch")]: typeMismatch,
+        [tr(
+          "demonlist",
+          "record",
+          "record-videolink-dialog.videolink-validator-typemismatch"
+        )]: typeMismatch,
       },
     });
 
@@ -234,7 +264,9 @@ function createNoteHtml(note) {
     closeX.style.transform = "scale(0.75)";
 
     closeX.addEventListener("click", () => {
-      if (confirm(tr("demonlist", "record", "record-note-listed.confirm-delete"))) {
+      if (
+        confirm(tr("demonlist", "record", "record-note-listed.confirm-delete"))
+      ) {
         del(
           "/api/v1/records/" +
             recordManager.currentObject.id +
@@ -249,7 +281,7 @@ function createNoteHtml(note) {
   let b = document.createElement("b");
   b.innerText = trp("demonlist", "record", "record-note-listed", {
     ["note-id"]: note.id,
-  })
+  });
 
   let i = document.createElement("i");
   i.innerText = note.content;
@@ -259,19 +291,28 @@ function createNoteHtml(note) {
   furtherInfo.style.textAlign = "right";
 
   if (note.author === null) {
-    furtherInfo.innerText =
-      tr("demonlist", "record", "record-note-listed.author-submitter");
+    furtherInfo.innerText = tr(
+      "demonlist",
+      "record",
+      "record-note-listed.author-submitter"
+    );
   } else {
-    furtherInfo.innerText = trp("demonlist", "record", "record-note-listed.author", {
-      ["author"]: note.author,
-    });
+    furtherInfo.innerText = trp(
+      "demonlist",
+      "record",
+      "record-note-listed.author",
+      {
+        ["author"]: note.author,
+      }
+    );
   }
   furtherInfo.innerText += " ";
 
   if (note.editors.length) {
-    furtherInfo.innerText += trp("demonlist", "record", "record-note-listed.editors", {
-      ["editors"]: note.editors.join(", ")
-    }) + " ";
+    furtherInfo.innerText +=
+      trp("demonlist", "record", "record-note-listed.editors", {
+        ["editors"]: note.editors.join(", "),
+      }) + " ";
   }
 
   if (note.transferred) {
@@ -280,7 +321,8 @@ function createNoteHtml(note) {
   }
 
   if (note.is_public) {
-    furtherInfo.innerText += tr("demonlist", "record", "record-note-listed.public") + " ";
+    furtherInfo.innerText +=
+      tr("demonlist", "record", "record-note-listed.public") + " ";
   }
 
   if (isAdmin) noteDiv.appendChild(closeX);
@@ -342,7 +384,10 @@ function setupRecordSearchRecordIdForm() {
   );
   var recordId = recordSearchByIdForm.input("record-record-id");
 
-  recordId.addValidator(valueMissing, tr("demonlist", "record", "record-idsearch-panel.id-validator-valuemissing"));
+  recordId.addValidator(
+    valueMissing,
+    tr("demonlist", "record", "record-idsearch-panel.id-validator-valuemissing")
+  );
   recordSearchByIdForm.onSubmit(function () {
     recordManager
       .selectArbitrary(parseInt(recordId.value))
@@ -366,9 +411,14 @@ function setupRecordFilterPlayerNameForm() {
           let json = response.data;
 
           if (!json || json.length == 0) {
-            playerName.errorText = trp("core", "error", "error-demonlist-playernotfoundname", {
-              ["player-name"]: playerName.value,
-            });
+            playerName.errorText = trp(
+              "core",
+              "error",
+              "error-demonlist-playernotfoundname",
+              {
+                ["player-name"]: playerName.value,
+              }
+            );
           } else {
             recordManager.updateQueryData("player", json[0].id);
           }
@@ -380,11 +430,7 @@ function setupRecordFilterPlayerNameForm() {
 
 function setupEditRecordForm() {
   document.getElementById("record-delete").addEventListener("click", () => {
-    if (
-      confirm(
-        tr("demonlist", "record", "record-viewer.confirm-delete")
-      )
-    ) {
+    if (confirm(tr("demonlist", "record", "record-viewer.confirm-delete"))) {
       del("/api/v1/records/" + recordManager.currentObject.id + "/", {
         "If-Match": recordManager.currentEtag,
       }).then(() => {

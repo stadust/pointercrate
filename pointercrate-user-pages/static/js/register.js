@@ -15,19 +15,28 @@ function intializeRegisterForm() {
   var registerPassword = registerForm.input("register-password");
   var registerPasswordRepeat = registerForm.input("register-password-repeat");
 
-  registerUsername.addValidator(valueMissing, tr("user", "user", "auth-username.validator-valuemissing"));
+  registerUsername.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-username.validator-valuemissing")
+  );
   registerUsername.addValidator(
     tooShort,
     tr("user", "user", "auth-username.validator-tooshort")
   );
 
-  registerPassword.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
+  registerPassword.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-password.validator-valuemissing")
+  );
   registerPassword.addValidator(
     tooShort,
     tr("user", "user", "auth-password.validator-tooshort")
   );
 
-  registerPasswordRepeat.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
+  registerPasswordRepeat.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-password.validator-valuemissing")
+  );
   registerPasswordRepeat.addValidator(
     tooShort,
     tr("user", "user", "auth-password.validator-valuemissing")
@@ -44,8 +53,11 @@ function intializeRegisterForm() {
       })
       .catch((response) => {
         if (response.status === 409) {
-          registerUsername.errorText =
-            tr("user", "user", "auth-username.error-alreadytaken");
+          registerUsername.errorText = tr(
+            "user",
+            "user",
+            "auth-username.error-alreadytaken"
+          );
         } else {
           registerForm.setError(response.data.message);
         }

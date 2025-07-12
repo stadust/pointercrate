@@ -302,8 +302,8 @@ export function setupDropdownEditor(
     backend
       .edit(data)
       .then((was304) => {
-        if (was304) output.setSuccess( tr("core", "ui", "edit-notmodified") );
-        else output.setSuccess( tr("core", "ui", "edit-success") );
+        if (was304) output.setSuccess(tr("core", "ui", "edit-notmodified"));
+        else output.setSuccess(tr("core", "ui", "edit-success"));
       })
       .catch((response) => displayError(output)(response));
   });
@@ -403,9 +403,9 @@ export function setupEditorDialog(
       .edit(dataTransform(data))
       .then((was304) => {
         if (was304) {
-          output.setSuccess( tr("core", "ui", "edit-notmodified") );
+          output.setSuccess(tr("core", "ui", "edit-notmodified"));
         } else {
-          output.setSuccess( tr("core", "ui", "edit-success") );
+          output.setSuccess(tr("core", "ui", "edit-success"));
         }
       })
       .catch((response) => {

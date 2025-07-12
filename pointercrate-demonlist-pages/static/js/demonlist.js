@@ -6,13 +6,13 @@ import { get } from "/static/core/js/modules/form.js";
 import { tr, trp } from "/static/core/js/modules/localization.js";
 
 $(window).on("load", function () {
-    if (window.demon_id) {
-      initializePositionChart();
-      initializeHistoryTable();
-    }
+  if (window.demon_id) {
+    initializePositionChart();
+    initializeHistoryTable();
+  }
 
-    initializeRecordSubmitter();
-    initializeTimeMachine();
+  initializeRecordSubmitter();
+  initializeTimeMachine();
 });
 
 function initializeHistoryTable() {
@@ -54,7 +54,11 @@ function initializeHistoryTable() {
             entry["new_position"] > window.extended_list_length ||
             lastPosition > window.extended_list_length
           ) {
-            cells[1].appendChild(document.createTextNode(tr("demonlist", "demon", "movements-newposition.legacy")));
+            cells[1].appendChild(
+              document.createTextNode(
+                tr("demonlist", "demon", "movements-newposition.legacy")
+              )
+            );
           } else {
             cells[1].appendChild(arrow);
             cells[1].appendChild(
@@ -89,13 +93,14 @@ function initializeHistoryTable() {
             let other = entry["reason"]["OtherMoved"]["other"];
             let name = other.name === null ? "A demon" : other["name"];
 
-            reason = positionChange < 0
-              ? trp("demonlist", "demon", "movements-reason.movedbelow", {
-                ["demon"]: name,
-              })
-              : trp("demonlist", "demon", "movements-reason.movedabove", {
-                ["demon"]: name,
-              })
+            reason =
+              positionChange < 0
+                ? trp("demonlist", "demon", "movements-reason.movedbelow", {
+                    ["demon"]: name,
+                  })
+                : trp("demonlist", "demon", "movements-reason.movedabove", {
+                    ["demon"]: name,
+                  });
           }
         }
 

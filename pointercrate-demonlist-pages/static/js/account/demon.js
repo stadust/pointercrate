@@ -68,8 +68,10 @@ export class DemonManager extends FilteredPaginator {
 
     thumbnailForm.addValidators({
       "demon-thumbnail-edit": {
-        [tr("demonlist", "demon", "demon-thumbnail.validator-typemismatch")]: typeMismatch,
-        [tr("demonlist", "demon", "demon-thumbnail.validator-valuemissing")]: valueMissing,
+        [tr("demonlist", "demon", "demon-thumbnail.validator-typemismatch")]:
+          typeMismatch,
+        [tr("demonlist", "demon", "demon-thumbnail.validator-valuemissing")]:
+          valueMissing,
       },
     });
 
@@ -86,11 +88,16 @@ export class DemonManager extends FilteredPaginator {
 
     requirementForm.addValidators({
       "demon-requirement-edit": {
-        [tr("demonlist", "demon", "demon-requirement.validator-underflow")]: rangeUnderflow,
-        [tr("demonlist", "demon", "demon-requirement.validator-rangeoverflow")]: rangeOverflow,
-        [tr("demonlist", "demon", "demon-requirement.validator-badinput")]: badInput,
-        [tr("demonlist", "demon", "demon-requirement.validator-stepmismatch")]: stepMismatch,
-        [tr("demonlist", "demon", "demon-requirement.validator-valuemissing")]: valueMissing,
+        [tr("demonlist", "demon", "demon-requirement.validator-underflow")]:
+          rangeUnderflow,
+        [tr("demonlist", "demon", "demon-requirement.validator-rangeoverflow")]:
+          rangeOverflow,
+        [tr("demonlist", "demon", "demon-requirement.validator-badinput")]:
+          badInput,
+        [tr("demonlist", "demon", "demon-requirement.validator-stepmismatch")]:
+          stepMismatch,
+        [tr("demonlist", "demon", "demon-requirement.validator-valuemissing")]:
+          valueMissing,
       },
     });
 
@@ -105,10 +112,14 @@ export class DemonManager extends FilteredPaginator {
 
     positionForm.addValidators({
       "demon-position-edit": {
-        [tr("demonlist", "demon", "demon-position.validator-rangeunderflow")]: rangeUnderflow,
-        [tr("demonlist", "demon", "demon-position.validator-badinput")]: badInput,
-        [tr("demonlist", "demon", "demon-position.validator-stepmismatch")]: stepMismatch,
-        [tr("demonlist", "demon", "demon-position.validator-valuemissing")]: valueMissing,
+        [tr("demonlist", "demon", "demon-position.validator-rangeunderflow")]:
+          rangeUnderflow,
+        [tr("demonlist", "demon", "demon-position.validator-badinput")]:
+          badInput,
+        [tr("demonlist", "demon", "demon-position.validator-stepmismatch")]:
+          stepMismatch,
+        [tr("demonlist", "demon", "demon-position.validator-valuemissing")]:
+          valueMissing,
       },
     });
 
@@ -123,7 +134,8 @@ export class DemonManager extends FilteredPaginator {
 
     nameForm.addValidators({
       "demon-name-edit": {
-        [tr("demonlist", "demon", "demon-name.validator-valuemissing")]: valueMissing,
+        [tr("demonlist", "demon", "demon-name.validator-valuemissing")]:
+          valueMissing,
       },
     });
     setupEditorDialog(
@@ -254,42 +266,66 @@ function createCreatorHtml(creator) {
 function setupDemonAdditionForm() {
   let form = new Form(document.getElementById("demon-submission-form"));
   form.addValidators({
-    "demon-add-name": { [tr("demonlist", "demon", "demon-name.validator-valuemissing")]: valueMissing },
+    "demon-add-name": {
+      [tr("demonlist", "demon", "demon-name.validator-valuemissing")]:
+        valueMissing,
+    },
     "demon-add-level-id": {
-      [tr("demonlist", "demon", "demon-id.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demonlist", "demon", "demon-id.validator-rangeunderflow")]:
+        rangeUnderflow,
     },
     "demon-add-position": {
-      [tr("demonlist", "demon", "demon-position.validator-valuemissing")]: valueMissing,
-      [tr("demonlist", "demon", "demon-position.validator-rangeunderflow")]: rangeUnderflow,
+      [tr("demonlist", "demon", "demon-position.validator-valuemissing")]:
+        valueMissing,
+      [tr("demonlist", "demon", "demon-position.validator-rangeunderflow")]:
+        rangeUnderflow,
       [tr("demonlist", "demon", "demon-position.validator-badinput")]: badInput,
-      [tr("demonlist", "demon", "demon-position.validator-stepmismatch")]: stepMismatch,
+      [tr("demonlist", "demon", "demon-position.validator-stepmismatch")]:
+        stepMismatch,
     },
     "demon-add-requirement": {
       [tr("demonlist", "demon", "demon-requirement.validator-valuemissing")]:
         valueMissing,
-      [tr("demonlist", "demon", "demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
-      [tr("demonlist", "demon", "demon-requirement.validator-overflow")]: rangeOverflow,
-      [tr("demonlist", "demon", "demon-requirement.validator-badinput")]: badInput,
-      [tr("demonlist", "demon", "demon-requirement.validator-stepmismatch")]: stepMismatch,
+      [tr("demonlist", "demon", "demon-requirement.validator-rangeunderflow")]:
+        rangeUnderflow,
+      [tr("demonlist", "demon", "demon-requirement.validator-overflow")]:
+        rangeOverflow,
+      [tr("demonlist", "demon", "demon-requirement.validator-badinput")]:
+        badInput,
+      [tr("demonlist", "demon", "demon-requirement.validator-stepmismatch")]:
+        stepMismatch,
     },
     "demon-add-requirement": {
       [tr("demonlist", "demon", "demon-requirement.validator-valuemissing")]:
         valueMissing,
-      [tr("demonlist", "demon", "demon-requirement.validator-rangeunderflow")]: rangeUnderflow,
-      [tr("demonlist", "demon", "demon-requirement.validator-rangeoverflow")]: rangeOverflow,
-      [tr("demonlist", "demon", "demon-requirement.validator-badinput")]: badInput,
-      [tr("demonlist", "demon", "demon-requirement.validator-stepmismatch")]: stepMismatch,
+      [tr("demonlist", "demon", "demon-requirement.validator-rangeunderflow")]:
+        rangeUnderflow,
+      [tr("demonlist", "demon", "demon-requirement.validator-rangeoverflow")]:
+        rangeOverflow,
+      [tr("demonlist", "demon", "demon-requirement.validator-badinput")]:
+        badInput,
+      [tr("demonlist", "demon", "demon-requirement.validator-stepmismatch")]:
+        stepMismatch,
     },
-    "demon-add-verifier": { [tr("demonlist", "demon", "demon-verifier.validator-valuemissing")]: valueMissing },
-    "demon-add-publisher": { [tr("demonlist", "demon", "demon-publisher.validator-valuemissing")]: valueMissing },
-    "demon-add-video": { [tr("demonlist", "demon", "demon-video.validator-typemismatch")]: typeMismatch },
+    "demon-add-verifier": {
+      [tr("demonlist", "demon", "demon-verifier.validator-valuemissing")]:
+        valueMissing,
+    },
+    "demon-add-publisher": {
+      [tr("demonlist", "demon", "demon-publisher.validator-valuemissing")]:
+        valueMissing,
+    },
+    "demon-add-video": {
+      [tr("demonlist", "demon", "demon-video.validator-typemismatch")]:
+        typeMismatch,
+    },
   });
 
   form.creators = [];
 
   form.onSubmit(() => {
     let data = form.serialize();
-    
+
     data["creators"] = form.creators;
 
     post("/api/v2/demons/", {}, data)
@@ -334,7 +370,9 @@ export function initialize() {
             ),
           });
 
-          demonManager.output.setSuccess(tr("demon-creator-dialog.edit-success"));
+          demonManager.output.setSuccess(
+            tr("demon-creator-dialog.edit-success")
+          );
         })
         .catch((response) => {
           displayError(creatorFormDialog.form)(response);

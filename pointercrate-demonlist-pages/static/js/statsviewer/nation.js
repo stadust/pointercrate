@@ -130,9 +130,14 @@ class NationStatsViewer extends StatsViewer {
         (creation) => {
           return this.makeTooltip(
             this.formatDemon(creation.demon),
-            trp("demonlist", "statsviewer", "statsviewer-nation.created-tooltip", {
+            trp(
+              "demonlist",
+              "statsviewer",
+              "statsviewer-nation.created-tooltip",
+              {
                 ["players"]: creation.players.length,
-              }).replaceAll(" ", "&nbsp;") + " ",
+              }
+            ).replaceAll(" ", "&nbsp;") + " ",
             creation.players.join(", ")
           );
         }
@@ -144,7 +149,11 @@ class NationStatsViewer extends StatsViewer {
         (verification) => {
           return this.makeTooltip(
             this.formatDemon(verification.demon),
-            tr("demonlist", "statsviewer", "statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
+            tr(
+              "demonlist",
+              "statsviewer",
+              "statsviewer-nation.verified-tooltip"
+            ).replaceAll(" ", "&nbsp;") + " ",
             verification.players.join(", ")
           );
         }
@@ -156,7 +165,11 @@ class NationStatsViewer extends StatsViewer {
         (publication) => {
           return this.makeTooltip(
             this.formatDemon(publication.demon),
-            tr("demonlist", "statsviewer", "statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
+            tr(
+              "demonlist",
+              "statsviewer",
+              "statsviewer-nation.published-tooltip"
+            ).replaceAll(" ", "&nbsp;") + " ",
             publication.players.join(", ")
           );
         }
@@ -171,9 +184,14 @@ class NationStatsViewer extends StatsViewer {
             (creation) => {
               return this.makeTooltip(
                 this.formatDemon(creation.demon),
-                trp("demonlist", "statsviewer", "statsviewer-nation.created-tooltip", {
+                trp(
+                  "demonlist",
+                  "statsviewer",
+                  "statsviewer-nation.created-tooltip",
+                  {
                     ["players"]: creation.players.length,
-                  }).replaceAll(" ", "&nbsp;") + " ",
+                  }
+                ).replaceAll(" ", "&nbsp;") + " ",
                 creation.players.join(", ")
               );
             }
@@ -188,7 +206,11 @@ class NationStatsViewer extends StatsViewer {
             (publication) => {
               return this.makeTooltip(
                 this.formatDemon(publication.demon),
-                tr("demonlist", "statsviewer", "statsviewer-nation.published-tooltip").replaceAll(" ", "&nbsp;") + " ",
+                tr(
+                  "demonlist",
+                  "statsviewer",
+                  "statsviewer-nation.published-tooltip"
+                ).replaceAll(" ", "&nbsp;") + " ",
                 publication.players.join(", ")
               );
             }
@@ -202,7 +224,11 @@ class NationStatsViewer extends StatsViewer {
             (verification) => {
               return this.makeTooltip(
                 this.formatDemon(verification.demon),
-                tr("demonlist", "statsviewer", "statsviewer-nation.verified-tooltip").replaceAll(" ", "&nbsp;") + " ",
+                tr(
+                  "demonlist",
+                  "statsviewer",
+                  "statsviewer-nation.verified-tooltip"
+                ).replaceAll(" ", "&nbsp;") + " ",
                 verification.players.join(", ")
               );
             }
@@ -248,20 +274,26 @@ class NationStatsViewer extends StatsViewer {
 
   formatDemonFromRecord(record, dontStyle) {
     let baseElement = this.formatDemon(record.demon, null, dontStyle);
-  
+
     if (record.progress !== 100)
       baseElement.appendChild(
         document.createTextNode(" (" + record.progress + "%)")
       );
 
     let title =
-      (record.progress === 100 
+      (record.progress === 100
         ? trp("demonlist", "statsviewer", "statsviewer-nation.beaten-tooltip", {
-          ["players"]: record.players.length,
-        })
-        : trp("demonlist", "statsviewer", "statsviewer-nation.progress-tooltip", {
-          ["players"]: record.players.length,
-        })).replaceAll(" ", "&nbsp;") + " ";
+            ["players"]: record.players.length,
+          })
+        : trp(
+            "demonlist",
+            "statsviewer",
+            "statsviewer-nation.progress-tooltip",
+            {
+              ["players"]: record.players.length,
+            }
+          )
+      ).replaceAll(" ", "&nbsp;") + " ";
 
     return this.makeTooltip(
       baseElement,

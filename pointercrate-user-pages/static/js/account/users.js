@@ -36,7 +36,9 @@ function setupPatchUserPermissionsForm() {
 
           editForm.setSuccess(tr("user", "user", "user-viewer.edit-success"));
         } else {
-          editForm.setSuccess(tr("user", "user", "user-viewer.edit-notmodified"));
+          editForm.setSuccess(
+            tr("user", "user", "user-viewer.edit-notmodified")
+          );
         }
       })
       .catch(displayError(editForm));
@@ -50,7 +52,9 @@ function setupPatchUserPermissionsForm() {
       del("/api/v1/users/" + selectedUser.id + "/", {
         "If-Match": selectedUser.etag,
       })
-        .then(() => editForm.setSuccess(tr("user", "user", "user-viewer.delete-success")))
+        .then(() =>
+          editForm.setSuccess(tr("user", "user", "user-viewer.delete-success"))
+        )
         .catch(displayError(editForm));
     });
   }
@@ -60,7 +64,10 @@ function setupUserByIdForm() {
   var userByIdForm = new Form(document.getElementById("find-id-form"));
   var userId = userByIdForm.input("find-id");
 
-  userId.addValidator(valueMissing, tr("user", "user", "user-idsearch-panel.id-validator-valuemissing"));
+  userId.addValidator(
+    valueMissing,
+    tr("user", "user", "user-idsearch-panel.id-validator-valuemissing")
+  );
 
   userByIdForm.onSubmit(function () {
     userPaginator.selectArbitrary(userId.value).catch((response) => {
@@ -83,14 +90,22 @@ function generateUser(userData) {
   b.appendChild(document.createTextNode(userData.name));
   i.appendChild(
     document.createTextNode(
-      tr("user", "user", "user-listed.displayname") + " " + (userData.display_name || tr("user", "user", "user-displayname.none"))
+      tr("user", "user", "user-listed.displayname") +
+        " " +
+        (userData.display_name || tr("user", "user", "user-displayname.none"))
     )
   );
 
   li.appendChild(b);
-  li.appendChild(document.createTextNode(" (" + trp("user", "user", "user-listed", {
-    ["user-id"]: userData.id
-  }) + ")"));
+  li.appendChild(
+    document.createTextNode(
+      " (" +
+        trp("user", "user", "user-listed", {
+          ["user-id"]: userData.id,
+        }) +
+        ")"
+    )
+  );
   li.appendChild(document.createElement("br"));
   li.appendChild(i);
 
@@ -116,9 +131,7 @@ class UserPaginator extends FilteredPaginator {
     editForm.setError(null);
 
     if (selectedUser.name == window.username) {
-      editForm.setError(
-        tr("user", "user", "user-viewer.own-account")
-      );
+      editForm.setError(tr("user", "user", "user-viewer.own-account"));
       for (let btn of this.output.html.getElementsByTagName("input")) {
         btn.classList.add("disabled");
         btn.disabled = true;

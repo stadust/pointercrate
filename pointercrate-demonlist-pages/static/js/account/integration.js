@@ -34,9 +34,11 @@ class ClaimManager extends FilteredPaginator {
       {}
     ).then((response) => {
       if (response.data.length === 0) {
-        this.setError(trp("demonlist", "player", "claim-manager.claim-no-records", {
-          ["player-id"]: selected.dataset.playerId,
-        }))
+        this.setError(
+          trp("demonlist", "player", "claim-manager.claim-no-records", {
+            ["player-id"]: selected.dataset.playerId,
+          })
+        );
         document.getElementById("claim-video").removeAttribute("src");
       } else {
         document.getElementById("claim-video").src = embedVideo(
@@ -171,9 +173,14 @@ class ClaimedPlayerRecordPaginator extends Paginator {
           }
 
           let title = document.createElement("b");
-          title.innerText = trp("demonlist", "player", "claim-records.record-notes", {
-            ["record-id"]: recordId,
-          });
+          title.innerText = trp(
+            "demonlist",
+            "player",
+            "claim-records.record-notes",
+            {
+              ["record-id"]: recordId,
+            }
+          );
 
           this.successOutput.appendChild(title);
           this.successOutput.appendChild(document.createElement("br"));
@@ -190,7 +197,9 @@ class ClaimedPlayerRecordPaginator extends Paginator {
 
           this.successOutput.style.display = "block";
         } else {
-          this.setSuccess(tr("demonlist", "player", "claim-records.record-notes-none"));
+          this.setSuccess(
+            tr("demonlist", "player", "claim-records.record-notes-none")
+          );
         }
       })
       .catch(displayError(this));
@@ -235,14 +244,23 @@ export function initialize() {
           .then((response) => {
             let nationality = response.data;
             if (nationality.subdivision) {
-              output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success-subdivision", {
-                ["nationality"]: nationality.nation,
-                ["subdivision"]: nationality.subdivision.name,
-              }))
+              output.setSuccess(
+                trp(
+                  "demonlist",
+                  "player",
+                  "claim-geolocate.edit-success-subdivision",
+                  {
+                    ["nationality"]: nationality.nation,
+                    ["subdivision"]: nationality.subdivision.name,
+                  }
+                )
+              );
             } else {
-              output.setSuccess(trp("demonlist", "player", "claim-geolocate.edit-success", {
-                ["nationality"]: nationality.nation,
-              }))
+              output.setSuccess(
+                trp("demonlist", "player", "claim-geolocate.edit-success", {
+                  ["nationality"]: nationality.nation,
+                })
+              );
             }
           })
           .catch(displayError(output));
@@ -259,7 +277,9 @@ export function initialize() {
         { lock_submissions: lockSubmissionsCheckbox.checked }
       )
         .then((_) => {
-          output.setSuccess(tr("demonlist", "player", "claim-lock-submissions.edit-success"));
+          output.setSuccess(
+            tr("demonlist", "player", "claim-lock-submissions.edit-success")
+          );
         })
         .catch(displayError(output));
     });

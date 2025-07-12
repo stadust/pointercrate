@@ -92,7 +92,11 @@ class IndividualStatsViewer extends StatsViewer {
         position: 321321321,
       });
 
-    this.setHardest(hardest.name === tr("demonlist", "statsviewer", "statsviewer.value-none") ? undefined : hardest);
+    this.setHardest(
+      hardest.name === tr("demonlist", "statsviewer", "statsviewer.value-none")
+        ? undefined
+        : hardest
+    );
 
     let non100Records = playerData.records.filter(
       (record) => record.progress !== 100
@@ -167,7 +171,6 @@ $(window).on("load", function () {
     else map.hideSubdivisions();
   });
 
-  
   window.statsViewer = new IndividualStatsViewer(
     document.getElementById("statsviewer")
   );
@@ -242,17 +245,17 @@ $(window).on("load", function () {
 
     window.statsViewer.initialize();
 
-    new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
-      (selected) => {
-        if (selected === "All") {
-          window.statsViewer.updateQueryData("continent", undefined);
-          map.resetContinentHighlight();
-        } else {
-          window.statsViewer.updateQueryData("continent", selected);
-          map.highlightContinent(selected);
-        }
+    new Dropdown(
+      document.getElementById("continent-dropdown")
+    ).addEventListener((selected) => {
+      if (selected === "All") {
+        window.statsViewer.updateQueryData("continent", undefined);
+        map.resetContinentHighlight();
+      } else {
+        window.statsViewer.updateQueryData("continent", selected);
+        map.highlightContinent(selected);
       }
-    );
+    });
 
     let subdivisionDropdown = new Dropdown(
       document.getElementById("subdivision-dropdown")
@@ -302,9 +305,12 @@ $(window).on("load", function () {
     map.addDeselectionListener(() => {
       statsViewer.dropdown.selectSilently("International");
       subdivisionDropdown.clearOptions();
-      statsViewer.updateQueryData2({ nation: undefined, subdivision: undefined });
+      statsViewer.updateQueryData2({
+        nation: undefined,
+        subdivision: undefined,
+      });
     });
-  })
+  });
 });
 
 function generateStatsViewerPlayer(player) {

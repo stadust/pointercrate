@@ -12,14 +12,20 @@ function initializeLoginForm() {
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
-  loginUsername.addValidator(valueMissing, tr("user", "user", "auth-username.validator-valuemissing"));
+  loginUsername.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-username.validator-valuemissing")
+  );
   loginUsername.addValidator(
     tooShort,
     tr("user", "user", "auth-username.validator-tooshort")
   );
 
   loginPassword.clearOnInvalid = true;
-  loginPassword.addValidator(valueMissing, tr("user", "user", "auth-password.validator-valuemissing"));
+  loginPassword.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-password.validator-valuemissing")
+  );
   loginPassword.addValidator(
     tooShort,
     tr("user", "user", "auth-password.validator-tooshort")
@@ -36,7 +42,11 @@ function initializeLoginForm() {
       .catch((response) => {
         console.log(response);
         if (response.status === 401) {
-          loginPassword.errorText = tr("user", "user", "login.error-invalidcredentials");
+          loginPassword.errorText = tr(
+            "user",
+            "user",
+            "login.error-invalidcredentials"
+          );
         } else {
           loginForm.setError(response.data.message);
         }
