@@ -96,7 +96,7 @@ pub async fn test_login_no_header(pool: Pool<Postgres>) {
     client
         .post("/api/v1/auth/", &())
         .header("X-Real-IP", "127.0.0.1")
-        .expect_status(Status::NotFound)
+        .expect_status(Status::Unauthorized)
         .execute()
         .await;
 }

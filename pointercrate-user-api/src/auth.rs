@@ -51,30 +51,26 @@ impl<'r> FromRequest<'r> for Auth<NonMutating> {
     type Error = UserError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        if request.cookies().get("access_token").is_none() {
-            return Outcome::Forward(Status::NotFound);
-        }
+        let Some(access_token) = request.cookies().get("access_token") else {
+            return Outcome::Forward(Status::Unauthorized);
+        };
 
         let pool = tryo_state!(request, PointercratePool);
         let permission_manager = tryo_state!(request, PermissionsManager).clone();
 
         let mut connection = tryo_result!(pool.transaction().await);
 
-        if let Some(access_token) = request.cookies().get("access_token") {
-            let access_claims = tryo_result!(AccessClaims::decode(access_token.value()));
-            let user = tryo_result!(AuthenticatedUser::by_id(tryo_result!(access_claims.id()), &mut connection).await);
-            let authenticated_for_get = tryo_result!(user.validate_cookie_claims(access_claims));
+        let access_claims = tryo_result!(AccessClaims::decode(access_token.value()));
+        let user = tryo_result!(AuthenticatedUser::by_id(tryo_result!(access_claims.id()), &mut connection).await);
+        let authenticated_for_get = tryo_result!(user.validate_cookie_claims(access_claims));
 
-            tryo_result!(audit_connection(&mut connection, authenticated_for_get.user().id).await);
+        tryo_result!(audit_connection(&mut connection, authenticated_for_get.user().id).await);
 
-            return Outcome::Success(Auth {
-                user: authenticated_for_get,
-                connection,
-                permissions: permission_manager,
-            });
-        }
-
-        CoreError::Unauthorized.into_outcome()
+        Outcome::Success(Auth {
+            user: authenticated_for_get,
+            connection,
+            permissions: permission_manager,
+        })
     }
 }
 
@@ -85,7 +81,7 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         // No auth header set, forward to the request handler that doesnt require authorization (if one exists)
         if request.headers().get_one("Authorization").is_none() && request.cookies().get("access_token").is_none() {
-            return Outcome::Forward(Status::NotFound);
+            return Outcome::Forward(Status::Unauthorized);
         }
 
         let pool = tryo_state!(request, PointercratePool);
@@ -125,7 +121,7 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
             });
         }
 
-        CoreError::Unauthorized.into_outcome()
+        Outcome::Forward(Status::Unauthorized)
     }
 }
 
@@ -140,7 +136,7 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
 
         // No auth header set, forward to the request handler that doesnt require authorization (if one exists)
         if request.headers().get_one("Authorization").is_none() && request.cookies().get("access_token").is_none() {
-            return Outcome::Forward(Status::NotFound);
+            return Outcome::Forward(Status::Unauthorized);
         }
 
         let pool = tryo_state!(request, PointercratePool);
@@ -190,6 +186,6 @@ impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
             });
         }
 
-        CoreError::Unauthorized.into_outcome()
+        Outcome::Forward(Status::Unauthorized)
     }
 }
