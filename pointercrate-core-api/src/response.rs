@@ -10,8 +10,9 @@ use pointercrate_core_pages::{
     head::{Head, HeadLike},
     PageConfiguration, PageFragment,
 };
+use rocket::tokio::runtime::Handle;
+use rocket::tokio::task::block_in_place;
 use rocket::{
-    futures,
     http::{ContentType, Header, Status},
     response::Responder,
     serde::json::Json,
@@ -42,20 +43,22 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
         let language = preferences.get(LOCALE_COOKIE_NAME).ok_or(Status::InternalServerError)?;
         let lang_id = LocaleConfiguration::get().by_code(language);
 
-        let (page_config, nav_bar, footer) = futures::executor::block_on(async {
-            LANGUAGE
-                .scope(lang_id.language, async {
-                    let page_config = request
-                        .rocket()
-                        .state::<fn() -> PageConfiguration>()
-                        .ok_or(Status::InternalServerError)?();
+        let (page_config, nav_bar, footer) = block_in_place(move || {
+            Handle::current().block_on(async {
+                LANGUAGE
+                    .scope(lang_id.language, async {
+                        let page_config = request
+                            .rocket()
+                            .state::<fn() -> PageConfiguration>()
+                            .ok_or(Status::InternalServerError)?();
 
-                    let nav_bar = page_config.nav_bar.render();
-                    let footer = page_config.footer.render();
+                        let nav_bar = page_config.nav_bar.render();
+                        let footer = page_config.footer.render();
 
-                    Ok((page_config, nav_bar, footer))
-                })
-                .await
+                        Ok((page_config, nav_bar, footer))
+                    })
+                    .await
+            })
         })?;
 
         let fragment = self.0;
