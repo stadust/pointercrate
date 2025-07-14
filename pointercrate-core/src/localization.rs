@@ -3,7 +3,6 @@ pub use fluent::FluentValue;
 use fluent::{concurrent::FluentBundle, FluentArgs, FluentError, FluentMessage, FluentResource};
 use fluent_syntax::parser::ParserError;
 use std::collections::hash_map::Entry;
-use std::os::unix::prelude::OsStrExt;
 use std::{collections::HashMap, fs::read_dir, path::Path, sync::OnceLock};
 use tokio::task_local;
 use unic_langid::subtags::Language;
@@ -50,7 +49,7 @@ impl LocalesLoader {
                     continue;
                 }
 
-                let lang_id = LanguageIdentifier::from_bytes(dir_entry.file_name().as_bytes())?;
+                let lang_id = LanguageIdentifier::from_bytes(dir_entry.file_name().as_encoded_bytes())?;
 
                 let bundle = match bundles.entry(lang_id.language) {
                     Entry::Occupied(bundle) => {

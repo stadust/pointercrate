@@ -212,7 +212,7 @@ fn page_configuration() -> PageConfiguration {
         ],
     })
     // Some links to social media, for example your twitter
-    .with_link("https://twitter.com/stadust1971", tr("footer-developer"));
+    .with_link("https://twitter.com/stadust1971", tr("footer-tweet.developer"));
 
     // Stitching it all together into a page configuration
     PageConfiguration::new("<your website name here>", nav_bar, footer)
