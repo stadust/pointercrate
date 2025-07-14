@@ -1,5 +1,6 @@
 use crate::{head::HeadLike, PageFragment};
-use maud::{html, Markup, PreEscaped};
+use maud::{html, Markup};
+use pointercrate_core::localization::tr;
 
 pub struct ErrorFragment {
     pub status: u16,
@@ -44,9 +45,10 @@ impl ErrorFragment {
                     }
                 }
                 p style="text-align: center; font-size: .7em" {
-                    "Believe we've made a mistake in showing you this error?"(PreEscaped("&nbsp;"))
+                    (tr("error-contact"))
+                    " "
                     a.link href = "/#contact" {
-                        "Contact us!"
+                        (tr("error-contact.contact-link"))
                     }
                 }
             }
