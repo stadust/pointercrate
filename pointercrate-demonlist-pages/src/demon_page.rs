@@ -253,7 +253,9 @@ impl DemonPage {
                                 ("verified-and-published", verified_and_published.into_string())
                             ))) },
                             [creator] => {
-                                @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier { /* Nothing */ }
+                                @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier {
+                                    (PreEscaped(trp!("demon-headline-by", ("creator", P(creator, None).render().into_string()))))
+                                }
                                 @else if creator != &self.data.demon.publisher && creator != &self.data.demon.verifier {
                                     (PreEscaped(trp!(
                                         "demon-headline.one-creator",
