@@ -89,6 +89,8 @@ movements-reason = Reason
 
 ## Records table
 demon-records = Records
+    .none = No records!
+    .none-yet = No records yet! Be the first to achieve one!
 
 demon-records-qualify = {$percent}% { $percent ->
     [100] required to qualify
