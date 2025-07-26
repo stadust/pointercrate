@@ -450,10 +450,10 @@ impl DemonPage {
                     @if self.data.records.is_empty() {
                         h3 {
                             @if position > list_config::extended_list_size() {
-                                "No records!"
+                                (tr("demon-records.none"))
                             }
                             @else {
-                                "No records yet! Be the first to achieve one!"
+                                (tr("demon-records.none-yet"))
                             }
                         }
                     }
