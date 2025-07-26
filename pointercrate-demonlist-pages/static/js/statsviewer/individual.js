@@ -194,7 +194,9 @@ $(window).on("load", function () {
     }
   });
 
-  window.subdivisionDropdown = new Dropdown(document.getElementById("subdivision-dropdown"));
+  window.subdivisionDropdown = new Dropdown(
+    document.getElementById("subdivision-dropdown")
+  );
 
   subdivisionDropdown.addEventListener((selected) => {
     if (selected === "None") {
