@@ -254,7 +254,7 @@ impl Display for DemonlistError {
                 DemonlistError::BannedFromSubmissions => tr("error-demonlist-bannedfromsubmissions"),
                 DemonlistError::ClaimUnverified => tr("error-demonlist-claimunverified"),
                 DemonlistError::VpsDetected => tr("error-demonlist-vpsdetected"),
-                DemonlistError::NoThirdPartySubmissions => tr("nothirdpartysubmissions-error-malformedvideourl"),
+                DemonlistError::NoThirdPartySubmissions => tr("error-demonlist-nothirdpartysubmissions"),
                 DemonlistError::SubmitterNotFound { id } => trp!("error-demonlist-submitternotfound", ("id", id)),
                 DemonlistError::NoteNotFound { note_id, record_id } => {
                     trp!("error-demonlist-notenotfound", ("note-id", note_id), ("record-id", record_id))
