@@ -32,9 +32,12 @@ macro_rules! ratelimits {
             let now = governor::clock::DefaultClock::default().now();
 
             self.$name.check().map_err(|too_early| {
+                let remaining: std::time::Duration = too_early.earliest_possible().duration_since(now).into();
+                log::debug!("Triggered ratelimit '{}'. Cooldown: {}s", stringify!($name), remaining.as_secs());
+
                 pointercrate_core::error::CoreError::Ratelimited {
                     message: $message.to_string(),
-                    remaining: too_early.earliest_possible().duration_since(now).into(),
+                    remaining,
                 }
             })
         }
@@ -48,9 +51,12 @@ macro_rules! ratelimits {
             let now = governor::clock::DefaultClock::default().now();
 
             self.$name.check_key(&ip).map_err(|too_early| {
+                let remaining: std::time::Duration = too_early.earliest_possible().duration_since(now).into();
+                log::debug!("Triggered ratelimit '{}' on key '{}'. Cooldown: {}s", stringify!($name), ip, remaining.as_secs());
+
                 pointercrate_core::error::CoreError::Ratelimited {
                     message: $message.to_string(),
-                    remaining: too_early.earliest_possible().duration_since(now).into(),
+                    remaining,
                 }
             })
         }
