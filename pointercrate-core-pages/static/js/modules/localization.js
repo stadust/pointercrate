@@ -1,9 +1,5 @@
 class LanguageSelector {
   constructor(group) {
-    this.group = $(group);
-
-    this.activeLanguage = document.getElementById("active-language");
-
     // add selection listeners to language items
     Array.from(group.querySelectorAll("[data-lang]")).map((language) => {
       this.addSelectionListener(language.parentNode, "click");

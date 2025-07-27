@@ -149,7 +149,7 @@ fn locale_selection_dropdown() -> Option<NavGroup<TopLevelNavigationBarItem>> {
         html! {
             span.flex {
                 (flag(active_locale.region))
-                span #active-language style = "margin-left: 8px" { (active_locale.language.as_str().to_uppercase()) }
+                span style = "margin-left: 8px" { (active_locale.language.as_str().to_uppercase()) }
             }
         },
     );
