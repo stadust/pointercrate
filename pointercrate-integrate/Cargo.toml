@@ -16,9 +16,7 @@ chrono = "0.4.41"
 tokio = {version = "1.46.1", features = ["rt"]}
 pointercrate-demonlist = { path = "../pointercrate-demonlist" }
 pointercrate-core = { path = "../pointercrate-core" }
+dash-rs = { git = "https://github.com/stadust/dash-rs" }
 governor = "0.10.0"
 nonzero_ext = "0.3.0"
 
-[dependencies.dash-rs]
-git = "https://github.com/stadust/dash-rs"
-rev = "8cdbb85625b7575b8775e6e28ce6850504bc7397"

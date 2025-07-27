@@ -372,11 +372,10 @@ dependencies = [
 [[package]]
 name = "dash-rs"
 version = "0.1.0"
-source = "git+https://github.com/stadust/dash-rs?rev=8cdbb85625b7575b8775e6e28ce6850504bc7397#8cdbb85625b7575b8775e6e28ce6850504bc7397"
+source = "git+https://github.com/stadust/dash-rs#666fb0a915a145eee79a41fa727d643626e96ba4"
 dependencies = [
  "base64 0.21.7",
  "dash-rs-derive",
- "dtoa",
  "flate2",
  "itoa",
  "log",
@@ -390,7 +389,7 @@ dependencies = [
 [[package]]
 name = "dash-rs-derive"
 version = "0.1.0"
-source = "git+https://github.com/stadust/dash-rs?rev=8cdbb85625b7575b8775e6e28ce6850504bc7397#8cdbb85625b7575b8775e6e28ce6850504bc7397"
+source = "git+https://github.com/stadust/dash-rs#666fb0a915a145eee79a41fa727d643626e96ba4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -519,12 +518,6 @@ name = "dotenvy"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
-
-[[package]]
-name = "dtoa"
-version = "1.0.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6add3b8cff394282be81f3fc1a0605db594ed69890078ca6e2cab1c408bcf04"
 
 [[package]]
 name = "either"
