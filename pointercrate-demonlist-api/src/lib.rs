@@ -12,6 +12,10 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
     let dash_rs = GeometryDashConnector::new(rocket.state::<PointercratePool>().unwrap().clone_inner());
 
+    if let Some(endpoint) = config::gd_connector_endpoint() {
+        pointercrate_integrate::set_gd_connector_endpoint(endpoint);
+    }
+
     #[cfg_attr(not(feature = "geolocation"), allow(unused_mut))]
     let mut player_routes = rocket::routes![
         endpoints::player::get,

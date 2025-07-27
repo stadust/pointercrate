@@ -372,7 +372,7 @@ dependencies = [
 [[package]]
 name = "dash-rs"
 version = "0.1.0"
-source = "git+https://github.com/stadust/dash-rs#666fb0a915a145eee79a41fa727d643626e96ba4"
+source = "git+https://github.com/stadust/dash-rs#44216f6847ca85918fab50d3281010fbc7d20df7"
 dependencies = [
  "base64 0.21.7",
  "dash-rs-derive",
@@ -389,7 +389,7 @@ dependencies = [
 [[package]]
 name = "dash-rs-derive"
 version = "0.1.0"
-source = "git+https://github.com/stadust/dash-rs#666fb0a915a145eee79a41fa727d643626e96ba4"
+source = "git+https://github.com/stadust/dash-rs#44216f6847ca85918fab50d3281010fbc7d20df7"
 dependencies = [
  "proc-macro2",
  "quote",

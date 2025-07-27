@@ -6,3 +6,7 @@ pub fn submission_webhook() -> Option<String> {
 pub fn abstract_api_key() -> Option<String> {
     std::env::var("ABSTRACT_API_KEY").ok()
 }
+
+pub fn gd_connector_endpoint() -> Option<String> {
+    std::env::var("GD_CONNECTOR_ENDPOINT").ok()
+}
