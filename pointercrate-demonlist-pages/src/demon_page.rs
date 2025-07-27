@@ -391,7 +391,7 @@ impl DemonPage {
                                 br;
                                 @match song.link {
                                     Thunk::Processed(ref link) if link != "-" => a.link href = (link) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
-                                    Thunk::Processed(_) => {
+                                    Thunk::Processed(_) => a.link href = {"https://www.newgrounds.com/audio/listen/" (song.song_id)} {
                                         (song.name) " by " (song.artist) " (ID " (song.song_id) ")"
                                     },
                                     _ => "unreachable!()"
