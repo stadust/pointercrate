@@ -42,7 +42,10 @@ impl GeometryDashConnector {
             && self.ratelimits.throttle().is_ok()
             && self.ratelimits.demon_refresh(demon.base.id).is_ok()
         {
-            tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
+            tokio::spawn(
+                self.clone()
+                    .refresh_demon_data(demon.base.name.clone(), demon.base.id, demon.level_id),
+            );
         }
 
         if let Some(level_id) = demon.level_id {
@@ -62,19 +65,25 @@ impl GeometryDashConnector {
         None
     }
 
-    pub async fn refresh_demon_data(self, name: String, demon_id: i32) {
+    pub async fn refresh_demon_data(self, name: String, demon_id: i32, level_id: Option<u64>) {
         debug!("Refreshing demon data for {} (id {})", name, demon_id);
 
-        // Lookup demon by name
-        let request = LevelsRequest::default()
-            // Heuristic: list levels have a lot of likes
-            .request_type(LevelRequestType::MostLiked)
-            .search(&name)
-            // passing any `LevelRating::Demon` variant here will result in filtering by arbitrary demon difficulty
-            .with_rating(LevelRating::Demon(DemonRating::Hard))
-            .search_filters(SearchFilters::default().rated());
+        let levels_request = match level_id {
+            None => {
+                // Lookup demon by name
+                LevelsRequest::default()
+                    // Heuristic: list levels have a lot of likes
+                    .request_type(LevelRequestType::MostLiked)
+                    .search(&name)
+                    // passing any `LevelRating::Demon` variant here will result in filtering by arbitrary demon difficulty
+                    .with_rating(LevelRating::Demon(DemonRating::Hard))
+                    .search_filters(SearchFilters::default().rated())
+            },
+            // Potentially need to do a LevelsRequest here to grab newgrounds song and creator
+            Some(level_id) => LevelsRequest::default().search(level_id.to_string()),
+        };
 
-        let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
+        let Ok(response) = self.make_request(levels_request.to_url(), levels_request.to_string()).await else {
             return;
         };
         let Ok(demons) = parse_get_gj_levels_response(&response)
@@ -92,6 +101,14 @@ impl GeometryDashConnector {
             return;
         };
 
+        if let Some(newgrounds_song) = &mut hardest.custom_song {
+            self.store_newgrounds_song(newgrounds_song).await;
+        }
+
+        if let Some(creator) = &hardest.creator {
+            self.store_creator(creator).await;
+        }
+
         let request = LevelRequest::new(hardest.level_id);
         let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
             return;
@@ -102,15 +119,7 @@ impl GeometryDashConnector {
             return;
         };
 
-        if let Some(newgrounds_song) = &mut hardest.custom_song {
-            self.store_newgrounds_song(newgrounds_song).await;
-        }
-
-        if let Some(creator) = &hardest.creator {
-            self.store_creator(creator).await;
-        }
-
-        self.store_level(&hardest, level.creator, level.custom_song).await;
+        self.store_level(&level, level.creator, level.custom_song).await;
         self.store_level_data(level.level_id, &mut level.level_data).await;
 
         let _ = sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level.level_id as i64, demon_id)
