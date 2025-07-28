@@ -71,43 +71,42 @@ impl DemonPage {
 
     fn head(&self) -> Markup {
         html! {
-            (PreEscaped(format!(r##"
+            (PreEscaped(r##"
                 <script type="application/ld+json">
-                {{
+                {
                     "@context": "http://schema.org",
                     "@type": "WebPage",
-                    "breadcrumb": {{
+                    "breadcrumb": {
                         "@type": "BreadcrumbList",
-                        "itemListElement": [{{
+                        "itemListElement": [{
                                 "@type": "ListItem",
                                 "position": 1,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/",
                                     "name": "pointercrate"
-                                }}
-                            }},{{
+                                }
+                            },{
                                 "@type": "ListItem",
                                 "position": 2,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/demonlist/",
                                     "name": "demonlist"
-                                }}
-                            }},{{
+                                }
+                            },{
                                 "@type": "ListItem",
                                 "position": 3,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/demonlist/{0}/",
                                     "name": "{1}"
-                                }}
-                            }}
+                                }
+                            }
                         ]
-                    }},
-                    "name": "#{0} - {1}",
-                    "description": "{2}",
+                    },
+                    "name": "#"##)) (self.data.position()) " - " (self.data.name()) (PreEscaped(r##"","description": ""##)) (self.description().replace(r"\", r"\\")) (PreEscaped(r##"",
                     "url": "https://pointercrate.com/demonlist/{0}/"
-                }}
+                }
                 </script>
-            "##, self.data.position(), self.data.name(), self.description())))
+            "##))
             (PreEscaped(format!("
                 <script>
                     window.list_length = {0};
