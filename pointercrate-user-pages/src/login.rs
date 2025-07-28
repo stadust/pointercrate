@@ -1,7 +1,5 @@
 use maud::{html, Markup};
-use pointercrate_core::{
-    localization::{task_lang, tr},
-};
+use pointercrate_core::localization::{task_lang, tr};
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_user::config;
 

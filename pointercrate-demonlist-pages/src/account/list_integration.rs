@@ -2,7 +2,11 @@ use crate::components::P;
 use log::error;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
-use pointercrate_core_pages::{error::ErrorFragment, trp_html, util::{filtered_paginator, paginator}};
+use pointercrate_core_pages::{
+    error::ErrorFragment,
+    trp_html,
+    util::{filtered_paginator, paginator},
+};
 use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating},

@@ -1,6 +1,6 @@
 use crate::statsviewer::stats_viewer_html;
 use maud::{html, Markup};
-use pointercrate_core::{localization::tr};
+use pointercrate_core::localization::tr;
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_demonlist::nationality::Nationality;
 

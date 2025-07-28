@@ -1,12 +1,12 @@
 use crate::components::{player_selection_dialog, player_selection_dropdown};
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, permission::PermissionsManager};
+use pointercrate_core_pages::trp_html;
 use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
-use pointercrate_core_pages::trp_html;
 
 pub struct DemonsTab;
 
