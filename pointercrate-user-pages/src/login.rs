@@ -75,12 +75,9 @@ fn login_page_body() -> Markup {
                 p style = "text-align: center; padding: 0px 10px" {
                     (PreEscaped(trp!(
                         "register.redirect",
-                        (
-                            "redirect-link",
-                            html! {
-                                a.link href="/register" { (tr("register.redirect-link")) }
-                            }.into_string()
-                        )
+                        "redirect-link" =  html! {
+                            a.link href="/register" { (tr("register.redirect-link")) }
+                        }.into_string()
                     )))
                 }
             }

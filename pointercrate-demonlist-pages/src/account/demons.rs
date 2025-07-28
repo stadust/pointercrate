@@ -272,14 +272,11 @@ fn change_thumbnail_dialog() -> Markup {
                 p style = "max-width: 400px"{
                     (PreEscaped(trp!(
                         "demon-thumbnail-dialog.info",
-                        (
-                            "video-id",
-                            html! {
-                                "https://i.ytimg.com/vi/"
-                                i { (tr("demon-thumbnail-dialog.info-videoid")) }
-                                "/mqdefault.jpg"
-                            }.into_string()
-                        ),
+                        "video-id" = html! {
+                            "https://i.ytimg.com/vi/"
+                            i { (tr("demon-thumbnail-dialog.info-videoid")) }
+                            "/mqdefault.jpg"
+                        }.into_string()
                     )))
                 }
                 form.flex.col novalidate = "" {

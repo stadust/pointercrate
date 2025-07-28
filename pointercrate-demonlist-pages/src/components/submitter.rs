@@ -32,7 +32,7 @@ impl Render for RecordSubmitter<'_> {
                         (tr("record-submission.demon"))
                     }
                     p {
-                        (trp!("record-submission.demon-info", ("list-size", config::extended_list_size())))
+                        (trp!("record-submission.demon-info", "list-size" = config::extended_list_size()))
                     }
                     span.form-input data-type = "dropdown" {
                         (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size())))
@@ -101,12 +101,9 @@ impl Render for RecordSubmitter<'_> {
                     p {
                         (PreEscaped(trp!(
                             "record-submission.guidelines",
-                            (
-                                "guidelines-link",
-                                html! {
-                                    a.link href = "/guidelines" { (tr("record-submission.guidelines-link")) }
-                                }.into_string()
-                            )
+                            "guidelines-link" = html! {
+                                a.link href = "/guidelines" { (tr("record-submission.guidelines-link")) }
+                            }.into_string()
                         )))
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("record-submission.submit"));

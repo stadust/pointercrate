@@ -53,18 +53,16 @@ impl IndividualStatsViewer {
                         p {
                             (PreEscaped(trp!(
                                 "subdivision-panel.info",
-                                (
-                                    "countries",
-                                    html! {
-                                        span.tooltip {
-                                            (tr("subdivision-panel.info-countries"))
+                                "countries" =
+                                html! {
+                                    span.tooltip {
+                                        (tr("subdivision-panel.info-countries"))
 
-                                            span.tooltiptext.fade {
-                                                r#"Argentina, Australia, Brazil, Canada, Chile, Colombia, Finland, France, Germany, Italy, Mexico, Netherlands, Norway, Peru, Poland, Russian Federation, South Korea, Spain, Ukraine, United Kingdom, United States"#
-                                            }
+                                        span.tooltiptext.fade {
+                                            r#"Argentina, Australia, Brazil, Canada, Chile, Colombia, Finland, France, Germany, Italy, Mexico, Netherlands, Norway, Peru, Poland, Russian Federation, South Korea, Spain, Ukraine, United Kingdom, United States"#
                                         }
-                                    }.into_string()
-                                )
+                                    }
+                                }.into_string()
                             )))
                         }
                         div.dropdown-menu.js-search #subdivision-dropdown data-default = "None" {

@@ -212,14 +212,14 @@ impl DemonPage {
             @if self.data.demon.publisher == self.data.demon.verifier {
                 (PreEscaped(trp!(
                     "demon-headline.same-verifier-publisher",
-                    ("publisher", P(&self.data.demon.publisher, None).render().into_string())
+                    "publisher" = P(&self.data.demon.publisher, None).render().into_string()
                 )))
             }
             @else {
                 (PreEscaped(trp!(
                     "demon-headline.unique-verifier-publisher",
-                    ("publisher", P(&self.data.demon.publisher, None).render().into_string()),
-                    ("verifier", P(&self.data.demon.verifier, None).render().into_string())
+                    "publisher" = P(&self.data.demon.publisher, None).render().into_string(),
+                    "verifier" = P(&self.data.demon.verifier, None).render().into_string()
                 )))
             }
         };
@@ -249,55 +249,55 @@ impl DemonPage {
                         @match &self.data.creators[..] {
                             [] => { (PreEscaped(trp!(
                                 "demon-headline.no-creators",
-                                ("verified-and-published", verified_and_published.into_string())
+                                "verified-and-published" = verified_and_published.into_string()
                             ))) },
                             [creator] => {
                                 @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier {
-                                    (PreEscaped(trp!("demon-headline-by", ("creator", P(creator, None).render().into_string()))))
+                                    (PreEscaped(trp!("demon-headline-by", "creator" = P(creator, None).render().into_string())))
                                 }
                                 @else if creator != &self.data.demon.publisher && creator != &self.data.demon.verifier {
                                     (PreEscaped(trp!(
                                         "demon-headline.one-creator",
-                                        ("creator", P(creator, None).render().into_string()),
-                                        ("verified-and-published", verified_and_published.into_string())
+                                        "creator" = P(creator, None).render().into_string(),
+                                        "verified-and-published" = verified_and_published.into_string()
                                     )))
                                 }
                                 @else if creator == &self.data.demon.publisher {
                                     (PreEscaped(trp!(
                                         "demon-headline.one-creator-is-publisher",
-                                        ("creator", P(creator, None).render().into_string()),
-                                        ("verifier", P(&self.data.demon.verifier, None).render().into_string())
+                                        "creator" = P(creator, None).render().into_string(),
+                                        "verifier" = P(&self.data.demon.verifier, None).render().into_string()
                                     )))
                                 }
                                 @else {
                                     (PreEscaped(trp!(
                                         "demon-headline.one-creator-is-verifier",
-                                        ("creator", P(creator, None).render().into_string()),
-                                        ("publisher", P(&self.data.demon.publisher, None).render().into_string())
+                                        "creator" = P(creator, None).render().into_string(),
+                                        "publisher" = P(&self.data.demon.publisher, None).render().into_string()
                                     )))
                                 }
                             },
                             [creator1, creator2] => {
                                 (PreEscaped(trp!(
                                     "demon-headline.two-creators",
-                                    ("creator1", P(creator1, None).render().into_string()),
-                                    ("creator2", P(creator2, None).render().into_string()),
-                                    ("verified-and-published", verified_and_published.into_string())
+                                    "creator1" = P(creator1, None).render().into_string(),
+                                    "creator2" = P(creator2, None).render().into_string(),
+                                    "verified-and-published" = verified_and_published.into_string()
                                 )))
                             },
                             [creator1, rest @ ..] => {
                                 (PreEscaped(trp!(
                                     "demon-headline.more-creators",
-                                    ("creator", P(creator1, None).render().into_string()),
-                                    ("more", html! {
+                                    "creator" = P(creator1, None).render().into_string(),
+                                    "more" = html! {
                                       div.tooltip.underdotted {
                                             (tr("demon-headline.more-creators-tooltip"))
                                             div.tooltiptext.fade {
                                                 (rest.iter().map(|player| player.name.as_ref()).collect::<Vec<_>>().join(", "))
                                             }
                                         }
-                                    }.into_string()),
-                                    ("verified-and-published", verified_and_published.into_string())
+                                    }.into_string(),
+                                    "verified-and-published" = verified_and_published.into_string()
                                 )))
                             }
                         }
@@ -401,7 +401,7 @@ impl DemonPage {
                     @if position <= list_config::extended_list_size() {
                         span {
                             b {
-                                (trp!("demon-score", ("percent", 100.0)))
+                                (trp!("demon-score", "percent" = 100.0))
                             }
                             br;
                             (format!("{:.2}", score100))
@@ -410,7 +410,7 @@ impl DemonPage {
                     @if position <= list_config::list_size(){
                         span {
                             b {
-                                (trp!("demon-score", ("percent", self.data.demon.requirement)))
+                                (trp!("demon-score", "percent" = self.data.demon.requirement))
                             }
                             br;
                             (format!("{:.2}", score_requirement))
@@ -434,18 +434,18 @@ impl DemonPage {
                         }
                         @if position <= list_config::list_size() {
                             h3 {
-                                (trp!("demon-records-qualify", ("percent", self.data.demon.requirement)))
+                                (trp!("demon-records-qualify", "percent" = self.data.demon.requirement))
                             }
                         }
                         @else if position <= list_config::extended_list_size() {
                             h3 {
-                                (trp!("demon-records-qualify", ("percent", 100.0)))
+                                (trp!("demon-records-qualify", "percent" = 100.0))
                             }
                         }
                         @if !self.data.records.is_empty() {
                             h4 {
                                 @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
-                                (trp!("demon-records-total", ("num-records", self.data.records.len()), ("num-completions", records_registered_100_count)))
+                                (trp!("demon-records-total", "num-records" = self.data.records.len(), "num-completions" = records_registered_100_count))
                             }
                         }
                     }

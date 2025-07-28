@@ -108,12 +108,9 @@ impl AccountPageTab for ListIntegrationTab {
                                     p {
                                         (PreEscaped(trp!(
                                             "claim-geolocate.info",
-                                            (
-                                                "info-api-link",
-                                                html! {
-                                                    a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
-                                                }.into_string()
-                                            )
+                                            "info-api-link" = html! {
+                                                a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
+                                            }.into_string()
                                         )))
                                     }
                                 }
@@ -145,29 +142,18 @@ impl AccountPageTab for ListIntegrationTab {
                             p {
                                 (PreEscaped(trp!(
                                     "claim-records.info",
-                                    (
-                                        "record-approved-styled",
-                                        html! {
-                                            span.ok { (tr("record-approved")) }
-                                        }.into_string()
-                                    ),(
-                                        "record-submitted-styled",
-                                        html! {
-                                            span.warn { (tr("record-submitted")) }
-                                        }.into_string()
-                                    ),
-                                    (
-                                        "record-rejected-styled",
-                                        html! {
-                                            span.err { (tr("record-rejected")) }
-                                        }.into_string()
-                                    ),
-                                    (
-                                        "record-underconsideration-styled",
-                                        html! {
-                                            span.consider { (tr("record-underconsideration")) }
-                                        }.into_string()
-                                    )
+                                    "record-approved-styled" = html! {
+                                        span.ok { (tr("record-approved")) }
+                                    }.into_string(),
+                                    "record-submitted-styled" = html! {
+                                        span.warn { (tr("record-submitted")) }
+                                    }.into_string(),
+                                    "record-rejected-styled" = html! {
+                                        span.err { (tr("record-rejected")) }
+                                    }.into_string(),
+                                    "record-underconsideration-styled" = html! {
+                                        span.consider { (tr("record-underconsideration")) }
+                                    }.into_string()
                                 )))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
@@ -211,12 +197,9 @@ impl AccountPageTab for ListIntegrationTab {
                         br;
                         (PreEscaped(trp!(
                             "claim-info-panel.info-b",
-                            (
-                                "discord",
-                                html! {
-                                    a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
-                                }.into_string()
-                            )
+                            "discord" = html! {
+                                a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
+                            }.into_string()
                         )))
                         br;
                         (tr("claim-info-panel.info-c"))

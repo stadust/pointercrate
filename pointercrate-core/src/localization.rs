@@ -245,7 +245,7 @@ pub fn tr(text_id: &str) -> String {
 /// Source text: `demon-score = Demonlist score ({$percent}%)`
 #[macro_export]
 macro_rules! trp {
-    ($text_id:expr $(, ($key:expr, $value:expr) )* $(,)?) => {{
+    ($text_id:expr $(, $key:literal = $value:expr )* $(,)?) => {{
         use std::collections::HashMap;
         use $crate::localization::{LANGUAGE, FluentValue, LocaleConfiguration};
 
