@@ -7,9 +7,9 @@ use crate::{
     },
     statsviewer::stats_viewer_panel,
 };
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, trp};
-use pointercrate_core_pages::{head::HeadLike, PageFragment};
+use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_demonlist::player::FullPlayer;
 use pointercrate_demonlist::{
     config as list_config, config,
@@ -158,10 +158,10 @@ impl OverviewPage {
                              }
                          }
                          h3 style = "text-align: left" {
-                            (PreEscaped(trp!(
+                            (trp_html!(
                                 "demon-info",
-                                "publisher" = P(&demon.publisher, None).render().into_string()
-                            )))
+                                "publisher" = html!{(P(&demon.publisher, None))}
+                            ))
                          }
                          div style="text-align: left; font-size: 0.8em" {
                             @if let Some(current_position) = current_position {

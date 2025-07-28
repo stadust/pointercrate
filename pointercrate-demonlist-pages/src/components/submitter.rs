@@ -1,6 +1,7 @@
 use crate::components::{demon_dropdown, player_selection_dropdown};
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, Render};
 use pointercrate_core::{localization::tr, trp};
+use pointercrate_core_pages::trp_html;
 use pointercrate_demonlist::{config, demon::Demon};
 
 pub struct RecordSubmitter<'a> {
@@ -99,12 +100,12 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     p {
-                        (PreEscaped(trp!(
+                        (trp_html!(
                             "record-submission.guidelines",
                             "guidelines-link" = html! {
                                 a.link href = "/guidelines" { (tr("record-submission.guidelines-link")) }
-                            }.into_string()
-                        )))
+                            }
+                        ))
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("record-submission.submit"));
                 }

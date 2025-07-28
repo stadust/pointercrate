@@ -2,10 +2,7 @@ use crate::components::P;
 use log::error;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
-use pointercrate_core_pages::{
-    error::ErrorFragment,
-    util::{filtered_paginator, paginator},
-};
+use pointercrate_core_pages::{error::ErrorFragment, trp_html, util::{filtered_paginator, paginator}};
 use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating},
@@ -106,12 +103,12 @@ impl AccountPageTab for ListIntegrationTab {
                                         }
                                     }
                                     p {
-                                        (PreEscaped(trp!(
+                                        (trp_html!(
                                             "claim-geolocate.info",
                                             "info-api-link" = html! {
                                                 a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
-                                            }.into_string()
-                                        )))
+                                            }
+                                        ))
                                     }
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
@@ -195,12 +192,12 @@ impl AccountPageTab for ListIntegrationTab {
                     p {
                         (tr("claim-info-panel.info-a"))
                         br;
-                        (PreEscaped(trp!(
+                        (trp_html!(
                             "claim-info-panel.info-b",
                             "discord" = html! {
                                 a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
-                            }.into_string()
-                        )))
+                            }
+                        ))
                         br;
                         (tr("claim-info-panel.info-c"))
                     }
