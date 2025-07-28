@@ -96,8 +96,8 @@ impl DemonPage {
                                 "@type": "ListItem",
                                 "position": 3,
                                 "item": {
-                                    "@id": "https://pointercrate.com/demonlist/{0}/",
-                                    "name": "{1}"
+                                    "@id": "https://pointercrate.com/demonlist/"##)) (self.data.position()) (PreEscaped(r##"/",
+                                    "name": ""##)) (self.data.name()) (PreEscaped(r##""
                                 }
                             }
                         ]
