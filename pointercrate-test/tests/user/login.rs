@@ -106,7 +106,7 @@ pub async fn test_no_login_if_google_account_linked(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
 
     // Make sure the user we're trying to log in to exists
-    let user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut *connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut connection).await;
 
     client
         .post("/api/v1/auth/", &())

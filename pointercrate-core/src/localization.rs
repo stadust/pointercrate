@@ -70,7 +70,7 @@ impl LocalesLoader {
                         continue;
                     }
 
-                    let source = FluentResource::try_new(std::fs::read_to_string(&ftl_file.path())?)
+                    let source = FluentResource::try_new(std::fs::read_to_string(ftl_file.path())?)
                         .map_err(|(_, errors)| LoaderError::FluentParsing(errors))?;
 
                     for entry in source.entries() {
@@ -79,7 +79,7 @@ impl LocalesLoader {
                         }
                     }
 
-                    bundle.add_resource(source).map_err(|errors| LoaderError::FluentConflict(errors))?
+                    bundle.add_resource(source).map_err(LoaderError::FluentConflict)?
                 }
             }
         }

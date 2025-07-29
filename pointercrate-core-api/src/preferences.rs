@@ -18,7 +18,7 @@ impl<'k: 'v, 'v> ClientPreferences<'k, 'v> {
     /// `T` must implement `From<ClientPreference>`, which [`String`] already
     /// implements, in case the untouched cookie value is what needs to be handled.
     pub fn get(&self, name: &'k str) -> Option<&'v str> {
-        self.0.get(name).map(|&s| s)
+        self.0.get(name).copied()
     }
 
     pub fn from_cookies(cookies: &'v CookieJar<'v>, preference_manager: &'k PreferenceManager) -> Self {
@@ -32,8 +32,7 @@ impl<'k: 'v, 'v> ClientPreferences<'k, 'v> {
                         cookies
                             .get(&format!("preference-{}", name))
                             .map(|cookie| cookie.value())
-                            .unwrap_or(default)
-                            .as_ref(),
+                            .unwrap_or(default),
                     )
                 })
                 .collect(),

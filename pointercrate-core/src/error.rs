@@ -251,7 +251,7 @@ impl Display for CoreError {
                     "message" = message,
                     "remaining-duration" = format!("{:.2?}", remaining)
                 ),
-                CoreError::InternalServerError { .. } => tr("error-core-internalservererror"),
+                CoreError::InternalServerError => tr("error-core-internalservererror"),
                 CoreError::DatabaseError => tr("error-core-databaseerror"),
                 CoreError::QueryTimeout => tr("error-core-querytimeout"),
                 CoreError::DatabaseConnectionError => tr("error-core-databaseconnectionerror"),

@@ -357,7 +357,7 @@ async fn test_player_merge(pool: Pool<Postgres>) {
     assert_eq!(patched.player.base.id, player2.id);
 
     client
-        .get(&format!("/api/v1/players/{}/", player1.id))
+        .get(format!("/api/v1/players/{}/", player1.id))
         .expect_status(Status::NotFound)
         .execute()
         .await;
