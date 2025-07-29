@@ -16,6 +16,12 @@ pub type Result<T> = std::result::Result<T, DemonlistError>;
 pub enum DemonlistError {
     Core(CoreError),
 
+    /// `400 BAD REQUEST` error returned if a request could not be geolocated
+    ///
+    /// Wikipedia says 400 is appropriate for "deceptive request routine", so it seems to fit the
+    /// bill for this error scenario.
+    GeolocationFailed,
+
     MalformedVideoUrl,
 
     /// `403 FORBIDDEN` error returned if someone with an IP-address that's banned from submitting
@@ -202,6 +208,7 @@ impl PointercrateError for DemonlistError {
 
         match self {
             Core(core) => core.error_code(),
+            GeolocationFailed => 40003,
             SubmitterNotFound { .. } => 40401,
             NoteNotFound { .. } => 40401,
             CreatorNotFound { .. } => 40401,
@@ -250,6 +257,7 @@ impl Display for DemonlistError {
                 DemonlistError::Core(core) => {
                     return core.fmt(f);
                 },
+                DemonlistError::GeolocationFailed => tr("error-demonlist-geolocationfailed"),
                 DemonlistError::MalformedVideoUrl => tr("error-demonlist-malformedvideourl"),
                 DemonlistError::BannedFromSubmissions => tr("error-demonlist-bannedfromsubmissions"),
                 DemonlistError::ClaimUnverified => tr("error-demonlist-claimunverified"),

@@ -46,8 +46,7 @@ claimed-player = Claimed Player
 # .info-api-link is turned into a clickable link to the geolocation API
 # pointercrate uses, and replaces { $info-api-link }
 claim-geolocate = Geolocate statsviewer flag
-    .info = Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses { $info-api-link }. Clicking the above button also counts as your consent for pointercrate to send your IP to abstract.
-    .info-api-link = abstract's IP geolocation API
+    .info = Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, your IP address might be shared with third-party services. Please consult the privacy policy for more information!
 
     .submit = Go
 

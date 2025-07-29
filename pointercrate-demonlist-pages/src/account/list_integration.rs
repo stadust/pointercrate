@@ -95,6 +95,8 @@ impl AccountPageTab for ListIntegrationTab {
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
                             div.overlined.pad.js-collapse-content #claims-claim-panel style="display:none" {
+                                // It'd be neat to eliminate this feature and instead have this tied to the presence of a Box<dyn GeolocationProvider> state, but
+                                // plumbing that information all the way here is... hella complicated.
                                 @if cfg!(feature = "geolocation") {
                                     p.info-red.output style = "margin: 10px 0" {}
                                     p.info-green.output style = "margin: 10px 0" {}
@@ -107,12 +109,7 @@ impl AccountPageTab for ListIntegrationTab {
                                         }
                                     }
                                     p {
-                                        (trp_html!(
-                                            "claim-geolocate.info",
-                                            "info-api-link" = html! {
-                                                a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
-                                            }
-                                        ))
+                                        (tr("claim-geolocate.info"))
                                     }
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {

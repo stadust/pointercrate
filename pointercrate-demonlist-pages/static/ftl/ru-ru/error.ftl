@@ -37,5 +37,4 @@ error-demonlist-invalidlevelid = ID уровня должен быть поло�
 error-demonlist-ratelimit-record-submit = Вы отправляете слишком много рекордов слишком часто!
 error-demonlist-ratelimit-record-submit-global = Слишком много рекордов отправляется на данный момент!
 error-demonlist-ratelimit-new-submitters = Ограничение запросов для DDoS-защиты
-error-demonlist-ratelimit-geolocate = Вы можете использовать геолокацию лишь раз в месяц!
 error-demonlist-ratelimit-add-demon = Поаккуратнее с кнопкой бро

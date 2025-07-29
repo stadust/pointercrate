@@ -46,9 +46,6 @@ claimed-player = Присвоенный профиль
 # .info-api-link is turned into a clickable link to the geolocation API
 # pointercrate uses, and replaces { $info-api-link }
 claim-geolocate = Указать флаг для панели статистики по геолокации
-    .info = Нажатие на кнопку выше позволит вам поставить флаг в панели статистики через IP-геолокацию. Для этой возможности pointercrate использует { $info-api-link }. Нажатие на кнопку выше также считается как ваше согласие на использование IP pointercrate для отправки его abstract.
-    .info-api-link = API IP-геолокации от abstract
-
     .submit = Найти
 
     .edit-success = Страна указана как { $nationality }

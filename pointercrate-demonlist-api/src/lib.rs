@@ -6,8 +6,13 @@ use rocket::{Build, Rocket};
 pub(crate) mod claims;
 pub(crate) mod config;
 mod endpoints;
+#[cfg(feature = "geolocation")]
+mod geolocate;
 pub(crate) mod pages;
 pub(crate) mod ratelimits;
+
+#[cfg(feature = "geolocation")]
+pub use geolocate::GeolocationProvider;
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
