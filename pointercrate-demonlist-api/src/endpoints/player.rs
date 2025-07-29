@@ -44,12 +44,8 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
 }
 
 #[localized]
-#[rocket::get("/me")]
-pub async fn get_me(auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
-    let Some(auth) = auth else {
-        return Err(CoreError::Unauthorized.into());
-    };
-
+#[rocket::get("/me", rank = 0)]
+pub async fn get_me(auth: Auth<ApiToken>, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
     let mut connection = pool.connection().await?;
 
     let user = auth.user.into_user();
