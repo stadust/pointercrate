@@ -172,7 +172,8 @@ pub async fn paginate_claims(
 #[rocket::post("/me/geolocate")]
 pub async fn geolocate_nationality(
     // This is ugly, but there is no other way to trigger our custom error responders from FromRequest impls :/
-    auth: std::result::Result<AuthWithClaim<ApiToken, true>, DemonlistError>, location: std::result::Result<crate::geolocate::GeolocatedNationality, DemonlistError>,
+    auth: std::result::Result<AuthWithClaim<ApiToken, true>, DemonlistError>,
+    location: std::result::Result<crate::geolocate::GeolocatedNationality, DemonlistError>,
 ) -> Result<Json<pointercrate_demonlist::nationality::Nationality>> {
     let AuthWithClaim(mut auth, claim) = auth?;
     let location = location?;

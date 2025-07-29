@@ -1,4 +1,3 @@
-use std::net::IpAddr;
 use maud::html;
 use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::pool::PointercratePool;
@@ -11,15 +10,16 @@ use pointercrate_core_pages::{
     PageConfiguration,
 };
 use pointercrate_demonlist::LIST_ADMINISTRATOR;
+use pointercrate_demonlist_api::GeolocationProvider;
 use pointercrate_demonlist_pages::account::{
     demons::DemonsTab, list_integration::ListIntegrationTab, players::PlayersPage, records::RecordsPage,
 };
 use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
 use rocket::{async_trait, fs::FileServer, response::Redirect, serde, uri, Request};
+use std::net::IpAddr;
 use unic_langid::lang;
 use unic_langid::subtags::Language;
-use pointercrate_demonlist_api::GeolocationProvider;
 
 /// A catcher for 404 errors (e.g. when a user tried to navigate to a URL that
 /// does not exist)
