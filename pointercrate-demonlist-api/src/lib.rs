@@ -3,6 +3,7 @@ use pointercrate_core::pool::PointercratePool;
 use pointercrate_integrate::gd::GeometryDashConnector;
 use rocket::{Build, Rocket};
 
+pub(crate) mod claims;
 pub(crate) mod config;
 mod endpoints;
 pub(crate) mod pages;

@@ -1,4 +1,6 @@
-use pointercrate_core::{error::CoreError, pool::PointercratePool};
+use crate::claims::AuthWithClaim;
+use pointercrate_core::error::CoreError;
+use pointercrate_core::pool::PointercratePool;
 use pointercrate_core_api::{
     error::Result,
     etag::{Precondition, TaggableExt, Tagged},
@@ -45,15 +47,11 @@ pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPaginat
 
 #[localized]
 #[rocket::get("/me", rank = 0)]
-pub async fn get_me(auth: Auth<ApiToken>, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
-    let mut connection = pool.connection().await?;
+pub async fn get_me(auth: AuthWithClaim<ApiToken, false>) -> Result<Tagged<FullPlayer>> {
+    let AuthWithClaim(mut auth, claim) = auth;
 
-    let user = auth.user.into_user();
-    let Some(player_claim) = PlayerClaim::by_user(user.id, &mut connection).await? else {
-        return Err(CoreError::NotFound.into());
-    };
-    let player = Player::by_id(player_claim.player.id, &mut connection).await?;
-    let full_player = player.upgrade(&mut connection).await?;
+    let player = Player::by_id(claim.player.id, &mut auth.connection).await?;
+    let full_player = player.upgrade(&mut auth.connection).await?;
 
     Ok(Tagged(full_player))
 }
