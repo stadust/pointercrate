@@ -8,6 +8,7 @@ use rocket::http::Status;
 use serde_json::json;
 use sqlx::{PgConnection, Pool, Postgres};
 
+mod claim;
 mod score;
 
 async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, DatabasePlayer) {
