@@ -63,6 +63,8 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let fragment = self.0;
 
+        let is_uk = request.headers().get_one("CF-IPCountry").map(|c| c == "GB").unwrap_or(false);
+
         let rendered_fragment = html! {
             (DOCTYPE)
             html lang=(lang_id) prefix="og: http://opg.me/ns#" {
@@ -73,6 +75,13 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
                 body {
                     div.content {
                         (nav_bar)
+                        @if is_uk {
+                            nav.red style="height:auto; font-weight: bolder; position: relative; z-index: 100" {
+                                marquee scrolldelay = "60" {
+                                    "Stand for a free internet, and the right to privacy and anonymity! " a.link href = "https://petition.parliament.uk/petitions/722903" style = "color: var(--color-error-bg)" {"Call"} " upon the UK government to repeal the " a.link href = "https://www.openrightsgroup.org/campaign/online-safety-bill-campaign-hub/" style = "color: var(--color-error-bg)" {"Online Safety Act!"} " Don't give up your privacy, use a " a.link href = "https://protonvpn.com/free-vpn" style = "color: var(--color-error-bg)"  {"VPN!"}
+                                }
+                            }
+                        }
                         (fragment.body)
                         div #bg {}
                     }
