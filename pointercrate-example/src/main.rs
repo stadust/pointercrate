@@ -1,3 +1,4 @@
+use std::net::IpAddr;
 use maud::html;
 use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::pool::PointercratePool;
@@ -15,9 +16,10 @@ use pointercrate_demonlist_pages::account::{
 };
 use pointercrate_user::MODERATOR;
 use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
-use rocket::{fs::FileServer, response::Redirect, uri};
+use rocket::{async_trait, fs::FileServer, response::Redirect, serde, uri, Request};
 use unic_langid::lang;
 use unic_langid::subtags::Language;
+use pointercrate_demonlist_api::GeolocationProvider;
 
 /// A catcher for 404 errors (e.g. when a user tried to navigate to a URL that
 /// does not exist)
@@ -56,6 +58,35 @@ fn home() -> Redirect {
 }
 
 const DEFAULT_LOCALE: Language = lang!("en");
+
+/// A very simplistic geolocation provider based on https://ipwho.is/
+///
+/// Note that ipwho.is is only free for testing, non-commercial use-cases, and
+/// up to 1000 requests / mo. In a production environment, it would be up to you to
+/// implement appropriate rate limits / use a service that matches your usecase!
+///
+/// Note that when running this locally, all requests will come from 127.0.0.1, which
+/// obviously cannot be geolocated.
+struct IpWhoIsGeolocationProvider;
+
+#[async_trait]
+impl GeolocationProvider for IpWhoIsGeolocationProvider {
+    async fn geolocate(&self, req: &Request<'_>) -> Option<(String, Option<String>)> {
+        #[derive(serde::Deserialize)]
+        struct IpWhoIsResponse {
+            country_code: String,
+            region_code: Option<String>,
+        }
+
+        let remote_ip: IpAddr = req.guard().await.succeeded()?;
+
+        let resp = reqwest::get(format!("https://ipwho.is/{}", remote_ip)).await.ok()?;
+
+        let data: IpWhoIsResponse = resp.json().await.ok()?;
+
+        Some((data.country_code, data.region_code))
+    }
+}
 
 #[rocket::launch]
 async fn rocket() -> _ {
@@ -105,6 +136,9 @@ async fn rocket() -> _ {
     let preference_manager = PreferenceManager::default().with_localization();
 
     let rocket = rocket.manage(preference_manager);
+
+    // Register the geolocation provider, so that we can geolocate player claims. The type erasure is important, otherwise you'll get internal server errors!
+    let rocket = rocket.manage(Box::new(IpWhoIsGeolocationProvider) as Box<dyn GeolocationProvider>);
 
     // Set up which tabs can show up in the "user area" of your website. Anything
     // that implements the [`AccountPageTab`] trait can be displayed here. Note that

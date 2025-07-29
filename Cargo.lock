@@ -2004,7 +2004,9 @@ dependencies = [
  "pointercrate-user",
  "pointercrate-user-api",
  "pointercrate-user-pages",
+ "reqwest",
  "rocket",
+ "serde",
  "unic-langid",
 ]
 
