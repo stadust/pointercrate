@@ -1,4 +1,5 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
+use pointercrate_core::error::CoreError;
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
 use pointercrate_core_macros::localized;
@@ -24,7 +25,6 @@ use pointercrate_user::auth::legacy::{LegacyAuthenticatedUser, Registration};
 #[cfg(feature = "oauth2")]
 use {
     crate::oauth::GoogleCertificateStore,
-    pointercrate_core::error::CoreError,
     pointercrate_user::auth::oauth::{OauthRegistration, UnvalidatedOauthCredential},
 };
 
@@ -61,7 +61,7 @@ pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Pag
 #[localized]
 #[rocket::post("/login")]
 pub async fn login(
-    auth: Result<Auth<PasswordOrBrowser>, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>,
+    auth: Result<Auth<PasswordOrBrowser>, CoreError>, ip: IpAddr, ratelimits: &State<UserRatelimits>, cookies: &CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
     ratelimits.login_attempts(ip)?;
 

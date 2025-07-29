@@ -1,9 +1,8 @@
 use crate::{
     auth::{AuthenticatedUser, AuthenticationType},
-    error::Result,
     User,
 };
-use pointercrate_core::error::CoreError;
+use pointercrate_core::error::{CoreError, Result};
 use sqlx::{Error, PgConnection};
 
 use super::NoAuth;
@@ -18,7 +17,7 @@ impl AuthenticatedUser<NoAuth> {
         .await;
 
         match row {
-            Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
+            Err(Error::RowNotFound) => Err(CoreError::Unauthorized),
             Err(err) => Err(err.into()),
             Ok(row) => {
                 let user = construct_from_row!(row);
@@ -50,7 +49,7 @@ impl AuthenticatedUser<NoAuth> {
         .await;
 
         match row {
-            Err(Error::RowNotFound) => Err(CoreError::Unauthorized.into()),
+            Err(Error::RowNotFound) => Err(CoreError::Unauthorized),
             Err(err) => Err(err.into()),
             Ok(row) => {
                 let user = construct_from_row!(row);

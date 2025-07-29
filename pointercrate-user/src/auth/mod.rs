@@ -20,9 +20,10 @@
 //! See [`AuthenticatedUser`] for implementation details.
 
 pub use self::patch::PatchMe;
-use crate::{config, error::Result, User};
+use crate::{config, User};
 use jsonwebtoken::{DecodingKey, EncodingKey, Validation};
 use legacy::LegacyAuthenticatedUser;
+use pointercrate_core::error::Result;
 use pointercrate_core::{error::CoreError, util::csprng_u64};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -113,7 +114,7 @@ impl AccessClaims {
     }
 
     pub fn id(&self) -> Result<i32> {
-        self.sub.parse().map_err(|_| CoreError::Unauthorized.into())
+        self.sub.parse().map_err(|_| CoreError::Unauthorized)
     }
 }
 
@@ -137,7 +138,7 @@ pub fn generate_jwt<C: Serialize>(claims: &C) -> String {
 
 pub fn decode_jwt<C: DeserializeOwned>(jwt: &str, validation: &Validation) -> Result<C> {
     jsonwebtoken::decode::<C>(jwt, &DecodingKey::from_secret(&config::secret()), validation)
-        .map_err(|_| CoreError::Unauthorized.into())
+        .map_err(|_| CoreError::Unauthorized)
         .map(|token_data| token_data.claims)
 }
 
@@ -175,7 +176,7 @@ impl<Auth> AuthenticatedUser<Auth> {
 impl AuthenticatedUser<NoAuth> {
     pub fn validate_api_access(self, claims: AccessClaims) -> Result<AuthenticatedUser<ApiToken>> {
         if claims.gen != self.gen || claims.id()? != self.user().id || claims.session_uuid.is_some() {
-            Err(CoreError::Unauthorized.into())
+            Err(CoreError::Unauthorized)
         } else {
             Ok(AuthenticatedUser {
                 gen: self.gen,
@@ -187,7 +188,7 @@ impl AuthenticatedUser<NoAuth> {
 
     pub fn validate_cookie_claims(self, claims: AccessClaims) -> Result<AuthenticatedUser<NonMutating>> {
         if claims.gen != self.gen || claims.id()? != self.user().id || claims.session_uuid.is_none() {
-            Err(CoreError::Unauthorized.into())
+            Err(CoreError::Unauthorized)
         } else {
             Ok(AuthenticatedUser {
                 gen: self.gen,
@@ -200,7 +201,7 @@ impl AuthenticatedUser<NoAuth> {
     pub fn verify_password(self, password: &str) -> Result<AuthenticatedUser<PasswordOrBrowser>> {
         match &self.auth_type {
             AuthenticationType::Legacy(legacy) => legacy.verify(password)?,
-            _ => return Err(CoreError::Unauthorized.into()),
+            _ => return Err(CoreError::Unauthorized),
         }
 
         Ok(AuthenticatedUser {
@@ -221,7 +222,7 @@ impl AuthenticatedUser<NonMutating> {
                 auth_type: self.auth_type,
                 auth_artifact: PasswordOrBrowser(false),
             }),
-            _ => Err(CoreError::Unauthorized.into()),
+            _ => Err(CoreError::Unauthorized),
         }
     }
 }
@@ -266,7 +267,7 @@ impl AuthenticatedUser<PasswordOrBrowser> {
 
     pub fn downgrade_auth_type(self) -> Result<AuthenticatedUser<ApiToken>> {
         if self.auth_artifact.0 {
-            Err(CoreError::Unauthorized.into())
+            Err(CoreError::Unauthorized)
         } else {
             Ok(AuthenticatedUser {
                 gen: self.gen,

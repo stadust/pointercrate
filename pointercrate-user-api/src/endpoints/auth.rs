@@ -18,6 +18,7 @@ use rocket::{
 };
 use std::net::IpAddr;
 
+use pointercrate_core::error::CoreError;
 #[cfg(feature = "legacy_accounts")]
 use {
     pointercrate_core::pool::PointercratePool,
@@ -53,7 +54,7 @@ pub async fn register(
 #[localized]
 #[rocket::post("/")]
 pub async fn login(
-    auth: std::result::Result<Auth<PasswordOrBrowser>, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>,
+    auth: std::result::Result<Auth<PasswordOrBrowser>, CoreError>, ip: IpAddr, ratelimits: &State<UserRatelimits>,
 ) -> Result<Response2<Json<serde_json::Value>>> {
     ratelimits.login_attempts(ip)?;
     let auth = auth?;

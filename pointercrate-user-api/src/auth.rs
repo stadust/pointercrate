@@ -7,10 +7,7 @@ use pointercrate_core::{
 };
 use pointercrate_core_api::error::IntoOutcome2;
 use pointercrate_core_api::{tryo_result, tryo_state};
-use pointercrate_user::{
-    auth::{AccessClaims, ApiToken, AuthenticatedUser, NonMutating, PasswordOrBrowser},
-    error::UserError,
-};
+use pointercrate_user::auth::{AccessClaims, ApiToken, AuthenticatedUser, NonMutating, PasswordOrBrowser};
 use rocket::{
     http::{Method, Status},
     request::{FromRequest, Outcome},
@@ -27,11 +24,11 @@ pub struct Auth<A> {
 }
 
 impl<A> Auth<A> {
-    pub async fn commit(self) -> Result<(), UserError> {
-        self.connection.commit().await.map_err(UserError::from)
+    pub async fn commit(self) -> Result<(), CoreError> {
+        self.connection.commit().await.map_err(CoreError::from)
     }
 
-    pub fn require_permission(&self, permission: Permission) -> Result<(), UserError> {
+    pub fn require_permission(&self, permission: Permission) -> Result<(), CoreError> {
         self.permissions.require_permission(self.user.user().permissions, permission)?;
 
         Ok(())
@@ -48,7 +45,7 @@ impl<A> Auth<A> {
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<NonMutating> {
-    type Error = UserError;
+    type Error = CoreError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let Some(access_token) = request.cookies().get("access_token") else {
@@ -76,7 +73,7 @@ impl<'r> FromRequest<'r> for Auth<NonMutating> {
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<ApiToken> {
-    type Error = UserError;
+    type Error = CoreError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         // No auth header set, forward to the request handler that doesnt require authorization (if one exists)
@@ -127,7 +124,7 @@ impl<'r> FromRequest<'r> for Auth<ApiToken> {
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth<PasswordOrBrowser> {
-    type Error = UserError;
+    type Error = CoreError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         if request.method() == Method::Get {
