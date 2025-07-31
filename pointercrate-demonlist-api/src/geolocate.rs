@@ -26,7 +26,12 @@ impl<'r> FromRequest<'r> for GeolocatedNationality {
 
         let pool = tryo_state!(request, PointercratePool);
         let mut connection = tryo_result!(pool.connection().await);
-        let mut nationality = tryo_result!(Nationality::by_country_code_or_name(&country_code, &mut connection).await);
+        let mut nationality = tryo_result!(Nationality::by_country_code_or_name(&country_code, &mut connection)
+            .await
+            .inspect_err(|_| log::warn!(
+                "Received country code '{}' from geolocation provider, but no such country exists in the database.",
+                &country_code
+            )));
         if let Some(region) = region_iso_code {
             nationality.subdivision = nationality
                 .subdivision_by_code(&region, &mut connection)
