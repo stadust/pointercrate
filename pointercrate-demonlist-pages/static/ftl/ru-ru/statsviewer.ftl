@@ -28,21 +28,21 @@ statsviewer-nation = Страны
     .players = Игроки
     .unbeaten = Непройденные демоны
 
-    .created-tooltip = Был создан { $players } { $players ->
+    .created-tooltip = Создан { $players } { $players ->
             [one] игрок
             [few] игрока
             [many] игроков
             *[other] игроков
         } в этой стране:
-    .published-tooltip = Был опубликован:
-    .verified-tooltip = Был верифицирован:
-    .beaten-tooltip = Был пройден { $players } { $players ->
+    .published-tooltip = Опубликован:
+    .verified-tooltip = Верифицирован:
+    .beaten-tooltip = Пройден { $players } { $players ->
             [one] игрок
             [few] игрока
             [many] игроков
             *[other] игроков
         } в этой стране:
-    .progress-tooltip = Был достигнут { $players } { $players ->
+    .progress-tooltip = Достигнут { $players } { $players ->
             [one] игрок
             [few] игрока
             [many] игроков
