@@ -49,8 +49,8 @@ demon-verifier = Верифер
 demon-creators = Создатели
 
 demon-headline-by = от { $creator }
-demon-headline-verified-by = был верифицирован { $verifier }
-demon-headline-published-by = был опубликован { $publisher }
+demon-headline-verified-by = верифицирован { $verifier }
+demon-headline-published-by = опубликован { $publisher }
 
 # { $verified-and-published } represents two possible variations of text
 # either .same-verifier-publisher OR .unique-verifier-publisher
@@ -58,14 +58,14 @@ demon-headline-published-by = был опубликован { $publisher }
 # { $more } in .more-creators is transformed into a tooltip listing all of
 # a demon's creators, with the text being .more-creators-tooltip
 demon-headline = от { $creator }
-    .same-verifier-publisher = был верифицирован и опубликован { $publisher }
+    .same-verifier-publisher = верифицирован и опубликован { $publisher }
     .unique-verifier-publisher = { demon-headline-published-by }, { demon-headline-verified-by }
 
-    .no-creators = от Unknown, { $verified-and-published }
+    .no-creators = от Неизвестно, { $verified-and-published }
 
     .one-creator = { demon-headline-by }, { $verified-and-published }
-    .one-creator-is-publisher = { demon-headline-by }, был верифицирован { $verifier }
-    .one-creator-is-verifier = { demon-headline-by }, был опубликован { $publisher }
+    .one-creator-is-publisher = { demon-headline-by }, верифицирован { $verifier }
+    .one-creator-is-verifier = { demon-headline-by }, опубликован { $publisher }
 
     .two-creators = от { $creator1 } и { $creator2 }, { $verified-and-published }
 
@@ -83,9 +83,9 @@ movements-newposition = Новая позиция
 movements-reason = Причина
     .added = Добавлен в лист
     .addedabove = { $demon } был добавлен выше
-    .moved = Подвинут
-    .movedabove = { $demon } был подвинут выше этого демона
-    .movedbelow = { $demon } был подвинут ниже этого демона
+    .moved = Перемещён
+    .movedabove = { $demon } был перемещён выше
+    .movedbelow = { $demon } был перемещён ниже
 
 ## Records table
 demon-records = Рекорды
