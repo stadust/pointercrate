@@ -12,7 +12,7 @@ record-submission-panel = Отправление рекордов
 #
 # { $guidelines-link } will be replaced by .guidelines-link,
 # which is turned into a clickable link to the submission guidelines
-record-submission = Отправленный рекорд
+record-submission = Отправление рекордов
     .note = Заметка
 
     .demon = Демон
@@ -36,7 +36,7 @@ record-submission = Отправленный рекорд
     .progress-validator-rangeunderflow = Значение прогресса не может быть отрицательным
     .progress-validator-rangeoverflow = Значение прогресса не может быть больше 100%
     .progress-validator-badinput = Значение прогресса должно быть целым числом
-    .progress-validator-stepmismatch = Значение прогресса не должно быть дробнымRecord progress mustn't be a decimal
+    .progress-validator-stepmismatch = Значение прогресса не должно быть дробным
 
     .video = Видео
     .video-info = Видео-доказательства честности данного рекорда. Если рекорд был поставлен на стриме, но не был опубликован где-то еще, предоставьте Twitch-ссылку на этот стрим.
