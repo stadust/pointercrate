@@ -9,7 +9,7 @@ user-permissions = Полномочия:
 
     .list-helper = Помощник листа
     .list-moderator = Модератор листа
-    .list-administrator = Лидер листа
+    .list-administrator = Администратор листа
 
 ## Auth input fields
 auth-username = Логин:
