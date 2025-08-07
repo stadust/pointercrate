@@ -3,10 +3,10 @@ player-banned = Забанен
     .no = Нет
 
 player-nationality = Национальность
-    .info = Учтите, что это должно восприниматься как 'Официальная страна больше' и ничего более. Никаких исключений.
+    .info = Учтите, что это должно восприниматься как 'Официальная страна проживания' и ничего более. Никаких исключений.
     .none = Н/Д
 
-player-subdivision = Политическое подразделение
+player-subdivision = Административное деление
     .none = Н/Д
 
 ## Players tab
@@ -46,13 +46,10 @@ claimed-player = Присвоенный профиль
 # .info-api-link is turned into a clickable link to the geolocation API
 # pointercrate uses, and replaces { $info-api-link }
 claim-geolocate = Указать флаг для панели статистики по геолокации
-    .info = Нажатие на кнопку выше позволит вам поставить флаг в панели статистики через IP-геолокацию. Для этой возможности pointercrate использует { $info-api-link }. Нажатие на кнопку выше также считается как ваше согласие на использование IP pointercrate для отправки его abstract.
-    .info-api-link = API IP-геолокации от abstract
-
     .submit = Найти
 
-    .edit-success = Национальность указана как { $nationality }
-    .edit-success-subdivision = Национальность указана как { $nationality }/{ $subdivision }
+    .edit-success = Страна указана как { $nationality }
+    .edit-success-subdivision = Страна указана как { $nationality }/{ $subdivision }
 
 claim-lock-submissions = Ограничить отправку рекордов
     .info = Ограничивает отправку ваших рекордов другими игроками, что означает возможность отправки рекордов только при условии входа в аккаунт с подтвержденным присвоением профиля нужного игрока.

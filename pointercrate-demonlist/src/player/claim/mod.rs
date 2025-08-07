@@ -8,6 +8,8 @@ mod paginate;
 mod patch;
 mod put;
 
+pub use get::ClaimBy;
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct PlayerClaim {
     pub user_id: i32,

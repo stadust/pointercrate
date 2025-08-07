@@ -10,8 +10,6 @@ ratelimits! {
 
         new_submitters[7u32 per 3600] => tr("error-demonlist-ratelimit-new-submitters"),
 
-        geolocate[1u32 per 2_678_400 per IpAddr] => tr("error-demonlist-ratelimit-geolocate"),
-
         add_demon[1u32 per 60] => tr("error-demonlist-ratelimit-add-demon"),
     }
 }

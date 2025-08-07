@@ -4,6 +4,7 @@ use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
 use pointercrate_core_pages::{
     error::ErrorFragment,
+    trp_html,
     util::{filtered_paginator, paginator},
 };
 use pointercrate_demonlist::player::claim::PlayerClaim;
@@ -94,6 +95,8 @@ impl AccountPageTab for ListIntegrationTab {
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
                             div.overlined.pad.js-collapse-content #claims-claim-panel style="display:none" {
+                                // It'd be neat to eliminate this feature and instead have this tied to the presence of a Box<dyn GeolocationProvider> state, but
+                                // plumbing that information all the way here is... hella complicated.
                                 @if cfg!(feature = "geolocation") {
                                     p.info-red.output style = "margin: 10px 0" {}
                                     p.info-green.output style = "margin: 10px 0" {}
@@ -106,15 +109,7 @@ impl AccountPageTab for ListIntegrationTab {
                                         }
                                     }
                                     p {
-                                        (PreEscaped(trp!(
-                                            "claim-geolocate.info",
-                                            (
-                                                "info-api-link",
-                                                html! {
-                                                    a.link href = "https://www.abstractapi.com/ip-geolocation-api" { (tr("claim-geolocate.info-api-link")) }
-                                                }.into_string()
-                                            )
-                                        )))
+                                        (tr("claim-geolocate.info"))
                                     }
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
@@ -145,29 +140,18 @@ impl AccountPageTab for ListIntegrationTab {
                             p {
                                 (PreEscaped(trp!(
                                     "claim-records.info",
-                                    (
-                                        "record-approved-styled",
-                                        html! {
-                                            span.ok { (tr("record-approved")) }
-                                        }.into_string()
-                                    ),(
-                                        "record-submitted-styled",
-                                        html! {
-                                            span.warn { (tr("record-submitted")) }
-                                        }.into_string()
-                                    ),
-                                    (
-                                        "record-rejected-styled",
-                                        html! {
-                                            span.err { (tr("record-rejected")) }
-                                        }.into_string()
-                                    ),
-                                    (
-                                        "record-underconsideration-styled",
-                                        html! {
-                                            span.consider { (tr("record-underconsideration")) }
-                                        }.into_string()
-                                    )
+                                    "record-approved-styled" = html! {
+                                        span.ok { (tr("record-approved")) }
+                                    }.into_string(),
+                                    "record-submitted-styled" = html! {
+                                        span.warn { (tr("record-submitted")) }
+                                    }.into_string(),
+                                    "record-rejected-styled" = html! {
+                                        span.err { (tr("record-rejected")) }
+                                    }.into_string(),
+                                    "record-underconsideration-styled" = html! {
+                                        span.consider { (tr("record-underconsideration")) }
+                                    }.into_string()
                                 )))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
@@ -209,15 +193,12 @@ impl AccountPageTab for ListIntegrationTab {
                     p {
                         (tr("claim-info-panel.info-a"))
                         br;
-                        (PreEscaped(trp!(
+                        (trp_html!(
                             "claim-info-panel.info-b",
-                            (
-                                "discord",
-                                html! {
-                                    a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
-                                }.into_string()
-                            )
-                        )))
+                            "discord" = html! {
+                                a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
+                            }
+                        ))
                         br;
                         (tr("claim-info-panel.info-c"))
                     }

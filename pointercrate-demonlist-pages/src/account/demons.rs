@@ -1,6 +1,7 @@
 use crate::components::{player_selection_dialog, player_selection_dropdown};
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{localization::tr, permission::PermissionsManager, trp};
+use pointercrate_core::{localization::tr, permission::PermissionsManager};
+use pointercrate_core_pages::trp_html;
 use pointercrate_core_pages::util::filtered_paginator;
 use pointercrate_demonlist::LIST_MODERATOR;
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
@@ -270,17 +271,14 @@ fn change_thumbnail_dialog() -> Markup {
                     (tr("demon-thumbnail-dialog"))
                 }
                 p style = "max-width: 400px"{
-                    (PreEscaped(trp!(
+                    (trp_html!(
                         "demon-thumbnail-dialog.info",
-                        (
-                            "video-id",
-                            html! {
-                                "https://i.ytimg.com/vi/"
-                                i { (tr("demon-thumbnail-dialog.info-videoid")) }
-                                "/mqdefault.jpg"
-                            }.into_string()
-                        ),
-                    )))
+                        "video-id" = html! {
+                            "https://i.ytimg.com/vi/"
+                            i { (tr("demon-thumbnail-dialog.info-videoid")) }
+                            "/mqdefault.jpg"
+                        }
+                    ))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}

@@ -1,7 +1,7 @@
 use crate::statsviewer::stats_viewer_html;
-use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{localization::tr, trp};
-use pointercrate_core_pages::{head::HeadLike, PageFragment};
+use maud::{html, Markup};
+use pointercrate_core::localization::tr;
+use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_demonlist::nationality::Nationality;
 
 #[derive(Debug)]
@@ -51,21 +51,19 @@ impl IndividualStatsViewer {
                             (tr("subdivision-panel"))
                         }
                         p {
-                            (PreEscaped(trp!(
+                            (trp_html!(
                                 "subdivision-panel.info",
-                                (
-                                    "countries",
-                                    html! {
-                                        span.tooltip {
-                                            (tr("subdivision-panel.info-countries"))
+                                "countries" =
+                                html! {
+                                    span.tooltip {
+                                        (tr("subdivision-panel.info-countries"))
 
-                                            span.tooltiptext.fade {
-                                                r#"Argentina, Australia, Brazil, Canada, Chile, Colombia, Finland, France, Germany, Italy, Mexico, Netherlands, Norway, Peru, Poland, Russian Federation, South Korea, Spain, Ukraine, United Kingdom, United States"#
-                                            }
+                                        span.tooltiptext.fade {
+                                            r#"Argentina, Australia, Brazil, Canada, Chile, Colombia, Finland, France, Germany, Italy, Mexico, Netherlands, Norway, Peru, Poland, Russian Federation, South Korea, Spain, Ukraine, United Kingdom, United States"#
                                         }
-                                    }.into_string()
-                                )
-                            )))
+                                    }
+                                }
+                            ))
                         }
                         div.dropdown-menu.js-search #subdivision-dropdown data-default = "None" {
                             div{

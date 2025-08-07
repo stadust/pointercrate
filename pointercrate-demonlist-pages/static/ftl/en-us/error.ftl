@@ -1,3 +1,4 @@
+error-demonlist-geolocationfailed = Geolocation failed!
 error-demonlist-malformedvideourl = Malformed video URL
 error-demonlist-bannedfromsubmissions = You are banned from submitting records to the demonlist!
 error-demonlist-claimunverified = Your claim on this player is unverified
@@ -37,5 +38,4 @@ error-demonlist-invalidlevelid = Level ID needs to be positive
 error-demonlist-ratelimit-record-submit = You're submitting too many records too fast!
 error-demonlist-ratelimit-record-submit-global = Too many records are being submitted right now!
 error-demonlist-ratelimit-new-submitters = DDoS protection ratelimit
-error-demonlist-ratelimit-geolocate = You can only geolocate once per month!
 error-demonlist-ratelimit-add-demon = Please don't spam the button, rSteel

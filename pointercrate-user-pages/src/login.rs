@@ -1,9 +1,6 @@
-use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{
-    localization::{task_lang, tr},
-    trp,
-};
-use pointercrate_core_pages::{head::HeadLike, PageFragment};
+use maud::{html, Markup};
+use pointercrate_core::localization::{task_lang, tr};
+use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_user::config;
 
 pub fn login_page() -> PageFragment {
@@ -73,15 +70,12 @@ fn login_page_body() -> Markup {
                     }
                 }
                 p style = "text-align: center; padding: 0px 10px" {
-                    (PreEscaped(trp!(
+                    (trp_html!(
                         "register.redirect",
-                        (
-                            "redirect-link",
-                            html! {
-                                a.link href="/register" { (tr("register.redirect-link")) }
-                            }.into_string()
-                        )
-                    )))
+                        "redirect-link" =  html! {
+                            a.link href="/register" { (tr("register.redirect-link")) }
+                        }
+                    ))
                 }
             }
         }

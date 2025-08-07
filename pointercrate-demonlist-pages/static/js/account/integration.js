@@ -240,7 +240,7 @@ export function initialize() {
 
     if (geolocationButton) {
       geolocationButton.addEventListener("click", () => {
-        post("/api/v1/players/" + playerId + "/geolocate")
+        post("/api/v1/players/me/geolocate")
           .then((response) => {
             let nationality = response.data;
             if (nationality.subdivision) {

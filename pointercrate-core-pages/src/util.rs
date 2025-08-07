@@ -94,3 +94,18 @@ pub fn simple_dropdown<T1: Display, T2: Display>(
         }
     }
 }
+
+/// A version of the `trp!` marco that encapsulates some of the ugly details
+/// of passing in rendered html as fluent placeholders. Particularly, it encapsulates
+/// the required handling of maud::PreEscaped safely.
+///
+/// Essentially, this macro gives us the guarantee that as long as the input values dont use
+/// maud::PreEscaped, then it will not be possible to inject unescaped data into the page using it.
+#[macro_export]
+macro_rules! trp_html {
+    ($text_id:expr, $($key:literal = $value:expr),*)  => {
+        maud::PreEscaped(pointercrate_core::trp!($text_id, $(
+            $key = {let _: maud::PreEscaped<String> = $value; $value.into_string()}
+        ),*))
+    };
+}

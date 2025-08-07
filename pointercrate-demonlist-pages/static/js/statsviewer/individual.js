@@ -160,7 +160,7 @@ class IndividualStatsViewer extends StatsViewer {
 }
 
 $(window).on("load", function () {
-  let map = new InteractiveWorldMap();
+  window.map = new InteractiveWorldMap();
   map.showSubdivisions();
 
   let subdivisionCheckbox = document.getElementById(
@@ -194,19 +194,7 @@ $(window).on("load", function () {
     }
   });
 
-  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
-    (selected) => {
-      if (selected === "All") {
-        window.statsViewer.updateQueryData("continent", undefined);
-        map.resetContinentHighlight();
-      } else {
-        window.statsViewer.updateQueryData("continent", selected);
-        map.highlightContinent(selected);
-      }
-    }
-  );
-
-  let subdivisionDropdown = new Dropdown(
+  window.subdivisionDropdown = new Dropdown(
     document.getElementById("subdivision-dropdown")
   );
 
@@ -224,6 +212,18 @@ $(window).on("load", function () {
       });
     }
   });
+
+  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
+    (selected) => {
+      if (selected === "All") {
+        window.statsViewer.updateQueryData("continent", undefined);
+        map.resetContinentHighlight();
+      } else {
+        window.statsViewer.updateQueryData("continent", selected);
+        map.highlightContinent(selected);
+      }
+    }
+  );
 
   statsViewer.dropdown.addEventListener((selected) => {
     if (selected === "International") {
@@ -243,72 +243,20 @@ $(window).on("load", function () {
       subdivisionDropdown.selectSilently(subdivisionCode)
     );
 
-    window.statsViewer.initialize();
+    statsViewer.dropdown.selectSilently(countryCode);
 
-    new Dropdown(
-      document.getElementById("continent-dropdown")
-    ).addEventListener((selected) => {
-      if (selected === "All") {
-        window.statsViewer.updateQueryData("continent", undefined);
-        map.resetContinentHighlight();
-      } else {
-        window.statsViewer.updateQueryData("continent", selected);
-        map.highlightContinent(selected);
-      }
+    statsViewer.updateQueryData2({
+      nation: countryCode,
+      subdivision: subdivisionCode,
     });
+  });
 
-    let subdivisionDropdown = new Dropdown(
-      document.getElementById("subdivision-dropdown")
-    );
-
-    subdivisionDropdown.addEventListener((selected) => {
-      if (selected === "None") {
-        map.deselectSubdivision();
-        statsViewer.updateQueryData("subdivision", undefined);
-      } else {
-        let countryCode = statsViewer.queryData["nation"];
-
-        map.select(countryCode, selected);
-        statsViewer.updateQueryData2({
-          nation: countryCode,
-          subdivision: selected,
-        });
-      }
-    });
-
-    statsViewer.dropdown.addEventListener((selected) => {
-      if (selected === "International") {
-        map.deselect();
-      } else {
-        map.select(selected);
-      }
-
-      // if 'countryCode == International' we send a nonsense request which results in a 404 and causes the dropdown to clear. That's exactly what we want, though.
-      populateSubdivisionDropdown(subdivisionDropdown, selected);
-
-      statsViewer.updateQueryData("subdivision", undefined);
-    });
-
-    map.addSelectionListener((countryCode, subdivisionCode) => {
-      populateSubdivisionDropdown(subdivisionDropdown, countryCode).then(() =>
-        subdivisionDropdown.selectSilently(subdivisionCode)
-      );
-
-      statsViewer.dropdown.selectSilently(countryCode);
-
-      statsViewer.updateQueryData2({
-        nation: countryCode,
-        subdivision: subdivisionCode,
-      });
-    });
-
-    map.addDeselectionListener(() => {
-      statsViewer.dropdown.selectSilently("International");
-      subdivisionDropdown.clearOptions();
-      statsViewer.updateQueryData2({
-        nation: undefined,
-        subdivision: undefined,
-      });
+  map.addDeselectionListener(() => {
+    statsViewer.dropdown.selectSilently("International");
+    subdivisionDropdown.clearOptions();
+    statsViewer.updateQueryData2({
+      nation: undefined,
+      subdivision: undefined,
     });
   });
 });

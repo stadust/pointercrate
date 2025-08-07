@@ -8,7 +8,7 @@ use dash_rs::{
     request::level::{LevelRequest, LevelRequestType, LevelsRequest, SearchFilters},
     response::{parse_download_gj_level_response, parse_get_gj_levels_response},
 };
-use log::{error, trace};
+use log::{debug, error, trace, warn};
 use pointercrate_core::ratelimits;
 use pointercrate_demonlist::demon::Demon;
 use reqwest::{header::CONTENT_TYPE, Client};
@@ -35,14 +35,17 @@ pub type IntegrationLevel = Level<'static, LevelData<'static>, Option<Newgrounds
 impl GeometryDashConnector {
     /// Attempts to pull the Geometry Dash level data for the given [`Demon`] from the database
     ///
-    /// If the last time the data for this demon was sought on the Geomeetry Dash servers was over 24h ago,
+    /// If the last time the data for this demon was sought on the Geometry Dash servers was over 24h ago,
     /// re-query them for updated data.
     pub async fn load_level_for_demon(&self, demon: &Demon) -> Option<IntegrationLevel> {
         if self.ratelimits.throttle_throttle(demon.base.id).is_ok()
             && self.ratelimits.throttle().is_ok()
             && self.ratelimits.demon_refresh(demon.base.id).is_ok()
         {
-            tokio::spawn(self.clone().refresh_demon_data(demon.base.name.clone(), demon.base.id));
+            tokio::spawn(
+                self.clone()
+                    .refresh_demon_data(demon.base.name.clone(), demon.base.id, demon.level_id),
+            );
         }
 
         if let Some(level_id) = demon.level_id {
@@ -62,20 +65,30 @@ impl GeometryDashConnector {
         None
     }
 
-    pub async fn refresh_demon_data(self, name: String, demon_id: i32) {
-        // Lookup demon by name
-        let request = LevelsRequest::default()
-            // Heuristic: list level have a lot of likes
-            .request_type(LevelRequestType::MostLiked)
-            .search(&name)
-            // passing any `LevelRating::Demon` variant here will result in filtering by arbitrary demon difficulty
-            .with_rating(LevelRating::Demon(DemonRating::Hard))
-            .search_filters(SearchFilters::default().rated());
+    pub async fn refresh_demon_data(self, name: String, demon_id: i32, level_id: Option<u64>) {
+        debug!("Refreshing demon data for {} (id {})", name, demon_id);
 
-        let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
+        let levels_request = match level_id {
+            None => {
+                // Lookup demon by name
+                LevelsRequest::default()
+                    // Heuristic: list levels have a lot of likes
+                    .request_type(LevelRequestType::MostLiked)
+                    .search(&name)
+                    // passing any `LevelRating::Demon` variant here will result in filtering by arbitrary demon difficulty
+                    .with_rating(LevelRating::Demon(DemonRating::Hard))
+                    .search_filters(SearchFilters::default().rated())
+            },
+            // Potentially need to do a LevelsRequest here to grab newgrounds song and creator
+            Some(level_id) => LevelsRequest::default().search(level_id.to_string()),
+        };
+
+        let Ok(response) = self.make_request(levels_request.to_url(), levels_request.to_string()).await else {
             return;
         };
-        let Ok(demons) = parse_get_gj_levels_response(&response) else {
+        let Ok(demons) = parse_get_gj_levels_response(&response)
+            .inspect_err(|err| warn!("[{}] Failed to parse getGJLevels response: {:?}", demon_id, err))
+        else {
             return;
         };
         let Some(mut hardest) = demons
@@ -84,14 +97,7 @@ impl GeometryDashConnector {
             .filter(|demon| demon.name.trim().eq_ignore_ascii_case(name.trim()))
             .max_by(|x, y| x.difficulty.cmp(&y.difficulty))
         else {
-            return;
-        };
-
-        let request = LevelRequest::new(hardest.level_id);
-        let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
-            return;
-        };
-        let Ok(mut level) = parse_download_gj_level_response(&response) else {
+            warn!("[{}] No demons found with name {}", demon_id, name);
             return;
         };
 
@@ -103,7 +109,17 @@ impl GeometryDashConnector {
             self.store_creator(creator).await;
         }
 
-        self.store_level(&hardest, level.creator, level.custom_song).await;
+        let request = LevelRequest::new(hardest.level_id);
+        let Ok(response) = self.make_request(request.to_url(), request.to_string()).await else {
+            return;
+        };
+        let Ok(mut level) = parse_download_gj_level_response(&response)
+            .inspect_err(|err| warn!("[{}] Failed to parse downloadGJLevel response: {:?}", demon_id, err))
+        else {
+            return;
+        };
+
+        self.store_level(&level, level.creator, level.custom_song).await;
         self.store_level_data(level.level_id, &mut level.level_data).await;
 
         let _ = sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level.level_id as i64, demon_id)
@@ -112,6 +128,8 @@ impl GeometryDashConnector {
     }
 
     async fn make_request(&self, url: String, body: String) -> Result<String, reqwest::Error> {
+        debug!("Making request to {} with body {}", url, body);
+
         let response = self.http_client
             .post(url)
               // boomlings.com rejects any request with a User-Agent header set, so make sure reqwest doesn't "helpfully" add one
@@ -119,7 +137,8 @@ impl GeometryDashConnector {
             .body(body)
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .send()
-            .await?;
+            .await
+            .inspect_err(|err| warn!("Failed to make boomlings request: {:?}", err))?;
 
         response.text().await
     }

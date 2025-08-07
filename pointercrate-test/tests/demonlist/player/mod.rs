@@ -8,6 +8,7 @@ use rocket::http::Status;
 use serde_json::json;
 use sqlx::{PgConnection, Pool, Postgres};
 
+mod claim;
 mod score;
 
 async fn create_players(connection: &mut PgConnection) -> (DatabasePlayer, DatabasePlayer) {
@@ -357,7 +358,7 @@ async fn test_player_merge(pool: Pool<Postgres>) {
     assert_eq!(patched.player.base.id, player2.id);
 
     client
-        .get(&format!("/api/v1/players/{}/", player1.id))
+        .get(format!("/api/v1/players/{}/", player1.id))
         .expect_status(Status::NotFound)
         .execute()
         .await;

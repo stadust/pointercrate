@@ -28,21 +28,21 @@ statsviewer-nation = Страны
     .players = Игроки
     .unbeaten = Непройденные демоны
 
-    .created-tooltip = Был создан { $players } { $players ->
+    .created-tooltip = Создан { $players } { $players ->
             [one] игрок
             [few] игрока
             [many] игроков
             *[other] игроков
         } в этой стране:
-    .published-tooltip = Был опубликован:
-    .verified-tooltip = Был верифицирован:
-    .beaten-tooltip = Был пройден { $players } { $players ->
+    .published-tooltip = Опубликован:
+    .verified-tooltip = Верифицирован:
+    .beaten-tooltip = Пройден { $players } { $players ->
             [one] игрок
             [few] игрока
             [many] игроков
             *[other] игроков
         } в этой стране:
-    .progress-tooltip = Был достигнут { $players } { $players ->
+    .progress-tooltip = Достигнут { $players } { $players ->
             [one] игрок
             [few] игрока
             [many] игроков
@@ -68,14 +68,14 @@ continent-panel = Континент
     .option-southamerica = Южная Америка
     .option-centralamerica = Центральная Америка
 
-toggle-subdivision-panel = Показать подразделения
-    .info = Настройка отображения на карте политических подразделений.
+toggle-subdivision-panel = Показать деления
+    .info = Настройка отображения административных делений на карте.
 
-    .option-toggle = Показать политические подразделения
+    .option-toggle = Показать административные деления
 
 # { $countries } will be replaced with .info-countries, which will be
 # turned into a tooltip listing all of the selectable countries
-subdivision-panel = Политическое подразделение
+subdivision-panel = Административное деление
     .info = Для { $countries } вы можете выбрать штат либо регион из выпадающего списка ниже, чтобы сфокусировать панель статистики на выбранном штате либо регионе.
     .info-countries = следующих стран
 

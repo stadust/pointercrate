@@ -1,3 +1,6 @@
+error-contact = Believe we've made a mistake in showing you this error?
+    .contact-link = Contact us!
+
 error-core-badrequest = The browser (or proxy) sent a request that this server could not understand.
 error-core-invalidheadervalue = The value for the header '{ $header }' could not be processed.
 error-core-unauthorized = The server could not verify that you are authorized to access the URL requested. You either supplied the wrong credentials (e.g. a bad password) or your browser doesn't understand how to supply the credentials required.

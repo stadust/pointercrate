@@ -113,17 +113,14 @@ impl Display for UserError {
                 UserError::PatchSelf => tr("error-user-patchself"),
                 UserError::PermissionNotAssignable { non_assignable } => trp!(
                     "error-user-permissionnotassignable",
-                    (
-                        "non-assignable",
-                        non_assignable
-                            .iter()
-                            .map(|permission| tr(permission.text_id()))
-                            .collect::<Vec<String>>()
-                            .join(", ")
-                    )
+                    "non-assignable" = non_assignable
+                        .iter()
+                        .map(|permission| tr(permission.text_id()))
+                        .collect::<Vec<String>>()
+                        .join(", ")
                 ),
-                UserError::UserNotFound { user_id } => trp!("error-user-usernotfound", ("user-id", user_id)),
-                UserError::UserNotFoundName { user_name } => trp!("error-user-usernotfoundname", ("user-name", user_name)),
+                UserError::UserNotFound { user_id } => trp!("error-user-usernotfound", "user-id" = user_id),
+                UserError::UserNotFoundName { user_name } => trp!("error-user-usernotfoundname", "user-name" = user_name),
                 UserError::NameTaken => tr("error-user-nametaken"),
                 UserError::InvalidUsername => tr("error-user-invalidusername"),
                 UserError::InvalidPassword => tr("error-user-invalidpassword"),

@@ -78,9 +78,9 @@ pub async fn overview(
 
     Ok(Page::new(OverviewPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
         },
         demonlist,
         time_machine: tardis,
@@ -153,11 +153,11 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 
     Ok(Page::new(DemonPage {
         team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut *connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut *connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut *connection).await?,
+            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
+            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
+            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
         },
-        demonlist: current_list(&mut *connection).await?,
+        demonlist: current_list(&mut connection).await?,
         movements: modifications,
         integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
@@ -170,7 +170,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     Ok(Page::new(IndividualStatsViewer {
-        nationalities_in_use: Nationality::used(&mut *connection).await?,
+        nationalities_in_use: Nationality::used(&mut connection).await?,
     }))
 }
 

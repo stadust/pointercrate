@@ -3,7 +3,6 @@ pub use fluent::FluentValue;
 use fluent::{concurrent::FluentBundle, FluentArgs, FluentError, FluentMessage, FluentResource};
 use fluent_syntax::parser::ParserError;
 use std::collections::hash_map::Entry;
-use std::os::unix::prelude::OsStrExt;
 use std::{collections::HashMap, fs::read_dir, path::Path, sync::OnceLock};
 use tokio::task_local;
 use unic_langid::subtags::Language;
@@ -50,7 +49,7 @@ impl LocalesLoader {
                     continue;
                 }
 
-                let lang_id = LanguageIdentifier::from_bytes(dir_entry.file_name().as_bytes())?;
+                let lang_id = LanguageIdentifier::from_bytes(dir_entry.file_name().as_encoded_bytes())?;
 
                 let bundle = match bundles.entry(lang_id.language) {
                     Entry::Occupied(bundle) => {
@@ -71,7 +70,7 @@ impl LocalesLoader {
                         continue;
                     }
 
-                    let source = FluentResource::try_new(std::fs::read_to_string(&ftl_file.path())?)
+                    let source = FluentResource::try_new(std::fs::read_to_string(ftl_file.path())?)
                         .map_err(|(_, errors)| LoaderError::FluentParsing(errors))?;
 
                     for entry in source.entries() {
@@ -80,7 +79,7 @@ impl LocalesLoader {
                         }
                     }
 
-                    bundle.add_resource(source).map_err(|errors| LoaderError::FluentConflict(errors))?
+                    bundle.add_resource(source).map_err(LoaderError::FluentConflict)?
                 }
             }
         }
@@ -246,7 +245,7 @@ pub fn tr(text_id: &str) -> String {
 /// Source text: `demon-score = Demonlist score ({$percent}%)`
 #[macro_export]
 macro_rules! trp {
-    ($text_id:expr $(, ($key:expr, $value:expr) )* $(,)?) => {{
+    ($text_id:literal, $($key:literal = $value:expr ),*) => {{
         use std::collections::HashMap;
         use $crate::localization::{LANGUAGE, FluentValue, LocaleConfiguration};
 

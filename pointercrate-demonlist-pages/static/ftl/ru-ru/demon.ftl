@@ -1,7 +1,7 @@
 ## Demon information, including information fetched by dash-rs
 ## Fields included in forms may have validators
 demon-name = Название демона
-    .validator-valuemissing = Пожалуйста, укажите имя
+    .validator-valuemissing = Пожалуйста, укажите название
 
 demon-password = Пароль от уровня
 
@@ -49,23 +49,23 @@ demon-verifier = Верифер
 demon-creators = Создатели
 
 demon-headline-by = от { $creator }
-demon-headline-verified-by = был верифицирован { $verifier }
-demon-headline-published-by = был опубликован { $publisher }
+demon-headline-verified-by = верифицирован { $verifier }
+demon-headline-published-by = опубликован { $publisher }
 
 # { $verified-and-published } represents two possible variations of text
 # either .same-verifier-publisher OR .unique-verifier-publisher
 #
 # { $more } in .more-creators is transformed into a tooltip listing all of
 # a demon's creators, with the text being .more-creators-tooltip
-demon-headline = by { $creator }
-    .same-verifier-publisher = был верифицирован и опубликован { $publisher }
+demon-headline = от { $creator }
+    .same-verifier-publisher = верифицирован и опубликован { $publisher }
     .unique-verifier-publisher = { demon-headline-published-by }, { demon-headline-verified-by }
 
-    .no-creators = от Unknown, { $verified-and-published }
+    .no-creators = от Неизвестно, { $verified-and-published }
 
     .one-creator = { demon-headline-by }, { $verified-and-published }
-    .one-creator-is-publisher = { demon-headline-by }, был верифицирован { $verifier }
-    .one-creator-is-verifier = { demon-headline-by }, был опубликован { $publisher }
+    .one-creator-is-publisher = { demon-headline-by }, верифицирован { $verifier }
+    .one-creator-is-verifier = { demon-headline-by }, опубликован { $publisher }
 
     .two-creators = от { $creator1 } и { $creator2 }, { $verified-and-published }
 
@@ -83,9 +83,9 @@ movements-newposition = Новая позиция
 movements-reason = Причина
     .added = Добавлен в лист
     .addedabove = { $demon } был добавлен выше
-    .moved = Подвинут
-    .movedabove = { $demon } был подвинут выше этого демона
-    .movedbelow = { $demon } был подвинут ниже этого демона
+    .moved = Перемещён
+    .movedabove = { $demon } был перемещён выше
+    .movedbelow = { $demon } был перемещён ниже
 
 ## Records table
 demon-records = Рекорды
@@ -152,14 +152,14 @@ demon-video-dialog = Изменение ссылки на видео с вери
     .submit = Изменить
 
 demon-name-dialog = Изменение названия демона
-    .info = Здесь проходит изменение названия данного демона. Несколько демонов с одинаковыми именами могут спокойно существовать!
+    .info = Здесь проходит изменение названия данного демона. Возможность добавления нескольких демонов с одинаковыми именами полностью работает!
     .name-field = Название:
     .submit = Изменить
 
 # { $video-id } will be replaced by https://i.ytimg.com/vi/{.info-videoid}/mqdefault.jpg but italicized
 # in english, this looks like https://i.ytimg.com/vi/VIDEO_ID/mqdefault.jpg
 demon-thumbnail-dialog = Изменение ссылки на превью
-    .info = Здесь проходит изменение ссылки на превью для этого демона. Чтобы поставить превью конкретного видео на YouTube, измените значение на { $video-id }.
+    .info = Здесь проходит изменение ссылки на превью видео для этого демона. Чтобы поставить превью конкретного видео на YouTube, измените значение на { $video-id }.
     .info-videoid = VIDEO_ID
 
     .thumbnail-field = Ссылка на превью:
@@ -184,7 +184,7 @@ demon-verifier-dialog = Изменение верифера демона
     .submit = Изменить
 
 demon-creator-dialog = Добавление креатора
-    .info = Здесь проходит добавление нового креатора для данного демона через поле ниже. Если такой игрок уже существует, его имя появится в качестве предложения ниже поля ввода. После этого нажмите на кнопку ниже.
+    .info = Здесь проходит добавление нового креатора для этого демона через поле ниже. Если такой игрок уже существует, его имя появится в качестве предложения ниже поля ввода. После этого нажмите на кнопку ниже.
     .submit = Добавить креатора
 
     .edit-success = Креатор добавлен успешно!

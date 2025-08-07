@@ -7,9 +7,9 @@ use crate::{
     statsviewer::stats_viewer_panel,
 };
 use chrono::NaiveDateTime;
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, trp};
-use pointercrate_core_pages::{head::HeadLike, PageFragment};
+use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_demonlist::{
     config::{self as list_config, extended_list_size},
     demon::{Demon, FullDemon},
@@ -71,43 +71,42 @@ impl DemonPage {
 
     fn head(&self) -> Markup {
         html! {
-            (PreEscaped(format!(r##"
+            (PreEscaped(r##"
                 <script type="application/ld+json">
-                {{
+                {
                     "@context": "http://schema.org",
                     "@type": "WebPage",
-                    "breadcrumb": {{
+                    "breadcrumb": {
                         "@type": "BreadcrumbList",
-                        "itemListElement": [{{
+                        "itemListElement": [{
                                 "@type": "ListItem",
                                 "position": 1,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/",
                                     "name": "pointercrate"
-                                }}
-                            }},{{
+                                }
+                            },{
                                 "@type": "ListItem",
                                 "position": 2,
-                                "item": {{
+                                "item": {
                                     "@id": "https://pointercrate.com/demonlist/",
                                     "name": "demonlist"
-                                }}
-                            }},{{
+                                }
+                            },{
                                 "@type": "ListItem",
                                 "position": 3,
-                                "item": {{
-                                    "@id": "https://pointercrate.com/demonlist/{0}/",
-                                    "name": "{1}"
-                                }}
-                            }}
+                                "item": {
+                                    "@id": "https://pointercrate.com/demonlist/"##)) (self.data.position()) (PreEscaped(r##"/",
+                                    "name": ""##)) (self.data.name()) (PreEscaped(r##""
+                                }
+                            }
                         ]
-                    }},
-                    "name": "#{0} - {1}",
-                    "description": "{2}",
+                    },
+                    "name": "#"##)) (self.data.position()) " - " (self.data.name()) (PreEscaped(r##"","description": ""##)) (self.description().replace(r"\", r"\\")) (PreEscaped(r##"",
                     "url": "https://pointercrate.com/demonlist/{0}/"
-                }}
+                }
                 </script>
-            "##, self.data.position(), self.data.name(), self.description())))
+            "##))
             (PreEscaped(format!("
                 <script>
                     window.list_length = {0};
@@ -211,17 +210,17 @@ impl DemonPage {
 
         let verified_and_published = html! {
             @if self.data.demon.publisher == self.data.demon.verifier {
-                (PreEscaped(trp!(
+                (trp_html!(
                     "demon-headline.same-verifier-publisher",
-                    ("publisher", P(&self.data.demon.publisher, None).render().into_string())
-                )))
+                    "publisher" = html! {(P(&self.data.demon.publisher, None))}
+                ))
             }
             @else {
-                (PreEscaped(trp!(
+                (trp_html!(
                     "demon-headline.unique-verifier-publisher",
-                    ("publisher", P(&self.data.demon.publisher, None).render().into_string()),
-                    ("verifier", P(&self.data.demon.verifier, None).render().into_string())
-                )))
+                    "publisher" = html! {(P(&self.data.demon.publisher, None))},
+                    "verifier" = html! {(P(&self.data.demon.verifier, None))}
+                ))
             }
         };
 
@@ -248,56 +247,58 @@ impl DemonPage {
                     "#, self.data.demon.base.id)))
                     h3 {
                         @match &self.data.creators[..] {
-                            [] => { (PreEscaped(trp!(
+                            [] => { (trp_html!(
                                 "demon-headline.no-creators",
-                                ("verified-and-published", verified_and_published.into_string())
-                            ))) },
+                                "verified-and-published" = verified_and_published
+                            )) },
                             [creator] => {
-                                @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier { /* Nothing */ }
+                                @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier {
+                                    (trp_html!("demon-headline-by", "creator" = html!{(P(creator, None))}))
+                                }
                                 @else if creator != &self.data.demon.publisher && creator != &self.data.demon.verifier {
-                                    (PreEscaped(trp!(
+                                    (trp_html!(
                                         "demon-headline.one-creator",
-                                        ("creator", P(creator, None).render().into_string()),
-                                        ("verified-and-published", verified_and_published.into_string())
-                                    )))
+                                        "creator" = html!{(P(creator, None))},
+                                        "verified-and-published" = verified_and_published
+                                    ))
                                 }
                                 @else if creator == &self.data.demon.publisher {
-                                    (PreEscaped(trp!(
+                                    (trp_html!(
                                         "demon-headline.one-creator-is-publisher",
-                                        ("creator", P(creator, None).render().into_string()),
-                                        ("verifier", P(&self.data.demon.verifier, None).render().into_string())
-                                    )))
+                                        "creator" = html!{(P(creator, None))},
+                                        "verifier" = html!{(P(&self.data.demon.verifier, None))}
+                                    ))
                                 }
                                 @else {
-                                    (PreEscaped(trp!(
+                                    (trp_html!(
                                         "demon-headline.one-creator-is-verifier",
-                                        ("creator", P(creator, None).render().into_string()),
-                                        ("publisher", P(&self.data.demon.publisher, None).render().into_string())
-                                    )))
+                                        "creator" = html!{(P(creator, None))},
+                                        "publisher" = html!{(P(&self.data.demon.publisher, None))}
+                                    ))
                                 }
                             },
                             [creator1, creator2] => {
-                                (PreEscaped(trp!(
+                                (trp_html!(
                                     "demon-headline.two-creators",
-                                    ("creator1", P(creator1, None).render().into_string()),
-                                    ("creator2", P(creator2, None).render().into_string()),
-                                    ("verified-and-published", verified_and_published.into_string())
-                                )))
+                                    "creator1" = html!{(P(creator1, None))},
+                                    "creator2" = html!{(P(creator2, None))},
+                                    "verified-and-published" = verified_and_published
+                                ))
                             },
                             [creator1, rest @ ..] => {
-                                (PreEscaped(trp!(
+                                (trp_html!(
                                     "demon-headline.more-creators",
-                                    ("creator", P(creator1, None).render().into_string()),
-                                    ("more", html! {
+                                    "creator" = html!{(P(creator1, None))},
+                                    "more" = html! {
                                       div.tooltip.underdotted {
                                             (tr("demon-headline.more-creators-tooltip"))
                                             div.tooltiptext.fade {
                                                 (rest.iter().map(|player| player.name.as_ref()).collect::<Vec<_>>().join(", "))
                                             }
                                         }
-                                    }.into_string()),
-                                    ("verified-and-published", verified_and_published.into_string())
-                                )))
+                                    },
+                                    "verified-and-published" = verified_and_published
+                                ))
                             }
                         }
                     }
@@ -388,7 +389,10 @@ impl DemonPage {
                                 }
                                 br;
                                 @match song.link {
-                                    Thunk::Processed(ref link) => a.link href = (link) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
+                                    Thunk::Processed(ref link) if link != "-" => a.link href = (link) {(song.name) " by " (song.artist) " (ID " (song.song_id) ")"},
+                                    Thunk::Processed(_) => a.link href = {"https://www.newgrounds.com/audio/listen/" (song.song_id)} {
+                                        (song.name) " by " (song.artist) " (ID " (song.song_id) ")"
+                                    },
                                     _ => "unreachable!()"
                                 }
                             }
@@ -397,7 +401,7 @@ impl DemonPage {
                     @if position <= list_config::extended_list_size() {
                         span {
                             b {
-                                (trp!("demon-score", ("percent", 100.0)))
+                                (trp!("demon-score", "percent" = 100.0))
                             }
                             br;
                             (format!("{:.2}", score100))
@@ -406,7 +410,7 @@ impl DemonPage {
                     @if position <= list_config::list_size(){
                         span {
                             b {
-                                (trp!("demon-score", ("percent", self.data.demon.requirement)))
+                                (trp!("demon-score", "percent" = self.data.demon.requirement))
                             }
                             br;
                             (format!("{:.2}", score_requirement))
@@ -430,28 +434,28 @@ impl DemonPage {
                         }
                         @if position <= list_config::list_size() {
                             h3 {
-                                (trp!("demon-records-qualify", ("percent", self.data.demon.requirement)))
+                                (trp!("demon-records-qualify", "percent" = self.data.demon.requirement))
                             }
                         }
                         @else if position <= list_config::extended_list_size() {
                             h3 {
-                                (trp!("demon-records-qualify", ("percent", 100.0)))
+                                (trp!("demon-records-qualify", "percent" = 100.0))
                             }
                         }
                         @if !self.data.records.is_empty() {
                             h4 {
                                 @let records_registered_100_count = self.data.records.iter().filter(|record| record.progress == 100).count();
-                                (trp!("demon-records-total", ("num-records", self.data.records.len()), ("num-completions", records_registered_100_count)))
+                                (trp!("demon-records-total", "num-records" = self.data.records.len(), "num-completions" = records_registered_100_count))
                             }
                         }
                     }
                     @if self.data.records.is_empty() {
                         h3 {
                             @if position > list_config::extended_list_size() {
-                                "No records!"
+                                (tr("demon-records.none"))
                             }
                             @else {
-                                "No records yet! Be the first to achieve one!"
+                                (tr("demon-records.none-yet"))
                             }
                         }
                     }

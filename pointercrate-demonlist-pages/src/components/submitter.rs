@@ -1,6 +1,7 @@
 use crate::components::{demon_dropdown, player_selection_dropdown};
-use maud::{html, Markup, PreEscaped, Render};
+use maud::{html, Markup, Render};
 use pointercrate_core::{localization::tr, trp};
+use pointercrate_core_pages::trp_html;
 use pointercrate_demonlist::{config, demon::Demon};
 
 pub struct RecordSubmitter<'a> {
@@ -32,7 +33,7 @@ impl Render for RecordSubmitter<'_> {
                         (tr("record-submission.demon"))
                     }
                     p {
-                        (trp!("record-submission.demon-info", ("list-size", config::extended_list_size())))
+                        (trp!("record-submission.demon-info", "list-size" = config::extended_list_size()))
                     }
                     span.form-input data-type = "dropdown" {
                         (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size())))
@@ -99,15 +100,12 @@ impl Render for RecordSubmitter<'_> {
                         p.error {}
                     }
                     p {
-                        (PreEscaped(trp!(
+                        (trp_html!(
                             "record-submission.guidelines",
-                            (
-                                "guidelines-link",
-                                html! {
-                                    a.link href = "/guidelines" { (tr("record-submission.guidelines-link")) }
-                                }.into_string()
-                            )
-                        )))
+                            "guidelines-link" = html! {
+                                a.link href = "/guidelines" { (tr("record-submission.guidelines-link")) }
+                            }
+                        ))
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("record-submission.submit"));
                 }

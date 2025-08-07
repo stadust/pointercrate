@@ -16,6 +16,12 @@ pub type Result<T> = std::result::Result<T, DemonlistError>;
 pub enum DemonlistError {
     Core(CoreError),
 
+    /// `400 BAD REQUEST` error returned if a request could not be geolocated
+    ///
+    /// Wikipedia says 400 is appropriate for "deceptive request routine", so it seems to fit the
+    /// bill for this error scenario.
+    GeolocationFailed,
+
     MalformedVideoUrl,
 
     /// `403 FORBIDDEN` error returned if someone with an IP-address that's banned from submitting
@@ -202,6 +208,7 @@ impl PointercrateError for DemonlistError {
 
         match self {
             Core(core) => core.error_code(),
+            GeolocationFailed => 40003,
             SubmitterNotFound { .. } => 40401,
             NoteNotFound { .. } => 40401,
             CreatorNotFound { .. } => 40401,
@@ -250,49 +257,50 @@ impl Display for DemonlistError {
                 DemonlistError::Core(core) => {
                     return core.fmt(f);
                 },
+                DemonlistError::GeolocationFailed => tr("error-demonlist-geolocationfailed"),
                 DemonlistError::MalformedVideoUrl => tr("error-demonlist-malformedvideourl"),
                 DemonlistError::BannedFromSubmissions => tr("error-demonlist-bannedfromsubmissions"),
                 DemonlistError::ClaimUnverified => tr("error-demonlist-claimunverified"),
                 DemonlistError::VpsDetected => tr("error-demonlist-vpsdetected"),
-                DemonlistError::NoThirdPartySubmissions => tr("nothirdpartysubmissions-error-malformedvideourl"),
-                DemonlistError::SubmitterNotFound { id } => trp!("error-demonlist-submitternotfound", ("id", id)),
+                DemonlistError::NoThirdPartySubmissions => tr("error-demonlist-nothirdpartysubmissions"),
+                DemonlistError::SubmitterNotFound { id } => trp!("error-demonlist-submitternotfound", "id" = id),
                 DemonlistError::NoteNotFound { note_id, record_id } => {
-                    trp!("error-demonlist-notenotfound", ("note-id", note_id), ("record-id", record_id))
+                    trp!("error-demonlist-notenotfound", "note-id" = note_id, "record-id" = record_id)
                 },
                 DemonlistError::CreatorNotFound { demon_id, player_id } => {
-                    trp!("error-demonlist-creatornotfound", ("player-id", player_id), ("demon-id", demon_id))
+                    trp!("error-demonlist-creatornotfound", "player-id" = player_id, "demon-id" = demon_id)
                 },
-                DemonlistError::NationalityNotFound { iso_code } => trp!("error-demonlist-nationalitynotfound", ("iso-code", iso_code)),
+                DemonlistError::NationalityNotFound { iso_code } => trp!("error-demonlist-nationalitynotfound", "iso-code" = iso_code),
                 DemonlistError::SubdivisionNotFound {
                     subdivision_code,
                     nation_code,
                 } => trp!(
                     "error-demonlist-subdivisionnotfound",
-                    ("subdivision-code", subdivision_code),
-                    ("nation-code", nation_code)
+                    "subdivision-code" = subdivision_code,
+                    "nation-code" = nation_code
                 ),
-                DemonlistError::PlayerNotFound { player_id } => trp!("error-demonlist-playernotfound", ("player-id", player_id)),
+                DemonlistError::PlayerNotFound { player_id } => trp!("error-demonlist-playernotfound", "player-id" = player_id),
                 DemonlistError::PlayerNotFoundName { player_name } =>
-                    trp!("error-demonlist-playernotfoundname", ("player-name", player_name)),
-                DemonlistError::DemonNotFound { demon_id } => trp!("error-demonlist-demonnotfound", ("demon-id", demon_id)),
-                DemonlistError::DemonNotFoundName { demon_name } => trp!("error-demonlist-demonnotfoundname", ("demon-name", demon_name)),
+                    trp!("error-demonlist-playernotfoundname", "player-name" = player_name),
+                DemonlistError::DemonNotFound { demon_id } => trp!("error-demonlist-demonnotfound", "demon-id" = demon_id),
+                DemonlistError::DemonNotFoundName { demon_name } => trp!("error-demonlist-demonnotfoundname", "demon-name" = demon_name),
                 DemonlistError::DemonNotFoundPosition { demon_position } =>
-                    trp!("error-demonlist-demonnotfoundposition", ("demon-position", demon_position)),
-                DemonlistError::RecordNotFound { record_id } => trp!("error-demonlist-recordnotfound", ("record-id", record_id)),
+                    trp!("error-demonlist-demonnotfoundposition", "demon-position" = demon_position),
+                DemonlistError::RecordNotFound { record_id } => trp!("error-demonlist-recordnotfound", "record-id" = record_id),
                 DemonlistError::ClaimNotFound { member_id, player_id } =>
-                    trp!("error-demonlist-claimnotfound", ("member-id", member_id), ("player-id", player_id)),
+                    trp!("error-demonlist-claimnotfound", "member-id" = member_id, "player-id" = player_id),
                 DemonlistError::CreatorExists => tr("error-demonlist-creatorexists"),
-                DemonlistError::DuplicateVideo { id } => trp!("error-demonlist-duplicatevideo", ("record-id", id)),
+                DemonlistError::DuplicateVideo { id } => trp!("error-demonlist-duplicatevideo", "record-id" = id),
                 DemonlistError::NoNationSet => tr("error-demonlist-nonationset"),
                 DemonlistError::ConflictingClaims { player1, player2 } =>
-                    trp!("error-demonlist-conflictingclaims", ("player-1", player1), ("player-2", player2)),
+                    trp!("error-demonlist-conflictingclaims", "player-1" = player1, "player-2" = player2),
                 DemonlistError::InvalidRequirement => tr("error-demonlist-invalidrequirement"),
-                DemonlistError::InvalidPosition { maximal } => trp!("error-demonlist-invalidposition", ("maximal", maximal)),
-                DemonlistError::InvalidProgress { requirement } => trp!("error-demonlist-invalidprogress", ("requirement", requirement)),
+                DemonlistError::InvalidPosition { maximal } => trp!("error-demonlist-invalidposition", "maximal" = maximal),
+                DemonlistError::InvalidProgress { requirement } => trp!("error-demonlist-invalidprogress", "requirement" = requirement),
                 DemonlistError::SubmissionExists { status, existing } => trp!(
                     "error-demonlist-submissionexists",
-                    ("record-status", format!("{}", status)),
-                    ("record-id", existing)
+                    "record-status" = format!("{}", status),
+                    "record-id" = existing
                 ),
                 DemonlistError::PlayerBanned => tr("error-demonlist-playerbanned"),
                 DemonlistError::SubmitLegacy => tr("error-demonlist-submitlegacy"),

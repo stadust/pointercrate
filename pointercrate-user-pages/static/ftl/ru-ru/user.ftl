@@ -29,7 +29,7 @@ auth-repeatpassword = Повторите пароль:
 # in the .redirect attributes
 #
 login = Вход
-    .oauth-info = Если вы связали свой аккаунт pointercrate с аккаунтом Google, вы должны войти через авторизацию Google по нажатию кнопки ниже:
+    .oauth-info = Если вы связали свой аккаунт pointercrate с аккаунтом Google, вы должны войти через Google, нажав на кнопку ниже:
 
     .methods-separator = либо
 
@@ -128,7 +128,7 @@ profile-change-password = Поменять пароль
     .repeatnewpassword-validator-notmatching = Пароли не совпадают
 
 profile-logout = Выход
-    .info = Выйти из своего аккаунта pointercrate в этом браузере.
+    .info = Выход из своего аккаунта pointercrate в этом браузере.
     .button = Выйти
 
 profile-get-token = Получение токена доступа

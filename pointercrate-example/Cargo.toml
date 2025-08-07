@@ -14,13 +14,15 @@ pointercrate-core-api = { version = "0.1.0", path = "../pointercrate-core-api" }
 pointercrate-core-pages = { version = "0.1.0", path = "../pointercrate-core-pages" }
 pointercrate-core-macros = { version = "0.1.0", path = "../pointercrate-core-macros" }
 pointercrate-demonlist = { version = "0.1.0", path = "../pointercrate-demonlist" }
-pointercrate-demonlist-api = { version = "0.1.0", path = "../pointercrate-demonlist-api" }
-pointercrate-demonlist-pages = { version = "0.1.0", path = "../pointercrate-demonlist-pages" }
+pointercrate-demonlist-api = { version = "0.1.0", path = "../pointercrate-demonlist-api", features = ["geolocation"] }
+pointercrate-demonlist-pages = { version = "0.1.0", path = "../pointercrate-demonlist-pages", features = ["geolocation"] }
 pointercrate-user = { version = "0.1.0", path = "../pointercrate-user" }
 pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api", features = ["legacy_accounts"] }
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages", features = ["legacy_accounts"] }
 rocket = "0.5.1"
 unic-langid = { version = "0.9.5", features = ["macros"] }
+reqwest = "0.12.22"
+serde = "1.0.219"
 
 [features]
 oauth2 = ["pointercrate-user-api/oauth2", "pointercrate-user-pages/oauth2"]
