@@ -84,8 +84,8 @@ movements-reason = Причина
     .added = Добавлен в лист
     .addedabove = { $demon } был добавлен выше
     .moved = Перемещён
-    .movedabove = { $demon } был перемещён выше
-    .movedbelow = { $demon } был перемещён ниже
+    .movedabove = { $demon } был перемещён выше этого демона
+    .movedbelow = { $demon } был перемещён ниже этого демона
 
 ## Records table
 demon-records = Рекорды

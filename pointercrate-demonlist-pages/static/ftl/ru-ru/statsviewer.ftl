@@ -20,7 +20,7 @@ statsviewer = Панель статистики
 statsviewer-individual = Игроки
     .welcome = Нажмите на имя игрока слева для начала работы!
 
-    .option-international = Международный
+    .option-international = Международная
 
 statsviewer-nation = Страны
     .welcome = Нажмите на имя страны слева для начала работы!
@@ -28,25 +28,25 @@ statsviewer-nation = Страны
     .players = Игроки
     .unbeaten = Непройденные демоны
 
-    .created-tooltip = Создан { $players } { $players ->
-            [one] игрок
-            [few] игрока
-            [many] игроков
-            *[other] игроков
+    .created-tooltip = Был создан { $players } { $players ->
+            [one] игроком
+            [few] игроками
+            [many] игроками
+            *[other] игроками
         } в этой стране:
-    .published-tooltip = Опубликован:
-    .verified-tooltip = Верифицирован:
-    .beaten-tooltip = Пройден { $players } { $players ->
-            [one] игрок
-            [few] игрока
-            [many] игроков
-            *[other] игроков
+    .published-tooltip = Был опубликован:
+    .verified-tooltip = Был верифицирован:
+    .beaten-tooltip = Был пройден { $players } { $players ->
+            [one] игроком
+            [few] игроками
+            [many] игроками
+            *[other] игроками
         } в этой стране:
-    .progress-tooltip = Достигнут { $players } { $players ->
-            [one] игрок
-            [few] игрока
-            [many] игроков
-            *[other] игроков
+    .progress-tooltip = Был достигнут { $players } { $players ->
+            [one] игроком
+            [few] игроками
+            [many] игроками
+            *[other] игроками
         } в этой стране:
 
 demon-sorting-panel = Сортировка демонов
@@ -68,10 +68,10 @@ continent-panel = Континент
     .option-southamerica = Южная Америка
     .option-centralamerica = Центральная Америка
 
-toggle-subdivision-panel = Показать деления
+toggle-subdivision-panel = Показ регионов
     .info = Настройка отображения административных делений на карте.
 
-    .option-toggle = Показать административные деления
+    .option-toggle = Показать регионы
 
 # { $countries } will be replaced with .info-countries, which will be
 # turned into a tooltip listing all of the selectable countries
