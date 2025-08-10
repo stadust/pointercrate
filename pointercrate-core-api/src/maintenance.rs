@@ -51,7 +51,7 @@ impl Fairing for MaintenanceFairing {
 
 // we can't use the #[localized] proc-macro here due to issues related to imports
 // (https://github.com/stadust/pointercrate/pull/232#discussion_r2118293806)
-#[rocket::get("/maintenance")]
+#[rocket::get("/maintenance/")]
 async fn maintenance(locale: ClientLocale) -> Result<()> {
     LANGUAGE.scope(locale.0, async { Err(CoreError::ReadOnlyMaintenance.into()) }).await
 }

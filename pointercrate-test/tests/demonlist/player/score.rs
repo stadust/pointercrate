@@ -20,14 +20,14 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
     let submission = serde_json::json! {{"progress": 100, "demon": demon.demon.base.id, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
 
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
         .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", player.id))
+        .get(format!("/api/v1/players/{}/", player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -45,7 +45,7 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
     .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", player.player.base.id))
+        .get(format!("/api/v1/players/{}/", player.player.base.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -61,7 +61,7 @@ pub async fn test_verifications_give_score(pool: Pool<Postgres>) {
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", demon.demon.verifier.id))
+        .get(format!("/api/v1/players/{}/", demon.demon.verifier.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -152,14 +152,14 @@ pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) 
 
     let submission = serde_json::json! {{"progress": 99, "demon": last_demon_id, "player": "stardust1972", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
         .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", record.player.id))
+        .get(format!("/api/v1/players/{}/", record.player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -192,7 +192,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
 
     let submission = serde_json::json! {{"progress": 99, "demon": last_demon_id, "player": "stardust1972", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
@@ -201,7 +201,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     assert_eq!(record.demon.position, 75);
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", record.player.id))
+        .get(format!("/api/v1/players/{}/", record.player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -215,7 +215,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     let _ = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     let record: FullRecord = clnt
-        .get(format!("/api/v1/records/{}", record.id))
+        .get(format!("/api/v1/records/{}/", record.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -223,7 +223,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     assert_eq!(record.demon.position, 76);
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", record.player.id))
+        .get(format!("/api/v1/players/{}/", record.player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;

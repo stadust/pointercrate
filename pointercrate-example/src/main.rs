@@ -178,10 +178,10 @@ async fn rocket() -> _ {
     // static files.
 
     rocket
-        .mount("/static/core", FileServer::from("pointercrate-core-pages/static"))
-        .mount("/static/demonlist", FileServer::from("pointercrate-demonlist-pages/static"))
-        .mount("/static/user", FileServer::from("pointercrate-user-pages/static"))
-        .mount("/static/example", FileServer::from("pointercrate-example/static"))
+        .mount("/static/core", FileServer::new("pointercrate-core-pages/static"))
+        .mount("/static/demonlist", FileServer::new("pointercrate-demonlist-pages/static"))
+        .mount("/static/user", FileServer::new("pointercrate-user-pages/static"))
+        .mount("/static/example", FileServer::new("pointercrate-example/static"))
 }
 
 /// Constructs a [`PageConfiguration`] for your site.

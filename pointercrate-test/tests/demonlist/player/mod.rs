@@ -26,7 +26,7 @@ async fn test_unauthenticated_pagination(pool: Pool<Postgres>) {
 
     let (_, unbanned) = create_players(&mut connection).await;
 
-    let json: Vec<Player> = client.get("/api/v1/players").expect_status(Status::Ok).get_result().await;
+    let json: Vec<Player> = client.get("/api/v1/players/").expect_status(Status::Ok).get_result().await;
 
     assert_eq!(json.len(), 1, "Pagination returned banned player");
     assert_eq!(json[0].base.id, unbanned.id);
@@ -40,7 +40,7 @@ async fn test_authenticated_pagination(pool: Pool<Postgres>) {
     let user = pointercrate_test::user::add_normal_user(&mut connection).await;
 
     let json: Vec<Player> = client
-        .get("/api/v1/players")
+        .get("/api/v1/players/")
         .authorize_as(&user)
         .expect_status(Status::Ok)
         .get_result()
@@ -58,7 +58,7 @@ async fn test_list_helper_pagination(pool: Pool<Postgres>) {
     let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
 
     let json: Vec<Player> = client
-        .get("/api/v1/players")
+        .get("/api/v1/players/")
         .authorize_as(&user)
         .expect_status(Status::Ok)
         .get_result()
@@ -177,14 +177,18 @@ async fn test_me(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     // Assert 401 without authentication
-    client.get("/api/v1/players/me").expect_status(Status::Unauthorized).execute().await;
+    client
+        .get("/api/v1/players/me/")
+        .expect_status(Status::Unauthorized)
+        .execute()
+        .await;
 
     let authenticated_user = pointercrate_test::user::add_normal_user(&mut connection).await;
     let user = authenticated_user.user();
 
     // Assert 404 when authorized, but claim doesn't exist
     client
-        .get("/api/v1/players/me")
+        .get("/api/v1/players/me/")
         .authorize_as(&authenticated_user)
         .expect_status(Status::NotFound)
         .execute()
@@ -209,7 +213,7 @@ async fn test_me(pool: Pool<Postgres>) {
     // Authorized and claim exists
     assert_eq!(
         client
-            .get("/api/v1/players/me")
+            .get("/api/v1/players/me/")
             .authorize_as(&authenticated_user)
             .expect_status(Status::Ok)
             .get_success_result::<FullPlayer>()
@@ -245,7 +249,7 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
         .await;
 
     // test if all players are returned by the endpoint (without filters)
-    let players: Vec<Player> = client.get("/api/v1/players").expect_status(Status::Ok).get_result().await;
+    let players: Vec<Player> = client.get("/api/v1/players/").expect_status(Status::Ok).get_result().await;
 
     assert_eq!(players.len(), 3, "Not all players are listed");
 
@@ -272,7 +276,7 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
 
     // test subdivision filter
     let subdivision_filtered_players: Vec<Player> = client
-        .get("/api/v1/players?subdivision=ENG")
+        .get("/api/v1/players/?subdivision=ENG")
         .expect_status(Status::Ok)
         .get_result()
         .await;
@@ -297,7 +301,11 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
     );
 
     // test nation filter
-    let nation_filtered_players: Vec<Player> = client.get("/api/v1/players?nation=GB").expect_status(Status::Ok).get_result().await;
+    let nation_filtered_players: Vec<Player> = client
+        .get("/api/v1/players/?nation=GB")
+        .expect_status(Status::Ok)
+        .get_result()
+        .await;
 
     assert_eq!(
         nation_filtered_players.len(),

@@ -175,7 +175,7 @@ pub async fn submit(
 }
 
 #[localized]
-#[rocket::get("/<record_id>")]
+#[rocket::get("/<record_id>/")]
 pub async fn get(record_id: i32, auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>) -> Result<Tagged<FullRecord>> {
     let is_helper = auth.as_ref().is_some_and(|auth| auth.has_permission(LIST_HELPER));
 
@@ -199,7 +199,7 @@ pub async fn get(record_id: i32, auth: Option<Auth<ApiToken>>, pool: &State<Poin
 }
 
 #[localized]
-#[rocket::get("/<record_id>/audit")]
+#[rocket::get("/<record_id>/audit/")]
 pub async fn audit(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<AuditLogEntry<RecordModificationData>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
@@ -213,7 +213,7 @@ pub async fn audit(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<
 }
 
 #[localized]
-#[rocket::patch("/<record_id>", data = "<patch>")]
+#[rocket::patch("/<record_id>/", data = "<patch>")]
 pub async fn patch(
     record_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchRecord>,
 ) -> Result<Tagged<FullRecord>> {
@@ -236,7 +236,7 @@ pub async fn patch(
 }
 
 #[localized]
-#[rocket::delete("/<record_id>")]
+#[rocket::delete("/<record_id>/")]
 pub async fn delete(record_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition) -> Result<Status> {
     let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
 
@@ -255,7 +255,7 @@ pub async fn delete(record_id: i32, mut auth: Auth<ApiToken>, precondition: Prec
 }
 
 #[localized]
-#[rocket::get("/<record_id>/notes")]
+#[rocket::get("/<record_id>/notes/")]
 pub async fn get_notes(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Response2<Json<Vec<Note>>>> {
     let record_holder_id = sqlx::query!("SELECT player FROM records WHERE id = $1", record_id)
         .fetch_one(&mut *auth.connection)
@@ -283,7 +283,7 @@ pub async fn get_notes(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Respo
 }
 
 #[localized]
-#[rocket::post("/<record_id>/notes", data = "<data>")]
+#[rocket::post("/<record_id>/notes/", data = "<data>")]
 pub async fn add_note(record_id: i32, mut auth: Auth<ApiToken>, data: Json<NewNote>) -> Result<Response2<Tagged<Note>>> {
     auth.require_permission(LIST_HELPER)?;
 
@@ -303,7 +303,7 @@ pub async fn add_note(record_id: i32, mut auth: Auth<ApiToken>, data: Json<NewNo
 }
 
 #[localized]
-#[rocket::patch("/<record_id>/notes/<note_id>", data = "<patch>")]
+#[rocket::patch("/<record_id>/notes/<note_id>/", data = "<patch>")]
 pub async fn patch_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>, patch: Json<PatchNote>) -> Result<Tagged<Note>> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
@@ -321,7 +321,7 @@ pub async fn patch_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>, 
 }
 
 #[localized]
-#[rocket::delete("/<record_id>/notes/<note_id>")]
+#[rocket::delete("/<record_id>/notes/<note_id>/")]
 pub async fn delete_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 

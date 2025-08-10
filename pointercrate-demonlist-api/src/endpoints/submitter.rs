@@ -23,7 +23,7 @@ pub async fn paginate(mut auth: Auth<ApiToken>, pagination: Query<SubmitterPagin
 }
 
 #[localized]
-#[rocket::get("/<submitter_id>")]
+#[rocket::get("/<submitter_id>/")]
 pub async fn get(submitter_id: i32, mut auth: Auth<ApiToken>) -> Result<Tagged<Submitter>> {
     auth.require_permission(LIST_MODERATOR)?;
 
@@ -31,7 +31,7 @@ pub async fn get(submitter_id: i32, mut auth: Auth<ApiToken>) -> Result<Tagged<S
 }
 
 #[localized]
-#[rocket::patch("/<submitter_id>", data = "<patch>")]
+#[rocket::patch("/<submitter_id>/", data = "<patch>")]
 pub async fn patch(
     submitter_id: i32, precondition: Precondition, mut auth: Auth<ApiToken>, patch: Json<PatchSubmitter>,
 ) -> Result<Tagged<Submitter>> {

@@ -39,13 +39,13 @@ pub async fn paginate(
 }
 
 #[localized]
-#[rocket::get("/ranking")]
+#[rocket::get("/ranking/")]
 pub async fn ranking(pool: &State<PointercratePool>, query: Query<RankingPagination>) -> Result<Response2<Json<Vec<RankedPlayer>>>> {
     Ok(pagination_response("/api/v1/players/ranking/", query.0, &mut *pool.connection().await?).await?)
 }
 
 #[localized]
-#[rocket::get("/me", rank = 0)]
+#[rocket::get("/me/", rank = 0)]
 pub async fn get_me(auth: AuthWithClaim<ApiToken, false>) -> Result<Tagged<FullPlayer>> {
     let AuthWithClaim(mut auth, claim) = auth;
 
@@ -56,7 +56,7 @@ pub async fn get_me(auth: AuthWithClaim<ApiToken, false>) -> Result<Tagged<FullP
 }
 
 #[localized]
-#[rocket::get("/<player_id>")]
+#[rocket::get("/<player_id>/")]
 pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagged<FullPlayer>> {
     let mut connection = pool.connection().await?;
 
@@ -66,7 +66,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
 }
 
 #[localized]
-#[rocket::patch("/<player_id>", data = "<patch>")]
+#[rocket::patch("/<player_id>/", data = "<patch>")]
 pub async fn patch(
     player_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchPlayer>,
 ) -> Result<Tagged<FullPlayer>> {
@@ -84,7 +84,7 @@ pub async fn patch(
 }
 
 #[localized]
-#[rocket::put("/<player_id>/claims")]
+#[rocket::put("/<player_id>/claims/")]
 pub async fn put_claim(player_id: i32, mut auth: Auth<ApiToken>) -> Result<Response2<Json<PlayerClaim>>> {
     let user_id = auth.user.user().id;
     let player = DatabasePlayer::by_id(player_id, &mut auth.connection).await?;
@@ -101,7 +101,7 @@ pub async fn put_claim(player_id: i32, mut auth: Auth<ApiToken>) -> Result<Respo
 /// changed by the person holding the claim, but only if the claim is verified (to claim a different
 /// player, put in a new `PUT` request)
 #[localized]
-#[rocket::patch("/<player_id>/claims/<user_id>", data = "<data>")]
+#[rocket::patch("/<player_id>/claims/<user_id>/", data = "<data>")]
 pub async fn patch_claim(
     player_id: i32, user_id: i32, mut auth: Auth<ApiToken>, data: Json<PatchPlayerClaim>,
 ) -> Result<Json<PlayerClaim>> {
@@ -145,7 +145,7 @@ pub async fn patch_claim(
 }
 
 #[localized]
-#[rocket::delete("/<player_id>/claims/<user_id>")]
+#[rocket::delete("/<player_id>/claims/<user_id>/")]
 pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     auth.require_permission(MODERATOR)?;
 
@@ -158,7 +158,7 @@ pub async fn delete_claim(player_id: i32, user_id: i32, mut auth: Auth<ApiToken>
 }
 
 #[localized]
-#[rocket::get("/claims")]
+#[rocket::get("/claims/")]
 pub async fn paginate_claims(
     mut auth: Auth<ApiToken>, pagination: Query<PlayerClaimPagination>,
 ) -> Result<Response2<Json<Vec<ListedClaim>>>> {
@@ -169,7 +169,7 @@ pub async fn paginate_claims(
 
 #[cfg(feature = "geolocation")]
 #[localized]
-#[rocket::post("/me/geolocate")]
+#[rocket::post("/me/geolocate/")]
 pub async fn geolocate_nationality(
     // This is ugly, but there is no other way to trigger our custom error responders from FromRequest impls :/
     auth: std::result::Result<AuthWithClaim<ApiToken, true>, DemonlistError>,
