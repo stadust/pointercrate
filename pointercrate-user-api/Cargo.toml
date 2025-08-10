@@ -19,7 +19,7 @@ serde_urlencoded = "0.7.0"
 log = "0.4.27"
 base64 = "0.22.1"
 nonzero_ext = "0.3.0"
-governor = "0.10.0"
+governor = "0.10.1"
 
 # Dependencies needed only for oauth2
 reqwest = { version = "0.12.22", optional = true, features = ["json"] }
