@@ -71,7 +71,7 @@ function googleOauthRegisterCallback(response) {
   dialog.form.onSubmit(() => {
     let formData = dialog.form.serialize();
     formData["credential"] = response["credential"];
-    post("/api/v1/auth/oauth/google/register", {}, formData)
+    post("/api/v1/auth/oauth/google/register/", {}, formData)
       .then(() => (window.location = "/account/"))
       .catch(displayError(dialog.form));
   });

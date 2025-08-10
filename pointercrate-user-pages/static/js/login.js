@@ -57,7 +57,7 @@ function initializeLoginForm() {
 function googleOauthCallback(response) {
   let error = document.getElementById("g-signin-error");
 
-  post("/api/v1/auth/oauth/google", {}, response)
+  post("/api/v1/auth/oauth/google/", {}, response)
     .then(() => (window.location = "/account/"))
     .catch((response) => {
       error.innerText = response.data.message;

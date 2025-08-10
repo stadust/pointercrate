@@ -27,7 +27,7 @@ use {
 
 #[cfg(feature = "legacy_accounts")]
 #[localized]
-#[rocket::post("/register", data = "<body>")]
+#[rocket::post("/register/", data = "<body>")]
 pub async fn register(
     ip: IpAddr, body: Json<Registration>, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,
 ) -> Result<Response2<Tagged<User>>> {
@@ -69,7 +69,7 @@ pub async fn login(
 }
 
 #[localized]
-#[rocket::post("/invalidate")]
+#[rocket::post("/invalidate/")]
 pub async fn invalidate(mut auth: Auth<PasswordOrBrowser>) -> Result<Status> {
     auth.user.invalidate_all_tokens(&mut auth.connection).await?;
     auth.connection.commit().await.map_err(UserError::from)?;
@@ -78,13 +78,13 @@ pub async fn invalidate(mut auth: Auth<PasswordOrBrowser>) -> Result<Status> {
 }
 
 #[localized]
-#[rocket::get("/me")]
+#[rocket::get("/me/")]
 pub async fn get_me(auth: Auth<ApiToken>) -> Tagged<User> {
     Tagged(auth.user.into_user())
 }
 
 #[localized]
-#[rocket::patch("/me", data = "<patch>")]
+#[rocket::patch("/me/", data = "<patch>")]
 pub async fn patch_me(
     mut auth: Auth<PasswordOrBrowser>, patch: Json<PatchMe>, pred: Precondition,
 ) -> Result<std::result::Result<Tagged<User>, Status>> {
@@ -104,7 +104,7 @@ pub async fn patch_me(
 }
 
 #[localized]
-#[rocket::delete("/me")]
+#[rocket::delete("/me/")]
 pub async fn delete_me(mut auth: Auth<PasswordOrBrowser>, pred: Precondition) -> Result<Status> {
     pred.require_etag_match(auth.user.user())?;
 

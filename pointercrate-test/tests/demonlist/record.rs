@@ -162,7 +162,7 @@ async fn test_no_submitter_info_on_unauthed_get(pool: Pool<Postgres>) {
     let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 50, player1.id, player1.id, &mut connection).await;
     let existing = pointercrate_test::demonlist::add_simple_record(70, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
 
-    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", existing)).get_success_result().await;
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}/", existing)).get_success_result().await;
 
     assert_eq!(record.submitter, None);
 }
@@ -185,11 +185,11 @@ async fn test_no_raw_footage_on_unauthed_get(pool: Pool<Postgres>) {
         .get_success_result()
         .await;
 
-    let record: FullRecord = clnt.get(format!("/api/v1/records/{}", record.id)).get_success_result().await;
+    let record: FullRecord = clnt.get(format!("/api/v1/records/{}/", record.id)).get_success_result().await;
     assert_eq!(record.raw_footage, None);
 
     let record: FullRecord = clnt
-        .get(format!("/api/v1/records/{}", record.id))
+        .get(format!("/api/v1/records/{}/", record.id))
         .authorize_as(&user)
         .get_success_result()
         .await;
@@ -208,7 +208,7 @@ async fn test_record_note_creation_and_deletion(pool: Pool<Postgres>) {
     // Create a record note whose author is `helper`.
     let note: Note = clnt
         .post(
-            format!("/api/v1/records/{}/notes", record),
+            format!("/api/v1/records/{}/notes/", record),
             &serde_json::json! {{
                 "content": "My Note",
                 "is_public": false,
@@ -222,7 +222,7 @@ async fn test_record_note_creation_and_deletion(pool: Pool<Postgres>) {
     // Check that the author was set correctly.
     assert_eq!(note.author.as_ref(), Some(&helper.user().name));
 
-    clnt.delete(format!("/api/v1/records/{}/notes/{}", record, note.id))
+    clnt.delete(format!("/api/v1/records/{}/notes/{}/", record, note.id))
         .authorize_as(&helper)
         .expect_status(Status::NoContent)
         .execute()
@@ -240,14 +240,14 @@ async fn test_record_deletion_updates_player_score(pool: Pool<Postgres>) {
     let submission = serde_json::json! {{"progress": 100, "demon": demon.demon.base.id, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
 
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
         .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", player.id))
+        .get(format!("/api/v1/players/{}/", player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -262,7 +262,7 @@ async fn test_record_deletion_updates_player_score(pool: Pool<Postgres>) {
         .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", player.player.base.id))
+        .get(format!("/api/v1/players/{}/", player.player.base.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;

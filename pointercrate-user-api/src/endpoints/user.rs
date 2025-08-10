@@ -35,11 +35,11 @@ pub async fn paginate(mut auth: Auth<ApiToken>, data: Query<UserPagination>) -> 
         }
     }
 
-    Ok(pagination_response("/api/v1/users", pagination, &mut auth.connection).await?)
+    Ok(pagination_response("/api/v1/users/", pagination, &mut auth.connection).await?)
 }
 
 #[localized]
-#[rocket::get("/<user_id>")]
+#[rocket::get("/<user_id>/")]
 pub async fn get_user(mut auth: Auth<ApiToken>, user_id: i32) -> Result<Tagged<User>> {
     let user = User::by_id(user_id, &mut auth.connection).await?;
 
@@ -57,7 +57,7 @@ pub async fn get_user(mut auth: Auth<ApiToken>, user_id: i32) -> Result<Tagged<U
 }
 
 #[localized]
-#[rocket::patch("/<user_id>", data = "<patch>")]
+#[rocket::patch("/<user_id>/", data = "<patch>")]
 pub async fn patch_user(
     mut auth: Auth<ApiToken>, precondition: Precondition, user_id: i32, mut patch: Json<PatchUser>,
 ) -> Result<Tagged<User>> {
@@ -112,7 +112,7 @@ pub async fn patch_user(
 }
 
 #[localized]
-#[rocket::delete("/<user_id>")]
+#[rocket::delete("/<user_id>/")]
 pub async fn delete_user(mut auth: Auth<ApiToken>, precondition: Precondition, user_id: i32) -> Result<Status> {
     auth.require_permission(ADMINISTRATOR)?;
 

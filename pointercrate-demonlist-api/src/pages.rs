@@ -99,7 +99,7 @@ async fn claimed_full_player(user: &User, connection: &mut PgConnection) -> Opti
     player.upgrade(connection).await.ok()
 }
 
-#[rocket::get("/permalink/<demon_id>")]
+#[rocket::get("/permalink/<demon_id>/")]
 pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> Result<Redirect> {
     let mut connection = pool.connection().await?;
 
@@ -109,7 +109,7 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[localized]
-#[rocket::get("/<position>")]
+#[rocket::get("/<position>/")]
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
@@ -165,7 +165,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
 }
 
 #[localized]
-#[rocket::get("/statsviewer")]
+#[rocket::get("/statsviewer/")]
 pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
@@ -175,7 +175,7 @@ pub async fn stats_viewer(pool: &State<PointercratePool>) -> Result<Page> {
 }
 
 #[localized]
-#[rocket::get("/statsviewer/nations")]
+#[rocket::get("/statsviewer/nations/")]
 pub async fn nation_stats_viewer() -> Page {
     Page::new(pointercrate_demonlist_pages::statsviewer::national::nation_based_stats_viewer())
 }

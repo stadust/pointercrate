@@ -29,7 +29,7 @@ pub async fn paginate(pool: &State<PointercratePool>, pagination: Query<DemonIdP
 }
 
 #[localized]
-#[rocket::get("/listed")]
+#[rocket::get("/listed/")]
 pub async fn paginate_listed(
     pool: &State<PointercratePool>, pagination: Query<DemonPositionPagination>,
 ) -> Result<Response2<Json<Vec<Demon>>>> {
@@ -37,13 +37,13 @@ pub async fn paginate_listed(
 }
 
 #[localized]
-#[rocket::get("/<demon_id>")]
+#[rocket::get("/<demon_id>/")]
 pub async fn get(demon_id: i32, pool: &State<PointercratePool>) -> Result<Tagged<FullDemon>> {
     Ok(Tagged(FullDemon::by_id(demon_id, &mut *pool.connection().await?).await?))
 }
 
 #[localized]
-#[rocket::get("/<demon_id>/audit")]
+#[rocket::get("/<demon_id>/audit/")]
 pub async fn audit(demon_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<AuditLogEntry<DemonModificationData>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
@@ -57,7 +57,7 @@ pub async fn audit(demon_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<A
 }
 
 #[localized]
-#[rocket::get("/<demon_id>/audit/movement")]
+#[rocket::get("/<demon_id>/audit/movement/")]
 pub async fn movement_log(demon_id: i32, pool: &State<PointercratePool>) -> Result<Json<Vec<MovementLogEntry>>> {
     let log = pointercrate_demonlist::demon::audit::movement_log_for_demon(demon_id, &mut *pool.connection().await?).await?;
 
@@ -89,7 +89,7 @@ pub async fn post(
 }
 
 #[localized]
-#[rocket::patch("/<demon_id>", data = "<patch>")]
+#[rocket::patch("/<demon_id>/", data = "<patch>")]
 pub async fn patch(
     demon_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchDemon>,
 ) -> Result<Tagged<FullDemon>> {
@@ -107,7 +107,7 @@ pub async fn patch(
 }
 
 #[localized]
-#[rocket::post("/<demon_id>/creators", data = "<creator>")]
+#[rocket::post("/<demon_id>/creators/", data = "<creator>")]
 pub async fn post_creator(demon_id: i32, mut auth: Auth<ApiToken>, creator: Json<PostCreator>) -> Result<Response2<Json<()>>> {
     auth.require_permission(LIST_MODERATOR)?;
 
@@ -125,7 +125,7 @@ pub async fn post_creator(demon_id: i32, mut auth: Auth<ApiToken>, creator: Json
 }
 
 #[localized]
-#[rocket::delete("/<demon_id>/creators/<player_id>")]
+#[rocket::delete("/<demon_id>/creators/<player_id>/")]
 pub async fn delete_creator(demon_id: i32, player_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     auth.require_permission(LIST_MODERATOR)?;
 

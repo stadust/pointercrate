@@ -228,7 +228,7 @@ class RecordManager extends Paginator {
     this._submitter.innerText = this.currentObject.submitter.id;
 
     // this is introducing race conditions. Oh well.
-    return get("/api/v1/records/" + this.currentObject.id + "/notes").then(
+    return get("/api/v1/records/" + this.currentObject.id + "/notes/").then(
       (response) => {
         // clear notes
         while (this._notes.firstChild) {
