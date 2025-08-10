@@ -177,7 +177,11 @@ async fn test_me(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     // Assert 401 without authentication
-    client.get("/api/v1/players/me/").expect_status(Status::Unauthorized).execute().await;
+    client
+        .get("/api/v1/players/me/")
+        .expect_status(Status::Unauthorized)
+        .execute()
+        .await;
 
     let authenticated_user = pointercrate_test::user::add_normal_user(&mut connection).await;
     let user = authenticated_user.user();
@@ -297,7 +301,11 @@ async fn test_players_pagination(pool: Pool<Postgres>) {
     );
 
     // test nation filter
-    let nation_filtered_players: Vec<Player> = client.get("/api/v1/players/?nation=GB").expect_status(Status::Ok).get_result().await;
+    let nation_filtered_players: Vec<Player> = client
+        .get("/api/v1/players/?nation=GB")
+        .expect_status(Status::Ok)
+        .get_result()
+        .await;
 
     assert_eq!(
         nation_filtered_players.len(),
