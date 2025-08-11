@@ -252,7 +252,7 @@ async fn test_record_deletion_updates_player_score(pool: Pool<Postgres>) {
         .get_success_result()
         .await;
 
-    assert_ne!(player.player.score, 0.0f64, "Adding approved record failed to give player score");
+    assert_ne!(player.player.score.unwrap(), 0.0f64, "Adding approved record failed to give player score");
 
     clnt.delete(format!("/api/v1/records/{}/", record.id))
         .authorize_as(&helper)
@@ -267,5 +267,5 @@ async fn test_record_deletion_updates_player_score(pool: Pool<Postgres>) {
         .get_success_result()
         .await;
 
-    assert_eq!(player.player.score, 0.0f64, "Deleting approved record failed to lower player score");
+    assert_eq!(player.player.score, None, "Deleting approved record failed to lower player score");
 }

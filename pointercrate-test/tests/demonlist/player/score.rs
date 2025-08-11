@@ -32,7 +32,7 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
         .get_success_result()
         .await;
 
-    assert_ne!(player.player.score, 0.0f64, "Adding approved record failed to give player score");
+    assert_ne!(player.player.score.unwrap(), 0.0f64, "Adding approved record failed to give player score");
 
     clnt.patch(
         format!("/api/v1/records/{}/", record.id),
@@ -50,7 +50,7 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
         .get_success_result()
         .await;
 
-    assert_eq!(player.player.score, 0.0f64, "Rejecting record failed to remove player score");
+    assert_eq!(player.player.score, None, "Rejecting record failed to remove player score");
 }
 
 #[sqlx::test(migrations = "../migrations")]
@@ -66,7 +66,7 @@ pub async fn test_verifications_give_score(pool: Pool<Postgres>) {
         .get_success_result()
         .await;
 
-    assert_ne!(player.player.score, 0.0f64);
+    assert_ne!(player.player.score.unwrap(), 0.0f64);
 }
 
 async fn nationality_score(iso_country_code: &str, connection: &mut PgConnection) -> f64 {
@@ -164,7 +164,7 @@ pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) 
         .get_success_result()
         .await;
 
-    assert_eq!(player.player.score, 0.0f64, "Progress record on extended list demon is given score");
+    assert_eq!(player.player.score, Some(0.0f64), "Progress record on extended list demon is given score (or incorrectly setting score to null)");
 }
 
 #[sqlx::test(migrations = "../migrations")]
@@ -207,7 +207,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
         .await;
 
     assert_ne!(
-        player.player.score, 0.0f64,
+        player.player.score.unwrap(), 0.0f64,
         "Progress record on final main list demon not giving score"
     );
 
@@ -229,7 +229,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
         .await;
 
     assert_eq!(
-        player.player.score, 0.0f64,
-        "Removal of player's last record did not reset their score to 0"
+        player.player.score, None,
+        "Removal of player's last record did not reset their score to null"
     );
 }
