@@ -12,7 +12,7 @@ pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-api = {path = "../pointercrate-core-api"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
-async-trait = "0.1.88"
+async-trait = "0.1.89"
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
 
 [features]
