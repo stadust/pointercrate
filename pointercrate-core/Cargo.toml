@@ -16,5 +16,5 @@ log = "0.4.27"
 chrono = {version = "0.4.41", features = ["serde"]}
 getrandom = "0.3.3"
 unic-langid = "0.9.5"
-thiserror = "2.0.12"
+thiserror = "2.0.15"
 fluent-syntax = "0.12.0"
