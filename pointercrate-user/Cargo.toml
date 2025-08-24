@@ -14,8 +14,8 @@ sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-
 jsonwebtoken = "9.3.1"
 log = "0.4.27"
 futures = "0.3.31"
-bcrypt = "0.17.0"
-url = "2.5.4"
+bcrypt = "0.17.1"
+url = "2.5.7"
 chrono = { version = "0.4.41", optional = true }
 
 [features]
