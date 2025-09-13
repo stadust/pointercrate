@@ -8,6 +8,7 @@ pub mod components;
 pub mod demon_page;
 pub mod overview;
 pub mod statsviewer;
+pub mod submit_record;
 
 struct ListSection {
     name: String,
