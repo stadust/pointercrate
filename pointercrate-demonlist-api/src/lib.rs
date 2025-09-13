@@ -97,7 +97,8 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
                 pages::nation_stats_viewer,
                 pages::demon_page,
                 pages::demon_permalink,
-                pages::heatmap_css
+                pages::heatmap_css,
+                pages::submit_record,
             ],
         )
 }
