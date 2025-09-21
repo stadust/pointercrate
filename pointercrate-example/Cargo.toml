@@ -22,7 +22,7 @@ pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-page
 rocket = { git = "https://github.com/rwf2/Rocket", branch = "master" }
 unic-langid = { version = "0.9.5", features = ["macros"] }
 reqwest = "0.12.23"
-serde = "1.0.219"
+serde = "1.0.226"
 
 [features]
 oauth2 = ["pointercrate-user-api/oauth2", "pointercrate-user-pages/oauth2"]

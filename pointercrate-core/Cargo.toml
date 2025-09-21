@@ -7,13 +7,13 @@ edition.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = "1.0.219"
+serde = "1.0.226"
 derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate"] }
 fluent = "0.17.0"
 tokio = "1.47.1"
 log = "0.4.28"
-chrono = {version = "0.4.41", features = ["serde"]}
+chrono = {version = "0.4.42", features = ["serde"]}
 getrandom = "0.3.3"
 unic-langid = "0.9.5"
 thiserror = "2.0.16"
