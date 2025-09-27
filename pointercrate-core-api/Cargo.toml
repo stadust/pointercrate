@@ -8,11 +8,11 @@ edition.workspace = true
 
 [dependencies]
 serde = "1.0.226"
-rocket = { git = "https://github.com/rwf2/Rocket", branch = "master", features = ["json"] }
+rocket = { workspace = true }
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
 serde_json = "1.0.145"
-sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono" ] }
+sqlx = { workspace = true }
 log = "0.4.28"
 serde_urlencoded = "0.7.0"
 maud = "0.27.0"

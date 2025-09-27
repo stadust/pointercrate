@@ -16,8 +16,8 @@ pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-api = {path = "../pointercrate-user-api"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages", features = ["legacy_accounts"]}
 serde = "1.0.226"
-sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
-rocket = { git = "https://github.com/rwf2/Rocket", branch = "master" }
+sqlx = { workspace = true }
+rocket = { workspace = true }
 serde_json = "1.0.145"
 dotenv = "0.15.0"
 serde_urlencoded = "0.7.1"
