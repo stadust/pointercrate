@@ -161,19 +161,16 @@ pub async fn google_oauth_login(
 #[rocket::post("/oauth/google/register/", data = "<payload>")]
 pub async fn google_oauth_register(
     payload: Json<OauthRegistration>, key_store: &State<GoogleCertificateStore>, ip: IpAddr, pool: &State<PointercratePool>,
-    cookies: &rocket::http::CookieJar<'_>, ratelimits: &State<UserRatelimits>,
+    cookies: &rocket::http::CookieJar<'_>,
 ) -> pointercrate_core_api::error::Result<Status> {
     let OauthRegistration { credential, username } = payload.0;
     let validated_credentials = key_store.validate_with_refresh(credential).await.ok_or(CoreError::Unauthorized)?;
 
     let mut connection = pool.transaction().await.map_err(UserError::from)?;
-    ratelimits.soft_registrations(ip)?;
 
     User::validate_name(&username)?;
 
     let user = AuthenticatedUser::register_oauth(username, validated_credentials, &mut connection).await?;
-
-    ratelimits.registrations(ip)?;
 
     connection.commit().await.map_err(UserError::from)?;
 

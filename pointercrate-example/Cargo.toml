@@ -19,10 +19,10 @@ pointercrate-demonlist-pages = { version = "0.1.0", path = "../pointercrate-demo
 pointercrate-user = { version = "0.1.0", path = "../pointercrate-user" }
 pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api", features = ["legacy_accounts"] }
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages", features = ["legacy_accounts"] }
-rocket = { git = "https://github.com/rwf2/Rocket", branch = "master" }
+rocket = { workspace = true }
 unic-langid = { version = "0.9.5", features = ["macros"] }
-reqwest = "0.12.22"
-serde = "1.0.219"
+reqwest = "0.12.23"
+serde = "1.0.226"
 
 [features]
 oauth2 = ["pointercrate-user-api/oauth2", "pointercrate-user-pages/oauth2"]
