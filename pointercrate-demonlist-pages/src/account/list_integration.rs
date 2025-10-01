@@ -7,7 +7,7 @@ use pointercrate_core_pages::{
     trp_html,
     util::{filtered_paginator, paginator},
 };
-use pointercrate_demonlist::player::claim::PlayerClaim;
+use pointercrate_demonlist::{list::List, player::claim::PlayerClaim};
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating},
     MODERATOR,
@@ -70,7 +70,7 @@ impl AccountPageTab for ListIntegrationTab {
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    (P(&claim.player, Some("claimed-player")))
+                                    (P(&claim.player, Some("claimed-player"), &List::RatedPlus))
                                 },
                                 None => {
                                     i {

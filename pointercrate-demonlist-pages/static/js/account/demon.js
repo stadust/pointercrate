@@ -20,6 +20,7 @@ import {
   post,
   setupEditorDialog,
   FormDialog,
+  setupDropdownEditor,
 } from "/static/core/js/modules/form.js";
 import { loadResource, tr } from "/static/core/js/modules/localization.js";
 
@@ -51,6 +52,14 @@ export class DemonManager extends FilteredPaginator {
     this._publisher = document.getElementById("demon-publisher");
 
     this._creators = document.getElementById("demon-creators");
+
+    this._rated = setupDropdownEditor(
+      new PaginatorEditorBackend(this, false),
+      "edit-demon-rated",
+      "rated",
+      this.output,
+      { true: true, false: false },
+    );
 
     let videoForm = setupFormDialogEditor(
       new PaginatorEditorBackend(this, false),
@@ -194,6 +203,8 @@ export class DemonManager extends FilteredPaginator {
       " (" +
       this.currentObject.verifier.id +
       ")";
+
+    this._rated.selectSilently(this.currentObject.rated.toString());
 
     while (this._creators.lastChild) {
       this._creators.removeChild(this._creators.lastChild);
