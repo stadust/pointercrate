@@ -1,10 +1,11 @@
 use chrono::{DateTime, Datelike, FixedOffset};
 use maud::{html, Markup, Render};
 use pointercrate_core::localization::tr;
-use pointercrate_demonlist::demon::TimeShiftedDemon;
+use pointercrate_demonlist::{demon::TimeShiftedDemon, list::List};
 
 pub enum Tardis {
     Activated {
+        list: List,
         destination: DateTime<FixedOffset>,
         demons: Vec<TimeShiftedDemon>,
         /// Whether the time selection panel should be visible.
@@ -23,8 +24,9 @@ impl Tardis {
         Tardis::Deactivated { show_selector: visible }
     }
 
-    pub fn activate(&mut self, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>, show_destination: bool) {
+    pub fn activate(&mut self, list: List, destination: DateTime<FixedOffset>, demons_then: Vec<TimeShiftedDemon>, show_destination: bool) {
         *self = Tardis::Activated {
+            list,
             show_selector: self.visible(),
             demons: demons_then,
             destination,
@@ -49,7 +51,7 @@ impl Render for Tardis {
     fn render(&self) -> Markup {
         html! {
             @match self {
-                Tardis::Activated { destination, show_destination, ..} if *show_destination => {
+                Tardis::Activated { list, destination, show_destination, ..} if *show_destination => {
                     div.panel.fade.blue.flex style="align-items: center;" {
                         span style = "text-align: end"{
                             (tr("time-machine.active-info"))
@@ -63,7 +65,7 @@ impl Render for Tardis {
                                 }
                             }
                         }
-                        a.white.button href = "/demonlist/" onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{ (tr("time-machine.return")) }}
+                        a.white.button href = (format!("/{}/", list.as_str())) onclick=r#"document.cookie = "when=""# style = "margin-left: 15px"{ b{ (tr("time-machine.return")) }}
                     }
                 },
                 _ => {}

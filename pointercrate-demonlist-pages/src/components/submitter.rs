@@ -2,16 +2,18 @@ use crate::components::{demon_dropdown, player_selection_dropdown};
 use maud::{html, Markup, Render};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::trp_html;
-use pointercrate_demonlist::{config, demon::Demon};
+use pointercrate_demonlist::{config, demon::Demon, list::List};
 
 pub struct RecordSubmitter<'a> {
+    list: &'a List,
     initially_visible: bool,
     demons: &'a [Demon],
 }
 
 impl<'a> RecordSubmitter<'a> {
-    pub fn new(visible: bool, demons: &'a [Demon]) -> RecordSubmitter<'a> {
+    pub fn new(list: &'a List, visible: bool, demons: &'a [Demon]) -> RecordSubmitter<'a> {
         RecordSubmitter {
+            list,
             initially_visible: visible,
             demons,
         }
@@ -36,7 +38,7 @@ impl Render for RecordSubmitter<'_> {
                         (trp!("record-submission.demon-info", "list-size" = config::extended_list_size()))
                     }
                     span.form-input data-type = "dropdown" {
-                        (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size())))
+                        (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position(self.list).unwrap() <= config::extended_list_size())))
                         p.error {}
                     }
                     h3 {
