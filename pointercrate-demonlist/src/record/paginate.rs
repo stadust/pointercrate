@@ -37,6 +37,16 @@ pub struct RecordPagination {
     #[serde(rename = "demon_position__gt")]
     demon_position_gt: Option<i16>,
 
+    demon_rated_position: Option<i16>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    #[serde(rename = "demon_rated_position__lt")]
+    demon_rated_position_lt: Option<i16>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    #[serde(rename = "demon_rated_position__gt")]
+    demon_rated_position_gt: Option<i16>,
+
     #[serde(default, deserialize_with = "non_nullable")]
     pub status: Option<RecordStatus>,
 
@@ -94,6 +104,9 @@ impl Paginatable<RecordPagination> for MinimalRecordPD {
             .bind(query.player)
             .bind(query.submitter)
             .bind(query.params.limit + 1)
+            .bind(query.demon_rated_position)
+            .bind(query.demon_rated_position_lt)
+            .bind(query.demon_rated_position_gt)
             .fetch(&mut *connection);
 
         let mut records = Vec::new();
@@ -114,6 +127,7 @@ impl Paginatable<RecordPagination> for MinimalRecordPD {
                 demon: MinimalDemon {
                     id: row.try_get("demon_id")?,
                     position: row.try_get("position")?,
+                    rated_position: row.try_get("rated_position")?,
                     name: row.try_get("demon_name")?,
                 },
             })

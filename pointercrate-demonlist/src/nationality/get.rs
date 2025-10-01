@@ -127,8 +127,8 @@ impl Nationality {
 
 pub async fn unbeaten_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     let mut stream = sqlx::query!(
-        r#"select name::text as "name!", id as "id!", position as "position!" from demons where position <= $1 except (select demons.name, demons.id, position from records inner join players on 
-         players.id=records.player inner join demons on demons.id=records.demon where status_='APPROVED' and nationality=$2 and progress=100 union select demons.name, demons.id, demons.position from demons inner join players on players.id=verifier where players.nationality=$2)"#,
+        r#"select name::text as "name!", id as "id!", position as "position!", rated_position from demons where position <= $1 except (select demons.name, demons.id, position, rated_position from records inner join players on 
+         players.id=records.player inner join demons on demons.id=records.demon where status_='APPROVED' and nationality=$2 and progress=100 union select demons.name, demons.id, demons.position, demons.rated_position from demons inner join players on players.id=verifier where players.nationality=$2)"#,
         crate::config::extended_list_size(),
         nation.iso_country_code
     )
@@ -142,6 +142,7 @@ pub async fn unbeaten_in(nation: &Nationality, connection: &mut PgConnection) ->
         unbeaten.push(MinimalDemon {
             id: row.id,
             position: row.position,
+            rated_position: row.rated_position,
             name: row.name,
         });
     }
@@ -150,7 +151,7 @@ pub async fn unbeaten_in(nation: &Nationality, connection: &mut PgConnection) ->
 }
 
 pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
-    let mut stream = sqlx::query!( r#"select demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from creators inner join demons on demons.id=demon inner join players on players.id=creator where nationality=$1 order by demon"#, nation.iso_country_code).fetch(connection);
+    let mut stream = sqlx::query!( r#"select demon, demons.name::text as "demon_name!", demons.position, demons.rated_position, players.name::text as "player_name!" from creators inner join demons on demons.id=demon inner join players on players.id=creator where nationality=$1 order by demon"#, nation.iso_country_code).fetch(connection);
 
     let mut creations = Vec::<MiniDemonWithPlayers>::new();
 
@@ -164,6 +165,7 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
                     id: row.demon,
                     name: row.demon_name,
                     position: row.position,
+                    rated_position: row.rated_position,
                 },
                 players: vec![row.player_name],
             }),
@@ -175,7 +177,7 @@ pub async fn created_in(nation: &Nationality, connection: &mut PgConnection) -> 
 
 pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
     let mut stream = sqlx::query!(
-        r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=verifier where nationality=$1"#, nation.iso_country_code).fetch(connection);
+        r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, demons.rated_position, players.name::text as "player_name!" from demons inner join players on players.id=verifier where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
     let mut demons = Vec::new();
 
@@ -187,6 +189,7 @@ pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) ->
                 id: row.demon,
                 name: row.demon_name,
                 position: row.position,
+                rated_position: row.rated_position,
             },
             players: vec![row.player_name],
         });
@@ -197,7 +200,7 @@ pub async fn verified_in(nation: &Nationality, connection: &mut PgConnection) ->
 
 pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<MiniDemonWithPlayers>> {
     let mut stream = sqlx::query!(
-        r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, players.name::text as "player_name!" from demons inner join players on players.id=publisher where nationality=$1"#, nation.iso_country_code).fetch(connection);
+        r#"select demons.id as demon, demons.name::text as "demon_name!", demons.position, demons.rated_position, players.name::text as "player_name!" from demons inner join players on players.id=publisher where nationality=$1"#, nation.iso_country_code).fetch(connection);
 
     let mut demons = Vec::new();
 
@@ -209,6 +212,7 @@ pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -
                 id: row.demon,
                 name: row.demon_name,
                 position: row.position,
+                rated_position: row.rated_position,
             },
             players: vec![row.player_name],
         });
@@ -219,7 +223,7 @@ pub async fn published_in(nation: &Nationality, connection: &mut PgConnection) -
 
 pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection) -> Result<Vec<BestRecord>> {
     let mut stream = sqlx::query!(
-        r#"SELECT progress as "progress!", demons.id AS "demon_id!", demons.name as "demon_name!: String", demons.position as "position!", players.name as "player_name!: String" FROM best_records_in($1) as records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id = records.player"#,
+        r#"SELECT progress as "progress!", demons.id AS "demon_id!", demons.name as "demon_name!: String", demons.position as "position!", demons.rated_position, players.name as "player_name!: String" FROM best_records_in($1) as records INNER JOIN demons ON records.demon = demons.id INNER JOIN players ON players.id = records.player"#,
         nation.iso_country_code
     )
         .fetch(connection);
@@ -236,6 +240,7 @@ pub async fn best_records_in(nation: &Nationality, connection: &mut PgConnection
                     id: row.demon_id,
                     name: row.demon_name,
                     position: row.position,
+                    rated_position: row.rated_position,
                 },
                 progress: row.progress,
                 players: vec![row.player_name],

@@ -4,4 +4,5 @@ FROM demons
         ON demons.publisher = publishers.id
     INNER JOIN players AS verifiers
         ON demons.verifier = verifiers.id
+WHERE rated
 ORDER BY position

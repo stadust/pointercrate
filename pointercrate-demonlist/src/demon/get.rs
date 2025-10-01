@@ -2,6 +2,7 @@ use crate::{
     creator::creators_of,
     demon::{Demon, FullDemon, MinimalDemon, TimeShiftedDemon},
     error::{DemonlistError, Result},
+    list::List,
     player::DatabasePlayer,
     record::approved_records_on,
 };
@@ -11,17 +12,25 @@ use sqlx::{Error, PgConnection};
 
 impl MinimalDemon {
     pub async fn by_id(id: i32, connection: &mut PgConnection) -> Result<MinimalDemon> {
-        sqlx::query_as!(MinimalDemon, r#"SELECT id, name, position FROM demons WHERE id = $1"#, id)
-            .fetch_one(connection)
-            .await
-            .map_err(|err| match err {
-                Error::RowNotFound => DemonlistError::DemonNotFound { demon_id: id },
-                _ => err.into(),
-            })
+        sqlx::query_as!(
+            MinimalDemon,
+            r#"SELECT id, name, position, rated_position FROM demons WHERE id = $1"#,
+            id
+        )
+        .fetch_one(connection)
+        .await
+        .map_err(|err| match err {
+            Error::RowNotFound => DemonlistError::DemonNotFound { demon_id: id },
+            _ => err.into(),
+        })
     }
 
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<MinimalDemon> {
-        let mut stream = sqlx::query!(r#"SELECT id, name, position FROM demons WHERE name = $1"#, name.to_string()).fetch(connection);
+        let mut stream = sqlx::query!(
+            r#"SELECT id, name, position, rated_position FROM demons WHERE name = $1"#,
+            name.to_string()
+        )
+        .fetch(connection);
 
         let mut demon = None;
         let mut further_demons = Vec::new();
@@ -32,6 +41,7 @@ impl MinimalDemon {
             let current_demon = MinimalDemon {
                 id: row.id,
                 position: row.position,
+                rated_position: row.rated_position,
                 name: row.name,
             };
 
@@ -62,8 +72,8 @@ impl FullDemon {
         Demon::by_id(id, connection).await?.upgrade(connection).await
     }
 
-    pub async fn by_position(position: i16, connection: &mut PgConnection) -> Result<FullDemon> {
-        Demon::by_position(position, connection).await?.upgrade(connection).await
+    pub async fn by_position(position: i16, list: &List, connection: &mut PgConnection) -> Result<FullDemon> {
+        Demon::by_position(position, list, connection).await?.upgrade(connection).await
     }
 }
 
@@ -91,8 +101,8 @@ impl Demon {
             })
     }
 
-    pub async fn by_position(position: i16, connection: &mut PgConnection) -> Result<Demon> {
-        sqlx::query_file_as!(FetchedDemon, "sql/demon_by_position.sql", position)
+    pub async fn by_position(position: i16, list: &List, connection: &mut PgConnection) -> Result<Demon> {
+        sqlx::query_file_as!(FetchedDemon, "sql/demon_by_position.sql", position, *list == List::RatedPlus)
             .fetch_one(connection)
             .await
             .map(Into::into)
@@ -119,7 +129,7 @@ macro_rules! query_many_demons {
 pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     query_many_demons!(
         connection,
-        r#"SELECT id, name, position FROM demons WHERE publisher = $1"#,
+        r#"SELECT id, name, position, rated_position FROM demons WHERE publisher = $1"#,
         player.id
     )
 }
@@ -127,7 +137,7 @@ pub async fn published_by(player: &DatabasePlayer, connection: &mut PgConnection
 pub async fn verified_by(player: &DatabasePlayer, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     query_many_demons!(
         connection,
-        r#"SELECT id, name, position FROM demons WHERE verifier = $1"#,
+        r#"SELECT id, name, position, rated_position FROM demons WHERE verifier = $1"#,
         player.id
     )
 }
@@ -136,6 +146,7 @@ struct FetchedDemon {
     demon_id: i32,
     demon_name: String,
     position: i16,
+    rated_position: Option<i16>,
     requirement: i16,
     video: Option<String>,
     thumbnail: String,
@@ -146,6 +157,7 @@ struct FetchedDemon {
     verifier_name: String,
     verifier_banned: bool,
     level_id: Option<i64>,
+    rated: bool,
 }
 
 impl From<FetchedDemon> for Demon {
@@ -155,6 +167,7 @@ impl From<FetchedDemon> for Demon {
                 id: fetched.demon_id,
                 name: fetched.demon_name,
                 position: fetched.position,
+                rated_position: fetched.rated_position,
             },
             requirement: fetched.requirement,
             video: fetched.video,
@@ -170,21 +183,31 @@ impl From<FetchedDemon> for Demon {
                 banned: fetched.verifier_banned,
             },
             level_id: fetched.level_id.map(|id| id as u64),
+            rated: fetched.rated,
         }
     }
 }
 
-pub async fn current_list(connection: &mut PgConnection) -> Result<Vec<Demon>> {
-    Ok(sqlx::query_file_as!(FetchedDemon, "sql/all_demons.sql")
-        .fetch_all(connection)
-        .await?
-        .into_iter()
-        .map(Into::into)
-        .collect())
+pub async fn current_list(list: &List, connection: &mut PgConnection) -> Result<Vec<Demon>> {
+    Ok(match list {
+        List::Demonlist => {
+            sqlx::query_file_as!(FetchedDemon, "sql/all_rated_demons.sql")
+                .fetch_all(connection)
+                .await?
+        },
+        List::RatedPlus => {
+            sqlx::query_file_as!(FetchedDemon, "sql/all_demons.sql")
+                .fetch_all(connection)
+                .await?
+        },
+    }
+    .into_iter()
+    .map(Into::into)
+    .collect())
 }
 
-pub async fn list_at(connection: &mut PgConnection, at: NaiveDateTime) -> Result<Vec<TimeShiftedDemon>> {
-    let mut stream = sqlx::query_file!("sql/all_demons_at.sql", at).fetch(connection);
+pub async fn list_at(connection: &mut PgConnection, list: &List, at: NaiveDateTime) -> Result<Vec<TimeShiftedDemon>> {
+    let mut stream = sqlx::query_file!("sql/all_demons_at.sql", at, *list == List::Demonlist).fetch(connection);
     let mut demons = Vec::new();
 
     while let Some(row) = stream.next().await {
@@ -194,7 +217,11 @@ pub async fn list_at(connection: &mut PgConnection, at: NaiveDateTime) -> Result
             current_demon: Demon {
                 base: MinimalDemon {
                     id: row.demon_id,
+                    // fixme: the query already retrieves the demon positions
+                    // for the list this struct is used in, so we can just set
+                    // these to the same thing
                     position: row.position,
+                    rated_position: Some(row.position),
                     name: row.demon_name,
                 },
                 requirement: row.requirement,
@@ -211,6 +238,7 @@ pub async fn list_at(connection: &mut PgConnection, at: NaiveDateTime) -> Result
                     banned: row.verifier_banned,
                 },
                 level_id: row.level_id.map(|i| i as u64),
+                rated: row.rated,
             },
             position_now: row.current_position,
         })

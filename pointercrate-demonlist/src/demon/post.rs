@@ -1,6 +1,6 @@
 use crate::{
     creator::Creator,
-    demon::{Demon, FullDemon, MinimalDemon},
+    demon::{recompute_rated_positions, Demon, FullDemon, MinimalDemon},
     error::Result,
     player::{recompute_scores, DatabasePlayer},
 };
@@ -18,6 +18,7 @@ pub struct PostDemon {
     creators: Vec<String>,
     video: Option<String>,
     level_id: Option<i64>,
+    rated: bool,
 }
 
 impl FullDemon {
@@ -41,15 +42,16 @@ impl FullDemon {
         Demon::shift_down(data.position, connection).await?;
 
         let created = sqlx::query!(
-            "INSERT INTO demons (name, position, requirement, video, verifier, publisher, level_id) VALUES ($1::text,$2,$3,$4::text,$5,$6, $7) \
-             RETURNING id, thumbnail",
+            "INSERT INTO demons (name, position, requirement, video, verifier, publisher, level_id, rated) VALUES ($1::text,$2,$3,$4::text,$5,$6, $7, $8) \
+             RETURNING id, thumbnail, rated_position",
             data.name.to_string(),
             data.position,
             data.requirement,
             video.as_ref(),
             verifier.id,
             publisher.id,
-            data.level_id
+            data.level_id,
+            data.rated,
         )
         .fetch_one(&mut *connection)
         .await?;
@@ -58,6 +60,7 @@ impl FullDemon {
             base: MinimalDemon {
                 id: created.id,
                 position: data.position,
+                rated_position: created.rated_position,
                 name: data.name,
             },
             requirement: data.requirement,
@@ -66,6 +69,7 @@ impl FullDemon {
             publisher,
             verifier,
             level_id,
+            rated: data.rated,
         };
 
         let mut creators = Vec::new();
@@ -77,6 +81,7 @@ impl FullDemon {
             creators.push(player);
         }
 
+        recompute_rated_positions(connection).await?;
         recompute_scores(connection).await?;
 
         Ok(FullDemon {
@@ -110,6 +115,7 @@ mod tests {
                 creators: Vec::new(),
                 video: None,
                 level_id: None,
+                rated: true,
             },
             &mut conn,
         )
@@ -136,6 +142,7 @@ mod tests {
                 creators: Vec::new(),
                 video: Some("https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_owned()),
                 level_id: None,
+                rated: true,
             },
             &mut conn,
         )
@@ -157,6 +164,7 @@ mod tests {
                 creators: Vec::new(),
                 video: Some("https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_owned()),
                 level_id: None,
+                rated: true,
             },
             &mut conn,
         )
@@ -178,6 +186,7 @@ mod tests {
                 creators: Vec::new(),
                 video: None,
                 level_id: Some(-1),
+                rated: true,
             },
             &mut conn,
         )

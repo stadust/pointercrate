@@ -57,7 +57,7 @@ pub async fn creators_of(demon: &MinimalDemon, connection: &mut PgConnection) ->
 pub async fn created_by(player_id: i32, connection: &mut PgConnection) -> Result<Vec<MinimalDemon>> {
     query_many_demons!(
         connection,
-        r#"SELECT demons.id, demons.name, demons.position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE
+        r#"SELECT demons.id, demons.name, demons.position, demons.rated_position FROM demons INNER JOIN creators ON demons.id = creators.demon WHERE
          creators.creator=$1"#,
         player_id
     )
