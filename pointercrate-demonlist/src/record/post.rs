@@ -96,13 +96,13 @@ impl NormalizedSubmission {
         }
 
         // Cannot submit records for the legacy list (it is possible to directly add them for list mods)
-        if self.demon.position > crate::config::extended_list_size() && self.status == RecordStatus::Submitted {
+        if self.demon.is_all_legacy() && self.status == RecordStatus::Submitted {
             return Err(DemonlistError::SubmitLegacy);
         }
 
         // Can only submit 100% records for the extended list (it is possible to directly add them for list
         // mods)
-        if self.demon.position > crate::config::list_size() && self.progress != 100 && self.status == RecordStatus::Submitted {
+        if !self.demon.is_any_main() && self.progress != 100 && self.status == RecordStatus::Submitted {
             return Err(DemonlistError::Non100Extended);
         }
 
@@ -240,6 +240,7 @@ mod tests {
             demon: MinimalDemon {
                 id: 1,
                 position: 1,
+                rated_position: Some(1),
                 name: "Bloodbath".to_string(),
             },
             status: RecordStatus::Submitted,
