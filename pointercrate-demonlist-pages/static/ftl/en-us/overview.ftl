@@ -23,6 +23,7 @@ time-machine = Time Machine
 
     .active-position = Currently #{ $position }
     .active-position-legacy = Currently Legacy
+    .active-position-none = Not currently on this list
 
     .active-info = You are currently looking at the demonlist how it was on
     .return = Go to present

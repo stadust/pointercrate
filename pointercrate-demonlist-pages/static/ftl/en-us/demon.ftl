@@ -46,6 +46,10 @@ demon-publisher = Publisher
 demon-verifier = Verifier
     .validator-valuemissing = Please specify a verifier
 
+demon-rated = Rated
+    .yes = Yes (Rated)
+    .no = No (Unrated)
+
 demon-creators = Creators
 
 demon-headline-by = by { $creator }
@@ -86,6 +90,10 @@ movements-reason = Reason
     .moved = Moved
     .movedabove = { $demon } was moved up past this demon
     .movedbelow = { $demon } was moved down past this demon
+    .rated = Rated
+    .unrated = Unrated
+    .otherrated = { $demon } was rated
+    .otherunrated = { $demon } was unrated
 
 ## Records table
 demon-records = Records
@@ -121,6 +129,7 @@ demon-viewer = Demon #
     .requirement-field = { demon-requirement }:
     .publisher-field = { demon-publisher }:
     .verifier-field = { demon-verifier }:
+    .rated-field = { demon-rated }:
     .creators-field = { demon-creators }:
 
 demon-add-panel = Add Demon
@@ -132,11 +141,12 @@ demon-add-form = Add Demon
     .name-validator-valuemissing = Please provide a name for the demon
 
     .levelid-field = Geometry Dash Level ID:
-    .position-field = { demon-position }:
+    .position-field = { demon-position } ({ list-ratedplus }):
     .requirement-field = { demon-requirement }:
     .verifier-field = { demon-verifier }:
     .publisher-field = { demon-publisher }:
     .video-field = { demon-video }:
+    .rated-field = { demon-rated }
     .creators-field = { demon-creators }:
 
     .submit = Add Demon
@@ -165,7 +175,7 @@ demon-thumbnail-dialog = Change thumbnail link
 
 demon-position-dialog = Change demon position
     .info = Change the position of this demon. Has be be greater than 0 and be at most the current list size.
-    .position-field = Position:
+    .position-field = Position ({ list-ratedplus }):
     .submit = Edit
 
 demon-requirement-dialog = Change demon requirement
