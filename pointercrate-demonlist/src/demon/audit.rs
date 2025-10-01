@@ -1,4 +1,5 @@
-use crate::error::Result;
+use crate::error::DemonlistError;
+use crate::{error::Result, list::List};
 
 use crate::demon::MinimalDemon;
 use chrono::{NaiveDateTime, NaiveTime};
@@ -8,14 +9,16 @@ use serde::Serialize;
 use sqlx::PgConnection;
 use std::collections::HashMap;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct DemonModificationData {
     pub name: Option<String>,
     pub position: Option<i16>,
+    pub rated_position: Option<i16>,
     pub requirement: Option<i16>,
     pub video: Option<String>,
     pub verifier: Option<NamedId>,
     pub publisher: Option<NamedId>,
+    pub rated: Option<bool>,
 }
 
 #[derive(Serialize, Debug)]
@@ -24,6 +27,10 @@ pub enum MovementReason {
     Moved,
     OtherAddedAbove { other: NamedId },
     OtherMoved { other: NamedId },
+    Rated,
+    Unrated,
+    OtherRated { other: NamedId },
+    OtherUnrated { other: NamedId },
     Unknown,
 }
 
@@ -36,7 +43,13 @@ pub struct MovementLogEntry {
     new_position: Option<i16>,
 }
 
-pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection) -> Result<Vec<MovementLogEntry>> {
+pub async fn movement_log_for_demon(list: &List, demon_id: i32, connection: &mut PgConnection) -> Result<Vec<MovementLogEntry>> {
+    // ensure that the demon exists on this list
+    MinimalDemon::by_id(demon_id, &mut *connection)
+        .await?
+        .position(list)
+        .ok_or(DemonlistError::DemonNotFound { demon_id })?;
+
     let audit_log = audit_log_for_demon(demon_id, connection).await?;
 
     let mut movement_log = Vec::new();
@@ -44,6 +57,10 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
     let mut additions = HashMap::new();
     // map time -> NamedId keeping track when movements to -1 happened
     let mut all_moves = HashMap::new();
+    // map time -> NamedId keeping track of all demon rates
+    let mut rates = HashMap::new();
+    // map time -> NamedId keeping track of all demon unrates
+    let mut unrates = HashMap::new();
 
     {
         // non-lexical lifetimes working amazingly I see >.>
@@ -84,6 +101,27 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
         }
     }
 
+    {
+        let mut rate_modification_stream = sqlx::query!(
+            r#"SELECT time, demon_modifications.id, demon_modifications.rated, demon_modifications.rated_position, demons.name::TEXT FROM demon_modifications 
+            LEFT OUTER JOIN demons ON demons.id = demon_modifications.id WHERE demon_modifications.rated IS NOT NULL"#
+        )
+        .fetch(&mut *connection);
+
+        while let Some(row) = rate_modification_stream.next().await {
+            let row = row?;
+
+            // add to rates map if this entry sets rated to true, otherwise add to unrates
+            (if row.rated.unwrap() { &mut unrates } else { &mut rates }).insert(
+                row.time,
+                NamedId {
+                    id: row.id,
+                    name: row.name,
+                },
+            );
+        }
+    }
+
     for log_entry in audit_log {
         let time = log_entry.time;
 
@@ -94,7 +132,30 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                 reason: MovementReason::Added,
             }),
             AuditLogEntryType::Modification(data) => {
-                if let Some(old_position) = data.position {
+                if list == &List::Demonlist {
+                    // rates/unrates are only relevant on rated demonlist
+                    if let Some(old_rated) = data.rated {
+                        if old_rated {
+                            movement_log.push(MovementLogEntry {
+                                reason: MovementReason::Unrated,
+                                new_position: None,
+                                time,
+                            });
+                        } else {
+                            movement_log.push(MovementLogEntry {
+                                reason: MovementReason::Rated,
+                                new_position: None,
+                                time,
+                            });
+                        }
+                    }
+                }
+
+                if let Some(old_position) = if list == &List::Demonlist {
+                    data.rated_position
+                } else {
+                    data.position
+                } {
                     // whenever a demon is moved, its position is first set to -1, all other demons are shifted, and
                     // then it is moved to its final position however since audit log entries with
                     // the same timestamp are not ordered in any way, trying to use this entry to draw conclusions about
@@ -104,7 +165,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                     }
 
                     // update the previous entry's "new_position" field
-                    if let Some(entry) = movement_log.last_mut() {
+                    if let Some(entry) = movement_log.iter_mut().rev().find(|e| !matches!(e.reason, MovementReason::Unrated)) {
                         entry.new_position = Some(old_position);
                     }
 
@@ -120,35 +181,62 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
                         continue;
                     }
 
-                    let moved = all_moves.get(&time);
+                    let unrated_demon = unrates.get(&time);
 
-                    match moved {
-                        Some(id) if id.id == demon_id => movement_log.push(MovementLogEntry {
-                            reason: MovementReason::Moved,
-                            time,
+                    match unrated_demon {
+                        Some(unrated_demon) if unrated_demon.id == demon_id => continue,
+                        Some(unrated_demon) => movement_log.push(MovementLogEntry {
+                            reason: MovementReason::OtherUnrated {
+                                other: unrated_demon.clone(),
+                            },
                             new_position: None,
-                        }),
-                        Some(id) => movement_log.push(MovementLogEntry {
-                            reason: MovementReason::OtherMoved { other: id.clone() },
-                            new_position: Some(old_position),
                             time,
                         }),
                         None => {
-                            let added_demon = additions.get(&time);
+                            let moved = all_moves.get(&time);
 
-                            match added_demon {
-                                Some(added_demon) => movement_log.push(MovementLogEntry {
-                                    reason: MovementReason::OtherAddedAbove {
-                                        other: added_demon.clone(),
-                                    },
+                            match moved {
+                                Some(id) if id.id == demon_id => movement_log.push(MovementLogEntry {
+                                    reason: MovementReason::Moved,
+                                    time,
                                     new_position: None,
+                                }),
+                                Some(id) => movement_log.push(MovementLogEntry {
+                                    reason: MovementReason::OtherMoved { other: id.clone() },
+                                    new_position: Some(old_position),
                                     time,
                                 }),
-                                None => movement_log.push(MovementLogEntry {
-                                    reason: MovementReason::Unknown,
-                                    new_position: None,
-                                    time,
-                                }),
+                                None => {
+                                    let added_demon = additions.get(&time);
+
+                                    match added_demon {
+                                        Some(added_demon) => movement_log.push(MovementLogEntry {
+                                            reason: MovementReason::OtherAddedAbove {
+                                                other: added_demon.clone(),
+                                            },
+                                            new_position: None,
+                                            time,
+                                        }),
+                                        None => {
+                                            let rated_demon = rates.get(&time);
+
+                                            match rated_demon {
+                                                Some(rated_demon) => movement_log.push(MovementLogEntry {
+                                                    reason: MovementReason::OtherRated {
+                                                        other: rated_demon.clone(),
+                                                    },
+                                                    new_position: None,
+                                                    time,
+                                                }),
+                                                None => movement_log.push(MovementLogEntry {
+                                                    reason: MovementReason::Unknown,
+                                                    new_position: None,
+                                                    time,
+                                                }),
+                                            }
+                                        },
+                                    }
+                                },
                             }
                         },
                     }
@@ -172,7 +260,7 @@ pub async fn movement_log_for_demon(demon_id: i32, connection: &mut PgConnection
     // update the last entry with the current position
     MinimalDemon::by_id(demon_id, &mut *connection).await.map(|minimal_demon| {
         if let Some(entry) = movement_log.last_mut() {
-            entry.new_position = Some(minimal_demon.position)
+            entry.new_position = Some(minimal_demon.position(&list).unwrap())
         }
     })?;
 
@@ -212,12 +300,14 @@ pub async fn audit_log_for_demon(demon_id: i32, connection: &mut PgConnection) -
                 userid,
                 demon_modifications.name::text,
                 position,
+                rated_position,
                 requirement,
                 video,
                 verifier,
                 verifiers.name::text as verifier_name,
                 publisher,
-                publishers.name::text as publisher_name
+                publishers.name::text as publisher_name,
+                rated
            FROM demon_modifications
            LEFT OUTER JOIN members ON members.member_id = userid
            LEFT OUTER JOIN players AS verifiers ON verifier=verifiers.id
@@ -239,6 +329,7 @@ pub async fn audit_log_for_demon(demon_id: i32, connection: &mut PgConnection) -
             r#type: AuditLogEntryType::Modification(DemonModificationData {
                 name: row.name,
                 position: row.position,
+                rated_position: row.rated_position,
                 requirement: row.requirement,
                 video: row.video,
                 verifier: match row.verifier {
@@ -255,6 +346,7 @@ pub async fn audit_log_for_demon(demon_id: i32, connection: &mut PgConnection) -
                     }),
                     None => None,
                 },
+                rated: row.rated,
             }),
             user: NamedId {
                 name: row.username,

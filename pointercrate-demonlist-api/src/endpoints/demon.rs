@@ -1,4 +1,4 @@
-use crate::ratelimits::DemonlistRatelimits;
+use crate::{list::ClientList, ratelimits::DemonlistRatelimits};
 use pointercrate_core::{audit::AuditLogEntry, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
@@ -57,9 +57,9 @@ pub async fn audit(demon_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<A
 }
 
 #[localized]
-#[rocket::get("/<demon_id>/audit/movement/")]
-pub async fn movement_log(demon_id: i32, pool: &State<PointercratePool>) -> Result<Json<Vec<MovementLogEntry>>> {
-    let log = pointercrate_demonlist::demon::audit::movement_log_for_demon(demon_id, &mut *pool.connection().await?).await?;
+#[rocket::get("/<demon_id>/audit/movement/?<list>")]
+pub async fn movement_log(list: ClientList, demon_id: i32, pool: &State<PointercratePool>) -> Result<Json<Vec<MovementLogEntry>>> {
+    let log = pointercrate_demonlist::demon::audit::movement_log_for_demon(&list.0, demon_id, &mut *pool.connection().await?).await?;
 
     if log.is_empty() {
         return Err(DemonlistError::DemonNotFound { demon_id }.into());
