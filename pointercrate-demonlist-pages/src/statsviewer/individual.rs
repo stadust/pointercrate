@@ -1,12 +1,13 @@
 use crate::statsviewer::stats_viewer_html;
-use maud::{html, Markup};
+use maud::{html, Markup, PreEscaped};
 use pointercrate_core::localization::tr;
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
-use pointercrate_demonlist::nationality::Nationality;
+use pointercrate_demonlist::{list::List, nationality::Nationality};
 
 #[derive(Debug)]
 pub struct IndividualStatsViewer {
     pub nationalities_in_use: Vec<Nationality>,
+    pub list: List,
 }
 
 impl From<IndividualStatsViewer> for PageFragment {
@@ -20,6 +21,9 @@ impl From<IndividualStatsViewer> for PageFragment {
         .module("/static/demonlist/js/statsviewer/individual.js")
         .stylesheet("/static/demonlist/css/statsviewer.css")
         .stylesheet("/static/core/css/sidebar.css")
+        .head(html! {
+            (PreEscaped(format!(r#"<link href="/{0}/statsviewer/heatmap.css" rel="stylesheet" type="text/css"/>"#, &stats_viewer.list.as_str())))
+        })
         .body(stats_viewer.body())
     }
 }
@@ -28,19 +32,17 @@ impl IndividualStatsViewer {
     fn body(&self) -> Markup {
         html! {
             nav.flex.wrap.m-center.fade #statsviewers style="text-align: center; z-index: 1" {
-                a.button.white.hover.no-shadow href="/demonlist/statsviewer/"{
+                a.button.white.hover.no-shadow href=(format!("/{}/statsviewer/", &self.list.as_str())){
                     b {(tr("statsviewer-individual"))}
                 }
-                a.button.white.hover.no-shadow href="/demonlist/statsviewer/nations/" {
+                a.button.white.hover.no-shadow href=(format!("/{}/statsviewer/nations/", &self.list.as_str())) {
                     b {(tr("statsviewer-nation"))}
                 }
             }
-            div #world-map-wrapper {
-                object style="min-width:100%" #world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" alt="World map showing the global demonlist score distribution" {}
-            }
+            (super::world_map())
             div.flex.m-center.container {
                 main.left {
-                    (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows(), false))
+                    (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows(&self.list), false))
                 }
                 aside.right {
                     (super::demon_sorting_panel())

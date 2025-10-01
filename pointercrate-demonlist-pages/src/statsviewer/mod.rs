@@ -1,12 +1,12 @@
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::localization::tr;
+use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::util::{dropdown, filtered_paginator, simple_dropdown};
-use pointercrate_demonlist::nationality::Nationality;
+use pointercrate_demonlist::{list::List, nationality::Nationality};
 
 pub mod individual;
 pub mod national;
 
-pub(crate) fn stats_viewer_panel() -> Markup {
+pub(crate) fn stats_viewer_panel(list: &List) -> Markup {
     html! {
         section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
             div.underlined {
@@ -17,8 +17,20 @@ pub(crate) fn stats_viewer_panel() -> Markup {
             p {
                 (tr("statsviewer-panel.info"))
             }
-            a.blue.hover.button #show-stats-viewer href = "/demonlist/statsviewer/ "{
+            a.blue.hover.button #show-stats-viewer href = (format!("/{}/statsviewer/", list.as_str())) {
                 (tr("statsviewer-panel.button"))
+            }
+        }
+    }
+}
+
+fn world_map() -> Markup {
+    let map = include_str!("../../static/images/world.svg").to_string();
+
+    html! {
+        div #world-map-wrapper {
+            div #world-map style="min-width:100%"  {
+                (PreEscaped(map))
             }
         }
     }
@@ -86,10 +98,16 @@ fn hide_subdivision_panel() -> Markup {
 
 struct StatsViewerRow(Vec<(String, &'static str)>);
 
-fn standard_stats_viewer_rows() -> Vec<StatsViewerRow> {
+fn standard_stats_viewer_rows(list: &List) -> Vec<StatsViewerRow> {
     vec![
-        StatsViewerRow(vec![(tr("statsviewer.rank"), "rank"), (tr("statsviewer.score"), "score")]),
-        StatsViewerRow(vec![(tr("statsviewer.stats"), "stats"), (tr("statsviewer.hardest"), "hardest")]),
+        StatsViewerRow(vec![
+            (trp!("statsviewer.rank", "list" = tr(list.to_key())), "rank"),
+            (trp!("statsviewer.score", "list" = tr(list.to_key())), "score"),
+        ]),
+        StatsViewerRow(vec![
+            (trp!("statsviewer.stats", "list" = tr(list.to_key())), "stats"),
+            (tr("statsviewer.hardest"), "hardest"),
+        ]),
         StatsViewerRow(vec![(tr("statsviewer.completed"), "beaten")]),
         StatsViewerRow(vec![(tr("statsviewer.completed-main"), "main-beaten")]),
         StatsViewerRow(vec![(tr("statsviewer.completed-extended"), "extended-beaten")]),
