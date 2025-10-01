@@ -1,0 +1,77 @@
+use std::str::FromStr;
+
+use pointercrate_core::error::CoreError;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, PartialEq, Eq, Serialize, Clone, Copy)]
+pub enum List {
+    Demonlist, // only consists of rated demons (Demonlist)
+    RatedPlus, // consists of ALL demons (Rated+ List)
+}
+
+impl List {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            List::Demonlist => "demonlist",
+            List::RatedPlus => "ratedplus",
+        }
+    }
+
+    pub fn to_key(&self) -> &'static str {
+        match self {
+            List::Demonlist => "list-demonlist",
+            List::RatedPlus => "list-ratedplus",
+        }
+    }
+}
+
+impl Default for List {
+    fn default() -> Self {
+        List::Demonlist
+    }
+}
+
+impl From<&str> for List {
+    fn from(value: &str) -> Self {
+        List::from_str(value).unwrap_or_default()
+    }
+}
+
+impl From<Option<&str>> for List {
+    fn from(value: Option<&str>) -> Self {
+        match value {
+            Some(list) => List::from(list),
+            None => List::default(),
+        }
+    }
+}
+
+impl FromStr for List {
+    type Err = CoreError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "demonlist" => Ok(List::Demonlist),
+            "ratedplus" => Ok(List::RatedPlus),
+            _ => Err(CoreError::UnprocessableEntity),
+        }
+    }
+}
+
+impl ToString for List {
+    fn to_string(&self) -> String {
+        self.as_str().to_string()
+    }
+}
+
+impl<'de> Deserialize<'de> for List {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let string = String::deserialize(deserializer)?;
+
+        List::from_str(&string[..])
+            .map_err(|_| serde::de::Error::invalid_value(serde::de::Unexpected::Str(&string), &"'demonlist', 'ratedplus'"))
+    }
+}
