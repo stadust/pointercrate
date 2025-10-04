@@ -1,6 +1,6 @@
-use crate::{
-    components::{demon_dropdown, player_selection_dialog},
-    submit_record::submit_record_panel,
+use crate::components::{
+    demon_dropdown, player_selection_dialog,
+    submitter::{submit_panel, RecordSubmitter},
 };
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
@@ -10,7 +10,6 @@ use pointercrate_core_pages::{
 };
 use pointercrate_demonlist::{
     demon::{current_list, Demon},
-    player::DatabasePlayer,
     LIST_HELPER,
 };
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
@@ -60,6 +59,7 @@ impl AccountPageTab for RecordsPage {
 
         html! {
             div.left {
+                (RecordSubmitter::new(false, &demons[..]))
                 (record_manager(&demons[..]))
                 (note_adder())
                 div.panel.fade #record-notes-container style = "display:none" {
@@ -74,7 +74,7 @@ impl AccountPageTab for RecordsPage {
                 (status_selector())
                 (record_selector())
                 (player_selector())
-                (submit_record_panel(None))
+                (submit_panel())
             }
             (change_progress_dialog())
             (change_video_dialog())
@@ -386,7 +386,6 @@ fn change_holder_dialog() -> Markup {
         &tr("record-holder-dialog.info"),
         &tr("record-holder-dialog.submit"),
         "player",
-        &None,
     )
 }
 
@@ -402,7 +401,7 @@ fn change_demon_dialog(demons: &[Demon]) -> Markup {
                     p {
                         (tr("record-videolink-dialog.info"))
                     }
-                    (demon_dropdown("edit-demon-record", demons, None))
+                    (demon_dropdown("edit-demon-record", demons.iter()))
                 }
             }
         }

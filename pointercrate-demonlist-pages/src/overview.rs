@@ -1,7 +1,10 @@
 use crate::components::P;
-use crate::submit_record::submit_record_panel;
 use crate::{
-    components::{team::Team, time_machine::Tardis},
+    components::{
+        submitter::{submit_panel, RecordSubmitter},
+        team::Team,
+        time_machine::Tardis,
+    },
     statsviewer::stats_viewer_panel,
 };
 use maud::{html, Markup, PreEscaped};
@@ -17,6 +20,7 @@ pub struct OverviewPage {
     pub team: Team,
     pub demonlist: Vec<Demon>,
     pub time_machine: Tardis,
+    pub submitter_initially_visible: bool,
     pub claimed_player: Option<FullPlayer>,
 }
 
@@ -93,6 +97,7 @@ impl OverviewPage {
             div.flex.m-center.container {
                 main.left {
                     (self.time_machine)
+                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist))
 
                     @match &self.time_machine {
                         Tardis::Activated { demons, ..} => {
@@ -115,7 +120,7 @@ impl OverviewPage {
                 aside.right {
                     (self.team)
                     (super::rules_panel())
-                    (submit_record_panel(None))
+                    (submit_panel())
                     (stats_viewer_panel())
                     (super::discord_panel())
                 }

@@ -303,7 +303,6 @@ fn change_verifier_dialog() -> Markup {
         &tr("demon-verifier-dialog.info"),
         &tr("demon-verifier-dialog.submit"),
         "verifier",
-        &None,
     )
 }
 
@@ -315,7 +314,6 @@ fn change_publisher_dialog() -> Markup {
         &tr("demon-publisher-dialog.info"),
         &tr("demon-publisher-dialog.submit"),
         "publisher",
-        &None,
     )
 }
 
@@ -327,7 +325,6 @@ fn add_creator_dialog() -> Markup {
         &tr("demon-creator-dialog.info"),
         &tr("demon-creator-dialog.submit"),
         "creator",
-        &None,
     )
 }
 
@@ -373,13 +370,13 @@ fn demon_submitter() -> Markup {
                     span.form-input.flex.col data-type = "dropdown" {
                         label{(tr("demon-add-form.verifier-field")) }
                         br;
-                        (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name", "verifier", &None))
+                        (player_selection_dropdown("demon-add-verifier", "/api/v1/players/", "name", "verifier"))
                         p.error {}
                     }
                     span.form-input.flex.col data-type = "dropdown" {
                         label {(tr("demon-add-form.publisher-field")) }
                         br;
-                        (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher", &None))
+                        (player_selection_dropdown("demon-add-publisher", "/api/v1/players/", "name", "publisher"))
                         p.error {}
                     }
                     span.form-input.flex.col #demon-add-video {

@@ -1,6 +1,11 @@
 use crate::components::P;
-use crate::submit_record::submit_record_panel;
-use crate::{components::team::Team, statsviewer::stats_viewer_panel};
+use crate::{
+    components::{
+        submitter::{submit_panel, RecordSubmitter},
+        team::Team,
+    },
+    statsviewer::stats_viewer_panel,
+};
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, trp};
@@ -145,6 +150,7 @@ impl DemonPage {
 
             div.flex.m-center.container {
                 main.left {
+                    (RecordSubmitter::new(false, &self.demonlist))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
@@ -187,7 +193,7 @@ impl DemonPage {
                 aside.right {
                     (self.team)
                     (super::rules_panel())
-                    (submit_record_panel(Some(self.data.position())))
+                    (submit_panel())
                     (stats_viewer_panel())
                     (super::discord_panel())
                 }

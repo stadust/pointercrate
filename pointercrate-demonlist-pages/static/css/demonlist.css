@@ -140,6 +140,13 @@ tr:nth-child(even) {
   margin: 20px 0px 10px 0px;
 }
 
+#submission-form > p {
+  margin: 5px 0;
+
+  font-size: 90%;
+  text-align: center;
+}
+
 .thumb {
   background: black;
   background-size: cover;

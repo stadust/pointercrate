@@ -1,17 +1,11 @@
-temp/
 **/target/
 .env
 .secret
 .idea
 .vscode
-.DS_Store
 
 # random stuff I have because of enabling eslint in vscode
 node_modules
 eslint.config.mjs
 package-lock.json
 package.json
-
-# Local Postgres data and scripts
-pg_data/
-pg_log

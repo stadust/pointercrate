@@ -9,7 +9,7 @@ use pointercrate_core_api::{
     error::Result,
     response::{Page, Response2},
 };
-use pointercrate_demonlist::player::{claim::PlayerClaim, DatabasePlayer};
+use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_demonlist::player::{FullPlayer, Player};
 use pointercrate_demonlist::{
     demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
@@ -22,7 +22,6 @@ use pointercrate_demonlist_pages::{
     demon_page::{DemonMovement, DemonPage},
     overview::OverviewPage,
     statsviewer::individual::IndividualStatsViewer,
-    submit_record::SubmitRecordPage,
 };
 use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::auth::NonMutating;
@@ -33,9 +32,10 @@ use rocket::{futures::StreamExt, http::CookieJar};
 use sqlx::PgConnection;
 
 #[localized]
-#[rocket::get("/?<timemachine>")]
+#[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
-    pool: &State<PointercratePool>, timemachine: Option<bool>, cookies: &CookieJar<'_>, auth: Option<Auth<NonMutating>>,
+    pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
+    auth: Option<Auth<NonMutating>>,
 ) -> Result<Page> {
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
@@ -43,8 +43,6 @@ pub async fn overview(
     let mut connection = pool.connection().await?;
 
     let demonlist = current_list(&mut connection).await?;
-
-    dbg!(&demonlist);
 
     let mut specified_when = cookies
         .get("when")
@@ -86,6 +84,7 @@ pub async fn overview(
         },
         demonlist,
         time_machine: tardis,
+        submitter_initially_visible: submitter.unwrap_or(false),
         claimed_player: match auth {
             Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
             None => None,
@@ -236,23 +235,4 @@ fn make_css_rule(code: &str, score: f64, highest_score: f64) -> String {
         0xdc as f64 + (0x81 - 0xdc) as f64 * (score / highest_score),
         0xe0 as f64 + (0xc6 - 0xe0) as f64 * (score / highest_score),
     )
-}
-
-#[localized]
-#[rocket::get("/submit-record?<demon>")]
-pub async fn submit_record(pool: &State<PointercratePool>, demon: Option<usize>, auth: Option<Auth<NonMutating>>) -> Result<Page> {
-    let mut connection = pool.connection().await?;
-
-    let demons = current_list(&mut connection).await?;
-
-    let claimed_player = match auth {
-        Some(auth) => DatabasePlayer::by_user(auth.user.user().id, &mut connection).await.unwrap_or(None),
-        None => None,
-    };
-
-    Ok(Page::new(SubmitRecordPage {
-        demons,
-        initial_demon: demon,
-        initial_holder: claimed_player,
-    }))
 }
