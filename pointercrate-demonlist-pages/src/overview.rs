@@ -97,7 +97,7 @@ impl OverviewPage {
             div.flex.m-center.container {
                 main.left {
                     (self.time_machine)
-                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist))
+                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist, self.claimed_player.as_ref().map(|p| &p.player.base), None))
 
                     @match &self.time_machine {
                         Tardis::Activated { demons, ..} => {

@@ -2,23 +2,31 @@ use crate::components::{demon_dropdown, player_selection_dropdown};
 use maud::{html, Markup, Render};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::trp_html;
-use pointercrate_demonlist::{config, demon::Demon};
+use pointercrate_demonlist::{config, demon::Demon, player::DatabasePlayer};
 
-pub struct RecordSubmitter<'a> {
+pub struct RecordSubmitter<'d, 'p> {
     initially_visible: bool,
-    demons: &'a [Demon],
+    demons: &'d [Demon],
+    initial_demon: Option<i16>,
+    initial_holder: Option<&'p DatabasePlayer>,
 }
 
-impl<'a> RecordSubmitter<'a> {
-    pub fn new(visible: bool, demons: &'a [Demon]) -> RecordSubmitter<'a> {
+impl<'d, 'p> RecordSubmitter<'d, 'p> {
+    /// * `visible` - Show the record submitter.
+    /// * `demons` - The  Demonlist.
+    /// * `holder` - Player to preselect as the record holder. `None` to not preselect a player.
+    /// * `demon` - Position of the demon in the demonlist to preselect. `None` to not preselect a demon.
+    pub fn new(visible: bool, demons: &'d [Demon], holder: Option<&'p DatabasePlayer>, demon: Option<i16>) -> RecordSubmitter<'d, 'p> {
         RecordSubmitter {
             initially_visible: visible,
             demons,
+            initial_demon: demon,
+            initial_holder: holder,
         }
     }
 }
 
-impl Render for RecordSubmitter<'_> {
+impl Render for RecordSubmitter<'_, '_> {
     fn render(&self) -> Markup {
         html! {
             section.panel.fade.closable #submitter style=(if !self.initially_visible {"display:none"} else {""}) {
@@ -36,7 +44,7 @@ impl Render for RecordSubmitter<'_> {
                         (trp!("record-submission.demon-info", "list-size" = config::extended_list_size()))
                     }
                     span.form-input data-type = "dropdown" {
-                        (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size())))
+                        (demon_dropdown("id_demon", self.demons.iter().filter(|demon| demon.base.position <= config::extended_list_size()), self.initial_demon))
                         p.error {}
                     }
                     h3 {
@@ -46,7 +54,7 @@ impl Render for RecordSubmitter<'_> {
                         (tr("record-submission.holder-info"))
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        (player_selection_dropdown("id_player", "/api/v1/players/", "name", "player"))
+                        (player_selection_dropdown("id_player", "/api/v1/players/", "name", "player", self.initial_holder))
                         p.error {}
                     }
                     h3 {

@@ -9,7 +9,7 @@ use pointercrate_core_api::{
     error::Result,
     response::{Page, Response2},
 };
-use pointercrate_demonlist::player::claim::PlayerClaim;
+use pointercrate_demonlist::player::{claim::PlayerClaim, DatabasePlayer};
 use pointercrate_demonlist::player::{FullPlayer, Player};
 use pointercrate_demonlist::{
     demon::{audit::audit_log_for_demon, current_list, list_at, FullDemon, MinimalDemon},
@@ -110,10 +110,17 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 
 #[localized]
 #[rocket::get("/<position>/")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
+pub async fn demon_page(
+    position: i16, auth: Option<Auth<NonMutating>>, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>,
+) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut connection).await?;
+
+    let claimed_player = match auth {
+        Some(auth) => DatabasePlayer::by_user(auth.user.user().id, &mut connection).await?,
+        None => None,
+    };
 
     let audit_log = audit_log_for_demon(full_demon.demon.base.id, &mut connection).await?;
 
@@ -161,6 +168,7 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         movements: modifications,
         integration: gd.load_level_for_demon(&full_demon.demon).await,
         data: full_demon,
+        claimed_player,
     }))
 }
 
