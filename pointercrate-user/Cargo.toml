@@ -8,10 +8,10 @@ edition.workspace = true
 
 [dependencies]
 pointercrate-core = {path = "../pointercrate-core"}
-serde = "1.0.226"
+serde = "1.0.228"
 derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { workspace = true }
-jsonwebtoken = "9.3.1"
+jsonwebtoken = "10.0.0"
 log = "0.4.28"
 futures = "0.3.31"
 bcrypt = "0.17.1"
