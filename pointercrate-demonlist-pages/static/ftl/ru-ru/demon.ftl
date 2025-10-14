@@ -46,6 +46,10 @@ demon-publisher = Публикатор
 demon-verifier = Верифер
     .validator-valuemissing = Пожалуйста, укажите верифера
 
+demon-rated = Оценен
+    .yes = Да (Оценен)
+    .no = Нет (Не оценен)
+
 demon-creators = Создатели
 
 demon-headline-by = от { $creator }
@@ -86,6 +90,10 @@ movements-reason = Причина
     .moved = Перемещён
     .movedabove = { $demon } был перемещён выше этого демона
     .movedbelow = { $demon } был перемещён ниже этого демона
+    .rated = Оценен
+    .unrated = Не оценен
+    .otherrated = { $demon } получил оценку
+    .otherunrated = { $demon } потерял оценку
 
 ## Records table
 demon-records = Рекорды

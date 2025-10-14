@@ -23,6 +23,7 @@ time-machine = Машина времени
 
     .active-position = Сейчас на #{ $position }
     .active-position-legacy = Сейчас в Legacy-листе
+    .active-position-none = На данный момент находится не в этом листе
 
     .active-info = Вы сейчас смотрите на демонлист, каким он был
     .return = Вернуться к настоящему
