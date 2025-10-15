@@ -1,5 +1,5 @@
 main-list = Main List
-    .info = The main section of the Demonlist. These demons are the hardest rated levels in the game. Records are accepted above a given threshold and award a large amount of points!
+    .info = The main section of the Demonlist. These demons are the hardest levels in the game. Records are accepted above a given threshold and award a large amount of points!
 
 extended-list = Extended List
     .info = These are demons that dont qualify for the main section of the list, but are still of high relevance. Only 100% records are accepted for these demons! Note that non-100% that were submitted/approved before a demon fell off the main list will be retained.
