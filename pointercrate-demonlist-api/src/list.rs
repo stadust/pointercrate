@@ -16,10 +16,7 @@ impl<'a> FromParam<'a> for ClientList {
     type Error = CoreError;
 
     fn from_param(param: &'a str) -> Result<Self, Self::Error> {
-        match List::from_str(param) {
-            Ok(list) => Ok(ClientList(list)),
-            Err(err) => Err(err),
-        }
+        Ok(ClientList(List::from_str(param)?))
     }
 }
 

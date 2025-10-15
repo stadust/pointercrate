@@ -3,7 +3,7 @@ use std::str::FromStr;
 use pointercrate_core::error::CoreError;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Eq, Serialize, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum List {
     Demonlist, // only consists of rated demons (Demonlist)
     RatedPlus, // consists of ALL demons (Rated+ List)
@@ -46,6 +46,15 @@ impl FromStr for List {
 impl ToString for List {
     fn to_string(&self) -> String {
         self.as_str().to_string()
+    }
+}
+
+impl Serialize for List {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(self.as_str())
     }
 }
 
