@@ -31,21 +31,6 @@ impl Default for List {
     }
 }
 
-impl From<&str> for List {
-    fn from(value: &str) -> Self {
-        List::from_str(value).unwrap_or_default()
-    }
-}
-
-impl From<Option<&str>> for List {
-    fn from(value: Option<&str>) -> Self {
-        match value {
-            Some(list) => List::from(list),
-            None => List::default(),
-        }
-    }
-}
-
 impl FromStr for List {
     type Err = CoreError;
 

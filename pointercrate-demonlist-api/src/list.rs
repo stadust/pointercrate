@@ -27,7 +27,7 @@ impl<'a> FromUriParam<Path, &'a str> for ClientList {
     type Target = ClientList;
 
     fn from_uri_param(param: &'a str) -> Self::Target {
-        ClientList(List::from(param))
+        ClientList(List::from_str(param).unwrap_or_default())
     }
 }
 
