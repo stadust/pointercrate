@@ -21,8 +21,8 @@ pointercrate-user-api = { version = "0.1.0", path = "../pointercrate-user-api", 
 pointercrate-user-pages = { version = "0.1.0", path = "../pointercrate-user-pages", features = ["legacy_accounts"] }
 rocket = { workspace = true }
 unic-langid = { version = "0.9.5", features = ["macros"] }
-reqwest = "0.12.23"
-serde = "1.0.226"
+reqwest = "0.12.24"
+serde = "1.0.228"
 
 [features]
 oauth2 = ["pointercrate-user-api/oauth2", "pointercrate-user-pages/oauth2"]
