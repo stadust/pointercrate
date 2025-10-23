@@ -81,7 +81,7 @@ impl AccountPageTab for SettingsTab {
                                 b {
                                     i.fa.fa-pencil-alt.clickable #display-name-pen aria-hidden = "true" {} " " (tr("settings-display-name")) ": "
                                 }
-                                i #profile-display-name {
+                                i #settings-display-name {
                                     @match user.display_name {
                                         Some(ref dn) => (dn),
                                         None => "-"
@@ -95,7 +95,7 @@ impl AccountPageTab for SettingsTab {
                                 b {
                                     i.fa.fa-pencil-alt.clickable #youtube-pen aria-hidden = "true" {} " " (tr("settings-youtube")) ": "
                                 }
-                                i #profile-youtube-channel {
+                                i #settings-youtube-channel {
                                     @match user.youtube_channel {
                                         Some(ref yc) => a.link href = (yc) {},
                                         None => "-"
