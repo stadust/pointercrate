@@ -76,14 +76,14 @@ user-idsearch-panel = Find users
 
     .id-validator-valuemissing = User ID required
 
-## Profile tab
-profile = Profile
-    .header = Profile - {$username}
+## Settings tab
+settings = Settings
+    .header = Settings - {$username}
 
-profile-username = Username
+settings-username = Username
     .info = The name you registered under and which you use to log in to pointercrate. This name is unique to your account, and cannot be changed.
 
-profile-display-name = Display name
+settings-display-name = Display name
     .info = If set, this name will be displayed instead of your username. Display names aren't unique and you cannot use your display name to login to your pointercrate account.
 
     .dialog-header = Edit Display Name
@@ -91,7 +91,7 @@ profile-display-name = Display name
 
     .dialog-submit = Edit
 
-profile-youtube = YouTube channel
+settings-youtube = YouTube channel
     .info = A link to your YouTube channel, if you have one. If set, all mentions of your name will turn into links to it.
 
     .dialog-header = Edit YouTube Channel Link
@@ -101,15 +101,15 @@ profile-youtube = YouTube channel
 
     .newlink-validator-typemismatch = Please enter a valid URL
 
-profile-permissions = Permissions
+settings-permissions = Permissions
     .info = The permissions you have on pointercrate. 'List ...' means you're a member of the demonlist team. 'Moderator' and 'Administrator' mean you're part of pointercrate's staff team.
 
-profile-delete-account = Delete My Account
+settings-delete-account = Delete My Account
     .dialog-header = Delete Account
     .dialog-info = Deletion of your account is irreversible!
     .dialog-submit = Delete
 
-profile-change-password = Change Password
+settings-change-password = Change Password
     .dialog-header = Change Password
     .dialog-info = To make profile related edits, re-entering your password below is required. Changing your password will log you out and redirect to the login page. It will further invalidate all access tokens to your account.
 
@@ -127,19 +127,19 @@ profile-change-password = Change Password
     .repeatnewpassword-validator-tooshort = Password too short. It needs to be at least 10 characters long.
     .repeatnewpassword-validator-notmatching = Passwords don't match
 
-profile-logout = Logout
+settings-logout = Logout
     .info = Log out of your pointercrate account in this browser.
     .button = Logout
 
-profile-get-token = Get access token
+settings-get-token = Get access token
     .info = Your pointercrate access token allows you, or programs authorized by you, to make API calls on your behalf. They do not allow modifications of your account however.
     .button = Get access token
 
     .view-header = Your access token is
 
-profile-invalidate-tokens = Invalidate tokens
+settings-invalidate-tokens = Invalidate tokens
     .info = If one of your access tokens ever got leaked, you can invalidate them here. Invalidating will cause all access tokens to your account to stop functioning. This includes the one stored inside the browser currently, meaning you'll have to log in again after this action!
     .button = Invalidate all access tokens
 
-profile-oauth = Link With Google
+settings-oauth = Link With Google
     .info = Enable signing in to your pointercrate account via Google oauth. More secure than password login, and avoids account lock-outs due to forgotten passwords. Linking a Google account is irreversible, and you cannot change the linked Google account later on!

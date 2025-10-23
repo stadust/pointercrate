@@ -15,16 +15,16 @@ use pointercrate_user::{
 use pointercrate_user_pages::account::AccountPageTab;
 use sqlx::PgConnection;
 
-pub struct ListIntegrationTab(#[doc = "discord invite url"] pub &'static str);
+pub struct ProfileTab(#[doc = "discord invite url"] pub &'static str);
 
 #[async_trait::async_trait]
-impl AccountPageTab for ListIntegrationTab {
+impl AccountPageTab for ProfileTab {
     fn should_display_for(&self, _permissions_we_have: u16, _permissions: &PermissionsManager) -> bool {
         true
     }
 
     fn initialization_script(&self) -> String {
-        "/static/demonlist/js/account/integration.js".into()
+        "/static/demonlist/js/account/profile.js".into()
     }
 
     fn tab_id(&self) -> u8 {
@@ -34,10 +34,10 @@ impl AccountPageTab for ListIntegrationTab {
     fn tab(&self) -> Markup {
         html! {
             b {
-                (tr("list-integration"))
+                (tr("profile"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
-            i class = "fa fa-list fa-2x" aria-hidden="true" {}
+            i class = "fa fa-user fa-2x" aria-hidden="true" {}
         }
     }
 
