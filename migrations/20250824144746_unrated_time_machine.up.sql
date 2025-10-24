@@ -21,7 +21,10 @@ FROM demons
 LEFT OUTER JOIN (
     SELECT DISTINCT ON (id) id, CASE WHEN is_rated_list THEN rated_position ELSE position END AS position
     FROM demon_modifications
-    WHERE time >= $2 AND (is_rated_list AND rated_position IS NOT NULL) OR (NOT is_rated_list AND position != -1)
+    WHERE time >= $2 AND (
+        (is_rated_list AND rated_position IS NOT NULL) 
+        OR (NOT is_rated_list AND position != -1)
+    )
     ORDER BY id, time
 ) t
 ON demons.id = t.id

@@ -201,7 +201,7 @@ CREATE VIEW ranked_nations AS
 ALTER TABLE demon_modifications ADD COLUMN rated BOOLEAN NULL DEFAULT NULL;
 ALTER TABLE demon_modifications ADD COLUMN rated_position SMALLINT NULL DEFAULT NULL;
 
-UPDATE demon_modifications SET rated_position = position;
+UPDATE demon_modifications SET rated_position = position WHERE position != -1;
 
 CREATE OR REPLACE FUNCTION audit_demon_modification() RETURNS trigger AS $demon_modification_trigger$
 DECLARE
