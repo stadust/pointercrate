@@ -213,9 +213,9 @@ pub async fn heatmap_css(list: ClientList, pool: &State<PointercratePool>) -> Re
 
     let mut nation_scores = HashMap::new();
     let mut nations_stream = sqlx::query!(
-        r#"SELECT iso_country_code, CASE WHEN $1 THEN score ELSE unrated_score END as score
+        r#"SELECT iso_country_code, CASE WHEN $1 THEN score ELSE ratedplus_score END as score
         FROM nationalities 
-        WHERE CASE WHEN $1 THEN score ELSE unrated_score END > 0.0"#,
+        WHERE CASE WHEN $1 THEN score ELSE ratedplus_score END > 0.0"#,
         list.0 == List::Demonlist
     )
     .fetch(&mut *connection);
@@ -239,9 +239,9 @@ pub async fn heatmap_css(list: ClientList, pool: &State<PointercratePool>) -> Re
     drop(nations_stream);
 
     let mut subdivisions_stream = sqlx::query!(
-        r#"SELECT nation, iso_code, CASE WHEN $1 THEN score ELSE unrated_score END as score 
+        r#"SELECT nation, iso_code, CASE WHEN $1 THEN score ELSE ratedplus_score END as score 
         FROM subdivisions 
-        WHERE CASE WHEN $1 THEN score ELSE unrated_score END > 0.0"#,
+        WHERE CASE WHEN $1 THEN score ELSE ratedplus_score END > 0.0"#,
         list.0 == List::Demonlist,
     )
     .fetch(&mut *connection);

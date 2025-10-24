@@ -101,9 +101,9 @@ impl Paginatable<PlayerPagination> for Player {
                     banned: row.get("banned"),
                 },
                 rated_score: row.get("score"),
-                score: row.get("unrated_score"),
+                score: row.get("ratedplus_score"),
                 rated_rank: row.get("rank"),
-                rank: row.get("unrated_rank"),
+                rank: row.get("ratedplus_rank"),
                 nationality,
             })
         }

@@ -35,7 +35,7 @@ impl NationalityRankingPagination {
                 List::Demonlist => 
                     r#"SELECT rank, score, nation, iso_country_code FROM ranked_nations WHERE rank IS NOT NULL AND (STRPOS(nation, $1::CITEXT) > 0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#,
                 List::RatedPlus => 
-                    r#"SELECT unrated_rank as rank, unrated_score as score, nation, iso_country_code FROM ranked_nations WHERE unrated_rank IS NOT NULL AND (STRPOS(nation, $1::CITEXT) > 0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#
+                    r#"SELECT ratedplus_rank as rank, ratedplus_score as score, nation, iso_country_code FROM ranked_nations WHERE ratedplus_rank IS NOT NULL AND (STRPOS(nation, $1::CITEXT) > 0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#
             }
         )
         .bind(&self.name_contains)

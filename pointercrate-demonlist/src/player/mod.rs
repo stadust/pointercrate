@@ -89,19 +89,19 @@ impl DatabasePlayer {
     pub async fn update_score(&self, connection: &mut PgConnection) -> Result<(f64, f64), CoreError> {
         // No need to specially handle banned players - they have no approved records, so `score_of_player` will return 0
         let new_scores = sqlx::query!(
-            "UPDATE players SET score = coalesce(score_of_player(true, $1), 0), unrated_score = coalesce(score_of_player(false, $1), 0) WHERE id = $1 RETURNING score, unrated_score",
+            "UPDATE players SET score = coalesce(score_of_player(true, $1), 0), ratedplus_score = coalesce(score_of_player(false, $1), 0) WHERE id = $1 RETURNING score, ratedplus_score",
             self.id
         )
         .fetch_one(&mut *connection)
         .await?;
 
-        sqlx::query!("UPDATE nationalities SET score = coalesce(score_of_nation(true, nationalities.iso_country_code), 0), unrated_score = coalesce(score_of_nation(false, nationalities.iso_country_code), 0) FROM players WHERE players.id = $1 AND players.nationality = nationalities.iso_country_code", self.id).execute(&mut *connection).await?;
-        sqlx::query!("UPDATE subdivisions SET score = coalesce(score_of_subdivision(true, subdivisions.nation, subdivisions.iso_code), 0), unrated_score = coalesce(score_of_subdivision(false, subdivisions.nation, subdivisions.iso_code), 0) FROM players WHERE players.id = $1 AND players.nationality = subdivisions.nation AND players.subdivision = subdivisions.iso_code", self.id).execute(&mut *connection).await?;
+        sqlx::query!("UPDATE nationalities SET score = coalesce(score_of_nation(true, nationalities.iso_country_code), 0), ratedplus_score = coalesce(score_of_nation(false, nationalities.iso_country_code), 0) FROM players WHERE players.id = $1 AND players.nationality = nationalities.iso_country_code", self.id).execute(&mut *connection).await?;
+        sqlx::query!("UPDATE subdivisions SET score = coalesce(score_of_subdivision(true, subdivisions.nation, subdivisions.iso_code), 0), ratedplus_score = coalesce(score_of_subdivision(false, subdivisions.nation, subdivisions.iso_code), 0) FROM players WHERE players.id = $1 AND players.nationality = subdivisions.nation AND players.subdivision = subdivisions.iso_code", self.id).execute(&mut *connection).await?;
         sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;")
             .execute(&mut *connection)
             .await?;
 
-        Ok((new_scores.score, new_scores.unrated_score))
+        Ok((new_scores.score, new_scores.ratedplus_score))
     }
 }
 

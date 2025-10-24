@@ -190,9 +190,9 @@ ALTER TABLE demons DROP COLUMN rated_position;
 DROP FUNCTION recompute_rated_positions();
 
 ALTER TABLE demons DROP COLUMN rated;
-ALTER TABLE players DROP COLUMN unrated_score;
-ALTER TABLE nationalities DROP COLUMN unrated_score;
-ALTER TABLE subdivisions DROP COLUMN unrated_score;
+ALTER TABLE players DROP COLUMN ratedplus_score;
+ALTER TABLE nationalities DROP COLUMN ratedplus_score;
+ALTER TABLE subdivisions DROP COLUMN ratedplus_score;
 
 ALTER TABLE demon_modifications DROP COLUMN rated;
 ALTER TABLE demon_modifications DROP COLUMN rated_position;

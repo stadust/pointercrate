@@ -1,7 +1,7 @@
 ALTER TABLE demons ADD COLUMN rated BOOLEAN NOT NULL DEFAULT TRUE;
-ALTER TABLE players ADD COLUMN unrated_score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
-ALTER TABLE nationalities ADD COLUMN unrated_score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
-ALTER TABLE subdivisions ADD COLUMN unrated_score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
+ALTER TABLE players ADD COLUMN ratedplus_score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
+ALTER TABLE nationalities ADD COLUMN ratedplus_score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
+ALTER TABLE subdivisions ADD COLUMN ratedplus_score DOUBLE PRECISION NOT NULL DEFAULT 0.0;
 
 ALTER TABLE demons ADD COLUMN rated_position SMALLINT DEFAULT NULL;
 UPDATE demons SET rated_position = position;
@@ -65,11 +65,11 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION recompute_player_scores() RETURNS void AS $$
     UPDATE players
-    SET score = COALESCE(q.score, 0), unrated_score = COALESCE(q.unrated_score, 0)
+    SET score = COALESCE(q.score, 0), ratedplus_score = COALESCE(q.ratedplus_score, 0)
     FROM (
         SELECT player, 
         SUM(record_score(progress, position, 150, requirement))
-            FILTER (WHERE NOT rated_list) AS unrated_score,
+            FILTER (WHERE NOT rated_list) AS ratedplus_score,
         SUM(record_score(progress, position, 150, requirement))
             FILTER (WHERE rated_list) AS score
         FROM score_giving
@@ -92,13 +92,13 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION recompute_nation_scores() RETURNS void AS $$
     UPDATE nationalities
-    SET score = COALESCE(p.score, 0), unrated_score = COALESCE(p.unrated_score, 0)
+    SET score = COALESCE(p.score, 0), ratedplus_score = COALESCE(p.ratedplus_score, 0)
     FROM (
         SELECT nationality,
         SUM(record_score(q.progress, q.position, 150, q.requirement))
             FILTER (WHERE q.rated_list) AS score,
         SUM(record_score(q.progress, q.position, 150, q.requirement))
-            FILTER (WHERE NOT q.rated_list) AS unrated_score
+            FILTER (WHERE NOT q.rated_list) AS ratedplus_score
         FROM (
             SELECT DISTINCT ON (position, nationality, rated_list) * from score_giving
             INNER JOIN players 
@@ -127,13 +127,13 @@ $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION recompute_subdivision_scores() RETURNS void AS $$
     UPDATE subdivisions
-    SET score = COALESCE(p.score, 0), unrated_score = COALESCE(p.unrated_score, 0)
+    SET score = COALESCE(p.score, 0), ratedplus_score = COALESCE(p.ratedplus_score, 0)
     FROM (
         SELECT nationality, subdivision,
             SUM(record_score(q.progress, q.position, 150, q.requirement))
                 FILTER (WHERE q.rated_list) AS score,
             SUM(record_score(q.progress, q.position, 150, q.requirement))
-                FILTER (WHERE NOT q.rated_list) AS unrated_score
+                FILTER (WHERE NOT q.rated_list) AS ratedplus_score
         FROM (
             SELECT DISTINCT ON (position, nationality, subdivision, rated_list) * from score_giving
             INNER JOIN players 
@@ -158,20 +158,20 @@ DROP MATERIALIZED VIEW player_ranks;
 CREATE MATERIALIZED VIEW player_ranks AS
 SELECT
     CASE WHEN score != 0 THEN RANK() OVER (ORDER BY score DESC) END AS rank,
-    CASE WHEN unrated_score != 0 THEN RANK() OVER (ORDER BY unrated_score DESC) END AS unrated_rank,
+    CASE WHEN ratedplus_score != 0 THEN RANK() OVER (ORDER BY ratedplus_score DESC) END AS ratedplus_rank,
     id
 FROM players
-WHERE unrated_score != 0 OR score != 0 AND NOT banned;
+WHERE ratedplus_score != 0 OR score != 0 AND NOT banned;
 
 CREATE UNIQUE INDEX player_ranks_id_idx ON player_ranks(id);
 
 CREATE VIEW ranked_players AS
 SELECT
     ROW_NUMBER() OVER(ORDER BY rank, id) AS index,
-    ROW_NUMBER() OVER (ORDER BY unrated_rank, id) AS unrated_index,
+    ROW_NUMBER() OVER (ORDER BY ratedplus_rank, id) AS ratedplus_index,
     rank,
-    unrated_rank,
-    id, name, players.score, players.unrated_score,
+    ratedplus_rank,
+    id, name, players.score, players.ratedplus_score,
     subdivision,
     nationalities.iso_country_code,
     nationalities.nation,
@@ -186,16 +186,16 @@ DROP VIEW ranked_nations;
 CREATE VIEW ranked_nations AS 
     SELECT 
         ROW_NUMBER() OVER (ORDER BY score DESC, iso_country_code) AS index,
-        ROW_NUMBER() OVER (ORDER BY unrated_score DESC, iso_country_code) AS unrated_index,
+        ROW_NUMBER() OVER (ORDER BY ratedplus_score DESC, iso_country_code) AS ratedplus_index,
         CASE WHEN score != 0 THEN RANK() OVER (ORDER BY score DESC) END AS rank,
-        CASE WHEN unrated_score != 0 THEN RANK() OVER (ORDER BY unrated_score DESC) END AS unrated_rank,
+        CASE WHEN ratedplus_score != 0 THEN RANK() OVER (ORDER BY ratedplus_score DESC) END AS ratedplus_rank,
         score,
-        unrated_score,
+        ratedplus_score,
         iso_country_code,
         nation,
         continent
     FROM nationalities
-    WHERE score > 0.0 OR unrated_score > 0.0;
+    WHERE score > 0.0 OR ratedplus_score > 0.0;
 
 -- audit log stuff
 ALTER TABLE demon_modifications ADD COLUMN rated BOOLEAN NULL DEFAULT NULL;
