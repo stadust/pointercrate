@@ -36,7 +36,7 @@ impl PageConfiguration {
             head: Head::new(default_head_html)
                 .meta("og:site_name", site_name)
                 .meta("og:type", "website")
-                .meta("referrer", "no-referrer")
+                .meta("referrer", "strict-origin-when-cross-origin")
                 .meta("viewport", "initial-scale=1, maximum-scale=1")
                 .script("https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js")
                 .script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
