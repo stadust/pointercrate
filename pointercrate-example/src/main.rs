@@ -11,11 +11,9 @@ use pointercrate_core_pages::{
 };
 use pointercrate_demonlist::LIST_ADMINISTRATOR;
 use pointercrate_demonlist_api::GeolocationProvider;
-use pointercrate_demonlist_pages::account::{
-    demons::DemonsTab, list_integration::ListIntegrationTab, players::PlayersPage, records::RecordsPage,
-};
+use pointercrate_demonlist_pages::account::{demons::DemonsTab, players::PlayersPage, profile::ProfileTab, records::RecordsPage};
 use pointercrate_user::MODERATOR;
-use pointercrate_user_pages::account::{profile::ProfileTab, users::UsersTab, AccountPageConfig};
+use pointercrate_user_pages::account::{settings::SettingsTab, users::UsersTab, AccountPageConfig};
 use rocket::{async_trait, fs::FileServer, response::Redirect, serde, uri, Request};
 use std::net::IpAddr;
 use unic_langid::lang;
@@ -146,9 +144,9 @@ async fn rocket() -> _ {
     // [`AccountPageTab::should_display_for`] returns `true`.
     let account_page_config = AccountPageConfig::default()
         // Tab where users can modify their own accounts
-        .with_page(ProfileTab)
-        // Tab where users can initiate player claims and manage their claimed players
-        .with_page(ListIntegrationTab("https://discord.gg/tMBzYP77ag"))
+        .with_page(SettingsTab)
+        // Tab where users can initiate player claims and manage their claimed players (formerly "List Integration" tab)
+        .with_page(ProfileTab("https://discord.gg/tMBzYP77ag"))
         // Tab where website moderators can manage permissions. 
         // The vector below specified which permissions a user needs to have for the tab to be displayed.
         .with_page(UsersTab(vec![MODERATOR, LIST_ADMINISTRATOR]))

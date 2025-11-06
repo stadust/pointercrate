@@ -36,8 +36,8 @@ player-name-dialog = Изменение имени игрока
 
     .name-validator-valuemissing = Пожалуйста, укажите имя игрока
 
-## List integration tab
-list-integration = Интеграция в листе
+## Profile tab
+profile = Профиль
 
 claimed-player = Присвоенный профиль
     .verified = Подтвержден
