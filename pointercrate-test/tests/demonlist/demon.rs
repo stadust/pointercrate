@@ -14,7 +14,7 @@ async fn test_add_demon_ratelimits(pool: Pool<Postgres>) {
 
     let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
-    let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": [], "level_id": 10565740}};
+    let demon = serde_json::json! {{"name": "Bloodbath", "requirement": 90, "position": 1, "verifier": "Riot", "publisher": "Riot", "creators": [], "level_id": 10565740, "rated": true}};
 
     // first one should succeed
     clnt.post("/api/v2/demons/", &demon)
@@ -52,9 +52,9 @@ async fn test_demon_pagination(pool: Pool<Postgres>) {
     assert_eq!(links, LinksBuilder::new(URL).generate(&DemonPositionPagination::default()).unwrap());
 
     // Let's add some data to the database and do actual tests!
-    let id1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 100, player.id, player.id, &mut connection).await;
-    let id2 = pointercrate_test::demonlist::add_demon("Bloodbath 2", 2, 100, player.id, player.id, &mut connection).await;
-    let id3 = pointercrate_test::demonlist::add_demon("Bloodbath 3", 3, 100, player.id, player.id, &mut connection).await;
+    let id1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 100, player.id, player.id, true, &mut connection).await;
+    let id2 = pointercrate_test::demonlist::add_demon("Bloodbath 2", 2, 100, player.id, player.id, true, &mut connection).await;
+    let id3 = pointercrate_test::demonlist::add_demon("Bloodbath 3", 3, 100, player.id, player.id, true, &mut connection).await;
 
     // Test only the limit parameter in isolation. Off-by-one errors in the limit are hard to catch due to how the "next" parameter
     // is computed internally, so make sure that if limit is ignored, at least 2 more elements would be returned

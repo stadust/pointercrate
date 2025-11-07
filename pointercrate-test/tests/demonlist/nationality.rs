@@ -21,7 +21,7 @@ pub async fn test_search_nation(pool: Pool<Postgres>) {
     player.set_nationality(Some(nationality), &mut connection).await.unwrap();
 
     let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
-    client.add_demon(&helper, "Bloodbath", 1, 100, PLAYER_NAME, PLAYER_NAME).await;
+    client.add_demon(&helper, "Bloodbath", 1, 100, PLAYER_NAME, PLAYER_NAME, true).await;
 
     let json: Vec<RankedNation> = client
         .get("/api/v1/nationalities/ranking/?name_contains=gErManY")

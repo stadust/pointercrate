@@ -350,7 +350,7 @@ async fn test_player_merge(pool: Pool<Postgres>) {
     let player1 = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
     let player2 = DatabasePlayer::by_name_or_create("stardust1972", &mut connection).await.unwrap();
 
-    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, &mut connection).await;
+    let demon1 = pointercrate_test::demonlist::add_demon("Bloodbath", 1, 87, player1.id, player1.id, true, &mut connection).await;
 
     pointercrate_test::demonlist::add_simple_record(90, player1.id, demon1, RecordStatus::Approved, &mut connection).await;
     pointercrate_test::demonlist::add_simple_record(95, player2.id, demon1, RecordStatus::Approved, &mut connection).await;
