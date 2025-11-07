@@ -10,6 +10,7 @@ use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
+use pointercrate_demonlist::player::DatabasePlayer;
 use pointercrate_demonlist::{
     config::{self as list_config, extended_list_size},
     demon::{Demon, FullDemon},
@@ -29,6 +30,7 @@ pub struct DemonPage {
     pub data: FullDemon,
     pub movements: Vec<DemonMovement>,
     pub integration: Option<IntegrationLevel>,
+    pub claimed_player: Option<DatabasePlayer>,
 }
 
 impl From<DemonPage> for PageFragment {
@@ -145,12 +147,18 @@ impl DemonPage {
             }
         }
 
+        let demon = self
+            .demonlist
+            .iter()
+            .position(|d| d.base.id == self.data.demon.base.id)
+            .map(|i| i as i16 + 1);
+
         html! {
             (dropdowns)
 
             div.flex.m-center.container {
                 main.left {
-                    (RecordSubmitter::new(false, &self.demonlist))
+                    (RecordSubmitter::new(false, &self.demonlist, self.claimed_player.as_ref(), demon))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {

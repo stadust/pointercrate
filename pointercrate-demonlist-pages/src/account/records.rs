@@ -10,6 +10,7 @@ use pointercrate_core_pages::{
 };
 use pointercrate_demonlist::{
     demon::{current_list, Demon},
+    player::DatabasePlayer,
     LIST_HELPER,
 };
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
@@ -43,7 +44,7 @@ impl AccountPageTab for RecordsPage {
     }
 
     async fn content(
-        &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, connection: &mut PgConnection,
+        &self, user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> Markup {
         let demons = match current_list(connection).await {
             Ok(demons) => demons,
@@ -57,9 +58,11 @@ impl AccountPageTab for RecordsPage {
             },
         };
 
+        let player = DatabasePlayer::by_user(user.user().id, connection).await.unwrap_or(None);
+
         html! {
             div.left {
-                (RecordSubmitter::new(false, &demons[..]))
+                (RecordSubmitter::new(false, &demons[..], player.as_ref(), None))
                 (record_manager(&demons[..]))
                 (note_adder())
                 div.panel.fade #record-notes-container style = "display:none" {
@@ -386,6 +389,7 @@ fn change_holder_dialog() -> Markup {
         &tr("record-holder-dialog.info"),
         &tr("record-holder-dialog.submit"),
         "player",
+        None,
     )
 }
 
@@ -401,7 +405,7 @@ fn change_demon_dialog(demons: &[Demon]) -> Markup {
                     p {
                         (tr("record-videolink-dialog.info"))
                     }
-                    (demon_dropdown("edit-demon-record", demons.iter()))
+                    (demon_dropdown("edit-demon-record", demons.iter(), None))
                 }
             }
         }
