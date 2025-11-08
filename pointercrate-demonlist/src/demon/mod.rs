@@ -6,6 +6,7 @@ pub use self::{
 };
 use crate::{
     error::{DemonlistError, Result},
+    list::List,
     player::DatabasePlayer,
     record::MinimalRecordP,
 };
@@ -26,9 +27,15 @@ mod paginate;
 mod patch;
 mod post;
 
+pub async fn recompute_rated_positions(connection: &mut PgConnection) -> Result<()> {
+    sqlx::query("SELECT recompute_rated_positions()").execute(connection).await?;
+
+    Ok(())
+}
+
 pub struct TimeShiftedDemon {
     pub current_demon: Demon,
-    pub position_now: i16,
+    pub position_now: Option<i16>,
 }
 
 /// Struct modelling a demon. These objects are returned from the paginating `/demons/` endpoint
@@ -57,6 +64,9 @@ pub struct Demon {
     /// This is automatically queried based on the level name, but can be manually overridden by a
     /// list mod.
     pub level_id: Option<u64>,
+
+    /// Whether this [`Demon`] has a star rating in Geometry Dash
+    pub rated: bool,
 }
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
@@ -70,6 +80,9 @@ pub struct MinimalDemon {
     ///
     /// Positions for consecutive demons are always consecutive positive integers
     pub position: i16,
+
+    /// The [`Demon`]'s position on the Rated+ list
+    pub rated_position: Option<i16>,
 
     /// The [`Demon`]'s Geometry Dash level name
     ///
@@ -106,6 +119,24 @@ impl MinimalDemon {
             .fetch_one(connection)
             .await?
             .requirement)
+    }
+
+    /// Utility function for getting the position of a demon on a particular list
+    pub fn position(&self, list: &List) -> Option<i16> {
+        match *list {
+            List::Demonlist => self.rated_position,
+            List::RatedPlus => Some(self.position),
+        }
+    }
+
+    /// Returns whether this demon is on the main list for all the lists it's on
+    pub fn is_any_main(&self) -> bool {
+        self.position <= crate::config::list_size() || self.rated_position.is_some_and(|p| p <= crate::config::list_size())
+    }
+
+    /// Returns whether this demon is on the legacy list for all the lists it's on
+    pub fn is_all_legacy(&self) -> bool {
+        self.position > crate::config::extended_list_size() && self.rated_position.map_or(true, |p| p > crate::config::extended_list_size())
     }
 }
 
@@ -170,12 +201,15 @@ impl Demon {
             .unwrap_or(0))
     }
 
-    pub fn score(&self, progress: i16) -> f64 {
+    pub fn score(&self, list: &List, progress: i16) -> f64 {
         if progress < self.requirement {
             return 0.0;
         }
 
-        let position = self.base.position;
+        let position = match *list {
+            List::RatedPlus => self.base.position,
+            List::Demonlist => self.base.rated_position.unwrap_or_else(|| return 0),
+        };
 
         let beaten_score = match position {
             56..=150 => 1.039035131_f64 * ((185.7_f64 * (-0.02715_f64 * position as f64).exp()) + 14.84_f64),

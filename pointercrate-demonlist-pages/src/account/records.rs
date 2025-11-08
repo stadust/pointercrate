@@ -10,6 +10,7 @@ use pointercrate_core_pages::{
 };
 use pointercrate_demonlist::{
     demon::{current_list, Demon},
+    list::List,
     LIST_HELPER,
 };
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
@@ -45,7 +46,8 @@ impl AccountPageTab for RecordsPage {
     async fn content(
         &self, _user: &AuthenticatedUser<NonMutating>, _permissions: &PermissionsManager, connection: &mut PgConnection,
     ) -> Markup {
-        let demons = match current_list(connection).await {
+        // rated+ list consists of ALL demons
+        let demons = match current_list(&List::RatedPlus, connection).await {
             Ok(demons) => demons,
             Err(err) => {
                 return ErrorFragment {
@@ -59,7 +61,7 @@ impl AccountPageTab for RecordsPage {
 
         html! {
             div.left {
-                (RecordSubmitter::new(false, &demons[..]))
+                (RecordSubmitter::new(&List::RatedPlus, false, &demons[..]))
                 (record_manager(&demons[..]))
                 (note_adder())
                 div.panel.fade #record-notes-container style = "display:none" {

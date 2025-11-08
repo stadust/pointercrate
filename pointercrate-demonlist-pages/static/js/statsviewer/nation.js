@@ -22,6 +22,8 @@ class NationStatsViewer extends StatsViewer {
   onReceive(response) {
     super.onReceive(response);
 
+    const demonPositionKey = window.active_list == "demonlist" ? "rated_position" : "position";
+
     this._rank.innerText = this.currentlySelected.dataset.rank;
     this._score.innerHTML =
       this.currentlySelected.getElementsByTagName("i")[0].innerHTML;
@@ -35,6 +37,11 @@ class NationStatsViewer extends StatsViewer {
     let beaten = [];
     let progress = [];
 
+    let verified = nationData.verified.filter((record) => record.demon[demonPositionKey] != null);
+    let unbeaten = nationData.unbeaten.filter((demon) => demon[demonPositionKey] != null);
+    let published = nationData.published.filter((demon) => demon[demonPositionKey] != null);
+    let created = nationData.created.filter((demon) => demon[demonPositionKey] != null);
+
     let legacy = 0;
     let extended = 0;
 
@@ -42,11 +49,11 @@ class NationStatsViewer extends StatsViewer {
 
     let players = new Set();
 
-    for (let record of nationData.records) {
+    for (let record of nationData.records.filter((record) => record.demon[demonPositionKey] != null)) {
       record.players.forEach(players.add, players);
 
       if (record.progress !== 100) {
-        if (!nationData.verified.some((d) => d.demon.id === record.demon.id))
+        if (!verified.some((d) => d.demon.id === record.demon.id))
           progress.push(record);
       } else {
         beaten.push(record);
@@ -55,15 +62,15 @@ class NationStatsViewer extends StatsViewer {
           hardest = record.demon;
         }
 
-        if (record.demon.position > this.list_size)
-          if (record.demon.position <= this.extended_list_size) ++extended;
+        if (record.demon[demonPositionKey] > this.list_size)
+          if (record.demon[demonPositionKey] <= this.extended_list_size) ++extended;
           else ++legacy;
       }
     }
 
     let amountBeaten = beaten.length - extended - legacy;
 
-    for (let record of nationData.verified) {
+    for (let record of verified) {
       record.players.forEach(players.add, players);
 
       if (hardest === undefined || record.demon.position < hardest.position) {
@@ -71,8 +78,8 @@ class NationStatsViewer extends StatsViewer {
       }
 
       if (!beaten.some((d) => d.demon.id === record.demon.id))
-        if (record.demon.position > this.list_size)
-          if (record.demon.position <= this.extended_list_size) ++extended;
+        if (record.demon[demonPositionKey] > this.list_size)
+          if (record.demon[demonPositionKey] <= this.extended_list_size) ++extended;
           else ++legacy;
         else ++amountBeaten;
     }
@@ -92,7 +99,7 @@ class NationStatsViewer extends StatsViewer {
     formatInto(
       this._main_beaten,
       beaten
-        .filter((record) => record.demon.position <= this.list_size)
+        .filter((record) => record.demon[demonPositionKey] <= this.list_size)
         .map((record) => this.formatDemonFromRecord(record, true))
     );
     formatInto(
@@ -100,21 +107,21 @@ class NationStatsViewer extends StatsViewer {
       beaten
         .filter(
           (record) =>
-            record.demon.position > this.list_size &&
-            record.demon.position <= this.extended_list_size
+            record.demon[demonPositionKey] > this.list_size &&
+            record.demon[demonPositionKey] <= this.extended_list_size
         )
         .map((record) => this.formatDemonFromRecord(record, true))
     );
     formatInto(
       this._legacy_beaten,
       beaten
-        .filter((record) => record.demon.position > this.extended_list_size)
+        .filter((record) => record.demon[demonPositionKey] > this.extended_list_size)
         .map((record) => this.formatDemonFromRecord(record, true))
     );
 
     formatInto(
       this._unbeaten,
-      this.sortStatsViewerRow(selectedSort, nationData.unbeaten).map((demon) =>
+      this.sortStatsViewerRow(selectedSort, unbeaten).map((demon) =>
         this.formatDemon(demon)
       )
     );
@@ -126,7 +133,7 @@ class NationStatsViewer extends StatsViewer {
     );
     formatInto(
       this._created,
-      this.sortStatsViewerRow(selectedSort, nationData.created).map(
+      this.sortStatsViewerRow(selectedSort, created).map(
         (creation) => {
           return this.makeTooltip(
             this.formatDemon(creation.demon),
@@ -145,7 +152,7 @@ class NationStatsViewer extends StatsViewer {
     );
     formatInto(
       this._verified,
-      this.sortStatsViewerRow(selectedSort, nationData.verified).map(
+      this.sortStatsViewerRow(selectedSort, verified).map(
         (verification) => {
           return this.makeTooltip(
             this.formatDemon(verification.demon),
@@ -161,7 +168,7 @@ class NationStatsViewer extends StatsViewer {
     );
     formatInto(
       this._published,
-      this.sortStatsViewerRow(selectedSort, nationData.published).map(
+      this.sortStatsViewerRow(selectedSort, published).map(
         (publication) => {
           return this.makeTooltip(
             this.formatDemon(publication.demon),
@@ -177,10 +184,10 @@ class NationStatsViewer extends StatsViewer {
     );
 
     this.demonSortingModeDropdown.addEventListener((selected) => {
-      if (nationData.created.length > 0) {
+      if (created.length > 0) {
         formatInto(
           this._created,
-          this.sortStatsViewerRow(selected, nationData.created).map(
+          this.sortStatsViewerRow(selected, created).map(
             (creation) => {
               return this.makeTooltip(
                 this.formatDemon(creation.demon),
@@ -199,10 +206,10 @@ class NationStatsViewer extends StatsViewer {
         );
       }
 
-      if (nationData.published.length > 0) {
+      if (published.length > 0) {
         formatInto(
           this._published,
-          this.sortStatsViewerRow(selected, nationData.published).map(
+          this.sortStatsViewerRow(selected, published).map(
             (publication) => {
               return this.makeTooltip(
                 this.formatDemon(publication.demon),
@@ -217,10 +224,10 @@ class NationStatsViewer extends StatsViewer {
           )
         );
       }
-      if (nationData.verified.length > 0) {
+      if (verified.length > 0) {
         formatInto(
           this._verified,
-          this.sortStatsViewerRow(selected, nationData.verified).map(
+          this.sortStatsViewerRow(selected, verified).map(
             (verification) => {
               return this.makeTooltip(
                 this.formatDemon(verification.demon),
@@ -243,10 +250,10 @@ class NationStatsViewer extends StatsViewer {
           )
         );
 
-      if (nationData.unbeaten.length > 0)
+      if (unbeaten.length > 0)
         formatInto(
           this._unbeaten,
-          this.sortStatsViewerRow(selected, nationData.unbeaten).map((demon) =>
+          this.sortStatsViewerRow(selected, unbeaten).map((demon) =>
             this.formatDemon(demon)
           )
         );

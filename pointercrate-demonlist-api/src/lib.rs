@@ -8,6 +8,7 @@ pub(crate) mod config;
 mod endpoints;
 #[cfg(feature = "geolocation")]
 mod geolocate;
+pub(crate) mod list;
 pub(crate) mod pages;
 pub(crate) mod ratelimits;
 
@@ -90,7 +91,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             ],
         )
         .mount(
-            "/demonlist/",
+            "/",
             rocket::routes![
                 pages::overview,
                 pages::stats_viewer,

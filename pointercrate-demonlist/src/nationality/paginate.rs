@@ -1,14 +1,18 @@
 use crate::{
     error::Result,
+    list::List,
     nationality::{Continent, Nationality},
 };
 use futures::StreamExt;
 use pointercrate_core::util::non_nullable;
 use serde::{Deserialize, Serialize};
-use sqlx::PgConnection;
+use sqlx::{PgConnection, Row};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct NationalityRankingPagination {
+    #[serde(default, deserialize_with = "non_nullable")]
+    list: Option<List>,
+
     #[serde(default, deserialize_with = "non_nullable")]
     continent: Option<Continent>,
 
@@ -26,12 +30,16 @@ pub struct RankedNation {
 
 impl NationalityRankingPagination {
     pub async fn page(&self, connection: &mut PgConnection) -> Result<Vec<RankedNation>> {
-        let mut stream = sqlx::query!(
-            r#"SELECT rank as "rank!", score as "score!", nation as "nation!", iso_country_code as "iso_country_code!" FROM ranked_nations WHERE (STRPOS(nation, $1::CITEXT) > 
-             0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#,
-            self.name_contains,
-            self.continent.map(|c| c.to_sql())
+        let mut stream = sqlx::query(
+            match self.list.unwrap_or_default() {
+                List::Demonlist => 
+                    r#"SELECT rank, score, nation, iso_country_code FROM ranked_nations WHERE rank IS NOT NULL AND (STRPOS(nation, $1::CITEXT) > 0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#,
+                List::RatedPlus => 
+                    r#"SELECT ratedplus_rank as rank, ratedplus_score as score, nation, iso_country_code FROM ranked_nations WHERE ratedplus_rank IS NOT NULL AND (STRPOS(nation, $1::CITEXT) > 0 OR $1 is NULL) AND (continent::text = $2 OR $2 IS NULL)"#
+            }
         )
+        .bind(&self.name_contains)
+        .bind(self.continent.map(|c| c.to_sql()))
         .fetch(connection);
 
         let mut nations = Vec::new();
@@ -40,11 +48,11 @@ impl NationalityRankingPagination {
             let row = row?;
 
             nations.push(RankedNation {
-                rank: row.rank,
-                score: row.score,
+                rank: row.get("rank"),
+                score: row.get("score"),
                 nationality: Nationality {
-                    iso_country_code: row.iso_country_code,
-                    nation: row.nation,
+                    iso_country_code: row.get("iso_country_code"),
+                    nation: row.get("nation"),
                     subdivision: None,
                 },
             })

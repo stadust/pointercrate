@@ -112,6 +112,23 @@ impl AccountPageTab for DemonsTab {
                                         span #demon-verifier {}
                                     }
                                 }
+                                div.stats-container.flex.space {
+                                    span {
+                                        b { (tr("demon-viewer.rated-field")) }
+                                        br;
+                                        div.dropdown-menu.js-search #edit-demon-rated style = "max-width: 120px" {
+                                            div {
+                                                input type = "text" style = "font-weight: bold" {}
+                                            }
+                                            div.menu {
+                                                ul {
+                                                    li.white.hover data-value="true" { (tr("demon-rated.yes")) }
+                                                    li.white.hover data-value="false" { (tr("demon-rated.no")) }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 div.stats-container.flex.space  {
                                     span{
                                         i.fa.fa-plus.clickable #demon-add-creator-pen aria-hidden = "true" {} b {
@@ -385,6 +402,11 @@ fn demon_submitter() -> Markup {
                         }
                         input type = "url" name = "video";
                         p.error {}
+                    }
+                    span.form-input.flex.cb-container.no-stretch #demon-add-rated style = "margin-bottom:20px" {
+                        label for = "rated" { (tr("demon-add-form.rated-field")) }
+                        input type = "checkbox" name = "rated" checked {}
+                        span.checkmark {}
                     }
                     span {
                         i.fa.fa-plus.clickable #add-demon-add-creator-pen aria-hidden = "true" {} i {

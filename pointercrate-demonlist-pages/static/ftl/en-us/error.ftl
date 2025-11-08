@@ -14,6 +14,7 @@ error-demonlist-playernotfoundname = No player with name { $player-name } found
 error-demonlist-demonnotfound = No demon with id { $demon-id } found
 error-demonlist-demonnotfoundname = No demon with name { $demon-name } found
 error-demonlist-demonnotfoundposition = No demon at position { $demon-position } found
+error-demonlist-listnotfound = This list does not exist
 error-demonlist-recordnotfound = No record with id { $record-id } found
 error-demonlist-claimnotfound = No claim by user { $member-id } on player { $player-id } found
 error-demonlist-creatorexists = This player is already registered as a creator on this demon

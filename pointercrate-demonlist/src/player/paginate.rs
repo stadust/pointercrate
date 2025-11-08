@@ -1,4 +1,5 @@
 use crate::{
+    list::List,
     nationality::{Continent, Nationality, Subdivision},
     player::{DatabasePlayer, Player},
 };
@@ -99,8 +100,10 @@ impl Paginatable<PlayerPagination> for Player {
                     name: row.get("name"),
                     banned: row.get("banned"),
                 },
-                score: row.get("score"),
-                rank: row.get("rank"),
+                rated_score: row.get("score"),
+                score: row.get("ratedplus_score"),
+                rated_rank: row.get("rank"),
+                rank: row.get("ratedplus_rank"),
                 nationality,
             })
         }
@@ -117,6 +120,9 @@ impl Paginatable<PlayerPagination> for Player {
 pub struct RankingPagination {
     #[serde(flatten)]
     pub params: PaginationParameters,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    list: Option<List>,
 
     #[serde(default, deserialize_with = "nullable")]
     nation: Option<Option<String>>,
@@ -148,8 +154,11 @@ impl PaginationQuery for RankingPagination {
 pub struct RankedPlayer {
     #[serde(skip)]
     index: i64,
+    score: f64,
+    rank: Option<i64>,
     #[serde(flatten)]
-    player: Player,
+    base: DatabasePlayer,
+    nationality: Option<Nationality>,
 }
 
 impl Paginatable<RankingPagination> for RankedPlayer {
@@ -164,7 +173,10 @@ impl Paginatable<RankingPagination> for RankedPlayer {
     async fn page(query: &RankingPagination, connection: &mut PgConnection) -> Result<(Vec<RankedPlayer>, PageContext), sqlx::Error> {
         let order = query.params.order();
 
-        let sql_query = format!(include_str!("../../sql/paginate_player_ranking.sql"), order);
+        let sql_query = match query.list.as_ref().unwrap_or(&List::default()) {
+            List::Demonlist => format!(include_str!("../../sql/paginate_rated_player_ranking.sql"), order),
+            List::RatedPlus => format!(include_str!("../../sql/paginate_player_ranking.sql"), order),
+        };
 
         let mut stream = sqlx::query(&sql_query)
             .bind(query.params.before)
@@ -191,7 +203,8 @@ impl Paginatable<RankingPagination> for RankedPlayer {
                 _ => None,
             };
 
-            let player = Player {
+            players.push(RankedPlayer {
+                index: row.get("index"),
                 base: DatabasePlayer {
                     id: row.get("id"),
                     name: row.get("name"),
@@ -200,11 +213,6 @@ impl Paginatable<RankingPagination> for RankedPlayer {
                 score: row.get("score"),
                 rank: row.get("rank"),
                 nationality,
-            };
-
-            players.push(RankedPlayer {
-                index: row.get("index"),
-                player,
             })
         }
 

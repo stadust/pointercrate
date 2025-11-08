@@ -1,4 +1,4 @@
-SELECT players.id, players.name::TEXT, banned, nationalities.nation::TEXT, iso_country_code::TEXT, subdivision::TEXT AS iso_code, subdivisions.name AS subdivision_name, players.score, player_ranks.rank
+SELECT players.id, players.name::TEXT, banned, nationalities.nation::TEXT, iso_country_code::TEXT, subdivision::TEXT AS iso_code, subdivisions.name AS subdivision_name, players.score, players.ratedplus_score, player_ranks.rank, player_ranks.ratedplus_rank
 FROM players
 LEFT OUTER JOIN nationalities ON nationality = iso_country_code
 LEFT OUTER JOIN subdivisions ON iso_code = subdivision AND subdivisions.nation = nationality

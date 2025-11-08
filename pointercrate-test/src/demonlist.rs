@@ -42,15 +42,17 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
 }
 
 pub async fn add_demon(
-    name: impl Into<String>, position: i16, requirement: i16, verifier_id: i32, publisher_id: i32, connection: &mut PgConnection,
+    name: impl Into<String>, position: i16, requirement: i16, verifier_id: i32, publisher_id: i32, rated: bool,
+    connection: &mut PgConnection,
 ) -> i32 {
     sqlx::query!(
-        "INSERT INTO demons (name, position, requirement, verifier, publisher) VALUES ($1::TEXT::CITEXT, $2, $3, $4, $5) RETURNING id",
+        "INSERT INTO demons (name, position, requirement, verifier, publisher, rated) VALUES ($1::TEXT::CITEXT, $2, $3, $4, $5, $6) RETURNING id",
         name.into(),
         position,
         requirement,
         verifier_id,
-        publisher_id
+        publisher_id,
+        rated,
     )
     .fetch_one(&mut *connection)
     .await
@@ -117,9 +119,9 @@ impl TestClient {
 
     pub async fn add_demon(
         &self, auth_context: &AuthenticatedUser<PasswordOrBrowser>, name: impl Into<String>, position: i16, requirement: i16,
-        verifier: impl Into<String>, publisher: impl Into<String>,
+        verifier: impl Into<String>, publisher: impl Into<String>, rated: bool,
     ) -> FullDemon {
-        self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": []}))
+        self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": [], "rated": rated}))
             .expect_status(Status::Created)
             .authorize_as(auth_context)
             .get_success_result()

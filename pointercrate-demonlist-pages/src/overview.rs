@@ -10,6 +10,7 @@ use crate::{
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
+use pointercrate_demonlist::list::List;
 use pointercrate_demonlist::player::FullPlayer;
 use pointercrate_demonlist::{
     config as list_config, config,
@@ -18,6 +19,7 @@ use pointercrate_demonlist::{
 
 pub struct OverviewPage {
     pub team: Team,
+    pub list: List,
     pub demonlist: Vec<Demon>,
     pub time_machine: Tardis,
     pub submitter_initially_visible: bool,
@@ -72,11 +74,11 @@ impl OverviewPage {
                 }
                 </script>
             "#))
-            (PreEscaped(format!("
+            (PreEscaped(format!(r#"
                 <script>
                     window.list_length = {0};
-                    window.extended_list_length = {1}
-                </script>", list_config::list_size(), list_config::extended_list_size())
+                    window.extended_list_length = {1};
+                </script>"#, list_config::list_size(), list_config::extended_list_size())
             ))
             // FIXME: abstract away
             link ref = "canonical" href = "https://pointercrate.com/demonlist/";
@@ -89,7 +91,7 @@ impl OverviewPage {
             _ => self.demonlist.iter().collect(),
         };
 
-        let dropdowns = super::dropdowns(&demons_for_dropdown[..], None);
+        let dropdowns = super::dropdowns(&demons_for_dropdown[..], &self.list, None);
 
         html! {
             (dropdowns)
@@ -97,19 +99,19 @@ impl OverviewPage {
             div.flex.m-center.container {
                 main.left {
                     (self.time_machine)
-                    (RecordSubmitter::new(self.submitter_initially_visible, &self.demonlist))
+                    (RecordSubmitter::new(&self.list, self.submitter_initially_visible, &self.demonlist))
 
                     @match &self.time_machine {
                         Tardis::Activated { demons, ..} => {
                             @for TimeShiftedDemon {current_demon, position_now} in demons {
-                                @if current_demon.base.position <= list_config::extended_list_size() {
+                                @if current_demon.base.position(&self.list) <= Some(list_config::extended_list_size()) {
                                     (self.demon_panel(current_demon, Some(*position_now)))
                                 }
                             }
                         },
                         _ => {
                             @for demon in &self.demonlist {
-                                @if demon.base.position <= list_config::extended_list_size() {
+                                @if demon.base.position(&self.list) <= Some(list_config::extended_list_size()) {
                                     (self.demon_panel(demon, None))
                                 }
                             }
@@ -121,14 +123,16 @@ impl OverviewPage {
                     (self.team)
                     (super::rules_panel())
                     (submit_panel())
-                    (stats_viewer_panel())
+                    (stats_viewer_panel(&self.list))
                     (super::discord_panel())
                 }
             }
         }
     }
 
-    fn demon_panel(&self, demon: &Demon, current_position: Option<i16>) -> Markup {
+    fn demon_panel(&self, demon: &Demon, current_position: Option<Option<i16>>) -> Markup {
+        let position = demon.base.position(&self.list).unwrap();
+
         let video_link = demon.video.as_deref().unwrap_or("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 
         let progress = self
@@ -143,9 +147,9 @@ impl OverviewPage {
             })
             .unwrap_or_default();
 
-        let total_score = format!("{:.2}", demon.score(100));
-        let progress_score = format!("{:.2}", demon.score(progress));
-        let minimal_score = format!("{:.2}", demon.score(demon.requirement));
+        let total_score = format!("{:.2}", demon.score(&self.list, 100));
+        let progress_score = format!("{:.2}", demon.score(&self.list, progress));
+        let minimal_score = format!("{:.2}", demon.score(&self.list, demon.requirement));
 
         html! {
              section.panel.fade.flex.mobile-col.completed[progress==100] style="overflow:hidden" {
@@ -153,30 +157,35 @@ impl OverviewPage {
                  div.flex.demon-info style = "align-items: center" {
                      div.demon-byline {
                          h2 style = "text-align: left; margin-bottom: 0px" {
-                             a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
-                                 "#" (demon.base.position) (PreEscaped(" &#8211; ")) (demon.base.name)
+                             a href = {"/" (&self.list.as_str()) "/permalink/" (demon.base.id) "/"} {
+                                 "#" (position) (PreEscaped(" &#8211; ")) (demon.base.name)
                              }
                          }
                          h3 style = "text-align: left" {
                             (trp_html!(
                                 "demon-info",
-                                "publisher" = html!{(P(&demon.publisher, None))}
+                                "publisher" = html!{(P(&demon.publisher, None, &self.list))}
                             ))
                          }
                          div style="text-align: left; font-size: 0.8em" {
-                            @if let Some(current_position) = current_position {
-                                 @if current_position > list_config::extended_list_size() {
-                                     (tr("time-machine.active-position-legacy"))
-                                 }
-                                 @else {
-                                    (trp!(
-                                        "time-machine.active-position",
-                                        "position" = current_position
-                                    ))
-                                 }
+                            @if let Some(maybe_current_position) = current_position {
+                                @if let Some(current_position) = maybe_current_position {
+                                    @if current_position > list_config::extended_list_size() {
+                                        (tr("time-machine.active-position-legacy"))
+                                    }
+                                    @else {
+                                        (trp!(
+                                            "time-machine.active-position",
+                                            "position" = current_position
+                                        ))
+                                    }
+                                }
+                                @else {
+                                    (tr("time-machine.active-position-none"))
+                                }
                             }
                             @else {
-                                @if demon.base.position > config::list_size() {
+                                @if demon.base.position(&self.list) > Some(config::list_size()) {
                                     (trp!(
                                         "demon-info.score-short",
                                         "score" = total_score

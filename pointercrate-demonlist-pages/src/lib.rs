@@ -1,7 +1,7 @@
 use maud::{html, Markup};
 
 use pointercrate_core::localization::tr;
-use pointercrate_demonlist::{config, demon::Demon};
+use pointercrate_demonlist::{config, demon::Demon, list::List};
 
 pub mod account;
 pub mod components;
@@ -16,7 +16,7 @@ struct ListSection {
     numbered: bool,
 }
 
-fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
+fn dropdowns(all_demons: &[&Demon], list: &List, current: Option<&Demon>) -> Markup {
     let (main, extended, legacy) = if all_demons.len() < config::list_size() as usize {
         (all_demons, Default::default(), Default::default())
     } else {
@@ -35,21 +35,21 @@ fn dropdowns(all_demons: &[&Demon], current: Option<&Demon>) -> Markup {
     html! {
         nav.flex.wrap.m-center.fade #lists style="text-align: center;" {
             // The drop down for the main list:
-            (dropdown(&ListSection { name: tr("main-list"), description: tr("main-list.info"), id: "mainlist", numbered: true }, main, current))
+            (dropdown(&ListSection { name: tr("main-list"), description: tr("main-list.info"), id: "mainlist", numbered: true }, main, list, current))
             // The drop down for the extended list:
-            (dropdown(&ListSection { name: tr("extended-list"), description: tr("extended-list.info"), id: "extended", numbered: true }, extended, current))
+            (dropdown(&ListSection { name: tr("extended-list"), description: tr("extended-list.info"), id: "extended", numbered: true }, extended, list, current))
             // The drop down for the legacy list:
-            (dropdown(&ListSection { name: tr("legacy-list"), description: tr("legacy-list.info"), id: "legacy", numbered: false }, legacy, current))
+            (dropdown(&ListSection { name: tr("legacy-list"), description: tr("legacy-list.info"), id: "legacy", numbered: false }, legacy, list, current))
         }
     }
 }
 
-fn dropdown(section: &ListSection, demons: &[&Demon], current: Option<&Demon>) -> Markup {
+fn dropdown(section: &ListSection, demons: &[&Demon], list: &List, current: Option<&Demon>) -> Markup {
     let format = |demon: &Demon| -> Markup {
         html! {
-            a href = {"/demonlist/permalink/" (demon.base.id) "/"} {
+            a href = (format!("/{}/permalink/{}/", list.as_str(), demon.base.id)) {
                 @if section.numbered {
-                    {"#" (demon.base.position) " - " (demon.base.name)}
+                    {"#" (demon.base.position(list).unwrap()) " - " (demon.base.name)}
                     br ;
                     i {
                         (demon.publisher.name)
@@ -82,12 +82,12 @@ fn dropdown(section: &ListSection, demons: &[&Demon], current: Option<&Demon>) -
                 ul.flex.wrap.space {
                     @for demon in demons {
                         @match current {
-                            Some(current) if current.base.position == demon.base.position =>
-                                li.hover.white.active title={"#" (demon.base.position) " - " (demon.base.name)} {
+                            Some(current) if current.base.position(list) == demon.base.position(list) =>
+                                li.hover.white.active title={"#" (demon.base.position(list).unwrap()) " - " (demon.base.name)} {
                                     (format(demon))
                                 },
                             _ =>
-                                li.hover.white title={"#" (demon.base.position) " - " (demon.base.name)} {
+                                li.hover.white title={"#" (demon.base.position(list).unwrap()) " - " (demon.base.name)} {
                                     (format(demon))
                                 }
                         }

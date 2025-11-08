@@ -3,6 +3,7 @@
 use maud::{html, Markup, Render};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_demonlist::demon::Demon;
+use pointercrate_demonlist::list::List;
 use pointercrate_demonlist::player::DatabasePlayer;
 
 pub mod submitter;
@@ -17,8 +18,9 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a De
             }
             div.menu {
                ul {
-                    @for demon in demons {
-                        li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(demon.base.position) " - " (demon.base.name)} br; { (trp!("demon-listed.publisher", "publisher" = demon.publisher.name)) }}
+                    // we dont know what list it is, but we know it's 1-150 (so enumerate)
+                    @for (i, demon) in demons.enumerate() {
+                        li.white.hover data-value = (demon.base.id) data-display = (demon.base.name) {b{"#"(i + 1) " - " (demon.base.name)} br; { (trp!("demon-listed.publisher", "publisher" = demon.publisher.name)) }}
                     }
                 }
             }
@@ -65,19 +67,19 @@ pub fn player_selection_dialog(
     }
 }
 
-pub struct P<'a>(pub &'a DatabasePlayer, pub Option<&'static str>);
+pub struct P<'a>(pub &'a DatabasePlayer, pub Option<&'static str>, pub &'a List);
 
 impl Render for P<'_> {
     fn render(&self) -> Markup {
         if let Some(id) = self.1 {
             html! {
-                a.underdotted #(id) href = {"/demonlist/statsviewer?player="(self.0.id)} data-id = (self.0.id) target = "_blank" {
+                a.underdotted #(id) href = {"/" (self.2.as_str()) "/statsviewer?player="(self.0.id)} data-id = (self.0.id) target = "_blank" {
                     (self.0.name)
                 }
             }
         } else {
             html! {
-                a.underdotted href = {"/demonlist/statsviewer?player="(self.0.id)} data-id = (self.0.id) target = "_blank" {
+                a.underdotted href = {"/" (self.2.as_str()) "/statsviewer?player="(self.0.id)} data-id = (self.0.id) target = "_blank" {
                     (self.0.name)
                 }
             }

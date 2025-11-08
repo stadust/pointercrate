@@ -10,6 +10,7 @@ use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped};
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
+use pointercrate_demonlist::list::List;
 use pointercrate_demonlist::{
     config::{self as list_config, extended_list_size},
     demon::{Demon, FullDemon},
@@ -25,6 +26,7 @@ pub struct DemonMovement {
 
 pub struct DemonPage {
     pub team: Team,
+    pub list: List,
     pub demonlist: Vec<Demon>,
     pub data: FullDemon,
     pub movements: Vec<DemonMovement>,
@@ -53,8 +55,10 @@ impl DemonPage {
             self.data.demon.base.name // FIXME: flatten the structs, holy shit
         );
 
-        if self.data.demon.base.position <= extended_list_size() {
-            title = format!("#{} - {}", self.data.demon.base.position, title);
+        let position = self.data.demon.base.position(&self.list).unwrap();
+
+        if position <= extended_list_size() {
+            title = format!("#{} - {}", position, title);
         }
 
         title
@@ -89,36 +93,36 @@ impl DemonPage {
                                 "@type": "ListItem",
                                 "position": 2,
                                 "item": {
-                                    "@id": "https://pointercrate.com/demonlist/",
-                                    "name": "demonlist"
+                                    "@id": "https://pointercrate.com/"##)) (self.list.as_str()) (PreEscaped(format!(r##"/,
+                                    "name": "{}"##, self.list.as_str()))) (PreEscaped(r##"/
                                 }
                             },{
                                 "@type": "ListItem",
                                 "position": 3,
                                 "item": {
-                                    "@id": "https://pointercrate.com/demonlist/"##)) (self.data.position()) (PreEscaped(r##"/",
+                                    "@id": "https://pointercrate.com/"##)) (self.list.as_str()) (self.data.position()) (PreEscaped(r##"/",
                                     "name": ""##)) (self.data.name()) (PreEscaped(r##""
                                 }
                             }
                         ]
                     },
                     "name": "#"##)) (self.data.position()) " - " (self.data.name()) (PreEscaped(r##"","description": ""##)) (self.description().replace(r"\", r"\\")) (PreEscaped(r##"",
-                    "url": "https://pointercrate.com/demonlist/{0}/"
+                    "url": "https://pointercrate.com/"##)) (self.list.as_str()) (PreEscaped(r##"/{0}/"
                 }
                 </script>
             "##))
-            (PreEscaped(format!("
+            (PreEscaped(format!(r#"
                 <script>
                     window.list_length = {0};
                     window.extended_list_length = {1};
                     window.demon_id = {2};
-                </script>", list_config::list_size(), list_config::extended_list_size(), self.data.demon.base.id
+                </script>"#, list_config::list_size(), list_config::extended_list_size(), self.data.demon.base.id
             )))
         }
     }
 
     fn body(&self) -> Markup {
-        let dropdowns = super::dropdowns(&self.demonlist.iter().collect::<Vec<_>>()[..], Some(&self.data.demon));
+        let dropdowns = super::dropdowns(&self.demonlist.iter().collect::<Vec<_>>()[..], &self.list, Some(&self.data.demon));
 
         let mut labels = Vec::new();
 
@@ -150,7 +154,7 @@ impl DemonPage {
 
             div.flex.m-center.container {
                 main.left {
-                    (RecordSubmitter::new(false, &self.demonlist))
+                    (RecordSubmitter::new(&self.list, false, &self.demonlist))
                     (self.demon_panel())
                     div.panel.fade.js-scroll-anim.js-collapse data-anim = "fade" {
                         h2.underlined.pad {
@@ -187,14 +191,14 @@ impl DemonPage {
                         window.positionChartData = [{},{}];
                         </script>",
                         labels.join("','"),
-                        self.movements.iter().map(|movement| movement.from_position.to_string()).collect::<Vec<_>>().join(","), self.data.demon.base.position
+                        self.movements.iter().map(|movement| movement.from_position.to_string()).collect::<Vec<_>>().join(","), self.data.demon.base.position(&self.list).unwrap()
                     ))) // FIXME: bad
                 }
                 aside.right {
                     (self.team)
                     (super::rules_panel())
                     (submit_panel())
-                    (stats_viewer_panel())
+                    (stats_viewer_panel(&self.list))
                     (super::discord_panel())
                 }
             }
@@ -202,24 +206,24 @@ impl DemonPage {
     }
 
     fn demon_panel(&self) -> Markup {
-        let position = self.data.demon.base.position;
+        let position = self.data.demon.base.position(&self.list).unwrap();
         let name = &self.data.demon.base.name;
 
-        let score100 = self.data.demon.score(100);
-        let score_requirement = self.data.demon.score(self.data.demon.requirement);
+        let score100 = self.data.demon.score(&self.list, 100);
+        let score_requirement = self.data.demon.score(&self.list, self.data.demon.requirement);
 
         let verified_and_published = html! {
             @if self.data.demon.publisher == self.data.demon.verifier {
                 (trp_html!(
                     "demon-headline.same-verifier-publisher",
-                    "publisher" = html! {(P(&self.data.demon.publisher, None))}
+                    "publisher" = html! {(P(&self.data.demon.publisher, None, &self.list))}
                 ))
             }
             @else {
                 (trp_html!(
                     "demon-headline.unique-verifier-publisher",
-                    "publisher" = html! {(P(&self.data.demon.publisher, None))},
-                    "verifier" = html! {(P(&self.data.demon.verifier, None))}
+                    "publisher" = html! {(P(&self.data.demon.publisher, None, &self.list))},
+                    "verifier" = html! {(P(&self.data.demon.verifier, None, &self.list))}
                 ))
             }
         };
@@ -228,23 +232,23 @@ impl DemonPage {
             section.panel.fade.js-scroll-anim data-anim = "fade" {
                 div.underlined {
                     h1 #demon-heading style = "overflow: hidden"{
-                        @if self.data.demon.base.position != 1 {
-                            a href=(format!("/demonlist/{:?}", self.data.demon.base.position - 1)) {
+                        @if position != 1 {
+                            a href=(format!("/{}/{:?}", self.list.as_str(), position - 1)) {
                                 i class="fa fa-chevron-left" style="padding-right: 5%" {}
                             }
                         }
                         (name)
                         @if position as usize != self.demonlist.len() {
-                            a href=(format!("/demonlist/{:?}", position + 1)) {
+                            a href=(format!("/{}/{:?}", self.list.as_str(), position + 1)) {
                                 i class="fa fa-chevron-right" style="padding-left: 5%" {}
                             }
                         }
                     }
                     (PreEscaped(format!(r#"
                     <script>
-                    document.getElementById("demon-heading").addEventListener('click', () => navigator.clipboard.writeText('https://pointercrate.com/demonlist/permalink/{}/?redirect'))
+                    document.getElementById("demon-heading").addEventListener('click', () => navigator.clipboard.writeText('https://pointercrate.com/{}/permalink/{}/?redirect'))
                     </script>
-                    "#, self.data.demon.base.id)))
+                    "#, self.list.as_str(), self.data.demon.base.id)))
                     h3 {
                         @match &self.data.creators[..] {
                             [] => { (trp_html!(
@@ -253,42 +257,42 @@ impl DemonPage {
                             )) },
                             [creator] => {
                                 @if creator == &self.data.demon.publisher && creator == &self.data.demon.verifier {
-                                    (trp_html!("demon-headline-by", "creator" = html!{(P(creator, None))}))
+                                    (trp_html!("demon-headline-by", "creator" = html!{(P(creator, None, &self.list))}))
                                 }
                                 @else if creator != &self.data.demon.publisher && creator != &self.data.demon.verifier {
                                     (trp_html!(
                                         "demon-headline.one-creator",
-                                        "creator" = html!{(P(creator, None))},
+                                        "creator" = html!{(P(creator, None, &self.list))},
                                         "verified-and-published" = verified_and_published
                                     ))
                                 }
                                 @else if creator == &self.data.demon.publisher {
                                     (trp_html!(
                                         "demon-headline.one-creator-is-publisher",
-                                        "creator" = html!{(P(creator, None))},
-                                        "verifier" = html!{(P(&self.data.demon.verifier, None))}
+                                        "creator" = html!{(P(creator, None, &self.list))},
+                                        "verifier" = html!{(P(&self.data.demon.verifier, None, &self.list))}
                                     ))
                                 }
                                 @else {
                                     (trp_html!(
                                         "demon-headline.one-creator-is-verifier",
-                                        "creator" = html!{(P(creator, None))},
-                                        "publisher" = html!{(P(&self.data.demon.publisher, None))}
+                                        "creator" = html!{(P(creator, None, &self.list))},
+                                        "publisher" = html!{(P(&self.data.demon.publisher, None, &self.list))}
                                     ))
                                 }
                             },
                             [creator1, creator2] => {
                                 (trp_html!(
                                     "demon-headline.two-creators",
-                                    "creator1" = html!{(P(creator1, None))},
-                                    "creator2" = html!{(P(creator2, None))},
+                                    "creator1" = html!{(P(creator1, None, &self.list))},
+                                    "creator2" = html!{(P(creator2, None, &self.list))},
                                     "verified-and-published" = verified_and_published
                                 ))
                             },
                             [creator1, rest @ ..] => {
                                 (trp_html!(
                                     "demon-headline.more-creators",
-                                    "creator" = html!{(P(creator1, None))},
+                                    "creator" = html!{(P(creator1, None, &self.list))},
                                     "more" = html! {
                                       div.tooltip.underdotted {
                                             (tr("demon-headline.more-creators-tooltip"))
@@ -422,7 +426,7 @@ impl DemonPage {
     }
 
     fn records_panel(&self) -> Markup {
-        let position = self.data.demon.base.position;
+        let position = self.data.demon.base.position(&self.list).unwrap();
         let _name = &self.data.demon.base.name;
 
         html! {
@@ -482,7 +486,7 @@ impl DemonPage {
                                             }
                                         }
                                         td {
-                                            (P(&record.player, None))
+                                            (P(&record.player, None, &self.list))
                                         }
                                         td {
                                             @if let Some(ref video) = record.video {

@@ -86,7 +86,7 @@ export function initializeTimeMachine() {
 
     document.cookie = "when=" + when;
 
-    window.location = "/demonlist/";
+    window.location = `/${window.active_list}/`;
   });
 }
 

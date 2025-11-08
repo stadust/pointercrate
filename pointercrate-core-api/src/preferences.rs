@@ -4,7 +4,7 @@ use crate::localization::LOCALE_COOKIE_NAME;
 use pointercrate_core::error::CoreError;
 use pointercrate_core::localization::LocaleConfiguration;
 use rocket::{
-    http::CookieJar,
+    http::{Cookie, CookieJar},
     request::{FromRequest, Outcome},
     Request,
 };
@@ -14,11 +14,13 @@ pub struct ClientPreferences<'k, 'v>(HashMap<&'k str, &'v str>);
 
 impl<'k: 'v, 'v> ClientPreferences<'k, 'v> {
     /// Retrieve a particular preference which was sent to us from the client.
-    ///
-    /// `T` must implement `From<ClientPreference>`, which [`String`] already
-    /// implements, in case the untouched cookie value is what needs to be handled.
     pub fn get(&self, name: &'k str) -> Option<&'v str> {
         self.0.get(name).copied()
+    }
+
+    /// Set a preference to a particular value.
+    pub fn set(name: &str, value: &str, cookies: &'v CookieJar<'v>) {
+        cookies.add(Cookie::new(format!("preference-{}", name), value.to_string()));
     }
 
     pub fn from_cookies(cookies: &'v CookieJar<'v>, preference_manager: &'k PreferenceManager) -> Self {

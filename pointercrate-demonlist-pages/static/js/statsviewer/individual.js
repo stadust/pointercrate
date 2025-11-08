@@ -24,27 +24,36 @@ class IndividualStatsViewer extends StatsViewer {
 
     var playerData = response.data.data;
 
-    this._rank.innerText = playerData.rank || "-";
-    this._score.innerText = playerData.score.toFixed(2);
+    const rankKey = window.active_list == "demonlist" ? "rated_rank" : "rank";
+    const scoreKey = window.active_list == "demonlist" ? "rated_score" : "score";
+    // this doesn't need to be used in sorting operations because position and rated_position will always be in the same order (and position is non-nullable)
+    const demonPositionKey = window.active_list == "demonlist" ? "rated_position" : "position";
+
+    this._rank.innerText = playerData[rankKey] || "-";
+    this._score.innerText = playerData[scoreKey].toFixed(2);
 
     this.setName(playerData.name, playerData.nationality);
 
     const selectedSort = this.demonSortingModeDropdown.selected;
 
+    let created = playerData.created.filter((demon) => demon[demonPositionKey] != null);
+    let published = playerData.published.filter((demon) => demon[demonPositionKey] != null);
+    let verified = playerData.verified.filter((demon) => demon[demonPositionKey] != null);
+
     this.formatDemonsInto(
       this._created,
-      this.sortStatsViewerRow(selectedSort, playerData.created)
+      this.sortStatsViewerRow(selectedSort, created)
     );
     this.formatDemonsInto(
       this._published,
-      this.sortStatsViewerRow(selectedSort, playerData.published)
+      this.sortStatsViewerRow(selectedSort, published)
     );
     this.formatDemonsInto(
       this._verified,
-      this.sortStatsViewerRow(selectedSort, playerData.verified)
+      this.sortStatsViewerRow(selectedSort, verified)
     );
 
-    let beaten = playerData.records.filter((record) => record.progress === 100);
+    let beaten = playerData.records.filter((record) => record.progress === 100 && record.demon[demonPositionKey] != null);
 
     beaten.sort((r1, r2) => r1.demon.name.localeCompare(r2.demon.name));
     this.formatRecordsInto(this._beaten, beaten);
@@ -52,40 +61,40 @@ class IndividualStatsViewer extends StatsViewer {
     beaten.sort((r1, r2) => r1.demon.position - r2.demon.position);
 
     let legacy = beaten.filter(
-      (record) => record.demon.position > this.extended_list_size
+      (record) => record.demon[demonPositionKey] > this.extended_list_size
     );
     let extended = beaten.filter(
       (record) =>
-        record.demon.position > this.list_size &&
-        record.demon.position <= this.extended_list_size
+        record.demon[demonPositionKey] > this.list_size &&
+        record.demon[demonPositionKey] <= this.extended_list_size
     );
     let main = beaten.filter(
-      (record) => record.demon.position <= this.list_size
+      (record) => record.demon[demonPositionKey] <= this.list_size
     );
 
     this.formatRecordsInto(this._main_beaten, main, true);
     this.formatRecordsInto(this._extended_beaten, extended, true);
     this.formatRecordsInto(this._legacy_beaten, legacy, true);
 
-    let verifiedExtended = playerData.verified.filter(
+    let verifiedExtended = verified.filter(
       (demon) =>
-        demon.position <= this.extended_list_size &&
-        demon.position > this.list_size
+        demon[demonPositionKey] <= this.extended_list_size &&
+        demon[demonPositionKey] > this.list_size
     ).length;
-    let verifiedLegacy = playerData.verified.filter(
-      (demon) => demon.position > this.extended_list_size
+    let verifiedLegacy = verified.filter(
+      (demon) =>  demon[demonPositionKey] > this.extended_list_size
     ).length;
 
     this.setCompletionNumber(
       main.length +
-        playerData.verified.length -
+        verified.length -
         verifiedExtended -
         verifiedLegacy,
       extended.length + verifiedExtended,
       legacy.length + verifiedLegacy
     );
 
-    let hardest = playerData.verified
+    let hardest = verified
       .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
         name: tr("demonlist", "statsviewer", "statsviewer.value-none"),
@@ -99,7 +108,7 @@ class IndividualStatsViewer extends StatsViewer {
     );
 
     let non100Records = playerData.records.filter(
-      (record) => record.progress !== 100
+      (record) => record.progress !== 100 && record.demon[demonPositionKey] != null
     );
 
     this.formatRecordsInto(
@@ -110,15 +119,15 @@ class IndividualStatsViewer extends StatsViewer {
     this.demonSortingModeDropdown.addEventListener((selected) => {
       this.formatDemonsInto(
         this._created,
-        this.sortStatsViewerRow(selected, playerData.created)
+        this.sortStatsViewerRow(selected, created)
       );
       this.formatDemonsInto(
         this._published,
-        this.sortStatsViewerRow(selected, playerData.published)
+        this.sortStatsViewerRow(selected, published)
       );
       this.formatDemonsInto(
         this._verified,
-        this.sortStatsViewerRow(selected, playerData.verified)
+        this.sortStatsViewerRow(selected, verified)
       );
       this.formatRecordsInto(
         this._progress,

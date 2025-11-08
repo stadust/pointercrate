@@ -72,7 +72,9 @@ impl FullPlayer {
             self.set_name(name, connection).await?;
         }
 
-        self.player.score = self.player.base.update_score(connection).await?;
+        let new_scores = self.player.base.update_score(connection).await?;
+        self.player.rated_score = new_scores.0;
+        self.player.score = new_scores.1;
 
         Ok(self)
     }

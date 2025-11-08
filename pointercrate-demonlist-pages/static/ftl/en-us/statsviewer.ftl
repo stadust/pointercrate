@@ -1,7 +1,7 @@
 statsviewer = Stats Viewer
-    .rank = Demonlist rank
-    .score = Demonlist score
-    .stats = Demonlist stats
+    .rank = { $list } rank
+    .score = { $list } score
+    .stats = { $list } stats
     .hardest = Hardest demon
 
     .completed = Demons completed

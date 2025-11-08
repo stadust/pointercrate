@@ -97,6 +97,7 @@ impl Paginatable<DemonIdPagination> for Demon {
                     id: row.get("demon_id"),
                     name: row.get("demon_name"),
                     position: row.get("position"),
+                    rated_position: row.get("rated_position"),
                 },
                 requirement: row.get("requirement"),
                 video,
@@ -112,6 +113,7 @@ impl Paginatable<DemonIdPagination> for Demon {
                     banned: row.get("verifier_banned"),
                 },
                 level_id: row.get::<Option<i64>, _>("level_id").map(|id| id as u64),
+                rated: row.get("rated"),
             })
         }
 
@@ -209,6 +211,7 @@ impl Paginatable<DemonPositionPagination> for Demon {
                     id: row.get("demon_id"),
                     name: row.get("demon_name"),
                     position: row.get("position"),
+                    rated_position: row.get("rated_position"),
                 },
                 requirement: row.get("requirement"),
                 video,
@@ -224,6 +227,7 @@ impl Paginatable<DemonPositionPagination> for Demon {
                     banned: row.get("verifier_banned"),
                 },
                 level_id: row.get::<Option<i64>, _>("level_id").map(|id| id as u64),
+                rated: row.get("rated"),
             })
         }
 

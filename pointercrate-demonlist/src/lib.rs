@@ -6,6 +6,7 @@ pub mod demon;
 pub mod config;
 pub mod creator;
 pub mod error;
+pub mod list;
 pub mod nationality;
 pub mod player;
 pub mod record;

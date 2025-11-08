@@ -15,7 +15,9 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
 
     let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
     let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
-    let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1972", "stardust1972").await;
+    let demon = clnt
+        .add_demon(&helper, "Bloodbath", 1, 100, "stardust1972", "stardust1972", true)
+        .await;
 
     let submission = serde_json::json! {{"progress": 100, "demon": demon.demon.base.id, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
 
@@ -58,7 +60,9 @@ pub async fn test_verifications_give_score(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
-    let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
+    let demon = clnt
+        .add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971", true)
+        .await;
 
     let player: FullPlayer = clnt
         .get(format!("/api/v1/players/{}/", demon.demon.verifier.id))
@@ -94,7 +98,9 @@ pub async fn test_player_score_reflects_to_nationality(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
     let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
-    let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
+    let demon = clnt
+        .add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971", true)
+        .await;
 
     clnt.patch_player(
         demon.demon.verifier.id,
@@ -140,9 +146,10 @@ pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) 
 
     for position in 1..=(list_size + 1) {
         last_demon_id = sqlx::query!(
-            "INSERT INTO demons (name, position, requirement, verifier, publisher) VALUES ('Bloodbath', $2, 98, $1, $1) RETURNING id",
+            "INSERT INTO demons (name, position, requirement, verifier, publisher, rated) VALUES ('Bloodbath', $2, 98, $1, $1, $3) RETURNING id",
             player.id,
-            position
+            position,
+            true,
         )
         .fetch_one(&mut *connection)
         .await
@@ -180,9 +187,10 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
 
     for position in 1..=list_size {
         last_demon_id = sqlx::query!(
-            "INSERT INTO demons (name, position, requirement, verifier, publisher) VALUES ('Bloodbath', $2, 98, $1, $1) RETURNING id",
+            "INSERT INTO demons (name, position, requirement, verifier, publisher, rated) VALUES ('Bloodbath', $2, 98, $1, $1, $3) RETURNING id",
             player.id,
-            position
+            position,
+            true,
         )
         .fetch_one(&mut *connection)
         .await
@@ -212,7 +220,9 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     );
 
     // Shift everything down. The demon on which the player has a progress record is now no longer main list, so his score should be updated to 0 now.
-    let _ = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
+    let _ = clnt
+        .add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971", true)
+        .await;
 
     let record: FullRecord = clnt
         .get(format!("/api/v1/records/{}/", record.id))
