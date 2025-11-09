@@ -1,4 +1,5 @@
-import { Dropdown } from "/static/core/js/modules/form.js";
+import { tr } from "/static/core/js/modules/localization.js";
+import { displayError, Dropdown, get } from "/static/core/js/modules/form.js";
 import {
   getCountryFlag,
   populateSubdivisionDropdown,
@@ -23,11 +24,25 @@ class IndividualStatsViewer extends StatsViewer {
 
     var playerData = response.data.data;
 
+    this._rank.innerText = playerData.rank || "-";
+    this._score.innerText = playerData.score.toFixed(2);
+
     this.setName(playerData.name, playerData.nationality);
 
-    this.formatDemonsInto(this._created, playerData.created);
-    this.formatDemonsInto(this._published, playerData.published);
-    this.formatDemonsInto(this._verified, playerData.verified);
+    const selectedSort = this.demonSortingModeDropdown.selected;
+
+    this.formatDemonsInto(
+      this._created,
+      this.sortStatsViewerRow(selectedSort, playerData.created)
+    );
+    this.formatDemonsInto(
+      this._published,
+      this.sortStatsViewerRow(selectedSort, playerData.published)
+    );
+    this.formatDemonsInto(
+      this._verified,
+      this.sortStatsViewerRow(selectedSort, playerData.verified)
+    );
 
     let beaten = playerData.records.filter((record) => record.progress === 100);
 
@@ -73,17 +88,43 @@ class IndividualStatsViewer extends StatsViewer {
     let hardest = playerData.verified
       .concat(beaten.map((record) => record.demon))
       .reduce((acc, next) => (acc.position > next.position ? next : acc), {
-        name: "None",
-        position: 321321321321,
+        name: tr("demonlist", "statsviewer", "statsviewer.value-none"),
+        position: 321321321,
       });
 
-    this.setHardest(hardest.name === "None" ? undefined : hardest);
+    this.setHardest(
+      hardest.name === tr("demonlist", "statsviewer", "statsviewer.value-none")
+        ? undefined
+        : hardest
+    );
 
-    let non100Records = playerData.records
-      .filter((record) => record.progress !== 100)
-      .sort((r1, r2) => r1.progress - r2.progress);
+    let non100Records = playerData.records.filter(
+      (record) => record.progress !== 100
+    );
 
-    this.formatRecordsInto(this._progress, non100Records);
+    this.formatRecordsInto(
+      this._progress,
+      this.sortStatsViewerRow(selectedSort, non100Records)
+    );
+
+    this.demonSortingModeDropdown.addEventListener((selected) => {
+      this.formatDemonsInto(
+        this._created,
+        this.sortStatsViewerRow(selected, playerData.created)
+      );
+      this.formatDemonsInto(
+        this._published,
+        this.sortStatsViewerRow(selected, playerData.published)
+      );
+      this.formatDemonsInto(
+        this._verified,
+        this.sortStatsViewerRow(selected, playerData.verified)
+      );
+      this.formatRecordsInto(
+        this._progress,
+        this.sortStatsViewerRow(selected, non100Records)
+      );
+    });
   }
 
   formatDemonsInto(element, demons) {
@@ -107,10 +148,19 @@ class IndividualStatsViewer extends StatsViewer {
       })
     );
   }
+  onSelect(selected) {
+    let params = new URLSearchParams(window.location.href.split("?")[1]);
+    params.set("player", selected.dataset.id);
+    const urlWithoutParam = `${window.location.origin}${
+      window.location.pathname
+    }?${params.toString()}`;
+    window.history.replaceState({}, "", urlWithoutParam);
+    super.onSelect(selected);
+  }
 }
 
 $(window).on("load", function () {
-  let map = new InteractiveWorldMap();
+  window.map = new InteractiveWorldMap();
   map.showSubdivisions();
 
   let subdivisionCheckbox = document.getElementById(
@@ -125,21 +175,26 @@ $(window).on("load", function () {
     document.getElementById("statsviewer")
   );
 
-  window.statsViewer.initialize();
+  window.statsViewer.initialize().then(() => {
+    let url = window.location.href;
+    let params = new URLSearchParams(url.split("?")[1]);
+    let playerId = parseInt(params.get("player"));
+    if (playerId !== undefined && !isNaN(playerId)) {
+      window.statsViewer.selectArbitrary(playerId).catch((err) => {
+        displayError(window.statsViewer)(err);
 
-  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
-    (selected) => {
-      if (selected === "All") {
-        window.statsViewer.updateQueryData("continent", undefined);
-        map.resetContinentHighlight();
-      } else {
-        window.statsViewer.updateQueryData("continent", selected);
-        map.highlightContinent(selected);
-      }
+        // if the param failed, set the URL bar's value to the same location, but with the
+        // "player" parameter removed
+        params.delete("player");
+        const urlWithoutParam = `${window.location.origin}${
+          window.location.pathname
+        }?${params.toString()}`;
+        window.history.replaceState({}, "", urlWithoutParam);
+      });
     }
-  );
+  });
 
-  let subdivisionDropdown = new Dropdown(
+  window.subdivisionDropdown = new Dropdown(
     document.getElementById("subdivision-dropdown")
   );
 
@@ -157,6 +212,18 @@ $(window).on("load", function () {
       });
     }
   });
+
+  new Dropdown(document.getElementById("continent-dropdown")).addEventListener(
+    (selected) => {
+      if (selected === "All") {
+        window.statsViewer.updateQueryData("continent", undefined);
+        map.resetContinentHighlight();
+      } else {
+        window.statsViewer.updateQueryData("continent", selected);
+        map.highlightContinent(selected);
+      }
+    }
+  );
 
   statsViewer.dropdown.addEventListener((selected) => {
     if (selected === "International") {
@@ -187,7 +254,10 @@ $(window).on("load", function () {
   map.addDeselectionListener(() => {
     statsViewer.dropdown.selectSilently("International");
     subdivisionDropdown.clearOptions();
-    statsViewer.updateQueryData2({ nation: undefined, subdivision: undefined });
+    statsViewer.updateQueryData2({
+      nation: undefined,
+      subdivision: undefined,
+    });
   });
 });
 
@@ -198,7 +268,6 @@ function generateStatsViewerPlayer(player) {
 
   li.className = "white hover";
   li.dataset.id = player.id;
-  li.dataset.rank = player.rank;
 
   b.appendChild(document.createTextNode("#" + player.rank + " "));
   i.appendChild(document.createTextNode(player.score.toFixed(2)));

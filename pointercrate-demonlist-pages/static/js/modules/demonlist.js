@@ -17,6 +17,7 @@ import {
   setupEditorDialog,
   get,
 } from "/static/core/js/modules/form.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export function embedVideo(video) {
   if (!video) return;
@@ -43,10 +44,21 @@ export function initializeTimeMachine() {
   var timeMachineForm = new Form(formHtml);
   var destination = timeMachineForm.input("time-machine-destination");
 
-  destination.addValidator(valueMissing, "Please specify a value");
+  destination.addValidator(
+    valueMissing,
+    tr(
+      "demonlist",
+      "overview",
+      "time-machine.destination-validator-valuemissing"
+    )
+  );
   destination.addValidator(
     rangeUnderflow,
-    "You cannot go back in time that far!"
+    tr(
+      "demonlist",
+      "overview",
+      "time-machine.destination-validator-rangeunderflow"
+    )
   );
 
   var now = new Date();
@@ -73,10 +85,6 @@ export function initializeTimeMachine() {
       (offsetMinutes + "").padStart(2, "0");
 
     document.cookie = "when=" + when;
-    gtag("event", "time-machine-usage", {
-      "event-category": "demonlist",
-      label: when,
-    });
 
     window.location = "/demonlist/";
   });
@@ -93,41 +101,98 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
   demon.addValidator(
     (input) => input.dropdown.selected !== undefined,
-    "Please specify a demon"
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.demon-validator-valuemissing"
+    )
   );
   demon.setTransform(parseInt);
 
   player.addValidator(
     (input) => input.value !== undefined,
-    "Please specify a record holder"
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.holder-validator-valuemissing"
+    )
   );
   player.addValidator(
     (input) => input.value === undefined || input.value.length <= 50,
-    "Due to Geometry Dash's limitations I know that no player has such a long name"
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.holder-validator-rangeoverflow"
+    )
   );
 
-  progress.addValidator(valueMissing, "Please specify the record's progress");
-  progress.addValidator(rangeUnderflow, "Record progress cannot be negative");
+  progress.addValidator(
+    valueMissing,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-valuemissing"
+    )
+  );
+  progress.addValidator(
+    rangeUnderflow,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-rangeunderflow"
+    )
+  );
   progress.addValidator(
     rangeOverflow,
-    "Record progress cannot be larger than 100%"
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-rangeoverflow"
+    )
   );
-  progress.addValidator(badInput, "Record progress must be a valid integer");
-  progress.addValidator(stepMismatch, "Record progress mustn't be a decimal");
+  progress.addValidator(
+    badInput,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-badinput"
+    )
+  );
+  progress.addValidator(
+    stepMismatch,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.progress-validator-stepmismatch"
+    )
+  );
 
   video.addValidator(
     valueMissing,
-    "Please specify a video so we can check the records validity"
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.video-validator-valuemissing"
+    )
   );
-  video.addValidator(typeMismatch, "Please enter a valid URL");
-
-  rawFootage.addValidator(typeMismatch, "Please enter a valid URL");
-
-  submissionForm.onInvalid(() =>
-    gtag("event", "record-submit-failure-frontend", {
-      "event-category": "demonlist",
-    })
+  video.addValidator(
+    typeMismatch,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.video-validator-typemismatch"
+    )
   );
+
+  rawFootage.addValidator(
+    typeMismatch,
+    tr(
+      "demonlist",
+      "submitter",
+      "record-submission.raw-footage-validator-typemismatch"
+    )
+  );
+
   submissionForm.onSubmit(function () {
     let data = submissionForm.serialize();
     let headers = {};
@@ -141,13 +206,20 @@ export function initializeRecordSubmitter(submitApproved = false) {
 
         if (queue_position)
           submissionForm.setSuccess(
-            `Record successfully submitted. It is #${queue_position} in the queue!`
+            trp(
+              "demonlist",
+              "submitter",
+              "record-submission.submission-success.queue",
+              {
+                ["queue-position"]: queue_position,
+              }
+            )
           );
-        else submissionForm.setSuccess("Record successfully submitted.");
+        else
+          submissionForm.setSuccess(
+            tr("demonlist", "submitter", "record-submission.submission-success")
+          );
         submissionForm.clear();
-        gtag("event", "record-submit-success", {
-          "event-category": "demonlist",
-        });
       })
       .catch((response) => {
         switch (response.data.code) {
@@ -174,9 +246,6 @@ export function initializeRecordSubmitter(submitApproved = false) {
           default:
             submissionForm.setError(response.data.message);
         }
-        gtag("event", "record-submit-failure-backend", {
-          "event-category": "demonlist",
-        });
       }); // TODO: maybe specially handle some error codes
   });
 }
@@ -237,12 +306,10 @@ export function generatePlayer(player) {
   var b = document.createElement("b");
   var b2 = document.createElement("b");
 
-  li.className = "white";
-
   if (player.banned) {
-    li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+    li.classList.add("err");
   } else {
-    li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+    li.classList.add("ok");
   }
 
   li.dataset.name = player.name;
@@ -277,10 +344,21 @@ export function generateDemon(demon) {
 
   li.appendChild(b);
   li.appendChild(
-    document.createTextNode(demon.name + " (ID: " + demon.id + ")")
+    document.createTextNode(
+      trp("demonlist", "demon", "demon-listed", {
+        ["demon"]: demon.name,
+        ["demon-id"]: demon.id.toString(),
+      })
+    )
   );
   li.appendChild(document.createElement("br"));
-  li.appendChild(document.createTextNode("by " + demon.publisher.name));
+  li.appendChild(
+    document.createTextNode(
+      trp("demonlist", "demon", "demon-listed.publisher", {
+        ["publisher"]: demon.publisher.name,
+      })
+    )
+  );
 
   return li;
 }
@@ -289,27 +367,32 @@ export function generateRecord(record) {
   var li = document.createElement("li");
   var recordId = document.createElement("b");
 
-  li.className = "white";
   li.dataset.id = record.id;
 
   switch (record.status) {
     case "approved":
-      li.style.backgroundColor = "rgba( 198, 255, 161, .3)";
+      li.classList.add("ok");
       break;
     case "rejected":
-      li.style.backgroundColor = "rgba(255, 161, 174, .3)";
+      li.classList.add("err");
       break;
     case "submitted":
-      li.style.backgroundColor = "rgba(255, 255, 161, .3)";
+      li.classList.add("warn");
       break;
     case "under consideration":
-      li.style.backgroundColor = "rgba(142, 230, 230, .3)";
+      li.classList.add("consider");
       break;
     default:
       break;
   }
 
-  recordId.appendChild(document.createTextNode("Record #" + record.id));
+  recordId.appendChild(
+    document.createTextNode(
+      trp("demonlist", "record", "record-listed", {
+        ["record-id"]: record.id.toString(),
+      })
+    )
+  );
 
   li.appendChild(recordId);
   li.appendChild(document.createElement("br"));
@@ -318,7 +401,12 @@ export function generateRecord(record) {
   );
   li.appendChild(document.createElement("br"));
   li.appendChild(
-    document.createTextNode(record.progress + "% on " + record.demon.name)
+    document.createTextNode(
+      trp("demonlist", "record", "record-listed.progress", {
+        ["percent"]: record.progress,
+        ["demon"]: record.demon.name,
+      })
+    )
   );
   li.appendChild(document.createElement("br"));
 

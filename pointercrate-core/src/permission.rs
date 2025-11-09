@@ -5,21 +5,21 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Debug, Display, Eq, PartialEq, Clone, Copy, Hash)]
 #[serde(transparent)]
-#[display(fmt = "{}", name)]
+#[display("{}", text_id)]
 pub struct Permission {
-    name: &'static str,
+    text_id: &'static str,
 
     #[serde(skip)]
     bit: u16,
 }
 
 impl Permission {
-    pub const fn new(name: &'static str, bit: u16) -> Permission {
-        Permission { name, bit }
+    pub const fn new(text_id: &'static str, bit: u16) -> Permission {
+        Permission { text_id, bit }
     }
 
-    pub fn name(&self) -> &str {
-        self.name
+    pub fn text_id(&self) -> &str {
+        self.text_id
     }
 
     pub fn bit(&self) -> u16 {
@@ -131,12 +131,12 @@ impl PermissionsManager {
     // we should probably verify that added permissions are all part of what was in
     // the constructor but whatever
     pub fn assigns(mut self, perm1: Permission, perm2: Permission) -> Self {
-        self.assignable_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
+        self.assignable_map.entry(perm1).or_default().insert(perm2);
         self
     }
 
     pub fn implies(mut self, perm1: Permission, perm2: Permission) -> Self {
-        self.implication_map.entry(perm1).or_insert_with(HashSet::new).insert(perm2);
+        self.implication_map.entry(perm1).or_default().insert(perm2);
         self
     }
 

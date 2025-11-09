@@ -18,7 +18,7 @@ mod paginate;
 mod patch;
 
 #[derive(Debug, Hash, Eq, PartialEq, Serialize, Display, Clone, Deserialize)]
-#[display(fmt = "{} (ID: {})", name, id)]
+#[display("{} (ID: {})", name, id)]
 pub struct DatabasePlayer {
     pub id: i32,
     pub name: String,
@@ -26,7 +26,7 @@ pub struct DatabasePlayer {
 }
 
 #[derive(Debug, Serialize, Deserialize, Display, PartialEq, Hash)]
-#[display(fmt = "{}", player)]
+#[display("{}", player)]
 pub struct FullPlayer {
     #[serde(flatten)]
     pub player: Player,
@@ -37,7 +37,7 @@ pub struct FullPlayer {
 }
 
 #[derive(Debug, PartialEq, Serialize, Display, Deserialize)]
-#[display(fmt = "{}", base)]
+#[display("{}", base)]
 pub struct Player {
     #[serde(flatten)]
     pub base: DatabasePlayer,
@@ -59,6 +59,7 @@ pub struct Player {
     ///   * Player banned
     ///   * Player objects merged
     pub score: Option<f64>,
+    pub rank: Option<i64>,
     pub nationality: Option<Nationality>,
 }
 
@@ -93,6 +94,9 @@ impl DatabasePlayer {
 
         sqlx::query!("UPDATE nationalities SET score = coalesce(score_of_nation(nationalities.iso_country_code), 0) FROM players WHERE players.id = $1 AND players.nationality = nationalities.iso_country_code", self.id).execute(&mut *connection).await?;
         sqlx::query!("UPDATE subdivisions SET score = coalesce(score_of_subdivision(subdivisions.nation, subdivisions.iso_code), 0) FROM players WHERE players.id = $1 AND players.nationality = subdivisions.nation AND players.subdivision = subdivisions.iso_code", self.id).execute(&mut *connection).await?;
+        sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;")
+            .execute(&mut *connection)
+            .await?;
 
         Ok(new_score.score)
     }
@@ -101,6 +105,11 @@ impl DatabasePlayer {
 pub async fn recompute_scores(connection: &mut PgConnection) -> Result<(), CoreError> {
     sqlx::query!("SELECT recompute_player_scores();").execute(&mut *connection).await?;
     sqlx::query!("SELECT recompute_nation_scores();").execute(&mut *connection).await?;
-    sqlx::query!("SELECT recompute_subdivision_scores();").execute(connection).await?;
+    sqlx::query!("SELECT recompute_subdivision_scores();")
+        .execute(&mut *connection)
+        .await?;
+    sqlx::query!("REFRESH MATERIALIZED VIEW CONCURRENTLY player_ranks;")
+        .execute(&mut *connection)
+        .await?;
     Ok(())
 }

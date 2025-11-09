@@ -10,6 +10,7 @@ import {
   get,
   Viewer,
 } from "/static/core/js/modules/form.js";
+import { tr, trp } from "/static/core/js/modules/localization.js";
 
 export class StatsViewer extends FilteredPaginator {
   /**
@@ -65,11 +66,11 @@ export class StatsViewer extends FilteredPaginator {
       });
     }
 
-    let demonSortingModeDropdown = new Dropdown(
+    this.demonSortingModeDropdown = new Dropdown(
       document.getElementById("demon-sorting-mode-dropdown")
     );
 
-    demonSortingModeDropdown.addEventListener((selected) => {
+    this.demonSortingModeDropdown.addEventListener((selected) => {
       window.localStorage.setItem("demon_sorting_mode", selected);
 
       if (selected === "Alphabetical") {
@@ -87,7 +88,7 @@ export class StatsViewer extends FilteredPaginator {
       }
     });
 
-    demonSortingModeDropdown.select(
+    this.demonSortingModeDropdown.select(
       localStorage.getItem("demon_sorting_mode") ?? "Alphabetical",
       true
     ); // default to alphabetical
@@ -139,23 +140,24 @@ export class StatsViewer extends FilteredPaginator {
       this._hardest.removeChild(this._hardest.lastChild);
     this._hardest.appendChild(
       hardest === undefined
-        ? document.createTextNode("None")
+        ? document.createTextNode(
+            tr("demonlist", "statsviewer", "statsviewer.value-none")
+          )
         : this.formatDemon(hardest)
     );
   }
 
   setCompletionNumber(main, extended, legacy) {
-    this._amountBeaten.textContent =
-      main + " Main, " + extended + " Extended, " + legacy + " Legacy ";
-  }
-
-  onReceive(response) {
-    super.onReceive(response);
-
-    // Using currentlySelected is O.K. here, as selection via clicking li-elements is the only possibility (well, not for the nation based one, but oh well)!
-    this._rank.innerText = this.currentlySelected.dataset.rank;
-    this._score.innerHTML =
-      this.currentlySelected.getElementsByTagName("i")[0].innerHTML;
+    this._amountBeaten.textContent = trp(
+      "demonlist",
+      "statsviewer",
+      "statsviewer.stats-value",
+      {
+        ["main"]: main,
+        ["extended"]: extended,
+        ["legacy"]: legacy,
+      }
+    );
   }
 
   formatDemon(demon, link, dontStyle) {
@@ -182,6 +184,35 @@ export class StatsViewer extends FilteredPaginator {
 
     return element;
   }
+
+  /**
+   * Sort demons by the selected sorting option
+   * @param {string} sortOption - The sorting option ("Alphabetical" or "Position")
+   * @param data - Demon data to sort
+   * @returns Sorted data
+   */
+  sortStatsViewerRow(sortOption, data) {
+    if (sortOption === "Alphabetical") {
+      data.sort((r1, r2) => {
+        if (r1.demon) {
+          return r1.demon.name.localeCompare(r2.demon.name);
+        } else {
+          // nation unbeaten section does not have "demon" key
+          return r1.name.localeCompare(r2.name);
+        }
+      });
+    } else if (sortOption === "Position") {
+      data.sort((r1, r2) => {
+        if (r1.demon) {
+          return r1.demon.position - r2.demon.position;
+        } else {
+          // nation unbeaten section does not have "demon" key
+          return r1.position - r2.position;
+        }
+      });
+    }
+    return data;
+  }
 }
 
 export function formatInto(parent, childs) {
@@ -198,7 +229,11 @@ export function formatInto(parent, childs) {
     // remove trailing dash
     parent.removeChild(parent.lastChild);
   } else {
-    parent.appendChild(document.createTextNode("None"));
+    parent.appendChild(
+      document.createTextNode(
+        tr("demonlist", "statsviewer", "statsviewer.value-none")
+      )
+    );
   }
 }
 

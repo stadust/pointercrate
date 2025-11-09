@@ -9,3 +9,5 @@ edition.workspace = true
 [dependencies]
 maud = "0.27.0"
 pointercrate-core = {path = "../pointercrate-core"}
+unic-langid = "0.9.5"
+log = "0.4.28"

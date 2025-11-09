@@ -9,13 +9,17 @@ edition.workspace = true
 [dependencies]
 pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
+pointercrate-core-macros = {path = "../pointercrate-core-macros"}
 pointercrate-user = {path = "../pointercrate-user"}
 pointercrate-user-pages = {path = "../pointercrate-user-pages"}
 pointercrate-demonlist = {path = "../pointercrate-demonlist"}
 pointercrate-integrate = {path = "../pointercrate-integrate"}
 maud = "0.27.0"
-chrono = "0.4.40"
-url = "2.5.4"
-async-trait = "0.1.88"
-log = "0.4.26"
-sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
+chrono = "0.4.42"
+url = "2.5.7"
+async-trait = "0.1.89"
+log = "0.4.28"
+sqlx = { workspace = true }
+
+[features]
+geolocation = []

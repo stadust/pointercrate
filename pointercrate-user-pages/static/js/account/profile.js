@@ -13,6 +13,7 @@ import {
   typeMismatch,
   valueMissing,
 } from "/static/core/js/modules/form.js";
+import { loadResource, tr } from "/static/core/js/modules/localization.js";
 
 function setupGetAccessToken() {
   var getTokenForm = new Form(document.getElementById("get-token-form"));
@@ -57,7 +58,7 @@ class ProfileEditorBackend extends EditorBackend {
       window.etag = response.headers["etag"];
       window.username = response.data.data.name;
 
-      this._displayName.innerText = response.data.data.display_name || "None";
+      this._displayName.innerText = response.data.data.display_name || "-";
       this._youtube.removeChild(this._youtube.lastChild); // only ever has one child
       if (response.data.data.youtube_channel) {
         let a = document.createElement("a");
@@ -90,7 +91,8 @@ function setupEditAccount() {
 
   editYoutubeForm.addValidators({
     "edit-yt": {
-      "Please enter a valid URL": typeMismatch,
+      [tr("user", "user", "profile-youtube.newlink-validator-typemismatch")]:
+        typeMismatch,
     },
   });
 
@@ -109,18 +111,35 @@ function setupEditAccount() {
 
     changePasswordForm.addValidators({
       "auth-pw": {
-        "Password required": valueMissing,
-        "Password too short. It needs to be at least 10 characters long.":
-          tooShort,
+        [tr(
+          "user",
+          "user",
+          "profile-change-password.authenticate-validator-valuemissing"
+        )]: valueMissing,
+        [tr(
+          "user",
+          "user",
+          "profile-change-password.authenticate-validator-tooshort"
+        )]: tooShort,
       },
       "edit-pw": {
-        "Password too short. It needs to be at least 10 characters long.":
-          tooShort,
+        [tr(
+          "user",
+          "user",
+          "profile-change-password.newpassword-validator-tooshort"
+        )]: tooShort,
       },
       "edit-pw-repeat": {
-        "Password too short. It needs to be at least 10 characters long.":
-          tooShort,
-        "Passwords don't match": (rpp) => rpp.value == editPw.value,
+        [tr(
+          "user",
+          "user",
+          "profile-change-password.repeatnewpassword-validator-tooshort"
+        )]: tooShort,
+        [tr(
+          "user",
+          "user",
+          "profile-change-password.repeatnewpassword-validator-notmatching"
+        )]: (rpp) => rpp.value == editPw.value,
       },
     });
 
@@ -154,6 +173,19 @@ function setupInvalidateToken() {
       .catch(displayError(invalidateForm));
   });
 }
+
+function googleOauthCallback(response) {
+  let error = document.getElementById("g-signin-error");
+
+  post("/api/v1/auth/oauth/google/", {}, response)
+    .then(() => window.location.reload())
+    .catch((response) => {
+      error.innerText = response.data.message;
+      error.style.display = "block";
+    });
+}
+
+window.googleOauthCallback = googleOauthCallback;
 
 export function initialize() {
   setupGetAccessToken();

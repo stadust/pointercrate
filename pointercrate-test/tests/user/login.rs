@@ -9,7 +9,7 @@ use sqlx::{Pool, Postgres};
 pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
 
-    let mut user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut *connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut connection).await;
 
     for _ in 0..3 {
         let response: serde_json::Value = client
@@ -22,7 +22,7 @@ pub async fn test_login_with_ratelimit(pool: Pool<Postgres>) {
 
         assert_eq!(user.user().id as i64, response["data"]["id"].as_i64().unwrap());
 
-        AuthenticatedUser::by_id(user.user().id, &mut *connection)
+        AuthenticatedUser::by_id(user.user().id, &mut connection)
             .await
             .unwrap()
             .validate_api_access(AccessClaims::decode(response["token"].as_str().unwrap()).unwrap())
@@ -65,7 +65,7 @@ pub async fn test_login_wrong_password(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
 
     // Make sure the user we're trying to log in to exists
-    let _ = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut *connection).await;
+    let _ = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut connection).await;
 
     client
         .post("/api/v1/auth/", &())
@@ -96,7 +96,36 @@ pub async fn test_login_no_header(pool: Pool<Postgres>) {
     client
         .post("/api/v1/auth/", &())
         .header("X-Real-IP", "127.0.0.1")
-        .expect_status(Status::NotFound)
+        .expect_status(Status::Unauthorized)
+        .execute()
+        .await;
+}
+
+#[sqlx::test(migrations = "../migrations")]
+pub async fn test_no_login_if_google_account_linked(pool: Pool<Postgres>) {
+    let (client, mut connection) = pointercrate_test::user::setup_rocket(pool).await;
+
+    // Make sure the user we're trying to log in to exists
+    let user = pointercrate_test::user::system_user_with_perms(ADMINISTRATOR, &mut connection).await;
+
+    client
+        .post("/api/v1/auth/", &())
+        .header("Authorization", "Basic UGF0cmljazpiYWQgcGFzc3dvcmQ=")
+        .header("X-Real-IP", "127.0.0.1")
+        .expect_status(Status::Ok)
+        .execute()
+        .await;
+
+    sqlx::query!("UPDATE members SET google_account_id='1' WHERE member_id=$1", user.user().id)
+        .execute(&mut *connection)
+        .await
+        .unwrap();
+
+    client
+        .post("/api/v1/auth/", &())
+        .header("Authorization", "Basic UGF0cmljazpiYWQgcGFzc3dvcmQ=")
+        .header("X-Real-IP", "127.0.0.1")
+        .expect_status(Status::Unauthorized)
         .execute()
         .await;
 }

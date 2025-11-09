@@ -13,26 +13,26 @@ use sqlx::{PgConnection, Pool, Postgres};
 pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1972", "stardust1972").await;
 
     let submission = serde_json::json! {{"progress": 100, "demon": demon.demon.base.id, "player": "stardust1971", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
 
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
         .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", player.id))
+        .get(format!("/api/v1/players/{}/", player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
 
-    assert_ne!(player.player.score, 0.0f64, "Adding approved record failed to give player score");
+    assert_ne!(player.player.score.unwrap(), 0.0f64, "Adding approved record failed to give player score");
 
     clnt.patch(
         format!("/api/v1/records/{}/", record.id),
@@ -45,28 +45,28 @@ pub async fn test_score_update_on_record_update(pool: Pool<Postgres>) {
     .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", player.player.base.id))
+        .get(format!("/api/v1/players/{}/", player.player.base.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
 
-    assert_eq!(player.player.score, 0.0f64, "Rejecting record failed to remove player score");
+    assert_eq!(player.player.score, None, "Rejecting record failed to remove player score");
 }
 
 #[sqlx::test(migrations = "../migrations")]
 pub async fn test_verifications_give_score(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", demon.demon.verifier.id))
+        .get(format!("/api/v1/players/{}/", demon.demon.verifier.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
 
-    assert_ne!(player.player.score, 0.0f64);
+    assert_ne!(player.player.score.unwrap(), 0.0f64);
 }
 
 async fn nationality_score(iso_country_code: &str, connection: &mut PgConnection) -> f64 {
@@ -93,7 +93,7 @@ async fn subdivision_score(nation: &str, iso_code: &str, connection: &mut PgConn
 pub async fn test_player_score_reflects_to_nationality(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
     let demon = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     clnt.patch_player(
@@ -131,8 +131,8 @@ pub async fn test_player_score_reflects_to_nationality(pool: Pool<Postgres>) {
 pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
 
     let list_size = std::env::var("LIST_SIZE").unwrap().parse::<i16>().unwrap();
 
@@ -152,27 +152,27 @@ pub async fn test_extended_progress_records_give_no_score(pool: Pool<Postgres>) 
 
     let submission = serde_json::json! {{"progress": 99, "demon": last_demon_id, "player": "stardust1972", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
         .await;
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", record.player.id))
+        .get(format!("/api/v1/players/{}/", record.player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
 
-    assert_eq!(player.player.score, 0.0f64, "Progress record on extended list demon is given score");
+    assert_eq!(player.player.score, Some(0.0f64), "Progress record on extended list demon is given score (or incorrectly setting score to null)");
 }
 
 #[sqlx::test(migrations = "../migrations")]
 pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     let (clnt, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
 
-    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut *connection).await;
-    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut *connection).await.unwrap();
+    let helper = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
+    let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
 
     let list_size = std::env::var("LIST_SIZE").unwrap().parse::<i16>().unwrap();
 
@@ -192,7 +192,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
 
     let submission = serde_json::json! {{"progress": 99, "demon": last_demon_id, "player": "stardust1972", "video": "https://youtube.com/watch?v=1234567890", "status": "Approved"}};
     let record = clnt
-        .post("/api/v1/records", &submission)
+        .post("/api/v1/records/", &submission)
         .authorize_as(&helper)
         .expect_status(Status::Ok)
         .get_success_result::<FullRecord>()
@@ -201,13 +201,13 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     assert_eq!(record.demon.position, 75);
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", record.player.id))
+        .get(format!("/api/v1/players/{}/", record.player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
 
     assert_ne!(
-        player.player.score, 0.0f64,
+        player.player.score.unwrap(), 0.0f64,
         "Progress record on final main list demon not giving score"
     );
 
@@ -215,7 +215,7 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     let _ = clnt.add_demon(&helper, "Bloodbath", 1, 100, "stardust1971", "stardust1971").await;
 
     let record: FullRecord = clnt
-        .get(format!("/api/v1/records/{}", record.id))
+        .get(format!("/api/v1/records/{}/", record.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
@@ -223,13 +223,13 @@ pub async fn test_score_resets_if_last_record_removed(pool: Pool<Postgres>) {
     assert_eq!(record.demon.position, 76);
 
     let player: FullPlayer = clnt
-        .get(format!("/api/v1/players/{}", record.player.id))
+        .get(format!("/api/v1/players/{}/", record.player.id))
         .expect_status(Status::Ok)
         .get_success_result()
         .await;
 
     assert_eq!(
-        player.player.score, 0.0f64,
-        "Removal of player's last record did not reset their score to 0"
+        player.player.score, None,
+        "Removal of player's last record did not reset their score to null"
     );
 }

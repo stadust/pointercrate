@@ -1,3 +1,5 @@
+import { tr } from "/static/core/js/modules/localization.js";
+
 /**
  * Class for those dropdown selectors we use throughout the website
  */
@@ -22,7 +24,7 @@ export class Dropdown {
     this.html = html;
     this.input = this.html.getElementsByTagName("input")[0];
     if (this.input.dataset.default === undefined && !this.input.placeholder)
-      this.input.placeholder = "Click to select";
+      this.input.placeholder = tr("core", "ui", "dropdown-placeholder");
     this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
     this.ul = this.html.getElementsByTagName("ul")[0];
 
@@ -300,8 +302,8 @@ export function setupDropdownEditor(
     backend
       .edit(data)
       .then((was304) => {
-        if (was304) output.setSuccess("Nothing changed!");
-        else output.setSuccess("Edit successful!");
+        if (was304) output.setSuccess(tr("core", "ui", "edit-notmodified"));
+        else output.setSuccess(tr("core", "ui", "edit-success"));
       })
       .catch((response) => displayError(output)(response));
   });
@@ -401,9 +403,9 @@ export function setupEditorDialog(
       .edit(dataTransform(data))
       .then((was304) => {
         if (was304) {
-          output.setSuccess("Nothing changed");
+          output.setSuccess(tr("core", "ui", "edit-notmodified"));
         } else {
-          output.setSuccess("Edit successful!");
+          output.setSuccess(tr("core", "ui", "edit-success"));
         }
       })
       .catch((response) => {
@@ -493,9 +495,10 @@ export class Paginator extends Output {
    * @returns A promise
    */
   selectArbitrary(id) {
-    return get(this.retrievalEndpoint + id + "/").then(
-      this.onReceive.bind(this)
-    );
+    return get(this.retrievalEndpoint + id + "/").then((response) => {
+      this.setError(null);
+      this.onReceive(response);
+    });
   }
 
   /**
@@ -608,6 +611,7 @@ export class Paginator extends Output {
    * @memberof Paginator
    */
   refresh() {
+    this.setError(null);
     return get(this.currentLink)
       .then(this.handleResponse.bind(this))
       .catch(displayError(this));
@@ -615,6 +619,7 @@ export class Paginator extends Output {
 
   onPreviousClick() {
     if (this.links.prev) {
+      this.setError(null);
       get(this.links.prev)
         .then(this.handleResponse.bind(this))
         .catch(displayError(this));
@@ -623,6 +628,7 @@ export class Paginator extends Output {
 
   onNextClick() {
     if (this.links.next) {
+      this.setError(null);
       get(this.links.next)
         .then(this.handleResponse.bind(this))
         .catch(displayError(this));
@@ -1228,6 +1234,7 @@ export function displayError(output, specialCodes = {}) {
       output.setError(
         "FrontEnd JavaScript Error. Please notify an administrator and tell them as accurately as possible how to replicate this bug!"
       );
+      console.error(response);
       throw new Error("FrontendError");
     }
   };

@@ -24,7 +24,7 @@ impl LegacyAuthenticatedUser {
         &self.user
     }
 
-    pub(super) fn verify(&self, password: &str) -> Result<(), UserError> {
+    pub(super) fn verify(&self, password: &str) -> Result<(), CoreError> {
         let valid = bcrypt::verify(password, &self.password_hash)
             .inspect_err(|bcrypt_err| {
                 log::error!(
@@ -33,7 +33,7 @@ impl LegacyAuthenticatedUser {
                     bcrypt_err
                 )
             })
-            .map_err(|_| UserError::Core(CoreError::Unauthorized))?;
+            .map_err(|_| CoreError::Unauthorized)?;
 
         if valid {
             log::debug!("Password correct, proceeding");
@@ -42,7 +42,7 @@ impl LegacyAuthenticatedUser {
         } else {
             log::warn!("Wrong password for account {}", self.user);
 
-            Err(UserError::Core(CoreError::Unauthorized))
+            Err(CoreError::Unauthorized)
         }
     }
 

@@ -3,6 +3,7 @@ members = [
     "pointercrate-core",
     "pointercrate-core-api",
     "pointercrate-core-pages",
+    "pointercrate-core-macros",
     "pointercrate-demonlist",
     "pointercrate-demonlist-api",
     "pointercrate-demonlist-pages",
@@ -25,3 +26,7 @@ description = "Libraries for creating pointercrate-like demonlist websites"
 homepage = "https://pointercrate.com"
 edition = "2021"
 repository = "https://github.com/stadust/pointercrate"
+
+[workspace.dependencies]
+sqlx = { version = "0.8", default-features = false, features = [ "runtime-tokio-native-tls", "macros", "postgres", "chrono", "migrate" ] }
+rocket = { git = "https://github.com/rwf2/Rocket", branch = "master", features = ["json"] }

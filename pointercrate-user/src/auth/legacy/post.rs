@@ -1,15 +1,12 @@
 #[cfg(feature = "legacy_accounts")]
 pub use register::Registration;
 
-use crate::Result;
-
 #[cfg(feature = "legacy_accounts")]
 mod register {
-    use super::*;
     use crate::{
-        auth::{AuthenticatedUser, AuthenticationType, NoAuth, PasswordOrBrowser},
+        auth::{AuthenticatedUser, AuthenticationType, PasswordOrBrowser},
         error::UserError,
-        User,
+        Result, User,
     };
     use serde::{Deserialize, Serialize};
     use sqlx::PgConnection;
@@ -20,8 +17,8 @@ mod register {
         pub password: String,
     }
 
-    impl AuthenticatedUser<NoAuth> {
-        pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<AuthenticatedUser<PasswordOrBrowser>> {
+    impl AuthenticatedUser<PasswordOrBrowser> {
+        pub async fn register(registration: Registration, connection: &mut PgConnection) -> Result<Self> {
             log::info!("Attempting registration of new user under name {}", registration.name);
 
             log::trace!("Registration request is formally correct");

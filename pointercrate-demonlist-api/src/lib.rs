@@ -3,14 +3,40 @@ use pointercrate_core::pool::PointercratePool;
 use pointercrate_integrate::gd::GeometryDashConnector;
 use rocket::{Build, Rocket};
 
+pub(crate) mod claims;
 pub(crate) mod config;
 mod endpoints;
+#[cfg(feature = "geolocation")]
+mod geolocate;
 pub(crate) mod pages;
 pub(crate) mod ratelimits;
+
+#[cfg(feature = "geolocation")]
+pub use geolocate::GeolocationProvider;
 
 pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
     let ratelimits = DemonlistRatelimits::new();
     let dash_rs = GeometryDashConnector::new(rocket.state::<PointercratePool>().unwrap().clone_inner());
+
+    if let Some(endpoint) = config::gd_connector_endpoint() {
+        pointercrate_integrate::set_gd_connector_endpoint(endpoint);
+    }
+
+    #[cfg_attr(not(feature = "geolocation"), allow(unused_mut))]
+    let mut player_routes = rocket::routes![
+        endpoints::player::get,
+        endpoints::player::get_me,
+        endpoints::player::paginate,
+        endpoints::player::patch,
+        endpoints::player::ranking,
+        endpoints::player::put_claim,
+        endpoints::player::patch_claim,
+        endpoints::player::paginate_claims,
+        endpoints::player::delete_claim,
+    ];
+
+    #[cfg(feature = "geolocation")]
+    player_routes.extend(rocket::routes![endpoints::player::geolocate_nationality]);
 
     rocket
         .manage(ratelimits)
@@ -40,21 +66,7 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
                 endpoints::record::submit
             ],
         )
-        .mount(
-            "/api/v1/players/",
-            rocket::routes![
-                endpoints::player::get,
-                endpoints::player::get_me,
-                endpoints::player::paginate,
-                endpoints::player::patch,
-                endpoints::player::ranking,
-                endpoints::player::put_claim,
-                endpoints::player::patch_claim,
-                endpoints::player::paginate_claims,
-                endpoints::player::delete_claim,
-                endpoints::player::geolocate_nationality
-            ],
-        )
+        .mount("/api/v1/players/", player_routes)
         .mount(
             "/api/v1/nationalities/",
             rocket::routes![
@@ -81,7 +93,6 @@ pub fn setup(rocket: Rocket<Build>) -> Rocket<Build> {
             "/demonlist/",
             rocket::routes![
                 pages::overview,
-                pages::stats_viewer_redirect,
                 pages::stats_viewer,
                 pages::nation_stats_viewer,
                 pages::demon_page,

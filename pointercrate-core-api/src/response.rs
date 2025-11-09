@@ -1,10 +1,17 @@
-use crate::etag::Tagged;
-use maud::{html, DOCTYPE};
-use pointercrate_core::etag::Taggable;
+use crate::localization::LOCALE_COOKIE_NAME;
+use crate::{
+    etag::Tagged,
+    preferences::{ClientPreferences, PreferenceManager},
+};
+use maud::{html, Render, DOCTYPE};
+use pointercrate_core::localization::LocaleConfiguration;
+use pointercrate_core::{etag::Taggable, localization::LANGUAGE};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
     PageConfiguration, PageFragment,
 };
+use rocket::tokio::runtime::Handle;
+use rocket::tokio::task::block_in_place;
 use rocket::{
     http::{ContentType, Header, Status},
     response::Responder,
@@ -30,24 +37,55 @@ impl HeadLike for Page {
 
 impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
-        let page_config = request.rocket().state::<PageConfiguration>().ok_or(Status::InternalServerError)?;
+        let preference_manager = request.rocket().state::<PreferenceManager>().ok_or(Status::InternalServerError)?;
+        let preferences = ClientPreferences::from_cookies(request.cookies(), preference_manager);
+
+        let language = preferences.get(LOCALE_COOKIE_NAME).ok_or(Status::InternalServerError)?;
+        let lang_id = LocaleConfiguration::get().by_code(language);
+
+        let (page_config, nav_bar, footer) = block_in_place(move || {
+            Handle::current().block_on(async {
+                LANGUAGE
+                    .scope(lang_id.language, async {
+                        let page_config = request
+                            .rocket()
+                            .state::<fn() -> PageConfiguration>()
+                            .ok_or(Status::InternalServerError)?();
+
+                        let nav_bar = page_config.nav_bar.render();
+                        let footer = page_config.footer.render();
+
+                        Ok((page_config, nav_bar, footer))
+                    })
+                    .await
+            })
+        })?;
 
         let fragment = self.0;
 
+        let is_uk = request.headers().get_one("CF-IPCountry").map(|c| c == "GB").unwrap_or(false);
+
         let rendered_fragment = html! {
             (DOCTYPE)
-            html lang="en" prefix="og: http://opg.me/ns#" {
+            html lang=(lang_id) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)
                 }
                 body {
                     div.content {
-                        (page_config.nav_bar)
+                        (nav_bar)
+                        @if is_uk {
+                            nav.red style="height:auto; font-weight: bolder; position: relative; z-index: 100" {
+                                marquee scrolldelay = "60" {
+                                    "Stand for a free internet, and the right to privacy and anonymity! " a.link href = "https://petition.parliament.uk/petitions/722903" style = "color: var(--color-error-bg)" {"Call"} " upon the UK government to repeal the " a.link href = "https://www.openrightsgroup.org/campaign/online-safety-bill-campaign-hub/" style = "color: var(--color-error-bg)" {"Online Safety Act!"} " Don't give up your privacy, use a " a.link href = "https://protonvpn.com/free-vpn" style = "color: var(--color-error-bg)"  {"VPN!"}
+                                }
+                            }
+                        }
                         (fragment.body)
                         div #bg {}
                     }
-                    (page_config.footer)
+                    (footer)
                 }
             }
         }

@@ -1,8 +1,10 @@
+use crate::components::P;
 use log::error;
 use maud::{html, Markup, PreEscaped};
-use pointercrate_core::{error::PointercrateError, permission::PermissionsManager};
+use pointercrate_core::{error::PointercrateError, localization::tr, permission::PermissionsManager, trp};
 use pointercrate_core_pages::{
     error::ErrorFragment,
+    trp_html,
     util::{filtered_paginator, paginator},
 };
 use pointercrate_demonlist::player::claim::PlayerClaim;
@@ -32,7 +34,7 @@ impl AccountPageTab for ListIntegrationTab {
     fn tab(&self) -> Markup {
         html! {
             b {
-                "List Integration"
+                (tr("list-integration"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
             i class = "fa fa-list fa-2x" aria-hidden="true" {}
@@ -64,13 +66,11 @@ impl AccountPageTab for ListIntegrationTab {
                         span style = "font-size: 1.3em" {
                             i.fa.fa-pencil-alt.clickable #player-claim-pen aria-hidden = "true" {} (PreEscaped("&nbsp;"))
                             b {
-                                "Claimed Player: "
+                                (tr("claimed-player")) ": "
                             }
                             @match player_claim {
                                 Some(ref claim) => {
-                                    i #claimed-player data-id = (claim.player.id) {
-                                        (claim.player.name)
-                                    }
+                                    (P(&claim.player, Some("claimed-player")))
                                 },
                                 None => {
                                     i {
@@ -83,11 +83,11 @@ impl AccountPageTab for ListIntegrationTab {
                             @match player_claim {
                                 Some(ref claim) if claim.verified => {
                                     i style="margin-right: 15px;" {
-                                        "Verified"
+                                        (tr("claimed-player.verified"))
                                     }
                                     span.arrow.hover {}
                                 },
-                                Some(_) => i{"Unverified"},
+                                Some(_) => i{(tr("claimed-player.unverified"))},
                                 _ => {}
                             }
                         }
@@ -95,24 +95,26 @@ impl AccountPageTab for ListIntegrationTab {
                     @if let Some(ref claim) = player_claim {
                         @if claim.verified {
                             div.overlined.pad.js-collapse-content #claims-claim-panel style="display:none" {
-                                p.info-red.output style = "margin: 10px 0" {}
-                                p.info-green.output style = "margin: 10px 0" {}
-                                div.flex.no-stretch style="justify-content: space-between; align-items: center" {
-                                    b {
-                                        "Geolocate statsviewer flag:"
+                                // It'd be neat to eliminate this feature and instead have this tied to the presence of a Box<dyn GeolocationProvider> state, but
+                                // plumbing that information all the way here is... hella complicated.
+                                @if cfg!(feature = "geolocation") {
+                                    p.info-red.output style = "margin: 10px 0" {}
+                                    p.info-green.output style = "margin: 10px 0" {}
+                                    div.flex.no-stretch style="justify-content: space-between; align-items: center" {
+                                        b {
+                                            (tr("claim-geolocate"))
+                                        }
+                                        a.button.blue.hover #claims-geolocate-nationality {
+                                            (tr("claim-geolocate.submit"))
+                                        }
                                     }
-                                    a.button.blue.hover #claims-geolocate-nationality {
-                                        "Go"
+                                    p {
+                                        (tr("claim-geolocate.info"))
                                     }
-                                }
-                                p {
-                                    "Clicking the above button let's you set your claimed player's statsviewer flag via IP Geolocation. To offer this functionality, pointercrate uses "
-                                    a.link href = "https://www.abstractapi.com/ip-geolocation-api" { "abstract's IP geolocation API"}
-                                    ". Clicking the above button also counts as your consent for pointercrate to send your IP to abstract."
                                 }
                                 div.cb-container.flex.no-stretch style="justify-content: space-between; align-items: center" {
                                     b {
-                                        "Lock Submissions:"
+                                        (tr("claim-lock-submissions"))
                                     }
                                     @if claim.lock_submissions {
                                         input #lock-submissions-checkbox type = "checkbox" name = "lock_submissions" checked = "";
@@ -123,7 +125,7 @@ impl AccountPageTab for ListIntegrationTab {
                                     span.checkmark {}
                                 }
                                 p {
-                                    "Whether submissions for your claimed player should be locked, meaning only you will be able to submit records for your claimed player (and only while logged in to this account holding the verified claim)"
+                                    (tr("claim-lock-submissions.info"))
                                 }
                             }
                         }
@@ -133,14 +135,24 @@ impl AccountPageTab for ListIntegrationTab {
                     @if claim.verified {
                         div.panel.fade {
                             h2.pad.underlined {
-                                "Your claimed player's records"
+                                (tr("claim-records"))
                             }
                             p {
-                                "A list of your claimed player's records, including all under consideration and rejected records and all submissions. Use this to track the status of your submissions. Clicking on a record will pull up any public notes a list mod left on the given record. The background color of each record tells you whether the record is "
-                                span  style = "background-color: #E9FAE3" { "Approved"  } ", "
-                                span style = "background-color: #F7F7E0" { "Unchecked" } ", "
-                                span style = "background-color: #F8DCE4" { "Rejected" } " or "
-                                span style = "background-color: #D8EFF3" { "Under Consideration" } "."
+                                (PreEscaped(trp!(
+                                    "claim-records.info",
+                                    "record-approved-styled" = html! {
+                                        span.ok { (tr("record-approved")) }
+                                    }.into_string(),
+                                    "record-submitted-styled" = html! {
+                                        span.warn { (tr("record-submitted")) }
+                                    }.into_string(),
+                                    "record-rejected-styled" = html! {
+                                        span.err { (tr("record-rejected")) }
+                                    }.into_string(),
+                                    "record-underconsideration-styled" = html! {
+                                        span.consider { (tr("record-underconsideration")) }
+                                    }.into_string()
+                                )))
                             }
                             (paginator("claims-record-pagination", "/api/v1/records/"))
                         }
@@ -149,16 +161,16 @@ impl AccountPageTab for ListIntegrationTab {
                 @if is_moderator {
                     div.panel.fade {
                         h2.pad.underlined {
-                            "Manage Claims"
+                            (tr("claim-manager"))
                         }
                         p {
-                            "Manage claims using the interface below. The list can be filtered by player and user using the panels on the right. Invalid claims should be deleted using the trash icon. "
+                            (tr("claim-manager.info-a"))
                             br;
-                            "To verify a claim, click the checkmark. Only verify claims you have verified to be correct (this will probably mean talking to the player that's being claimed, and asking if they initiated the claim themselves, or if the claim is malicious)."
+                            (tr("claim-manager.info-b"))
                             br;
-                            "Once a claim on a player is verified, all other unverified claims on that player are auto-deleted. Users cannot put new, unverified claims on players that have a verified claim on them."
+                            (tr("claim-manager.info-c"))
                             br;
-                            "A claim with a green background is verified, a claim with a blue background is unverified/unchecked"
+                            (tr("claim-manager.info-d"))
                         }
                         (filtered_paginator("claim-pagination", "/api/v1/players/claims/"))
                     }
@@ -167,32 +179,37 @@ impl AccountPageTab for ListIntegrationTab {
             div.right {
                 div.panel.fade style = "display: none;"{
                     h2.underlined.pad {
-                        "Initiate Claim"
+                        (tr("claim-initiate-panel"))
                     }
                     p {
-                        "Select the player you wish to claim below"
+                        (tr("claim-initiate-panel.info"))
                     }
                     (filtered_paginator("claims-initiate-claim-pagination", "/api/v1/players/"))
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        "Claiming 101"
+                        (tr("claim-info-panel"))
                     }
                     p {
-                        "Player claiming is the process of associated a demonlist player with a pointercrate user account. A verified claim allows you to to modify some of the player's properties, such as nationality. "
+                        (tr("claim-info-panel.info-a"))
                         br;
-                        "To initiate a claim, click the pen left of the 'Claimed Player' heading. Once initiated, you have an unverified claim on a player. These claims will then be manually verified by members of the pointercrate team. You can request verification in " a.link href=(self.0) {"this discord server"} "."
+                        (trp_html!(
+                            "claim-info-panel.info-b",
+                            "discord" = html! {
+                                a.link href = (&self.0) { (tr("claim-info-panel.info-discord")) }
+                            }
+                        ))
                         br;
-                        "You cannot initiate a claim on a player that already has a verified claim by a different user on it. "
+                        (tr("claim-info-panel.info-c"))
                     }
                 }
                 @if is_moderator {
                     div.panel.fade {
                         h2.underlined.pad {
-                            "Record video"
+                            (tr("claim-video-panel"))
                         }
                         p {
-                            "Clicking a claim in the 'Manage Claims' panel will pull up a random video of an approved record by the claimed player."
+                            (tr("claim-video-panel.info"))
                         }
                         iframe."ratio-16-9"#claim-video style="width:100%;" allowfullscreen="" {}
                     }

@@ -88,98 +88,49 @@ footer {
 /* color modifying styles */
 
 .blue {
-  background-color: #0881c6;
-  color: white;
+  background-color: var(--color-pc-button-bg);
+  color: var(--color-pc-button-text);
 }
 
 .blue.hover:not(.disabled):not([disabled]):hover,
 .blue.active {
-  background-color: #076696;
-  color: white;
+  background-color: var(--color-pc-button-bg-hover);
 }
 
 .blue.hover:not(.disabled):not([disabled]):active {
-  background-color: #055075;
-  color: #eee;
-}
-
-.gray {
-  background-color: #ddd;
-  color: black;
-}
-
-.gray.hover:not(.disabled):not([disabled]):hover,
-.gray.active {
-  background-color: #e4e4e4;
-  color: #222;
-}
-
-.gray.hover:not(.disabled):not([disabled]):active {
-  background-color: #ccc;
-  color: #111;
+  background-color: var(--color-pc-button-bg-click);
+  color: var(--color-pc-button-text-click);
 }
 
 .white {
-  background-color: white;
-  color: #444446;
+  background-color: var(--color-unobstrusive-button-bg);
+  color: var(--color-unobstrusive-button-text);
 }
 
 .white.hover:not(.disabled):not([disabled]):hover,
 .white.active {
-  background-color: #ddd;
-  color: #222224;
+  background-color: var(--color-unobstrusive-button-bg-hover);
 }
 
 .white.hover:not(.disabled):not([disabled]):active {
-  background-color: #aaa;
-  color: #111113;
-}
-
-.orange {
-  background: #f77e39;
-  color: white;
-}
-
-.orange.hover:not(.disabled):not([disabled]):hover,
-.orange.active {
-  background-color: #d16432;
-  color: white;
-}
-
-.orange.hover:not(.disabled):not([disabled]):active,
-.orange.active {
-  background-color: #ba5b2c;
-  color: #ddd;
+  background-color: var(--color-unobstrusive-button-bg-click);
+  color: var(--color-unobstrusive-button-text-click);
 }
 
 .red {
-  background: #ff003c;
-  color: white;
+  background: var(--color-imp-button-bg);
+  color: var(--color-pc-button-text);
 }
 
 .red.hover:not(.disabled):not([disabled]):hover,
 .red.active {
-  background: #ff2457;
+  background: var(--color-imp-button-bg-hover);
 }
 
 .red.hover:not(.disabled):not([disabled]):active,
 .red.active {
-  background: #f21347;
-}
-
-.green {
-  background: #73ce2e;
-  color: white;
-}
-
-.green.hover:not(.disabled):not([disabled]):hover,
-.green.active {
-  background: #7dcc41;
-}
-
-.green.hover:not(.disabled):not([disabled]):active,
-.green.active {
-  background: #5ba324;
+  background: var(--color-imp-button-bg-click);
+  color: var(--color-pc-button-text-click);
 }
 
 /* size modifying styles */

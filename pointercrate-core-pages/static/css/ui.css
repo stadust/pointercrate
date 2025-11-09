@@ -8,6 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  text-wrap: wrap;
 }
 
 .button.disabled,
@@ -26,7 +27,7 @@
 /* Link styles */
 
 a.link {
-  color: blue;
+  color: var(--color-link);
 }
 
 a.link:after {
@@ -44,6 +45,26 @@ a.link:after {
 a.link:after {
   content: "\f35d";
   text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  a.mobile-only-link {
+    color: var(--color-link);
+  }
+
+  a.mobile-only-link:after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 600;
+    font-style: normal;
+    display: inline-block;
+    text-decoration: inherit;
+    margin: auto 3px;
+  }
+
+  a.mobile-only-link:after {
+    content: "\f35d";
+    text-decoration: none;
+  }
 }
 
 /* Default header styles */
@@ -115,7 +136,7 @@ ul {
 }
 
 a {
-  color: #222;
+  color: var(--color-text-accent);
   text-decoration: none;
   cursor: pointer;
 }
@@ -140,6 +161,12 @@ a {
 
 .flex.col {
   flex-direction: column;
+}
+
+@media (max-width: 767px) {
+  .flex.mobile-col {
+    flex-direction: column;
+  }
 }
 
 .flex.space {
@@ -171,9 +198,9 @@ a {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
+  background: var(--color-bg);;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
-  border: 1px lightgray dashed;
+  border: 1px var(--color-border-broken) dashed;
   padding: 10px;
   max-width: 600px;
   overflow:auto;
@@ -195,7 +222,7 @@ a {
 
   position: relative;
 
-  background: white;
+  background: var(--color-bg);
 
   flex-grow: 1;
   overflow: hidden;
@@ -229,8 +256,8 @@ input, textarea {
 }
 
 textarea {
-  background: rgba(0, 0, 0, 0);
-  border: 1px solid #ddd;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   padding: 5px;
   box-sizing: border-box;
   resize: none;
@@ -242,12 +269,13 @@ input[type="url"],
 input[type="password"],
 input[type="datetime-local"],
 textarea {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
   min-width: 0; /* Firefox and Egde need this */
 
   padding: 0px 5px;
 
-  background: rgba(0, 0, 0, 0);
+  background: var(--color-bg);
   box-sizing: border-box;
 }
 
@@ -266,7 +294,7 @@ form input[type="url"]:valid,
 form input[type="password"]:valid,
 form input[type="datetime-local"]:valid,
 textarea:valid {
-  border-bottom: 1px solid lime;
+  border-bottom: 1px solid var(--color-ok-border);
 }
 
 form input[type="text"]:invalid,
@@ -275,19 +303,21 @@ form input[type="url"]:invalid,
 form input[type="password"]:invalid,
 form input[type="datetime-local"]:invalid,
 textarea:invalid {
-  border-bottom: 1px solid coral;
+  border-bottom: 1px solid var(--color-link-dark);
 }
 
 .form-input > * {
   text-align: left;
   font-style: italic;
 
-  margin: 2px 10px !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
 }
 
-.form-input .error {
+p.error {
   font-size: 60% !important;
-  color: coral;
+  color: var(--color-link-dark);
+  margin: 0;
 }
 
 .form-input {
@@ -338,7 +368,7 @@ textarea:invalid {
 
 /* When the checkbox is checked, add a blue background */
 .cb-container input:checked ~ .checkmark {
-  background-color: #2196f3;
+  background-color: var(--color-pc-button-bg);
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
@@ -413,8 +443,8 @@ textarea:invalid {
 }
 
 .search.seperated input {
-  border-left: 1px solid #888;
-  border-right: 1px solid #888;
+  border-left: 1px solid var(--color-border-broken);
+  border-right: 1px solid var(--color-border-broken);
 }
 
 /*
@@ -472,6 +502,10 @@ textarea:invalid {
   .viewer {
     flex-wrap: wrap;
   }
+  
+  .no-mobile {
+    display: none
+  }
 }
 
 .stats-container {
@@ -507,9 +541,9 @@ textarea:invalid {
   max-height: 290px;
   overflow-y: scroll;
 
-  background: white;
+  background: var(--color-bg);
 
-  border: 1px solid #bbb;
+  border: 1px solid var(--color-border);
 
   z-index: 100;
 
@@ -523,7 +557,7 @@ h2 .dropdown-menu ul {
 }
 
 .dropdown-menu > div {
-  border-bottom: 1px dotted #555;
+  border-bottom: 1px dotted var(--color-border-broken);
   width: 100%;
 }
 
@@ -574,7 +608,6 @@ h2 .dropdown-menu ul {
 .tooltip {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted #555;
 }
 
 .tooltip .tooltiptext {
@@ -587,7 +620,7 @@ h2 .dropdown-menu ul {
   z-index: 9;
 
   border: 3px solid #ddd;
-  background: #fff;
+  background: var(--color-bg);
 
   left: 50%;
   transform: translateX(-50%);
@@ -606,18 +639,7 @@ h2 .dropdown-menu ul {
 
 /* (Under)lines */
 .underlined {
-  margin-bottom: 5px;
-
-  /*border-bottom: 1px solid transparent;
-  border-image: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
-  border-bottom: 1px solid rgba(211, 211, 211, 1);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .underlined.pad {
@@ -625,18 +647,7 @@ h2 .dropdown-menu ul {
 }
 
 .leftlined {
-  margin-left: 5px;
-
-  /*border-left: 1px solid transparent;
-  border-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
-  border-left: 1px solid rgba(211, 211, 211, 1);
+  border-left: 1px solid var(--color-border);
 }
 
 .leftlined.pad {
@@ -644,18 +655,7 @@ h2 .dropdown-menu ul {
 }
 
 .rightlined {
-  margin-right: 5px;
-
-  /*border-right: 1px solid transparent;
-  border-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
-  border-right: 1px solid rgba(211, 211, 211, 1);
+  border-right: 1px solid var(--color-border);
 }
 
 .rightlined.pad {
@@ -663,50 +663,62 @@ h2 .dropdown-menu ul {
 }
 
 .overlined {
-  margin-top: 5px;
-
-  /*border-top: 1px solid transparent;
-  border-image: linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(211, 211, 211, 1) 15%,
-      rgba(211, 211, 211, 1) 85%,
-      rgba(0, 0, 0, 0) 100%
-    )
-    1;*/
-  border-top: 1px solid rgba(211, 211, 211, 1);
+  border-top: 1px solid var(--color-border);
 }
 
 .overlined.pad {
   padding-top: 10px;
 }
 
+.underdotted {
+  border-bottom: 1px dotted var(--color-border-broken);
+}
+
+.info-green, .ok {
+  background: var(--color-ok-bg);
+  border-color: var(--color-ok-border);
+  color: var(--color-ok-text);
+}
+
 .info-green {
-  background: #ddffdd;
-  border: 1px solid #a8ff93;
   padding: 5px 15px;
-  color: #074d07;
-  margin: 25px 0px;
+  margin: 5px 0px;
+  border-width: 1px;
+  border-style:  solid;
 }
 
 .info-green a {
-  color: #68bf0b !important;
+  color: var(--color-ok-accent);
+}
+
+.info-yellow, .warn {
+  background: var(--color-warn-bg);
+  border-color: var(--color-warn-border);
+  color: var(--color-warn-text);
 }
 
 .info-yellow {
-  background: #fffadd;
-  border: 1px solid #e0e37b;
   padding: 5px 15px;
-  color: #4d4707;
-  margin: 25px 0px;
+  margin: 5px 0px;
+  border-width: 1px;
+  border-style:  solid;
+}
+
+.info-red, .err {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+  color: var(--color-error-text);
 }
 
 .info-red {
-  background: #fdd;
-  border: 1px solid #ff9393;
   padding: 5px 15px;
-  color: #4d0707;
-  margin: 25px 0px;
+  margin: 5px 0px;
+  border-width: 1px;
+  border-style:  solid;
+}
+
+.consider {
+  background: var(--color-consider-bg);
 }
 
 .output {
@@ -714,10 +726,6 @@ h2 .dropdown-menu ul {
   font-style: italic;
   font-size: 80%;
   margin: 0px;
-}
-
-form .output {
-  margin: 0px 10px;
 }
 
 ul.selection-list {
@@ -743,5 +751,5 @@ ul.selection-list li {
 }
 
 .tab-active {
-  color: #0881c6;
+  color: var(--color-pc-button-bg);
 }

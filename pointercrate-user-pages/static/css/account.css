@@ -19,8 +19,7 @@
 }
 
 .tab-active {
-  background-color: #ddd;
-  color: #222224;
+  background-color: var(--color-unobstrusive-button-bg-hover);
 }
 
 form {

@@ -8,6 +8,7 @@ use pointercrate_core_api::{
     query::Query,
     response::Response2,
 };
+use pointercrate_core_macros::localized;
 use pointercrate_demonlist::{
     error::DemonlistError,
     player::claim::PlayerClaim,
@@ -34,6 +35,7 @@ use std::net::IpAddr;
 /// `APPROVED` is allowed, UNLESS we also filter by player and the player we filter by match a
 /// verified claim of the user making the request, in which case access to all records is allowed
 /// (the `status` property does not get defaulted, and filtering on it is allowed)
+#[localized]
 #[rocket::get("/")]
 pub async fn paginate(mut auth: Auth<ApiToken>, query: Query<RecordPagination>) -> Result<Response2<Json<Vec<MinimalRecordPD>>>> {
     let mut pagination = query.0;
@@ -57,6 +59,7 @@ pub async fn paginate(mut auth: Auth<ApiToken>, query: Query<RecordPagination>) 
     Ok(pagination_response("/api/v1/records/", pagination, &mut auth.connection).await?)
 }
 
+#[localized]
 #[rocket::get("/", rank = 1)]
 pub async fn unauthed_pagination(
     pool: &State<PointercratePool>, query: Query<RecordPagination>,
@@ -74,9 +77,10 @@ pub async fn unauthed_pagination(
 
     pagination.status = Some(RecordStatus::Approved);
 
-    Ok(pagination_response("/api/v1/records/", pagination, &mut *connection).await?)
+    Ok(pagination_response("/api/v1/records/", pagination, &mut connection).await?)
 }
 
+#[localized]
 #[rocket::post("/", data = "<submission>")]
 pub async fn submit(
     ip: IpAddr, auth: Option<Auth<ApiToken>>, submission: Json<Submission>, pool: &State<PointercratePool>,
@@ -101,12 +105,12 @@ pub async fn submit(
         None => pool.transaction().await?,
     };
 
-    let submitter = match Submitter::by_ip(ip, &mut *connection).await? {
+    let submitter = match Submitter::by_ip(ip, &mut connection).await? {
         Some(submitter) => submitter,
         None => {
             ratelimits.new_submitters()?;
 
-            Submitter::create_submitter(ip, &mut *connection).await?
+            Submitter::create_submitter(ip, &mut connection).await?
         },
     };
 
@@ -115,10 +119,10 @@ pub async fn submit(
         return Err(DemonlistError::BannedFromSubmissions.into());
     }
 
-    let normalized = submission.normalize(&mut *connection).await?;
+    let normalized = submission.normalize(&mut connection).await?;
 
     // check if the player is claimed with submissions locked
-    if let Some(claim) = normalized.verified_player_claim(&mut *connection).await? {
+    if let Some(claim) = normalized.verified_player_claim(&mut connection).await? {
         if claim.lock_submissions {
             match user_id {
                 Some(user_id) if user_id == claim.user_id => (),
@@ -127,7 +131,7 @@ pub async fn submit(
         }
     }
 
-    let validated = normalized.validate(&mut *connection).await?;
+    let validated = normalized.validate(&mut connection).await?;
 
     if !is_team_member {
         // Check ratelimits before any change is made to the database so that the transaction rollback is
@@ -138,7 +142,7 @@ pub async fn submit(
         ratelimits.record_submission_global()?;
     }
 
-    let mut record = validated.create(submitter, &mut *connection).await?;
+    let mut record = validated.create(submitter, &mut connection).await?;
 
     connection.commit().await.map_err(DemonlistError::from)?;
 
@@ -170,7 +174,8 @@ pub async fn submit(
     Ok(response)
 }
 
-#[rocket::get("/<record_id>")]
+#[localized]
+#[rocket::get("/<record_id>/")]
 pub async fn get(record_id: i32, auth: Option<Auth<ApiToken>>, pool: &State<PointercratePool>) -> Result<Tagged<FullRecord>> {
     let is_helper = auth.as_ref().is_some_and(|auth| auth.has_permission(LIST_HELPER));
 
@@ -179,7 +184,7 @@ pub async fn get(record_id: i32, auth: Option<Auth<ApiToken>>, pool: &State<Poin
         None => pool.transaction().await?,
     };
 
-    let mut record = FullRecord::by_id(record_id, &mut *connection).await?;
+    let mut record = FullRecord::by_id(record_id, &mut connection).await?;
 
     // TODO: allow access if auth is provided and a verified claim on the record's player is given
     if !is_helper {
@@ -193,7 +198,8 @@ pub async fn get(record_id: i32, auth: Option<Auth<ApiToken>>, pool: &State<Poin
     Ok(Tagged(record))
 }
 
-#[rocket::get("/<record_id>/audit")]
+#[localized]
+#[rocket::get("/<record_id>/audit/")]
 pub async fn audit(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<AuditLogEntry<RecordModificationData>>>> {
     auth.require_permission(LIST_ADMINISTRATOR)?;
 
@@ -206,7 +212,8 @@ pub async fn audit(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Json<Vec<
     Ok(Json(log))
 }
 
-#[rocket::patch("/<record_id>", data = "<patch>")]
+#[localized]
+#[rocket::patch("/<record_id>/", data = "<patch>")]
 pub async fn patch(
     record_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchRecord>,
 ) -> Result<Tagged<FullRecord>> {
@@ -228,7 +235,8 @@ pub async fn patch(
     Ok(Tagged(record))
 }
 
-#[rocket::delete("/<record_id>")]
+#[localized]
+#[rocket::delete("/<record_id>/")]
 pub async fn delete(record_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition) -> Result<Status> {
     let record = FullRecord::by_id(record_id, &mut auth.connection).await?;
 
@@ -246,7 +254,8 @@ pub async fn delete(record_id: i32, mut auth: Auth<ApiToken>, precondition: Prec
     Ok(Status::NoContent)
 }
 
-#[rocket::get("/<record_id>/notes")]
+#[localized]
+#[rocket::get("/<record_id>/notes/")]
 pub async fn get_notes(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Response2<Json<Vec<Note>>>> {
     let record_holder_id = sqlx::query!("SELECT player FROM records WHERE id = $1", record_id)
         .fetch_one(&mut *auth.connection)
@@ -273,7 +282,8 @@ pub async fn get_notes(record_id: i32, mut auth: Auth<ApiToken>) -> Result<Respo
     Ok(Response2::json(notes))
 }
 
-#[rocket::post("/<record_id>/notes", data = "<data>")]
+#[localized]
+#[rocket::post("/<record_id>/notes/", data = "<data>")]
 pub async fn add_note(record_id: i32, mut auth: Auth<ApiToken>, data: Json<NewNote>) -> Result<Response2<Tagged<Note>>> {
     auth.require_permission(LIST_HELPER)?;
 
@@ -292,7 +302,8 @@ pub async fn add_note(record_id: i32, mut auth: Auth<ApiToken>, data: Json<NewNo
         .with_header("Location", format!("/api/v1/records/{}/notes/{}/", record.id, note_id)))
 }
 
-#[rocket::patch("/<record_id>/notes/<note_id>", data = "<patch>")]
+#[localized]
+#[rocket::patch("/<record_id>/notes/<note_id>/", data = "<patch>")]
 pub async fn patch_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>, patch: Json<PatchNote>) -> Result<Tagged<Note>> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
@@ -309,7 +320,8 @@ pub async fn patch_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>, 
     Ok(Tagged(note))
 }
 
-#[rocket::delete("/<record_id>/notes/<note_id>")]
+#[localized]
+#[rocket::delete("/<record_id>/notes/<note_id>/")]
 pub async fn delete_note(record_id: i32, note_id: i32, mut auth: Auth<ApiToken>) -> Result<Status> {
     let note = Note::by_id(record_id, note_id, &mut auth.connection).await?;
 
@@ -340,7 +352,7 @@ async fn validate(record_id: i32, video: String, body: serde_json::Value, mut co
             } else {
                 warn!("Server response to 'GET {}' was {:?}, deleting submission!", video, response);
 
-                match FullRecord::delete_by_id(record_id, &mut *connection).await {
+                match FullRecord::delete_by_id(record_id, &mut connection).await {
                     Ok(_) => (),
                     Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
                 }
@@ -352,7 +364,7 @@ async fn validate(record_id: i32, video: String, body: serde_json::Value, mut co
                 error
             );
 
-            match FullRecord::delete_by_id(record_id, &mut *connection).await {
+            match FullRecord::delete_by_id(record_id, &mut connection).await {
                 Ok(_) => (),
                 Err(error) => error!("INTERNAL SERVER ERROR: Failure to delete record - {:?}!", error),
             }

@@ -33,7 +33,7 @@ pub struct TimeShiftedDemon {
 
 /// Struct modelling a demon. These objects are returned from the paginating `/demons/` endpoint
 #[derive(Debug, Deserialize, Serialize, Hash, Display, Eq, PartialEq)]
-#[display(fmt = "{}", base)]
+#[display("{}", base)]
 pub struct Demon {
     #[serde(flatten)]
     pub base: MinimalDemon,
@@ -61,7 +61,7 @@ pub struct Demon {
 
 /// Absolutely minimal representation of a demon to be sent when a demon is part of another object
 #[derive(Debug, Hash, Serialize, Deserialize, Display, PartialEq, Eq, Clone)]
-#[display(fmt = "{} (at {})", name, position)]
+#[display("{} (at {})", name, position)]
 pub struct MinimalDemon {
     /// The [`Demon`]'s unique internal pointercrate ID
     pub id: i32,
@@ -82,7 +82,7 @@ pub struct MinimalDemon {
 /// In addition to containing publisher/verifier information it also contains a list of the demon's
 /// creators and a list of accepted records
 #[derive(Debug, Serialize, Deserialize, Display, PartialEq, Eq, Hash)]
-#[display(fmt = "{}", demon)]
+#[display("{}", demon)]
 pub struct FullDemon {
     #[serde(flatten)]
     pub demon: Demon,
@@ -116,53 +116,6 @@ impl FullDemon {
 
     pub fn name(&self) -> &str {
         self.demon.base.name.as_ref()
-    }
-
-    pub fn headline(&self) -> String {
-        let publisher = &self.demon.publisher.name;
-        let verifier = &self.demon.verifier.name;
-
-        let creator = match &self.creators[..] {
-            [] => "Unknown".to_string(),
-            [creator] => creator.name.to_string(),
-            many => {
-                let mut iter = many.iter();
-                let fst = iter.next().unwrap();
-
-                format!(
-                    "{} and {}",
-                    iter.map(|player| player.name.to_string()).collect::<Vec<_>>().join(", "),
-                    fst.name
-                )
-            },
-        };
-
-        // no comparison between &String and String, so just make it a reference
-        let creator = &creator;
-
-        if creator == verifier && creator == publisher {
-            format!("by {}", creator)
-        } else if creator != verifier && verifier == publisher {
-            format!("by {}, verified and published by {}", creator, verifier)
-        } else if creator != verifier && creator != publisher && publisher != verifier {
-            format!("by {}, verified by {}, published by {}", creator, verifier, publisher)
-        } else if creator == verifier && creator != publisher {
-            format!("by {}, published by {}", creator, publisher)
-        } else if creator == publisher && creator != verifier {
-            format!("by {}, verified by {}", creator, verifier)
-        } else {
-            "If you're seeing this, file a bug report".to_string()
-        }
-    }
-
-    pub fn short_headline(&self) -> String {
-        let demon = &self.demon;
-
-        if demon.publisher == demon.verifier {
-            format!("verified and published by {}", demon.verifier.name)
-        } else {
-            format!("published by {}, verified by {}", demon.publisher.name, demon.verifier.name)
-        }
     }
 }
 
@@ -218,6 +171,10 @@ impl Demon {
     }
 
     pub fn score(&self, progress: i16) -> f64 {
+        if progress < self.requirement {
+            return 0.0;
+        }
+
         let position = self.base.position;
 
         let beaten_score = match position {

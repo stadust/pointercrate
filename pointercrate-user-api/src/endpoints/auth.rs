@@ -5,6 +5,7 @@ use pointercrate_core_api::{
     etag::{Precondition, Tagged},
     response::Response2,
 };
+use pointercrate_core_macros::localized;
 use pointercrate_user::{
     auth::{ApiToken, PasswordOrBrowser, PatchMe},
     error::UserError,
@@ -17,6 +18,7 @@ use rocket::{
 };
 use std::net::IpAddr;
 
+use pointercrate_core::error::CoreError;
 #[cfg(feature = "legacy_accounts")]
 use {
     pointercrate_core::pool::PointercratePool,
@@ -24,7 +26,8 @@ use {
 };
 
 #[cfg(feature = "legacy_accounts")]
-#[rocket::post("/register", data = "<body>")]
+#[localized]
+#[rocket::post("/register/", data = "<body>")]
 pub async fn register(
     ip: IpAddr, body: Json<Registration>, ratelimits: &State<UserRatelimits>, pool: &State<PointercratePool>,
 ) -> Result<Response2<Tagged<User>>> {
@@ -37,7 +40,7 @@ pub async fn register(
     LegacyAuthenticatedUser::validate_password(&body.password)?;
     User::validate_name(&body.name)?;
 
-    let user = AuthenticatedUser::register(body.0, &mut *connection).await?;
+    let user = AuthenticatedUser::register(body.0, &mut connection).await?;
 
     ratelimits.registrations(ip)?;
 
@@ -48,9 +51,10 @@ pub async fn register(
         .status(Status::Created))
 }
 
+#[localized]
 #[rocket::post("/")]
 pub async fn login(
-    auth: std::result::Result<Auth<PasswordOrBrowser>, UserError>, ip: IpAddr, ratelimits: &State<UserRatelimits>,
+    auth: std::result::Result<Auth<PasswordOrBrowser>, CoreError>, ip: IpAddr, ratelimits: &State<UserRatelimits>,
 ) -> Result<Response2<Json<serde_json::Value>>> {
     ratelimits.login_attempts(ip)?;
     let auth = auth?;
@@ -64,7 +68,8 @@ pub async fn login(
     .with_header("etag", auth.user.user().etag_string()))
 }
 
-#[rocket::post("/invalidate")]
+#[localized]
+#[rocket::post("/invalidate/")]
 pub async fn invalidate(mut auth: Auth<PasswordOrBrowser>) -> Result<Status> {
     auth.user.invalidate_all_tokens(&mut auth.connection).await?;
     auth.connection.commit().await.map_err(UserError::from)?;
@@ -72,12 +77,14 @@ pub async fn invalidate(mut auth: Auth<PasswordOrBrowser>) -> Result<Status> {
     Ok(Status::NoContent)
 }
 
-#[rocket::get("/me")]
-pub fn get_me(auth: Auth<ApiToken>) -> Tagged<User> {
+#[localized]
+#[rocket::get("/me/")]
+pub async fn get_me(auth: Auth<ApiToken>) -> Tagged<User> {
     Tagged(auth.user.into_user())
 }
 
-#[rocket::patch("/me", data = "<patch>")]
+#[localized]
+#[rocket::patch("/me/", data = "<patch>")]
 pub async fn patch_me(
     mut auth: Auth<PasswordOrBrowser>, patch: Json<PatchMe>, pred: Precondition,
 ) -> Result<std::result::Result<Tagged<User>, Status>> {
@@ -96,7 +103,8 @@ pub async fn patch_me(
     }
 }
 
-#[rocket::delete("/me")]
+#[localized]
+#[rocket::delete("/me/")]
 pub async fn delete_me(mut auth: Auth<PasswordOrBrowser>, pred: Precondition) -> Result<Status> {
     pred.require_etag_match(auth.user.user())?;
 

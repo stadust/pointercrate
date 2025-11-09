@@ -15,6 +15,7 @@ import {
   get,
 } from "/static/core/js/modules/form.js";
 import { recordManager, initialize as initRecords } from "./records.js";
+import { loadResource, tr } from "/static/core/js/modules/localization.js";
 
 export let playerManager;
 
@@ -79,7 +80,9 @@ class PlayerManager extends FilteredPaginator {
         this.currentObject.nationality.country_code
       ).then(() => {
         if (!this.currentObject.nationality.subdivision) {
-          this._subdivision.selectSilently("None");
+          this._subdivision.selectSilently(
+            tr("demonlist", "player", "player-subdivision.none")
+          );
         } else {
           this._subdivision.selectSilently(
             this.currentObject.nationality.subdivision.iso_code
@@ -87,8 +90,12 @@ class PlayerManager extends FilteredPaginator {
         }
       });
     } else {
-      this._nationality.selectSilently("None");
-      this._subdivision.selectSilently("None");
+      this._nationality.selectSilently(
+        tr("demonlist", "player", "player-nationality.none")
+      );
+      this._subdivision.selectSilently(
+        tr("demonlist", "player", "player-subdivision.none")
+      );
     }
   }
 
@@ -102,7 +109,11 @@ class PlayerManager extends FilteredPaginator {
 
     form.addValidators({
       "player-name-edit": {
-        "Please provide a name for the player": valueMissing,
+        [tr(
+          "demonlist",
+          "player",
+          "player-name-dialog.name-validator-valuemissing"
+        )]: valueMissing,
       },
     });
   }
@@ -114,7 +125,10 @@ function setupPlayerSearchPlayerIdForm() {
   );
   var playerId = playerSearchByIdForm.input("search-player-id");
 
-  playerId.addValidator(valueMissing, "Player ID required");
+  playerId.addValidator(
+    valueMissing,
+    tr("demonlist", "player", "player-idsearch-panel.id-validator-valuemissing")
+  );
   playerSearchByIdForm.onSubmit(function () {
     playerManager
       .selectArbitrary(parseInt(playerId.value))

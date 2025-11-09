@@ -4,7 +4,7 @@ import {
   tooShort,
   post,
 } from "/static/core/js/modules/form.js";
-import { TabbedPane } from "/static/core/js/modules/tab.js";
+import { tr } from "/static/core/js/modules/localization.js";
 
 function initializeLoginForm() {
   var loginForm = new Form(document.getElementById("login-form"));
@@ -12,17 +12,23 @@ function initializeLoginForm() {
   var loginUsername = loginForm.input("login-username");
   var loginPassword = loginForm.input("login-password");
 
-  loginUsername.addValidator(valueMissing, "Username required");
+  loginUsername.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-username.validator-valuemissing")
+  );
   loginUsername.addValidator(
     tooShort,
-    "Username too short. It needs to be at least 3 characters long."
+    tr("user", "user", "auth-username.validator-tooshort")
   );
 
   loginPassword.clearOnInvalid = true;
-  loginPassword.addValidator(valueMissing, "Password required");
+  loginPassword.addValidator(
+    valueMissing,
+    tr("user", "user", "auth-password.validator-valuemissing")
+  );
   loginPassword.addValidator(
     tooShort,
-    "Password too short. It needs to be at least 10 characters long."
+    tr("user", "user", "auth-password.validator-tooshort")
   );
 
   loginForm.onSubmit(function (event) {
@@ -36,7 +42,11 @@ function initializeLoginForm() {
       .catch((response) => {
         console.log(response);
         if (response.status === 401) {
-          loginPassword.errorText = "Invalid credentials";
+          loginPassword.errorText = tr(
+            "user",
+            "user",
+            "login.error-invalidcredentials"
+          );
         } else {
           loginForm.setError(response.data.message);
         }
@@ -44,53 +54,19 @@ function initializeLoginForm() {
   });
 }
 
-function intializeRegisterForm() {
-  var registerForm = new Form(document.getElementById("register-form"));
+function googleOauthCallback(response) {
+  let error = document.getElementById("g-signin-error");
 
-  var registerUsername = registerForm.input("register-username");
-  var registerPassword = registerForm.input("register-password");
-  var registerPasswordRepeat = registerForm.input("register-password-repeat");
-
-  registerUsername.addValidator(valueMissing, "Username required");
-  registerUsername.addValidator(
-    tooShort,
-    "Username too short. It needs to be at least 3 characters long."
-  );
-
-  registerPassword.addValidator(valueMissing, "Password required");
-  registerPassword.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-
-  registerPasswordRepeat.addValidator(valueMissing, "Password required");
-  registerPasswordRepeat.addValidator(
-    tooShort,
-    "Password too short. It needs to be at least 10 characters long."
-  );
-  registerPasswordRepeat.addValidator(
-    (rpp) => rpp.value == registerPassword.value,
-    "Passwords don't match"
-  );
-
-  registerForm.onSubmit(function (event) {
-    post("/register/", {}, registerForm.serialize())
-      .then((response) => {
-        window.location = "/account/";
-      })
-      .catch((response) => {
-        if (response.status === 409) {
-          registerUsername.errorText =
-            "This username is already taken. Please choose another one";
-        } else {
-          registerForm.setError(response.data.message);
-        }
-      });
-  });
+  post("/api/v1/auth/oauth/google/", {}, response)
+    .then(() => (window.location = "/account/"))
+    .catch((response) => {
+      error.innerText = response.data.message;
+      error.style.display = "block";
+    });
 }
 
-$(document).ready(function () {
-  new TabbedPane(document.getElementById("login-tabber"), null);
+window.googleOauthCallback = googleOauthCallback;
+
+$(window).on("load", function () {
   initializeLoginForm();
-  intializeRegisterForm();
 });

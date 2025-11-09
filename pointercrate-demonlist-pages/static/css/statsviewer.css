@@ -13,7 +13,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    box-shadow: inset 0 -10px 23px 22px #FFF;
+    box-shadow: inset 0 -10px 23px 22px var(--color-bg);
     top: 0;
     bottom: 0;
     pointer-events: none;
@@ -48,7 +48,6 @@
     background-position: 0%;
     flex-grow: 2;
 }
-
 
 .tooltip:hover .tooltiptext {
     opacity: 1 !important;

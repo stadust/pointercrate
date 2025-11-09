@@ -1,6 +1,8 @@
 use crate::{TestClient, TestRequest};
 use pointercrate_core::etag::Taggable;
+use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::{permission::PermissionsManager, pool::PointercratePool};
+use pointercrate_core_api::preferences::PreferenceManager;
 use pointercrate_demonlist::demon::FullDemon;
 use pointercrate_demonlist::{
     player::{claim::PlayerClaim, FullPlayer},
@@ -24,12 +26,15 @@ pub async fn setup_rocket(pool: Pool<Postgres>) -> (TestClient, PoolConnection<P
         .implies(LIST_ADMINISTRATOR, LIST_MODERATOR)
         .implies(LIST_MODERATOR, LIST_HELPER);
 
+    LocalesLoader::empty();
+
     let rocket = pointercrate_demonlist_api::setup(rocket::build().manage(PointercratePool::from(pool)))
         .manage(permissions)
-        .manage(AccountPageConfig::default());
+        .manage(AccountPageConfig::default())
+        .manage(PreferenceManager::default().preference("locale", "en"));
 
     // generate some data
-    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut *connection)
+    Submitter::create_submitter(IpAddr::from_str("127.0.0.1").unwrap(), &mut connection)
         .await
         .unwrap();
 
@@ -105,7 +110,7 @@ impl TestClient {
             .await;
 
         self.patch(format!("/api/v1/players/{}/", player_id), &patch)
-            .authorize_as(&auth_context)
+            .authorize_as(auth_context)
             .header("If-Match", player.etag_string())
             .expect_status(Status::Ok)
     }
@@ -116,7 +121,7 @@ impl TestClient {
     ) -> FullDemon {
         self.post("/api/v2/demons/", &serde_json::json!({"name": name.into(), "position": position, "requirement": requirement, "verifier": verifier.into(), "publisher": publisher.into(), "creators": []}))
             .expect_status(Status::Created)
-            .authorize_as(&auth_context)
+            .authorize_as(auth_context)
             .get_success_result()
             .await
     }
