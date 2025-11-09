@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION record_score(progress FLOAT, demon FLOAT, list_size F
 $record_score$
 SELECT CASE
        WHEN demon > 150 THEN 0.0
+       WHEN demon > 75 AND progress < 100 THEN 0.0
        WHEN progress < requirement THEN 0.0
        WHEN progress = 100 THEN
            CASE
