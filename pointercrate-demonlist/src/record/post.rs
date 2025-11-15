@@ -5,6 +5,7 @@ use crate::{
     record::{FullRecord, RecordStatus},
     submitter::Submitter,
 };
+use chrono::{TimeZone, Utc};
 use derive_more::Display;
 use log::debug;
 use serde::Deserialize;
@@ -172,8 +173,8 @@ impl NormalizedSubmission {
 
 impl ValidatedSubmission {
     pub async fn create(self, submitter: Submitter, connection: &mut PgConnection) -> Result<FullRecord> {
-        let id = sqlx::query!(
-            "INSERT INTO records (progress, video, status_, player, submitter, demon, raw_footage) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4, $5, $6) RETURNING id",
+        let row = sqlx::query!(
+            "INSERT INTO records (progress, video, status_, player, submitter, demon, raw_footage) VALUES ($1, $2::TEXT, 'SUBMITTED', $3, $4, $5, $6) RETURNING id, date",
             self.progress,
             self.video,
             self.player.id,
@@ -182,11 +183,10 @@ impl ValidatedSubmission {
             self.raw_footage
         )
         .fetch_one(&mut *connection)
-        .await?
-        .id;
+        .await?;
 
         let mut record = FullRecord {
-            id,
+            id: row.id,
             progress: self.progress,
             video: self.video,
             raw_footage: self.raw_footage,
@@ -194,6 +194,7 @@ impl ValidatedSubmission {
             player: self.player,
             demon: self.demon,
             submitter: Some(submitter),
+            date: Utc.from_utc_datetime(&row.date),
         };
 
         // Dealing with different status and upholding their invariant is complicated, we should not
