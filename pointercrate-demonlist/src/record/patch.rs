@@ -4,6 +4,7 @@ use crate::{
     player::DatabasePlayer,
     record::{FullRecord, RecordStatus},
 };
+use chrono::{DateTime, Utc};
 use log::{info, warn};
 use pointercrate_core::{
     error::CoreError,
@@ -31,6 +32,9 @@ pub struct PatchRecord {
 
     #[serde(default, deserialize_with = "non_nullable")]
     demon_id: Option<i32>,
+
+    #[serde(default, deserialize_with = "non_nullable")]
+    date: Option<DateTime<Utc>>,
 }
 
 impl FullRecord {
@@ -67,6 +71,10 @@ impl FullRecord {
             (None, Some(demon_id)) => self.set_demon(MinimalDemon::by_id(demon_id, connection).await?, connection).await?,
             (Some(_), Some(_)) => return Err(CoreError::MutuallyExclusive.into()),
             _ => (),
+        }
+
+        if let Some(date) = data.date {
+            self.set_date(date, connection).await?;
         }
 
         // Not all record update require recomputing scores (for example, changing status from "submitted" to "under consideration")
@@ -392,6 +400,16 @@ impl FullRecord {
             .await?;
 
         self.progress = progress;
+
+        Ok(())
+    }
+
+    pub async fn set_date(&mut self, date: DateTime<Utc>, connection: &mut PgConnection) -> Result<()> {
+        sqlx::query!("UPDATE records SET date = $1 WHERE id = $2", date.naive_utc(), self.id)
+            .execute(&mut *connection)
+            .await?;
+
+        self.date = date;
 
         Ok(())
     }
