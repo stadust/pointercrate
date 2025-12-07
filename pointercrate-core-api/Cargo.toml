@@ -13,7 +13,7 @@ pointercrate-core = {path = "../pointercrate-core"}
 pointercrate-core-pages = {path = "../pointercrate-core-pages"}
 serde_json = "1.0.145"
 sqlx = { workspace = true }
-log = "0.4.28"
+log = "0.4.29"
 serde_urlencoded = "0.7.0"
 maud = "0.27.0"
 unic-langid = "0.9.5"
