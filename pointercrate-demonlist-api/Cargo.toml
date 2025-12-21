@@ -19,12 +19,12 @@ pointercrate-user-api = {path = "../pointercrate-user-api"}
 pointercrate-integrate = {path = "../pointercrate-integrate"}
 sqlx = { workspace = true }
 serde_json = "1.0.145"
-log = "0.4.28"
+log = "0.4.29"
 nonzero_ext = "0.3.0"
 reqwest = {version = "0.12.*", features = ["json"]}
 chrono = "0.4.42"
 serde = "1.0.228"
-governor = "0.10.1"
+governor = "0.10.4"
 rand = "0.9.2"
 
 [features]
