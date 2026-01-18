@@ -9,14 +9,14 @@ edition.workspace = true
 [dependencies]
 sqlx = { workspace = true }
 bincode = "1.3.1"
-reqwest = "0.12.*"
+reqwest = "0.13.*"
 futures = "0.3.31"
-log = "0.4.28"
-chrono = "0.4.42"
-tokio = {version = "1.48.0", features = ["rt"]}
+log = "0.4.29"
+chrono = "0.4.43"
+tokio = {version = "1.49.0", features = ["rt"]}
 pointercrate-demonlist = { path = "../pointercrate-demonlist" }
 pointercrate-core = { path = "../pointercrate-core" }
 dash-rs = { git = "https://github.com/stadust/dash-rs" }
-governor = "0.10.1"
+governor = "0.10.4"
 nonzero_ext = "0.3.0"
 
