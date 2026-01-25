@@ -11,10 +11,10 @@ serde = "1.0.228"
 derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { workspace = true }
 fluent = "0.17.0"
-tokio = "1.48.0"
-log = "0.4.28"
-chrono = {version = "0.4.42", features = ["serde"]}
+tokio = "1.49.0"
+log = "0.4.29"
+chrono = {version = "0.4.43", features = ["serde"]}
 getrandom = "0.3.4"
 unic-langid = "0.9.5"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 fluent-syntax = "0.12.0"
