@@ -106,6 +106,16 @@ impl Render for NavigationBar {
                     @if let Some(locales_dropdown) = locale_selection_dropdown() {
                         (locales_dropdown)
                     }
+                    (NavGroup { // light-dark theme toggle
+                        inner: TopLevelNavigationBarItem::new(
+                            None,
+                            html! {
+                                span.fa {}
+                            }
+                        ),
+                        id: Some("theme-toggle"),
+                        nohide: true,
+                    })
                     div.nav-item.collapse-button.nav-nohide {
                         div.hamburger.hover {
                             input type="checkbox"{}

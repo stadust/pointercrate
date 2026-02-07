@@ -6,6 +6,7 @@ pub mod localization;
 pub mod pagination;
 pub mod permission;
 pub mod pool;
+pub mod theme;
 pub mod util;
 #[macro_use]
 pub mod ratelimits;

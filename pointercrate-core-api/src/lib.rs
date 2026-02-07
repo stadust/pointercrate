@@ -6,3 +6,4 @@ pub mod pagination;
 pub mod preferences;
 pub mod query;
 pub mod response;
+pub mod theme;
