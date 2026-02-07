@@ -241,7 +241,7 @@ export class InteractiveWorldMap {
   constructor() {
     this.wrapper = document.getElementById("world-map-wrapper");
     this.map = document.getElementById("world-map");
-    this.svg = this.map.contentDocument.children[0];
+    this.svg = this.map.children[0];
 
     this.selectionListeners = [];
     this.deselectionListeners = [];
@@ -260,7 +260,7 @@ export class InteractiveWorldMap {
 
     this.currentlySelected = undefined;
 
-    for (let subdivision of this.map.contentDocument.querySelectorAll(
+    for (let subdivision of this.map.querySelectorAll(
       ".land-with-states .state"
     )) {
       subdivision.addEventListener("click", (event) => {
@@ -283,7 +283,7 @@ export class InteractiveWorldMap {
       });
     }
 
-    for (let clickable of this.map.contentDocument.querySelectorAll(
+    for (let clickable of this.map.querySelectorAll(
       ".land, .island, .land-with-states"
     )) {
       clickable.addEventListener("click", () => {
@@ -363,7 +363,7 @@ export class InteractiveWorldMap {
   }
 
   showSubdivisions() {
-    for (let divided of this.map.contentDocument.querySelectorAll(
+    for (let divided of this.map.querySelectorAll(
       ".land-with-states"
     )) {
       divided.classList.add("subdivided");
@@ -371,7 +371,7 @@ export class InteractiveWorldMap {
   }
 
   hideSubdivisions() {
-    for (let divided of this.map.contentDocument.querySelectorAll(
+    for (let divided of this.map.querySelectorAll(
       ".land-with-states.subdivided"
     )) {
       divided.classList.remove("subdivided");

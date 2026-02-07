@@ -35,9 +35,7 @@ impl IndividualStatsViewer {
                     b {(tr("statsviewer-nation"))}
                 }
             }
-            div #world-map-wrapper {
-                object style="min-width:100%" #world-map data="/static/demonlist/images/world.svg" type="image/svg+xml" alt="World map showing the global demonlist score distribution" {}
-            }
+            (super::world_map())
             div.flex.m-center.container {
                 main.left {
                     (stats_viewer_html(Some(&self.nationalities_in_use), super::standard_stats_viewer_rows(), false))
