@@ -63,3 +63,27 @@ pub fn localized_catcher(_: TokenStream, input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote!(#f))
 }
+
+/// A procedural macro for automatically wrapping a request handler inside a tokio::task_local!
+/// [`LocalKey`] scope for `THEME`, with the value of the [`ClientTheme`] request guard.
+#[proc_macro_attribute]
+pub fn themed(_: TokenStream, input: TokenStream) -> TokenStream {
+    let mut f = parse_macro_input!(input as ItemFn);
+
+    f.sig
+        .inputs
+        .push(parse_quote! { __theme: pointercrate_core_api::theme::ClientTheme });
+
+    let block = &f.block;
+    let block = quote! {
+        {
+            pointercrate_core::theme::THEME.scope(__theme.0, async {
+                #block
+            }).await
+        }
+    };
+
+    f.block = parse2(block).unwrap();
+
+    TokenStream::from(quote!(#f))
+}
