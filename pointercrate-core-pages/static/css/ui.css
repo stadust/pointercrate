@@ -120,6 +120,10 @@ h4 {
   }
 }
 
+html[data-theme="dark"] body {
+  scrollbar-color: var(--color-text) var(--color-bg-surface);
+}
+
 /* Misc element styles */
 
 iframe {
@@ -189,7 +193,7 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--color-overlay);
   z-index: 1083458237;
 }
 
@@ -198,7 +202,7 @@ a {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--color-bg);;
+  background: var(--color-bg-surface);;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
   border: 1px var(--color-border-broken) dashed;
   padding: 10px;
@@ -222,7 +226,7 @@ a {
 
   position: relative;
 
-  background: var(--color-bg);
+  background: var(--color-bg-surface);
 
   flex-grow: 1;
   overflow: hidden;
@@ -256,7 +260,7 @@ input, textarea {
 }
 
 textarea {
-  background: var(--color-bg);
+  background: var(--color-bg-surface);
   border: 1px solid var(--color-border);
   padding: 5px;
   box-sizing: border-box;
@@ -275,7 +279,7 @@ textarea {
 
   padding: 0px 5px;
 
-  background: var(--color-bg);
+  background: var(--color-bg-surface);
   box-sizing: border-box;
 }
 
@@ -541,13 +545,13 @@ p.error {
   max-height: 290px;
   overflow-y: scroll;
 
-  background: var(--color-bg);
+  background: var(--color-bg-surface);
 
   border: 1px solid var(--color-border);
 
   z-index: 100;
 
-  box-shadow: 0px 8px 10px #ccc, -10px 8px 15px #ccc, 10px 8px 15px #ccc;
+  box-shadow: 0px 8px 10px var(--color-dropdown-shadow), -10px 8px 15px var(--color-dropdown-shadow), 10px 8px 15px var(--color-dropdown-shadow);
 }
 
 h1 .dropdown-menu ul,
@@ -568,9 +572,9 @@ h2 .dropdown-menu ul {
 }
 
 .dropdown-menu div:focus-within {
-  border: 1px solid #bbb;
+  border: 1px solid var(--color-dropdown-border);
   border-bottom: none;
-  box-shadow: 0 0 10px 5px #ccc;
+  box-shadow: 0 0 10px 5px var(--color-dropdown-shadow);
 }
 
 .dropdown-menu input:focus, .dropdown-menu input:invalid {
@@ -620,7 +624,7 @@ h2 .dropdown-menu ul {
   z-index: 9;
 
   border: 3px solid #ddd;
-  background: var(--color-bg);
+  background: var(--color-bg-surface);
 
   left: 50%;
   transform: translateX(-50%);
@@ -719,6 +723,7 @@ h2 .dropdown-menu ul {
 
 .consider {
   background: var(--color-consider-bg);
+  color: var(--color-consider-text);
 }
 
 .output {

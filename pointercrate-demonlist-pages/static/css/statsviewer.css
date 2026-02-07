@@ -1,3 +1,13 @@
+:root {
+  --color-world-land-stroke: white;
+  --color-world-land-fill: #dadce0;
+}
+
+html[data-theme="dark"] {
+  --color-world-land-stroke: #424d63;
+  --color-world-land-fill: #252d3c;
+}
+
 #world-map-wrapper {
     overflow: hidden;
     position: fixed;
@@ -27,8 +37,6 @@
 
 #stats-viewer-pagination li i {
     padding-left: 5px;
-
-    color: #444;
 
     font-size: 70%;
     font-variant: small-caps;

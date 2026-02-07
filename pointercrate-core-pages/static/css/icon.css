@@ -18,7 +18,7 @@
   content: " ";
   height: 25px;
   width: 3px;
-  background-color: #333;
+  background-color: var(--color-icon);
   border-radius: 10px;
 }
 
@@ -109,7 +109,7 @@ i.fa.hover {
 }
 
 .hamburger.hover > span {
-  background: #333;
+  background: var(--color-icon);
 }
 
 .hamburger.hover:hover,
@@ -140,7 +140,7 @@ i.fa.hover:hover {
   display: inline-block;
   width: 12px;
   height: 3px;
-  background-color: #333;
+  background-color: var(--color-icon);
   transition: 0.4s ease;
 }
 

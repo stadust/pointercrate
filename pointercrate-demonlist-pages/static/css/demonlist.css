@@ -1,3 +1,13 @@
+:root {
+  --color-records-odd: #fefeff;
+  --color-records-even: #e6eeff;
+}
+
+html[data-theme="dark"] {
+  --color-records-odd: #242c3c;
+  --color-records-even: #1c2230;
+}
+
 table {
   width: 90%;
   margin: 0 5%;
@@ -16,11 +26,11 @@ td {
 }
 
 tr {
-  background: #fefeff;
+  background: var(--color-records-odd);
 }
 
 tr:nth-child(even) {
-  background: #e6eeff;
+  background: var(--color-records-even);
 }
 
 #history-table {
@@ -99,7 +109,7 @@ tr:nth-child(even) {
 }
 
 .dropdown {
-  background: var(--color-bg);
+  background: var(--color-bg-surface);
   text-align: center;
 }
 
@@ -127,8 +137,6 @@ tr:nth-child(even) {
 
 #stats-viewer-pagination li i {
   padding-left: 5px;
-
-  color: #444;
 
   font-size: 70%;
   font-variant: small-caps;
@@ -159,7 +167,7 @@ tr:nth-child(even) {
 @media (max-width: 767px) {
   .thumb {
     width: 100%;
-    box-shadow: 1px -53px 26px -20px var(--color-bg) inset;
+    box-shadow: 1px -53px 26px -20px var(--color-bg-surface) inset;
   }
 
   .completed .thumb {

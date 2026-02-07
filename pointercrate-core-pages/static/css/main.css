@@ -16,7 +16,7 @@
 
   --color-consider-bg: #D8EFF3;
   /* --color-consider-border */
-  --color-consider-text: #326067;
+  --color-consider-text: #213e42;
   /* --color-consider-accent */
 
   --color-text: #444446;
@@ -26,6 +26,8 @@
   --color-border-broken: #555;
 
   --color-bg: white;
+  --color-bg-surface: white;
+  --color-overlay: rgba(255, 255, 255, 0.8);
 
   --color-link: blue;
   --color-link-dark: #f77e39;
@@ -40,11 +42,71 @@
   --color-imp-button-bg-hover: #ff2457;
   --color-imp-button-bg-click: #f21347;
 
-  --color-unobstrusive-button-bg: var(--color-bg);
+  --color-unobstrusive-button-bg: var(--color-bg-surface);
   --color-unobstrusive-button-bg-hover: #ddd;
   --color-unobstrusive-button-bg-click: #aaa;
   --color-unobstrusive-button-text: var(--color-text);
   --color-unobstrusive-button-text-click: #111;
+
+  --color-dropdown-border: #bbb;
+  --color-dropdown-shadow: #ccc;
+
+  --color-icon: #333;
+}
+
+html[data-theme="dark"] {
+  --color-ok-bg: #69b0405e;
+  --color-ok-border: #a8ff93;
+  --color-ok-text: rgb(243, 255, 235);
+  --color-ok-accent: #68bf0b;
+
+  --color-warn-bg: #a49a6094;
+  --color-warn-border: #e0e37b;
+  --color-warn-text: #fffdf5;
+  /* --color-warn-accent */
+
+  --color-error-bg: #985858b7;
+  --color-error-border: #ff939390;
+  --color-error-text: rgb(255, 247, 247);
+  /* --color-error-accent */
+
+  --color-consider-bg: #68afbf64;
+  /* --color-consider-border */
+  --color-consider-text: #D8EFF3;
+  /* --color-consider-accent */
+
+  --color-text-accent: #dce6e3;
+  --color-text: #c9c6bf;
+
+  --color-bg: #121720;
+  --color-bg-surface: #252d3c;
+  --color-overlay: rgba(7, 9, 13, 0.8);
+
+  --color-link: #1ca4f3;
+
+  --color-border: #4d5566;
+
+  --color-imp-button-bg: #c0070a;
+  --color-imp-button-bg-hover: #bd1e20;
+  --color-imp-button-bg-click: #9b0306;
+
+  --color-unobstrusive-button-bg-hover: #181d27;
+  --color-unobstrusive-button-bg-click: #12151d;
+  --color-unobstrusive-button-text: var(--color-text-accent);
+  --color-unobstrusive-button-text-click: var(--color-text);
+
+  --color-dropdown-border: #4d5566;
+  --color-dropdown-shadow: #1a212c;
+
+  --color-icon: #c4c4c4;
+}
+
+#theme-toggle > a > .fa::before {
+  content: "\f186"; /* moon icon */
+}
+
+html[data-theme="dark"] #theme-toggle > a > .fa::before {
+  content: "\f185"; /* sun icon */
 }
 
 body {
@@ -55,6 +117,7 @@ body {
   min-width: 100%;
   height: 100%;
 
+  background-color: var(--color-bg);
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
