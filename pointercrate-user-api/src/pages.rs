@@ -1,7 +1,9 @@
 use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::error::CoreError;
 use pointercrate_core::permission::PermissionsManager;
+use pointercrate_core::theme::THEME;
 use pointercrate_core_api::response::Page;
+use pointercrate_core_api::theme::ClientTheme;
 use pointercrate_core_macros::localized;
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating, PasswordOrBrowser},
@@ -52,9 +54,13 @@ fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJa
 
 #[localized]
 #[rocket::get("/login/")]
-pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
-    auth.map(|_| Redirect::to(rocket::uri!(account_page)))
-        .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
+pub async fn login_page(auth: Option<Auth<NonMutating>>, theme: ClientTheme) -> Result<Redirect, Page> {
+    THEME
+        .scope(theme.0, async {
+            auth.map(|_| Redirect::to(rocket::uri!(account_page)))
+                .ok_or_else(|| Page::new(pointercrate_user_pages::login::login_page()))
+        })
+        .await
 }
 
 // Doing the post with cookies already set will just refresh them. No point in doing that, but also not harmful.
@@ -74,8 +80,10 @@ pub async fn login(
 
 #[localized]
 #[rocket::get("/register/")]
-pub async fn register_page() -> Page {
-    Page::new(pointercrate_user_pages::register::registration_page())
+pub async fn register_page(theme: ClientTheme) -> Page {
+    THEME
+        .scope(theme.0, async { Page::new(pointercrate_user_pages::register::registration_page()) })
+        .await
 }
 
 #[cfg(feature = "legacy_accounts")]
@@ -106,10 +114,16 @@ pub async fn register(
 #[localized]
 #[rocket::get("/account/")]
 pub async fn account_page(
-    auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,
+    auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>, theme: ClientTheme,
 ) -> Result<Page, Redirect> {
     match auth {
-        Some(mut auth) => Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await)),
+        Some(mut auth) => {
+            THEME
+                .scope(theme.0, async {
+                    Ok(Page::new(tabs.account_page(auth.user, permissions, &mut auth.connection).await))
+                })
+                .await
+        },
         None => Err(Redirect::to(rocket::uri!(login_page))),
     }
 }
