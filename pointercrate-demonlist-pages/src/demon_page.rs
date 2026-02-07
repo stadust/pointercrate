@@ -8,6 +8,7 @@ use crate::{
 };
 use chrono::NaiveDateTime;
 use maud::{html, Markup, PreEscaped};
+use pointercrate_core::theme::task_theme;
 use pointercrate_core::{localization::tr, trp};
 use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_demonlist::{
@@ -195,7 +196,7 @@ impl DemonPage {
                     (super::rules_panel())
                     (submit_panel())
                     (stats_viewer_panel())
-                    (super::discord_panel())
+                    (super::discord_panel(&task_theme()))
                 }
             }
         }

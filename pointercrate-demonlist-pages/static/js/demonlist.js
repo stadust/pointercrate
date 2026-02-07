@@ -4,6 +4,7 @@ import {
 } from "/static/demonlist/js/modules/demonlist.js";
 import { get } from "/static/core/js/modules/form.js";
 import { tr, trp } from "/static/core/js/modules/localization.js";
+import { ThemedElement } from "/static/core/js/modules/theme.js";
 
 $(window).on("load", function () {
   if (window.demon_id) {
@@ -13,6 +14,19 @@ $(window).on("load", function () {
 
   initializeRecordSubmitter();
   initializeTimeMachine();
+
+  new ThemedElement(
+    document.querySelector("#discord > iframe"),
+    (iframe, theme) => {
+      let src = iframe.src || iframe.dataset.attrValue;
+
+      let url = new URL(src);
+      url.searchParams.set("theme", theme);
+
+      if (iframe.src) iframe.src = url;
+      iframe.dataset.attrValue = url;
+    },
+  )
 });
 
 function initializeHistoryTable() {

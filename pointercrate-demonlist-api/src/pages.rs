@@ -4,10 +4,11 @@ use pointercrate_core_macros::localized;
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
-use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
+use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool, theme::THEME};
 use pointercrate_core_api::{
     error::Result,
     response::{Page, Response2},
+    theme::ClientTheme,
 };
 use pointercrate_demonlist::player::claim::PlayerClaim;
 use pointercrate_demonlist::player::{FullPlayer, Player};
@@ -35,7 +36,7 @@ use sqlx::PgConnection;
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
-    auth: Option<Auth<NonMutating>>,
+    auth: Option<Auth<NonMutating>>, theme: ClientTheme,
 ) -> Result<Page> {
     // A few months before pointercrate first went live - definitely the oldest data we have
     let beginning_of_time = NaiveDate::from_ymd_opt(2017, 1, 4).unwrap().and_hms_opt(0, 0, 0).unwrap();
@@ -76,20 +77,24 @@ pub async fn overview(
         tardis.activate(destination, demons_then, !is_april_1st)
     }
 
-    Ok(Page::new(OverviewPage {
-        team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
-        },
-        demonlist,
-        time_machine: tardis,
-        submitter_initially_visible: submitter.unwrap_or(false),
-        claimed_player: match auth {
-            Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
-            None => None,
-        },
-    }))
+    THEME
+        .scope(theme.0, async {
+            Ok(Page::new(OverviewPage {
+                team: Team {
+                    admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
+                    moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
+                    helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
+                },
+                demonlist,
+                time_machine: tardis,
+                submitter_initially_visible: submitter.unwrap_or(false),
+                claimed_player: match auth {
+                    Some(auth) => claimed_full_player(auth.user.user(), &mut connection).await,
+                    None => None,
+                },
+            }))
+        })
+        .await
 }
 
 async fn claimed_full_player(user: &User, connection: &mut PgConnection) -> Option<FullPlayer> {
@@ -110,7 +115,9 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 
 #[localized]
 #[rocket::get("/<position>/")]
-pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
+pub async fn demon_page(
+    position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>, theme: ClientTheme,
+) -> Result<Page> {
     let mut connection = pool.connection().await?;
 
     let full_demon = FullDemon::by_position(position, &mut connection).await?;
@@ -151,17 +158,21 @@ pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &Stat
         );
     }
 
-    Ok(Page::new(DemonPage {
-        team: Team {
-            admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
-            moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
-            helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
-        },
-        demonlist: current_list(&mut connection).await?,
-        movements: modifications,
-        integration: gd.load_level_for_demon(&full_demon.demon).await,
-        data: full_demon,
-    }))
+    THEME
+        .scope(theme.0, async {
+            Ok(Page::new(DemonPage {
+                team: Team {
+                    admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
+                    moderators: User::by_permission(LIST_MODERATOR, &mut connection).await?,
+                    helpers: User::by_permission(LIST_HELPER, &mut connection).await?,
+                },
+                demonlist: current_list(&mut connection).await?,
+                movements: modifications,
+                integration: gd.load_level_for_demon(&full_demon.demon).await,
+                data: full_demon,
+            }))
+        })
+        .await
 }
 
 #[localized]
