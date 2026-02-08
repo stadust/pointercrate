@@ -122,6 +122,7 @@ demon-viewer = Demon #
     .publisher-field = { demon-publisher }:
     .verifier-field = { demon-verifier }:
     .creators-field = { demon-creators }:
+    .levelid-field = { demon-id }:
 
 demon-add-panel = Add Demon
     .button = Add a demon!
@@ -179,6 +180,10 @@ demon-publisher-dialog = Change demon publisher
 
 demon-verifier-dialog = Change demon verifier
     .info = Type the new verifier of the demon into the text field below. If the player already exists, it will appear as a suggestion below the text field. Then click the button below.
+    .submit = Edit
+
+demon-levelid-dialog = Change level ID
+    .info = Leave empty to remove the level ID.
     .submit = Edit
 
 demon-creator-dialog = Add creator
