@@ -14,7 +14,7 @@ use pointercrate_demonlist::{
         claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
         DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
     },
-    LIST_HELPER,
+    LIST_HELPER, LIST_MODERATOR
 };
 use pointercrate_user::{auth::ApiToken, MODERATOR};
 use pointercrate_user_api::auth::Auth;
@@ -70,6 +70,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
 pub async fn patch(
     player_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchPlayer>,
 ) -> Result<Tagged<FullPlayer>> {
+    auth.require_permission(LIST_MODERATOR)?;
     let player = Player::by_id(player_id, &mut auth.connection)
         .await?
         .upgrade(&mut auth.connection)
