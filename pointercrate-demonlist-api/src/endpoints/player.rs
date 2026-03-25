@@ -70,6 +70,7 @@ pub async fn get(player_id: i32, pool: &State<PointercratePool>) -> Result<Tagge
 pub async fn patch(
     player_id: i32, mut auth: Auth<ApiToken>, precondition: Precondition, patch: Json<PatchPlayer>,
 ) -> Result<Tagged<FullPlayer>> {
+    auth.require_permission(LIST_MODERATOR)?;
     let player = Player::by_id(player_id, &mut auth.connection)
         .await?
         .upgrade(&mut auth.connection)
