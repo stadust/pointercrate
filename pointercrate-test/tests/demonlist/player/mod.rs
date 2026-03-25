@@ -73,7 +73,7 @@ async fn test_list_helper_pagination(pool: Pool<Postgres>) {
 async fn test_patch_player_nationality(pool: Pool<Postgres>) {
     let (client, mut connection) = pointercrate_test::demonlist::setup_rocket(pool).await;
     let player = DatabasePlayer::by_name_or_create("stardust1971", &mut connection).await.unwrap();
-    let user = pointercrate_test::user::system_user_with_perms(LIST_HELPER, &mut connection).await;
+    let user = pointercrate_test::user::system_user_with_perms(LIST_MODERATOR, &mut connection).await;
 
     // Try to set subdivision when no nation is set. Should fail.
     let result: serde_json::Value = client
