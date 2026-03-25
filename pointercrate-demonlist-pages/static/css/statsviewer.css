@@ -1,13 +1,3 @@
-:root {
-  --color-world-land-stroke: white;
-  --color-world-land-fill: #dadce0;
-}
-
-html[data-theme="dark"] {
-  --color-world-land-stroke: #424d63;
-  --color-world-land-fill: #252d3c;
-}
-
 #world-map-wrapper {
     overflow: hidden;
     position: fixed;
@@ -27,6 +17,10 @@ html[data-theme="dark"] {
     top: 0;
     bottom: 0;
     pointer-events: none;
+}
+
+#world-map {
+    visibility: hidden;
 }
 
 .container {

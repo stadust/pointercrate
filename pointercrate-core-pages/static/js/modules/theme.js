@@ -10,6 +10,22 @@ export function currentTheme() {
     return THEME.LIGHT;
 }
 
+// disables transitions temporarily so color transitions dont make the site look funny when toggling light/dark mode
+export function transitionTheme(newTheme, doc, head, toggleFn) {
+    // disable css transitions
+    const original = head.querySelector("style")?.textContent;
+    let css = head.querySelector("style") ?? doc.createElement("style");
+    css.textContent += "*{ transition: none !important }";
+    head.appendChild(css);
+
+    doc.documentElement.dataset.theme = newTheme;
+
+    toggleFn();
+    
+    // re-enable css transitions
+    requestAnimationFrame(() => original ? css.textContent = original : head.removeChild(css));
+}
+
 $(window).on("load", function () {
     let toggle = document.getElementById("theme-toggle");
 
@@ -20,18 +36,8 @@ $(window).on("load", function () {
         exp.setFullYear(exp.getFullYear() + 1);
 
         document.cookie = `preference-theme=${newTheme}; expires=${exp.toUTCString()}; path=/;`;
-
-        // disable css transitions
-        let css = document.createElement("style");
-        css.innerText = "*{ transition: none !important }";
-        document.head.appendChild(css);
-
-        document.documentElement.dataset.theme = newTheme;
-
-        ThemedElement.toggleAll();
         
-        // re-enable css transitions
-        setTimeout(() => { document.head.removeChild(css); }, 1);
+        transitionTheme(newTheme, document, document.head, () => ThemedElement.toggleAll());
     })
 });
 

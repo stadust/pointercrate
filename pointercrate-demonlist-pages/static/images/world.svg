@@ -6,6 +6,16 @@
 		World Map
 	</title>
 	<style id="style7" type="text/css">
+		:root {
+		--color-world-land-stroke: white;
+		--color-world-land-fill: #dadce0;
+		}
+		
+		svg[data-theme="dark"] {
+		--color-world-land-stroke: #424d63;
+		--color-world-land-fill: #252d3c;
+		}
+		
 		svg {
 		transform-origin: top left;
 		overflow: hidden;
