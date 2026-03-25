@@ -14,7 +14,7 @@ use pointercrate_demonlist::{
         claim::{ListedClaim, PatchPlayerClaim, PlayerClaim, PlayerClaimPagination},
         DatabasePlayer, FullPlayer, PatchPlayer, Player, PlayerPagination, RankedPlayer, RankingPagination,
     },
-    LIST_HELPER, LIST_MODERATOR
+    LIST_HELPER, LIST_MODERATOR,
 };
 use pointercrate_user::{auth::ApiToken, MODERATOR};
 use pointercrate_user_api::auth::Auth;
