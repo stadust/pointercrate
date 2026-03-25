@@ -12,11 +12,11 @@ serde = "1.0.228"
 derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { workspace = true }
 jsonwebtoken = "9.3.1"
-log = "0.4.28"
-futures = "0.3.31"
-bcrypt = "0.17.1"
-url = "2.5.7"
-chrono = { version = "0.4.42", optional = true }
+log = "0.4.29"
+futures = "0.3.32"
+bcrypt = "0.19.0"
+url = "2.5.8"
+chrono = { version = "0.4.44", optional = true }
 
 [features]
 legacy_accounts = []
