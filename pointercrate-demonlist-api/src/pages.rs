@@ -27,7 +27,7 @@ use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::auth::NonMutating;
 use pointercrate_user::User;
 use pointercrate_user_api::auth::Auth;
-use rand::Rng;
+use rand::RngExt;
 use rocket::{futures::StreamExt, http::CookieJar};
 use sqlx::PgConnection;
 
