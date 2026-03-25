@@ -11,7 +11,7 @@ pointercrate-core = {path = "../pointercrate-core"}
 serde = "1.0.228"
 derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { workspace = true }
-jsonwebtoken = "10.1.0"
+jsonwebtoken = "9.0.0"
 log = "0.4.28"
 futures = "0.3.31"
 bcrypt = "0.17.1"
