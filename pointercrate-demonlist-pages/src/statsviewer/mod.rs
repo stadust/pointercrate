@@ -6,18 +6,6 @@ use pointercrate_demonlist::nationality::Nationality;
 pub mod individual;
 pub mod national;
 
-fn world_map() -> Markup {
-    let map = include_str!("../../static/images/world.svg").to_string();
-
-    html! {
-        div #world-map-wrapper {
-            div #world-map style="min-width:100%"  {
-                (PreEscaped(map))
-            }
-        }
-    }
-}
-
 pub(crate) fn stats_viewer_panel() -> Markup {
     html! {
         section #stats.panel.fade.js-scroll-anim data-anim = "fade" {
