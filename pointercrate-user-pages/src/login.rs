@@ -73,7 +73,7 @@ fn login_page_body() -> Markup {
                     (trp_html!(
                         "register.redirect",
                         "redirect-link" =  html! {
-                            a.link href="/register" { (tr("register.redirect-link")) }
+                            a.link href="/register/" { (tr("register.redirect-link")) }
                         }
                     ))
                 }
