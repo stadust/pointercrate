@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use pointercrate_core_macros::localized;
+use pointercrate_core_macros::{localized, themed};
 use rocket::{response::Redirect, State};
 
 use chrono::{DateTime, FixedOffset, NaiveDate, Utc};
@@ -31,6 +31,7 @@ use rocket::{futures::StreamExt, http::CookieJar};
 use sqlx::PgConnection;
 
 #[localized]
+#[themed]
 #[rocket::get("/?<timemachine>&<submitter>")]
 pub async fn overview(
     pool: &State<PointercratePool>, timemachine: Option<bool>, submitter: Option<bool>, cookies: &CookieJar<'_>,
@@ -60,7 +61,6 @@ pub async fn overview(
         let demons_then = list_at(&mut connection, destination.naive_utc()).await?;
         tardis.activate(destination, demons_then, true)
     }
-
     Ok(Page::new(OverviewPage {
         team: Team {
             admins: User::by_permission(LIST_ADMINISTRATOR, &mut connection).await?,
@@ -94,6 +94,7 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
 }
 
 #[localized]
+#[themed]
 #[rocket::get("/<position>/")]
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {
     let mut connection = pool.connection().await?;

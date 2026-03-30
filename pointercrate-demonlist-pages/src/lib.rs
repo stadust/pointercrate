@@ -1,6 +1,6 @@
 use maud::{html, Markup};
 
-use pointercrate_core::localization::tr;
+use pointercrate_core::{localization::tr, theme::Theme};
 use pointercrate_demonlist::{config, demon::Demon};
 
 pub mod account;
@@ -114,10 +114,10 @@ fn rules_panel() -> Markup {
     }
 }
 
-fn discord_panel() -> Markup {
+fn discord_panel(theme: &Theme) -> Markup {
     html! {
         section.panel.fade.js-scroll-anim #discord data-anim = "fade" {
-            iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = "https://discordapp.com/widget?id=395654171422097420&theme=light" {}
+            iframe.js-delay-attr style = "width: 100%; height: 400px;" allowtransparency="true" frameborder = "0" data-attr = "src" data-attr-value = (format!("https://discordapp.com/widget?id=395654171422097420&theme={}", theme)) {}
             p {
                 (tr("discord-panel-info"))
             }

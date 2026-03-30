@@ -2,7 +2,7 @@ use crate::{auth::Auth, ratelimits::UserRatelimits};
 use pointercrate_core::error::CoreError;
 use pointercrate_core::permission::PermissionsManager;
 use pointercrate_core_api::response::Page;
-use pointercrate_core_macros::localized;
+use pointercrate_core_macros::{localized, themed};
 use pointercrate_user::{
     auth::{AuthenticatedUser, NonMutating, PasswordOrBrowser},
     error::UserError,
@@ -51,6 +51,7 @@ fn build_cookies(user: &AuthenticatedUser<PasswordOrBrowser>, cookies: &CookieJa
 }
 
 #[localized]
+#[themed]
 #[rocket::get("/login/")]
 pub async fn login_page(auth: Option<Auth<NonMutating>>) -> Result<Redirect, Page> {
     auth.map(|_| Redirect::to(rocket::uri!(account_page)))
@@ -73,6 +74,7 @@ pub async fn login(
 }
 
 #[localized]
+#[themed]
 #[rocket::get("/register/")]
 pub async fn register_page() -> Page {
     Page::new(pointercrate_user_pages::register::registration_page())
@@ -104,6 +106,7 @@ pub async fn register(
 }
 
 #[localized]
+#[themed]
 #[rocket::get("/account/")]
 pub async fn account_page(
     auth: Option<Auth<NonMutating>>, permissions: &State<PermissionsManager>, tabs: &State<AccountPageConfig>,

@@ -1,7 +1,6 @@
 import {
   getCountryFlag,
   getSubdivisionFlag,
-  populateSubdivisionDropdown,
 } from "/static/demonlist/js/modules/demonlist.js";
 import {
   Dropdown,
@@ -11,6 +10,7 @@ import {
   Viewer,
 } from "/static/core/js/modules/form.js";
 import { tr, trp } from "/static/core/js/modules/localization.js";
+import { currentTheme, ThemedElement, transitionTheme } from "/static/core/js/modules/theme.js";
 
 export class StatsViewer extends FilteredPaginator {
   /**
@@ -254,6 +254,12 @@ export class InteractiveWorldMap {
 
     this.relativeMousePosition = { x: 0, y: 0 };
     this.lastTouchPosition = { x: 0, y: 0 };
+
+    const mapTheme = new ThemedElement(this.map, (map, theme) => transitionTheme(theme, map.contentDocument, map.contentDocument.documentElement, () => {
+      map.contentDocument.documentElement.style.setProperty("--color-pc-button-bg", getComputedStyle(document.documentElement).getPropertyValue("--color-pc-button-bg"));
+    }));
+    this.map.style = "visibility: visible";
+    mapTheme.toggleFn(this.map, currentTheme());
 
     this.setupTouchHandlers();
     this.setupMouseHandlers();

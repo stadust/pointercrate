@@ -5,6 +5,7 @@ use crate::{
 };
 use maud::{html, Render, DOCTYPE};
 use pointercrate_core::localization::LocaleConfiguration;
+use pointercrate_core::theme::Theme;
 use pointercrate_core::{etag::Taggable, localization::LANGUAGE};
 use pointercrate_core_pages::{
     head::{Head, HeadLike},
@@ -43,6 +44,8 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
         let language = preferences.get(LOCALE_COOKIE_NAME).ok_or(Status::InternalServerError)?;
         let lang_id = LocaleConfiguration::get().by_code(language);
 
+        let theme = preferences.get(Theme::cookie_name()).ok_or(Status::InternalServerError)?;
+
         let (page_config, nav_bar, footer) = block_in_place(move || {
             Handle::current().block_on(async {
                 LANGUAGE
@@ -67,7 +70,7 @@ impl<'r, 'o: 'r> Responder<'r, 'o> for Page {
 
         let rendered_fragment = html! {
             (DOCTYPE)
-            html lang=(lang_id) prefix="og: http://opg.me/ns#" {
+            html lang=(lang_id) data-theme=(theme) prefix="og: http://opg.me/ns#" {
                 head {
                     (page_config.head)
                     (fragment.head)

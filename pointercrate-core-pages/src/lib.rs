@@ -44,6 +44,7 @@ impl PageConfiguration {
                 .script("/static/core/js/nav.js")
                 .script("/static/core/js/misc.js")
                 .module("/static/core/js/modules/localization.js")
+                .module("/static/core/js/modules/theme.js")
                 .stylesheet("/static/core/css/icon.css")
                 .stylesheet("/static/core/css/nav.css")
                 .stylesheet("/static/core/css/main.css")
