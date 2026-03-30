@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use pointercrate_core_macros::localized;
 use rocket::{response::Redirect, State};
 
-use chrono::{DateTime, Datelike, FixedOffset, NaiveDate, Utc};
+use chrono::{DateTime, FixedOffset, NaiveDate, Utc};
 use pointercrate_core::{audit::AuditLogEntryType, pool::PointercratePool};
 use pointercrate_core_api::{
     error::Result,
@@ -27,7 +27,6 @@ use pointercrate_integrate::gd::GeometryDashConnector;
 use pointercrate_user::auth::NonMutating;
 use pointercrate_user::User;
 use pointercrate_user_api::auth::Auth;
-use rand::RngExt;
 use rocket::{futures::StreamExt, http::CookieJar};
 use sqlx::PgConnection;
 
@@ -44,23 +43,9 @@ pub async fn overview(
 
     let demonlist = current_list(&mut connection).await?;
 
-    let mut specified_when = cookies
+    let specified_when = cookies
         .get("when")
         .and_then(|cookie| DateTime::<FixedOffset>::parse_from_rfc3339(cookie.value()).ok());
-
-    // On april's fools, ignore the cookie and just pick a random day to display
-    let today = Utc::now().naive_utc();
-    let is_april_1st = today.day() == 1 && today.month() == 4;
-    if is_april_1st {
-        let seconds_since_beginning_of_time = (today - beginning_of_time).num_seconds();
-        let go_back_by = chrono::Duration::seconds(rand::rng().random_range(0..seconds_since_beginning_of_time));
-
-        if let Some(date) = today.checked_sub_signed(go_back_by) {
-            // We do not neccessarily know the time zone of the user here (we get it from the 'when' cookie in the normal case).
-            // This however is not a problem, the UI will simply display "GMT+0" instead of the correct local timezone.
-            specified_when = Some(date.and_utc().fixed_offset());
-        }
-    }
 
     let specified_when = match specified_when {
         Some(when) if when.naive_utc() < beginning_of_time => Some(DateTime::from_naive_utc_and_offset(beginning_of_time, *when.offset())),
@@ -73,7 +58,7 @@ pub async fn overview(
 
     if let Some(destination) = specified_when {
         let demons_then = list_at(&mut connection, destination.naive_utc()).await?;
-        tardis.activate(destination, demons_then, !is_april_1st)
+        tardis.activate(destination, demons_then, true)
     }
 
     Ok(Page::new(OverviewPage {
