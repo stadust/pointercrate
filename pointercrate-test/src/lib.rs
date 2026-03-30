@@ -20,23 +20,23 @@ impl TestClient {
         TestClient(client)
     }
 
-    pub fn get(&self, url: impl Into<String>) -> TestRequest {
+    pub fn get(&self, url: impl Into<String>) -> TestRequest<'_> {
         TestRequest::new(self.0.get(url.into()))
     }
 
-    pub fn put(&self, url: impl Into<String>) -> TestRequest {
+    pub fn put(&self, url: impl Into<String>) -> TestRequest<'_> {
         TestRequest::new(self.0.put(url.into()))
     }
 
-    pub fn post(&self, url: impl Into<String>, body: &impl Serialize) -> TestRequest {
+    pub fn post(&self, url: impl Into<String>, body: &impl Serialize) -> TestRequest<'_> {
         TestRequest::new(self.0.post(url.into()).json(body))
     }
 
-    pub fn patch(&self, url: impl Into<String>, body: &impl Serialize) -> TestRequest {
+    pub fn patch(&self, url: impl Into<String>, body: &impl Serialize) -> TestRequest<'_> {
         TestRequest::new(self.0.patch(url.into()).json(body))
     }
 
-    pub fn delete(&self, url: impl Into<String>) -> TestRequest {
+    pub fn delete(&self, url: impl Into<String>) -> TestRequest<'_> {
         TestRequest::new(self.0.delete(url.into()))
     }
 }

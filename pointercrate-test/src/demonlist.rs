@@ -102,7 +102,7 @@ pub async fn add_simple_record(progress: i16, player: i32, demon: i32, status: R
 impl TestClient {
     pub async fn patch_player(
         &self, player_id: i32, auth_context: &AuthenticatedUser<PasswordOrBrowser>, patch: serde_json::Value,
-    ) -> TestRequest {
+    ) -> TestRequest<'_> {
         let player: FullPlayer = self
             .get(format!("/api/v1/players/{}/", player_id))
             .expect_status(Status::Ok)
