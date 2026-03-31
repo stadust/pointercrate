@@ -210,6 +210,10 @@ impl PermissionsManager {
 
         Ok(())
     }
+
+    pub fn is_elevated(&self, permission_bits: u16) -> bool {
+        permission_bits > 0
+    }
 }
 
 #[cfg(test)]

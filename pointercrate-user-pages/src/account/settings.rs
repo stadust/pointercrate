@@ -12,16 +12,16 @@ use pointercrate_user::{
 };
 use sqlx::PgConnection;
 
-pub struct ProfileTab;
+pub struct SettingsTab;
 
 #[async_trait::async_trait]
-impl AccountPageTab for ProfileTab {
+impl AccountPageTab for SettingsTab {
     fn should_display_for(&self, _permissions_we_have: u16, _permissions: &PermissionsManager) -> bool {
         true
     }
 
     fn initialization_script(&self) -> String {
-        "/static/user/js/account/profile.js".into()
+        "/static/user/js/account/settings.js".into()
     }
 
     fn additional_scripts(&self) -> Vec<Script> {
@@ -39,10 +39,10 @@ impl AccountPageTab for ProfileTab {
     fn tab(&self) -> Markup {
         html! {
             b {
-                (tr("profile"))
+                (tr("settings"))
             }
             (PreEscaped("&nbsp;&nbsp;"))
-            i class = "fa fa-user fa-2x" aria-hidden="true" {}
+            i class = "fa fa-cog fa-2x" aria-hidden="true" {}
         }
     }
 
@@ -50,6 +50,8 @@ impl AccountPageTab for ProfileTab {
         &self, authenticated_user: &AuthenticatedUser<NonMutating>, permissions: &PermissionsManager, _connection: &mut PgConnection,
     ) -> Markup {
         let user = authenticated_user.user();
+
+        let is_elevated = permissions.is_elevated(user.permissions);
 
         let permissions = permissions.bits_to_permissions(user.permissions);
         let permission_string = permissions.iter().map(|perm| tr(perm.text_id())).collect::<Vec<_>>().join(", ");
@@ -60,62 +62,64 @@ impl AccountPageTab for ProfileTab {
             div.left {
                 div.panel.fade {
                     h1.underlined.pad {
-                        (trp!("profile.header", "username" = user.name()))
+                        (trp!("settings.header", "username" = user.name()))
                     }
                     div.flex.space.wrap #things {
                         p.info-red.output style = "margin: 10px" {}
                         p.info-green.output style = "margin: 10px" {}
                         span {
                             b {
-                                (tr("profile-username")) ": "
+                                (tr("settings-username")) ": "
                             }
                             (user.name)
                             p {
-                                (tr("profile-username.info"))
+                                (tr("settings-username.info"))
                             }
                         }
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #display-name-pen aria-hidden = "true" {} " " (tr("profile-display-name")) ": "
-                            }
-                            i #profile-display-name {
-                                @match user.display_name {
-                                    Some(ref dn) => (dn),
-                                    None => "-"
+                        @if is_elevated {
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #display-name-pen aria-hidden = "true" {} " " (tr("settings-display-name")) ": "
+                                }
+                                i #settings-display-name {
+                                    @match user.display_name {
+                                        Some(ref dn) => (dn),
+                                        None => "-"
+                                    }
+                                }
+                                p {
+                                    (tr("settings-display-name.info"))
                                 }
                             }
-                            p {
-                                (tr("profile-display-name.info"))
-                            }
-                        }
-                        span {
-                            b {
-                                i.fa.fa-pencil-alt.clickable #youtube-pen aria-hidden = "true" {} " " (tr("profile-youtube")) ": "
-                            }
-                            i #profile-youtube-channel {
-                                @match user.youtube_channel {
-                                    Some(ref yc) => a.link href = (yc) {},
-                                    None => "-"
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #youtube-pen aria-hidden = "true" {} " " (tr("settings-youtube")) ": "
+                                }
+                                i #settings-youtube-channel {
+                                    @match user.youtube_channel {
+                                        Some(ref yc) => a.link href = (yc) {},
+                                        None => "-"
+                                    }
+                                }
+                                p {
+                                    (tr("settings-youtube.info"))
                                 }
                             }
-                            p {
-                                (tr("profile-youtube.info"))
-                            }
-                        }
-                        span {
-                            b {
-                                (tr("profile-permissions")) ": "
-                            }
-                            (permission_string)
-                            p {
-                                (tr("profile-permissions.info"))
+                            span {
+                                b {
+                                    (tr("settings-permissions")) ": "
+                                }
+                                (permission_string)
+                                p {
+                                    (tr("settings-permissions.info"))
+                                }
                             }
                         }
                     }
                     div.flex.no-stretch {
-                        input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value=(tr("profile-delete-account"));
+                        input.button.red.hover #delete-account type = "button" style = "margin: 15px auto 0px;" value=(tr("settings-delete-account"));
                         @if authenticated_user.is_legacy() {
-                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value=(tr("profile-change-password"));
+                            input.button.blue.hover #change-password type = "button" style = "margin: 15px auto 0px;" value=(tr("settings-change-password"));
                         }
                     }
                 }
@@ -123,22 +127,22 @@ impl AccountPageTab for ProfileTab {
             div.right {
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr("profile-logout"))
+                        (tr("settings-logout"))
                     }
                     p {
-                        (tr("profile-logout.info"))
+                        (tr("settings-logout.info"))
                     }
                     a.red.hover.button href = "/logout" style = "margin: 15px auto 0px; display: inline-block" {
-                        (tr("profile-logout.button"))
+                        (tr("settings-logout.button"))
                     }
                 }
                 @if cfg!(feature = "oauth2") && authenticated_user.is_legacy() {
                     div.panel.fade {
                         h2.underlined.pad {
-                            (tr("profile-oauth"))
+                            (tr("settings-oauth"))
                         }
                         p {
-                            (tr("profile-oauth.info"))
+                            (tr("settings-oauth.info"))
                         }
                         div #g_id_onload
                             data-ux_mode="popup"
@@ -154,30 +158,30 @@ impl AccountPageTab for ProfileTab {
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr("profile-get-token"))
+                        (tr("settings-get-token"))
                     }
                     p {
-                        (tr("profile-get-token.info"))
+                        (tr("settings-get-token.info"))
                     }
                     div.overlined.pad #token-area style = "display: none" {
-                        b {(tr("profile-get-token.view-header")) }
+                        b {(tr("settings-get-token.view-header")) }
                         textarea #access-token readonly="" style = "resize: none; width: 100%; margin-top: 8px; min-height:75px" {}
                     }
                     form.flex.col #get-token-form novalidate = "" {
                         p.info-red.output {}
-                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-get-token.button"));
+                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value=(tr("settings-get-token.button"));
                     }
                 }
                 div.panel.fade {
                     h2.underlined.pad {
-                        (tr("profile-invalidate-tokens"))
+                        (tr("settings-invalidate-tokens"))
                     }
                     p {
-                        (tr("profile-invalidate-tokens.info"))
+                        (tr("settings-invalidate-tokens.info"))
                     }
                     form.flex.col #invalidate-form novalidate = "" {
                         p.info-red.output {}
-                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-invalidate-tokens.button"));
+                        input.blue.hover.button type = "submit" style = "margin: 15px auto 0px;" value=(tr("settings-invalidate-tokens.button"));
                     }
                 }
             }
@@ -197,17 +201,17 @@ fn edit_display_name_dialog() -> Markup {
             div.dialog #edit-dn-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-display-name.dialog-header"))
+                    (tr("settings-display-name.dialog-header"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-dn {
-                        label for = "display_name" {(tr("profile-display-name.dialog-newname")) }
+                        label for = "display_name" {(tr("settings-display-name.dialog-newname")) }
                         input type = "text" name = "display_name";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-display-name.dialog-submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("settings-display-name.dialog-submit"));
                 }
             }
         }
@@ -220,17 +224,17 @@ fn edit_youtube_link_dialog() -> Markup {
             div.dialog #edit-yt-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-youtube.dialog-header"))
+                    (tr("settings-youtube.dialog-header"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-yt {
-                        label for = "youtube_channel" {(tr("profile-youtube.dialog-newlink")) }
+                        label for = "youtube_channel" {(tr("settings-youtube.dialog-newlink")) }
                         input type = "url" name = "youtube_channel";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-youtube.dialog-submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("settings-youtube.dialog-submit"));
                 }
             }
         }
@@ -243,30 +247,30 @@ fn change_password_dialog() -> Markup {
             div.dialog #edit-pw-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-change-password.dialog-header"))
+                    (tr("settings-change-password.dialog-header"))
                 }
                 p {
-                    (tr("profile-change-password.dialog-info"))
+                    (tr("settings-change-password.dialog-info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
                     p.info-green.output {}
                     span.form-input #edit-pw {
-                        label for = "password" {(tr("profile-change-password.dialog-newpassword")) }
+                        label for = "password" {(tr("settings-change-password.dialog-newpassword")) }
                         input type = "password" name = "password" minlength = "10";
                         p.error {}
                     }
                     span.form-input #edit-pw-repeat {
-                        label for = "password2" {(tr("profile-change-password.dialog-repeatnewpassword")) }
+                        label for = "password2" {(tr("settings-change-password.dialog-repeatnewpassword")) }
                         input type = "password"  minlength = "10";
                         p.error {}
                     }
                     span.overlined.pad.form-input #auth-pw {
-                        label {(tr("profile-change-password.dialog-authenticate")) }
+                        label {(tr("settings-change-password.dialog-authenticate")) }
                         input type = "password" minlength = "10" required = "";
                         p.error {}
                     }
-                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-change-password.dialog-submit"));
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("settings-change-password.dialog-submit"));
                 }
             }
         }
@@ -279,14 +283,14 @@ fn delete_account_dialog() -> Markup {
             div.dialog #delete-acc-dialog {
                 span.plus.cross.hover {}
                 h2.underlined.pad {
-                    (tr("profile-delete-account.dialog-header"))
+                    (tr("settings-delete-account.dialog-header"))
                 }
                 p {
-                    (tr("profile-delete-account.dialog-info"))
+                    (tr("settings-delete-account.dialog-info"))
                 }
                 form.flex.col novalidate = "" {
                     p.info-red.output {}
-                    input.button.red.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("profile-delete-account.dialog-submit"));
+                    input.button.red.hover type = "submit" style = "margin: 15px auto 0px;" value=(tr("settings-delete-account.dialog-submit"));
                 }
             }
         }

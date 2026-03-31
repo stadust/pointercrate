@@ -36,8 +36,8 @@ player-name-dialog = Change player name
 
     .name-validator-valuemissing = Please provide a name for the player
 
-## List integration tab
-list-integration = List Integration
+## Profile tab
+profile = Profile
 
 claimed-player = Claimed Player
     .verified = Verified

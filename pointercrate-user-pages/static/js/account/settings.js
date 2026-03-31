@@ -13,7 +13,7 @@ import {
   typeMismatch,
   valueMissing,
 } from "/static/core/js/modules/form.js";
-import { loadResource, tr } from "/static/core/js/modules/localization.js";
+import { tr } from "/static/core/js/modules/localization.js";
 
 function setupGetAccessToken() {
   var getTokenForm = new Form(document.getElementById("get-token-form"));
@@ -35,8 +35,8 @@ class ProfileEditorBackend extends EditorBackend {
     super();
 
     this._pw = passwordInput;
-    this._displayName = document.getElementById("profile-display-name");
-    this._youtube = document.getElementById("profile-youtube-channel");
+    this._displayName = document.getElementById("settings-display-name");
+    this._youtube = document.getElementById("settings-youtube-channel");
   }
 
   url() {
@@ -75,30 +75,6 @@ class ProfileEditorBackend extends EditorBackend {
 function setupEditAccount() {
   let output = new Output(document.getElementById("things"));
 
-  setupFormDialogEditor(
-    new ProfileEditorBackend(null),
-    "edit-dn-dialog",
-    "display-name-pen",
-    output
-  );
-
-  let editYoutubeForm = setupFormDialogEditor(
-    new ProfileEditorBackend(null),
-    "edit-yt-dialog",
-    "youtube-pen",
-    output
-  );
-
-  editYoutubeForm.addValidators({
-    "edit-yt": {
-      [tr("user", "user", "profile-youtube.newlink-validator-typemismatch")]:
-        typeMismatch,
-    },
-  });
-
-  editYoutubeForm.addErrorOverride(42225, "edit-yt");
-  editYoutubeForm.addErrorOverride(42226, "edit-yt");
-
   if (document.getElementById("change-password")) {
     let changePasswordForm = setupFormDialogEditor(
       new ProfileEditorBackend(document.querySelector("#auth-pw input")), // not pretty, but oh well
@@ -114,31 +90,31 @@ function setupEditAccount() {
         [tr(
           "user",
           "user",
-          "profile-change-password.authenticate-validator-valuemissing"
+          "settings-change-password.authenticate-validator-valuemissing"
         )]: valueMissing,
         [tr(
           "user",
           "user",
-          "profile-change-password.authenticate-validator-tooshort"
+          "settings-change-password.authenticate-validator-tooshort"
         )]: tooShort,
       },
       "edit-pw": {
         [tr(
           "user",
           "user",
-          "profile-change-password.newpassword-validator-tooshort"
+          "settings-change-password.newpassword-validator-tooshort"
         )]: tooShort,
       },
       "edit-pw-repeat": {
         [tr(
           "user",
           "user",
-          "profile-change-password.repeatnewpassword-validator-tooshort"
+          "settings-change-password.repeatnewpassword-validator-tooshort"
         )]: tooShort,
         [tr(
           "user",
           "user",
-          "profile-change-password.repeatnewpassword-validator-notmatching"
+          "settings-change-password.repeatnewpassword-validator-notmatching"
         )]: (rpp) => rpp.value == editPw.value,
       },
     });
@@ -161,6 +137,34 @@ function setupEditAccount() {
       .then(() => window.location.reload())
       .catch(displayError(deleteAccountForm));
   });
+}
+
+function setupEditElevatedAccount() {
+  let output = new Output(document.getElementById("things"));
+
+  setupFormDialogEditor(
+    new ProfileEditorBackend(null),
+    "edit-dn-dialog",
+    "display-name-pen",
+    output
+  );
+
+  let editYoutubeForm = setupFormDialogEditor(
+    new ProfileEditorBackend(null),
+    "edit-yt-dialog",
+    "youtube-pen",
+    output
+  );
+
+  editYoutubeForm.addValidators({
+    "edit-yt": {
+      [tr("user", "user", "settings-youtube.newlink-validator-typemismatch")]:
+        typeMismatch,
+    },
+  });
+
+  editYoutubeForm.addErrorOverride(42225, "edit-yt");
+  editYoutubeForm.addErrorOverride(42226, "edit-yt");
 }
 
 function setupInvalidateToken() {
@@ -190,5 +194,11 @@ window.googleOauthCallback = googleOauthCallback;
 export function initialize() {
   setupGetAccessToken();
   setupEditAccount();
+
+  // check if active user has elevated permissions
+  if (window.permissions > 0) {
+    setupEditElevatedAccount();
+  }
+
   setupInvalidateToken();
 }

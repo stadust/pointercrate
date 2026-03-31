@@ -7,7 +7,7 @@ use pointercrate_core_pages::{
 use pointercrate_user::auth::{AuthenticatedUser, NonMutating};
 use sqlx::PgConnection;
 
-pub mod profile;
+pub mod settings;
 pub mod users;
 
 #[async_trait::async_trait]
