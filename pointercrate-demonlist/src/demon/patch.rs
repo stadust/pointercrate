@@ -30,6 +30,9 @@ pub struct PatchDemon {
 
     #[serde(default, deserialize_with = "non_nullable")]
     pub publisher: Option<String>,
+
+    #[serde(default, deserialize_with = "nullable")]
+    pub level_id: Option<Option<i64>>,
 }
 
 impl FullDemon {
@@ -87,6 +90,10 @@ impl Demon {
 
         if let Some(requirement) = patch.requirement {
             self.set_requirement(requirement, connection).await?;
+        }
+
+        if let Some(level_id) = patch.level_id {
+            self.set_level_id(level_id, connection).await?;
         }
 
         Ok(self)
@@ -166,6 +173,21 @@ impl Demon {
             .await?;
 
         self.thumbnail = thumbnail;
+
+        Ok(())
+    }
+
+    pub async fn set_level_id(&mut self, level_id: Option<i64>, connection: &mut PgConnection) -> Result<()> {
+        let validated_level_id = match level_id {
+            Some(id) => Some(Demon::validate_level_id(id)?),
+            None => None,
+        };
+
+        sqlx::query!("UPDATE demons SET level_id = $1 WHERE id = $2", level_id, self.base.id)
+            .execute(connection)
+            .await?;
+
+        self.level_id = validated_level_id;
 
         Ok(())
     }
