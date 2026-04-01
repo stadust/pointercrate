@@ -133,6 +133,9 @@ export class DynamicSuggestionDropdown extends Dropdown {
   constructor(html) {
     super(html);
 
+    if (this.input.dataset.default !== undefined) {
+      this.input.value = this.input.dataset.default;
+    }
     this.endpoint = html.dataset.endpoint;
     this.field = html.dataset.field;
 

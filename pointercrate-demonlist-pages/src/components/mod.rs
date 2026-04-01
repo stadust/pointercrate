@@ -9,11 +9,11 @@ pub mod submitter;
 pub mod team;
 pub mod time_machine;
 
-pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Demon>) -> Markup {
+pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a Demon>, initial_demon: Option<i16>) -> Markup {
     html! {
         div.dropdown-menu.js-search #(dropdown_id) {
             div {
-                input type = "text" name = "demon" required="" autocomplete="off";
+                input type = "text" name = "demon" required="" autocomplete="off" data-default=[initial_demon];
             }
             div.menu {
                ul {
@@ -26,11 +26,13 @@ pub fn demon_dropdown<'a>(dropdown_id: &str, demons: impl Iterator<Item = &'a De
     }
 }
 
-pub fn player_selection_dropdown(dropdown_id: &str, endpoint: &str, field: &str, form_field: &str) -> Markup {
+pub fn player_selection_dropdown(
+    dropdown_id: &str, endpoint: &str, field: &str, form_field: &str, initial_player: Option<&DatabasePlayer>,
+) -> Markup {
     html! {
         div.dropdown-menu #(dropdown_id) data-endpoint = (endpoint) data-field = (field) {
             div {
-                input type = "text" name = (form_field) required="" autocomplete="off" placeholder = (tr("record-submission.holder-input-placeholder"));
+                input type = "text" name = (form_field) required="" autocomplete="off" placeholder = (tr("record-submission.holder-input-placeholder")) data-default=[initial_player.map(|p| &p.name)];
             }
             div.menu {
                 // dynamically populated once the user starts typing
@@ -42,6 +44,7 @@ pub fn player_selection_dropdown(dropdown_id: &str, endpoint: &str, field: &str,
 
 pub fn player_selection_dialog(
     dialog_id: &str, dropdown_id: &str, headline: &str, description: &str, button_text: &str, form_field: &str,
+    initial_player: Option<&DatabasePlayer>,
 ) -> Markup {
     html! {
         div.overlay.closable {
@@ -55,7 +58,7 @@ pub fn player_selection_dialog(
                         (description)
                     }
                     span.form-input.flex.col data-type = "dropdown" {
-                        (player_selection_dropdown(dropdown_id, "/api/v1/players/", "name", form_field))
+                        (player_selection_dropdown(dropdown_id, "/api/v1/players/", "name", form_field, initial_player))
                         p.error {}
                     }
                     input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (button_text);

@@ -114,6 +114,20 @@ impl DatabasePlayer {
             result => result,
         }
     }
+
+    pub async fn by_user(user_id: i32, connection: &mut PgConnection) -> Result<Option<DatabasePlayer>> {
+        sqlx::query_as!(
+            DatabasePlayer,
+            "SELECT players.id, players.name, players.banned FROM players
+            JOIN player_claims ON player_claims.player_id = players.id
+            JOIN members ON members.member_id = player_claims.member_id
+            WHERE members.member_id = $1",
+            user_id
+        )
+        .fetch_optional(connection)
+        .await
+        .map_err(DemonlistError::from)
+    }
 }
 
 #[cfg(test)]
