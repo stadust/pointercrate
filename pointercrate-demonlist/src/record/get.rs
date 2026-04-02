@@ -6,6 +6,7 @@ use crate::{
     record::{FullRecord, MinimalRecordD, MinimalRecordP, RecordStatus},
     submitter::Submitter,
 };
+use chrono::{NaiveDateTime, TimeZone, Utc};
 use futures::stream::StreamExt;
 use sqlx::{Error, PgConnection};
 
@@ -15,6 +16,7 @@ struct FetchedRecord {
     video: Option<String>,
     raw_footage: Option<String>,
     status: String,
+    date: NaiveDateTime,
     player_id: i32,
     player_name: String,
     player_banned: bool,
@@ -52,6 +54,7 @@ impl FullRecord {
                     id: row.submitter_id,
                     banned: row.submitter_banned,
                 }),
+                date: Utc.from_utc_datetime(&row.date),
             }),
 
             Err(Error::RowNotFound) => Err(DemonlistError::RecordNotFound { record_id: id }),
@@ -106,7 +109,7 @@ pub async fn approved_records_on(demon: &MinimalDemon, connection: &mut PgConnec
         Fetched,
         r#"SELECT records.id, progress, CASE WHEN players.link_banned THEN NULL ELSE video::text END, players.id AS player_id, 
          players.name, players.banned, nation::TEXT, iso_country_code::TEXT FROM records INNER JOIN players ON records.player = players.id LEFT OUTER JOIN nationalities ON nationality = iso_country_code WHERE status_ = 'APPROVED' AND 
-         records.demon = $1 ORDER BY progress DESC, id ASC"#,
+         records.demon = $1 ORDER BY progress DESC, date ASC"#,
         demon.id
     )
     .fetch(connection);

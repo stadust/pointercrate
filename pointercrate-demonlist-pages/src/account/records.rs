@@ -80,6 +80,7 @@ impl AccountPageTab for RecordsPage {
             (change_video_dialog())
             (change_holder_dialog())
             (change_demon_dialog(&demons[..]))
+            (change_date_dialog())
         }
     }
 }
@@ -170,6 +171,15 @@ fn record_manager(demons: &[Demon]) -> Markup {
                                 }
                                 br;
                                 span #record-submitter {}
+                            }
+                        }
+                        div.stats-container.flex.space {
+                            span {
+                                b {
+                                    i.fa.fa-pencil-alt.clickable #record-date-pen aria-hidden = "true" {} " " (tr("record-date"))
+                                }
+                                br;
+                                span #record-date {}
                             }
                         }
                         span.button.red.hover #record-delete style = "margin: 15px auto 0px" {(tr("record-viewer.delete"))};
@@ -402,6 +412,32 @@ fn change_demon_dialog(demons: &[Demon]) -> Markup {
                         (tr("record-videolink-dialog.info"))
                     }
                     (demon_dropdown("edit-demon-record", demons.iter()))
+                }
+            }
+        }
+    }
+}
+
+fn change_date_dialog() -> Markup {
+    html! {
+        div.overlay.closable {
+            div.dialog #record-date-dialog {
+                span.plus.cross.hover {}
+                h2.underlined.pad {
+                    (tr("record-date-dialog"))
+                }
+                p style = "max-width: 400px"{
+                    (tr("record-date-dialog.info"))
+                }
+                form.flex.col novalidate = "" {
+                    p.info-red.output {}
+                    p.info-green.output {}
+                    span.form-input #record-date-edit {
+                        label for = "date" {(tr("record-date-dialog.date-field")) }
+                        input name = "date" type = "datetime-local";
+                        p.error {}
+                    }
+                    input.button.blue.hover type = "submit" style = "margin: 15px auto 0px;" value = (tr("record-date-dialog.submit"));
                 }
             }
         }

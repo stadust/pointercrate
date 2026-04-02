@@ -28,6 +28,7 @@ pub use self::{
     post::Submission,
 };
 use crate::{demon::MinimalDemon, error::Result, nationality::Nationality, player::DatabasePlayer, submitter::Submitter};
+use chrono::{DateTime, Utc};
 use derive_more::Display;
 use pointercrate_core::etag::Taggable;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -128,6 +129,7 @@ pub struct FullRecord {
     pub demon: MinimalDemon,
     pub submitter: Option<Submitter>,
     pub raw_footage: Option<String>,
+    pub date: DateTime<Utc>,
 }
 
 impl Taggable for FullRecord {

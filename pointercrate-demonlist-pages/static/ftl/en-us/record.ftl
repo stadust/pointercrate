@@ -11,6 +11,7 @@ record-demon = Demon
 record-holder = Record Holder
 record-progress = Progress
 record-submitter = Submitter ID
+record-date = Submission Date
 
 ## Records tab (user area)
 records = Records
@@ -93,6 +94,12 @@ record-progress-dialog = Change record progress
     .progress-validator-badinput = Record progress must be a valid integer
     .progress-validator-stepmismatch = Record progress mustn't be a decimal
     .progress-validator-valuemissing = Please enter a progress value
+
+record-date-dialog = Change record submission date
+    .info = Change the submission date of this record. This can be modified to reorder records in demon pages.
+    .date-field = Date:
+
+    .submit = Edit
 
 # The giant information box below the record manager, split
 # into different sections here

@@ -50,6 +50,7 @@ class RecordManager extends Paginator {
     this._progress = document.getElementById("record-progress");
     this._submitter = document.getElementById("record-submitter");
     this._notes = document.getElementById("record-notes");
+    this._date = document.getElementById("record-date");
 
     this.dropdown = new Dropdown(
       document
@@ -84,6 +85,7 @@ class RecordManager extends Paginator {
       this.output
     );
     this.initDemonDialog();
+    this.initDateDialog();
 
     document
       .getElementById("record-copy-info")
@@ -183,6 +185,16 @@ class RecordManager extends Paginator {
     );
   }
 
+  initDateDialog() {
+    setupEditorDialog(
+      new FormDialog("record-date-dialog"),
+      "record-date-pen",
+      new PaginatorEditorBackend(this, true),
+      this.output,
+      (date) => ({ date: new Date(date.date).toISOString() })
+    );
+  }
+
   onReceive(response) {
     super.onReceive(response);
 
@@ -226,6 +238,9 @@ class RecordManager extends Paginator {
     this._status.selectSilently(this.currentObject.status);
     this._progress.innerText = this.currentObject.progress + "%";
     this._submitter.innerText = this.currentObject.submitter.id;
+
+    let date = new Date(this.currentObject.date);
+    this._date.innerText = date.toLocaleString();
 
     // this is introducing race conditions. Oh well.
     return get("/api/v1/records/" + this.currentObject.id + "/notes/").then(
