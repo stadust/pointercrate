@@ -2,6 +2,7 @@ use maud::html;
 use pointercrate_core::localization::LocalesLoader;
 use pointercrate_core::pool::PointercratePool;
 use pointercrate_core::{error::CoreError, localization::tr};
+use pointercrate_core_api::normalize_uri::uri_normalizer;
 use pointercrate_core_api::{error::ErrorResponder, maintenance::MaintenanceFairing, preferences::PreferenceManager};
 use pointercrate_core_macros::localized_catcher;
 use pointercrate_core_pages::{
@@ -178,6 +179,7 @@ async fn rocket() -> _ {
     // static files.
 
     rocket
+        .attach(uri_normalizer())
         .mount("/static/core", FileServer::new("pointercrate-core-pages/static"))
         .mount("/static/demonlist", FileServer::new("pointercrate-demonlist-pages/static"))
         .mount("/static/user", FileServer::new("pointercrate-user-pages/static"))
