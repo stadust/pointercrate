@@ -13,7 +13,7 @@ reqwest = "0.13.*"
 futures = "0.3.32"
 log = "0.4.29"
 chrono = "0.4.44"
-tokio = {version = "1.50.0", features = ["rt"]}
+tokio = {version = "1.51.0", features = ["rt"]}
 pointercrate-demonlist = { path = "../pointercrate-demonlist" }
 pointercrate-core = { path = "../pointercrate-core" }
 dash-rs = { git = "https://github.com/stadust/dash-rs" }
