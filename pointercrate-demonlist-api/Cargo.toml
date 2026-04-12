@@ -25,7 +25,7 @@ reqwest = {version = "0.13.*", features = ["json"]}
 chrono = "0.4.44"
 serde = "1.0.228"
 governor = "0.10.4"
-rand = "0.10.0"
+rand = "0.10.1"
 
 [features]
 geolocation = ["pointercrate-demonlist-pages/geolocation"]

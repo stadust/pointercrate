@@ -11,7 +11,7 @@ serde = "1.0.228"
 derive_more = { version = "2.0.1", features = ["display"] }
 sqlx = { workspace = true }
 fluent = "0.17.0"
-tokio = "1.50.0"
+tokio = "1.51.1"
 log = "0.4.29"
 chrono = {version = "0.4.44", features = ["serde"]}
 getrandom = "0.4.2"
