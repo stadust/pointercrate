@@ -1,47 +1,48 @@
 function forceRatio(element, wRatio, hRatio) {
-  var target = $(element);
-  var width = target.width();
+  var width = element.offsetWidth;
   var calculatedHeight = (width * hRatio) / wRatio;
-  if (Math.abs(target.height() - calculatedHeight) > 20) {
-    target.height((target.width() * hRatio) / wRatio);
+  if (Math.abs(element.offsetHeight - calculatedHeight) > 20) {
+    element.style.height = ((element.offsetWidth * hRatio) / wRatio) + "px";
   }
 }
 
-$(window).on("load resize", function () {
+function initMisc() {
   // back to top things
 
-  var scrollers = $(".js-scroll");
-  var scrollTarget = $("html, body");
+  var scrollers = document.querySelectorAll(".js-scroll");
 
-  scrollers.each((i, elem) => {
-    var src = $(elem);
+  scrollers.forEach(function (elem) {
+    if (elem.dataset.miscBound) return;
+    elem.dataset.miscBound = "true";
 
-    src.click(() => {
-      var dest = src.data("destination");
-      var destination = $("#" + dest);
+    elem.addEventListener("click", function () {
+      var dest = elem.dataset.destination;
+      var destination = dest ? document.getElementById(dest) : null;
 
-      if (src.data("reveal")) destination.fadeIn(1000);
+      if (elem.dataset.reveal && destination) fadeIn(destination, 1000);
 
-      if (dest !== undefined)
-        scrollTarget.animate({ scrollTop: destination.offset().top - 60 }, 400);
-      else scrollTarget.animate({ scrollTop: 0 }, 400);
+      if (destination) {
+        var destinationTop = destination.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: destinationTop - 60, behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     });
-  });
-
-  // sometimes animating scrolltop causes things to get stuck. This fixes it.
-
-  $(window).bind("mousewheel touchmove touchstart", function () {
-    $("html, body").stop();
   });
 
   // Closable panels
 
-  for (let x of document.querySelectorAll(".plus.cross")) {
-    let parent = x.parentNode;
+  for (var x of document.querySelectorAll(".plus.cross")) {
+    if (x.dataset.closableBound) continue;
+    x.dataset.closableBound = "true";
+
+    var parent = x.parentNode;
 
     while (parent !== null && parent.classList !== null) {
       if (parent.classList.contains("closable")) {
-        x.addEventListener("click", () => $(parent).fadeOut(1000));
+        x.addEventListener("click", function () {
+          fadeOut(parent, 1000);
+        });
         break;
       }
       parent = parent.parentNode;
@@ -49,14 +50,12 @@ $(window).on("load resize", function () {
   }
 
   // Animation stuff when scrolling
-  var toAnimate = $(".js-scroll-anim");
-  var wnd = $(window);
+  var toAnimate = document.querySelectorAll(".js-scroll-anim");
 
-  wnd.on("scroll resize", checkAnimations);
-  toAnimate.each((i, elem) => {
-    var obj = $(elem);
-
-    if (obj.data("js-shown") !== undefined) return;
+  window.addEventListener("scroll", checkAnimations);
+  window.addEventListener("resize", checkAnimations);
+  toAnimate.forEach(function (elem) {
+    if (elem.dataset.jsShown !== undefined) return;
 
     var observer = new MutationObserver(checkAnimations);
     var conf = {
@@ -68,55 +67,60 @@ $(window).on("load resize", function () {
     };
     observer.observe(elem.parentElement, conf);
 
-    obj.data("js-shown", true);
+    elem.dataset.jsShown = "true";
   });
 
   checkAnimations();
 
   function checkAnimations() {
-    var viewportBottom = wnd.scrollTop() + wnd.innerHeight();
+    var viewportBottom = window.scrollY + window.innerHeight;
 
-    toAnimate.each((i, elem) => {
-      var obj = $(elem);
-      var objBottom = obj.offset().top;
+    toAnimate.forEach(function (elem) {
+      var objBottom = elem.offsetTop;
 
-      if (objBottom <= viewportBottom && !obj.data("js-shown")) {
-        switch (obj.data("anim")) {
+      if (objBottom <= viewportBottom && elem.dataset.jsShown !== "true") {
+        switch (elem.dataset.anim) {
           default:
           case "fade":
-            obj.stop().fadeTo(500, 1);
+            stopAnimation(elem);
+            fadeTo(elem, 500, 1);
             break;
         }
-        obj.data("js-shown", true);
-      } else if (objBottom > viewportBottom && obj.data("js-shown")) {
-        switch (obj.data("anim")) {
+        elem.dataset.jsShown = "true";
+      } else if (objBottom > viewportBottom && elem.dataset.jsShown === "true") {
+        switch (elem.dataset.anim) {
           default:
           case "fade":
-            obj.stop().fadeTo(500, 0);
+            stopAnimation(elem);
+            fadeTo(elem, 500, 0);
             break;
         }
-        obj.data("js-shown", false);
+        elem.dataset.jsShown = "false";
       }
     });
   }
 
-  $(".js-collapse").each(function (i, elem) {
-    var collapse = $(elem);
-    var content = collapse.find(".js-collapse-content");
-    var arrow = collapse.find(".arrow");
+  document.querySelectorAll(".js-collapse").forEach(function (elem) {
+    if (elem.dataset.collapseBound) return;
+    elem.dataset.collapseBound = "true";
 
-    arrow.parent().click(function () {
-      if (!collapse.hasClass("js-sliding")) {
-        collapse.addClass("js-sliding");
-        if (collapse.hasClass("active")) {
-          content.slideUp(250, () => {
-            collapse.removeClass("active");
-            collapse.removeClass("js-sliding");
+    var content = elem.querySelector(".js-collapse-content");
+    var arrow = elem.querySelector(".arrow");
+
+    if (!arrow || !arrow.parentElement) return;
+
+    arrow.parentElement.addEventListener("click", function () {
+      if (!elem.classList.contains("js-sliding")) {
+        elem.classList.add("js-sliding");
+        if (elem.classList.contains("active")) {
+          slideUp(content, 250, function () {
+            elem.classList.remove("active");
+            elem.classList.remove("js-sliding");
           });
         } else {
-          content.slideDown(250, () => {
-            collapse.addClass("active");
-            collapse.removeClass("js-sliding");
+          slideDown(content, 250, function () {
+            elem.classList.add("active");
+            elem.classList.remove("js-sliding");
           });
         }
       }
@@ -125,28 +129,29 @@ $(window).on("load resize", function () {
 
   // ratio things
 
-  $(".ratio-16-9").each(function () {
-    forceRatio(this, 16, 9);
-    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 16, 9);
+  document.querySelectorAll(".ratio-16-9").forEach(function (elem) {
+    forceRatio(elem, 16, 9);
+    if (elem.tagName === "IFRAME") elem.onload = function () { forceRatio(elem, 16, 9); };
   });
-  $(".ratio-4-3").each(function () {
-    forceRatio(this, 4, 3);
-    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 4, 3);
-  });
-
-  $(".js-delay-css").each((i, elem) => {
-    var elem = $(elem);
-    var attr = elem.data("property");
-    var value = elem.data("property-value");
-
-    if (elem.css(attr) != value) elem.css(attr, value);
+  document.querySelectorAll(".ratio-4-3").forEach(function (elem) {
+    forceRatio(elem, 4, 3);
+    if (elem.tagName === "IFRAME") elem.onload = function () { forceRatio(elem, 4, 3); };
   });
 
-  $(".js-delay-attr").each((i, elem) => {
-    var elem = $(elem);
-    var attr = elem.data("attr");
-    var value = elem.data("attr-value");
+  document.querySelectorAll(".js-delay-css").forEach(function (elem) {
+    var attr = elem.dataset.property;
+    var value = elem.dataset.propertyValue;
 
-    if (elem.attr(attr) != value) elem.attr(attr, value);
+    if (getComputedStyle(elem).getPropertyValue(attr) != value) elem.style.setProperty(attr, value);
   });
-});
+
+  document.querySelectorAll(".js-delay-attr").forEach(function (elem) {
+    var attr = elem.dataset.attr;
+    var value = elem.dataset.attrValue;
+
+    if (elem.getAttribute(attr) != value) elem.setAttribute(attr, value);
+  });
+}
+
+window.addEventListener("load", initMisc);
+window.addEventListener("resize", initMisc);

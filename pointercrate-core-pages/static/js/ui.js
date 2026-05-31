@@ -6,22 +6,16 @@ class DropDown {
 
   show(complete) {
     this.shown = true;
-    this.dropdown.stop().slideDown({
-      duration: 200,
-      easing: "easeInOutQuad",
-      complete: complete,
-    });
+    stopAnimation(this.dropdown);
+    slideDown(this.dropdown, 200, complete);
 
-    DropDown.currentlyShown = this.dropdown[0].id;
+    DropDown.currentlyShown = this.dropdown.id;
   }
 
   hide(complete) {
     this.shown = false;
-    this.dropdown.stop().slideUp({
-      duration: 200,
-      easing: "easeInOutQuad",
-      complete: complete,
-    });
+    stopAnimation(this.dropdown);
+    slideUp(this.dropdown, 200, complete);
 
     DropDown.currentlyShown = undefined;
   }
@@ -30,9 +24,9 @@ class DropDown {
     var toShow = DropDown.getDropDown(id);
 
     if (DropDown.currentlyShown !== undefined) {
-      DropDown.hideDropDown(DropDown.currentlyShown, () =>
-        toShow.show(complete)
-      );
+      DropDown.hideDropDown(DropDown.currentlyShown, function () {
+        toShow.show(complete);
+      });
     } else {
       toShow.show(complete);
     }
@@ -59,17 +53,17 @@ DropDown.allDropDowns = {};
 
 class Search {
   constructor(search) {
-    this.search = $(search);
-    this.input = $(search.getElementsByTagName("input")[0]);
-    this.searchDepth = this.search.data("search-depth");
+    this.search = search;
+    this.input = search.getElementsByTagName("input")[0];
+    this.searchDepth = search.dataset.searchDepth;
 
     if (typeof this.searchDepth === "undefined") {
-      this.container = this.search.parent();
+      this.container = this.search.parentElement;
     } else {
       var src = this.search;
 
       for (var i = 0; i < this.searchDepth; ++i) {
-        src = src.parent();
+        src = src.parentElement;
       }
 
       this.container = src;
@@ -77,70 +71,80 @@ class Search {
 
     this.registerHandlers();
 
-    if (this.input.val()) {
-      this.updateResults(this.input.val().toLowerCase());
+    if (this.input.value) {
+      this.updateResults(this.input.value.toLowerCase());
     }
   }
 
   updateResults(searchString) {
     var queries = searchString.split(";");
-    this.container.find("ul").each((i, l) => $(l).hide());
+    for (var ul of this.container.getElementsByTagName("ul")) {
+      ul.style.display = "none";
+    }
 
-    this.container.find("li").each((index, element) => {
-      element = $(element);
-      var content = element.text().toLowerCase();
-      if (queries.some((q) => content.includes(q))) {
-        element.show();
+    for (var li of this.container.getElementsByTagName("li")) {
+      var content = li.innerText.toLowerCase();
+      if (queries.some(function (q) { return content.includes(q); })) {
+        li.style.display = "";
       } else {
-        element.hide();
+        li.style.display = "none";
       }
-    });
+    }
 
-    this.container.find("ul").each((i, l) => $(l).show());
+    for (var ul of this.container.getElementsByTagName("ul")) {
+      ul.style.display = "";
+    }
   }
 
   registerHandlers() {
-    this.input.on("keydown change input paste", () => {
-      this.updateResults(this.input.val().toLowerCase());
-    });
+    var update = function () {
+      this.updateResults(this.input.value.toLowerCase());
+    }.bind(this);
 
-    this.search.click((event) => {
-      if ($(event.target).is(this.search)) {
-        let xOff = event.pageX - this.search.offset().left;
+    this.input.addEventListener("keydown", update);
+    this.input.addEventListener("change", update);
+    this.input.addEventListener("input", update);
+    this.input.addEventListener("paste", update);
 
-        if (xOff > this.input.width()) {
-          this.input.val("");
-          this.input[0].dispatchEvent(new Event("change"));
+    this.search.addEventListener("click", function (event) {
+      if (event.target === this.search) {
+        var xOff = event.pageX - this.search.getBoundingClientRect().left;
+
+        if (xOff > this.input.offsetWidth) {
+          this.input.value = "";
+          this.input.dispatchEvent(new Event("change"));
         }
       }
-    });
+    }.bind(this));
   }
 }
 
 Search.allSearchBars = [];
 
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
   // register dropdowns
 
-  $(".dropdown").each((i, elem) => {
-    DropDown.allDropDowns[elem.id] = new DropDown($(elem));
-  });
+  for (var elem of document.querySelectorAll(".dropdown")) {
+    DropDown.allDropDowns[elem.id] = new DropDown(elem);
+  }
 
   // register search elements
 
-  $(".js-search").each((index, element) => {
+  for (var element of document.querySelectorAll(".js-search")) {
     Search.allSearchBars.push(new Search(element));
-  });
+  }
 
   // close all dropdowns if clicked outside of dropdown
 
-  $(document).click(() => {
-    if (!$(event.target).parents("#lists").length) {
+  document.addEventListener("click", function (event) {
+    if (!event.target.closest("#lists")) {
       if (DropDown.currentlyShown) {
         // don't try to hide undefined
         DropDown.hideDropDown(DropDown.currentlyShown);
         // remove active class to remove highlight
-        $(".js-toggle.active").removeClass("active");
+        for (var elem of document.querySelectorAll(".js-toggle.active")) {
+          elem.classList.remove("active");
+        }
       }
     }
   });
@@ -149,26 +153,25 @@ $(document).ready(function () {
 
   var toggleGroups = {};
 
-  $(".js-toggle").each((i, elem) => {
-    var obj = $(elem);
-    var group = obj.data("toggle-group");
+  for (var elem of document.querySelectorAll(".js-toggle")) {
+    var group = elem.dataset.toggleGroup;
 
     if (group !== undefined) {
       if (toggleGroups[group] === undefined) {
-        toggleGroups[group] = [obj];
+        toggleGroups[group] = [elem];
       } else {
-        toggleGroups[group].push(obj);
+        toggleGroups[group].push(elem);
       }
     }
 
-    obj.click(() => {
-      if (obj.hasClass("active")) {
-        obj.removeClass("active");
+    elem.addEventListener("click", function () {
+      if (this.classList.contains("active")) {
+        this.classList.remove("active");
       } else {
-        for (var other of toggleGroups[group]) other.removeClass("active");
+        for (var other of toggleGroups[group]) other.classList.remove("active");
 
-        obj.addClass("active");
+        this.classList.add("active");
       }
-    });
-  });
+    }.bind(elem));
+  }
 });

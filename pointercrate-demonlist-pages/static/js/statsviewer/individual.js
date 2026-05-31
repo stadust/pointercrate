@@ -159,7 +159,7 @@ class IndividualStatsViewer extends StatsViewer {
   }
 }
 
-$(window).on("load", function () {
+window.addEventListener("load", function () {
   window.map = new InteractiveWorldMap();
   map.showSubdivisions();
 

@@ -150,8 +150,8 @@ function setupEditAccount() {
   var deleteAccountForm = new Form(
     deleteAccountDialog.getElementsByTagName("form")[0]
   );
-  document.getElementById("delete-account").addEventListener("click", () => {
-    $(deleteAccountDialog.parentElement).show();
+  document.getElementById("delete-account").addEventListener("click", function () {
+    fadeIn(deleteAccountDialog.parentElement, 300);
   });
 
   deleteAccountForm.onSubmit(() => {

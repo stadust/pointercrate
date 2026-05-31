@@ -304,7 +304,7 @@ class NationStatsViewer extends StatsViewer {
   }
 }
 
-$(window).on("load", function () {
+window.addEventListener("load", function () {
   let map = new InteractiveWorldMap();
 
   window.statsViewer = new NationStatsViewer(

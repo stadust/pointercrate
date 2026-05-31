@@ -80,6 +80,6 @@ function googleOauthRegisterCallback(response) {
 
 window.googleOauthRegisterCallback = googleOauthRegisterCallback;
 
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
   intializeRegisterForm();
 });

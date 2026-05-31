@@ -77,7 +77,7 @@ export function trp(category, resource, text_id, args) {
   return window.fluentBundle.formatPattern(pattern, args);
 }
 
-$(window).on("load", function () {
+window.addEventListener("load", function () {
   let languageSelectorGroup = document.getElementById("language-selector");
 
   if (languageSelectorGroup) {

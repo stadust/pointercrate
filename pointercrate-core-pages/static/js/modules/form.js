@@ -25,7 +25,7 @@ export class Dropdown {
     this.input = this.html.getElementsByTagName("input")[0];
     if (this.input.dataset.default === undefined && !this.input.placeholder)
       this.input.placeholder = tr("core", "ui", "dropdown-placeholder");
-    this.menu = $(this.html.getElementsByClassName("menu")[0]); // we need jquery for the animations
+    this.menu = this.html.getElementsByClassName("menu")[0];
     this.ul = this.html.getElementsByTagName("ul")[0];
 
     this.listeners = [];
@@ -58,12 +58,12 @@ export class Dropdown {
 
     this.input.addEventListener("focus", () => {
       this.onFocus();
-      this.menu.fadeTo(300, 0.95);
+      fadeTo(this.menu, 300, 0.95);
     });
 
     this.input.addEventListener("focusout", () => {
       this.onUnfocus();
-      this.menu.fadeOut(300);
+      fadeOut(this.menu, 300);
     });
   }
 
@@ -343,7 +343,7 @@ export class Dialog {
   open() {
     if (this.reject !== undefined) throw new Error("Dialog is already open");
 
-    $(this.dialog.parentNode).fadeIn(300);
+    fadeIn(this.dialog.parentNode, 300);
 
     return new Promise((resolve, reject) => {
       this.reject = reject;
@@ -357,7 +357,7 @@ export class Dialog {
    * Note that no callbacks are actually called, since its impossible for this method to know whether or not the close happened because of successful reasons or not (or what data should be passed along in the success case).
    */
   close() {
-    $(this.dialog.parentNode).fadeOut(300);
+    fadeOut(this.dialog.parentNode, 300);
 
     this.reject = undefined;
     this.resolve = undefined;
@@ -459,7 +459,7 @@ export class Paginator extends Output {
     this.retrievalEndpoint = this.endpoint;
 
     // The link for the request that was made to display the current data (required for refreshing)
-    this.currentLink = this.endpoint + "?" + $.param(queryData);
+    this.currentLink = this.endpoint + "?" + serializeQueryData(queryData);
     // The query data for the first request. Pagination may only update the 'before' and 'after' parameter,
     // meaning everything else will always stay the same.
     // Storing this means we won't have to parse the query data of the links from the 'Links' header, and allows
@@ -589,7 +589,7 @@ export class Paginator extends Output {
       else this.queryData[key] = value;
     }
 
-    this.currentLink = this.endpoint + "?" + $.param(this.queryData);
+    this.currentLink = this.endpoint + "?" + serializeQueryData(this.queryData);
     this.refresh();
   }
 
@@ -601,7 +601,7 @@ export class Paginator extends Output {
    */
   setQueryData(queryData) {
     this.queryData = queryData;
-    this.currentLink = this.endpoint + "?" + $.param(queryData);
+    this.currentLink = this.endpoint + "?" + serializeQueryData(queryData);
     this.refresh();
   }
 
@@ -664,6 +664,13 @@ export function findParentWithClass(element, clz) {
   }
 }
 
+export function serializeQueryData(data) {
+  return Object.entries(data)
+    .filter(([_, v]) => v !== undefined)
+    .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+    .join("&");
+}
+
 export class Viewer extends Output {
   constructor(elementId, paginator) {
     super(elementId);
@@ -678,14 +685,14 @@ export class Viewer extends Output {
       this.setError(null);
       this.setSuccess(null);
 
-      $(this._content).fadeIn(100);
-      $(this._welcome).fadeOut(100);
+      fadeIn(this._content, 100);
+      fadeOut(this._welcome, 100);
     });
   }
 
   hideContent() {
-    $(this._welcome).fadeIn(100);
-    $(this._content).fadeOut(100);
+    fadeIn(this._welcome, 100);
+    fadeOut(this._content, 100);
   }
 }
 

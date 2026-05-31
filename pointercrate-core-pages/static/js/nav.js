@@ -10,7 +10,7 @@ class NavigationBar {
   }
 }
 
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
   for (let navbar of document.querySelectorAll("header nav.collapse"))
     new NavigationBar(navbar);
 });

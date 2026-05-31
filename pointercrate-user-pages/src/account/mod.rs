@@ -152,7 +152,7 @@ if (!initialized{0}) {{
         {}
         {}
         
-$(document).ready(function () {{        
+document.addEventListener("DOMContentLoaded", function () {{        
     let accountTabber = new TabbedPane(
     document.getElementById("account-tabber"),
     "account-tab-selection"

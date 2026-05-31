@@ -239,7 +239,7 @@ class RecordManager extends Paginator {
           this._notes.appendChild(createNoteHtml(note));
         }
 
-        $(this._notes.parentElement).show(300); // TODO: maybe via CSS transform?
+        fadeIn(this._notes.parentElement, 300);
       }
     );
   }
@@ -350,7 +350,7 @@ function setupAddNote() {
         let newNote = createNoteHtml(noteResponse.data.data);
         recordManager._notes.appendChild(newNote);
 
-        $(adder).hide(100);
+        fadeOut(adder, 100);
         textArea.value = "";
       })
       .catch(displayError(output));
@@ -359,7 +359,7 @@ function setupAddNote() {
   document
     .getElementById("add-record-note-open")
     .addEventListener("click", () => {
-      $(adder).show(300);
+      fadeIn(adder, 300);
     });
 }
 

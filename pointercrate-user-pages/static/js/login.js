@@ -67,6 +67,6 @@ function googleOauthCallback(response) {
 
 window.googleOauthCallback = googleOauthCallback;
 
-$(window).on("load", function () {
+window.addEventListener("load", function () {
   initializeLoginForm();
 });

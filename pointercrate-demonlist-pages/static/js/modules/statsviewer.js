@@ -8,6 +8,7 @@ import {
   FilteredPaginator,
   findParentWithClass,
   get,
+  serializeQueryData,
   Viewer,
 } from "/static/core/js/modules/form.js";
 import { tr, trp } from "/static/core/js/modules/localization.js";
@@ -29,7 +30,7 @@ export class StatsViewer extends FilteredPaginator {
     this.endpoint = statsviewerdata.rankingEndpoint;
     // different from pagination endpoint here!
     this.retrievalEndpoint = statsviewerdata.retrievalEndpoint;
-    this.currentLink = this.endpoint + "?" + $.param(this.queryData);
+    this.currentLink = this.endpoint + "?" + serializeQueryData(this.queryData);
 
     this.html = html;
     this.output = new Viewer(

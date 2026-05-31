@@ -5,7 +5,7 @@ import {
 import { get } from "/static/core/js/modules/form.js";
 import { tr, trp } from "/static/core/js/modules/localization.js";
 
-$(window).on("load", function () {
+window.addEventListener("load", function () {
   if (window.demon_id) {
     initializePositionChart();
     initializeHistoryTable();
