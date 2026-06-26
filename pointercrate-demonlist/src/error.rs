@@ -78,6 +78,10 @@ pub enum DemonlistError {
         demon_id: i32,
     },
 
+    DemonNotFoundLevelID {
+        level_id: i32,
+    },
+
     DemonNotFoundName {
         demon_name: String,
     },
@@ -226,6 +230,7 @@ impl PointercrateError for DemonlistError {
             PlayerNotFound { .. } => 40401,
             PlayerNotFoundName { .. } => 40401,
             DemonNotFound { .. } => 40401,
+            DemonNotFoundLevelID { .. } => 40401,
             DemonNotFoundName { .. } => 40401,
             DemonNotFoundPosition { .. } => 40401,
             RecordNotFound { .. } => 40401,
@@ -283,6 +288,7 @@ impl Display for DemonlistError {
                 DemonlistError::PlayerNotFoundName { player_name } =>
                     trp!("error-demonlist-playernotfoundname", "player-name" = player_name),
                 DemonlistError::DemonNotFound { demon_id } => trp!("error-demonlist-demonnotfound", "demon-id" = demon_id),
+                DemonlistError::DemonNotFoundLevelID { level_id } => trp!("error-demonlist-demonnotfoundlevelid", "level-id" = level_id),
                 DemonlistError::DemonNotFoundName { demon_name } => trp!("error-demonlist-demonnotfoundname", "demon-name" = demon_name),
                 DemonlistError::DemonNotFoundPosition { demon_position } =>
                     trp!("error-demonlist-demonnotfoundposition", "demon-position" = demon_position),

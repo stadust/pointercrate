@@ -20,6 +20,16 @@ impl MinimalDemon {
             })
     }
 
+    pub async fn by_level_id(id: i32, connection: &mut PgConnection) -> Result<MinimalDemon> {
+        sqlx::query_as!(MinimalDemon, r#"SELECT id, name, position FROM demons WHERE level_id = $1"#, i64::from(id))
+            .fetch_one(connection)
+            .await
+            .map_err(|err| match err {
+                Error::RowNotFound => DemonlistError::DemonNotFoundLevelID { level_id: id },
+                _ => err.into(),
+            })
+    }
+
     pub async fn by_name(name: &str, connection: &mut PgConnection) -> Result<MinimalDemon> {
         let mut stream = sqlx::query!(r#"SELECT id, name, position FROM demons WHERE name = $1"#, name.to_string()).fetch(connection);
 

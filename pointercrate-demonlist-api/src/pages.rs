@@ -93,6 +93,15 @@ pub async fn demon_permalink(demon_id: i32, pool: &State<PointercratePool>) -> R
     Ok(Redirect::to(rocket::uri!("/demonlist", demon_page(position))))
 }
 
+#[rocket::get("/levelid/<level_id>/")]
+pub async fn demon_levelid(level_id: i32, pool: &State<PointercratePool>) -> Result<Redirect> {
+    let mut connection = pool.connection().await?;
+
+    let position = MinimalDemon::by_level_id(level_id, &mut connection).await?.position;
+
+    Ok(Redirect::to(rocket::uri!("/demonlist", demon_page(position))))
+}
+
 #[localized]
 #[rocket::get("/<position>/")]
 pub async fn demon_page(position: i16, pool: &State<PointercratePool>, gd: &State<GeometryDashConnector>) -> Result<Page> {

@@ -89,6 +89,7 @@ If everything is set up correctly, you should see `rocket`'s development server 
    >> (stats_viewer) GET /demonlist/statsviewer
    >> (nation_stats_viewer) GET /demonlist/statsviewer/nations
    >> (demon_permalink) GET /demonlist/permalink/<demon_id>
+   >> (demon_levelid) GET /demonlist/levelid/<level_id>
    >> (heatmap_css) GET /demonlist/statsviewer/heatmap.css
    >> (FileServer: pointercrate-core-pages/static) GET /static/core/<path..> [10]
    >> (FileServer: pointercrate-user-pages/static) GET /static/user/<path..> [10]
