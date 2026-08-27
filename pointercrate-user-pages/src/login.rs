@@ -4,7 +4,7 @@ use pointercrate_core_pages::{head::HeadLike, trp_html, PageFragment};
 use pointercrate_user::config;
 
 pub fn login_page() -> PageFragment {
-    let mut frag = PageFragment::new(
+    PageFragment::new(
         "Pointercrate - Login",
         "Log in to an existing pointercrate account or register for a new one!",
     )
@@ -12,13 +12,7 @@ pub fn login_page() -> PageFragment {
     .module("/static/core/js/modules/form.js")
     .module("/static/core/js/modules/tab.js")
     .stylesheet("/static/user/css/login.css")
-    .body(login_page_body());
-
-    if cfg!(feature = "oauth2") {
-        frag = frag.async_script("https://accounts.google.com/gsi/client");
-    }
-
-    frag
+    .body(login_page_body())
 }
 
 fn login_page_body() -> Markup {
@@ -43,7 +37,7 @@ fn login_page_body() -> Markup {
                             data-client_id=(config::google_client_id())
                             data-callback="googleOauthCallback" {}
 
-                        script src=(format!("https://accounts.google.com/gsi/client?hl={}", &lang)) async {}
+                        script src=(format!("https://accounts.google.com/gsi/client?hl={}", &lang)) defer {}
                         div .g_id_signin data-text="continue_with" style="margin: 10px 0px" data-locale=(lang) {}
                         p.error #g-signin-error style="text-align: left" {}
 
