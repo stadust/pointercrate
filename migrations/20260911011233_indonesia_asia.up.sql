@@ -1,0 +1,1 @@
+UPDATE nationalities SET continent = 'Asia' WHERE iso_country_code = 'ID';

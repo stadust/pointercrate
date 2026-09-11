@@ -5,7 +5,7 @@ use crate::{
 use futures::stream::StreamExt;
 use pointercrate_core::{
     first_and_last,
-    pagination::{PageContext, Paginatable, PaginationParameters, PaginationQuery, __pagination_compat},
+    pagination::{__pagination_compat, PageContext, Paginatable, PaginationParameters, PaginationQuery},
     util::non_nullable,
 };
 use serde::{Deserialize, Serialize};

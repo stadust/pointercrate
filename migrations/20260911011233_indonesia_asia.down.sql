@@ -1,0 +1,1 @@
+UPDATE nationalities SET continent = 'Australia and Oceania' WHERE iso_country_code = 'ID';
