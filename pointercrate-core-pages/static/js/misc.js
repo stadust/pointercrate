@@ -7,7 +7,7 @@ function forceRatio(element, wRatio, hRatio) {
   }
 }
 
-$(window).on("load resize", function () {
+$(window).on("load", function () {
   // back to top things
 
   var scrollers = $(".js-scroll");
@@ -124,15 +124,7 @@ $(window).on("load resize", function () {
   });
 
   // ratio things
-
-  $(".ratio-16-9").each(function () {
-    forceRatio(this, 16, 9);
-    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 16, 9);
-  });
-  $(".ratio-4-3").each(function () {
-    forceRatio(this, 4, 3);
-    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 4, 3);
-  });
+  applyRatios();
 
   $(".js-delay-css").each((i, elem) => {
     var elem = $(elem);
@@ -150,3 +142,16 @@ $(window).on("load resize", function () {
     if (elem.attr(attr) != value) elem.attr(attr, value);
   });
 });
+
+function applyRatios() {
+  $(".ratio-16-9").each(function () {
+    forceRatio(this, 16, 9);
+    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 16, 9);
+  });
+  $(".ratio-4-3").each(function () {
+    forceRatio(this, 4, 3);
+    if (this.tagName == "IFRAME") this.onload = () => forceRatio(this, 4, 3);
+  });
+}
+
+$(window).on("resize", applyRatios);
